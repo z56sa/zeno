@@ -17,14 +17,30 @@ module.exports = {
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
 
   async execute(interaction) {
+    // 1. الاستجابة الفورية لمنع انتهاء المهلة (3 ثواني)
+    await interaction.deferReply({ ephemeral: true });
+
     if (!interaction.member.permissions.has(PermissionFlagsBits.Administrator)) {
-      return interaction.reply({ content: '❌ لا تملك صلاحية الأدمن.', ephemeral: true });
+      return interaction.editReply({ content: '❌ لا تملك صلاحية الأدمن.' });
     }
 
     const newPrefix = interaction.options.getString('prefix');
-    db.updateGuildSetting(interaction.guild.id, 'prefix', newPrefix);
 
-    await interaction.reply(`✅ تم تغيير برفكس البوت في هذا السيرفر بنجاح إلى: \`${newPrefix}\``);
+    try {
+      // 2. استخدام الدالة الصحيحة المتوافقة مع قاعدة البيانات لديك
+      if (typeof db.setGuildSetting === 'function') {
+        db.setGuildSetting(interaction.guild.id, 'prefix', newPrefix);
+      } else if (typeof db.setGuildPrefix === 'function') {
+        db.setGuildPrefix(interaction.guild.id, newPrefix);
+      } else {
+        db.updateGuildSetting(interaction.guild.id, 'prefix', newPrefix);
+      }
+
+      await interaction.editReply({ content: `✅ تم تغيير برفكس البوت في هذا السيرفر بنجاح إلى: \`${newPrefix}\`` });
+    } catch (err) {
+      console.error('خطأ في حفظ البرفكس:', err);
+      await interaction.editReply({ content: '❌ حدث خطأ أثناء محاولة حفظ البرفكس في قاعدة البيانات.' });
+    }
   },
 
   async executePrefix(message, args) {
@@ -37,7 +53,19 @@ module.exports = {
       return message.reply('❌ يرجى كتابة الرمز الجديد (بحد أقصى 3 أحرف/رموز). مثال: `#setprefix !`');
     }
 
-    db.updateGuildSetting(message.guild.id, 'prefix', newPrefix);
-    message.reply(`✅ تم تغيير برفكس البوت بنجاح إلى: \`${newPrefix}\``);
+    try {
+      if (typeof db.setGuildSetting === 'function') {
+        db.setGuildSetting(message.guild.id, 'prefix', newPrefix);
+      } else if (typeof db.setGuildPrefix === 'function') {
+        db.setGuildPrefix(message.guild.id, newPrefix);
+      } else {
+        db.updateGuildSetting(message.guild.id, 'prefix', newPrefix);
+      }
+
+      message.reply(`✅ تم تغيير برفكس البوت بنجاح إلى: \`${newPrefix}\``);
+    } catch (err) {
+      console.error('خطأ في حفظ البرفكس:', err);
+      message.reply('❌ حدث خطأ أثناء حفظ البرفكس.');
+    }
   }
 };
