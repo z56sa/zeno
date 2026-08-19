@@ -6,9 +6,12 @@ const express = require('express');
 const path = require('path');
 const session = require('express-session');
 const pgSession = require('connect-pg-simple')(session); // 1. استدعاء مكتبة تخزين الجلسات في بورتغريس
-const { Pool } = require('pg');                         // 2. استدعاء مكتبة الاتصال بقاعدة البيانات
+const { Pool } = require('pg');                        // 2. استدعاء مكتبة الاتصال بقاعدة البيانات
 const axios = require('axios');
 const app = express();
+
+// مفيد جداً لبروتوكولات الإحالة خلف بروكسي Railway
+app.set('trust proxy', 1);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -25,7 +28,7 @@ const pgPool = new Pool({
 // 4. إعداد الجلسات (Sessions) لتخزينها في قاعدة البيانات بدلاً من الذاكرة العشوائية
 app.use(session({
     store: new pgSession({
-        pool: pgPool,                // استخدام الـ pool المعرف أعلاه
+        pool: pgPool,                           // استخدام الـ pool المعرف أعلاه
         tableName: 'session',        // اسم الجدول الذي سيتم إنشاؤه تلقائياً في قاعدة البيانات
         createTableIfMissing: true   // إنشاء الجدول تلقائياً إذا لم يكن موجوداً
     }),
@@ -33,7 +36,7 @@ app.use(session({
     resave: false,
     saveUninitialized: false,
     cookie: {
-        secure: false, // اجعلها true إذا كنت تستخدم HTTPS مع بروكسي متقدم، حاليا مناسبة لريلواي
+        secure: process.env.NODE_ENV === 'production', // آمن ومتوافق تماماً مع HTTPS في Railway
         maxAge: 30 * 24 * 60 * 60 * 1000 // مدة الجلسة (30 يوم)
     }
 }));
@@ -50,10 +53,9 @@ app.get('/auth/discord', (req, res) => {
         return res.status(500).send('Error: CLIENT_ID is not defined in environment variables.');
     }
 
-    const protocol = req.headers['x-forwarded-proto'] || req.protocol;
-    const REDIRECT_URI = encodeURIComponent(`${protocol}://${req.get('host')}/auth/discord/callback`);
+    const REDIRECT_URI = encodeURIComponent("https://zeno-production-b6d7.up.railway.app/auth/discord/callback");
+    const discordAuthUrl = `https://discord.com/api/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=code&scope=identify`;
 
-    const discordAuthUrl = `https://discord.com/api/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=code&scope=identify%20guilds`;
     res.redirect(discordAuthUrl);
 });
 
@@ -65,8 +67,7 @@ app.get('/auth/discord/callback', async (req, res) => {
     }
 
     try {
-        const protocol = req.headers['x-forwarded-proto'] || req.protocol;
-        const REDIRECT_URI = `${protocol}://${req.get('host')}/auth/discord/callback`;
+        const REDIRECT_URI = "https://zeno-production-b6d7.up.railway.app/auth/discord/callback";
 
         const tokenResponseData = new URLSearchParams({
             client_id: process.env.CLIENT_ID,
