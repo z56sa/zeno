@@ -1,6 +1,5 @@
 const { Pool } = require('pg');
 
-// إعدادات الاتصال بقاعدة البيانات باستخدام متغير البيئة في Railway
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
     ssl: {
@@ -8,7 +7,42 @@ const pool = new Pool({
     }
 });
 
-// 1. جلب بيانات المستخدم (لحل خطأ db.getUser)
+// قائمة المسموحات (Whitelist) لحماية الكود من حقن الاستعلامات (SQL Injection)
+const ALLOWED_SETTINGS = [
+    'prefix',
+    'welcome_channel',
+    'log_channel',
+    'ticket_category',
+    'auto_role'
+];
+
+// تهيئة الجداول تلقائياً في حال عدم وجودها عند تشغيل البوت
+async function initDatabase() {
+    const query = `
+        CREATE TABLE IF NOT EXISTS users (
+            user_id VARCHAR(32) PRIMARY KEY,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+
+        CREATE TABLE IF NOT EXISTS guild_settings (
+            guild_id VARCHAR(32) PRIMARY KEY,
+            prefix VARCHAR(10) DEFAULT '!',
+            welcome_channel VARCHAR(32),
+            log_channel VARCHAR(32),
+            ticket_category VARCHAR(32),
+            auto_role VARCHAR(32)
+        );
+    `;
+    try {
+        await pool.query(query);
+    } catch (err) {
+        console.error(' Database Initialization Error:', err);
+    }
+}
+
+initDatabase();
+
+// 1. جلب بيانات المستخدم
 async function getUser(userId) {
     try {
         const query = 'SELECT * FROM users WHERE user_id = $1';
@@ -25,8 +59,6 @@ async function getGuildSettings(guildId) {
     try {
         const query = 'SELECT * FROM guild_settings WHERE guild_id = $1';
         const result = await pool.query(query, [guildId]);
-
-        // إذا لم توجد إعدادات سابقة، أرجع كائن فارغ أو القيم الافتراضية
         return result.rows[0] || { guild_id: guildId };
     } catch (err) {
         console.error('Database Error (getGuildSettings):', err);
@@ -34,10 +66,14 @@ async function getGuildSettings(guildId) {
     }
 }
 
-// 3. تحديث أو حفظ إعدادات السيرفر
+// 3. تحديث أو حفظ إعدادات السيرفر بأمان
 async function updateGuildSetting(guildId, settingKey, settingValue) {
+    // التحقق من أن المفتاح المطلوب تحديثه محدد في القائمة المسموحة
+    if (!ALLOWED_SETTINGS.includes(settingKey)) {
+        throw new Error(`حقل غير مصرح بتعديله: ${settingKey}`);
+    }
+
     try {
-        // تخزين الإعدادات باستخدام UPSERT (الإدخال أو التحديث إذا كان موجوداً)
         const query = `
             INSERT INTO guild_settings (guild_id, ${settingKey})
             VALUES ($1, $2)
@@ -51,11 +87,9 @@ async function updateGuildSetting(guildId, settingKey, settingValue) {
     }
 }
 
-// تصدير كافة الدوال وقاعدة البيانات للاستخدام في المشروع
 module.exports = {
     pool,
     getUser,
     getGuildSettings,
-    updateGuildSetting,
-    // ... دوالك الأخرى القديمة هنا ...
+    updateGuildSetting
 };
