@@ -189,7 +189,7 @@ app.get('/dashboard', (req, res) => {
     `);
 });
 
-// صفحة إدارة السيرفر الداخلية المخصصة (شبيهة بـ ProBot تماماً)
+// صفحة إدارة السيرفر الداخلية
 app.get('/dashboard/:guildId', (req, res) => {
     if (!req.session || !req.session.user) {
         return res.redirect('/auth/discord');
@@ -246,4 +246,24 @@ app.get('/dashboard/:guildId', (req, res) => {
                         <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-400 hover:bg-gray-800/50 hover:text-white transition"> الإشراف والحماية</a>
                     </nav>
                 </div>
-                <div class="p-4 border-t border-
+                <div class="p-4 border-t border-gray-800/50">
+                    <a href="/dashboard" class="flex items-center justify-center gap-2 w-full py-2.5 bg-gray-800/50 hover:bg-gray-800 text-gray-300 rounded-xl text-xs font-bold transition">
+                        العودة لقائمة السيرفرات
+                    </a>
+                </div>
+            </aside>
+
+            <main class="flex-1 p-8 overflow-y-auto">
+                <h1 class="text-2xl font-bold mb-4">نظرة عامة - ${currentGuild.name}</h1>
+                <p class="text-gray-400 text-sm">مرحباً بك في لوحة تحكم ${currentGuild.name}. استخدم القائمة الجانبية للتنقل بين إعدادات البوت.</p>
+            </main>
+
+        </body>
+        </html>
+    `);
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+});
