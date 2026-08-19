@@ -1,3 +1,7 @@
+// ==========================================
+// FILE: src/database.js
+// ==========================================
+
 const { Pool } = require('pg');
 
 const pool = new Pool({
@@ -7,7 +11,6 @@ const pool = new Pool({
     }
 });
 
-// قائمة المسموحات (Whitelist) لحماية الكود من حقن الاستعلامات (SQL Injection)
 const ALLOWED_SETTINGS = [
     'prefix',
     'welcome_channel',
@@ -16,7 +19,6 @@ const ALLOWED_SETTINGS = [
     'auto_role'
 ];
 
-// تهيئة الجداول تلقائياً في حال عدم وجودها عند تشغيل البوت
 async function initDatabase() {
     const query = `
         CREATE TABLE IF NOT EXISTS users (
@@ -42,7 +44,6 @@ async function initDatabase() {
 
 initDatabase();
 
-// 1. جلب بيانات المستخدم
 async function getUser(userId) {
     try {
         const query = 'SELECT * FROM users WHERE user_id = $1';
@@ -54,7 +55,6 @@ async function getUser(userId) {
     }
 }
 
-// 2. جلب إعدادات السيرفر
 async function getGuildSettings(guildId) {
     try {
         const query = 'SELECT * FROM guild_settings WHERE guild_id = $1';
@@ -66,9 +66,7 @@ async function getGuildSettings(guildId) {
     }
 }
 
-// 3. تحديث أو حفظ إعدادات السيرفر بأمان
 async function updateGuildSetting(guildId, settingKey, settingValue) {
-    // التحقق من أن المفتاح المطلوب تحديثه محدد في القائمة المسموحة
     if (!ALLOWED_SETTINGS.includes(settingKey)) {
         throw new Error(`حقل غير مصرح بتعديله: ${settingKey}`);
     }
