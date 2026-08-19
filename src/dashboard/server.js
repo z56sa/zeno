@@ -47,23 +47,15 @@ module.exports = function (app) {
             <script src="https://cdn.tailwindcss.com"></script>
             <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@500;700;800;900&display=swap" rel="stylesheet">
             <style>
-                * {
-                    box-sizing: border-box;
-                }
+                * { box-sizing: border-box; }
                 html, body {
                     background-color: #08080a !important;
                     color: #ffffff !important;
                     font-family: 'Cairo', sans-serif !important;
-                    margin: 0;
-                    padding: 0;
+                    margin: 0; padding: 0;
                 }
-                .purple-glow {
-                    background: radial-gradient(circle at 50% 30%, rgba(168, 85, 247, 0.18), transparent 70%);
-                }
-                .glass-card {
-                    background-color: #12121a !important;
-                    border: 1px solid #232334 !important;
-                }
+                .purple-glow { background: radial-gradient(circle at 50% 30%, rgba(168, 85, 247, 0.18), transparent 70%); }
+                .glass-card { background-color: #12121a !important; border: 1px solid #232334 !important; }
             </style>
         </head>
         <body class="min-h-screen flex flex-col justify-between purple-glow">
@@ -131,18 +123,14 @@ module.exports = function (app) {
         `);
     });
 
-    // 2. توجيه تسجيل الدخول بـ Discord
-    // مثال على مسار تسجيل الدخول عبر ديسكورد
-    app.get('/auth/discord', passport.authenticate('discord'));
+    // 2. توجيه تسجيل الدخول بـ Discord (إعادة توجيه لصفحة Discord OAuth)
+    app.get('/auth/discord', (req, res) => {
+        const clientId = process.env.DISCORD_CLIENT_ID || '1506005273893146775';
+        const redirectUri = encodeURIComponent(`https://${req.get('host')}/auth/discord/callback`);
+        res.redirect(`https://discord.com/api/oauth2/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=identify%20guilds`);
+    });
 
-    app.get('/auth/discord/callback',
-        passport.authenticate('discord', { failureRedirect: '/' }),
-        (req, res) => {
-            res.redirect('/dashboard'); // أو الصفحة الرئيسية بعد تسجيل الدخول
-        }
-    );
-
-    // 3. استقبال العودة من OAuth2
+    // 3. استقبال العودة من OAuth2 والمعالجة
     app.get('/auth/discord/callback', async (req, res) => {
         const code = req.query.code;
         if (!code) return res.redirect('/');
