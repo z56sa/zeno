@@ -1,5 +1,5 @@
 // ======================================================================
-// FILE: src/index.js - THE SINGLE ENTRY POINT (FINAL VERSION)
+// FILE: src/index.js - THE SINGLE ENTRY POINT (OPTIMIZED VERSION)
 // ======================================================================
 
 const { Client, GatewayIntentBits, Collection } = require('discord.js');
@@ -92,7 +92,9 @@ app.listen(PORT, () => {
     console.log(`=============================================================`);
 });
 
-const token = process.env.DISCORD_TOKEN || process.env.BOT_TOKEN;
+// قراءة وتنظيف التوكن لمنع أي مشاكل في المسافات
+const rawToken = process.env.DISCORD_TOKEN || process.env.BOT_TOKEN;
+const token = rawToken ? rawToken.trim() : '';
 
 console.log('🔍 Checking Token Status...');
 if (token) {
