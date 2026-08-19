@@ -129,27 +129,42 @@ module.exports = function (app) {
                 </div>
             </main>
 
-            <!-- Features Section -->
+            <!-- Features Section (Expanded) -->
             <section id="features" class="max-w-7xl mx-auto px-6 py-20 w-full border-t border-[#1f1f2e]">
                 <div class="text-center mb-16">
                     <h2 class="text-3xl font-black text-white mb-3">مميزات بوت ZENO</h2>
-                    <p class="text-gray-400 text-xs md:text-sm font-semibold">كل ما تحتاجه لإدارة سيرفرك واحترافه في مكان واحد</p>
+                    <p class="text-gray-400 text-xs md:text-sm font-semibold">كل ما تحتاجه لإدارة سيرفرك واحترافه في مكان واحد بأعلى جودة</p>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div class="glass-card p-6 rounded-2xl border border-[#232334]">
-                        <div class="w-12 h-12 rounded-xl bg-purple-600/10 border border-purple-500/20 flex items-center justify-center text-purple-400 text-xl font-bold mb-4">🎫</div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="glass-card p-6 rounded-2xl border border-[#232334] hover:border-purple-500/40 transition">
+                        <div class="w-12 h-12 rounded-xl bg-purple-600/10 border border-purple-500/20 flex items-content justify-center text-purple-400 text-xl font-bold mb-4 items-center">🎫</div>
                         <h3 class="text-white font-bold text-base mb-2">نظام التذاكر المتقدم</h3>
-                        <p class="text-gray-400 text-xs leading-relaxed font-semibold">لوحة تحكم كاملة وإنشاء تذاكر دعم فني منظمة وآمنة لأعضاء سيرفرك.</p>
+                        <p class="text-gray-400 text-xs leading-relaxed font-semibold">لوحة تحكم كاملة وإنشاء تذاكر دعم فني منظمة وآمنة وسريعة لأعضاء سيرفرك.</p>
                     </div>
-                    <div class="glass-card p-6 rounded-2xl border border-[#232334]">
+                    <div class="glass-card p-6 rounded-2xl border border-[#232334] hover:border-purple-500/40 transition">
                         <div class="w-12 h-12 rounded-xl bg-purple-600/10 border border-purple-500/20 flex items-center justify-center text-purple-400 text-xl font-bold mb-4">🛡️</div>
                         <h3 class="text-white font-bold text-base mb-2">أوامر الإشراف والحماية</h3>
-                        <p class="text-gray-400 text-xs leading-relaxed font-semibold">حماية سيرفرك وأعضائك بأوامر إشرافية سريعة ودقيقة لحفظ الأمان والنظام.</p>
+                        <p class="text-gray-400 text-xs leading-relaxed font-semibold">حماية سيرفرك وأعضائك بأوامر إشرافية سريعة ودقيقة لحفظ الأمان والنظام المستمر.</p>
                     </div>
-                    <div class="glass-card p-6 rounded-2xl border border-[#232334]">
+                    <div class="glass-card p-6 rounded-2xl border border-[#232334] hover:border-purple-500/40 transition">
                         <div class="w-12 h-12 rounded-xl bg-purple-600/10 border border-purple-500/20 flex items-center justify-center text-purple-400 text-xl font-bold mb-4">⚙️</div>
                         <h3 class="text-white font-bold text-base mb-2">لوحة تحكم سهلة</h3>
-                        <p class="text-gray-400 text-xs leading-relaxed font-semibold">إدارة كاملة لإعدادات بوتك وسيرفرك عبر موقع الويب مباشرة بكل سهولة.</p>
+                        <p class="text-gray-400 text-xs leading-relaxed font-semibold">إدارة كاملة لإعدادات بوتك وسيرفرك عبر موقع الويب مباشرة بكل سهولة ومرونة.</p>
+                    </div>
+                    <div class="glass-card p-6 rounded-2xl border border-[#232334] hover:border-purple-500/40 transition">
+                        <div class="w-12 h-12 rounded-xl bg-purple-600/10 border border-purple-500/20 flex items-center justify-center text-purple-400 text-xl font-bold mb-4">👋</div>
+                        <h3 class="text-white font-bold text-base mb-2">نظام الترحيب التلقائي</h3>
+                        <p class="text-gray-400 text-xs leading-relaxed font-semibold">استقبال الأعضاء الجدد بشكل احترافي مع صور وبطاقات ترحيب مخصصة وجذابة.</p>
+                    </div>
+                    <div class="glass-card p-6 rounded-2xl border border-[#232334] hover:border-purple-500/40 transition">
+                        <div class="w-12 h-12 rounded-xl bg-purple-600/10 border border-purple-500/20 flex items-center justify-center text-purple-400 text-xl font-bold mb-4">⚡</div>
+                        <h3 class="text-white font-bold text-base mb-2">سرعة فائقة واستقرار</h3>
+                        <p class="text-gray-400 text-xs leading-relaxed font-semibold">يعمل البوت على سيرفرات قوية جداً لضمان عدم التوقف وسرعة الاستجابة اللحظية.</p>
+                    </div>
+                    <div class="glass-card p-6 rounded-2xl border border-[#232334] hover:border-purple-500/40 transition">
+                        <div class="w-12 h-12 rounded-xl bg-purple-600/10 border border-purple-500/20 flex items-center justify-center text-purple-400 text-xl font-bold mb-4">🛠️</div>
+                        <h3 class="text-white font-bold text-base mb-2">دعم فني وتحديثات مستمرة</h3>
+                        <p class="text-gray-400 text-xs leading-relaxed font-semibold">تحديثات دورية وإضافات مستمرة للمميزات مع وجود فريق دعم جاهز لمساعدتك دائمًا.</p>
                     </div>
                 </div>
             </section>
