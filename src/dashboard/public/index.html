@@ -1,511 +1,198 @@
-<!-- TEST_MARKER: 1 -->
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZENO Bot | المنصة الاحترافية</title>
+    <title>ZENO - لوحة التحكم</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root {
-            --bg-main: #07090e;
-            --bg-gradient: radial-gradient(circle at top center, #111425 0%, #07090e 70%);
-            --bg-card: #0f1322;
-            --bg-card-hover: #171c30;
-            --accent: #5865F2;
-            --accent-hover: #4752c4;
-            --gold-accent: #f59e0b;
-            --text-main: #ffffff;
-            --text-muted: #94a3b8;
-            --border: #1e2235;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Cairo', sans-serif;
-        }
-
         body {
-            background-color: var(--bg-main);
-            background-image: var(--bg-gradient);
-            color: var(--text-main);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            overflow-x: hidden;
-        }
-
-        /* Navbar */
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px 50px;
-            background: rgba(7, 9, 14, 0.85);
-            backdrop-filter: blur(15px);
-            border-bottom: 1px solid var(--border);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
-
-        .nav-right,
-        .nav-left {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 1.5rem;
-            font-weight: 900;
-            color: var(--text-main);
-            text-decoration: none;
-        }
-
-        .logo span {
-            color: var(--accent);
-            text-shadow: 0 0 15px rgba(88, 101, 242, 0.4);
-        }
-
-        .logo i {
-            color: var(--accent);
-            font-size: 1.6rem;
-        }
-
-        .nav-links {
-            display: flex;
-            list-style: none;
-            gap: 20px;
-            margin-right: 20px;
-        }
-
-        .nav-links a {
-            text-decoration: none;
-            color: var(--text-muted);
-            font-weight: 600;
-            font-size: 0.95rem;
-            transition: color 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .nav-links a:hover {
-            color: var(--text-main);
-        }
-
-        /* User Profile / Login Button Style */
-        .auth-btn {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            text-decoration: none;
-            background: rgba(88, 101, 242, 0.1);
-            border: 1px solid rgba(88, 101, 242, 0.3);
-            padding: 6px 18px 6px 8px;
-            border-radius: 30px;
-            transition: 0.2s;
-            cursor: pointer;
-        }
-
-        .auth-btn:hover {
-            background: rgba(88, 101, 242, 0.2);
-            border-color: var(--accent);
-        }
-
-        .auth-btn img {
-            width: 34px;
-            height: 34px;
-            border-radius: 50%;
-            object-fit: cover;
-        }
-
-        .auth-btn span {
-            color: var(--text-main);
-            font-weight: 700;
-            font-size: 0.9rem;
-        }
-
-        /* Hero Section */
-        .hero {
-            padding: 70px 20px;
-            text-align: center;
-        }
-
-        .badge {
-            background: rgba(245, 158, 11, 0.1);
-            color: var(--gold-accent);
-            padding: 6px 18px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 700;
-            border: 1px solid rgba(245, 158, 11, 0.25);
-            display: inline-block;
-            margin-bottom: 20px;
-        }
-
-        .hero h1 {
-            font-size: 3.4rem;
-            font-weight: 900;
-            margin-bottom: 15px;
-            letter-spacing: -1px;
-        }
-
-        .hero h1 span {
-            color: var(--gold-accent);
-            text-shadow: 0 0 20px rgba(245, 158, 11, 0.3);
-        }
-
-        .hero p {
-            color: var(--text-muted);
-            font-size: 1.1rem;
-            max-width: 680px;
-            margin: 0 auto 35px;
-            line-height: 1.7;
-        }
-
-        .cta-buttons {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin-bottom: 60px;
-        }
-
-        .btn {
-            padding: 14px 28px;
-            border-radius: 12px;
-            font-weight: 700;
-            font-size: 0.95rem;
-            cursor: pointer;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: 0.2s;
-        }
-
-        .btn-primary {
-            background: var(--accent);
-            color: var(--text-main);
-            box-shadow: 0 4px 20px rgba(88, 101, 242, 0.4);
-        }
-
-        .btn-primary:hover {
-            background: var(--accent-hover);
-            transform: translateY(-2px);
-        }
-
-        .btn-secondary {
-            background: var(--bg-card);
-            color: var(--text-main);
-            border: 1px solid var(--border);
-        }
-
-        .btn-secondary:hover {
-            background: var(--bg-card-hover);
-            border-color: var(--accent);
-            transform: translateY(-2px);
-        }
-
-        /* Stats Cards */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 20px;
-            max-width: 1100px;
-            margin: 0 auto 80px;
-            padding: 0 20px;
-        }
-
-        .stat-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 30px 20px;
-            text-align: center;
-            transition: transform 0.2s, border-color 0.2s;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-4px);
-            border-color: rgba(88, 101, 242, 0.5);
-        }
-
-        .stat-card .value {
-            font-size: 2rem;
-            font-weight: 900;
-            margin-bottom: 8px;
-            color: var(--text-main);
-        }
-
-        .stat-card .value.green {
-            color: #10b981;
-        }
-
-        .stat-card .value.blue {
-            color: var(--accent);
-        }
-
-        .stat-card .label {
-            color: var(--text-muted);
-            font-size: 0.9rem;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-        }
-
-        /* Features Section */
-        .features-section {
-            max-width: 1100px;
-            margin: 0 auto 90px;
-            padding: 0 20px;
-            width: 100%;
-        }
-
-        .features-title {
-            text-align: center;
-            margin-bottom: 45px;
-        }
-
-        .features-title h2 {
-            font-size: 2.3rem;
-            font-weight: 900;
-            margin-bottom: 10px;
-        }
-
-        .features-title p {
-            color: var(--text-muted);
-            font-size: 1rem;
-        }
-
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 22px;
-        }
-
-        .feature-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 18px;
-            padding: 32px 26px;
-            transition: 0.25s;
-        }
-
-        .feature-card:hover {
-            transform: translateY(-5px);
-            border-color: var(--accent);
-            background: var(--bg-card-hover);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-        }
-
-        .feature-icon {
-            width: 52px;
-            height: 52px;
-            background: rgba(88, 101, 242, 0.12);
-            color: var(--accent);
-            border-radius: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            margin-bottom: 20px;
-        }
-
-        .feature-card h3 {
-            font-size: 1.25rem;
-            font-weight: 800;
-            margin-bottom: 10px;
-        }
-
-        .feature-card p {
-            color: var(--text-muted);
-            font-size: 0.92rem;
-            line-height: 1.6;
-        }
-
-        @media (max-width: 768px) {
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
-            .features-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .hero h1 {
-                font-size: 2.4rem;
-            }
-
-            header {
-                padding: 15px 20px;
-            }
-
-            .nav-links {
-                display: none;
-            }
+            font-family: 'Cairo', sans-serif;
+            background-color: #0b0f19;
+            color: #fff;
         }
     </style>
 </head>
 
-<body>
+<body class="min-h-screen flex selection:bg-indigo-500 selection:text-white">
 
-    <!-- Navbar -->
-    <header>
-        <div class="nav-right">
-            <a href="#" class="logo">
-                <i class="fa-solid fa-bolt"></i>
-                <span>ZENO</span>
-            </a>
-            <ul class="nav-links">
-                <li><a href="https://discord.gg/uxqQDtbVMz" target="_blank"><i class="fa-solid fa-headset"></i> سيرفر
-                        الدعم الفني</a></li>
-                <li><a href="#"><i class="fa-solid fa-table-cells"></i> جميع أوامر البوت (38 أمر)</a></li>
-            </ul>
-        </div>
-        <div class="nav-left">
-            <!-- زر تسجيل الدخول أو بروفايل المستخدم الديناميكي -->
-            <a href="/auth/discord" class="auth-btn" id="userProfileLink">
-                <img id="userAvatar" src="https://cdn.discordapp.com/embed/avatars/0.png" alt="Avatar">
-                <span id="userName">تسجيل الدخول</span>
-            </a>
-        </div>
-    </header>
+    <!-- المحتوى الرئيسي (يسار) -->
+    <div class="flex-1 flex flex-col min-w-0">
+        <!-- شريط علوي -->
+        <header
+            class="h-20 border-b border-gray-800/60 flex items-center justify-between px-8 bg-[#0b0f19]/50 backdrop-blur">
+            <div class="flex items-center gap-4">
+                <span class="text-xl font-bold tracking-wide">إدارة خادم ديسكورد</span>
+            </div>
+            <div class="flex items-center gap-6">
+                <a href="#" class="text-sm text-gray-400 hover:text-white transition">الأوامر</a>
+                <a href="#" class="text-sm text-gray-400 hover:text-white transition">الدعم الفني</a>
+            </div>
+        </header>
 
-    <!-- Hero Section -->
-    <section class="hero">
-        <div class="badge">الجيل المتطور لإدارة وحماية سيرفرات Discord</div>
-        <h1>اصنع مجتمعاً متكاملاً مع <span>ZENO</span></h1>
-        <p>نظام سحابي ذكي وشامل يوفر لسيرفرك تذاكر دعم فني فورية مع تقييمات، جدار حماية صارم Anti-Nuke، عملة Star Coin
-            ومتاجر افتراضية، ورومات صوتية تفاعلية.</p>
+        <!-- محتوى الداشبورد والكروت -->
+        <main class="p-8 flex-1 overflow-y-auto">
+            <div class="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 gap-4">
+                <div>
+                    <h1 class="text-2xl font-black mb-1">لوحة التحكم السريعة</h1>
+                    <p class="text-xs text-gray-400">تحكم بجميع خصائص وإعدادات بوت ZENO بسهولة تامة</p>
+                </div>
+                <input type="text" placeholder="Search plugins..."
+                    class="bg-gray-900 border border-gray-800 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-indigo-500 w-full md:w-64 text-gray-300">
+            </div>
 
-        <div class="cta-buttons">
-            <!-- زر دعوة البوت -->
-            <a href="https://discord.com/api/oauth2/authorize?client_id=1506005273893146775&permissions=8&scope=bot%20applications.commands"
-                target="_blank" class="btn btn-primary">
-                <i class="fa-brands fa-discord"></i> دعوة البوت لسيرفرك
-            </a>
-            <!-- زر لوحة التحكم -->
-            <a href="/dashboard" class="btn btn-secondary" id="dashboardBtn">
-                <i class="fa-solid fa-gear"></i> لوحة التحكم
-            </a>
-        </div>
-    </section>
+            <!-- قسم General -->
+            <p class="text-xs text-gray-500 font-bold mb-4 tracking-wider">GENERAL</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-10">
 
-    <!-- Stats Cards -->
-    <div class="stats-grid">
-        <div class="stat-card">
-            <div class="value green" id="statSecurity">100%</div>
-            <div class="label"><i class="fa-solid fa-shield-halved"></i> جاهزية الحماية (نشط)</div>
-        </div>
-        <div class="stat-card">
-            <div class="value blue" id="statPing">--ms</div>
-            <div class="label"><i class="fa-solid fa-bolt"></i> استجابة البث الحية</div>
-        </div>
-        <div class="stat-card">
-            <div class="value" id="statMembers">...</div>
-            <div class="label"><i class="fa-solid fa-users"></i> أعضاء يخدمهم</div>
-        </div>
-        <div class="stat-card">
-            <div class="value" id="statServers">...</div>
-            <div class="label"><i class="fa-solid fa-chess-rook"></i> سيرفرات نشطة</div>
-        </div>
+                <!-- نظرة عامة -->
+                <div
+                    class="bg-[#131825] border border-gray-800/80 rounded-2xl p-6 flex flex-col justify-between hover:border-indigo-500/50 transition">
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="font-bold text-base">نظرة عامة</span>
+                            <div class="p-2.5 rounded-xl bg-indigo-500/10 text-indigo-400">📊</div>
+                        </div>
+                        <p class="text-xs text-gray-400 mb-6">Get main information about your server settings</p>
+                    </div>
+                    <button
+                        class="w-full py-2.5 rounded-xl bg-gray-800 hover:bg-indigo-600 transition font-semibold text-xs tracking-wide shadow-md">Visit</button>
+                </div>
+
+                <!-- إعدادات السيرفر -->
+                <div
+                    class="bg-[#131825] border border-gray-800/80 rounded-2xl p-6 flex flex-col justify-between hover:border-indigo-500/50 transition">
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="font-bold text-base">إعدادات السيرفر</span>
+                            <div class="p-2.5 rounded-xl bg-indigo-500/10 text-indigo-400">⚙️</div>
+                        </div>
+                        <p class="text-xs text-gray-400 mb-6">Manage your server settings</p>
+                    </div>
+                    <button
+                        class="w-full py-2.5 rounded-xl bg-gray-800 hover:bg-indigo-600 transition font-semibold text-xs tracking-wide shadow-md">Visit</button>
+                </div>
+
+                <!-- رسائل الإيمبد -->
+                <div
+                    class="bg-[#131825] border border-gray-800/80 rounded-2xl p-6 flex flex-col justify-between hover:border-indigo-500/50 transition">
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="font-bold text-base">رسائل الإيمبد</span>
+                            <div class="p-2.5 rounded-xl bg-indigo-500/10 text-indigo-400">💬</div>
+                        </div>
+                        <p class="text-xs text-gray-400 mb-6">Create and manage embed messages</p>
+                    </div>
+                    <button
+                        class="w-full py-2.5 rounded-xl bg-gray-800 hover:bg-indigo-600 transition font-semibold text-xs tracking-wide shadow-md">Visit</button>
+                </div>
+
+            </div>
+
+            <!-- قسم Modules -->
+            <p class="text-xs text-gray-500 font-bold mb-4 tracking-wider">MODULES</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+
+                <!-- نظام التذاكر -->
+                <div
+                    class="bg-[#131825] border border-gray-800/80 rounded-2xl p-6 flex flex-col justify-between hover:border-indigo-500/50 transition">
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="font-bold text-base">نظام التذاكر (Tickets)</span>
+                            <div class="p-2.5 rounded-xl bg-indigo-500/10 text-indigo-400">🎫</div>
+                        </div>
+                        <p class="text-xs text-gray-400 mb-6">Manage ticket panels and support rooms</p>
+                    </div>
+                    <button
+                        class="w-full py-2.5 rounded-xl bg-gray-800 hover:bg-indigo-600 transition font-semibold text-xs tracking-wide shadow-md">Visit</button>
+                </div>
+
+                <!-- الأوامر العامة -->
+                <div
+                    class="bg-[#131825] border border-gray-800/80 rounded-2xl p-6 flex flex-col justify-between hover:border-indigo-500/50 transition">
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="font-bold text-base">الأوامر العامة</span>
+                            <div class="p-2.5 rounded-xl bg-indigo-500/10 text-indigo-400">🛠️</div>
+                        </div>
+                        <p class="text-xs text-gray-400 mb-6">Utility commands and features</p>
+                    </div>
+                    <button
+                        class="w-full py-2.5 rounded-xl bg-gray-800 hover:bg-indigo-600 transition font-semibold text-xs tracking-wide shadow-md">Visit</button>
+                </div>
+
+                <!-- الإشراف -->
+                <div
+                    class="bg-[#131825] border border-gray-800/80 rounded-2xl p-6 flex flex-col justify-between hover:border-indigo-500/50 transition">
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="font-bold text-base">الإشراف</span>
+                            <div class="p-2.5 rounded-xl bg-indigo-500/10 text-indigo-400">🛡️</div>
+                        </div>
+                        <p class="text-xs text-gray-400 mb-6">Moderation tools and commands</p>
+                    </div>
+                    <button
+                        class="w-full py-2.5 rounded-xl bg-gray-800 hover:bg-indigo-600 transition font-semibold text-xs tracking-wide shadow-md">Visit</button>
+                </div>
+
+            </div>
+        </main>
     </div>
 
-    <!-- Features Section -->
-    <section class="features-section">
-        <div class="features-title">
-            <h2>ميزات بوت ZENO</h2>
-            <p>كل ما تحتاجه لإدارة سيرفرك باحترافية وأمان تام في مكان واحد</p>
-        </div>
-        <div class="features-grid">
-            <div class="feature-card">
-                <div class="feature-icon"><i class="fa-solid fa-ticket"></i></div>
-                <h3>تذاكر الدعم الفني</h3>
-                <p>نظام تذاكر متطور مع لوحة تحكم خاصة، أزرار تفاعلية، وتقييمات فورية لأداء الدعم.</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon"><i class="fa-solid fa-shield-cat"></i></div>
-                <h3>حماية Anti-Nuke</h3>
-                <p>درع حماية قوي جداً يصد الهجمات والتهكيرات ويحمي رومات ورتب سيرفرك من التخريب.</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon"><i class="fa-solid fa-coins"></i></div>
-                <h3>المتاجر وعملة Star Coin</h3>
-                <p>نظام اقتصاد واكتساب نقاط ومتاجر افتراضية تفاعلية تزيد من تفاعل أعضاء سيرفرك.</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon"><i class="fa-solid fa-dice-three"></i></div>
-                <h3>ألعاب وتسلية ممتعة</h3>
-                <p>مجموعة ضخمة من الألعاب الترفيهية مثل الروليت، الكراسي، المافيا، وكت تويت لإشعال الحماس.</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon"><i class="fa-solid fa-microphone-lines"></i></div>
-                <h3>رومات صوتية تفاعلية</h3>
-                <p>إنشاء رومات صوتية مؤقتة وتخصيصها بالكامل للأعضاء مع تحكم كامل للمالكين.</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon"><i class="fa-solid fa-sliders"></i></div>
-                <h3>لوحة تحكم سهلة</h3>
-                <p>تحكم بكل صغيرة وكبيرة في البوت والسيرفر عبر لوحة تحكم ويب سريعة وآمنة.</p>
+    <!-- الشريط الجانبي (Sidebar - يمين) -->
+    <aside class="w-80 bg-[#111522] border-r border-gray-800/60 flex flex-col p-6 h-screen sticky top-0">
+        <!-- معلومات البوت -->
+        <div class="flex items-center gap-3.5 pb-6 border-b border-gray-800/60 mb-6">
+            <div
+                class="w-12 h-12 rounded-2xl bg-indigo-600 flex items-center justify-center font-black text-xl shadow-lg shadow-indigo-600/30">
+                Z</div>
+            <div>
+                <h3 class="font-bold text-sm">ZENO TICKETS</h3>
+                <span class="text-xs text-emerald-400 flex items-center gap-1 mt-0.5">● متصل الآن</span>
             </div>
         </div>
-    </section>
 
-    <!-- Script to Fetch Real-time Data & User Session -->
-    <script>
-        async function fetchBotStats() {
-            try {
-                const response = await fetch('/api/stats');
-                const data = await response.json();
-                if (data) {
-                    document.getElementById('statPing').innerText = (data.ping || '24') + 'ms';
-                    document.getElementById('statMembers').innerText = data.totalMembers || '1';
-                    document.getElementById('statServers').innerText = data.totalServers || '1';
-                    document.getElementById('statSecurity').innerText = (data.security || '100') + '%';
-                }
-            } catch (e) {
-                document.getElementById('statPing').innerText = '18ms';
-                document.getElementById('statMembers').innerText = '1,420';
-                document.getElementById('statServers').innerText = '12';
-            }
-        }
+        <!-- قائمة التنقل الجانبية -->
+        <div class="flex-1 overflow-y-auto space-y-1.5 pr-1">
+            <p class="text-[11px] text-gray-500 font-bold px-3 mb-2 tracking-wider">عام</p>
+            <a href="#"
+                class="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-indigo-600 text-white font-semibold text-xs shadow-md shadow-indigo-600/25">
+                <span>نظرة عامة</span>
+                <span class="w-2 h-2 rounded-full bg-white"></span>
+            </a>
+            <a href="#"
+                class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-gray-400 hover:bg-gray-800/50 hover:text-white transition text-xs">
+                <span>إعدادات السيرفر</span>
+            </a>
+            <a href="#"
+                class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-gray-400 hover:bg-gray-800/50 hover:text-white transition text-xs">
+                <span>رسائل الإيمبد</span>
+            </a>
 
-        async function fetchUserData() {
-            const profileLink = document.getElementById('userProfileLink');
-            try {
-                const res = await fetch('/api/user');
-                const user = await res.json();
-                if (user && user.username) {
-                    document.getElementById('userName').innerText = user.username;
-                    if (user.avatar) {
-                        document.getElementById('userAvatar').src = `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`;
-                    }
-                    profileLink.href = '/dashboard';
-                } else {
-                    document.getElementById('userName').innerText = 'تسجيل الدخول';
-                    profileLink.href = '/auth/discord';
-                }
-            } catch (e) {
-                document.getElementById('userName').innerText = 'تسجيل الدخول';
-                profileLink.href = '/auth/discord';
-            }
-        }
+            <p class="text-[11px] text-gray-500 font-bold px-3 mt-6 mb-2 tracking-wider">قائمة الخصائص</p>
+            <a href="#"
+                class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-gray-400 hover:bg-gray-800/50 hover:text-white transition text-xs">
+                <span>نظام التذاكر</span>
+                <span class="text-[10px] bg-indigo-500/20 text-indigo-400 px-2 py-0.5 rounded-md font-bold">جديد</span>
+            </a>
+            <a href="#"
+                class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-gray-400 hover:bg-gray-800/50 hover:text-white transition text-xs">
+                <span>الرولات التلقائية</span>
+            </a>
+            <a href="#"
+                class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-gray-400 hover:bg-gray-800/50 hover:text-white transition text-xs">
+                <span>الإشراف والحماية</span>
+            </a>
+            <a href="#"
+                class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-gray-400 hover:bg-gray-800/50 hover:text-white transition text-xs">
+                <span>سجل لوحة التحكم</span>
+            </a>
+        </div>
+    </aside>
 
-        fetchBotStats();
-        fetchUserData();
-        setInterval(fetchBotStats, 10000);
-    </script>
 </body>
 
 </html>
