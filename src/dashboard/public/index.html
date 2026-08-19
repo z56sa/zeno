@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ZENO - اصنع خادم ديسكورد احترافي</title>
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
     <style>
@@ -18,8 +19,10 @@
 
 <body class="min-h-screen flex flex-col justify-between selection:bg-indigo-500 selection:text-white overflow-x-hidden">
 
+    <!-- الهيدر (Navbar) -->
     <header class="flex items-center justify-between px-8 py-6 max-w-7xl mx-auto w-full relative">
 
+        <!-- اليسار: زر تسجيل الدخول بحساب ديسكورد -->
         <div class="flex items-center gap-4">
             <a href="/auth/discord"
                 class="flex items-center gap-2.5 px-4 py-2 rounded-xl bg-[#5865F2]/10 hover:bg-[#5865F2]/20 border border-[#5865F2]/30 text-[#5865F2] hover:text-white transition text-xs font-bold shadow-lg">
@@ -31,8 +34,8 @@
             </a>
         </div>
 
+        <!-- المنتصف: القوائم -->
         <nav class="hidden md:flex items-center gap-8 text-sm text-gray-300 font-medium">
-
             <div class="relative group">
                 <button class="hover:text-indigo-400 transition flex items-center gap-1 py-2 focus:outline-none">
                     <span>المميزات</span>
@@ -43,49 +46,21 @@
                 <div
                     class="absolute top-full right-0 w-52 bg-[#131825] border border-gray-800 rounded-2xl shadow-2xl py-3 hidden group-hover:block z-50">
                     <a href="/dashboard"
-                        class="flex items-center gap-2.5 px-4 py-2.5 text-xs text-gray-300 hover:bg-indigo-600/20 hover:text-indigo-400 transition">
-                        <span>🎫</span> نظام التذاكر (Tickets)
-                    </a>
+                        class="flex items-center gap-2.5 px-4 py-2.5 text-xs text-gray-300 hover:bg-indigo-600/20 hover:text-indigo-400 transition">🎫
+                        نظام التذاكر</a>
                     <a href="/dashboard"
-                        class="flex items-center gap-2.5 px-4 py-2.5 text-xs text-gray-300 hover:bg-indigo-600/20 hover:text-indigo-400 transition">
-                        <span>🛡️</span> الإشراف والحماية (Moderation)
-                    </a>
+                        class="flex items-center gap-2.5 px-4 py-2.5 text-xs text-gray-300 hover:bg-indigo-600/20 hover:text-indigo-400 transition">🛡️
+                        الإشراف والحماية</a>
                     <a href="/dashboard"
-                        class="flex items-center gap-2.5 px-4 py-2.5 text-xs text-gray-300 hover:bg-indigo-600/20 hover:text-indigo-400 transition">
-                        <span>💰</span> النظام الاقتصادي (Economy)
-                    </a>
-                    <a href="/dashboard"
-                        class="flex items-center gap-2.5 px-4 py-2.5 text-xs text-gray-300 hover:bg-indigo-600/20 hover:text-indigo-400 transition">
-                        <span>⚙️</span> الأوامر العامة والإدارية
-                    </a>
+                        class="flex items-center gap-2.5 px-4 py-2.5 text-xs text-gray-300 hover:bg-indigo-600/20 hover:text-indigo-400 transition">💰
+                        النظام الاقتصادي</a>
                 </div>
             </div>
-
-            <div class="relative group">
-                <button class="hover:text-indigo-400 transition flex items-center gap-1 py-2 focus:outline-none">
-                    <span>المصادر</span>
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                    </svg>
-                </button>
-                <div
-                    class="absolute top-full right-0 w-48 bg-[#131825] border border-gray-800 rounded-2xl shadow-2xl py-3 hidden group-hover:block z-50">
-                    <a href="https://discord.gg/uxqQDtbVMz" target="_blank"
-                        class="block px-4 py-2.5 text-xs text-gray-300 hover:bg-indigo-600/20 hover:text-indigo-400 transition">سيرفر
-                        الدعم الفني</a>
-                    <a href="/terms.html"
-                        class="block px-4 py-2.5 text-xs text-gray-300 hover:bg-indigo-600/20 hover:text-indigo-400 transition">شروط
-                        الاستخدام</a>
-                    <a href="/privacy.html"
-                        class="block px-4 py-2.5 text-xs text-gray-300 hover:bg-indigo-600/20 hover:text-indigo-400 transition">سياسة
-                        الخصوصية</a>
-                </div>
-            </div>
-
             <a href="https://discord.gg/uxqQDtbVMz" target="_blank" class="hover:text-indigo-400 transition">سيرفر
                 الدعم</a>
         </nav>
 
+        <!-- اليمين: شعار ZENO -->
         <div class="flex items-center gap-3">
             <span class="text-xl font-bold tracking-wider">ZENO</span>
             <div
@@ -94,10 +69,11 @@
         </div>
     </header>
 
+    <!-- المحتوى الرئيسي -->
     <main class="flex-1 flex flex-col items-center justify-center text-center px-4 py-16">
         <div
             class="inline-block bg-indigo-500/10 text-indigo-400 text-xs font-semibold px-4 py-1.5 rounded-full mb-8 border border-indigo-500/20">
-            ✨ جديد: نظام التذاكر المطور
+            ✨ جديد: لوحة تحكم متطورة لإدارة سيرفرك
         </div>
 
         <h1 class="text-4xl md:text-6xl font-black tracking-tight mb-6 max-w-3xl leading-tight">
@@ -105,8 +81,7 @@
         </h1>
 
         <p class="text-gray-400 text-sm md:text-base max-w-xl mb-12 leading-relaxed">
-            بوت متعدد الأغراض قابل للتخصيص جداً حيث يوفر لك تخصيص رسائل الترحيب، وسجلات متعمقة، وأوامر تذاكر وإشراف
-            وأكثر بكثير.
+            بوت متعدد الأغراض قابل للتخصيص بالكامل لتوفير نظام التذاكر، الإشراف، الترحيب وأوامر إدارية متقدمة.
         </p>
 
         <div class="flex flex-wrap items-center justify-center gap-4">
@@ -122,6 +97,7 @@
         </div>
     </main>
 
+    <!-- الفوتر -->
     <footer class="py-6 text-center text-gray-500 text-xs border-t border-gray-800/40">
         جميع الحقوق محفوظة © ZENO BOT 2026 - <a href="https://discord.gg/uxqQDtbVMz" target="_blank"
             class="text-indigo-400 hover:underline">سيرفر الدعم</a>

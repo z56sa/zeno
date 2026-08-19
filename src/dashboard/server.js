@@ -62,7 +62,7 @@ app.get('/auth/discord', (req, res) => {
     res.redirect(discordAuthUrl);
 });
 
-// الـ Callback الجلوس وجلب بيانات المستخدم والسيرفرات
+// الـ Callback وجلب بيانات المستخدم والسيرفرات
 app.get('/auth/discord/callback', async (req, res) => {
     const code = req.query.code;
     if (!code) {
@@ -88,18 +88,15 @@ app.get('/auth/discord/callback', async (req, res) => {
 
         const accessToken = tokenResult.data.access_token;
 
-        // جلب معلومات المستخدم
         const userResult = await axios.get('https://discord.com/api/users/@me', {
             headers: { authorization: `Bearer ${accessToken}` },
         });
 
-        // جلب سيرفرات المستخدم
         const guildsResult = await axios.get('https://discord.com/api/users/@me/guilds', {
             headers: { authorization: `Bearer ${accessToken}` },
         });
 
         req.session.user = userResult.data;
-        // تصفية السيرفرات التي يمتلك فيها المستخدم صلاحية الإدارة (Administrator = 0x8 أو قريبة منها) أو صاحب السيرفر
         req.session.guilds = guildsResult.data.filter(guild => (guild.permissions & 0x8) === 0x8 || guild.owner);
 
         res.redirect('/dashboard');
@@ -116,7 +113,7 @@ app.get('/logout', (req, res) => {
     });
 });
 
-// مسار لوحة التحكم الاحترافية الحقيقية
+// صفحة اختيار السيرفرات الرئيسية
 app.get('/dashboard', (req, res) => {
     if (!req.session || !req.session.user) {
         return res.redirect('/auth/discord');
@@ -128,18 +125,17 @@ app.get('/dashboard', (req, res) => {
         ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`
         : `https://cdn.discordapp.com/embed/avatars/${user.discriminator % 5}.png`;
 
-    // توليد قائمة السيرفرات HTML
     const guildsHtml = guilds.length > 0 ? guilds.map(guild => {
         const guildIcon = guild.icon
             ? `https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.png`
             : `https://cdn.discordapp.com/embed/avatars/0.png`;
         return `
-            <div class="bg-[#131825] border border-gray-800 hover:border-indigo-500/50 transition p-4 rounded-2xl flex items-center justify-between shadow-lg">
+            <div class="bg-[#131825] border border-gray-800 hover:border-indigo-500/50 transition p-5 rounded-2xl flex items-center justify-between shadow-lg">
                 <div class="flex items-center gap-4">
-                    <img src="${guildIcon}" alt="${guild.name}" class="w-12 h-12 rounded-2xl object-cover border border-gray-700">
+                    <img src="${guildIcon}" alt="${guild.name}" class="w-14 h-14 rounded-2xl object-cover border border-gray-700">
                     <div>
-                        <h3 class="font-bold text-white text-sm md:text-base">${guild.name}</h3>
-                        <span class="text-xs text-indigo-400">مؤهل للإدارة</span>
+                        <h3 class="font-bold text-white text-base">${guild.name}</h3>
+                        <span class="text-xs text-indigo-400 font-medium">مؤهل للإدارة</span>
                     </div>
                 </div>
                 <a href="/dashboard/${guild.id}" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition shadow-lg shadow-indigo-600/30">
@@ -155,21 +151,17 @@ app.get('/dashboard', (req, res) => {
         <head>
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>لوحة التحكم - ZENO</title>
+            <title>اختر سيرفر - ZENO</title>
             <script src="https://cdn.tailwindcss.com"></script>
             <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
             <style> body { font-family: 'Cairo', sans-serif; background-color: #0b0f19; color: #fff; } </style>
         </head>
         <body class="min-h-screen flex flex-col justify-between selection:bg-indigo-500 selection:text-white">
-
-            <!-- الهيدر العلوي -->
             <header class="flex items-center justify-between px-8 py-5 border-b border-gray-800/60 bg-[#0b0f19]/80 backdrop-blur-md sticky top-0 z-50">
                 <div class="flex items-center gap-3">
                     <span class="text-xl font-black tracking-wider text-indigo-400">ZENO</span>
                     <span class="text-xs bg-indigo-500/10 text-indigo-400 px-3 py-1 rounded-full border border-indigo-500/20 font-bold">لوحة التحكم</span>
                 </div>
-
-                <!-- حساب المستخدم -->
                 <div class="flex items-center gap-4">
                     <div class="flex items-center gap-3 bg-[#131825] px-4 py-2 rounded-2xl border border-gray-800">
                         <img src="${avatarUrl}" alt="Avatar" class="w-8 h-8 rounded-full border border-indigo-500">
@@ -180,27 +172,78 @@ app.get('/dashboard', (req, res) => {
                     </a>
                 </div>
             </header>
-
-            <!-- محتوى لوحة التحكم -->
-            <main class="max-w-6xl mx-auto px-6 py-12 flex-1 w-full">
-                <div class="mb-8">
+            <main class="max-w-5xl mx-auto px-6 py-12 flex-1 w-full">
+                <div class="mb-8 text-center md:text-right">
                     <h1 class="text-2xl md:text-3xl font-black mb-2">اختر خادماً لإدارته</h1>
-                    <p class="text-gray-400 text-sm">قم باختيار أحد خوادم ديسكورد التي تمتلك صلاحيات إدارية عليها لتعديل إعدادات بوت ZENO.</p>
+                    <p class="text-gray-400 text-sm">قم باختيار أحد خوادم ديسكورد لتعديل وتخصيص إعدادات بوت ZENO.</p>
                 </div>
-
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     ${guildsHtml}
                 </div>
             </main>
-
-            <!-- الفوتر -->
             <footer class="py-6 text-center text-gray-500 text-xs border-t border-gray-800/40">
-                جميع الحقوق محفوظة © ZENO BOT 2026 - <a href="https://discord.gg/uxqQDtbVMz" target="_blank" class="text-indigo-400 hover:underline">سيرفر الدعم</a>
+                جميع الحقوق محفوظة © ZENO BOT 2026
             </footer>
-
         </body>
         </html>
     `);
 });
 
-module.exports = app;
+// صفحة إدارة السيرفر الداخلية المخصصة (شبيهة بـ ProBot تماماً)
+app.get('/dashboard/:guildId', (req, res) => {
+    if (!req.session || !req.session.user) {
+        return res.redirect('/auth/discord');
+    }
+
+    const guildId = req.params.guildId;
+    const guilds = req.session.guilds || [];
+    const currentGuild = guilds.find(g => g.id === guildId);
+
+    if (!currentGuild) {
+        return res.redirect('/dashboard?error=guild_not_found');
+    }
+
+    const guildIcon = currentGuild.icon
+        ? `https://cdn.discordapp.com/icons/${currentGuild.id}/${currentGuild.icon}.png`
+        : `https://cdn.discordapp.com/embed/avatars/0.png`;
+
+    res.send(`
+        <!DOCTYPE html>
+        <html lang="ar" dir="rtl">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>إدارة ${currentGuild.name} - ZENO</title>
+            <script src="https://cdn.tailwindcss.com"></script>
+            <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+            <style> body { font-family: 'Cairo', sans-serif; background-color: #0b0f19; color: #fff; } </style>
+        </head>
+        <body class="min-h-screen flex bg-[#0b0f19] selection:bg-indigo-500 selection:text-white">
+
+            <aside class="w-72 bg-[#101420] border-l border-gray-800/60 flex flex-col justify-between hidden md:flex h-screen sticky top-0 overflow-y-auto">
+                <div>
+                    <div class="p-6 border-b border-gray-800/50 flex items-center gap-3">
+                        <img src="${guildIcon}" class="w-10 h-10 rounded-xl object-cover border border-gray-700">
+                        <div>
+                            <h2 class="font-bold text-sm truncate max-w-[150px]">${currentGuild.name}</h2>
+                            <span class="text-[10px] text-indigo-400 font-bold">لوحة التحكم النشطة</span>
+                        </div>
+                    </div>
+                    <nav class="p-4 space-y-1.5 text-xs">
+                        <div class="text-gray-500 font-bold px-3 py-1 mb-1">عام</div>
+                        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-indigo-600 text-white font-bold shadow-lg shadow-indigo-600/20"> نظرة عامة</a>
+                        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-400 hover:bg-gray-800/50 hover:text-white transition"> إعدادات السيرفر</a>
+                        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-400 hover:bg-gray-800/50 hover:text-white transition"> رسائل الإيمبد</a>
+                        
+                        <div class="text-gray-500 font-bold px-3 py-1 mt-4 mb-1">قائمة الخصائص</div>
+                        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-400 hover:bg-gray-800/50 hover:text-white transition"> الأوامر العامة</a>
+                        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-400 hover:bg-gray-800/50 hover:text-white transition"> الترحيب & المغادرة</a>
+                        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-400 hover:bg-gray-800/50 hover:text-white transition"> الرد التلقائي</a>
+                        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-400 hover:bg-gray-800/50 hover:text-white transition"> نظام التذاكر</a>
+                        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-400 hover:bg-gray-800/50 hover:text-white transition"> الرولات التلقائية</a>
+
+                        <div class="text-gray-500 font-bold px-3 py-1 mt-4 mb-1">الإشراف</div>
+                        <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-400 hover:bg-gray-800/50 hover:text-white transition"> الإشراف والحماية</a>
+                    </nav>
+                </div>
+                <div class="p-4 border-t border-
