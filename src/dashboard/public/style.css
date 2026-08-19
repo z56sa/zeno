@@ -7,8 +7,9 @@
   --bg-gradient: radial-gradient(circle at top center, #131825 0%, #0b0f19 70%);
   --bg-card: #131825;
   --bg-card-hover: #1a2033;
-  --accent: #6366f1;
-  --accent-hover: #4f46e5;
+  --accent: #a855f7;
+  /* تم التعديل للون البنفسجي الخاص بـ ZENO */
+  --accent-hover: #9333ea;
   --text-main: #f8fafc;
   --text-muted: #94a3b8;
   --border: #1e2235;
@@ -68,25 +69,17 @@ header.navbar {
 .logo {
   display: flex;
   align-items: center;
-  gap: 10px;
-  font-size: 1.5rem;
+  gap: 12px;
+  font-size: 1.25rem;
   font-weight: 900;
   color: var(--text-main);
   text-decoration: none;
-}
-
-.logo span.badge {
-  background: rgba(99, 102, 241, 0.1);
-  color: var(--accent);
-  padding: 2px 10px;
-  border-radius: 20px;
-  font-size: 0.75rem;
-  border: 1px solid rgba(99, 102, 241, 0.2);
+  letter-spacing: 0.25em;
 }
 
 nav {
   display: flex;
-  gap: 25px;
+  gap: 30px;
   align-items: center;
 }
 
