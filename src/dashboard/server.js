@@ -113,7 +113,7 @@ app.get('/dashboard', (req, res) => {
         return res.redirect('/auth/discord');
     }
 
-    res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 module.exports = app;
