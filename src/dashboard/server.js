@@ -69,15 +69,16 @@ app.get('/auth/discord/callback', async (req, res) => {
     try {
         const REDIRECT_URI = "https://zeno-production-b6d7.up.railway.app/auth/discord/callback";
 
-        const tokenResponseData = new URLSearchParams({
-            client_id: process.env.CLIENT_ID,
-            client_secret: process.env.CLIENT_SECRET,
-            grant_type: 'authorization_code',
-            code: code,
-            redirect_uri: REDIRECT_URI,
-        });
-
-        const tokenResult = await axios.post('https://discord.com/api/oauth2/token', tokenResponseData, {
+        const tokenResult = await axios({
+            method: 'post',
+            url: 'https://discord.com/api/oauth2/token',
+            data: new URLSearchParams({
+                client_id: process.env.CLIENT_ID,
+                client_secret: process.env.CLIENT_SECRET,
+                grant_type: 'authorization_code',
+                code: code,
+                redirect_uri: REDIRECT_URI,
+            }).toString(),
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
             },
