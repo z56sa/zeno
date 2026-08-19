@@ -1,150 +1,213 @@
 // ==========================================
-// FILE: src/index.js
+// FILE: src/database/index.js
 // ==========================================
 
-const { Client, GatewayIntentBits, Partials, Collection } = require('discord.js');
-const express = require('express');
-const fs = require('fs');
-const path = require('path');
-const db = require('./database');
+const { Pool } = require('pg');
 
-// ------------------------------------------
-// 1. EXPRESS & WEB SERVER SETUP
-// ------------------------------------------
-const app = express();
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-// ------------------------------------------
-// 2. DISCORD CLIENT INITIALIZATION
-// ------------------------------------------
-const client = new Client({
-    intents: [
-        GatewayIntentBits.Guilds,
-        GatewayIntentBits.GuildMessages,
-        GatewayIntentBits.MessageContent,
-        GatewayIntentBits.GuildMembers,
-        GatewayIntentBits.GuildVoiceStates,
-        GatewayIntentBits.GuildMessageReactions
-    ],
-    partials: [
-        Partials.Message,
-        Partials.Channel,
-        Partials.Reaction,
-        Partials.User,
-        Partials.GuildMember
-    ]
-});
-
-client.commands = new Collection();
-client.slashCommands = new Collection();
-client.cooldowns = new Collection();
-
-// تمرير app و client بأمان للوحة التحكم
-try {
-    const dashboardServer = require('./dashboard/server');
-    if (typeof dashboardServer === 'function') {
-        dashboardServer(app, client);
-    }
-} catch (err) {
-    console.warn('⚠️ لم يتم تحميل ملف الداشبورد أو أنه يحتوي على هيكلة مختلفة:', err.message);
+if (!process.env.DATABASE_URL) {
+    console.warn('⚠️ تحذير: متغير البيئة DATABASE_URL غير معرف!');
 }
 
-// ------------------------------------------
-// 3. API ENDPOINTS (RAILWAY & MONITORING)
-// ------------------------------------------
-app.get('/api/stats', async (req, res) => {
+const pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: process.env.DATABASE_URL?.includes('localhost') ? false : { rejectUnauthorized: false }
+});
+
+const ALLOWED_SETTINGS = [
+    'prefix',
+    'welcome_channel',
+    'log_channel',
+    'ticket_category',
+    'ticket_log_channel',
+    'support_role',
+    'auto_role'
+];
+
+async function initDatabase() {
+    const query = `
+        CREATE TABLE IF NOT EXISTS users (
+            user_id VARCHAR(32) PRIMARY KEY,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+
+        CREATE TABLE IF NOT EXISTS guild_settings (
+            guild_id VARCHAR(32) PRIMARY KEY,
+            prefix VARCHAR(10) DEFAULT '!',
+            welcome_channel VARCHAR(32),
+            log_channel VARCHAR(32),
+            ticket_category VARCHAR(32),
+            ticket_log_channel VARCHAR(32),
+            support_role VARCHAR(32),
+            auto_role VARCHAR(32)
+        );
+
+        CREATE TABLE IF NOT EXISTS tickets (
+            id SERIAL PRIMARY KEY,
+            guild_id VARCHAR(32) NOT NULL,
+            channel_id VARCHAR(32) NOT NULL UNIQUE,
+            user_id VARCHAR(32) NOT NULL,
+            category VARCHAR(64) DEFAULT 'General',
+            status VARCHAR(16) DEFAULT 'open',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            closed_at TIMESTAMP
+        );
+    `;
     try {
-        const dbStats = typeof db.getSystemStats === 'function' ? await db.getSystemStats() : {};
-
-        res.json({
-            status: client.user ? 'online' : 'connecting',
-            ping: client.ws?.ping || 0,
-            guildsCount: client.guilds?.cache?.size || 0,
-            usersCount: client.users?.cache?.size || 0,
-            dbStats: dbStats,
-            uptime: Math.floor(process.uptime())
-        });
-    } catch (error) {
-        res.status(500).json({ error: 'Failed to fetch bot statistics' });
+        await pool.query(query);
+        console.log('✅ تم تجهيز قاعدة البيانات والجداول بنجاح.');
+    } catch (err) {
+        console.error('❌ خطأ في تهيئة قاعدة البيانات:', err);
     }
-});
-
-// ------------------------------------------
-// 4. DYNAMIC HANDLERS (COMMANDS & EVENTS)
-// ------------------------------------------
-const loadBotModules = () => {
-    // 1. تحميل الأحداث (Events)
-    const eventsPath = path.join(__dirname, 'events');
-    if (fs.existsSync(eventsPath)) {
-        const eventFiles = fs.readdirSync(eventsPath).filter(file => file.endsWith('.js'));
-        for (const file of eventFiles) {
-            const event = require(path.join(eventsPath, file));
-            if (event.name && typeof event.execute === 'function') {
-                if (event.once) {
-                    client.once(event.name, (...args) => event.execute(...args, client));
-                } else {
-                    client.on(event.name, (...args) => event.execute(...args, client));
-                }
-            }
-        }
-        console.log(`✅ Loaded ${eventFiles.length} events successfully.`);
-    }
-
-    // 2. تحميل الأوامر (Commands / Slash Commands)
-    const commandsPath = path.join(__dirname, 'commands');
-    if (fs.existsSync(commandsPath)) {
-        const categories = fs.readdirSync(commandsPath);
-        let commandCount = 0;
-
-        for (const category of categories) {
-            const categoryPath = path.join(commandsPath, category);
-
-            if (fs.statSync(categoryPath).isDirectory()) {
-                const commandFiles = fs.readdirSync(categoryPath).filter(file => file.endsWith('.js'));
-                for (const file of commandFiles) {
-                    const command = require(path.join(categoryPath, file));
-
-                    // دعم أوامر السلاش (Slash) والأوامر العادية (Prefix)
-                    if (command.data && command.execute) {
-                        client.slashCommands.set(command.data.name, command);
-                        commandCount++;
-                    } else if (command.name && command.execute) {
-                        client.commands.set(command.name, command);
-                        commandCount++;
-                    }
-                }
-            }
-        }
-        console.log(`✅ Loaded ${commandCount} bot commands.`);
-    }
-};
-
-loadBotModules();
-
-// ------------------------------------------
-// 5. ANTI-CRASH SYSTEM (STABILITY)
-// ------------------------------------------
-process.on('unhandledRejection', (reason, promise) => {
-    console.error('⚠️ Unhandled Promise Rejection:', reason);
-});
-
-process.on('uncaughtException', (err) => {
-    console.error('💥 Uncaught Exception:', err);
-});
-
-// ------------------------------------------
-// 6. START SERVER & LOGIN
-// ------------------------------------------
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`🚀 Web server running on port ${PORT}`);
-});
-
-const TOKEN = process.env.BOT_TOKEN || process.env.DISCORD_TOKEN || process.env.TOKEN;
-
-if (!TOKEN) {
-    console.error('❌ Critical Error: Bot Token is missing in environment variables!');
-} else {
-    client.login(TOKEN);
 }
+
+initDatabase();
+
+async function getUser(userId) {
+    try {
+        const result = await pool.query('SELECT * FROM users WHERE user_id = $1', [userId]);
+        return result.rows[0] || null;
+    } catch (err) {
+        console.error('Database Error (getUser):', err);
+        return null;
+    }
+}
+
+async function createUser(userId) {
+    try {
+        const result = await pool.query(
+            'INSERT INTO users (user_id) VALUES ($1) ON CONFLICT (user_id) DO NOTHING RETURNING *;',
+            [userId]
+        );
+        return result.rows[0] || null;
+    } catch (err) {
+        console.error('Database Error (createUser):', err);
+        return null;
+    }
+}
+
+async function getGuildSettings(guildId) {
+    try {
+        const result = await pool.query('SELECT * FROM guild_settings WHERE guild_id = $1', [guildId]);
+        return result.rows[0] || { guild_id: guildId, prefix: '!' };
+    } catch (err) {
+        console.error('Database Error (getGuildSettings):', err);
+        return null;
+    }
+}
+
+async function updateGuildSetting(guildId, settingKey, settingValue) {
+    if (!ALLOWED_SETTINGS.includes(settingKey)) {
+        throw new Error(`حقل غير مصرح بتعديله: ${settingKey}`);
+    }
+    try {
+        const query = `
+            INSERT INTO guild_settings (guild_id, ${settingKey})
+            VALUES ($1, $2)
+            ON CONFLICT (guild_id) 
+            DO UPDATE SET ${settingKey} = $2;
+        `;
+        await pool.query(query, [guildId, settingValue]);
+    } catch (err) {
+        console.error('Database Error (updateGuildSetting):', err);
+        throw err;
+    }
+}
+
+async function createTicket(guildId, channelId, userId, category = 'General') {
+    try {
+        const query = `
+            INSERT INTO tickets (guild_id, channel_id, user_id, category, status)
+            VALUES ($1, $2, $3, $4, 'open')
+            RETURNING *;
+        `;
+        const result = await pool.query(query, [guildId, channelId, userId, category]);
+        return result.rows[0];
+    } catch (err) {
+        console.error('Database Error (createTicket):', err);
+        throw err;
+    }
+}
+
+async function closeTicket(channelId) {
+    try {
+        const query = `
+            UPDATE tickets 
+            SET status = 'closed', closed_at = CURRENT_TIMESTAMP 
+            WHERE channel_id = $1
+            RETURNING *;
+        `;
+        const result = await pool.query(query, [channelId]);
+        return result.rows[0] || null;
+    } catch (err) {
+        console.error('Database Error (closeTicket):', err);
+        throw err;
+    }
+}
+
+async function getTicketByChannel(channelId) {
+    try {
+        const result = await pool.query('SELECT * FROM tickets WHERE channel_id = $1', [channelId]);
+        return result.rows[0] || null;
+    } catch (err) {
+        console.error('Database Error (getTicketByChannel):', err);
+        return null;
+    }
+}
+
+async function getUserActiveTickets(guildId, userId) {
+    try {
+        const result = await pool.query(
+            "SELECT * FROM tickets WHERE guild_id = $1 AND user_id = $2 AND status = 'open';",
+            [guildId, userId]
+        );
+        return result.rows;
+    } catch (err) {
+        console.error('Database Error (getUserActiveTickets):', err);
+        return [];
+    }
+}
+
+async function getGuildTickets(guildId, limit = 50) {
+    try {
+        const result = await pool.query(
+            'SELECT * FROM tickets WHERE guild_id = $1 ORDER BY created_at DESC LIMIT $2;',
+            [guildId, limit]
+        );
+        return result.rows;
+    } catch (err) {
+        console.error('Database Error (getGuildTickets):', err);
+        return [];
+    }
+}
+
+async function getSystemStats() {
+    try {
+        const usersCount = await pool.query('SELECT COUNT(*) FROM users');
+        const guildsCount = await pool.query('SELECT COUNT(*) FROM guild_settings');
+        const openTicketsCount = await pool.query("SELECT COUNT(*) FROM tickets WHERE status = 'open'");
+
+        return {
+            totalUsers: parseInt(usersCount.rows[0].count, 10) || 0,
+            totalGuilds: parseInt(guildsCount.rows[0].count, 10) || 0,
+            openTickets: parseInt(openTicketsCount.rows[0].count, 10) || 0
+        };
+    } catch (err) {
+        console.error('Database Error (getSystemStats):', err);
+        return { totalUsers: 0, totalGuilds: 0, openTickets: 0 };
+    }
+}
+
+module.exports = {
+    pool,
+    initDatabase,
+    getUser,
+    createUser,
+    getGuildSettings,
+    updateGuildSetting,
+    createTicket,
+    closeTicket,
+    getTicketByChannel,
+    getUserActiveTickets,
+    getGuildTickets,
+    getSystemStats
+};
