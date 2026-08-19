@@ -13,6 +13,16 @@ const pool = new Pool({
     ssl: process.env.DATABASE_URL?.includes('localhost') ? false : { rejectUnauthorized: false }
 });
 
+const express = require('express');
+const app = express(); // إسناد تطبيق express لتفعيل app.get
+
+// استدعاء ملف الداشبورد وتمرير app له
+const dashboardServer = require('./dashboard/server');
+if (typeof dashboardServer === 'function') {
+    dashboardServer(app);
+}
+
+
 const ALLOWED_SETTINGS = [
     'prefix',
     'welcome_channel',
