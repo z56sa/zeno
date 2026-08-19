@@ -40,11 +40,26 @@
         <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
 
             <!-- Login / Dashboard Button (في اليمين) -->
+            <!-- مكان زر تسجيل الدخول في الهيدر -->
             <div>
-                <a href="/dashboard"
-                    class="px-5 py-2.5 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-xs font-bold transition shadow-lg shadow-purple-600/30">
-                    تسجيل الدخول
-                </a>
+                <% if (user) { %>
+                    <!-- إذا كان المستخدم مسجل دخوله، تظهر صورته واسمه -->
+                    <a href="/dashboard"
+                        class="flex items-center gap-3 bg-[#12121a] border border-[#232334] px-4 py-2 rounded-xl hover:border-purple-500/50 transition">
+                        <img src="https://cdn.discordapp.com/avatars/<%= user.id %>/<%= user.avatar %>.png"
+                            alt="<%= user.username %>"
+                            class="w-8 h-8 rounded-full object-cover border border-purple-500/40">
+                        <span class="text-xs font-bold text-white">
+                            <%= user.username %>
+                        </span>
+                    </a>
+                    <% } else { %>
+                        <!-- إذا لم يكن مسجل دخوله، يظهر زر تسجيل الدخول -->
+                        <a href="/auth/discord"
+                            class="px-5 py-2.5 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-xs font-bold transition shadow-lg shadow-purple-600/30">
+                            تسجيل الدخول
+                        </a>
+                        <% } %>
             </div>
 
             <!-- Nav Links (في المنتصف) -->

@@ -132,11 +132,15 @@ module.exports = function (app) {
     });
 
     // 2. توجيه تسجيل الدخول بـ Discord
-    app.get('/auth/discord', (req, res) => {
-        const redirectUri = encodeURIComponent(`https://${req.get('host')}/auth/discord/callback`);
-        const clientId = process.env.DISCORD_CLIENT_ID || process.env.CLIENT_ID || '1506005273893146775';
-        res.redirect(`https://discord.com/oauth2/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=identify%20guilds`);
-    });
+    // مثال على مسار تسجيل الدخول عبر ديسكورد
+    app.get('/auth/discord', passport.authenticate('discord'));
+
+    app.get('/auth/discord/callback',
+        passport.authenticate('discord', { failureRedirect: '/' }),
+        (req, res) => {
+            res.redirect('/dashboard'); // أو الصفحة الرئيسية بعد تسجيل الدخول
+        }
+    );
 
     // 3. استقبال العودة من OAuth2
     app.get('/auth/discord/callback', async (req, res) => {
