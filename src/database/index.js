@@ -4,11 +4,13 @@
 
 const { Pool } = require('pg');
 
+if (!process.env.DATABASE_URL) {
+    console.warn('⚠️ تحذير: متغير البيئة DATABASE_URL غير معرف!');
+}
+
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
-    ssl: {
-        rejectUnauthorized: false
-    }
+    ssl: process.env.DATABASE_URL?.includes('localhost') ? false : { rejectUnauthorized: false }
 });
 
 const ALLOWED_SETTINGS = [
@@ -37,11 +39,13 @@ async function initDatabase() {
     `;
     try {
         await pool.query(query);
+        console.log('✅ تم تجهيز قاعدة البيانات والجداول بنجاح.');
     } catch (err) {
-        console.error(' Database Initialization Error:', err);
+        console.error('❌ خطأ في تهيئة قاعدة البيانات:', err);
     }
 }
 
+// تهيئة الجداول فور استدعاء الملف
 initDatabase();
 
 async function getUser(userId) {
@@ -55,11 +59,27 @@ async function getUser(userId) {
     }
 }
 
+async function createUser(userId) {
+    try {
+        const query = `
+            INSERT INTO users (user_id) 
+            VALUES ($1) 
+            ON CONFLICT (user_id) DO NOTHING 
+            RETURNING *;
+        `;
+        const result = await pool.query(query, [userId]);
+        return result.rows[0] || null;
+    } catch (err) {
+        console.error('Database Error (createUser):', err);
+        return null;
+    }
+}
+
 async function getGuildSettings(guildId) {
     try {
         const query = 'SELECT * FROM guild_settings WHERE guild_id = $1';
         const result = await pool.query(query, [guildId]);
-        return result.rows[0] || { guild_id: guildId };
+        return result.rows[0] || { guild_id: guildId, prefix: '!' };
     } catch (err) {
         console.error('Database Error (getGuildSettings):', err);
         return null;
@@ -87,7 +107,9 @@ async function updateGuildSetting(guildId, settingKey, settingValue) {
 
 module.exports = {
     pool,
+    initDatabase,
     getUser,
+    createUser,
     getGuildSettings,
     updateGuildSetting
 };
