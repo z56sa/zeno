@@ -14,7 +14,6 @@ const pool = new Pool({
 });
 
 module.exports = function (app) {
-    // 🟢 تفعيل الثقة بالبروكسي لتحديد HTTPS بشكل صحيح على Railway
     app.set('trust proxy', 1);
 
     app.use(express.static('public'));
@@ -71,21 +70,27 @@ module.exports = function (app) {
 
             <!-- Navbar -->
             <header class="bg-[#0b0b10]/95 border-b border-[#1f1f2e] sticky top-0 z-50 backdrop-blur-md">
-                <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+                <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between flex-row-reverse">
                     <a href="/" class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-purple-700 via-purple-500 to-violet-400 flex items-center justify-center font-black text-white text-xl shadow-lg shadow-purple-600/40">Z</div>
                         <span class="text-xl font-black tracking-[0.25em] text-white">Z E N O</span>
+                        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-purple-700 via-purple-500 to-violet-400 flex items-center justify-center font-black text-white text-xl shadow-lg shadow-purple-600/40">Z</div>
                     </a>
-                    <div>
-                        ${isLoggedIn ? `
-                            <a href="/dashboard" class="px-5 py-2.5 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-xs font-bold transition shadow-lg shadow-purple-600/30">
-                                لوحة التحكم
-                            </a>
-                        ` : `
-                            <a href="/auth/discord" class="px-5 py-2.5 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-xs font-bold transition shadow-lg shadow-purple-600/30">
-                                تسجيل الدخول
-                            </a>
-                        `}
+                    <div class="flex items-center gap-6">
+                        <div class="hidden md:flex items-center gap-6 text-xs font-bold text-gray-300">
+                            <a href="#features" class="hover:text-purple-400 transition">المميزات</a>
+                            <a href="https://discord.gg/yourserver" target="_blank" class="hover:text-purple-400 transition">سرور الدعم</a>
+                        </div>
+                        <div>
+                            ${isLoggedIn ? `
+                                <a href="/dashboard" class="px-5 py-2.5 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-xs font-bold transition shadow-lg shadow-purple-600/30">
+                                    لوحة التحكم
+                                </a>
+                            ` : `
+                                <a href="/auth/discord" class="px-5 py-2.5 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-xs font-bold transition shadow-lg shadow-purple-600/30">
+                                    تسجيل الدخول
+                                </a>
+                            `}
+                        </div>
                     </div>
                 </div>
             </header>
@@ -116,8 +121,10 @@ module.exports = function (app) {
             </main>
 
             <!-- Footer -->
-            <footer class="border-t border-[#1f1f2e] bg-[#060608] py-6 text-center text-gray-400 text-xs font-semibold">
-                جميع الحقوق محفوظة © ZENO BOT 2026
+            <footer class="border-t border-[#1f1f2e] bg-[#060608] py-6 text-center text-gray-400 text-xs font-semibold flex items-center justify-center gap-2">
+                <span>جميع الحقوق محفوظة © ZENO BOT 2026</span>
+                <span>-</span>
+                <a href="https://discord.gg/yourserver" target="_blank" class="hover:text-purple-400 transition">سرور الدعم</a>
             </footer>
         </body>
         </html>
@@ -234,15 +241,15 @@ module.exports = function (app) {
         </head>
         <body class="min-h-screen flex flex-col justify-between purple-glow">
             <header class="bg-[#0b0b10]/95 border-b border-[#1f1f2e] sticky top-0 z-50 backdrop-blur-md">
-                <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+                <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between flex-row-reverse">
                     <a href="/" class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-purple-700 via-purple-500 to-violet-400 flex items-center justify-center font-black text-white text-xl shadow-lg shadow-purple-600/40">Z</div>
                         <span class="text-xl font-black tracking-[0.25em] text-white">Z E N O</span>
+                        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-purple-700 via-purple-500 to-violet-400 flex items-center justify-center font-black text-white text-xl shadow-lg shadow-purple-600/40">Z</div>
                     </a>
                     <div class="flex items-center gap-4">
                         <div class="flex items-center gap-3 bg-[#13131c] border border-[#232334] px-3.5 py-1.5 rounded-xl">
-                            <img src="${avatarUrl}" class="w-8 h-8 rounded-lg object-cover border border-purple-500/30">
                             <span class="text-xs font-bold text-white hidden sm:inline">${user.username}</span>
+                            <img src="${avatarUrl}" class="w-8 h-8 rounded-lg object-cover border border-purple-500/30">
                         </div>
                         <a href="/logout" class="px-3.5 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 rounded-xl text-xs font-bold transition">خروج</a>
                     </div>
