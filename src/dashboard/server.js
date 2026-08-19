@@ -1,3 +1,7 @@
+// ==========================================
+// FILE: src/dashboard/server.js
+// ==========================================
+
 // صفحة لوحة التحكم الاحترافية (ZENO V3 Ultra Dashboard)
 app.get('/dashboard', (req, res) => {
     if (!req.session || !req.session.user) {
