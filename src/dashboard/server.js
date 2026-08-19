@@ -35,7 +35,12 @@ module.exports = function (app) {
 
     // 1. الصفحة الرئيسية (Landing Page - /)
     app.get('/', (req, res) => {
-        const isLoggedIn = req.session && req.session.user;
+        const user = req.session && req.session.user;
+
+        // تجهيز بيانات المستخدم إذا كان مسجلاً للدخول
+        const userAvatar = user && user.avatar
+            ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.${user.avatar.startsWith('a_') ? 'gif' : 'png'}`
+            : 'https://cdn.discordapp.com/embed/avatars/0.png';
 
         res.send(`
         <!DOCTYPE html>
@@ -73,10 +78,14 @@ module.exports = function (app) {
                             <a href="https://discord.gg/yourserver" target="_blank" class="hover:text-purple-400 transition">سرور الدعم</a>
                         </div>
                         <div>
-                            ${isLoggedIn ? `
-                                <a href="/dashboard" class="px-5 py-2.5 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-xs font-bold transition shadow-lg shadow-purple-600/30">
-                                    لوحة التحكم
-                                </a>
+                            ${user ? `
+                                <div class="flex items-center gap-3">
+                                    <a href="/dashboard" class="flex items-center gap-2 bg-[#13131c] border border-[#232334] px-3.5 py-1.5 rounded-xl hover:border-purple-500/50 transition">
+                                        <img src="${userAvatar}" class="w-8 h-8 rounded-lg object-cover border border-purple-500/30">
+                                        <span class="text-xs font-bold text-white hidden sm:inline">${user.username}</span>
+                                    </a>
+                                    <a href="/logout" class="px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 rounded-xl text-xs font-bold transition">خروج</a>
+                                </div>
                             ` : `
                                 <a href="/auth/discord" class="px-5 py-2.5 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-xs font-bold transition shadow-lg shadow-purple-600/30">
                                     تسجيل الدخول
@@ -123,7 +132,7 @@ module.exports = function (app) {
         `);
     });
 
-    // 2. توجيه تسجيل الدخول بـ Discord (إعادة توجيه لصفحة Discord OAuth)
+    // 2. توجيه تسجيل الدخول بـ Discord
     app.get('/auth/discord', (req, res) => {
         const clientId = process.env.DISCORD_CLIENT_ID || '1506005273893146775';
         const redirectUri = encodeURIComponent(`https://${req.get('host')}/auth/discord/callback`);
