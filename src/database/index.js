@@ -13,11 +13,14 @@ const pool = new Pool({
     ssl: process.env.DATABASE_URL?.includes('localhost') ? false : { rejectUnauthorized: false }
 });
 
+// قائمة الحقول المصرح بتعديلها لحماية الاستعلامات
 const ALLOWED_SETTINGS = [
     'prefix',
     'welcome_channel',
     'log_channel',
     'ticket_category',
+    'ticket_log_channel',
+    'support_role',
     'auto_role'
 ];
 
@@ -34,7 +37,20 @@ async function initDatabase() {
             welcome_channel VARCHAR(32),
             log_channel VARCHAR(32),
             ticket_category VARCHAR(32),
+            ticket_log_channel VARCHAR(32),
+            support_role VARCHAR(32),
             auto_role VARCHAR(32)
+        );
+
+        CREATE TABLE IF NOT EXISTS tickets (
+            id SERIAL PRIMARY KEY,
+            guild_id VARCHAR(32) NOT NULL,
+            channel_id VARCHAR(32) NOT NULL UNIQUE,
+            user_id VARCHAR(32) NOT NULL,
+            category VARCHAR(64) DEFAULT 'General',
+            status VARCHAR(16) DEFAULT 'open',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            closed_at TIMESTAMP
         );
     `;
     try {
@@ -47,6 +63,10 @@ async function initDatabase() {
 
 // تهيئة الجداول فور استدعاء الملف
 initDatabase();
+
+// ==========================================
+// USER FUNCTIONS
+// ==========================================
 
 async function getUser(userId) {
     try {
@@ -74,6 +94,10 @@ async function createUser(userId) {
         return null;
     }
 }
+
+// ==========================================
+// GUILD SETTINGS FUNCTIONS
+// ==========================================
 
 async function getGuildSettings(guildId) {
     try {
@@ -105,11 +129,75 @@ async function updateGuildSetting(guildId, settingKey, settingValue) {
     }
 }
 
+// ==========================================
+// TICKET SYSTEM FUNCTIONS
+// ==========================================
+
+async function createTicket(guildId, channelId, userId, category = 'General') {
+    try {
+        const query = `
+            INSERT INTO tickets (guild_id, channel_id, user_id, category, status)
+            VALUES ($1, $2, $3, $4, 'open')
+            RETURNING *;
+        `;
+        const result = await pool.query(query, [guildId, channelId, userId, category]);
+        return result.rows[0];
+    } catch (err) {
+        console.error('Database Error (createTicket):', err);
+        throw err;
+    }
+}
+
+async function closeTicket(channelId) {
+    try {
+        const query = `
+            UPDATE tickets 
+            SET status = 'closed', closed_at = CURRENT_TIMESTAMP 
+            WHERE channel_id = $1
+            RETURNING *;
+        `;
+        const result = await pool.query(query, [channelId]);
+        return result.rows[0] || null;
+    } catch (err) {
+        console.error('Database Error (closeTicket):', err);
+        throw err;
+    }
+}
+
+async function getTicketByChannel(channelId) {
+    try {
+        const query = 'SELECT * FROM tickets WHERE channel_id = $1';
+        const result = await pool.query(query, [channelId]);
+        return result.rows[0] || null;
+    } catch (err) {
+        console.error('Database Error (getTicketByChannel):', err);
+        return null;
+    }
+}
+
+async function getUserActiveTickets(guildId, userId) {
+    try {
+        const query = `
+            SELECT * FROM tickets 
+            WHERE guild_id = $1 AND user_id = $2 AND status = 'open';
+        `;
+        const result = await pool.query(query, [guildId, userId]);
+        return result.rows;
+    } catch (err) {
+        console.error('Database Error (getUserActiveTickets):', err);
+        return [];
+    }
+}
+
 module.exports = {
     pool,
     initDatabase,
     getUser,
     createUser,
     getGuildSettings,
-    updateGuildSetting
+    updateGuildSetting,
+    createTicket,
+    closeTicket,
+    getTicketByChannel,
+    getUserActiveTickets
 };
