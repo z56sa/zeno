@@ -58,6 +58,7 @@ module.exports = function (app) {
                     color: #ffffff !important;
                     font-family: 'Cairo', sans-serif !important;
                     margin: 0; padding: 0;
+                    scroll-behavior: smooth;
                 }
                 .purple-glow { background: radial-gradient(circle at 50% 30%, rgba(168, 85, 247, 0.18), transparent 70%); }
                 .glass-card { background-color: #12121a !important; border: 1px solid #232334 !important; }
@@ -71,8 +72,8 @@ module.exports = function (app) {
                     
                     <!-- الشعار والصورة (في اليمين) -->
                     <a href="/" class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-full overflow-hidden border-2 border-purple-500/50 shadow-lg shadow-purple-600/30 flex items-center justify-center bg-[#12121a]">
-                            <img src="/logo.png" alt="ZENO" class="w-full h-full object-cover">
+                        <div class="w-11 h-11 rounded-full overflow-hidden border-2 border-purple-500/50 shadow-lg shadow-purple-600/30 flex items-center justify-center bg-[#12121a] shrink-0">
+                            <img src="/logo.png" alt="ZENO" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='/logo.jpg';">
                         </div>
                         <span class="text-xl font-black tracking-[0.25em] text-white">Z E N O</span>
                     </a>
@@ -80,7 +81,7 @@ module.exports = function (app) {
                     <!-- الروابط في المنتصف -->
                     <div class="hidden md:flex items-center gap-8 text-xs font-bold text-gray-300">
                         <a href="#features" class="hover:text-purple-400 transition">المميزات</a>
-                        <a href="https://discord.gg/yourserver" target="_blank" class="hover:text-purple-400 transition">سرور الدعم</a>
+                        <a href="https://discord.gg/yourserver" target="_blank" class="hover:text-purple-400 transition">سرور الدعم الفني</a>
                     </div>
 
                     <!-- زر تسجيل الدخول (في أقصى اليسار) -->
@@ -128,11 +129,36 @@ module.exports = function (app) {
                 </div>
             </main>
 
+            <!-- Features Section -->
+            <section id="features" class="max-w-7xl mx-auto px-6 py-20 w-full border-t border-[#1f1f2e]">
+                <div class="text-center mb-16">
+                    <h2 class="text-3xl font-black text-white mb-3">مميزات بوت ZENO</h2>
+                    <p class="text-gray-400 text-xs md:text-sm font-semibold">كل ما تحتاجه لإدارة سيرفرك واحترافه في مكان واحد</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="glass-card p-6 rounded-2xl border border-[#232334]">
+                        <div class="w-12 h-12 rounded-xl bg-purple-600/10 border border-purple-500/20 flex items-center justify-center text-purple-400 text-xl font-bold mb-4">🎫</div>
+                        <h3 class="text-white font-bold text-base mb-2">نظام التذاكر المتقدم</h3>
+                        <p class="text-gray-400 text-xs leading-relaxed font-semibold">لوحة تحكم كاملة وإنشاء تذاكر دعم فني منظمة وآمنة لأعضاء سيرفرك.</p>
+                    </div>
+                    <div class="glass-card p-6 rounded-2xl border border-[#232334]">
+                        <div class="w-12 h-12 rounded-xl bg-purple-600/10 border border-purple-500/20 flex items-center justify-center text-purple-400 text-xl font-bold mb-4">🛡️</div>
+                        <h3 class="text-white font-bold text-base mb-2">أوامر الإشراف والحماية</h3>
+                        <p class="text-gray-400 text-xs leading-relaxed font-semibold">حماية سيرفرك وأعضائك بأوامر إشرافية سريعة ودقيقة لحفظ الأمان والنظام.</p>
+                    </div>
+                    <div class="glass-card p-6 rounded-2xl border border-[#232334]">
+                        <div class="w-12 h-12 rounded-xl bg-purple-600/10 border border-purple-500/20 flex items-center justify-center text-purple-400 text-xl font-bold mb-4">⚙️</div>
+                        <h3 class="text-white font-bold text-base mb-2">لوحة تحكم سهلة</h3>
+                        <p class="text-gray-400 text-xs leading-relaxed font-semibold">إدارة كاملة لإعدادات بوتك وسيرفرك عبر موقع الويب مباشرة بكل سهولة.</p>
+                    </div>
+                </div>
+            </section>
+
             <!-- Footer -->
             <footer class="border-t border-[#1f1f2e] bg-[#060608] py-6 text-center text-gray-400 text-xs font-semibold flex items-center justify-center gap-2">
                 <span>جميع الحقوق محفوظة © ZENO BOT 2026</span>
                 <span>-</span>
-                <a href="https://discord.gg/yourserver" target="_blank" class="hover:text-purple-400 transition">سرور الدعم</a>
+                <a href="https://discord.gg/yourserver" target="_blank" class="hover:text-purple-400 transition">سرور الدعم الفني</a>
             </footer>
         </body>
         </html>
@@ -251,8 +277,8 @@ module.exports = function (app) {
             <header class="bg-[#0b0b10]/95 border-b border-[#1f1f2e] sticky top-0 z-50 backdrop-blur-md">
                 <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
                     <a href="/" class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-full overflow-hidden border-2 border-purple-500/50 shadow-lg shadow-purple-600/30 flex items-center justify-center bg-[#12121a]">
-                            <img src="/logo.png" alt="ZENO" class="w-full h-full object-cover">
+                        <div class="w-11 h-11 rounded-full overflow-hidden border-2 border-purple-500/50 shadow-lg shadow-purple-600/30 flex items-center justify-center bg-[#12121a] shrink-0">
+                            <img src="/logo.png" alt="ZENO" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='/logo.jpg';">
                         </div>
                         <span class="text-xl font-black tracking-[0.25em] text-white">Z E N O</span>
                     </a>
@@ -267,7 +293,7 @@ module.exports = function (app) {
             </header>
 
             <main class="max-w-7xl mx-auto w-full px-6 py-10 flex-1">
-                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 border-b border-[#1f1f2e] pb-6">
+                <div class="fallback-container flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 border-b border-[#1f1f2e] pb-6">
                     <div>
                         <h1 class="text-2xl font-black text-white">سيرفراتي</h1>
                         <p class="text-xs text-gray-400 mt-1">اختر السيرفر الذي ترغب بإدارته للتحكم بالتذاكر والأوامر</p>
