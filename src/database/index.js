@@ -189,6 +189,39 @@ async function getUserActiveTickets(guildId, userId) {
     }
 }
 
+async function getGuildTickets(guildId, limit = 50) {
+    try {
+        const query = `
+            SELECT * FROM tickets 
+            WHERE guild_id = $1 
+            ORDER BY created_at DESC 
+            LIMIT $2;
+        `;
+        const result = await pool.query(query, [guildId, limit]);
+        return result.rows;
+    } catch (err) {
+        console.error('Database Error (getGuildTickets):', err);
+        return [];
+    }
+}
+
+async function getSystemStats() {
+    try {
+        const usersCount = await pool.query('SELECT COUNT(*) FROM users');
+        const guildsCount = await pool.query('SELECT COUNT(*) FROM guild_settings');
+        const openTicketsCount = await pool.query("SELECT COUNT(*) FROM tickets WHERE status = 'open'");
+
+        return {
+            totalUsers: parseInt(usersCount.rows[0].count, 10) || 0,
+            totalGuilds: parseInt(guildsCount.rows[0].count, 10) || 0,
+            openTickets: parseInt(openTicketsCount.rows[0].count, 10) || 0
+        };
+    } catch (err) {
+        console.error('Database Error (getSystemStats):', err);
+        return { totalUsers: 0, totalGuilds: 0, openTickets: 0 };
+    }
+}
+
 module.exports = {
     pool,
     initDatabase,
@@ -199,5 +232,7 @@ module.exports = {
     createTicket,
     closeTicket,
     getTicketByChannel,
-    getUserActiveTickets
+    getUserActiveTickets,
+    getGuildTickets,
+    getSystemStats
 };
