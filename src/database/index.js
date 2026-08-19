@@ -1,16 +1,32 @@
-// مثال لكيفية إضافة وتصدير دوال إعدادات السيرفر في src/database/index.js
-
-// (افترض أنك تستخدم مكتبة pg أو pool للاتصال بقاعدة البيانات)
 const { Pool } = require('pg');
-const pool = new Pool({ /* إعدادات الاتصال لديك */ });
 
-// 1. جلب إعدادات السيرفر
+// إعدادات الاتصال بقاعدة البيانات باستخدام متغير البيئة في Railway
+const pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: {
+        rejectUnauthorized: false
+    }
+});
+
+// 1. جلب بيانات المستخدم (لحل خطأ db.getUser)
+async function getUser(userId) {
+    try {
+        const query = 'SELECT * FROM users WHERE user_id = $1';
+        const result = await pool.query(query, [userId]);
+        return result.rows[0] || null;
+    } catch (err) {
+        console.error('Database Error (getUser):', err);
+        return null;
+    }
+}
+
+// 2. جلب إعدادات السيرفر
 async function getGuildSettings(guildId) {
     try {
         const query = 'SELECT * FROM guild_settings WHERE guild_id = $1';
         const result = await pool.query(query, [guildId]);
 
-        // إذا لمويجد إعدادات سابقة، أرجع كائن فارغ أو القيم الافتراضية
+        // إذا لم توجد إعدادات سابقة، أرجع كائن فارغ أو القيم الافتراضية
         return result.rows[0] || { guild_id: guildId };
     } catch (err) {
         console.error('Database Error (getGuildSettings):', err);
@@ -18,10 +34,10 @@ async function getGuildSettings(guildId) {
     }
 }
 
-// 2. تحديث أو حفظ إعدادات السيرفر
+// 3. تحديث أو حفظ إعدادات السيرفر
 async function updateGuildSetting(guildId, settingKey, settingValue) {
     try {
-        // مثال لتخزين الإعدادات باستخدام UPSERT (الإدخال أو التحديث إذا كان موجوداً)
+        // تخزين الإعدادات باستخدام UPSERT (الإدخال أو التحديث إذا كان موجوداً)
         const query = `
             INSERT INTO guild_settings (guild_id, ${settingKey})
             VALUES ($1, $2)
@@ -35,9 +51,10 @@ async function updateGuildSetting(guildId, settingKey, settingValue) {
     }
 }
 
-// تأكد من تصدير هذه الدوال مع بقية الدوال لديك في النهاية:
+// تصدير كافة الدوال وقاعدة البيانات للاستخدام في المشروع
 module.exports = {
     pool,
+    getUser,
     getGuildSettings,
     updateGuildSetting,
     // ... دوالك الأخرى القديمة هنا ...
