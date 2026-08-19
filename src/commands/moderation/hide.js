@@ -14,11 +14,13 @@ module.exports = {
       return interaction.reply({ content: '❌ لا تملك صلاحية إدارة القنوات.', ephemeral: true });
     }
 
+    await interaction.deferReply().catch(() => { });
+
     await interaction.channel.permissionOverwrites.edit(interaction.guild.roles.everyone, {
       ViewChannel: false
     });
 
-    await interaction.reply('👁️❌ **تم إخفاء هذا الروم عن الأعضاء بنجاح.**');
+    await interaction.editReply('👁️❌ **تم إخفاء هذا الروم عن الأعضاء بنجاح.**');
   },
 
   async executePrefix(message) {

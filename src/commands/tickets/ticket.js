@@ -32,14 +32,18 @@ module.exports = {
     const sub = interaction.options.getSubcommand();
 
     if (sub === 'close') {
-      await interaction.reply('🔒 سيتم إغلاق وحذف التذكرة خلال 5 ثوانٍ...');
+      await interaction.deferReply({ ephemeral: true }).catch(() => { });
       db.closeTicket(interaction.channel.id);
+      await interaction.editReply('🔒 سيتم إغلاق وحذف التذكرة خلال 5 ثوانٍ...');
 
       setTimeout(async () => {
-        db.deleteTicket(interaction.channel.id);
-        await interaction.channel.delete().catch(() => {});
+        try {
+          db.deleteTicket(interaction.channel.id);
+          await interaction.channel.delete();
+        } catch (err) { }
       }, 5000);
     } else if (sub === 'add') {
+      await interaction.deferReply({ ephemeral: true }).catch(() => { });
       const user = interaction.options.getUser('user');
       await interaction.channel.permissionOverwrites.edit(user.id, {
         ViewChannel: true,
@@ -47,11 +51,12 @@ module.exports = {
         AttachFiles: true,
         ReadMessageHistory: true
       });
-      await interaction.reply(`✅ تمت إضافة ${user} إلى التذكرة.`);
+      await interaction.editReply(`✅ تمت إضافة ${user} إلى التذكرة.`);
     } else if (sub === 'remove') {
+      await interaction.deferReply({ ephemeral: true }).catch(() => { });
       const user = interaction.options.getUser('user');
       await interaction.channel.permissionOverwrites.delete(user.id);
-      await interaction.reply(`✅ تمت إزالة ${user} من التذكرة.`);
+      await interaction.editReply(`✅ تمت إزالة ${user} من التذكرة.`);
     }
   },
 
@@ -66,8 +71,10 @@ module.exports = {
       await message.reply('🔒 سيتم حذف التذكرة خلال 5 ثوانٍ...');
       db.closeTicket(message.channel.id);
       setTimeout(async () => {
-        db.deleteTicket(message.channel.id);
-        await message.channel.delete().catch(() => {});
+        try {
+          db.deleteTicket(message.channel.id);
+          await message.channel.delete();
+        } catch (err) { }
       }, 5000);
     } else if (action === 'add') {
       const user = message.mentions.users.first();

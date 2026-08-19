@@ -1,4 +1,4 @@
-const { ChannelType, PermissionFlagsBits, ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, ModalBuilder, TextInputBuilder, TextInputStyle } = require('discord.js');
+const { ChannelType, PermissionFlagsBits, ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, ModalBuilder, TextInputBuilder, TextInputStyle, AttachmentBuilder } = require('discord.js');
 const db = require('../../database');
 const embedUtil = require('../../utils/embed');
 const logger = require('../../utils/logger');
@@ -31,21 +31,23 @@ module.exports = {
 
       // 2. التعامل مع أزرار الرتب التفاعلية (Reaction Roles)
       if (interaction.isButton() && interaction.customId.startsWith('rr_')) {
+        await interaction.deferReply({ ephemeral: true }).catch(() => { });
         const rrData = db.getReactionRole(interaction.customId);
         if (rrData) {
           const role = interaction.guild.roles.cache.get(rrData.role_id);
           if (!role) {
-            return interaction.reply({ content: '❌ لم يتم العثور على الرتبة المحددة.', ephemeral: true });
+            return interaction.editReply({ content: '❌ لم يتم العثور على الرتبة المحددة.' });
           }
 
           if (interaction.member.roles.cache.has(role.id)) {
             await interaction.member.roles.remove(role);
-            return interaction.reply({ content: `✅ تمت إزالة رتبة **${role.name}** منك.`, ephemeral: true });
+            return interaction.editReply({ content: `✅ تمت إزالة رتبة **${role.name}** منك.` });
           } else {
             await interaction.member.roles.add(role);
-            return interaction.reply({ content: `✅ تم إعطاؤك رتبة **${role.name}** بنجاح.`, ephemeral: true });
+            return interaction.editReply({ content: `✅ تم إعطاؤك رتبة **${role.name}** بنجاح.` });
           }
         }
+        return;
       }
 
       // 2.4 نظام التحقق الأمني (Verification Button & Captcha)
@@ -109,6 +111,7 @@ module.exports = {
           modal.addComponents(new ActionRowBuilder().addComponents(codeInput));
           return interaction.showModal(modal);
         } else {
+          await interaction.deferReply({ ephemeral: true }).catch(() => { });
           try {
             await interaction.member.roles.add(verifiedRole);
             if (settings.unverified_role) {
@@ -136,19 +139,19 @@ module.exports = {
               }
             }
 
-            return interaction.reply({
-              content: `✅ **تم التحقق بنجاح!** مرحباً بك يا ${interaction.member} في **${interaction.guild.name}**!\nأصبح بإمكانك الوصول إلى جميع القنوات والتحدث مع الأعضاء. استمتع! 🎉`,
-              ephemeral: true
+            return interaction.editReply({
+              content: `✅ **تم التحقق بنجاح!** مرحباً بك يا ${interaction.member} في **${interaction.guild.name}**!\nأصبح بإمكانك الوصول إلى جميع القنوات والتحدث مع الأعضاء. استمتع! 🎉`
             });
           } catch (err) {
             logger.error('فشل في إعطاء رتبة التحقق:', err);
-            return interaction.reply({ content: '❌ حدث خطأ أثناء إعطاء رتبة التحقق. تواصل مع الإدارة.', ephemeral: true });
+            return interaction.editReply({ content: '❌ حدث خطأ أثناء إعطاء رتبة التحقق. تواصل مع الإدارة.' });
           }
         }
       }
 
       // معالجة إجابة الكابتشا الحسابية والنصية (Captcha & Code Modal Submit)
       if (interaction.isModalSubmit() && (interaction.customId.startsWith('captcha_verify_') || interaction.customId.startsWith('code_verify_'))) {
+        await interaction.deferReply({ ephemeral: true }).catch(() => { });
         const isCode = interaction.customId.startsWith('code_verify_');
         const correctVal = interaction.customId.split('_')[2];
         const userVal = isCode
@@ -188,27 +191,26 @@ module.exports = {
                 }
               }
 
-              return interaction.reply({
-                content: `✅ **إجابة صحيحة!** تم التحقق من هويتك بنجاح يا ${interaction.member}!\nأصبح بإمكانك الوصول الكامل لجميع قنوات السيرفر. 🎉`,
-                ephemeral: true
+              return interaction.editReply({
+                content: `✅ **إجابة صحيحة!** تم التحقق من هويتك بنجاح يا ${interaction.member}!\nأصبح بإمكانك الوصول الكامل لجميع قنوات السيرفر. 🎉`
               });
             } catch {
-              return interaction.reply({ content: '❌ حدث خطأ أثناء إعطاء الرتبة. تواصل مع الإدارة.', ephemeral: true });
+              return interaction.editReply({ content: '❌ حدث خطأ أثناء إعطاء الرتبة. تواصل مع الإدارة.' });
             }
           }
         } else {
-          return interaction.reply({
-            content: `❌ **إجابة خاطئة!** يرجى الضغط على زر التحقق مجدداً والمحاولة مرة أخرى.`,
-            ephemeral: true
+          return interaction.editReply({
+            content: `❌ **إجابة خاطئة!** يرجى الضغط على زر التحقق مجدداً والمحاولة مرة أخرى.`
           });
         }
       }
 
       // 2.5 التعامل مع زر الاشتراك في القيف أواي (Giveaways Pro)
       if (interaction.isButton() && interaction.customId === 'join_giveaway') {
+        await interaction.deferReply({ ephemeral: true }).catch(() => { });
         const giveaway = db.getGiveaway(interaction.message.id);
         if (!giveaway || giveaway.ended) {
-          return interaction.reply({ content: '❌ هذا القيف أواي قد انتهى بالفعل!', ephemeral: true });
+          return interaction.editReply({ content: '❌ هذا القيف أواي قد انتهى بالفعل!' });
         }
 
         const entries = db.getGiveawayEntries(interaction.message.id);
@@ -228,21 +230,19 @@ module.exports = {
               .setStyle(ButtonStyle.Secondary)
           );
           await interaction.message.edit({ components: [newRow] }).catch(() => { });
-          return interaction.reply({ content: '👋 **تم إلغاء اشتراكك** من هذا السحب.', ephemeral: true });
+          return interaction.editReply({ content: '👋 **تم إلغاء اشتراكك** من هذا السحب.' });
         } else {
           if (giveaway.required_role && !interaction.member.roles.cache.has(giveaway.required_role)) {
-            return interaction.reply({
-              content: `❌ **عذراً، لا تستوفي شرط الرتبة!**\nتحتاج إلى رتبة <@&${giveaway.required_role}> للاشتراك في هذا السحب.`,
-              ephemeral: true
+            return interaction.editReply({
+              content: `❌ **عذراً، لا تستوفي شرط الرتبة!**\nتحتاج إلى رتبة <@&${giveaway.required_role}> للاشتراك في هذا السحب.`
             });
           }
 
           if (giveaway.min_account_age > 0) {
             const ageDays = (Date.now() - interaction.user.createdTimestamp) / (1000 * 60 * 60 * 24);
             if (ageDays < giveaway.min_account_age) {
-              return interaction.reply({
-                content: `❌ **عمر حسابك غير كافٍ!**\nيجب أن يكون عمر حسابك **${giveaway.min_account_age} يوم** على الأقل (عمر حسابك الحالي: ${Math.floor(ageDays)} يوم).`,
-                ephemeral: true
+              return interaction.editReply({
+                content: `❌ **عمر حسابك غير كافٍ!**\nيجب أن يكون عمر حسابك **${giveaway.min_account_age} يوم** على الأقل (عمر حسابك الحالي: ${Math.floor(ageDays)} يوم).`
               });
             }
           }
@@ -250,9 +250,8 @@ module.exports = {
           if (giveaway.min_level > 0) {
             const userDb = db.getUser(interaction.user.id, interaction.guild.id);
             if ((userDb.level || 0) < giveaway.min_level) {
-              return interaction.reply({
-                content: `❌ **مستواك الحالي غير كافٍ!**\nتحتاج إلى المستوى **${giveaway.min_level}** للاشتراك (مستواك الحالي: Level ${userDb.level || 0}).`,
-                ephemeral: true
+              return interaction.editReply({
+                content: `❌ **مستواك الحالي غير كافٍ!**\nتحتاج إلى المستوى **${giveaway.min_level}** للاشتراك (مستواك الحالي: Level ${userDb.level || 0}).`
               });
             }
           }
@@ -273,40 +272,38 @@ module.exports = {
           );
           await interaction.message.edit({ components: [newRow] }).catch(() => { });
 
-          return interaction.reply({
-            content: `🎉 **تم تسجيل اشتراكك بنجاح في السحب!** 🍀${hasBonus ? '\n🔥 **ميزة:** لديك فرصة فوز مضاعفة (x2) بفضل رتبتك المميزة!' : ''}`,
-            ephemeral: true
+          return interaction.editReply({
+            content: `🎉 **تم تسجيل اشتراكك بنجاح في السحب!** 🍀${hasBonus ? '\n🔥 **ميزة:** لديك فرصة فوز مضاعفة (x2) بفضل رتبتك المميزة!' : ''}`
           });
         }
       }
 
       // 2.6 استعراض المشتركين في القيف أواي
       if (interaction.isButton() && interaction.customId === 'view_giveaway_entries') {
+        await interaction.deferReply({ ephemeral: true }).catch(() => { });
         const giveaway = db.getGiveaway(interaction.message.id);
         if (!giveaway) {
-          return interaction.reply({ content: '❌ لم يتم العثور على القيف أواي.', ephemeral: true });
+          return interaction.editReply({ content: '❌ لم يتم العثور على القيف أواي.' });
         }
         const entries = db.getGiveawayEntries(interaction.message.id);
         if (entries.length === 0) {
-          return interaction.reply({ content: '👥 لا يوجد أي مشتركين في هذا السحب حتى الآن.', ephemeral: true });
+          return interaction.editReply({ content: '👥 لا يوجد أي مشتركين في هذا السحب حتى الآن.' });
         }
 
         const topEntries = entries.slice(0, 30).map((id, i) => `${i + 1}. <@${id}>`).join('\n');
         const countText = entries.length > 30 ? `\n... و ${entries.length - 30} مشترك آخرين.` : '';
 
-        return interaction.reply({
-          content: `📊 **إجمالي المشتركين في السحب (${entries.length} مشترك):**\n\n${topEntries}${countText}`,
-          ephemeral: true
+        return interaction.editReply({
+          content: `📊 **إجمالي المشتركين في السحب (${entries.length} مشترك):**\n\n${topEntries}${countText}`
         });
       }
 
-      // 3. التعامل مع أزرار وقوائم التذاكر المخصصة (Custom Tickets) - [تم إصلاح مشكلة التأخير هنا]
+      // 3. التعامل مع أزرار وقوائم التذاكر المخصصة (Custom Tickets)
       const isTicketButton = interaction.isButton() && (interaction.customId === 'open_ticket' || interaction.customId.startsWith('ticket_open_'));
       const isTicketSelect = interaction.isStringSelectMenu() && interaction.customId.startsWith('ticket_select_');
 
       if (isTicketButton || isTicketSelect) {
-        // الاستجابة الفورية لمنع خطأ انتهاء المهلة (3 ثواني)
-        await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ ephemeral: true }).catch(() => { });
 
         let panelId = null;
         let selectedCategoryType = 'support';
@@ -456,17 +453,19 @@ module.exports = {
 
         return interaction.reply({
           content: '⚠️ هل أنت متأكد من رغبتك في إغلاق وحذف هذه التذكرة؟ (سيتم حفظ نسخة Transcript تلقائياً)',
-          components: [confirmRow]
+          components: [confirmRow],
+          ephemeral: true
         });
       }
 
       // 5. تأكيد إغلاق وحذف التذكرة وحفظ السجل (Transcript)
       if (interaction.isButton() && interaction.customId === 'confirm_close_ticket') {
+        await interaction.deferReply().catch(() => { });
         const ticketData = db.getTicket(interaction.channel.id);
         const settings = db.getGuildSettings(interaction.guild.id);
 
         db.closeTicket(interaction.channel.id);
-        await interaction.reply({ content: '🔒 جاري حفظ المحادثة وسيتم حذف التذكرة خلال 5 ثوانٍ...' });
+        await interaction.editReply({ content: '🔒 جاري حفظ المحادثة وسيتم حذف التذكرة خلال 5 ثوانٍ...' });
 
         try {
           const messages = await interaction.channel.messages.fetch({ limit: 100 }).catch(() => null);
@@ -478,7 +477,6 @@ module.exports = {
                 .map(m => `[${new Date(m.createdTimestamp).toLocaleTimeString()}] ${m.author.tag}: ${m.content || (m.attachments.size > 0 ? '[مرفق/ملف]' : '[Embed]')}`)
                 .join('\n');
 
-              const { AttachmentBuilder } = require('discord.js');
               const transcriptFile = new AttachmentBuilder(Buffer.from(formattedMessages, 'utf-8'), {
                 name: `transcript-${interaction.channel.name}.txt`
               });
@@ -545,25 +543,26 @@ module.exports = {
 
       // 7. زر التحقق وتوثيق الحساب (Verification System)
       if (interaction.isButton() && interaction.customId === 'verify_user_btn') {
+        await interaction.deferReply({ ephemeral: true }).catch(() => { });
         const settings = db.getGuildSettings(interaction.guild.id);
         if (!settings.verify_role) {
-          return interaction.reply({ content: '❌ لم يتم تحديد رتبة التوثيق في لوحة التحكم بعد.', ephemeral: true });
+          return interaction.editReply({ content: '❌ لم يتم تحديد رتبة التوثيق في لوحة التحكم بعد.' });
         }
 
         const role = interaction.guild.roles.cache.get(settings.verify_role);
         if (!role) {
-          return interaction.reply({ content: '❌ الرتبة المحددة غير موجودة بالسيرفر.', ephemeral: true });
+          return interaction.editReply({ content: '❌ الرتبة المحددة غير موجودة بالسيرفر.' });
         }
 
         if (interaction.member.roles.cache.has(role.id)) {
-          return interaction.reply({ content: '✅ حسابك موثق بالفعل وتمتلك الرتبة مسبقاً!', ephemeral: true });
+          return interaction.editReply({ content: '✅ حسابك موثق بالفعل وتمتلك الرتبة مسبقاً!' });
         }
 
         try {
           await interaction.member.roles.add(role);
-          return interaction.reply({ content: `🎉 تم توثيق حسابك بنجاح! تم منحك رتبة **@${role.name}** وفتح قنوات السيرفر.`, ephemeral: true });
+          return interaction.editReply({ content: `🎉 تم توثيق حسابك بنجاح! تم منحك رتبة **@${role.name}** وفتح قنوات السيرفر.` });
         } catch (err) {
-          return interaction.reply({ content: '❌ حدث خطأ أثناء محاولة منحك الرتبة. تأكد من أن رتبة البوت أعلى من رتبة التوثيق.', ephemeral: true });
+          return interaction.editReply({ content: '❌ حدث خطأ أثناء محاولة منحك الرتبة. تأكد من أن رتبة البوت أعلى من رتبة التوثيق.' });
         }
       }
 
@@ -594,6 +593,7 @@ module.exports = {
 
       // 9. إرسال نموذج التقييم (Ticket Rating Modal Submit)
       if (interaction.isModalSubmit() && interaction.customId.startsWith('modal_review_')) {
+        await interaction.deferReply({ ephemeral: true }).catch(() => { });
         const parts = interaction.customId.split('_');
         const rating = parseInt(parts[2], 10) || 5;
         const ticketId = parts[3];
@@ -623,7 +623,7 @@ module.exports = {
           }
         }
 
-        return interaction.reply({ content: '🌟 تم إرسال تقييمك بنجاح للإدارة! شكراً جزيلاً لوقتك وملاحظاتك.', ephemeral: true });
+        return interaction.editReply({ content: '🌟 تم إرسال تقييمك بنجاح للإدارة! شكراً جزيلاً لوقتك وملاحظاتك.' });
       }
     } catch (err) {
       logger.error('خطأ في interactionCreate:', err);

@@ -18,16 +18,18 @@ module.exports = {
       return interaction.reply({ content: '❌ لا تملك صلاحية طرد الأعضاء.', ephemeral: true });
     }
 
+    await interaction.deferReply({ ephemeral: true }).catch(() => { });
+
     const targetUser = interaction.options.getUser('target');
     const reason = interaction.options.getString('reason') || 'لم يتم تحديد سبب';
     const member = await interaction.guild.members.fetch(targetUser.id).catch(() => null);
 
     if (!member) {
-      return interaction.reply({ content: '❌ العضو غير موجود في السيرفر.', ephemeral: true });
+      return interaction.editReply({ content: '❌ العضو غير موجود في السيرفر.' });
     }
 
     if (!member.kickable) {
-      return interaction.reply({ content: '❌ لا يمكنني طرد هذا العضو.', ephemeral: true });
+      return interaction.editReply({ content: '❌ لا يمكنني طرد هذا العضو.' });
     }
 
     await member.kick(`${reason} | بواسطة ${interaction.user.tag}`);
@@ -42,7 +44,8 @@ module.exports = {
       )
       .setTimestamp();
 
-    await interaction.reply({ embeds: [embed] });
+    await interaction.deleteReply().catch(() => { });
+    await interaction.channel.send({ embeds: [embed] });
   },
 
   async executePrefix(message, args) {
@@ -56,7 +59,10 @@ module.exports = {
     const member = await message.guild.members.fetch(targetUser.id).catch(() => null);
     if (!member || !member.kickable) return message.reply('❌ لا يمكنني طرد هذا العضو.');
 
-    const reason = args.slice(1).join(' ') || 'لم يتم تحديد سبب';
+    // التحقق مما إذا كان الوسيط الأول هو منشن أو أيدي لتحديد بداية السبب بشكل صحيح
+    const reasonStartIndex = message.mentions.users.first() ? 1 : 1;
+    const reason = args.slice(reasonStartIndex).join(' ') || 'لم يتم تحديد سبب';
+
     await member.kick(`${reason} | بواسطة ${message.author.tag}`);
 
     const embed = new EmbedBuilder()

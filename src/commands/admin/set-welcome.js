@@ -27,25 +27,43 @@ module.exports = {
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
 
   async execute(interaction) {
+    // 1. التأجيل الفوري لمنع خطأ انتهاء المهلة (3 ثواني)
+    await interaction.deferReply({ ephemeral: true });
+
     if (!interaction.member.permissions.has(PermissionFlagsBits.Administrator)) {
-      return interaction.reply({ content: '❌ لا تملك صلاحية الأدمن.', ephemeral: true });
+      return interaction.editReply({ content: '❌ لا تملك صلاحية الأدمن.' });
     }
 
     const channel = interaction.options.getChannel('channel');
     const message = interaction.options.getString('message');
     const image = interaction.options.getBoolean('image');
 
-    db.updateGuildSetting(interaction.guild.id, 'welcome_channel', channel.id);
-    if (message !== null) {
-      db.updateGuildSetting(interaction.guild.id, 'welcome_message', message);
-    }
-    if (image !== null) {
-      db.updateGuildSetting(interaction.guild.id, 'welcome_image', image ? 1 : 0);
-    }
+    try {
+      // 2. تحديث قاعدة البيانات بالطريقة الآمنة
+      const updateSetting = (key, val) => {
+        if (typeof db.setGuildSetting === 'function') {
+          db.setGuildSetting(interaction.guild.id, key, val);
+        } else if (typeof db.updateGuildSetting === 'function') {
+          db.updateGuildSetting(interaction.guild.id, key, val);
+        }
+      };
 
-    await interaction.reply({
-      content: `✅ تم تحديث إعدادات الترحيب بنجاح!\n📍 الروم: <#${channel.id}>\n🖼️ بطاقة الترحيب المصممة: **${image === false ? 'معطلة' : 'مفعلة'}**`
-    });
+      updateSetting('welcome_channel', channel.id);
+      if (message !== null) {
+        updateSetting('welcome_message', message);
+      }
+      if (image !== null) {
+        updateSetting('welcome_image', image ? 1 : 0);
+      }
+
+      // 3. الرد النهائي الآمن
+      await interaction.editReply({
+        content: `✅ تم تحديث إعدادات الترحيب بنجاح!\n📍 الروم: <#${channel.id}>\n🖼️ بطاقة الترحيب المصممة: **${image === false ? 'معطلة' : 'مفعلة'}**`
+      });
+    } catch (err) {
+      console.error('خطأ في إعدادات الترحيب:', err);
+      await interaction.editReply({ content: '❌ حدث خطأ أثناء حفظ إعدادات الترحيب في قاعدة البيانات.' });
+    }
   },
 
   async executePrefix(message, args) {
@@ -56,7 +74,16 @@ module.exports = {
     const channel = message.mentions.channels.first();
     if (!channel) return message.reply('❌ يرجى منشن الروم. مثال: `#set-welcome #welcome`');
 
-    db.updateGuildSetting(message.guild.id, 'welcome_channel', channel.id);
-    message.reply(`✅ تم تعيين روم الترحيب: <#${channel.id}>`);
+    try {
+      if (typeof db.setGuildSetting === 'function') {
+        db.setGuildSetting(message.guild.id, 'welcome_channel', channel.id);
+      } else if (typeof db.updateGuildSetting === 'function') {
+        db.updateGuildSetting(message.guild.id, 'welcome_channel', channel.id);
+      }
+      message.reply(`✅ تم تعيين روم الترحيب: <#${channel.id}>`);
+    } catch (err) {
+      console.error('خطأ في إعدادات الترحيب (Prefix):', err);
+      message.reply('❌ حدث خطأ أثناء حفظ روم الترحيب.');
+    }
   }
 };

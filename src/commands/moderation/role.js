@@ -26,31 +26,33 @@ module.exports = {
       return interaction.reply({ content: '❌ لا تملك صلاحية إدارة الرتب.', ephemeral: true });
     }
 
+    await interaction.deferReply({ ephemeral: true }).catch(() => { });
+
     const sub = interaction.options.getSubcommand();
     const user = interaction.options.getUser('user');
     const role = interaction.options.getRole('role');
     const member = await interaction.guild.members.fetch(user.id).catch(() => null);
 
     if (!member) {
-      return interaction.reply({ content: '❌ العضو غير موجود في السيرفر.', ephemeral: true });
+      return interaction.editReply({ content: '❌ العضو غير موجود في السيرفر.' });
     }
 
     if (role.position >= interaction.guild.members.me.roles.highest.position) {
-      return interaction.reply({ content: '❌ رتبة البوت أدنى من هذه الرتبة ولا يمكنه التحكم بها.', ephemeral: true });
+      return interaction.editReply({ content: '❌ رتبة البوت أدنى من هذه الرتبة ولا يمكنه التحكم بها.' });
     }
 
     if (sub === 'add') {
       if (member.roles.cache.has(role.id)) {
-        return interaction.reply({ content: `❌ المستخدم يملك رتبة **${role.name}** بالفعل.`, ephemeral: true });
+        return interaction.editReply({ content: `❌ المستخدم يملك رتبة **${role.name}** بالفعل.` });
       }
       await member.roles.add(role);
-      await interaction.reply(`✅ تم إعطاء رتبة **${role.name}** إلى ${user} بنجاح.`);
+      await interaction.editReply({ content: `✅ تم إعطاء رتبة **${role.name}** إلى ${user} بنجاح.` });
     } else if (sub === 'remove') {
       if (!member.roles.cache.has(role.id)) {
-        return interaction.reply({ content: `❌ المستخدم لا يملك رتبة **${role.name}**.`, ephemeral: true });
+        return interaction.editReply({ content: `❌ المستخدم لا يملك رتبة **${role.name}**.` });
       }
       await member.roles.remove(role);
-      await interaction.reply(`✅ تمت إزالة رتبة **${role.name}** من ${user} بنجاح.`);
+      await interaction.editReply({ content: `✅ تمت إزالة رتبة **${role.name}** من ${user} بنجاح.` });
     }
   },
 

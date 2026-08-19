@@ -18,12 +18,14 @@ module.exports = {
       return interaction.reply({ content: '❌ لا تملك صلاحية حظر الأعضاء.', ephemeral: true });
     }
 
+    await interaction.deferReply({ ephemeral: true }).catch(() => { });
+
     const targetUser = interaction.options.getUser('target');
     const reason = interaction.options.getString('reason') || 'لم يتم تحديد سبب';
     const member = await interaction.guild.members.fetch(targetUser.id).catch(() => null);
 
     if (member && !member.bannable) {
-      return interaction.reply({ content: '❌ لا يمكنني حظر هذا العضو (رتبته أعلى من رتبتي أو مالك السيرفر).', ephemeral: true });
+      return interaction.editReply({ content: '❌ لا يمكنني حظر هذا العضو (رتبته أعلى من رتبتي أو مالك السيرفر).' });
     }
 
     await interaction.guild.bans.create(targetUser.id, { reason: `${reason} | بواسطة ${interaction.user.tag}` });
@@ -38,7 +40,8 @@ module.exports = {
       )
       .setTimestamp();
 
-    await interaction.reply({ embeds: [embed] });
+    await interaction.deleteReply().catch(() => { });
+    await interaction.channel.send({ embeds: [embed] });
     this.sendToLog(interaction.guild, embed);
   },
 
@@ -75,9 +78,9 @@ module.exports = {
 
   sendToLog(guild, embed) {
     const settings = db.getGuildSettings(guild.id);
-    if (settings.log_channel) {
+    if (settings && settings.log_channel) {
       const logChannel = guild.channels.cache.get(settings.log_channel);
-      if (logChannel) logChannel.send({ embeds: [embed] }).catch(() => {});
+      if (logChannel) logChannel.send({ embeds: [embed] }).catch(() => { });
     }
   }
 };

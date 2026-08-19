@@ -10,11 +10,14 @@ module.exports = {
     .setDescription('إيقاف الصوت ومغادرة الروم الصوتي'),
 
   async execute(interaction) {
+    await interaction.deferReply({ ephemeral: true }).catch(() => { });
+
     const stopped = audioManager.stop(interaction.guild.id);
     if (stopped) {
-      await interaction.reply('⏹️ **تم إيقاف التشغيل ومغادرة الروم الصوتي بنجاح.**');
+      await interaction.deleteReply().catch(() => { });
+      await interaction.channel.send('⏹️ **تم إيقاف التشغيل ومغادرة الروم الصوتي بنجاح.**');
     } else {
-      await interaction.reply({ content: '❌ البوت لا يقوم بتشغيل أي صوت حالياً في هذا السيرفر.', ephemeral: true });
+      await interaction.editReply({ content: '❌ البوت لا يقوم بتشغيل أي صوت حالياً في هذا السيرفر.' });
     }
   },
 

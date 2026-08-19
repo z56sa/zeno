@@ -19,18 +19,20 @@ module.exports = {
       return interaction.reply({ content: '❌ لا تملك صلاحية إسكات الأعضاء.', ephemeral: true });
     }
 
+    await interaction.deferReply({ ephemeral: true }).catch(() => { });
+
     const targetUser = interaction.options.getUser('target');
     const durationStr = interaction.options.getString('duration');
     const reason = interaction.options.getString('reason') || 'لم يتم تحديد سبب';
 
     const durationMs = ms(durationStr);
     if (!durationMs || durationMs < 5000 || durationMs > 28 * 24 * 60 * 60 * 1000) {
-      return interaction.reply({ content: '❌ مدة الإسكات غير صالحة. يرجى استخدام صيغ مثل `10m`, `1h`, `1d` (بحد أقصى 28 يوم).', ephemeral: true });
+      return interaction.editReply({ content: '❌ مدة الإسكات غير صالحة. يرجى استخدام صيغ مثل `10m`, `1h`, `1d` (بحد أقصى 28 يوم).' });
     }
 
     const member = await interaction.guild.members.fetch(targetUser.id).catch(() => null);
     if (!member || !member.moderatable) {
-      return interaction.reply({ content: '❌ لا يمكنني إسكات هذا العضو.', ephemeral: true });
+      return interaction.editReply({ content: '❌ لا يمكنني إسكات هذا العضو.' });
     }
 
     await member.timeout(durationMs, `${reason} | بواسطة ${interaction.user.tag}`);
@@ -46,7 +48,9 @@ module.exports = {
       )
       .setTimestamp();
 
-    await interaction.reply({ embeds: [embed] });
+    // نجعل الرد عاماً في الروم بعد التاجيل، أو نقوم بحذف الرد المؤقت وإرسال رسالة عادية
+    await interaction.deleteReply().catch(() => { });
+    await interaction.channel.send({ embeds: [embed] });
   },
 
   async executePrefix(message, args) {
