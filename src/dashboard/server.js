@@ -81,7 +81,7 @@ module.exports = function (app) {
                     <!-- الروابط في المنتصف -->
                     <div class="hidden md:flex items-center gap-8 text-xs font-bold text-gray-300">
                         <a href="#features" class="hover:text-purple-400 transition">المميزات</a>
-                        <a href="https://discord.gg/yourserver" target="_blank" class="hover:text-purple-400 transition">سرور الدعم الفني</a>
+                        <a href="https://discord.gg/uxqQDtbVMz" target="_blank" class="hover:text-purple-400 transition">سيرفر الدعم الفني</a>
                     </div>
 
                     <!-- زر تسجيل الدخول (في أقصى اليسار) -->
@@ -137,7 +137,7 @@ module.exports = function (app) {
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     <div class="glass-card p-6 rounded-2xl border border-[#232334] hover:border-purple-500/40 transition">
-                        <div class="w-12 h-12 rounded-xl bg-purple-600/10 border border-purple-500/20 flex items-content justify-center text-purple-400 text-xl font-bold mb-4 items-center">🎫</div>
+                        <div class="w-12 h-12 rounded-xl bg-purple-600/10 border border-purple-500/20 flex items-center justify-center text-purple-400 text-xl font-bold mb-4">🎫</div>
                         <h3 class="text-white font-bold text-base mb-2">نظام التذاكر المتقدم</h3>
                         <p class="text-gray-400 text-xs leading-relaxed font-semibold">لوحة تحكم كاملة وإنشاء تذاكر دعم فني منظمة وآمنة وسريعة لأعضاء سيرفرك.</p>
                     </div>
@@ -173,7 +173,7 @@ module.exports = function (app) {
             <footer class="border-t border-[#1f1f2e] bg-[#060608] py-6 text-center text-gray-400 text-xs font-semibold flex items-center justify-center gap-2">
                 <span>جميع الحقوق محفوظة © ZENO BOT 2026</span>
                 <span>-</span>
-                <a href="https://discord.gg/yourserver" target="_blank" class="hover:text-purple-400 transition">سرور الدعم الفني</a>
+                <a href="https://discord.gg/uxqQDtbVMz" target="_blank" class="hover:text-purple-400 transition">سيرفر الدعم الفني</a>
             </footer>
         </body>
         </html>
