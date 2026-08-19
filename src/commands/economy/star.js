@@ -30,14 +30,15 @@ module.exports = {
     ),
 
   async execute(interaction) {
+    // تم وضع deferReply في أول سطر لتجنب مشكلة انتهاء مهلة ديسكورد (Unknown interaction)
+    await interaction.deferReply();
+
     const targetUser = interaction.options.getUser('user');
     const amount = interaction.options.getInteger('amount');
     const guildId = interaction.guild.id;
 
     // 1. حالة التحويل إذا تم إدخال العضو والمبلغ
     if (targetUser && amount) {
-      await interaction.deferReply({ flags: 6 }); // منع انتهاء المهلة عبر استجابة مؤقتة فورية
-
       const sender = interaction.user;
 
       if (targetUser.id === sender.id) {
@@ -114,7 +115,6 @@ module.exports = {
     }
 
     // 2. حالة الاستعلام عن الرصيد وبطاقة البروفايل
-    await interaction.deferReply();
     const userToQuery = targetUser || interaction.user;
     const userData = fetchUserData(userToQuery.id, guildId);
 
