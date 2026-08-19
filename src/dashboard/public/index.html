@@ -365,7 +365,7 @@
             </ul>
         </div>
         <div class="nav-left">
-            <!-- Authenticated User Profile Link -->
+            <!-- زر تسجيل الدخول بحساب دسكورد (يتحول تلقائياً لاسم المستخدم إذا سجل دخول) -->
             <a href="/auth/discord" class="user-profile" id="userProfileLink">
                 <span id="userName">تسجيل الدخول</span>
                 <img id="userAvatar" src="https://cdn.discordapp.com/embed/avatars/0.png" alt="User Avatar">
@@ -380,11 +380,12 @@
         <p>نظام سحابي ذكي وشامل يوفر لسيرفرك تذاكر دعم فني فورية مع تقييمات، جدار حماية صارم Anti-Nuke، عملة Star Coin
             ومتاجر افتراضية، ورومات صوتية تفاعلية.</p>
         <div class="cta-buttons">
-            <!-- تم تعديل الآي دي برقم البوت الحقيقي -->
+            <!-- زر دعوة البوت للسيرفر -->
             <a href="https://discord.com/api/oauth2/authorize?client_id=1506005273893146775&permissions=8&scope=bot%20applications.commands"
                 target="_blank" class="btn btn-primary">
                 <i class="fa-brands fa-discord"></i> دعوة البوت لسيرفرك
             </a>
+            <!-- زر لوحة التحكم (لتعديل إعدادات البوت والتحكم) -->
             <a href="/dashboard" class="btn btn-secondary" id="dashboardBtn">
                 <i class="fa-solid fa-gear"></i> لوحة التحكم
             </a>
@@ -473,7 +474,6 @@
 
         async function fetchUserData() {
             const profileLink = document.getElementById('userProfileLink');
-            const dashboardBtn = document.getElementById('dashboardBtn');
 
             try {
                 const res = await fetch('/api/user');
@@ -483,17 +483,16 @@
                     if (user.avatar) {
                         document.getElementById('userAvatar').src = `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`;
                     }
+                    // إذا كان مسجل دخول، زر البروفيسور ينقله للوحة التحكم مباشرة
                     profileLink.href = '/dashboard';
-                    dashboardBtn.href = '/dashboard';
                 } else {
                     document.getElementById('userName').innerText = 'تسجيل الدخول';
+                    // إذا لم يسجل دخول، زر البروفيسور يفتح صفحة المصادقة
                     profileLink.href = '/auth/discord';
-                    dashboardBtn.href = '/auth/discord';
                 }
             } catch (e) {
                 document.getElementById('userName').innerText = 'تسجيل الدخول';
                 profileLink.href = '/auth/discord';
-                dashboardBtn.href = '/auth/discord';
             }
         }
 
