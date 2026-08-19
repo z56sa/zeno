@@ -1,38 +1,27 @@
-// ==========================================
-// FILE: src/index.js
-// ==========================================
-
 const { Client, GatewayIntentBits, Collection } = require('discord.js');
-const app = require('./dashboard/server');
-const db = require('./database');
+const express = require('express');
+const { getSystemStats } = require('./database');
 
-const client = new Client({
-    intents: [
-        GatewayIntentBits.Guilds,
-        GatewayIntentBits.GuildMessages,
-        GatewayIntentBits.MessageContent,
-        GatewayIntentBits.GuildMembers
-    ]
-});
+const app = express();
 
-client.commands = new Collection();
-client.slashCommands = new Collection();
+// استدعاء الداشبورد
+const dashboardServer = require('./dashboard/server');
+if (typeof dashboardServer === 'function') {
+    dashboardServer(app);
+}
 
-// لمراقبة حالة البوت API مسار
-app.get('/api/stats', (req, res) => {
+// مسار الإحصائيات
+app.get('/api/stats', async (req, res) => {
+    const dbStats = await getSystemStats();
     res.json({
         status: 'online',
-        guildsCount: client.guilds.cache.size || 0,
-        usersCount: client.users.cache.size || 0,
-        ping: client.ws.ping || 0
+        ping: client.ws?.ping || 0,
+        ...dbStats
     });
 });
 
-// قراءة التوكن ودعم متغير Railway (BOT_TOKEN)
-const token = process.env.BOT_TOKEN || process.env.DISCORD_TOKEN || process.env.TOKEN;
+// تشغيل سيرفر الويب على المنفذ المحدد
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`🚀 Dashboard server running on port ${PORT}`));
 
-if (!token) {
-    console.error('❌ خطأ: لم يتم العثور على التوكن في متغيرات البيئة! تأكد من إضافة BOT_TOKEN على Railway.');
-} else {
-    client.login(token);
-}
+// ... كود تهيئة Discord Client وتسجيل الدخول يكتمل هنا ...
