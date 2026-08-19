@@ -106,6 +106,7 @@
             padding: 6px 16px 6px 6px;
             border-radius: 40px;
             transition: 0.2s;
+            cursor: pointer;
         }
 
         .user-profile:hover {
@@ -364,9 +365,9 @@
             </ul>
         </div>
         <div class="nav-left">
-            <!-- Real Authenticated User Profile -->
-            <a href="/dashboard" class="user-profile" id="userProfileLink">
-                <span id="userName">جاري التحميل...</span>
+            <!-- Authenticated User Profile Link -->
+            <a href="/auth/discord" class="user-profile" id="userProfileLink">
+                <span id="userName">تسجيل الدخول</span>
                 <img id="userAvatar" src="https://cdn.discordapp.com/embed/avatars/0.png" alt="User Avatar">
             </a>
         </div>
@@ -379,8 +380,14 @@
         <p>نظام سحابي ذكي وشامل يوفر لسيرفرك تذاكر دعم فني فورية مع تقييمات، جدار حماية صارم Anti-Nuke، عملة Star Coin
             ومتاجر افتراضية، ورومات صوتية تفاعلية.</p>
         <div class="cta-buttons">
-            <a href="#" class="btn btn-primary"><i class="fa-brands fa-discord"></i> دعوة البوت لسيرفرك</a>
-            <a href="/dashboard" class="btn btn-secondary"><i class="fa-solid fa-gear"></i> لوحة التحكم</a>
+            <!-- استبدل YOUR_CLIENT_ID برقم الـ Client ID الخاص بالبوت -->
+            <a href="https://discord.com/api/oauth2/authorize?client_id=YOUR_CLIENT_ID&permissions=8&scope=bot%20applications.commands"
+                target="_blank" class="btn btn-primary">
+                <i class="fa-brands fa-discord"></i> دعوة البوت لسيرفرك
+            </a>
+            <a href="/dashboard" class="btn btn-secondary" id="dashboardBtn">
+                <i class="fa-solid fa-gear"></i> لوحة التحكم
+            </a>
         </div>
     </section>
 
@@ -448,7 +455,6 @@
     <script>
         async function fetchBotStats() {
             try {
-                // جلب بيانات الحية من مسار الـ API الخاص بالبوت (تأكد من توفير هذا المسار في الباك إند لديك)
                 const response = await fetch('/api/stats');
                 const data = await response.json();
 
@@ -459,7 +465,6 @@
                     document.getElementById('statSecurity').innerText = (data.security || '100') + '%';
                 }
             } catch (e) {
-                // قيم افتراضية في حال لم يتم الاتصال بالباك إند بعد
                 document.getElementById('statPing').innerText = '18ms';
                 document.getElementById('statMembers').innerText = '1,420';
                 document.getElementById('statServers').innerText = '12';
@@ -467,6 +472,9 @@
         }
 
         async function fetchUserData() {
+            const profileLink = document.getElementById('userProfileLink');
+            const dashboardBtn = document.getElementById('dashboardBtn');
+
             try {
                 const res = await fetch('/api/user');
                 const user = await res.json();
@@ -475,17 +483,22 @@
                     if (user.avatar) {
                         document.getElementById('userAvatar').src = `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`;
                     }
+                    profileLink.href = '/dashboard';
+                    dashboardBtn.href = '/dashboard';
                 } else {
                     document.getElementById('userName').innerText = 'تسجيل الدخول';
+                    profileLink.href = '/auth/discord';
+                    dashboardBtn.href = '/auth/discord';
                 }
             } catch (e) {
-                document.getElementById('userName').innerText = 'حسابي';
+                document.getElementById('userName').innerText = 'تسجيل الدخول';
+                profileLink.href = '/auth/discord';
+                dashboardBtn.href = '/auth/discord';
             }
         }
 
         fetchBotStats();
         fetchUserData();
-        // تحديث البينج كل 10 ثواني ليكون حي وفوري
         setInterval(fetchBotStats, 10000);
     </script>
 </body>
