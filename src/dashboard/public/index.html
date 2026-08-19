@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZENO - لوحة التحكم</title>
+    <title>ZENO - اصنع خادم ديسكورد احترافي</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
@@ -17,181 +17,84 @@
     </style>
 </head>
 
-<body class="min-h-screen flex selection:bg-indigo-500 selection:text-white">
+<body class="min-h-screen flex flex-col justify-between selection:bg-indigo-500 selection:text-white overflow-x-hidden">
 
-    <!-- المحتوى الرئيسي (يسار) -->
-    <div class="flex-1 flex flex-col min-w-0">
-        <!-- شريط علوي -->
-        <header
-            class="h-20 border-b border-gray-800/60 flex items-center justify-between px-8 bg-[#0b0f19]/50 backdrop-blur">
-            <div class="flex items-center gap-4">
-                <span class="text-xl font-bold tracking-wide">إدارة خادم ديسكورد</span>
-            </div>
-            <div class="flex items-center gap-6">
-                <a href="#" class="text-sm text-gray-400 hover:text-white transition">الأوامر</a>
-                <a href="#" class="text-sm text-gray-400 hover:text-white transition">الدعم الفني</a>
-            </div>
-        </header>
+    <!-- الهيدر (Navbar) مطابق لتصميم ProBot -->
+    <header class="flex items-center justify-between px-8 py-6 max-w-7xl mx-auto w-full">
 
-        <!-- محتوى الداشبورد والكروت -->
-        <main class="p-8 flex-1 overflow-y-auto">
-            <div class="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 gap-4">
-                <div>
-                    <h1 class="text-2xl font-black mb-1">لوحة التحكم السريعة</h1>
-                    <p class="text-xs text-gray-400">تحكم بجميع خصائص وإعدادات بوت ZENO بسهولة تامة</p>
-                </div>
-                <input type="text" placeholder="Search plugins..."
-                    class="bg-gray-900 border border-gray-800 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-indigo-500 w-full md:w-64 text-gray-300">
-            </div>
-
-            <!-- قسم General -->
-            <p class="text-xs text-gray-500 font-bold mb-4 tracking-wider">GENERAL</p>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-10">
-
-                <!-- نظرة عامة -->
-                <div
-                    class="bg-[#131825] border border-gray-800/80 rounded-2xl p-6 flex flex-col justify-between hover:border-indigo-500/50 transition">
-                    <div>
-                        <div class="flex items-center justify-between mb-4">
-                            <span class="font-bold text-base">نظرة عامة</span>
-                            <div class="p-2.5 rounded-xl bg-indigo-500/10 text-indigo-400">📊</div>
-                        </div>
-                        <p class="text-xs text-gray-400 mb-6">Get main information about your server settings</p>
-                    </div>
-                    <button
-                        class="w-full py-2.5 rounded-xl bg-gray-800 hover:bg-indigo-600 transition font-semibold text-xs tracking-wide shadow-md">Visit</button>
-                </div>
-
-                <!-- إعدادات السيرفر -->
-                <div
-                    class="bg-[#131825] border border-gray-800/80 rounded-2xl p-6 flex flex-col justify-between hover:border-indigo-500/50 transition">
-                    <div>
-                        <div class="flex items-center justify-between mb-4">
-                            <span class="font-bold text-base">إعدادات السيرفر</span>
-                            <div class="p-2.5 rounded-xl bg-indigo-500/10 text-indigo-400">⚙️</div>
-                        </div>
-                        <p class="text-xs text-gray-400 mb-6">Manage your server settings</p>
-                    </div>
-                    <button
-                        class="w-full py-2.5 rounded-xl bg-gray-800 hover:bg-indigo-600 transition font-semibold text-xs tracking-wide shadow-md">Visit</button>
-                </div>
-
-                <!-- رسائل الإيمبد -->
-                <div
-                    class="bg-[#131825] border border-gray-800/80 rounded-2xl p-6 flex flex-col justify-between hover:border-indigo-500/50 transition">
-                    <div>
-                        <div class="flex items-center justify-between mb-4">
-                            <span class="font-bold text-base">رسائل الإيمبد</span>
-                            <div class="p-2.5 rounded-xl bg-indigo-500/10 text-indigo-400">💬</div>
-                        </div>
-                        <p class="text-xs text-gray-400 mb-6">Create and manage embed messages</p>
-                    </div>
-                    <button
-                        class="w-full py-2.5 rounded-xl bg-gray-800 hover:bg-indigo-600 transition font-semibold text-xs tracking-wide shadow-md">Visit</button>
-                </div>
-
-            </div>
-
-            <!-- قسم Modules -->
-            <p class="text-xs text-gray-500 font-bold mb-4 tracking-wider">MODULES</p>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-
-                <!-- نظام التذاكر -->
-                <div
-                    class="bg-[#131825] border border-gray-800/80 rounded-2xl p-6 flex flex-col justify-between hover:border-indigo-500/50 transition">
-                    <div>
-                        <div class="flex items-center justify-between mb-4">
-                            <span class="font-bold text-base">نظام التذاكر (Tickets)</span>
-                            <div class="p-2.5 rounded-xl bg-indigo-500/10 text-indigo-400">🎫</div>
-                        </div>
-                        <p class="text-xs text-gray-400 mb-6">Manage ticket panels and support rooms</p>
-                    </div>
-                    <button
-                        class="w-full py-2.5 rounded-xl bg-gray-800 hover:bg-indigo-600 transition font-semibold text-xs tracking-wide shadow-md">Visit</button>
-                </div>
-
-                <!-- الأوامر العامة -->
-                <div
-                    class="bg-[#131825] border border-gray-800/80 rounded-2xl p-6 flex flex-col justify-between hover:border-indigo-500/50 transition">
-                    <div>
-                        <div class="flex items-center justify-between mb-4">
-                            <span class="font-bold text-base">الأوامر العامة</span>
-                            <div class="p-2.5 rounded-xl bg-indigo-500/10 text-indigo-400">🛠️</div>
-                        </div>
-                        <p class="text-xs text-gray-400 mb-6">Utility commands and features</p>
-                    </div>
-                    <button
-                        class="w-full py-2.5 rounded-xl bg-gray-800 hover:bg-indigo-600 transition font-semibold text-xs tracking-wide shadow-md">Visit</button>
-                </div>
-
-                <!-- الإشراف -->
-                <div
-                    class="bg-[#131825] border border-gray-800/80 rounded-2xl p-6 flex flex-col justify-between hover:border-indigo-500/50 transition">
-                    <div>
-                        <div class="flex items-center justify-between mb-4">
-                            <span class="font-bold text-base">الإشراف</span>
-                            <div class="p-2.5 rounded-xl bg-indigo-500/10 text-indigo-400">🛡️</div>
-                        </div>
-                        <p class="text-xs text-gray-400 mb-6">Moderation tools and commands</p>
-                    </div>
-                    <button
-                        class="w-full py-2.5 rounded-xl bg-gray-800 hover:bg-indigo-600 transition font-semibold text-xs tracking-wide shadow-md">Visit</button>
-                </div>
-
-            </div>
-        </main>
-    </div>
-
-    <!-- الشريط الجانبي (Sidebar - يمين) -->
-    <aside class="w-80 bg-[#111522] border-r border-gray-800/60 flex flex-col p-6 h-screen sticky top-0">
-        <!-- معلومات البوت -->
-        <div class="flex items-center gap-3.5 pb-6 border-b border-gray-800/60 mb-6">
+        <!-- اليسار: صورة البروفايل أو زر الدخول -->
+        <div class="flex items-center gap-4">
             <div
-                class="w-12 h-12 rounded-2xl bg-indigo-600 flex items-center justify-center font-black text-xl shadow-lg shadow-indigo-600/30">
-                Z</div>
-            <div>
-                <h3 class="font-bold text-sm">ZENO TICKETS</h3>
-                <span class="text-xs text-emerald-400 flex items-center gap-1 mt-0.5">● متصل الآن</span>
+                class="w-10 h-10 rounded-full bg-gray-800 border border-gray-700 overflow-hidden flex items-center justify-center">
+                <!-- استبدلها بصورة بروفايل المستخدم أو أيقونة -->
+                <span class="text-xs text-gray-400 font-bold">Z</span>
             </div>
         </div>
 
-        <!-- قائمة التنقل الجانبية -->
-        <div class="flex-1 overflow-y-auto space-y-1.5 pr-1">
-            <p class="text-[11px] text-gray-500 font-bold px-3 mb-2 tracking-wider">عام</p>
-            <a href="#"
-                class="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-indigo-600 text-white font-semibold text-xs shadow-md shadow-indigo-600/25">
-                <span>نظرة عامة</span>
-                <span class="w-2 h-2 rounded-full bg-white"></span>
+        <!-- المنتصف: القوائم (المميزات، المصادر، بريميوم) -->
+        <nav class="hidden md:flex items-center gap-8 text-sm text-gray-300 font-medium">
+            <a href="#" class="hover:text-indigo-400 transition flex items-center gap-1">
+                <span>المميزات</span>
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
             </a>
-            <a href="#"
-                class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-gray-400 hover:bg-gray-800/50 hover:text-white transition text-xs">
-                <span>إعدادات السيرفر</span>
+            <a href="#" class="hover:text-indigo-400 transition flex items-center gap-1">
+                <span>المصادر</span>
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
             </a>
-            <a href="#"
-                class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-gray-400 hover:bg-gray-800/50 hover:text-white transition text-xs">
-                <span>رسائل الإيمبد</span>
+            <a href="#" class="hover:text-amber-400 transition flex items-center gap-1.5 text-amber-400 font-semibold">
+                <span>✨ بريميوم</span>
             </a>
+        </nav>
 
-            <p class="text-[11px] text-gray-500 font-bold px-3 mt-6 mb-2 tracking-wider">قائمة الخصائص</p>
-            <a href="#"
-                class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-gray-400 hover:bg-gray-800/50 hover:text-white transition text-xs">
-                <span>نظام التذاكر</span>
-                <span class="text-[10px] bg-indigo-500/20 text-indigo-400 px-2 py-0.5 rounded-md font-bold">جديد</span>
+        <!-- اليمين: شعار ZENO -->
+        <div class="flex items-center gap-3">
+            <span class="text-xl font-bold tracking-wider">ZENO</span>
+            <div
+                class="bg-indigo-600 p-2 rounded-xl text-lg font-black shadow-lg shadow-indigo-600/30 flex items-center justify-center w-10 h-10">
+                Z</div>
+        </div>
+    </header>
+
+    <!-- المحتوى الرئيسي (Hero Section) -->
+    <main class="flex-1 flex flex-col items-center justify-center text-center px-4 py-16">
+        <!-- شارة التحديث العلوي -->
+        <div
+            class="inline-block bg-indigo-500/10 text-indigo-400 text-xs font-semibold px-4 py-1.5 rounded-full mb-8 border border-indigo-500/20">
+            جديد: نظام التذاكر المطور
+        </div>
+
+        <!-- العنوان الرئيسي الضخم -->
+        <h1 class="text-4xl md:text-6xl font-black tracking-tight mb-6 max-w-3xl leading-tight">
+            اصنع خادم ديسكورد <br class="hidden md:block"> احترافي!
+        </h1>
+
+        <!-- الوصف -->
+        <p class="text-gray-400 text-sm md:text-base max-w-xl mb-12 leading-relaxed">
+            بوت متعدد الأغراض قابل للتخصيص جداً حيث يوفر لك تخصيص صورة كرسالة ترحيبية وسجلات متعمقة وأوامر اجتماعية
+            وإشراف وأكثر...
+        </p>
+
+        <!-- الأزرار (عكس الترتيب لتكون مطابقة: لوحة التحكم يمين، إضافة البوت يسار حسب اتجاه الـ RTL) -->
+        <div class="flex flex-wrap items-center justify-center gap-4">
+            <a href="/dashboard"
+                class="px-8 py-3.5 rounded-xl bg-gray-800 hover:bg-gray-700 transition font-bold border border-gray-700/50 text-sm">
+                لوحة التحكم
             </a>
             <a href="#"
-                class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-gray-400 hover:bg-gray-800/50 hover:text-white transition text-xs">
-                <span>الرولات التلقائية</span>
-            </a>
-            <a href="#"
-                class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-gray-400 hover:bg-gray-800/50 hover:text-white transition text-xs">
-                <span>الإشراف والحماية</span>
-            </a>
-            <a href="#"
-                class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-gray-400 hover:bg-gray-800/50 hover:text-white transition text-xs">
-                <span>سجل لوحة التحكم</span>
+                class="px-8 py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 transition font-bold shadow-xl shadow-indigo-600/30 text-sm">
+                إضافة البوت في Discord
             </a>
         </div>
-    </aside>
+    </main>
+
+    <!-- فوتر بسيط -->
+    <footer class="py-6 text-center text-gray-600 text-xs">
+        <!-- مساحة فارغة سفلية مطابقة للصورة -->
+    </footer>
 
 </body>
 
