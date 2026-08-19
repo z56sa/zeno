@@ -76,15 +76,19 @@ app.listen(PORT, () => {
     console.log(`=============================================================`);
 });
 
-// تسجيل الدخول بالبوت (يدعم DISCORD_TOKEN أو BOT_TOKEN تلقائياً)
+// تسجيل الدخول المباشر للبوت
 const token = process.env.DISCORD_TOKEN || process.env.BOT_TOKEN;
 
+console.log('🔍 Checking Token Status...');
 if (token) {
-    client.login(token).catch(err => {
-        console.error('Failed to login to Discord:', err);
+    console.log('🔑 Token found! Attempting to login to Discord...');
+    client.login(token).then(() => {
+        console.log('🎉 Discord Login Promise Resolved Successfully!');
+    }).catch(err => {
+        console.error('❌ Failed to login to Discord:', err);
     });
 } else {
-    console.log('⚠️ Bot Token is not provided in environment variables. Bot login skipped.');
+    console.log('🚨 ERROR: Bot Token is completely missing from environment variables!');
 }
 
 module.exports = { client, app };
