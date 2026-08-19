@@ -7,26 +7,38 @@ const pgSession = require('connect-pg-simple')(session);
 const { Pool } = require('pg');
 
 module.exports = function (app) {
-    // 1. الاتصال بقاعدة البيانات
-    const pool = new Pool({
-        connectionString: process.env.DATABASE_URL,
-        ssl: process.env.DATABASE_URL && !process.env.DATABASE_URL.includes('localhost')
-            ? { rejectUnauthorized: false }
-            : false
-    });
+    let sessionStore;
 
-    pool.on('error', (err) => console.error('⚠️ Database Error:', err));
+    // 1. نظام الطوارئ: محاولة الاتصال بالقاعدة، وإذا فشل يفتح الموقع بالذاكرة المؤقتة
+    try {
+        if (process.env.DATABASE_URL) {
+            const pool = new Pool({
+                connectionString: process.env.DATABASE_URL,
+                ssl: { rejectUnauthorized: false }
+            });
+
+            pool.on('error', (err) => console.error('⚠️ Database Error:', err.message));
+
+            sessionStore = new pgSession({
+                pool: pool,
+                tableName: 'user_sessions',
+                createTableIfMissing: false
+            });
+        } else {
+            console.warn("⚠️ DATABASE_URL مو موجود في Railway! تم التحويل للذاكرة المؤقتة.");
+            sessionStore = new session.MemoryStore();
+        }
+    } catch (dbError) {
+        console.error("⚠️ فشل إعداد قاعدة البيانات، تم التحويل للذاكرة المؤقتة:", dbError.message);
+        sessionStore = new session.MemoryStore();
+    }
 
     app.set('trust proxy', 1);
     app.use(express.static('public'));
 
-    // 2. إعداد نظام الجلسات (مع تعطيل إنشاء الجدول لأنه موجود مسبقاً لتجنب الخطأ)
+    // 2. إعداد الجلسات (بأمان تام)
     app.use(session({
-        store: new pgSession({
-            pool: pool,
-            tableName: 'user_sessions',
-            createTableIfMissing: false, // هنا الحل الجذري للمشكلة اللي ظهرت لك
-        }),
+        store: sessionStore,
         secret: process.env.SESSION_SECRET || 'ZENO_TICKETS_SUPER_SECRET',
         resave: false,
         saveUninitialized: false,
@@ -38,12 +50,10 @@ module.exports = function (app) {
     }));
 
     // ==========================================
-    // الصفحة الرئيسية
+    // الصفحة الرئيسية (التصميم الاحترافي)
     // ==========================================
     app.get('/', (req, res) => {
         const user = req.session?.user;
-        const error = req.query.error;
-
         const userAvatar = user?.avatar
             ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.${user.avatar.startsWith('a_') ? 'gif' : 'png'}?size=128`
             : 'https://cdn.discordapp.com/embed/avatars/0.png';
@@ -115,7 +125,7 @@ module.exports = function (app) {
     // ==========================================
     app.get('/auth/discord/callback', async (req, res) => {
         const code = req.query.code;
-        if (!code) return res.redirect('/?error=no_code_provided');
+        if (!code) return res.redirect('/');
 
         try {
             const clientId = process.env.DISCORD_CLIENT_ID || process.env.CLIENT_ID;
@@ -134,7 +144,7 @@ module.exports = function (app) {
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
             });
 
-            if (!tokenRes.ok) throw new Error('Failed to get token');
+            if (!tokenRes.ok) throw new Error('فشل التوكن');
             const tokenData = await tokenRes.json();
 
             const [userRes, guildsRes] = await Promise.all([
@@ -149,8 +159,7 @@ module.exports = function (app) {
                 ? allGuilds.filter(g => (g.permissions & 0x8) === 0x8 || (g.permissions & 0x20) === 0x20)
                 : [];
 
-            req.session.save((err) => {
-                if (err) console.error("Session Save Error:", err);
+            req.session.save(() => {
                 res.redirect('/dashboard');
             });
         } catch (error) {
@@ -160,7 +169,7 @@ module.exports = function (app) {
     });
 
     // ==========================================
-    // لوحة التحكم (السيرفرات بالتصميم الكامل)
+    // لوحة التحكم
     // ==========================================
     app.get('/dashboard', (req, res) => {
         if (!req.session?.user) return res.redirect('/auth/discord');
