@@ -100,6 +100,7 @@ app.listen(PORT, () => {
 });
 
 // قراءة وتنظيف التوكن لمنع أي مشاكل في المسافات
+// قراءة وتنظيف التوكن
 const rawToken = process.env.DISCORD_TOKEN || process.env.BOT_TOKEN;
 const token = rawToken ? rawToken.trim() : '';
 
@@ -108,13 +109,21 @@ if (token) {
     console.log('🔑 Token found! Attempting to login to Discord...');
     console.log('🌐 Node Environment:', process.env.NODE_ENV || 'development');
 
-    client.login(token)
+    const LOGIN_TIMEOUT = 15000; // 15 ثانية مهلة قصوى للاتصال
+
+    const loginPromise = client.login(token);
+    const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('⏰ Discord Login Timeout: WebSocket connection is blocked or taking too long on this network!')), LOGIN_TIMEOUT)
+    );
+
+    Promise.race([loginPromise, timeoutPromise])
         .then(() => {
             console.log(`🎉 SUCCESS: Logged in successfully as ${client.user.tag}!`);
         })
         .catch(err => {
             console.error('❌ CRITICAL LOGIN ERROR:', err);
         });
+
 } else {
     console.log('🚨 ERROR: Bot Token is completely missing from environment variables!');
 }
