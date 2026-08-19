@@ -1,5 +1,5 @@
 // ========================================================
-// FILE: src/dashboard/server.js - النسخة الأسطورية (تصميم كامل + حماية قصوى)
+// FILE: src/dashboard/server.js
 // ========================================================
 const express = require('express');
 const session = require('express-session');
@@ -7,7 +7,7 @@ const pgSession = require('connect-pg-simple')(session);
 const { Pool } = require('pg');
 
 module.exports = function (app) {
-    // 1. الاتصال بقاعدة البيانات مع حماية ضد الانهيار
+    // 1. الاتصال بقاعدة البيانات
     const pool = new Pool({
         connectionString: process.env.DATABASE_URL,
         ssl: process.env.DATABASE_URL && !process.env.DATABASE_URL.includes('localhost')
@@ -15,21 +15,17 @@ module.exports = function (app) {
             : false
     });
 
-    // منع السيرفر من الانهيار إذا انقطع الاتصال بقاعدة البيانات فجأة
-    pool.on('error', (err) => {
-        console.error('⚠️ Database Error:', err);
-    });
+    pool.on('error', (err) => console.error('⚠️ Database Error:', err));
 
     app.set('trust proxy', 1);
     app.use(express.static('public'));
 
-    // 2. إعداد نظام الجلسات الأقوى (يحمي بيانات الدخول)
+    // 2. إعداد نظام الجلسات (مع تعطيل إنشاء الجدول لأنه موجود مسبقاً لتجنب الخطأ)
     app.use(session({
         store: new pgSession({
             pool: pool,
             tableName: 'user_sessions',
-            createTableIfMissing: true,
-            errorLog: console.error // طباعة الأخطاء بدلاً من الإغلاق
+            createTableIfMissing: false, // هنا الحل الجذري للمشكلة اللي ظهرت لك
         }),
         secret: process.env.SESSION_SECRET || 'ZENO_TICKETS_SUPER_SECRET',
         resave: false,
@@ -41,13 +37,8 @@ module.exports = function (app) {
         }
     }));
 
-    // 3. دالة حماية للمسارات (تمنع الشاشة البيضاء Internal Server Error بشكل نهائي)
-    const asyncHandler = (fn) => (req, res, next) => {
-        Promise.resolve(fn(req, res, next)).catch(next);
-    };
-
     // ==========================================
-    // الصفحة الرئيسية (التصميم الاحترافي الكامل)
+    // الصفحة الرئيسية
     // ==========================================
     app.get('/', (req, res) => {
         const user = req.session?.user;
@@ -56,8 +47,6 @@ module.exports = function (app) {
         const userAvatar = user?.avatar
             ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.${user.avatar.startsWith('a_') ? 'gif' : 'png'}?size=128`
             : 'https://cdn.discordapp.com/embed/avatars/0.png';
-
-        const errorMsg = error ? `<div class="max-w-xl mx-auto mt-6 bg-red-500/10 border border-red-500/30 text-red-400 px-4 py-3 rounded-xl text-sm font-bold text-center">⚠️ حدث خطأ في النظام: ${error}</div>` : '';
 
         res.send(`
         <!DOCTYPE html>
@@ -99,8 +88,6 @@ module.exports = function (app) {
                 </div>
             </header>
 
-            ${errorMsg}
-
             <main class="max-w-4xl mx-auto px-6 py-20 text-center flex-1 flex flex-col items-center justify-center">
                 <div class="inline-flex items-center gap-2 bg-[#181824] border border-purple-500/30 px-4 py-1.5 rounded-full text-xs font-bold text-purple-300 mb-6">✨ لوحة تحكم ZENO TICKETS</div>
                 <h1 class="text-4xl md:text-6xl font-black mb-6">نظام تذاكر ديسكورد <span class="text-purple-400">الاحترافي</span></h1>
@@ -119,64 +106,58 @@ module.exports = function (app) {
     // ==========================================
     app.get('/auth/discord', (req, res) => {
         const clientId = process.env.DISCORD_CLIENT_ID || process.env.CLIENT_ID;
-        if (!clientId) return res.redirect('/?error=missing_client_id');
-
         const redirectUri = encodeURIComponent(`${req.headers['x-forwarded-proto'] || req.protocol}://${req.get('host')}/auth/discord/callback`);
         res.redirect(`https://discord.com/api/oauth2/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=identify%20guilds`);
     });
 
     // ==========================================
-    // الـ Callback (مأمن بالكامل ضد الأخطاء)
+    // الـ Callback 
     // ==========================================
-    app.get('/auth/discord/callback', asyncHandler(async (req, res) => {
+    app.get('/auth/discord/callback', async (req, res) => {
         const code = req.query.code;
         if (!code) return res.redirect('/?error=no_code_provided');
 
-        const clientId = process.env.DISCORD_CLIENT_ID || process.env.CLIENT_ID;
-        const clientSecret = process.env.CLIENT_SECRET || process.env.DISCORD_CLIENT_SECRET;
-        const redirectUri = `${req.headers['x-forwarded-proto'] || req.protocol}://${req.get('host')}/auth/discord/callback`;
+        try {
+            const clientId = process.env.DISCORD_CLIENT_ID || process.env.CLIENT_ID;
+            const clientSecret = process.env.CLIENT_SECRET || process.env.DISCORD_CLIENT_SECRET;
+            const redirectUri = `${req.headers['x-forwarded-proto'] || req.protocol}://${req.get('host')}/auth/discord/callback`;
 
-        // 1. جلب التوكن
-        const tokenRes = await fetch('https://discord.com/api/oauth2/token', {
-            method: 'POST',
-            body: new URLSearchParams({
-                client_id: clientId,
-                client_secret: clientSecret,
-                grant_type: 'authorization_code',
-                code: code,
-                redirect_uri: redirectUri
-            }),
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-        });
+            const tokenRes = await fetch('https://discord.com/api/oauth2/token', {
+                method: 'POST',
+                body: new URLSearchParams({
+                    client_id: clientId,
+                    client_secret: clientSecret,
+                    grant_type: 'authorization_code',
+                    code: code,
+                    redirect_uri: redirectUri
+                }),
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+            });
 
-        if (!tokenRes.ok) throw new Error('فشل جلب الـ Token من ديسكورد');
-        const tokenData = await tokenRes.json();
+            if (!tokenRes.ok) throw new Error('Failed to get token');
+            const tokenData = await tokenRes.json();
 
-        // 2. جلب بيانات المستخدم والسيرفرات
-        const [userRes, guildsRes] = await Promise.all([
-            fetch('https://discord.com/api/users/@me', { headers: { authorization: `Bearer ${tokenData.access_token}` } }),
-            fetch('https://discord.com/api/users/@me/guilds', { headers: { authorization: `Bearer ${tokenData.access_token}` } })
-        ]);
+            const [userRes, guildsRes] = await Promise.all([
+                fetch('https://discord.com/api/users/@me', { headers: { authorization: `Bearer ${tokenData.access_token}` } }),
+                fetch('https://discord.com/api/users/@me/guilds', { headers: { authorization: `Bearer ${tokenData.access_token}` } })
+            ]);
 
-        if (!userRes.ok || !guildsRes.ok) throw new Error('فشل جلب البيانات من ديسكورد');
+            req.session.user = await userRes.json();
+            const allGuilds = await guildsRes.json();
 
-        req.session.user = await userRes.json();
-        const allGuilds = await guildsRes.json();
+            req.session.guilds = Array.isArray(allGuilds)
+                ? allGuilds.filter(g => (g.permissions & 0x8) === 0x8 || (g.permissions & 0x20) === 0x20)
+                : [];
 
-        // تصفية السيرفرات التي يملك فيها صلاحية الإدارة (Administrator)
-        req.session.guilds = Array.isArray(allGuilds)
-            ? allGuilds.filter(g => (g.permissions & 0x8) === 0x8 || (g.permissions & 0x20) === 0x20)
-            : [];
-
-        // 3. الحفظ اليدوي للجلسة لمنع ضياعها قبل التوجيه (هذا السطر يمنع الـ Error)
-        req.session.save((err) => {
-            if (err) {
-                console.error("Session Save Error:", err);
-                return res.redirect('/?error=session_error');
-            }
-            res.redirect('/dashboard');
-        });
-    }));
+            req.session.save((err) => {
+                if (err) console.error("Session Save Error:", err);
+                res.redirect('/dashboard');
+            });
+        } catch (error) {
+            console.error("Auth Error:", error);
+            res.redirect('/');
+        }
+    });
 
     // ==========================================
     // لوحة التحكم (السيرفرات بالتصميم الكامل)
@@ -205,7 +186,7 @@ module.exports = function (app) {
             <div class="col-span-full text-center py-16 glass-card rounded-2xl">
                 <div class="text-4xl mb-4">⚙️</div>
                 <h3 class="text-xl font-bold text-white mb-2">لا توجد سيرفرات</h3>
-                <p class="text-gray-400 text-sm">لم يتم العثور على سيرفرات تمتلك فيها صلاحية الإدارة (Administrator).</p>
+                <p class="text-gray-400 text-sm">لم يتم العثور على سيرفرات تمتلك فيها صلاحية الإدارة.</p>
             </div>
         `;
 
@@ -253,30 +234,9 @@ module.exports = function (app) {
         `);
     });
 
-    // ==========================================
-    // تسجيل الخروج
-    // ==========================================
     app.get('/logout', (req, res) => {
         req.session.destroy(() => {
             res.redirect('/');
         });
-    });
-
-    // ==========================================
-    // 🔴 صائد الأخطاء العالمي 🔴
-    // (بدلاً من الشاشة البيضاء، سيعرض لك سبب المشكلة مباشرة إذا حدثت)
-    // ==========================================
-    app.use((err, req, res, next) => {
-        console.error("🔴 Global Server Error:", err);
-        res.status(500).send(`
-            <div style="background:#08080a; color:white; font-family:sans-serif; text-align:center; padding:50px; height:100vh;">
-                <h1 style="color:#ef4444; font-size:30px; margin-bottom:10px;">حدث خطأ تقني</h1>
-                <p style="color:#9ca3af; margin-bottom:30px;">يبدو أن هناك مشكلة، لكننا قمنا بمنع السيرفر من التعطل.</p>
-                <div style="background:#12121a; border: 1px solid #ef4444; padding:20px; border-radius:10px; color:#ef4444; text-align:left; direction:ltr; font-family:monospace; max-width:600px; margin:0 auto;">
-                    ${err.message || 'Internal Server Error'}
-                </div>
-                <a href="/" style="display:inline-block; margin-top:30px; background:#9333ea; color:white; padding:12px 24px; text-decoration:none; border-radius:10px; font-weight:bold;">العودة للرئيسية</a>
-            </div>
-        `);
     });
 };
