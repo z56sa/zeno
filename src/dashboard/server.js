@@ -36,8 +36,8 @@ module.exports = function (app) {
     // 1. الصفحة الرئيسية (Landing Page - /)
     app.get('/', (req, res) => {
         const user = req.session && req.session.user;
+        const hasError = req.query.error;
 
-        // تجهيز بيانات المستخدم إذا كان مسجلاً للدخول
         const userAvatar = user && user.avatar
             ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.${user.avatar.startsWith('a_') ? 'gif' : 'png'}`
             : 'https://cdn.discordapp.com/embed/avatars/0.png';
@@ -70,7 +70,6 @@ module.exports = function (app) {
             <header class="bg-[#0b0b10]/95 border-b border-[#1f1f2e] sticky top-0 z-50 backdrop-blur-md">
                 <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
                     
-                    <!-- الشعار والصورة (في اليمين) -->
                     <a href="/" class="flex items-center gap-3">
                         <div class="w-11 h-11 rounded-full overflow-hidden border-2 border-purple-500/50 shadow-lg shadow-purple-600/30 flex items-center justify-center bg-[#12121a] shrink-0">
                             <img src="/logo.png" alt="ZENO" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='/logo.jpg';">
@@ -78,13 +77,11 @@ module.exports = function (app) {
                         <span class="text-xl font-black tracking-[0.25em] text-white">Z E N O</span>
                     </a>
 
-                    <!-- الروابط في المنتصف -->
                     <div class="hidden md:flex items-center gap-8 text-xs font-bold text-gray-300">
                         <a href="#features" class="hover:text-purple-400 transition">المميزات</a>
                         <a href="https://discord.gg/uxqQDtbVMz" target="_blank" class="hover:text-purple-400 transition">سيرفر الدعم الفني</a>
                     </div>
 
-                    <!-- زر تسجيل الدخول (في أقصى اليسار) -->
                     <div>
                         ${user ? `
                             <div class="flex items-center gap-3">
@@ -104,6 +101,12 @@ module.exports = function (app) {
                 </div>
             </header>
 
+            ${hasError ? `
+                <div class="max-w-xl mx-auto mt-6 bg-red-500/10 border border-red-500/30 text-red-400 px-4 py-3 rounded-xl text-xs font-bold text-center">
+                    فشل تسجيل الدخول عبر Discord. يجدر التأكد من صحة Client ID و Client Secret في المتغيرات.
+                </div>
+            ` : ''}
+
             <!-- Hero Section -->
             <main class="max-w-4xl mx-auto px-6 py-20 text-center flex-1 flex flex-col items-center justify-center">
                 <div class="inline-flex items-center gap-2 bg-[#181824] border border-purple-500/30 px-4 py-1.5 rounded-full text-xs font-bold text-purple-300 mb-6 shadow-md">
@@ -120,7 +123,7 @@ module.exports = function (app) {
                 </p>
 
                 <div class="flex flex-wrap items-center justify-center gap-4">
-                    <a href="https://discord.com/api/oauth2/authorize?client_id=${process.env.DISCORD_CLIENT_ID || '1506005273893146775'}&permissions=8&scope=bot%20applications.commands" target="_blank" class="px-8 py-3.5 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-xl text-sm transition-all shadow-xl shadow-purple-600/30 hover:scale-105">
+                    <a href="https://discord.com/api/oauth2/authorize?client_id=${process.env.DISCORD_CLIENT_ID || process.env.CLIENT_ID || '1506005273893146775'}&permissions=8&scope=bot%20applications.commands" target="_blank" class="px-8 py-3.5 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-xl text-sm transition-all shadow-xl shadow-purple-600/30 hover:scale-105">
                         إضافة البوت في Discord
                     </a>
                     <a href="/dashboard" class="px-8 py-3.5 glass-card hover:bg-[#1a1a26] text-white font-bold rounded-xl text-sm transition-all hover:scale-105">
@@ -129,7 +132,7 @@ module.exports = function (app) {
                 </div>
             </main>
 
-            <!-- Features Section (Expanded) -->
+            <!-- Features Section -->
             <section id="features" class="max-w-7xl mx-auto px-6 py-20 w-full border-t border-[#1f1f2e]">
                 <div class="text-center mb-16">
                     <h2 class="text-3xl font-black text-white mb-3">مميزات بوت ZENO</h2>
@@ -182,21 +185,26 @@ module.exports = function (app) {
 
     // 2. توجيه تسجيل الدخول بـ Discord
     app.get('/auth/discord', (req, res) => {
-        const clientId = process.env.DISCORD_CLIENT_ID || '1506005273893146775';
-        const redirectUri = encodeURIComponent(`https://${req.get('host')}/auth/discord/callback`);
+        const clientId = process.env.DISCORD_CLIENT_ID || process.env.CLIENT_ID || '1506005273893146775';
+        const protocol = req.headers['x-forwarded-proto'] || req.protocol;
+        const redirectUri = encodeURIComponent(`${protocol}://${req.get('host')}/auth/discord/callback`);
         res.redirect(`https://discord.com/api/oauth2/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=identify%20guilds`);
     });
 
     // 3. استقبال العودة من OAuth2 والمعالجة
     app.get('/auth/discord/callback', async (req, res) => {
         const code = req.query.code;
-        if (!code) return res.redirect('/');
+        if (!code) return res.redirect('/?error=no_code');
 
         try {
-            const redirectUri = `https://${req.get('host')}/auth/discord/callback`;
+            const clientId = process.env.DISCORD_CLIENT_ID || process.env.CLIENT_ID || '1506005273893146775';
+            const clientSecret = process.env.CLIENT_SECRET || process.env.DISCORD_CLIENT_SECRET;
+            const protocol = req.headers['x-forwarded-proto'] || req.protocol;
+            const redirectUri = `${protocol}://${req.get('host')}/auth/discord/callback`;
+
             const params = new URLSearchParams({
-                client_id: process.env.DISCORD_CLIENT_ID || '1506005273893146775',
-                client_secret: process.env.DISCORD_CLIENT_SECRET,
+                client_id: clientId,
+                client_secret: clientSecret,
                 grant_type: 'authorization_code',
                 code: code,
                 redirect_uri: redirectUri,
@@ -207,8 +215,13 @@ module.exports = function (app) {
                 body: params,
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
             });
+
             const tokenData = await tokenRes.json();
-            if (!tokenData.access_token) return res.redirect('/?error=auth_failed');
+
+            if (!tokenData.access_token) {
+                console.error('Discord Token Error Response:', tokenData);
+                return res.redirect('/?error=auth_failed');
+            }
 
             const userRes = await fetch('https://discord.com/api/users/@me', {
                 headers: { authorization: `${tokenData.token_type} ${tokenData.access_token}` }
@@ -229,8 +242,8 @@ module.exports = function (app) {
 
             res.redirect('/dashboard');
         } catch (err) {
-            console.error('OAuth2 Error:', err);
-            res.redirect('/');
+            console.error('OAuth2 Exception Error:', err);
+            res.redirect('/?error=exception');
         }
     });
 
