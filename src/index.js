@@ -5,16 +5,10 @@ const { getSystemStats } = require('./database');
 
 const app = express();
 
-// 1. تعريف مجلد الملفات الثابتة (HTML / CSS / JS)
-const publicDir = path.join(__dirname, 'dashboard', 'public');
-app.use(express.static(publicDir));
+// تم حذف توجيه الـ index.html الثابت لكي يعمل سيرفر الداشبورد الديناميكي بكفاءة
+app.use(express.static('public'));
 
-// 2. توجيه الصفحة الرئيسية لفتح index.html
-app.get('/', (req, res) => {
-    res.sendFile(path.join(publicDir, 'index.html'));
-});
-
-// استدعاء الداشبورد
+// استدعاء الداشبورد (وهو اللي بيشغل الصفحة الرئيسية وكل المسارات)
 const dashboardServer = require('./dashboard/server');
 if (typeof dashboardServer === 'function') {
     dashboardServer(app);
