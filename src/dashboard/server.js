@@ -5,19 +5,37 @@
 const express = require('express');
 const path = require('path');
 const session = require('express-session');
-const axios = require('axios'); // تأكد إنك مثبت axios أو استخدم fetch المدمج
+const pgSession = require('connect-pg-simple')(session); // 1. استدعاء مكتبة تخزين الجلسات في بورتغريس
+const { Pool } = require('pg');                         // 2. استدعاء مكتبة الاتصال بقاعدة البيانات
+const axios = require('axios');
 const app = express();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// إعداد الجلسات (Sessions)
+// 3. إعداد اتصال قاعدة البيانات (PostgreSQL) في Railway
+const pgPool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: {
+        rejectUnauthorized: false // مطلوبة للاتصال الآمن مع Railway
+    }
+});
+
+// 4. إعداد الجلسات (Sessions) لتخزينها في قاعدة البيانات بدلاً من الذاكرة العشوائية
 app.use(session({
+    store: new pgSession({
+        pool: pgPool,                // استخدام الـ pool المعرف أعلاه
+        tableName: 'session',        // اسم الجدول الذي سيتم إنشاؤه تلقائياً في قاعدة البيانات
+        createTableIfMissing: true   // إنشاء الجدول تلقائياً إذا لم يكن موجوداً
+    }),
     secret: process.env.SESSION_SECRET || 'zeno_secret_key_change_this',
     resave: false,
     saveUninitialized: false,
-    cookie: { secure: false } // اجعلها true إذا كنت تستخدم HTTPS مع بروكسي متقدم، حاليا false مناسبة لريلواي
+    cookie: {
+        secure: false, // اجعلها true إذا كنت تستخدم HTTPS مع بروكسي متقدم، حاليا مناسبة لريلواي
+        maxAge: 30 * 24 * 60 * 60 * 1000 // مدة الجلسة (30 يوم)
+    }
 }));
 
 // الصفحة الرئيسية
@@ -32,7 +50,6 @@ app.get('/auth/discord', (req, res) => {
         return res.status(500).send('Error: CLIENT_ID is not defined in environment variables.');
     }
 
-    // تحديد رابط الـ Callback تلقائياً حسب الدومين الحالي في ريلواي
     const protocol = req.headers['x-forwarded-proto'] || req.protocol;
     const REDIRECT_URI = encodeURIComponent(`${protocol}://${req.get('host')}/auth/discord/callback`);
 
@@ -51,7 +68,6 @@ app.get('/auth/discord/callback', async (req, res) => {
         const protocol = req.headers['x-forwarded-proto'] || req.protocol;
         const REDIRECT_URI = `${protocol}://${req.get('host')}/auth/discord/callback`;
 
-        // إرسال طلب لـ Discord لتبديل الـ Code بـ Access Token
         const tokenResponseData = new URLSearchParams({
             client_id: process.env.CLIENT_ID,
             client_secret: process.env.CLIENT_SECRET,
@@ -68,17 +84,13 @@ app.get('/auth/discord/callback', async (req, res) => {
 
         const accessToken = tokenResult.data.access_token;
 
-        // جلب معلومات المستخدم من ديسكورد
         const userResult = await axios.get('https://discord.com/api/users/@me', {
             headers: {
                 authorization: `Bearer ${accessToken}`,
             },
         });
 
-        // تخزين بيانات المستخدم في الجلسة
         req.session.user = userResult.data;
-
-        // توجيهه للداشبورد بعد النجاح
         res.redirect('/dashboard');
     } catch (error) {
         console.error('Error during Discord OAuth:', error.response?.data || error.message);
@@ -93,7 +105,7 @@ app.get('/logout', (req, res) => {
     });
 });
 
-// مسار لوحة التحكم (مع التحقق من الجلسة)
+// مسار لوحة التحكم
 app.get('/dashboard', (req, res) => {
     if (!req.session || !req.session.user) {
         return res.redirect('/auth/discord');
