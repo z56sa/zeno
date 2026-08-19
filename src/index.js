@@ -3,8 +3,8 @@
 // ==========================================
 
 const { Client, GatewayIntentBits, Collection } = require('discord.js');
-const app = require('./dashboard/server'); // استدعاء سيرفر Express
-const db = require('./database');           // استدعاء ملف قاعدة البيانات
+const app = require('./dashboard/server');
+const db = require('./database');
 
 const client = new Client({
     intents: [
@@ -18,7 +18,7 @@ const client = new Client({
 client.commands = new Collection();
 client.slashCommands = new Collection();
 
-// مسار API لمراقبة حالة البوت
+// لمراقبة حالة البوت API مسار
 app.get('/api/stats', (req, res) => {
     res.json({
         status: 'online',
@@ -28,5 +28,11 @@ app.get('/api/stats', (req, res) => {
     });
 });
 
-// تسجيل دخول البوت
-client.login(process.env.TOKEN || process.env.DISCORD_TOKEN);
+// قراءة التوكن ودعم متغير Railway (BOT_TOKEN)
+const token = process.env.BOT_TOKEN || process.env.DISCORD_TOKEN || process.env.TOKEN;
+
+if (!token) {
+    console.error('❌ خطأ: لم يتم العثور على التوكن في متغيرات البيئة! تأكد من إضافة BOT_TOKEN على Railway.');
+} else {
+    client.login(token);
+}
