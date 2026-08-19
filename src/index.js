@@ -3,7 +3,7 @@
 // ======================================================================
 
 const { Client, GatewayIntentBits, Collection } = require('discord.js');
-const app = require('./dashboard/server'); // تعديل المسار ليدخل على مجلد dashboard صحيحاً
+const app = require('./dashboard/server');
 
 const PORT = process.env.PORT || 3000;
 
@@ -19,6 +19,22 @@ const client = new Client({
 });
 
 client.commands = new Collection();
+client.prefixCommands = new Collection();
+client.aliases = new Collection();
+
+// ==========================================
+// تشغيل معالجات الأوامر والأحداث (Handlers)
+// ==========================================
+try {
+    const commandHandler = require('./handlers/commandHandler');
+    const eventHandler = require('./handlers/eventHandler');
+
+    commandHandler(client);
+    eventHandler(client);
+    console.log('📂 Handlers initialization triggered successfully!');
+} catch (err) {
+    console.error('❌ Error loading handlers:', err);
+}
 
 // ربط الكلاينت بمدير الجلسات إذا وُجد
 try {
