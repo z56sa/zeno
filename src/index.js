@@ -15,7 +15,14 @@ const client = new Client({
         GatewayIntentBits.GuildMembers,
         GatewayIntentBits.MessageContent,
         GatewayIntentBits.GuildVoiceStates
-    ]
+    ],
+    // إضافة خيارات لتقليل المشاكل الشبكية وتحسين استقرار الـ WebSocket
+    restTimeOffset: 0,
+    failIfNotExists: false,
+    allowedMentions: {
+        parse: ['users', 'roles'],
+        repliedUser: false
+    }
 });
 
 client.commands = new Collection();
