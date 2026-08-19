@@ -1,8 +1,7 @@
 // ==========================================
 // FILE: src/dashboard/server.js
 // ==========================================
-app.use(express.static('public'));
-
+const express = require('express');
 const session = require('express-session');
 const pgSession = require('connect-pg-simple')(session);
 const { Pool } = require('pg');
@@ -18,6 +17,8 @@ module.exports = function (app) {
     // 🟢 تفعيل الثقة بالبروكسي لتحديد HTTPS بشكل صحيح على Railway
     app.set('trust proxy', 1);
 
+    app.use(express.static('public'));
+
     app.use(session({
         store: new pgSession({
             pool: pool,
@@ -29,7 +30,7 @@ module.exports = function (app) {
         saveUninitialized: false,
         cookie: {
             maxAge: 86400000,
-            secure: process.env.NODE_ENV === 'production' // تفعيل الخيار الآمن في البيئة الإنتاجية
+            secure: process.env.NODE_ENV === 'production'
         }
     }));
 
@@ -125,7 +126,6 @@ module.exports = function (app) {
 
     // 2. توجيه تسجيل الدخول بـ Discord
     app.get('/auth/discord', (req, res) => {
-        // 🟢 تثبيت استخدام https صراحة بدلاً من req.protocol
         const redirectUri = encodeURIComponent(`https://${req.get('host')}/auth/discord/callback`);
         const clientId = process.env.DISCORD_CLIENT_ID || process.env.CLIENT_ID || '1506005273893146775';
         res.redirect(`https://discord.com/oauth2/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=identify%20guilds`);
@@ -137,7 +137,6 @@ module.exports = function (app) {
         if (!code) return res.redirect('/');
 
         try {
-            // 🟢 تثبيت استخدام https صراحة بدلاً من req.protocol
             const redirectUri = `https://${req.get('host')}/auth/discord/callback`;
             const params = new URLSearchParams({
                 client_id: process.env.DISCORD_CLIENT_ID || '1506005273893146775',
