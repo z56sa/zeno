@@ -10,13 +10,14 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --bg-main: #090a0f;
-            --bg-gradient: radial-gradient(circle at top center, #131525 0%, #090a0f 70%);
-            --bg-card: #131622;
-            --bg-card-hover: #1a1e2f;
-            --accent: #6366f1;
-            --accent-hover: #4f46e5;
-            --text-main: #f8fafc;
+            --bg-main: #07090e;
+            --bg-gradient: radial-gradient(circle at top center, #111425 0%, #07090e 70%);
+            --bg-card: #0f1322;
+            --bg-card-hover: #171c30;
+            --accent: #5865F2;
+            --accent-hover: #4752c4;
+            --gold-accent: #f59e0b;
+            --text-main: #ffffff;
             --text-muted: #94a3b8;
             --border: #1e2235;
         }
@@ -44,7 +45,7 @@
             justify-content: space-between;
             align-items: center;
             padding: 20px 50px;
-            background: rgba(9, 10, 15, 0.8);
+            background: rgba(7, 9, 14, 0.85);
             backdrop-filter: blur(15px);
             border-bottom: 1px solid var(--border);
             position: sticky;
@@ -56,17 +57,22 @@
         .nav-left {
             display: flex;
             align-items: center;
-            gap: 25px;
+            gap: 20px;
         }
 
         .logo {
             display: flex;
             align-items: center;
             gap: 10px;
-            font-size: 1.4rem;
+            font-size: 1.5rem;
             font-weight: 900;
             color: var(--text-main);
             text-decoration: none;
+        }
+
+        .logo span {
+            color: var(--accent);
+            text-shadow: 0 0 15px rgba(88, 101, 242, 0.4);
         }
 
         .logo i {
@@ -78,6 +84,7 @@
             display: flex;
             list-style: none;
             gap: 20px;
+            margin-right: 20px;
         }
 
         .nav-links a {
@@ -95,36 +102,36 @@
             color: var(--text-main);
         }
 
-        /* Real User Profile */
-        .user-profile {
+        /* User Profile / Login Button Style */
+        .auth-btn {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
             text-decoration: none;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            padding: 6px 16px 6px 6px;
-            border-radius: 40px;
+            background: rgba(88, 101, 242, 0.1);
+            border: 1px solid rgba(88, 101, 242, 0.3);
+            padding: 6px 18px 6px 8px;
+            border-radius: 30px;
             transition: 0.2s;
             cursor: pointer;
         }
 
-        .user-profile:hover {
+        .auth-btn:hover {
+            background: rgba(88, 101, 242, 0.2);
             border-color: var(--accent);
-            background: var(--bg-card-hover);
         }
 
-        .user-profile img {
-            width: 38px;
-            height: 38px;
+        .auth-btn img {
+            width: 34px;
+            height: 34px;
             border-radius: 50%;
             object-fit: cover;
         }
 
-        .user-profile span {
+        .auth-btn span {
             color: var(--text-main);
             font-weight: 700;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
         }
 
         /* Hero Section */
@@ -135,7 +142,7 @@
 
         .badge {
             background: rgba(245, 158, 11, 0.1);
-            color: #f59e0b;
+            color: var(--gold-accent);
             padding: 6px 18px;
             border-radius: 20px;
             font-size: 0.85rem;
@@ -153,7 +160,8 @@
         }
 
         .hero h1 span {
-            color: #f59e0b;
+            color: var(--gold-accent);
+            text-shadow: 0 0 20px rgba(245, 158, 11, 0.3);
         }
 
         .hero p {
@@ -172,7 +180,7 @@
         }
 
         .btn {
-            padding: 14px 30px;
+            padding: 14px 28px;
             border-radius: 12px;
             font-weight: 700;
             font-size: 0.95rem;
@@ -187,7 +195,7 @@
         .btn-primary {
             background: var(--accent);
             color: var(--text-main);
-            box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4);
+            box-shadow: 0 4px 20px rgba(88, 101, 242, 0.4);
         }
 
         .btn-primary:hover {
@@ -203,10 +211,11 @@
 
         .btn-secondary:hover {
             background: var(--bg-card-hover);
+            border-color: var(--accent);
             transform: translateY(-2px);
         }
 
-        /* Stats Cards - Real-time Live */
+        /* Stats Cards */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -227,7 +236,7 @@
 
         .stat-card:hover {
             transform: translateY(-4px);
-            border-color: rgba(99, 102, 241, 0.5);
+            border-color: rgba(88, 101, 242, 0.5);
         }
 
         .stat-card .value {
@@ -242,7 +251,7 @@
         }
 
         .stat-card .value.blue {
-            color: #6366f1;
+            color: var(--accent);
         }
 
         .stat-card .label {
@@ -303,7 +312,7 @@
         .feature-icon {
             width: 52px;
             height: 52px;
-            background: rgba(99, 102, 241, 0.12);
+            background: rgba(88, 101, 242, 0.12);
             color: var(--accent);
             border-radius: 14px;
             display: flex;
@@ -365,10 +374,10 @@
             </ul>
         </div>
         <div class="nav-left">
-            <!-- زر تسجيل الدخول بحساب دسكورد (يتحول تلقائياً لاسم المستخدم إذا سجل دخول) -->
-            <a href="/auth/discord" class="user-profile" id="userProfileLink">
+            <!-- زر تسجيل الدخول أو بروفايل المستخدم الديناميكي -->
+            <a href="/auth/discord" class="auth-btn" id="userProfileLink">
+                <img id="userAvatar" src="https://cdn.discordapp.com/embed/avatars/0.png" alt="Avatar">
                 <span id="userName">تسجيل الدخول</span>
-                <img id="userAvatar" src="https://cdn.discordapp.com/embed/avatars/0.png" alt="User Avatar">
             </a>
         </div>
     </header>
@@ -379,20 +388,21 @@
         <h1>اصنع مجتمعاً متكاملاً مع <span>ZENO</span></h1>
         <p>نظام سحابي ذكي وشامل يوفر لسيرفرك تذاكر دعم فني فورية مع تقييمات، جدار حماية صارم Anti-Nuke، عملة Star Coin
             ومتاجر افتراضية، ورومات صوتية تفاعلية.</p>
+
         <div class="cta-buttons">
-            <!-- زر دعوة البوت للسيرفر -->
+            <!-- زر دعوة البوت -->
             <a href="https://discord.com/api/oauth2/authorize?client_id=1506005273893146775&permissions=8&scope=bot%20applications.commands"
                 target="_blank" class="btn btn-primary">
                 <i class="fa-brands fa-discord"></i> دعوة البوت لسيرفرك
             </a>
-            <!-- زر لوحة التحكم (لتعديل إعدادات البوت والتحكم) -->
+            <!-- زر لوحة التحكم -->
             <a href="/dashboard" class="btn btn-secondary" id="dashboardBtn">
                 <i class="fa-solid fa-gear"></i> لوحة التحكم
             </a>
         </div>
     </section>
 
-    <!-- Stats Cards - Real-time / Live Data -->
+    <!-- Stats Cards -->
     <div class="stats-grid">
         <div class="stat-card">
             <div class="value green" id="statSecurity">100%</div>
@@ -400,7 +410,7 @@
         </div>
         <div class="stat-card">
             <div class="value blue" id="statPing">--ms</div>
-            <div class="label"><i class="fa-solid fa-bolt"></i> استجابة البث الحية (فورياً)</div>
+            <div class="label"><i class="fa-solid fa-bolt"></i> استجابة البث الحية</div>
         </div>
         <div class="stat-card">
             <div class="value" id="statMembers">...</div>
@@ -458,7 +468,6 @@
             try {
                 const response = await fetch('/api/stats');
                 const data = await response.json();
-
                 if (data) {
                     document.getElementById('statPing').innerText = (data.ping || '24') + 'ms';
                     document.getElementById('statMembers').innerText = data.totalMembers || '1';
@@ -474,7 +483,6 @@
 
         async function fetchUserData() {
             const profileLink = document.getElementById('userProfileLink');
-
             try {
                 const res = await fetch('/api/user');
                 const user = await res.json();
@@ -483,11 +491,9 @@
                     if (user.avatar) {
                         document.getElementById('userAvatar').src = `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`;
                     }
-                    // إذا كان مسجل دخول، زر البروفيسور ينقله للوحة التحكم مباشرة
                     profileLink.href = '/dashboard';
                 } else {
                     document.getElementById('userName').innerText = 'تسجيل الدخول';
-                    // إذا لم يسجل دخول، زر البروفيسور يفتح صفحة المصادقة
                     profileLink.href = '/auth/discord';
                 }
             } catch (e) {
