@@ -4,11 +4,10 @@ const canvasUtil = require('../../utils/canvas');
 
 // دالة مساعدة لضمان جلب بيانات المستخدم حتى لو اختلفت التسمية في ملف الـ database
 const fetchUserData = (userId, guildId) => {
-    if (typeof db.getUser === 'function') return db.getUser(userId, guildId);
-    if (typeof db.getUserData === 'function') return db.getUserData(userId, guildId);
-    if (typeof db.findUser === 'function') return db.findUser(userId, guildId);
-    // قيمة افتراضية في حال لم تتوفر أي دالة معروفة لمنع توقف البوت
-    return { credits: 0, wallpaper_url: null };
+  if (typeof db.getUser === 'function') return db.getUser(userId, guildId);
+  if (typeof db.getUserData === 'function') return db.getUserData(userId, guildId);
+  if (typeof db.findUser === 'function') return db.findUser(userId, guildId);
+  return { credits: 0, wallpaper_url: null };
 };
 
 module.exports = {
@@ -37,22 +36,23 @@ module.exports = {
 
     // 1. حالة التحويل إذا تم إدخال العضو والمبلغ
     if (targetUser && amount) {
+      await interaction.deferReply({ flags: 6 }); // منع انتهاء المهلة عبر استجابة مؤقتة فورية
+
       const sender = interaction.user;
 
       if (targetUser.id === sender.id) {
-        return interaction.reply({ content: '❌ | لا يمكنك تحويل العملات لنفسك!', ephemeral: true });
+        return interaction.editReply({ content: '❌ | لا يمكنك تحويل العملات لنفسك!' });
       }
       if (targetUser.bot) {
-        return interaction.reply({ content: '❌ | لا يمكنك تحويل العملات للبوتات!', ephemeral: true });
+        return interaction.editReply({ content: '❌ | لا يمكنك تحويل العملات للبوتات!' });
       }
 
       const senderData = fetchUserData(sender.id, guildId);
       const senderBalance = Number(senderData.credits || 0);
 
       if (senderBalance < amount) {
-        return interaction.reply({
-          content: `:warning: | **${sender.username}**, رصيدك غير كافي! رصيدك الحالي هو **${senderBalance.toLocaleString()}** ⭐ Star Coin.`,
-          ephemeral: true
+        return interaction.editReply({
+          content: `:warning: | **${sender.username}**, رصيدك غير كافي! رصيدك الحالي هو **${senderBalance.toLocaleString()}** ⭐ Star Coin.`
         });
       }
 
@@ -73,14 +73,10 @@ module.exports = {
 
       const row = new ActionRowBuilder().addComponents(confirmBtn, cancelBtn);
 
-      const reply = await interaction.reply({
+      const replyMessage = await interaction.editReply({
         content: `🤔 | **${sender.username}**, هل أنت متأكد من رغبتك في تحويل **${amount.toLocaleString()}** ⭐ Star Coin إلى <@${targetUser.id}>؟\n*(الضريبة: ${tax.toLocaleString()} ⭐ - سيستلم العضو: ${finalAmount.toLocaleString()} ⭐)*`,
-        components: [row],
-        withResponse: true // استبدال fetchReply لتجنب تحذير ديسكورد
+        components: [row]
       });
-
-      // التعامل مع الـ reply object بحسب إصدار d.js الجديد
-      const replyMessage = reply.resource?.message || reply;
 
       const collector = replyMessage.createMessageComponentCollector({
         componentType: ComponentType.Button,
@@ -90,15 +86,14 @@ module.exports = {
 
       collector.on('collect', async i => {
         if (i.customId === 'confirm_pay') {
-          // إعادة التحقق من الرصيد
           const curSender = fetchUserData(sender.id, guildId);
           if (Number(curSender.credits || 0) < amount) {
             return i.update({ content: '❌ | حدث خطأ! رصيدك لم يعد كافياً.', components: [] });
           }
 
           if (typeof db.addCredits === 'function') {
-              db.addCredits(sender.id, guildId, -amount);
-              db.addCredits(targetUser.id, guildId, finalAmount);
+            db.addCredits(sender.id, guildId, -amount);
+            db.addCredits(targetUser.id, guildId, finalAmount);
           }
 
           await i.update({
@@ -112,7 +107,7 @@ module.exports = {
 
       collector.on('end', async (collected, reason) => {
         if (reason === 'time' && collected.size === 0) {
-          await interaction.editReply({ content: '⏱️ | انتهت مهلة تأكيد التحويل وتم إلغاء العملية.', components: [] }).catch(() => {});
+          await interaction.editReply({ content: '⏱️ | انتهت مهلة تأكيد التحويل وتم إلغاء العملية.', components: [] }).catch(() => { });
         }
       });
       return;
@@ -122,11 +117,11 @@ module.exports = {
     await interaction.deferReply();
     const userToQuery = targetUser || interaction.user;
     const userData = fetchUserData(userToQuery.id, guildId);
-    
+
     if (typeof db.getWallpaper === 'function') {
-        userData.wallpaper_url = db.getWallpaper(userToQuery.id) || userData.wallpaper_url;
+      userData.wallpaper_url = db.getWallpaper(userToQuery.id) || userData.wallpaper_url;
     }
-    
+
     const balance = Number(userData.credits || 0);
     const formattedBal = balance >= 999999999999999 ? '∞ (غير محدود)' : balance.toLocaleString();
 
@@ -154,7 +149,6 @@ module.exports = {
     const guildId = message.guild.id;
     const sender = message.author;
 
-    // 1. فحص إذا كان هناك تحويل
     let recipient = message.mentions.users.first();
     let amount = null;
 
@@ -173,7 +167,6 @@ module.exports = {
       }
     }
 
-    // إذا وُجد مستلم ومبلغ -> تنفيذ تحويل بأسلوب برو بوت
     if (recipient && amount) {
       if (recipient.id === sender.id) {
         return message.reply({ content: '❌ | لا يمكنك تحويل العملات لنفسك!' });
@@ -227,8 +220,8 @@ module.exports = {
           }
 
           if (typeof db.addCredits === 'function') {
-              db.addCredits(sender.id, guildId, -amount);
-              db.addCredits(recipient.id, guildId, finalAmount);
+            db.addCredits(sender.id, guildId, -amount);
+            db.addCredits(recipient.id, guildId, finalAmount);
           }
 
           await i.update({
@@ -242,22 +235,21 @@ module.exports = {
 
       collector.on('end', async (collected, reason) => {
         if (reason === 'time' && collected.size === 0) {
-          await promptMsg.edit({ content: '⏱️ | انتهت مهلة تأكيد التحويل وتم إلغاء العملية.', components: [] }).catch(() => {});
+          await promptMsg.edit({ content: '⏱️ | انتهت مهلة تأكيد التحويل وتم إلغاء العملية.', components: [] }).catch(() => { });
         }
       });
       return;
     }
 
-    // 2. حالة الاستعلام عن الرصيد وبطاقة البروفايل
     const userToQuery = message.mentions.users.first() ||
-                        (args[0] && !parseInt(args[0]) ? await message.client.users.fetch(args[0]).catch(() => null) : null) ||
-                        sender;
+      (args[0] && !parseInt(args[0]) ? await message.client.users.fetch(args[0]).catch(() => null) : null) ||
+      sender;
 
     const userData = fetchUserData(userToQuery.id, guildId);
     if (typeof db.getWallpaper === 'function') {
-        userData.wallpaper_url = db.getWallpaper(userToQuery.id) || userData.wallpaper_url;
+      userData.wallpaper_url = db.getWallpaper(userToQuery.id) || userData.wallpaper_url;
     }
-    
+
     const balance = Number(userData.credits || 0);
     const formattedBal = balance >= 999999999999999 ? '∞ (غير محدود)' : balance.toLocaleString();
 
