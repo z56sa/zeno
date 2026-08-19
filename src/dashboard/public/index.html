@@ -20,7 +20,7 @@
 <body class="min-h-screen flex flex-col justify-between selection:bg-indigo-500 selection:text-white overflow-x-hidden">
 
     <!-- الهيدر (Navbar) -->
-    <header class="flex items-center justify-between px-8 py-6 max-w-7xl mx-auto w-full">
+    <header class="flex items-center justify-between px-8 py-6 max-w-7xl mx-auto w-full relative">
 
         <!-- اليسار: زر تسجيل الدخول بحساب ديسكورد -->
         <div class="flex items-center gap-4">
@@ -34,20 +34,56 @@
             </a>
         </div>
 
-        <!-- المنتصف: القوائم (تم إزالة بريميوم) -->
+        <!-- المنتصف: القوائم (المميزات، المصادر، سيرفر الدعم) مع تفعيل المنيو المنسدل -->
         <nav class="hidden md:flex items-center gap-8 text-sm text-gray-300 font-medium">
-            <a href="#" class="hover:text-indigo-400 transition flex items-center gap-1">
-                <span>المميزات</span>
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                </svg>
-            </a>
-            <a href="#" class="hover:text-indigo-400 transition flex items-center gap-1">
-                <span>المصادر</span>
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                </svg>
-            </a>
+
+            <!-- قائمة المميزات -->
+            <div class="relative group">
+                <button class="hover:text-indigo-400 transition flex items-center gap-1 py-2 focus:outline-none">
+                    <span>المميزات</span>
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </button>
+                <div
+                    class="absolute top-full right-0 w-48 bg-[#131825] border border-gray-800 rounded-xl shadow-xl py-2 hidden group-hover:block z-50">
+                    <a href="/dashboard"
+                        class="block px-4 py-2 text-xs text-gray-300 hover:bg-indigo-600/20 hover:text-indigo-400 transition">نظام
+                        التذاكر</a>
+                    <a href="/dashboard"
+                        class="block px-4 py-2 text-xs text-gray-300 hover:bg-indigo-600/20 hover:text-indigo-400 transition">رسائل
+                        الإيمبد</a>
+                    <a href="/dashboard"
+                        class="block px-4 py-2 text-xs text-gray-300 hover:bg-indigo-600/20 hover:text-indigo-400 transition">الإشراف
+                        والحماية</a>
+                </div>
+            </div>
+
+            <!-- قائمة المصادر -->
+            <div class="relative group">
+                <button class="hover:text-indigo-400 transition flex items-center gap-1 py-2 focus:outline-none">
+                    <span>المصادر</span>
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </button>
+                <div
+                    class="absolute top-full right-0 w-48 bg-[#131825] border border-gray-800 rounded-xl shadow-xl py-2 hidden group-hover:block z-50">
+                    <a href="https://discord.gg/uxqQDtbVMz" target="_blank"
+                        class="block px-4 py-2 text-xs text-gray-300 hover:bg-indigo-600/20 hover:text-indigo-400 transition">سيرفر
+                        الدعم الفني</a>
+                    <a href="#"
+                        class="block px-4 py-2 text-xs text-gray-300 hover:bg-indigo-600/20 hover:text-indigo-400 transition">شروط
+                        الاستخدام</a>
+                    <a href="#"
+                        class="block px-4 py-2 text-xs text-gray-300 hover:bg-indigo-600/20 hover:text-indigo-400 transition">سياسة
+                        الخصوصية</a>
+                </div>
+            </div>
+
+            <!-- رابط سيرفر الدعم المباشر -->
+            <a href="https://discord.gg/uxqQDtbVMz" target="_blank" class="hover:text-indigo-400 transition">سيرفر
+                الدعم</a>
         </nav>
 
         <!-- اليمين: شعار ZENO -->
@@ -63,7 +99,7 @@
     <main class="flex-1 flex flex-col items-center justify-center text-center px-4 py-16">
         <div
             class="inline-block bg-indigo-500/10 text-indigo-400 text-xs font-semibold px-4 py-1.5 rounded-full mb-8 border border-indigo-500/20">
-            جديد: نظام التذاكر المطور
+            ✨ جديد: نظام التذاكر المطور
         </div>
 
         <h1 class="text-4xl md:text-6xl font-black tracking-tight mb-6 max-w-3xl leading-tight">
@@ -81,14 +117,20 @@
                 class="px-8 py-3.5 rounded-xl bg-gray-800 hover:bg-gray-700 transition font-bold border border-gray-700/50 text-sm shadow-md">
                 لوحة التحكم
             </a>
-            <a href="https://discord.com/oauth2/authorize..." target="_blank"
+            <!-- زر إضافة البوت -->
+            <a href="https://discord.com/oauth2/authorize?client_id=YOUR_CLIENT_ID&scope=bot&permissions=8"
+                target="_blank"
                 class="px-8 py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 transition font-bold shadow-xl shadow-indigo-600/30 text-sm">
                 إضافة البوت في Discord
             </a>
         </div>
     </main>
 
-    <footer class="py-6 text-center text-gray-600 text-xs"></footer>
+    <!-- الفوتر -->
+    <footer class="py-6 text-center text-gray-500 text-xs border-t border-gray-800/40">
+        جميع الحقوق محفوظة © ZENO BOT 2026 - <a href="https://discord.gg/uxqQDtbVMz" target="_blank"
+            class="text-indigo-400 hover:underline">سيرفر الدعم</a>
+    </footer>
 
 </body>
 
