@@ -28,8 +28,8 @@ const pgPool = new Pool({
 // 4. إعداد الجلسات (Sessions) لتخزينها في قاعدة البيانات بدلاً من الذاكرة العشوائية
 app.use(session({
     store: new pgSession({
-        pool: pgPool,                           // استخدام الـ pool المعرف أعلاه
-        tableName: 'session',        // اسم الجدول الذي سيتم إنشاؤه تلقائياً في قاعدة البيانات
+        pool: pgPool,                         // استخدام الـ pool المعرف أعلاه
+        tableName: 'session',       // اسم الجدول الذي سيتم إنشاؤه تلقائياً في قاعدة البيانات
         createTableIfMissing: true   // إنشاء الجدول تلقائياً إذا لم يكن موجوداً
     }),
     secret: process.env.SESSION_SECRET || 'zeno_secret_key_change_this',
@@ -46,7 +46,7 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// 1. مسار توجيه المستخدم لتسجيل الدخول بـ Discord
+// 1. مسار توجيه المستخدم لتسجيل الدخول بـ Discord (تمت إضافة scope guilds لجلب السيرفرات)
 app.get('/auth/discord', (req, res) => {
     const CLIENT_ID = process.env.CLIENT_ID;
     if (!CLIENT_ID) {
@@ -54,7 +54,7 @@ app.get('/auth/discord', (req, res) => {
     }
 
     const REDIRECT_URI = encodeURIComponent("https://zeno-production-b6d7.up.railway.app/auth/discord/callback");
-    const discordAuthUrl = `https://discord.com/api/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=code&scope=identify`;
+    const discordAuthUrl = `https://discord.com/api/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=code&scope=identify%20guilds`;
 
     res.redirect(discordAuthUrl);
 });
@@ -74,7 +74,6 @@ app.get('/auth/discord/callback', async (req, res) => {
             url: 'https://discord.com/api/oauth2/token',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
-                // إرسال البيانات بطريقة المصادقة الأساسية (Authentication Basic)
                 'Authorization': `Basic ${Buffer.from(`${process.env.CLIENT_ID}:${process.env.CLIENT_SECRET}`).toString('base64')}`
             },
             data: new URLSearchParams({
@@ -107,13 +106,13 @@ app.get('/logout', (req, res) => {
     });
 });
 
-// مسار لوحة التحكم
+// مسار لوحة التحكم (يحمي الصفحة ويتأكد من تسجيل الدخول)
 app.get('/dashboard', (req, res) => {
     if (!req.session || !req.session.user) {
         return res.redirect('/auth/discord');
     }
 
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+    res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
 });
 
 module.exports = app;
