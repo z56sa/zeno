@@ -1,17 +1,112 @@
 // ==========================================
-// FILE: src/dashboard/server.js (ZENO Purple Theme)
+// FILE: src/dashboard/server.js
 // ==========================================
 const session = require('express-session');
+const pgSession = require('connect-pg-simple')(session);
+const { Pool } = require('pg');
+
+// إعداد الاتصال بقاعدة البيانات للجلسات
+const pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: process.env.DATABASE_URL && !process.env.DATABASE_URL.includes('localhost')
+        ? { rejectUnauthorized: false }
+        : false
+});
 
 module.exports = function (app) {
+    // إعداد الجلسات في PostgreSQL لحل تحذير MemoryStore
     app.use(session({
+        store: new pgSession({
+            pool: pool,
+            tableName: 'user_sessions',
+            createTableIfMissing: true
+        }),
         secret: process.env.SESSION_SECRET || 'zeno_secret_key',
         resave: false,
         saveUninitialized: false,
-        cookie: { maxAge: 86400000 }
+        cookie: { maxAge: 86400000 } // 24 ساعة
     }));
 
-    // 1. رابط الدخول بـ Discord
+    // 1. الصفحة الرئيسية (Landing Page - /)
+    app.get('/', (req, res) => {
+        const isLoggedIn = req.session && req.session.user;
+
+        res.send(`
+        <!DOCTYPE html>
+        <html lang="ar" dir="rtl" class="dark">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>ZENO - بوت ديسكورد احترافي</title>
+            <script src="https://cdn.tailwindcss.com"></script>
+            <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@500;700;800;900&display=swap" rel="stylesheet">
+            <style>
+                html, body {
+                    background-color: #08080a !important;
+                    color: #ffffff !important;
+                    font-family: 'Cairo', sans-serif;
+                }
+                .purple-glow {
+                    background: radial-gradient(circle at 50% 20%, rgba(168, 85, 247, 0.12), transparent 60%);
+                }
+            </style>
+        </head>
+        <body class="min-h-screen flex flex-col justify-between purple-glow">
+            <!-- Navbar -->
+            <header class="bg-[#0b0b10]/90 border-b border-[#1c1c28] sticky top-0 z-50 backdrop-blur-xl">
+                <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+                    <a href="/" class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-purple-700 via-purple-500 to-violet-400 flex items-center justify-center font-black text-white text-xl shadow-lg shadow-purple-600/30">Z</div>
+                        <span class="text-xl font-black tracking-[0.25em] text-white">Z E N O</span>
+                    </a>
+                    <div>
+                        ${isLoggedIn ? `
+                            <a href="/dashboard" class="px-5 py-2.5 bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-500 hover:to-violet-500 text-white rounded-xl text-xs font-bold transition shadow-lg shadow-purple-600/20">
+                                لوحة التحكم
+                            </a>
+                        ` : `
+                            <a href="/auth/discord" class="px-5 py-2.5 bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-500 hover:to-violet-500 text-white rounded-xl text-xs font-bold transition shadow-lg shadow-purple-600/20 flex items-center gap-2">
+                                <span>تسجيل الدخول</span>
+                            </a>
+                        `}
+                    </div>
+                </div>
+            </header>
+
+            <!-- Hero Section -->
+            <main class="max-w-4xl mx-auto px-6 py-20 text-center flex-1 flex flex-col items-center justify-center">
+                <div class="inline-block bg-purple-500/10 border border-purple-500/20 px-4 py-1.5 rounded-full text-xs font-bold text-purple-300 mb-6">
+                    ✨ جديد: لوحة تحكم متطورة لإدارة سيرفرك
+                </div>
+                
+                <h1 class="text-4xl md:text-6xl font-black text-white leading-tight mb-6">
+                    اصنع خادم ديسكورد <span class="bg-gradient-to-r from-purple-400 to-violet-500 bg-clip-text text-transparent">احترافي!</span>
+                </h1>
+                
+                <p class="text-gray-400 text-sm md:text-base leading-relaxed max-w-2xl mb-8">
+                    بوت متعدد الأغراض قابل للتخصيص بالكامل لتوفير نظام التذاكر، الإشراف، الترحيب وأوامر إدارية متقدمة.
+                </p>
+
+                <div class="flex flex-wrap items-center justify-center gap-4">
+                    <a href="https://discord.com/api/oauth2/authorize?client_id=${process.env.DISCORD_CLIENT_ID || '1506005273893146775'}&permissions=8&scope=bot%20applications.commands" target="_blank" class="px-7 py-3.5 bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-500 hover:to-violet-500 text-white font-bold rounded-xl text-sm transition-all shadow-xl shadow-purple-600/25 hover:scale-105 active:scale-95">
+                        إضافة البوت في Discord
+                    </a>
+                    <a href="/dashboard" class="px-7 py-3.5 bg-[#111118] hover:bg-[#181824] text-white border border-[#222232] font-bold rounded-xl text-sm transition-all hover:scale-105 active:scale-95">
+                        لوحة التحكم
+                    </a>
+                </div>
+            </main>
+
+            <!-- Footer -->
+            <footer class="border-t border-[#1c1c28] bg-[#070709] py-6 text-center text-[#71717a] text-xs">
+                جميع الحقوق محفوظة © ZENO BOT 2026
+            </footer>
+        </body>
+        </html>
+        `);
+    });
+
+    // 2. توجيه تسجيل الدخول بـ Discord
     app.get('/auth/discord', (req, res) => {
         const clientId = process.env.DISCORD_CLIENT_ID || '1506005273893146775';
         const redirectUri = encodeURIComponent(`${req.protocol}://${req.get('host')}/auth/discord/callback`);
@@ -20,7 +115,7 @@ module.exports = function (app) {
         res.redirect(`https://discord.com/api/oauth2/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}`);
     });
 
-    // 2. استقبال بيانات ديسكورد
+    // 3. استقبال العودة من OAuth2
     app.get('/auth/discord/callback', async (req, res) => {
         const code = req.query.code;
         if (!code) return res.redirect('/');
@@ -67,7 +162,7 @@ module.exports = function (app) {
         }
     });
 
-    // 3. الصفحة الرئيسية للوحة التحكم بهوية ZENO
+    // 4. صفحة لوحة التحكم (/dashboard)
     app.get('/dashboard', (req, res) => {
         if (!req.session || !req.session.user) {
             return res.redirect('/auth/discord');
@@ -88,7 +183,7 @@ module.exports = function (app) {
                 : `https://cdn.discordapp.com/embed/avatars/0.png`;
 
             return `
-            <div data-name="${guild.name}" class="server-card bg-[#111118] hover:bg-[#161622] border border-[#222232] hover:border-[#a855f7]/60 transition-all duration-300 rounded-2xl p-4 flex items-center justify-between shadow-lg hover:shadow-purple-900/20">
+            <div data-name="${guild.name}" class="server-card bg-[#111118] hover:bg-[#161622] border border-[#222232] hover:border-[#a855f7]/60 transition-all duration-300 rounded-2xl p-4 flex items-center justify-between shadow-lg">
                 <div class="flex items-center gap-4">
                     <img src="${guildIcon}" alt="${guild.name}" class="w-14 h-14 rounded-2xl object-cover border border-[#2d2d42] shrink-0">
                     <div>
@@ -96,7 +191,7 @@ module.exports = function (app) {
                         <span class="inline-block text-[11px] text-[#a1a1aa] font-semibold mt-0.5">مسؤول (Admin)</span>
                     </div>
                 </div>
-                <a href="/dashboard/${guild.id}" class="px-5 py-2.5 bg-gradient-to-r from-purple-600 via-purple-500 to-violet-600 hover:from-purple-500 hover:to-violet-500 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-purple-600/20 hover:scale-105 active:scale-95 shrink-0">
+                <a href="/dashboard/${guild.id}" class="px-5 py-2.5 bg-gradient-to-r from-purple-600 to-violet-600 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-purple-600/20 hover:scale-105 shrink-0">
                     تحديد
                 </a>
             </div>
@@ -117,62 +212,42 @@ module.exports = function (app) {
             <script src="https://cdn.tailwindcss.com"></script>
             <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@500;700;800;900&display=swap" rel="stylesheet">
             <style>
-                html, body {
-                    background-color: #08080a !important;
-                    color: #ffffff !important;
-                    font-family: 'Cairo', sans-serif;
-                }
-                .purple-glow {
-                    background: radial-gradient(circle at 50% -20%, rgba(168, 85, 247, 0.15), transparent 70%);
-                }
-                ::-webkit-scrollbar { width: 6px; }
-                ::-webkit-scrollbar-track { background: #08080a; }
-                ::-webkit-scrollbar-thumb { background: #222232; border-radius: 10px; }
-                ::-webkit-scrollbar-thumb:hover { background: #a855f7; }
+                html, body { background-color: #08080a !important; color: #ffffff !important; font-family: 'Cairo', sans-serif; }
+                .purple-glow { background: radial-gradient(circle at 50% -20%, rgba(168, 85, 247, 0.15), transparent 70%); }
             </style>
         </head>
         <body class="min-h-screen flex flex-col justify-between purple-glow">
-
-            <!-- Navbar Menu -->
             <header class="bg-[#0b0b10]/90 border-b border-[#1c1c28] sticky top-0 z-50 backdrop-blur-xl">
                 <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-                    <a href="/" class="flex items-center gap-3 group">
-                        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-purple-700 via-purple-500 to-violet-400 flex items-center justify-center font-black text-white text-xl shadow-lg shadow-purple-600/30 group-hover:scale-105 transition-transform">Z</div>
-                        <span class="text-xl font-black tracking-[0.25em] text-white group-hover:text-purple-300 transition-colors">Z E N O</span>
+                    <a href="/" class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-purple-700 via-purple-500 to-violet-400 flex items-center justify-center font-black text-white text-xl shadow-lg shadow-purple-600/30">Z</div>
+                        <span class="text-xl font-black tracking-[0.25em] text-white">Z E N O</span>
                     </a>
-
                     <div class="flex items-center gap-4">
                         <div class="flex items-center gap-3 bg-[#13131c] border border-[#222232] px-3.5 py-1.5 rounded-xl">
                             <img src="${avatarUrl}" class="w-8 h-8 rounded-lg object-cover border border-purple-500/30">
                             <span class="text-xs font-bold text-white hidden sm:inline">${user.username}</span>
                         </div>
-
-                        <a href="/logout" class="px-3.5 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 rounded-xl text-xs font-bold transition">
-                            خروج
-                        </a>
+                        <a href="/logout" class="px-3.5 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 rounded-xl text-xs font-bold transition">خروج</a>
                     </div>
                 </div>
             </header>
 
-            <!-- Main Content -->
             <main class="max-w-7xl mx-auto w-full px-6 py-10 flex-1">
                 <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 border-b border-[#1c1c28] pb-6">
                     <div>
-                        <h1 class="text-2xl font-black text-white tracking-wide">سيرفراتي</h1>
+                        <h1 class="text-2xl font-black text-white">سيرفراتي</h1>
                         <p class="text-xs text-[#a1a1aa] mt-1">اختر السيرفر الذي ترغب بإدارته للتحكم بالتذاكر والأوامر</p>
                     </div>
-
                     <div class="w-full md:w-72">
-                        <input type="text" id="searchInput" onkeyup="filterServers()" placeholder="بحث عن سيرفر..." class="w-full bg-[#111118] border border-[#222232] focus:border-purple-500 rounded-xl px-4 py-2.5 text-xs text-white placeholder-gray-500 focus:outline-none transition shadow-inner">
+                        <input type="text" id="searchInput" onkeyup="filterServers()" placeholder="بحث عن سيرفر..." class="w-full bg-[#111118] border border-[#222232] focus:border-purple-500 rounded-xl px-4 py-2.5 text-xs text-white placeholder-gray-500 focus:outline-none transition">
                     </div>
                 </div>
-
                 <div id="serversGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     ${guildsHtml}
                 </div>
             </main>
 
-            <!-- Footer -->
             <footer class="border-t border-[#1c1c28] bg-[#070709] py-6 text-center text-[#71717a] text-xs">
                 ZENO BOT © 2026 - جميع الحقوق محفوظة
             </footer>
@@ -187,37 +262,6 @@ module.exports = function (app) {
                     });
                 }
             </script>
-        </body>
-        </html>
-        `);
-    });
-
-    // 4. صفحة الإدارة داخل السيرفر
-    app.get('/dashboard/:guildId', (req, res) => {
-        if (!req.session || !req.session.user) return res.redirect('/auth/discord');
-        const guildId = req.params.guildId;
-
-        res.send(`
-        <!DOCTYPE html>
-        <html lang="ar" dir="rtl" class="dark">
-        <head>
-            <meta charset="UTF-8">
-            <title>إدارة السيرفر - ZENO</title>
-            <script src="https://cdn.tailwindcss.com"></script>
-            <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;800;900&display=swap" rel="stylesheet">
-            <style>
-                body { background-color: #08080a !important; color: #fff !important; font-family: 'Cairo', sans-serif; }
-            </style>
-        </head>
-        <body class="min-h-screen flex items-center justify-center p-6">
-            <div class="max-w-md w-full bg-[#111118] border border-[#222232] p-8 rounded-2xl text-center shadow-2xl">
-                <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-purple-700 to-violet-500 mx-auto flex items-center justify-center font-black text-white text-2xl mb-4 shadow-lg shadow-purple-600/30">Z</div>
-                <h1 class="text-xl font-black mb-2 text-white">إدارة السيرفر (${guildId})</h1>
-                <p class="text-xs text-[#a1a1aa] mb-6">جاري جلب إعدادات السيرفر وقاعدة البيانات...</p>
-                <a href="/dashboard" class="inline-block px-5 py-2.5 bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-500 hover:to-violet-500 text-white rounded-xl text-xs font-bold transition shadow-md">
-                    العودة للقائمة
-                </a>
-            </div>
         </body>
         </html>
         `);
