@@ -1,0 +1,197 @@
+/* ========================================================= */
+/* 💎 ZENO Style Sheet - تصميم احترافي لـ Dashboard / Landing Page */
+/* ملاحظة: يفضل استخدام خط عربي مُحمل من Google Fonts مثل 'Cairo' أو 'Tajawal' */
+/* ========================================================= */
+
+/* --- إعدادات الألوان الأساسية والمتغيرات (CSS Variables) --- */
+:root {
+    --primary-bg-color: #121212; /* خلفية داكنة جداً */
+    --secondary-text: #ccc;     /* نص ثانوي فاتح */
+    --main-text: #ffffff;       /* النص الأساسي أبيض ناصع */
+    --accent-cyan: #00bcd4;     /* لون التمييز الرئيسي (Cyan) */
+    --primary-blue: #2196F3;    /* الأزرق الأساسي للأزرار الرئيسية */
+    --secondary-border: #4a90e2; /* أزرق ثانوي للتمييز */
+}
+
+/* إعادة تعيين أساسية وتحديد اتجاه النص (RTL) */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Cairo', sans-serif; /* يجب تحميل هذا الخط في <head> */
+}
+
+body {
+    background-color: var(--primary-bg-color);
+    color: var(--secondary-text);
+    direction: rtl; /* تحديد الاتجاه من اليمين لليسار */
+    line-height: 1.6;
+}
+
+/* =================================== */
+/* 🌐 شريط التنقل (Navbar) */
+/* =================================== */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 40px;
+    background-color: rgba(20, 20, 20, 0.9); /* خلفية شفافة شبه داكنة */
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+.logo {
+    font-size: 1.8rem;
+    font-weight: 900; /* ثقيل جداً */
+    color: var(--accent-cyan); /* لون التمييز للـ Logo */
+}
+
+nav a {
+    color: white;
+    text-decoration: none;
+    margin-left: 30px;
+    font-size: 1rem;
+    transition: color 0.3s ease;
+}
+
+nav a:hover {
+    color: var(--accent-cyan);
+}
+
+/* تخصيص زر تسجيل الدخول في الـ Navbar */
+.btn-login {
+    background-color: transparent;
+    border: 2px solid var(--secondary-border);
+    color: white;
+    padding: 8px 20px;
+    cursor: pointer;
+    border-radius: 10px;
+    transition: background-color 0.3s ease, all 0.3s ease;
+}
+
+.btn-login:hover {
+    background-color: var(--secondary-blue);
+    box-shadow: 0 4px 8px rgba(74, 144, 226, 0.5);
+}
+
+
+/* =================================== */
+/* ✨ القسم الرئيسي (Hero Section) - مركز التركيز */
+/* =================================== */
+
+.hero-container {
+    padding: 100px 20px; /* زيادة المساحات العمودية لمنح الإحساس بالفخامة */
+    text-align: center;
+}
+
+.content-wrapper {
+    max-width: 900px; /* تحديد عرض المحتوى لسهولة القراءة على الشاشات الكبيرة */
+    margin: 0 auto;
+    padding: 60px 40px;
+    /* تأثير بصري لجعل المحتوى يبرز من الخلفية الداكنة العامة */
+    background: rgba(30, 30, 50, 0.7); /* خلفية زرقاء داكنة شبه شفافة */
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+}
+
+h1 {
+    font-size: clamp(2rem, 5vw, 3.8rem); /* تغيير حجم الخط حسب الشاشة */
+    margin-bottom: 20px;
+    line-height: 1.4;
+    color: var(--main-text);
+}
+
+/* تخصيص لون اسم البوت (المطلب الرئيسي) */
+.bot-name {
+    color: #00e676; /* أخضر نيون ساطع ومُتباين جداً */
+    font-weight: 900;
+    text-shadow: 0 0 15px rgba(0, 230, 118, 0.4); /* تأثير توهج إضافي لزيادة التأثير */
+}
+
+.description {
+    font-size: clamp(1rem, 2vw, 1.3rem); /* حجم خط مناسب للمحتوى الطويل */
+    color: var(--secondary-text);
+    margin-bottom: 50px;
+    max-width: 700px;
+    margin-right: auto;
+    margin-left: auto;
+}
+
+
+/* =================================== */
+/* 🚀 الأزرار (CTA Buttons) - التحسين البصري */
+/* =================================== */
+
+.cta-group {
+    display: flex;
+    justify-content: center;
+    gap: 25px; /* المسافة بين الزرين */
+}
+
+/* التصميم الأساسي لكل الأزرار */
+button {
+    padding: 15px 40px; /* زيادة حجم الأزرار قليلاً */
+    border: none;
+    cursor: pointer;
+    font-size: 1.1rem;
+    font-weight: bold;
+    transition: all 0.3s ease; /* الانتقال السلس عند التفاعل */
+    /* الحواف المستديرة والظلال لإعطاء عمق */
+    border-radius: 12px; 
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+/* الزر الأساسي (Primary Button - الإجراء الأهم) */
+.primary-btn {
+    background-color: var(--primary-blue); /* اللون الأزرق المعتمد في الـ variables */
+    color: white;
+    box-shadow: 0 6px 20px rgba(33, 150, 243, 0.7); /* ظل أكثر قوة */
+}
+
+/* تفاعل الزر الأساسي (Hover State) */
+.primary-btn:hover {
+    background-color: #1976d2; /* أغمق قليلاً عند التمرير */
+    transform: translateY(-3px) scale(1.05); /* رفع وزيادة بسيطة في الحجم لإحساس "الضغط" */
+    box-shadow: 0 10px 30px rgba(33, 150, 243, 0.8);
+}
+
+/* الزر الثانوي (Secondary Button - الإجراء البديل) */
+.secondary-btn {
+    background-color: transparent; /* بدون خلفية صلبة */
+    border: 2px solid var(--secondary-border);
+    color: #4a90e2;
+    box-shadow: none; /* لا ظلال لتمييزه عن الأساسي */
+}
+
+/* تفاعل الزر الثانوي (Hover State) */
+.secondary-btn:hover {
+    background-color: rgba(74, 144, 226, 0.15); /* خلفية فاتحة جداً عند التمرير */
+    box-shadow: 0 4px 15px rgba(74, 144, 226, 0.3);
+}
+
+/* =================================== */
+/* 🌐 أقسام المحتوى الأخرى (General Layout) */
+/* =================================== */
+.content-section {
+    padding: 80px 20px;
+    text-align: center;
+    background-color: rgba(18, 18, 18, 0.9); /* خلفية داكنة للمحتوى التكميلي */
+}
+
+.content-section h2 {
+    font-size: 2.5rem;
+    margin-bottom: 40px;
+    color: var(--main-text);
+}
+
+
+/* =================================== */
+/* 🦶 الفوتر (Footer) */
+/* =================================== */
+.site-footer {
+    padding: 20px;
+    background-color: #0a0a0a; /* أسود خالص للفصل البصري */
+    text-align: center;
+    border-top: 1px solid rgba(50, 50, 50, 0.5);
+    font-size: 0.9rem;
+}
