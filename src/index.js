@@ -3,7 +3,7 @@
 // ======================================================================
 
 const { Client, GatewayIntentBits, Collection } = require('discord.js');
-const app = require('./dashboard/server'); // استيراد سيرفر الـ Express من نفس مجلد src
+const app = require('./dashboard/server'); // تعديل المسار ليدخل على مجلد dashboard صحيحاً
 
 const PORT = process.env.PORT || 3000;
 
