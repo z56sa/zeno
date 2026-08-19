@@ -72,16 +72,16 @@ app.get('/auth/discord/callback', async (req, res) => {
         const tokenResult = await axios({
             method: 'post',
             url: 'https://discord.com/api/oauth2/token',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                // إرسال البيانات بطريقة المصادقة الأساسية (Authentication Basic)
+                'Authorization': `Basic ${Buffer.from(`${process.env.CLIENT_ID}:${process.env.CLIENT_SECRET}`).toString('base64')}`
+            },
             data: new URLSearchParams({
-                client_id: process.env.CLIENT_ID,
-                client_secret: process.env.CLIENT_SECRET,
                 grant_type: 'authorization_code',
                 code: code,
                 redirect_uri: REDIRECT_URI,
             }).toString(),
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
         });
 
         const accessToken = tokenResult.data.access_token;
