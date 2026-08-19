@@ -1,6 +1,8 @@
 // ==========================================
 // FILE: src/dashboard/server.js
 // ==========================================
+app.use(express.static('public'));
+
 const session = require('express-session');
 const pgSession = require('connect-pg-simple')(session);
 const { Pool } = require('pg');
@@ -13,6 +15,9 @@ const pool = new Pool({
 });
 
 module.exports = function (app) {
+    // 🟢 تفعيل الثقة بالبروكسي لتحديد HTTPS بشكل صحيح على Railway
+    app.set('trust proxy', 1);
+
     app.use(session({
         store: new pgSession({
             pool: pool,
@@ -22,7 +27,10 @@ module.exports = function (app) {
         secret: process.env.SESSION_SECRET || 'zeno_secret_key',
         resave: false,
         saveUninitialized: false,
-        cookie: { maxAge: 86400000 }
+        cookie: {
+            maxAge: 86400000,
+            secure: process.env.NODE_ENV === 'production' // تفعيل الخيار الآمن في البيئة الإنتاجية
+        }
     }));
 
     // 1. الصفحة الرئيسية (Landing Page - /)
@@ -117,11 +125,10 @@ module.exports = function (app) {
 
     // 2. توجيه تسجيل الدخول بـ Discord
     app.get('/auth/discord', (req, res) => {
-        const clientId = process.env.DISCORD_CLIENT_ID || '1506005273893146775';
-        const redirectUri = encodeURIComponent(`${req.protocol}://${req.get('host')}/auth/discord/callback`);
-        const scope = encodeURIComponent('identify guilds');
-
-        res.redirect(`https://discord.com/api/oauth2/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}`);
+        // 🟢 تثبيت استخدام https صراحة بدلاً من req.protocol
+        const redirectUri = encodeURIComponent(`https://${req.get('host')}/auth/discord/callback`);
+        const clientId = process.env.DISCORD_CLIENT_ID || process.env.CLIENT_ID || '1506005273893146775';
+        res.redirect(`https://discord.com/oauth2/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=identify%20guilds`);
     });
 
     // 3. استقبال العودة من OAuth2
@@ -130,7 +137,8 @@ module.exports = function (app) {
         if (!code) return res.redirect('/');
 
         try {
-            const redirectUri = `${req.protocol}://${req.get('host')}/auth/discord/callback`;
+            // 🟢 تثبيت استخدام https صراحة بدلاً من req.protocol
+            const redirectUri = `https://${req.get('host')}/auth/discord/callback`;
             const params = new URLSearchParams({
                 client_id: process.env.DISCORD_CLIENT_ID || '1506005273893146775',
                 client_secret: process.env.DISCORD_CLIENT_SECRET,
