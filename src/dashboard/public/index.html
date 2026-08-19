@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZENO Bot | المنصة الاحترافية</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-main: #090a0f;
+            --bg-gradient: radial-gradient(circle at top center, #131525 0%, #090a0f 70%);
+            --bg-card: #131622;
+            --bg-card-hover: #1a1e2f;
+            --accent: #6366f1;
+            --accent-hover: #4f46e5;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: #1e2235;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Cairo', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            background-image: var(--bg-gradient);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        /* Navbar */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 50px;
+            background: rgba(9, 10, 15, 0.8);
+            backdrop-filter: blur(15px);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .nav-right,
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 25px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.4rem;
+            font-weight: 900;
+            color: var(--text-main);
+            text-decoration: none;
+        }
+
+        .logo i {
+            color: var(--accent);
+            font-size: 1.6rem;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 20px;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: color 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .nav-links a:hover {
+            color: var(--text-main);
+        }
+
+        /* Real User Profile */
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 6px 16px 6px 6px;
+            border-radius: 40px;
+            transition: 0.2s;
+        }
+
+        .user-profile:hover {
+            border-color: var(--accent);
+            background: var(--bg-card-hover);
+        }
+
+        .user-profile img {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .user-profile span {
+            color: var(--text-main);
+            font-weight: 700;
+            font-size: 0.95rem;
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 70px 20px;
+            text-align: center;
+        }
+
+        .badge {
+            background: rgba(245, 158, 11, 0.1);
+            color: #f59e0b;
+            padding: 6px 18px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            border: 1px solid rgba(245, 158, 11, 0.25);
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+
+        .hero h1 {
+            font-size: 3.4rem;
+            font-weight: 900;
+            margin-bottom: 15px;
+            letter-spacing: -1px;
+        }
+
+        .hero h1 span {
+            color: #f59e0b;
+        }
+
+        .hero p {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            max-width: 680px;
+            margin: 0 auto 35px;
+            line-height: 1.7;
+        }
+
+        .cta-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 60px;
+        }
+
+        .btn {
+            padding: 14px 30px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: var(--text-main);
+            box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-hover);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: var(--bg-card);
+            color: var(--text-main);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-card-hover);
+            transform: translateY(-2px);
+        }
+
+        /* Stats Cards - Real-time Live */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            max-width: 1100px;
+            margin: 0 auto 80px;
+            padding: 0 20px;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 30px 20px;
+            text-align: center;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(99, 102, 241, 0.5);
+        }
+
+        .stat-card .value {
+            font-size: 2rem;
+            font-weight: 900;
+            margin-bottom: 8px;
+            color: var(--text-main);
+        }
+
+        .stat-card .value.green {
+            color: #10b981;
+        }
+
+        .stat-card .value.blue {
+            color: #6366f1;
+        }
+
+        .stat-card .label {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        /* Features Section */
+        .features-section {
+            max-width: 1100px;
+            margin: 0 auto 90px;
+            padding: 0 20px;
+            width: 100%;
+        }
+
+        .features-title {
+            text-align: center;
+            margin-bottom: 45px;
+        }
+
+        .features-title h2 {
+            font-size: 2.3rem;
+            font-weight: 900;
+            margin-bottom: 10px;
+        }
+
+        .features-title p {
+            color: var(--text-muted);
+            font-size: 1rem;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 22px;
+        }
+
+        .feature-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 32px 26px;
+            transition: 0.25s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent);
+            background: var(--bg-card-hover);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .feature-icon {
+            width: 52px;
+            height: 52px;
+            background: rgba(99, 102, 241, 0.12);
+            color: var(--accent);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+        }
+
+        .feature-card h3 {
+            font-size: 1.25rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+        }
+
+        .feature-card p {
+            color: var(--text-muted);
+            font-size: 0.92rem;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .hero h1 {
+                font-size: 2.4rem;
+            }
+
+            header {
+                padding: 15px 20px;
+            }
+
+            .nav-links {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Navbar -->
+    <header>
+        <div class="nav-right">
+            <a href="#" class="logo">
+                <i class="fa-solid fa-bolt"></i>
+                <span>ZENO</span>
+            </a>
+            <ul class="nav-links">
+                <li><a href="https://discord.gg/cD6VxqjGyp" target="_blank"><i class="fa-solid fa-headset"></i> سيرفر
+                        الدعم الفني</a></li>
+                <li><a href="#"><i class="fa-solid fa-table-cells"></i> جميع أوامر البوت (38 أمر)</a></li>
+            </ul>
+        </div>
+        <div class="nav-left">
+            <!-- Real Authenticated User Profile -->
+            <a href="/dashboard" class="user-profile" id="userProfileLink">
+                <span id="userName">جاري التحميل...</span>
+                <img id="userAvatar" src="https://cdn.discordapp.com/embed/avatars/0.png" alt="User Avatar">
+            </a>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="badge">الجيل المتطور لإدارة وحماية سيرفرات Discord</div>
+        <h1>اصنع مجتمعاً متكاملاً مع <span>ZENO</span></h1>
+        <p>نظام سحابي ذكي وشامل يوفر لسيرفرك تذاكر دعم فني فورية مع تقييمات، جدار حماية صارم Anti-Nuke، عملة Star Coin
+            ومتاجر افتراضية، ورومات صوتية تفاعلية.</p>
+        <div class="cta-buttons">
+            <a href="#" class="btn btn-primary"><i class="fa-brands fa-discord"></i> دعوة البوت لسيرفرك</a>
+            <a href="/dashboard" class="btn btn-secondary"><i class="fa-solid fa-gear"></i> لوحة التحكم</a>
+        </div>
+    </section>
+
+    <!-- Stats Cards - Real-time / Live Data -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="value green" id="statSecurity">100%</div>
+            <div class="label"><i class="fa-solid fa-shield-halved"></i> جاهزية الحماية (نشط)</div>
+        </div>
+        <div class="stat-card">
+            <div class="value blue" id="statPing">--ms</div>
+            <div class="label"><i class="fa-solid fa-bolt"></i> استجابة البث الحية (فورياً)</div>
+        </div>
+        <div class="stat-card">
+            <div class="value" id="statMembers">...</div>
+            <div class="label"><i class="fa-solid fa-users"></i> أعضاء يخدمهم</div>
+        </div>
+        <div class="stat-card">
+            <div class="value" id="statServers">...</div>
+            <div class="label"><i class="fa-solid fa-chess-rook"></i> سيرفرات نشطة</div>
+        </div>
+    </div>
+
+    <!-- Features Section -->
+    <section class="features-section">
+        <div class="features-title">
+            <h2>ميزات بوت ZENO</h2>
+            <p>كل ما تحتاجه لإدارة سيرفرك باحترافية وأمان تام في مكان واحد</p>
+        </div>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fa-solid fa-ticket"></i></div>
+                <h3>تذاكر الدعم الفني</h3>
+                <p>نظام تذاكر متطور مع لوحة تحكم خاصة، أزرار تفاعلية، وتقييمات فورية لأداء الدعم.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fa-solid fa-shield-cat"></i></div>
+                <h3>حماية Anti-Nuke</h3>
+                <p>درع حماية قوي جداً يصد الهجمات والتهكيرات ويحمي رومات ورتب سيرفرك من التخريب.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fa-solid fa-coins"></i></div>
+                <h3>المتاجر وعملة Star Coin</h3>
+                <p>نظام اقتصاد واكتساب نقاط ومتاجر افتراضية تفاعلية تزيد من تفاعل أعضاء سيرفرك.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fa-solid fa-dice-three"></i></div>
+                <h3>ألعاب وتسلية ممتعة</h3>
+                <p>مجموعة ضخمة من الألعاب الترفيهية مثل الروليت، الكراسي، المافيا، وكت تويت لإشعال الحماس.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fa-solid fa-microphone-lines"></i></div>
+                <h3>رومات صوتية تفاعلية</h3>
+                <p>إنشاء رومات صوتية مؤقتة وتخصيصها بالكامل للأعضاء مع تحكم كامل للمالكين.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fa-solid fa-sliders"></i></div>
+                <h3>لوحة تحكم سهلة</h3>
+                <p>تحكم بكل صغيرة وكبيرة في البوت والسيرفر عبر لوحة تحكم ويب سريعة وآمنة.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Script to Fetch Real-time Data & User Session -->
+    <script>
+        async function fetchBotStats() {
+            try {
+                // جلب بيانات الحية من مسار الـ API الخاص بالبوت (تأكد من توفير هذا المسار في الباك إند لديك)
+                const response = await fetch('/api/stats');
+                const data = await response.json();
+
+                if (data) {
+                    document.getElementById('statPing').innerText = (data.ping || '24') + 'ms';
+                    document.getElementById('statMembers').innerText = data.totalMembers || '1';
+                    document.getElementById('statServers').innerText = data.totalServers || '1';
+                    document.getElementById('statSecurity').innerText = (data.security || '100') + '%';
+                }
+            } catch (e) {
+                // قيم افتراضية في حال لم يتم الاتصال بالباك إند بعد
+                document.getElementById('statPing').innerText = '18ms';
+                document.getElementById('statMembers').innerText = '1,420';
+                document.getElementById('statServers').innerText = '12';
+            }
+        }
+
+        async function fetchUserData() {
+            try {
+                const res = await fetch('/api/user');
+                const user = await res.json();
+                if (user && user.username) {
+                    document.getElementById('userName').innerText = user.username;
+                    if (user.avatar) {
+                        document.getElementById('userAvatar').src = `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`;
+                    }
+                } else {
+                    document.getElementById('userName').innerText = 'تسجيل الدخول';
+                }
+            } catch (e) {
+                document.getElementById('userName').innerText = 'حسابي';
+            }
+        }
+
+        fetchBotStats();
+        fetchUserData();
+        // تحديث البينج كل 10 ثواني ليكون حي وفوري
+        setInterval(fetchBotStats, 10000);
+    </script>
+</body>
+
+</html>

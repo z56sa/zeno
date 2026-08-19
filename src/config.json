@@ -1,0 +1,32 @@
+{
+  "defaultPrefix": "#",
+  "colors": {
+    "primary": "#5865F2",
+    "success": "#57F287",
+    "warning": "#FEE75C",
+    "danger": "#ED4245",
+    "info": "#00B0F4",
+    "ticket": "#5865F2",
+    "welcome": "#EB459E"
+  },
+  "emojis": {
+    "success": "✅",
+    "error": "❌",
+    "warning": "⚠️",
+    "shield": "🛡️",
+    "ticket": "🎫",
+    "coin": "🪙",
+    "rank": "🏆",
+    "loading": "⏳",
+    "lock": "🔒",
+    "unlock": "🔓"
+  },
+  "economy": {
+    "dailyAmount": 1000,
+    "dailyCooldownMs": 86400000,
+    "transferTaxRate": 0.05,
+    "xpPerMessage": 15,
+    "xpCooldownMs": 60000
+  },
+  "supportServer": "https://discord.gg/cD6VxqjGyp"
+}

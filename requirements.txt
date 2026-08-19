@@ -1,0 +1,15 @@
+# Dependencies for a multi-module Discord Bot (Python)
+
+# Core Bot Library (Using discord.py as primary example)
+discord==2.0.0 
+
+# Environment variable handling
+python-dotenv>=1.0.0
+
+# Database ORM/Connector
+SQLAlchemy>=2.0.0
+
+# General HTTP requests library
+requests
+
+# Note: For JavaScript components, 'npm install' commands are used with package.json.
