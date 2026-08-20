@@ -40,14 +40,10 @@ module.exports = function (app) {
                 <style>
                     body { background-color: #0b0c10; color: #ffffff; font-family: 'Cairo', sans-serif; overflow-x: hidden; }
                     .glow-bg {
-                        position: absolute;
-                        width: 600px;
-                        height: 600px;
+                        position: absolute; width: 600px; height: 600px;
                         background: radial-gradient(circle, rgba(168, 85, 247, 0.12) 0%, rgba(11, 12, 16, 0) 70%);
-                        z-index: 0;
-                        pointer-events: none;
+                        z-index: 0; pointer-events: none;
                     }
-                    .dropdown:hover .dropdown-menu { display: block; }
                 </style>
             </head>
             <body class="min-h-screen flex flex-col relative overflow-hidden">
@@ -75,15 +71,12 @@ module.exports = function (app) {
 
                 <main class="flex-1 flex flex-col items-center justify-center px-4 text-center pb-24 z-10 mt-12">
                     <span class="bg-purple-600/10 border border-purple-500/30 text-purple-300 px-5 py-2 rounded-full text-xs font-extrabold mb-8 shadow-inner tracking-wide">✨ لوحة تحكم متطورة بتصميم استثنائي</span>
-                    
                     <h1 class="text-4xl md:text-6xl font-black mb-6 leading-tight tracking-tight">
                         إدارة خادم ديسكورد الخاص بك <br> <span class="bg-gradient-to-r from-purple-400 via-indigo-300 to-purple-600 bg-clip-text text-transparent">بأعلى احترافية وسهولة!</span>
                     </h1>
-                    
                     <p class="text-gray-400 mb-10 max-w-xl mx-auto leading-relaxed text-sm md:text-base font-medium">
                         تحكم بكافة ميزات البوت، أنظمة التذاكر، الإشراف، والتنبيهات عبر لوحة تحكم تفاعلية وسريعة.
                     </p>
-                    
                     <div class="flex flex-col sm:flex-row gap-4 items-center justify-center w-full sm:w-auto">
                         <a href="/dashboard" class="px-8 py-3.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 rounded-2xl font-bold transition text-white shadow-xl shadow-purple-600/30 w-full sm:w-auto text-sm">لوحة التحكم</a>
                         <a href="/auth/discord" class="px-8 py-3.5 bg-[#13141b] hover:bg-[#1a1b24] border border-purple-500/20 rounded-2xl font-bold transition flex items-center justify-center gap-2 w-full sm:w-auto text-sm text-gray-200">تسجيل الدخول بـ Discord</a>
@@ -137,7 +130,7 @@ module.exports = function (app) {
     });
 
     // ==========================================
-    // لوحة التحكم لاختيار السيرفر (بتصميم غني واحترافي)
+    // لوحة التحكم لاختيار السيرفر
     // ==========================================
     app.get('/dashboard', (req, res) => {
         try {
@@ -177,31 +170,17 @@ module.exports = function (app) {
                 <title>اختر السيرفر | ZENO DASHBOARD</title>
                 <script src="https://cdn.tailwindcss.com"></script>
                 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
-                <style>
-                    body { background-color: #0b0c10; color: #d1d5db; font-family: 'Cairo', sans-serif; overflow-x: hidden; }
-                    .glow-main {
-                        position: absolute; width: 500px; height: 500px;
-                        background: radial-gradient(circle, rgba(147, 51, 234, 0.08) 0%, rgba(0,0,0,0) 70%);
-                        z-index: 0; pointer-events: none;
-                    }
-                </style>
+                <style>body { background-color: #0b0c10; color: #d1d5db; font-family: 'Cairo', sans-serif; }</style>
             </head>
             <body class="min-h-screen flex flex-col relative">
-                <div class="glow-main top-0 right-1/4"></div>
-
-                <!-- الهيدر الاحترافي على غرار ProBot -->
                 <header class="w-full px-6 md:px-16 py-4 border-b border-purple-900/20 backdrop-blur-xl bg-[#0b0c10]/90 sticky top-0 z-50 flex items-center justify-between shadow-lg">
-                    
-                    <!-- اليسار: زر الرئيسية ومعلومات الحساب الشخصي -->
                     <div class="flex items-center gap-4 z-10">
                         <a href="/" class="px-4 py-2 bg-[#13141b] hover:bg-[#1a1b24] text-gray-300 hover:text-white rounded-xl border border-purple-500/20 text-xs font-bold transition shadow">الرئيسية</a>
-                        <div class="flex items-center gap-3 bg-[#13141b] px-3.5 py-1.5 rounded-2xl border border-purple-500/25 shadow-inner">
+                        <div class="flex items-center gap-3.5 bg-[#13141b] px-3.5 py-1.5 rounded-2xl border border-purple-500/25 shadow-inner">
                             <span class="text-xs font-bold text-white hidden sm:inline">${user.username}</span>
                             <img src="${userAvatar}" class="w-8 h-8 rounded-full border border-purple-500/40 object-cover shadow">
                         </div>
                     </div>
-
-                    <!-- اليمين: عنوان لوحة التحكم وشعار البوت -->
                     <div class="flex items-center gap-3.5 z-10">
                         <div class="text-left">
                             <h1 class="font-black text-sm text-white tracking-wide">ZENO DASHBOARD</h1>
@@ -209,19 +188,14 @@ module.exports = function (app) {
                         </div>
                         <div class="w-10 h-10 bg-gradient-to-tr from-purple-700 to-indigo-500 rounded-xl flex items-center justify-center shadow-lg shadow-purple-600/30 text-white font-black text-xl border border-purple-400/40">Z</div>
                     </div>
-
                 </header>
-
                 <main class="flex-1 px-6 md:px-16 py-14 z-10 max-w-7xl mx-auto w-full">
                     <div class="mb-12 text-center">
                         <span class="px-4 py-1.5 bg-purple-600/10 text-purple-300 rounded-full text-xs font-bold border border-purple-500/20 mb-3 inline-block">خوادمك المتاحة</span>
                         <h2 class="text-3xl md:text-4xl font-black text-white tracking-tight">اختر السيرفر للبدء</h2>
                         <p class="text-gray-400 mt-2 text-sm font-medium">قم باختيار الخادم الذي تود التحكم بإعداداته وتخصيص ميزاته بالكامل.</p>
                     </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        ${guildsHtml}
-                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">${guildsHtml}</div>
                 </main>
             </body>
             </html>
@@ -232,7 +206,7 @@ module.exports = function (app) {
     });
 
     // ==========================================
-    // صفحة إدارة السيرفر الداخلية (بشكل غني وتفاعلي ممتلئ بالميزات)
+    // صفحة إدارة السيرفر الداخلية (تصميم ProBoot الحقيقي: القائمة الجانبية يمين، المحتوى يسار)
     // ==========================================
     app.get('/dashboard/:guildId', (req, res) => {
         try {
@@ -264,22 +238,9 @@ module.exports = function (app) {
             </head>
             <body class="min-h-screen flex flex-col bg-[#0b0c10] text-gray-200">
                 
-                <!-- هيدر الإدارة الداخلية -->
+                <!-- الهيدر العلوي تماماً مثل ProBoot -->
                 <header class="w-full px-6 py-4 border-b border-purple-900/20 bg-[#13141b]/90 backdrop-blur-md sticky top-0 z-50 flex items-center justify-between shadow-lg">
-                    <!-- اليمين: زر العودة للخوادم واسم السيرفر الحالي -->
-                    <div class="flex items-center gap-3.5 z-10">
-                        <a href="/dashboard" class="flex items-center gap-2 px-3 py-1.5 bg-[#0b0c10] hover:bg-[#1a1b24] text-gray-300 rounded-xl border border-purple-500/20 text-xs font-bold transition shadow">
-                            <svg class="w-4 h-4 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-                            <span>الخوادم</span>
-                        </a>
-                        <span class="text-purple-900 font-bold">/</span>
-                        <div class="flex items-center gap-2 bg-[#0b0c10]/80 px-3 py-1 rounded-xl border border-purple-500/15">
-                            <img src="${guildIcon}" class="w-6 h-6 rounded-lg object-cover">
-                            <span class="text-xs font-extrabold text-white truncate max-w-[140px]">${guild.name}</span>
-                        </div>
-                    </div>
-
-                    <!-- اليسار: معلومات الحساب وبوت ZENO -->
+                    <!-- جهة اليسار في النافبار: معلومات المستخدم وبوت ZENO -->
                     <div class="flex items-center gap-3 z-10">
                         <div class="flex items-center gap-2 bg-[#0b0c10] px-3.5 py-1.5 rounded-2xl border border-purple-500/20 shadow-inner">
                             <span class="text-xs font-bold text-white hidden sm:inline">ZENO DASHBOARD</span>
@@ -287,65 +248,106 @@ module.exports = function (app) {
                         </div>
                         <img src="${userAvatar}" class="w-9 h-9 rounded-full border border-purple-500/30 object-cover shadow">
                     </div>
+
+                    <!-- جهة اليمين في النافبار: زر العودة للخوادم واسم السيرفر الحالي -->
+                    <div class="flex items-center gap-3.5 z-10">
+                        <div class="flex items-center gap-2 bg-[#0b0c10]/80 px-3.5 py-1.5 rounded-xl border border-purple-500/15">
+                            <img src="${guildIcon}" class="w-6 h-6 rounded-lg object-cover">
+                            <span class="text-xs font-extrabold text-white truncate max-w-[140px]">${guild.name}</span>
+                        </div>
+                        <span class="text-purple-900 font-bold">/</span>
+                        <a href="/dashboard" class="flex items-center gap-2 px-3.5 py-1.5 bg-[#13141b] hover:bg-[#1a1b24] text-gray-300 hover:text-white rounded-xl border border-purple-500/20 text-xs font-bold transition shadow">
+                            <span>الخوادم</span>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                        </a>
+                    </div>
                 </header>
 
-                <div class="flex-1 flex flex-col lg:flex-row">
+                <div class="flex-1 flex flex-col lg:flex-row-reverse">
                     
-                    <!-- المحتوى الرئيسي -->
-                    <main class="flex-1 p-6 md:p-10 z-10 max-w-6xl">
+                    <!-- الشريط الجانبي (Sidebar) أصبح في اليمين تماماً مثل ProBoot -->
+                    <aside class="w-full lg:w-72 bg-[#101116] border-b lg:border-b-0 lg:border-r border-purple-900/15 p-5 flex flex-col gap-2 text-xs shrink-0">
+                        <div class="text-[10px] text-gray-500 font-extrabold uppercase tracking-wider px-3 mb-1">الرئيسية</div>
+                        <a href="#" class="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-purple-600/15 text-purple-300 font-bold border border-purple-500/20 shadow-sm">
+                            <span class="w-2 h-2 rounded-full bg-emerald-400 shadow-md shadow-emerald-400"></span>
+                            <span>⚡ نظرة عامة</span>
+                        </a>
+
+                        <div class="text-[10px] text-gray-500 font-extrabold uppercase tracking-wider px-3 mt-4 mb-1">الإدارة والميزات</div>
+                        <a href="#" class="flex items-center justify-end gap-2 px-3.5 py-2.5 rounded-xl text-gray-400 hover:text-white hover:bg-[#161720] transition font-medium text-right">
+                            <span>نظام التذاكر</span>
+                            <span>🎫</span>
+                        </a>
+                        <a href="#" class="flex items-center justify-end gap-2 px-3.5 py-2.5 rounded-xl text-gray-400 hover:text-white hover:bg-[#161720] transition font-medium text-right">
+                            <span>رسائل الترحيب</span>
+                            <span>👋</span>
+                        </a>
+                        <a href="#" class="flex items-center justify-end gap-2 px-3.5 py-2.5 rounded-xl text-gray-400 hover:text-white hover:bg-[#161720] transition font-medium text-right">
+                            <span>الحماية والأمان</span>
+                            <span>🛡️</span>
+                        </a>
+                        <a href="#" class="flex items-center justify-end gap-2 px-3.5 py-2.5 rounded-xl text-gray-400 hover:text-white hover:bg-[#161720] transition font-medium text-right">
+                            <span>السجلات والأخشاب (Logs)</span>
+                            <span>📊</span>
+                        </a>
+                    </aside>
+
+                    <!-- المحتوى الرئيسي أصبح في اليسار -->
+                    <main class="flex-1 p-6 md:p-10 z-10 max-w-6xl text-right">
                         
-                        <!-- شريط البحث السريع والترحيب بالسيرفر -->
-                        <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-10 bg-gradient-to-r from-[#13141b] to-[#101116] border border-purple-500/15 p-6 rounded-3xl shadow-xl relative overflow-hidden">
-                            <div class="absolute top-0 right-0 w-48 h-48 bg-purple-600/10 rounded-full blur-3xl pointer-events-none"></div>
+                        <!-- بانر العنوان العلوى للوحة الإعدادات -->
+                        <div class="flex flex-col md:flex-row-reverse items-start md:items-center justify-between gap-4 mb-10 bg-gradient-to-l from-[#13141b] to-[#101116] border border-purple-500/15 p-6 rounded-3xl shadow-xl relative overflow-hidden">
+                            <div class="absolute top-0 left-0 w-48 h-48 bg-purple-600/10 rounded-full blur-3xl pointer-events-none"></div>
                             <div>
-                                <h2 class="text-xl font-black text-white flex items-center gap-2">
-                                    <span>⚙️ لوحة إعدادات الخادم</span>
+                                <h2 class="text-xl font-black text-white flex items-center justify-end gap-2">
+                                    <span>لوحة إعدادات الخادم</span>
+                                    <span>⚙️</span>
                                 </h2>
                                 <p class="text-gray-400 text-xs mt-1 font-medium">تحكم في إعدادات التذاكر، الحماية، السجلات، والعديد من الخصائص المتقدمة.</p>
                             </div>
                             <div class="w-full md:w-72">
-                                <input type="text" placeholder="ابحث عن ميزة أو إعداد..." class="w-full bg-[#0b0c10] border border-purple-500/20 focus:border-purple-500 rounded-2xl px-4 py-3 text-xs text-gray-200 outline-none transition shadow-inner">
+                                <input type="text" placeholder="ابحث عن ميزة أو إعداد..." class="w-full bg-[#0b0c10] border border-purple-500/20 focus:border-purple-500 rounded-2xl px-4 py-3 text-xs text-gray-200 outline-none transition shadow-inner text-right">
                             </div>
                         </div>
 
-                        <!-- قسم الوصول السريع (Fast Access) -->
+                        <!-- أقسام التحكم السريع -->
                         <div class="mb-12">
                             <div class="flex items-center justify-between mb-4">
-                                <h3 class="text-xs font-extrabold text-purple-400 uppercase tracking-widest">أقسام التحكم السريع</h3>
                                 <span class="text-[11px] text-gray-500 font-bold">كل الوحدات مفعلة</span>
+                                <h3 class="text-xs font-extrabold text-purple-400 uppercase tracking-widest">أقسام التحكم السريع</h3>
                             </div>
 
                             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                                <!-- بطاقة 1: نظرة عامة -->
-                                <div class="bg-[#13141b] border border-purple-500/15 hover:border-purple-500/40 rounded-2xl p-5 flex flex-col justify-between transition-all group shadow-lg hover:shadow-purple-600/10">
+                                <!-- بطاقة 1 -->
+                                <div class="bg-[#13141b] border border-purple-500/15 hover:border-purple-500/40 rounded-2xl p-5 flex flex-col justify-between transition-all group shadow-lg">
                                     <div>
                                         <div class="flex items-center justify-between mb-3">
-                                            <h4 class="font-bold text-white text-sm">نظرة عامة</h4>
                                             <span class="p-2 bg-purple-600/10 rounded-xl text-purple-400 group-hover:scale-110 transition-transform">👁️</span>
+                                            <h4 class="font-bold text-white text-sm">نظرة عامة</h4>
                                         </div>
                                         <p class="text-gray-400 text-[11px] mb-6 leading-relaxed font-medium">عرض احصائيات سريعة عن السيرفر وحالة البوت والنشاط العام.</p>
                                     </div>
                                     <button class="w-full py-2.5 bg-[#1a1b24] hover:bg-purple-600 hover:text-white text-gray-300 rounded-xl font-bold text-xs transition border border-purple-500/10 shadow-sm">إدارة القسم</button>
                                 </div>
 
-                                <!-- بطاقة 2: نظام التذاكر -->
-                                <div class="bg-[#13141b] border border-purple-500/15 hover:border-purple-500/40 rounded-2xl p-5 flex flex-col justify-between transition-all group shadow-lg hover:shadow-purple-600/10">
+                                <!-- بطاقة 2 -->
+                                <div class="bg-[#13141b] border border-purple-500/15 hover:border-purple-500/40 rounded-2xl p-5 flex flex-col justify-between transition-all group shadow-lg">
                                     <div>
                                         <div class="flex items-center justify-between mb-3">
-                                            <h4 class="font-bold text-white text-sm">نظام التذاكر</h4>
                                             <span class="p-2 bg-indigo-600/10 rounded-xl text-indigo-400 group-hover:scale-110 transition-transform">🎫</span>
+                                            <h4 class="font-bold text-white text-sm">نظام التذاكر</h4>
                                         </div>
                                         <p class="text-gray-400 text-[11px] mb-6 leading-relaxed font-medium">تخصيص رسالة التذاكر، أزرار الفتح، ورتب الدعم الفني المسؤولة.</p>
                                     </div>
                                     <button class="w-full py-2.5 bg-[#1a1b24] hover:bg-indigo-600 hover:text-white text-gray-300 rounded-xl font-bold text-xs transition border border-purple-500/10 shadow-sm">تعديل التذاكر</button>
                                 </div>
 
-                                <!-- بطاقة 3: الترحيب والحماية -->
-                                <div class="bg-[#13141b] border border-purple-500/15 hover:border-purple-500/40 rounded-2xl p-5 flex flex-col justify-between transition-all group shadow-lg hover:shadow-purple-600/10">
+                                <!-- بطاقة 3 -->
+                                <div class="bg-[#13141b] border border-purple-500/15 hover:border-purple-500/40 rounded-2xl p-5 flex flex-col justify-between transition-all group shadow-lg">
                                     <div>
                                         <div class="flex items-center justify-between mb-3">
-                                            <h4 class="font-bold text-white text-sm">الترحيب والإشراف</h4>
                                             <span class="p-2 bg-emerald-600/10 rounded-xl text-emerald-400 group-hover:scale-110 transition-transform">🛡️</span>
+                                            <h4 class="font-bold text-white text-sm">الترحيب والإشراف</h4>
                                         </div>
                                         <p class="text-gray-400 text-[11px] mb-6 leading-relaxed font-medium">ضبط رسائل الترحيب للأعضاء الجدد وإعدادات الحماية التلقائية.</p>
                                     </div>
@@ -355,29 +357,6 @@ module.exports = function (app) {
                         </div>
 
                     </main>
-
-                    <!-- الشريط الجانبي (Sidebar) لإدارة الميزات -->
-                    <aside class="w-full lg:w-72 bg-[#101116] border-t lg:border-t-0 lg:border-r border-purple-900/15 p-5 flex flex-col gap-2 text-xs">
-                        <div class="text-[10px] text-gray-500 font-extrabold uppercase tracking-wider px-3 mb-1">الرئيسية</div>
-                        <a href="#" class="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-purple-600/15 text-purple-300 font-bold border border-purple-500/20 shadow-sm">
-                            <span class="flex items-center gap-2">⚡ نظرة عامة</span>
-                            <span class="w-2 h-2 rounded-full bg-emerald-400 shadow-md shadow-emerald-400"></span>
-                        </a>
-
-                        <div class="text-[10px] text-gray-500 font-extrabold uppercase tracking-wider px-3 mt-4 mb-1">الإدارة والميزات</div>
-                        <a href="#" class="flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-gray-400 hover:text-white hover:bg-[#161720] transition font-medium">
-                            <span>🎫 نظام التذاكر</span>
-                        </a>
-                        <a href="#" class="flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-gray-400 hover:text-white hover:bg-[#161720] transition font-medium">
-                            <span>👋 رسائل الترحيب</span>
-                        </a>
-                        <a href="#" class="flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-gray-400 hover:text-white hover:bg-[#161720] transition font-medium">
-                            <span>🛡️ الحماية والأمان</span>
-                        </a>
-                        <a href="#" class="flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-gray-400 hover:text-white hover:bg-[#161720] transition font-medium">
-                            <span>📊 السجلات والأخشاب (Logs)</span>
-                        </a>
-                    </aside>
 
                 </div>
             </body>
