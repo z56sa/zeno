@@ -5,14 +5,26 @@ const { getSystemStats } = require('./database');
 
 const app = express();
 
+// عميل بوت الديسكورد
+const client = new Client({
+    intents: [
+        GatewayIntentBits.Guilds,
+        // أضف بقية الـ intents اللي يحتاجها بوتك هنا (Members, MessageContent...الخ)
+    ],
+});
+client.commands = new Collection();
+
+// تسجيل دخول البوت
+client.login(process.env.BOT_TOKEN).catch((err) => {
+    console.error('⚠️ فشل تسجيل دخول البوت:', err.message);
+});
+
 // تم حذف توجيه الـ index.html الثابت لكي يعمل سيرفر الداشبورد الديناميكي بكفاءة
 app.use(express.static('public'));
 
-// استدعاء الداشبورد (وهو اللي بيشغل الصفحة الرئيسية وكل المسارات)
-const dashboardServer = require('./dashboard/server');
-if (typeof dashboardServer === 'function') {
-    dashboardServer(app);
-}
+// تركيب الداشبورد على نفس تطبيق express (وليس استدعاءه ككائن منفصل)
+const mountDashboard = require('./dashboard/server');
+mountDashboard(app, client);
 
 // مسار الإحصائيات
 app.get('/api/stats', async (req, res) => {
@@ -20,10 +32,12 @@ app.get('/api/stats', async (req, res) => {
     res.json({
         status: 'online',
         ping: client.ws?.ping || 0,
-        ...dbStats
+        ...dbStats,
     });
 });
 
 // تشغيل سيرفر الويب
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`🚀 Dashboard server running on port ${PORT}`));
+
+module.exports = { client };
