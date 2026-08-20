@@ -44,14 +44,15 @@ module.exports = async (client) => {
 
   // تسجيل أوامر السلاش في الديسكورد في الخلفية بشكل غير معطل (Background Asynchronous)
   const botToken = (process.env.BOT_TOKEN || process.env.DISCORD_TOKEN || process.env.TOKEN || '').trim();
-  const clientId = (process.env.CLIENT_ID || '').trim();
-  if (botToken && clientId && botToken !== 'YOUR_BOT_TOKEN_HERE') {
-    const rest = new REST({ version: '10' }).setToken(botToken);
-    (async () => {
+  
+  if (botToken && botToken !== 'YOUR_BOT_TOKEN_HERE') {
+    const registerCommands = async (targetClientId) => {
+      if (!targetClientId) return;
+      const rest = new REST({ version: '10' }).setToken(botToken);
       try {
-        logger.info('جاري تسجيل أوامر السلاش (Slash Commands) عالمياً في الخلفية...');
+        logger.info(`جاري تسجيل ${slashCommandsArray.length} أمر سلاش للبوت (${targetClientId})...`);
         const registered = await rest.put(
-          Routes.applicationCommands(clientId),
+          Routes.applicationCommands(targetClientId),
           { body: slashCommandsArray }
         );
         client.slashCommandIds = new Map();
@@ -60,10 +61,19 @@ module.exports = async (client) => {
             client.slashCommandIds.set(cmd.name, cmd.id);
           }
         }
-        logger.success('تم تسجيل وتحديث أوامر السلاش بنجاح!');
-      } catch (error) {
-        logger.error('حدث خطأ أثناء تسجيل أوامر السلاش في الخلفية:', error);
+        logger.info(`[SUCCESS] ✅ تم تسجيل ${registered?.length || slashCommandsArray.length} أمر سلاش بنجاح.`);
+      } catch (err) {
+        logger.error(`حدث خطأ أثناء تسجيل أوامر السلاش: ${err.message}`);
       }
-    })();
+    };
+
+    if (client.user?.id) {
+      registerCommands(client.user.id);
+    } else {
+      client.once('ready', () => {
+        const id = client.user?.id || (process.env.CLIENT_ID || '').trim();
+        registerCommands(id);
+      });
+    }
   }
 };
