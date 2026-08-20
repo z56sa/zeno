@@ -24,6 +24,7 @@
     "@napi-rs/canvas": "^0.1.68",
     "axios": "^1.19.0",
     "better-sqlite3": "^11.8.1",
+    "better-sqlite3-session-store": "^0.1.0",
     "body-parser": "^2.3.0",
     "chalk": "^4.1.2",
     "connect-pg-simple": "^10.0.0",

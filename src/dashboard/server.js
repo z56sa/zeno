@@ -1,11 +1,16 @@
-// ========================================================
-// FILE: src/dashboard/server.js
-// ========================================================
 const express = require('express');
 const session = require('express-session');
+const SqliteStore = require('better-sqlite3-session-store')(session);
+const { db } = require('../database');
 
 module.exports = function (app) {
-    const sessionStore = new session.MemoryStore();
+    const sessionStore = new SqliteStore({
+        client: db,
+        expired: {
+            clear: true,
+            intervalMs: 900000 // 15 دقيقة لتنظيف الجلسات القديمة
+        }
+    });
 
     app.set('trust proxy', 1);
     app.use(express.static('public'));
@@ -16,7 +21,7 @@ module.exports = function (app) {
         resave: false,
         saveUninitialized: false,
         cookie: {
-            maxAge: 86400000,
+            maxAge: 86400000 * 7, // 7 أيام
             secure: false,
             sameSite: 'lax'
         }
