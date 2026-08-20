@@ -427,10 +427,19 @@ module.exports = {
   removeLevelReward,
   addStar,
   getStars,
-  createGiveaway,
-  getGiveaway,
-  getActiveGiveaways,
-  updateGiveawayEntries,
-  endGiveaway,
-  getSystemStats
+  // Compatibility aliases
+  getTopXp: getLeaderboard,
+  getTopCredits: getCoinsLeaderboard,
+  addCredits: addCoins,
+  getUserRank: (userId, guildId) => {
+    const user = getUser(userId, guildId);
+    return { xp: user.xp || 0, level: user.level || 1, rank: 1 };
+  },
+  getWallpaper: (userId) => 'default',
+  setDaily: (userId, guildId, now, amount) => {
+    addCoins(userId, guildId, amount);
+    setLastDaily(userId, guildId, now);
+    const u = getUser(userId, guildId);
+    return u.coins || 0;
+  }
 };

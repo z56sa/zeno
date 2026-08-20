@@ -32,35 +32,36 @@ module.exports = {
   },
 
   async buildEmbed(guild, type) {
-    const embed = new EmbedBuilder().setColor(config.colors.primary).setTimestamp();
+    const embed = new EmbedBuilder().setColor(config.colors?.primary || '#5865F2').setTimestamp();
 
     if (type === 'xp') {
-      const topUsers = db.getTopXp(guild.id, 10);
+      const topUsers = db.getLeaderboard(guild.id, 10);
       embed.setTitle(`🏆 توب المتصدرين في المستويات | ${guild.name}`);
 
-      if (topUsers.length === 0) {
+      if (!topUsers || topUsers.length === 0) {
         embed.setDescription('لا توجد بيانات تفاعل بعد في هذا السيرفر.');
         return embed;
       }
 
       const list = topUsers.map((u, i) => {
         const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `**#${i + 1}**`;
-        return `${medal} <@${u.user_id}> • **المستوى ${u.level}** (${u.xp.toLocaleString()} XP)`;
+        return `${medal} <@${u.user_id}> • **المستوى ${u.level || 1}** (${(u.xp || 0).toLocaleString()} XP)`;
       }).join('\n');
 
       embed.setDescription(list);
     } else {
-      const topUsers = db.getTopCredits(guild.id, 10);
+      const topUsers = db.getCoinsLeaderboard(guild.id, 10);
       embed.setTitle(`💰 توب الأثرياء في الكريدت | ${guild.name}`);
 
-      if (topUsers.length === 0) {
+      if (!topUsers || topUsers.length === 0) {
         embed.setDescription('لا توجد بيانات أرصدة بعد.');
         return embed;
       }
 
       const list = topUsers.map((u, i) => {
         const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `**#${i + 1}**`;
-        return `${medal} <@${u.user_id}> • **${u.credits.toLocaleString()}** كريدت 🪙`;
+        const coins = u.coins || u.credits || 0;
+        return `${medal} <@${u.user_id}> • **${coins.toLocaleString()}** كريدت 🪙`;
       }).join('\n');
 
       embed.setDescription(list);
