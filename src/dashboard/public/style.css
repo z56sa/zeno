@@ -1,162 +1,586 @@
-/* ==========================================
-   FILE: src/dashboard/public/style.css
-   ========================================== */
+/* ============================================================
+   Zeno Dashboard — dashboard.css
+   هوية بصرية: بنفسجي × أسود، خطوط عربية مميزة (Almarai / Tajawal)
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Almarai:wght@400;700;800&family=Tajawal:wght@300;400;500;700&family=JetBrains+Mono:wght@500;700&display=swap');
 
 :root {
-  --bg-main: #0b0f19;
-  --bg-gradient: radial-gradient(circle at top center, #131825 0%, #0b0f19 70%);
-  --bg-card: #131825;
-  --bg-card-hover: #1a2033;
-  --accent: #a855f7;
-  /* تم التعديل للون البنفسجي الخاص بـ ZENO */
-  --accent-hover: #9333ea;
-  --text-main: #f8fafc;
-  --text-muted: #94a3b8;
-  --border: #1e2235;
-  --success: #10b981;
-  --danger: #ef4444;
+  --bg: #09070f;
+  --bg-elevated: #120e21;
+  --bg-card: #17122b;
+  --bg-card-hover: #1d1734;
+  --border: #241d40;
+  --border-light: #322a54;
+
+  --primary: #8b5cf6;
+  --primary-dark: #6d3ff2;
+  --primary-glow: rgba(139, 92, 246, .35);
+  --accent: #c4a6ff;
+
+  --text: #f1eefb;
+  --text-muted: #a79fc4;
+  --text-faint: #6d6489;
+
+  --success: #34d399;
+  --danger: #f87171;
+
+  --radius-lg: 18px;
+  --radius-md: 12px;
+  --radius-sm: 8px;
 }
 
 * {
+  box-sizing: border-box;
+}
+
+html,
+body {
   margin: 0;
   padding: 0;
-  box-sizing: border-box;
-  font-family: 'Cairo', sans-serif;
 }
 
 body {
-  background-color: var(--bg-main);
-  background-image: var(--bg-gradient);
-  color: var(--text-main);
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Tajawal', sans-serif;
+  direction: rtl;
   min-height: 100vh;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* توهج بنفسجي خلفي ثابت — العنصر المميز للتصميم */
+body::before {
+  content: '';
+  position: fixed;
+  top: -20%;
+  right: -10%;
+  width: 60vw;
+  height: 60vw;
+  background: radial-gradient(circle, var(--primary-glow) 0%, transparent 70%);
+  filter: blur(60px);
+  pointer-events: none;
+  z-index: 0;
+  animation: drift 18s ease-in-out infinite alternate;
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  bottom: -25%;
+  left: -15%;
+  width: 50vw;
+  height: 50vw;
+  background: radial-gradient(circle, rgba(109, 63, 242, .22) 0%, transparent 70%);
+  filter: blur(70px);
+  pointer-events: none;
+  z-index: 0;
+  animation: drift 22s ease-in-out infinite alternate-reverse;
+}
+
+@keyframes drift {
+  from {
+    transform: translate(0, 0) scale(1);
+  }
+
+  to {
+    transform: translate(-4%, 4%) scale(1.08);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  body::before,
+  body::after {
+    animation: none;
+  }
+}
+
+.app {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  min-height: 100vh;
+}
+
+/* ============================================================
+   الشريط الجانبي
+   ============================================================ */
+.sidebar {
+  width: 280px;
+  flex-shrink: 0;
+  background: rgba(18, 14, 33, .7);
+  backdrop-filter: blur(20px);
+  border-left: 1px solid var(--border);
+  padding: 22px 18px;
   display: flex;
   flex-direction: column;
-  overflow-x: hidden;
-}
-
-/* Scrollbar Customization */
-::-webkit-scrollbar {
-  width: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: var(--bg-main);
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--border);
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--accent);
-}
-
-/* Navbar */
-header.navbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20px 50px;
-  background: rgba(11, 15, 25, 0.85);
-  backdrop-filter: blur(15px);
-  border-bottom: 1px solid var(--border);
+  gap: 26px;
   position: sticky;
   top: 0;
-  z-index: 1000;
+  height: 100vh;
+  overflow-y: auto;
 }
 
-.logo {
+.brand {
   display: flex;
   align-items: center;
   gap: 12px;
-  font-size: 1.25rem;
-  font-weight: 900;
-  color: var(--text-main);
-  text-decoration: none;
-  letter-spacing: 0.25em;
+  padding: 4px 6px 14px;
+  border-bottom: 1px solid var(--border);
 }
 
-nav {
-  display: flex;
-  gap: 30px;
-  align-items: center;
-}
-
-nav a {
-  text-decoration: none;
-  color: var(--text-muted);
-  font-weight: 600;
-  font-size: 0.95rem;
-  transition: color 0.2s;
-}
-
-nav a:hover {
-  color: var(--text-main);
-}
-
-.btn-login {
-  background: var(--bg-card);
-  color: var(--text-main);
-  border: 1px solid var(--border);
-  padding: 10px 20px;
+.brand-logo {
+  width: 42px;
+  height: 42px;
   border-radius: 12px;
-  font-weight: 700;
-  cursor: pointer;
-  text-decoration: none;
-  transition: 0.2s;
-  display: inline-flex;
+  background: linear-gradient(145deg, var(--primary), var(--primary-dark));
+  display: flex;
   align-items: center;
+  justify-content: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  font-size: 18px;
+  color: #fff;
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, .15), 0 8px 20px -6px var(--primary-glow);
+  position: relative;
+}
+
+.brand-logo::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: -2px;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: var(--success);
+  border: 2px solid var(--bg-elevated);
+  box-shadow: 0 0 8px var(--success);
+}
+
+.brand-name {
+  font-family: 'Almarai', sans-serif;
+  font-weight: 800;
+  font-size: 17px;
+  letter-spacing: .2px;
+}
+
+.brand-status {
+  font-size: 11px;
+  color: var(--success);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.nav-group-label {
+  font-size: 11px;
+  color: var(--text-faint);
+  font-weight: 700;
+  letter-spacing: .6px;
+  padding: 0 10px;
+  margin-bottom: -12px;
+}
+
+.nav-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 14px;
+  border-radius: var(--radius-md);
+  color: var(--text-muted);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background .15s, color .15s;
+  border: 1px solid transparent;
+}
+
+.nav-item:hover {
+  background: var(--bg-card);
+  color: var(--text);
+}
+
+.nav-item.active {
+  background: linear-gradient(90deg, rgba(139, 92, 246, .18), rgba(139, 92, 246, .04));
+  border-color: rgba(139, 92, 246, .35);
+  color: #fff;
+}
+
+.nav-item .ic {
+  width: 18px;
+  text-align: center;
+  font-size: 15px;
+}
+
+.nav-item .count {
+  margin-right: auto;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--text-faint);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  padding: 1px 7px;
+  border-radius: 20px;
+}
+
+.sidebar-footer {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
   gap: 8px;
 }
 
-.btn-login:hover {
-  border-color: var(--accent);
+.footer-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--text-muted);
+  text-decoration: none;
+  padding: 9px 12px;
+  border-radius: var(--radius-sm);
+  transition: background .15s, color .15s;
+}
+
+.footer-link:hover {
+  background: var(--bg-card);
+  color: var(--text);
+}
+
+/* ============================================================
+   المحتوى الرئيسي
+   ============================================================ */
+.main {
+  flex: 1;
+  padding: 30px 40px 60px;
+  min-width: 0;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 30px;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.topbar h1 {
+  font-family: 'Almarai', sans-serif;
+  font-size: 24px;
+  font-weight: 800;
+  margin: 0 0 4px;
+}
+
+.topbar p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 13.5px;
+}
+
+.topbar-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border-radius: 10px;
+  font-size: 13.5px;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  border: 1px solid transparent;
+  font-family: 'Tajawal', sans-serif;
+  transition: transform .12s, box-shadow .12s, background .15s;
+}
+
+.btn:active {
+  transform: scale(.97);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  color: #fff;
+  box-shadow: 0 6px 18px -6px var(--primary-glow);
+}
+
+.btn-primary:hover {
+  box-shadow: 0 8px 24px -6px var(--primary-glow);
+}
+
+.btn-ghost {
+  background: var(--bg-card);
+  border-color: var(--border-light);
+  color: var(--text);
+}
+
+.btn-ghost:hover {
   background: var(--bg-card-hover);
 }
 
-/* Hero Section */
-.hero-container {
-  padding: 100px 20px;
-  text-align: center;
+/* ============================================================
+   بطاقات الإحصائيات
+   ============================================================ */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 34px;
 }
 
-.content-wrapper h1 {
-  font-size: 3.5rem;
-  font-weight: 900;
-  margin-bottom: 20px;
-  letter-spacing: -1px;
+.stat-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 20px 22px;
+  position: relative;
+  overflow: hidden;
 }
 
-.bot-name {
-  color: var(--accent);
+.stat-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(160deg, rgba(139, 92, 246, .08), transparent 60%);
+  pointer-events: none;
 }
 
-.description {
+.stat-label {
+  font-size: 12.5px;
   color: var(--text-muted);
-  font-size: 1.15rem;
-  max-width: 700px;
-  margin: 0 auto 40px;
-  line-height: 1.7;
+  margin-bottom: 10px;
 }
 
-.cta-group {
-  display: flex;
-  justify-content: center;
-  gap: 15px;
-}
-
-.primary-btn,
-.secondary-btn {
-  padding: 14px 28px;
-  border-radius: 12px;
+.stat-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 26px;
   font-weight: 700;
-  font-size: 0.95rem;
-  cursor: pointer;
-  border: none;
-  transition: 0.2s;
-  text-decoration: none;
-  display: inline-flex;
+  color: #fff;
+}
+
+.stat-value.online::before {
+  content: '●';
+  color: var(--success);
+  font-size: 12px;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
+/* ============================================================
+   شبكة أقسام الأوامر (Modules)
+   ============================================================ */
+.section-heading {
+  font-family: 'Almarai', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-muted);
+  margin: 8px 0 14px;
+  display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
+}
+
+.section-heading .line {
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.commands-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+  gap: 14px;
+  margin-bottom: 36px;
+}
+
+.command-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: border-color .15s, background .15s, transform .12s;
+}
+
+.command-card:hover {
+  border-color: var(--border-light);
+  background: var(--bg-card-hover);
+  transform: translateY(-2px);
+}
+
+.command-card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.command-name {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+  direction: ltr;
+  text-align: right;
+}
+
+.command-desc {
+  font-size: 12.5px;
+  color: var(--text-muted);
+  line-height: 1.7;
+  margin: 0;
+}
+
+/* مفتاح تبديل (toggle) */
+.toggle {
+  --w: 40px;
+  --h: 22px;
+  width: var(--w);
+  height: var(--h);
+  border-radius: 999px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-light);
+  position: relative;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background .2s, border-color .2s;
+}
+
+.toggle::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: calc(var(--h) - 6px);
+  height: calc(var(--h) - 6px);
+  border-radius: 50%;
+  background: var(--text-faint);
+  transition: transform .2s, background .2s;
+}
+
+.toggle.on {
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  border-color: transparent;
+}
+
+.toggle.on::after {
+  transform: translateX(calc(-1 * (var(--w) - var(--h))));
+  background: #fff;
+}
+
+/* ============================================================
+   السجلات والأحداث — قائمة زمنية بسيطة
+   ============================================================ */
+.log-list {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+.log-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 18px;
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+}
+
+.log-item:last-child {
+  border-bottom: none;
+}
+
+.log-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--primary);
+  flex-shrink: 0;
+}
+
+.log-event {
+  font-family: 'JetBrains Mono', monospace;
+  color: #fff;
+  font-size: 12.5px;
+}
+
+.log-desc {
+  color: var(--text-muted);
+}
+
+/* ============================================================
+   تجاوب مع الشاشات الصغيرة
+   ============================================================ */
+@media (max-width: 980px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 860px) {
+  .app {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    height: auto;
+    position: relative;
+    border-left: none;
+    border-bottom: 1px solid var(--border);
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .nav-list {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .main {
+    padding: 24px 18px 40px;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .commands-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* focus visible للوصولية */
+a:focus-visible,
+button:focus-visible,
+.nav-item:focus-visible,
+.toggle:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
