@@ -1,86 +1,129 @@
-const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
+const { SlashCommandBuilder, PermissionFlagsBits, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+const db = require('../../database');
+const config = require('../../config.json');
 
 module.exports = {
   name: 'role',
-  description: 'إعطاء أو سحب رتبة من عضو',
-  aliases: ['رتبة'],
+  description: 'إدارة أدوار الأعضاء مع دعم الأدوار المؤقتة',
+  aliases: ['دور'],
   data: new SlashCommandBuilder()
     .setName('role')
-    .setDescription('إدارة رتب الأعضاء')
-    .addSubcommand(sub =>
-      sub.setName('add')
-        .setDescription('إعطاء رتبة لعضو')
-        .addUserOption(opt => opt.setName('user').setDescription('العضو').setRequired(true))
-        .addRoleOption(opt => opt.setName('role').setDescription('الرتبة').setRequired(true))
-    )
-    .addSubcommand(sub =>
-      sub.setName('remove')
-        .setDescription('سحب رتبة من عضو')
-        .addUserOption(opt => opt.setName('user').setDescription('العضو').setRequired(true))
-        .addRoleOption(opt => opt.setName('role').setDescription('الرتبة').setRequired(true))
-    )
+    .setDescription('إدارة أدوار الأعضاء')
+    .addSubcommand(sub => sub.setName('add').setDescription('إضافة دور لعضو')
+      .addUserOption(opt => opt.setName('target').setDescription('العضو').setRequired(true))
+      .addRoleOption(opt => opt.setName('role').setDescription('الدور').setRequired(true)))
+    .addSubcommand(sub => sub.setName('remove').setDescription('إزالة دور من عضو')
+      .addUserOption(opt => opt.setName('target').setDescription('العضو').setRequired(true))
+      .addRoleOption(opt => opt.setName('role').setDescription('الدور').setRequired(true)))
+    .addSubcommand(sub => sub.setName('temp').setDescription('إضافة دور مؤقت')
+      .addUserOption(opt => opt.setName('target').setDescription('العضو').setRequired(true))
+      .addRoleOption(opt => opt.setName('role').setDescription('الدور').setRequired(true))
+      .addStringOption(opt => opt.setName('duration').setDescription('المدة (مثال: 1h, 1d, 7d)').setRequired(true)))
+    .addSubcommand(sub => sub.setName('info').setDescription('عرض معلومات دور')
+      .addRoleOption(opt => opt.setName('role').setDescription('الدور').setRequired(true)))
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageRoles),
 
   async execute(interaction) {
-    if (!interaction.member.permissions.has(PermissionFlagsBits.ManageRoles)) {
-      return interaction.reply({ content: '❌ لا تملك صلاحية إدارة الرتب.', ephemeral: true });
-    }
+    if (!interaction.member.permissions.has(PermissionFlagsBits.ManageRoles))
+      return interaction.reply({ content: '❌ ليس لديك صلاحية إدارة الأدوار.', ephemeral: true });
 
-    await interaction.deferReply({ ephemeral: true }).catch(() => { });
-
+    await interaction.deferReply({ ephemeral: false }).catch(() => {});
     const sub = interaction.options.getSubcommand();
-    const user = interaction.options.getUser('user');
+    const targetUser = interaction.options.getUser('target');
     const role = interaction.options.getRole('role');
-    const member = await interaction.guild.members.fetch(user.id).catch(() => null);
 
-    if (!member) {
-      return interaction.editReply({ content: '❌ العضو غير موجود في السيرفر.' });
-    }
+    if (sub === 'add' || sub === 'remove') {
+      const member = await interaction.guild.members.fetch(targetUser.id).catch(() => null);
+      if (!member) return interaction.editReply({ content: '❌ العضو غير موجود.' });
+      if (role.position >= interaction.guild.members.me.roles.highest.position)
+        return interaction.editReply({ content: '❌ الدور أعلى من دوري، لا أستطيع إدارته.' });
 
-    if (role.position >= interaction.guild.members.me.roles.highest.position) {
-      return interaction.editReply({ content: '❌ رتبة البوت أدنى من هذه الرتبة ولا يمكنه التحكم بها.' });
-    }
-
-    if (sub === 'add') {
-      if (member.roles.cache.has(role.id)) {
-        return interaction.editReply({ content: `❌ المستخدم يملك رتبة **${role.name}** بالفعل.` });
+      if (sub === 'add') {
+        await member.roles.add(role);
+        const embed = new EmbedBuilder().setColor(config.colors?.success || '#2ecc71')
+          .setTitle('✅ تم إضافة الدور')
+          .addFields(
+            { name: '👤 العضو', value: `${targetUser.tag}`, inline: true },
+            { name: '🎭 الدور', value: `<@&${role.id}>`, inline: true },
+            { name: '👮 بواسطة', value: interaction.user.tag, inline: true }
+          ).setTimestamp();
+        await interaction.editReply({ embeds: [embed] });
+      } else {
+        await member.roles.remove(role);
+        const embed = new EmbedBuilder().setColor(config.colors?.danger || '#e74c3c')
+          .setTitle('❌ تم إزالة الدور')
+          .addFields(
+            { name: '👤 العضو', value: `${targetUser.tag}`, inline: true },
+            { name: '🎭 الدور', value: `<@&${role.id}>`, inline: true },
+            { name: '👮 بواسطة', value: interaction.user.tag, inline: true }
+          ).setTimestamp();
+        await interaction.editReply({ embeds: [embed] });
       }
+
+    } else if (sub === 'temp') {
+      const ms = require('ms');
+      const durationStr = interaction.options.getString('duration');
+      const durationMs = ms(durationStr);
+      if (!durationMs) return interaction.editReply({ content: '❌ مدة غير صالحة.' });
+
+      const member = await interaction.guild.members.fetch(targetUser.id).catch(() => null);
+      if (!member) return interaction.editReply({ content: '❌ العضو غير موجود.' });
+
       await member.roles.add(role);
-      await interaction.editReply({ content: `✅ تم إعطاء رتبة **${role.name}** إلى ${user} بنجاح.` });
-    } else if (sub === 'remove') {
-      if (!member.roles.cache.has(role.id)) {
-        return interaction.editReply({ content: `❌ المستخدم لا يملك رتبة **${role.name}**.` });
-      }
-      await member.roles.remove(role);
-      await interaction.editReply({ content: `✅ تمت إزالة رتبة **${role.name}** من ${user} بنجاح.` });
+      const embed = new EmbedBuilder().setColor('#9b59b6')
+        .setTitle('⏳ تم إضافة دور مؤقت')
+        .addFields(
+          { name: '👤 العضو', value: `${targetUser.tag}`, inline: true },
+          { name: '🎭 الدور', value: `<@&${role.id}>`, inline: true },
+          { name: '⏱️ المدة', value: durationStr, inline: true },
+          { name: '👮 بواسطة', value: interaction.user.tag, inline: true }
+        ).setTimestamp();
+      await interaction.editReply({ embeds: [embed] });
+
+      // إزالة الدور بعد المدة
+      setTimeout(async () => {
+        await member.roles.remove(role).catch(() => {});
+        const logEmbed = new EmbedBuilder().setColor('#e74c3c')
+          .setTitle('⏰ انتهى الدور المؤقت')
+          .setDescription(`تم إزالة الدور <@&${role.id}> من **${targetUser.tag}** تلقائياً.`)
+          .setTimestamp();
+        const s = db.getGuildSettings(interaction.guild.id);
+        if (s?.log_channel) {
+          const ch = interaction.guild.channels.cache.get(s.log_channel);
+          if (ch) ch.send({ embeds: [logEmbed] }).catch(() => {});
+        }
+      }, durationMs);
+
+    } else if (sub === 'info') {
+      const embed = new EmbedBuilder().setColor(role.color || 0x5865F2)
+        .setTitle(`🎭 معلومات الدور: ${role.name}`)
+        .addFields(
+          { name: '🆔 الـ ID', value: `\`${role.id}\``, inline: true },
+          { name: '🎨 اللون', value: role.hexColor, inline: true },
+          { name: '📍 الموضع', value: `${role.position}`, inline: true },
+          { name: '👥 الأعضاء', value: `${role.members.size}`, inline: true },
+          { name: '📢 يُذكر', value: role.mentionable ? '✅ نعم' : '❌ لا', inline: true },
+          { name: '🔒 يُظهر منفصلاً', value: role.hoist ? '✅ نعم' : '❌ لا', inline: true }
+        ).setTimestamp();
+      await interaction.editReply({ embeds: [embed] });
     }
   },
 
   async executePrefix(message, args) {
-    if (!message.member.permissions.has(PermissionFlagsBits.ManageRoles)) {
-      return message.reply('❌ لا تملك صلاحية إدارة الرتب.');
-    }
-
-    const user = message.mentions.users.first();
+    if (!message.member.permissions.has(PermissionFlagsBits.ManageRoles))
+      return message.reply('❌ ليس لديك صلاحية.');
+    const action = args[0]?.toLowerCase();
+    const target = message.mentions.members.first();
     const role = message.mentions.roles.first();
-
-    if (!user || !role) {
-      return message.reply('❌ الاستخدام: `#role @user @role` (يقوم بإعطائها إن لم تكن معه أو سحبها إن كانت معه)');
-    }
-
-    const member = await message.guild.members.fetch(user.id).catch(() => null);
-    if (!member) return message.reply('❌ العضو غير موجود.');
-
-    if (role.position >= message.guild.members.me.roles.highest.position) {
-      return message.reply('❌ رتبة البوت أدنى من هذه الرتبة.');
-    }
-
-    if (member.roles.cache.has(role.id)) {
-      await member.roles.remove(role);
-      message.reply(`✅ تمت إزالة رتبة **${role.name}** من ${user}.`);
+    if (!target || !role) return message.reply('❌ الاستخدام: `#role add/remove @user @role`');
+    if (action === 'add') {
+      await target.roles.add(role);
+      message.reply(`✅ تم إضافة <@&${role.id}> لـ **${target.user.tag}**.`);
+    } else if (action === 'remove') {
+      await target.roles.remove(role);
+      message.reply(`✅ تم إزالة <@&${role.id}> من **${target.user.tag}**.`);
     } else {
-      await member.roles.add(role);
-      message.reply(`✅ تم إعطاء رتبة **${role.name}** إلى ${user}.`);
+      message.reply('❌ الاستخدام: `#role add @user @role` أو `#role remove @user @role`');
     }
   }
 };
