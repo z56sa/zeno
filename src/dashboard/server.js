@@ -300,10 +300,6 @@ module.exports = function (app, client) {
                                     <span class="w-1.5 h-1.5 rounded-full bg-white"></span>
                                     <span>نظرة عامة</span>
                                 </a>
-                                <a href="/dashboard" class="px-3 py-2 rounded-xl text-gray-400 hover:text-white hover:bg-[#282937] font-medium flex items-center justify-end gap-2">
-                                    <span>عضوية التميز</span>
-                                    <span class="text-[10px] bg-purple-500/20 text-purple-300 px-1.5 py-0.5 rounded">جديد</span>
-                                </a>
 
                                 <span class="text-[10px] font-bold text-gray-500 px-3 pt-3 pb-1">لوحة المتصدرين</span>
                                 <a href="/#leaderboard" class="px-3 py-2 rounded-xl text-gray-400 hover:text-white hover:bg-[#282937] font-medium text-right">أعلى 100 بواسطة XP</a>
@@ -446,13 +442,13 @@ module.exports = function (app, client) {
                                     <a href="/dashboard/${guildId}" class="w-full py-2 bg-[#282937] hover:bg-[#323444] text-gray-300 rounded-lg text-xs font-bold text-center transition">&gt; Visit</a>
                                 </div>
 
-                                <!-- اشتراكات البريميوم -->
+                                <!-- حماية السيرفر -->
                                 <div class="bg-[#1e1f2b] border border-[#282937] rounded-xl p-5 flex flex-col justify-between">
                                     <div class="flex items-center justify-between mb-2">
-                                        <div class="w-8 h-8 rounded-lg bg-[#282937] flex items-center justify-center text-gray-400">💎</div>
-                                        <h4 class="font-bold text-white text-sm">اشتراكات البريميوم</h4>
+                                        <div class="w-8 h-8 rounded-lg bg-[#282937] flex items-center justify-center text-gray-400">🛡️</div>
+                                        <h4 class="font-bold text-white text-sm">حماية السيرفر</h4>
                                     </div>
-                                    <p class="text-gray-400 text-[11px] mb-4 text-right">Control your premium subscription</p>
+                                    <p class="text-gray-400 text-[11px] mb-4 text-right">Anti-Nuke, Anti-Spam & Protection</p>
                                     <a href="/dashboard/${guildId}" class="w-full py-2 bg-[#282937] hover:bg-[#323444] text-gray-300 rounded-lg text-xs font-bold text-center transition">&gt; Visit</a>
                                 </div>
 
