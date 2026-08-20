@@ -1,271 +1,202 @@
-/**
- * ============================================================
- *  Zeno Dashboard - src/dashboard/server.js
- * ============================================================
- *
- *  هذا الملف لا يُنشئ تطبيق Express مستقل ولا يشغّل app.listen().
- *  بدلاً من ذلك يصدّر دالة "mount" تستقبل تطبيق Express الرئيسي
- *  (المُنشأ في src/index.js) وتضيف عليه كل شيء: الجلسات، تسجيل
- *  الدخول عبر Discord، والمسارات (routes) الخاصة بالداشبورد.
- *
- *  في src/index.js يجب أن يبقى الاستدعاء كما هو:
- *      const mountDashboard = require('./dashboard/server');
- *      mountDashboard(app, client); // client اختياري - بوت discord.js
- *
- *  التثبيت المطلوب (في package.json بالجذر):
- *  npm install express express-session passport passport-discord
- *  npm install dotenv helmet cors express-rate-limit connect-mongo axios
- * ============================================================
- */
-
-require('dotenv').config();
-
+// ========================================================
+// FILE: src/dashboard/server.js
+// ========================================================
+const express = require('express');
 const session = require('express-session');
-const passport = require('passport');
-const DiscordStrategy = require('passport-discord').Strategy;
-const helmet = require('helmet');
-const cors = require('cors');
-const rateLimit = require('express-rate-limit');
-const path = require('path');
+const pgSession = require('connect-pg-simple')(session);
+const { Pool } = require('pg');
 
-const {
-    CLIENT_ID = '1506005273893146775',
-    CLIENT_SECRET,
-    SESSION_SECRET = 'change_this_secret_before_production',
-    CALLBACK_URL = 'http://localhost:3000/auth/discord/callback',
-    SUPPORT_SERVER = 'https://discord.gg/uxqQDtbVMz',
-    INVITE_URL = `https://discord.com/oauth2/authorize?client_id=${CLIENT_ID}`,
-    MONGO_URI,
-} = process.env;
+module.exports = function (app) {
+    let sessionStore;
 
-if (!CLIENT_SECRET) {
-    console.error('❌ خطأ: يجب تعيين CLIENT_SECRET في ملف .env');
-}
+    // 1. إعداد قاعدة البيانات بدون أخطاء التعارض
+    if (process.env.DATABASE_URL) {
+        const pool = new Pool({
+            connectionString: process.env.DATABASE_URL,
+            ssl: { rejectUnauthorized: false }
+        });
 
-/**
- * الدالة الرئيسية: تستقبل تطبيق Express الموجود مسبقاً (app)
- * وتضيف عليه كل شيء يخص الداشبورد، دون إنشاء app جديد أو استدعاء listen().
- *
- * @param {import('express').Express} app - تطبيق Express الرئيسي من index.js
- * @param {import('discord.js').Client} [botClient] - عميل البوت (اختياري)
- */
-function mountDashboard(app, botClient = null) {
-    // ============================================================
-    // الحماية العامة
-    // ============================================================
-    app.use(helmet({
-        contentSecurityPolicy: false,
-    }));
+        sessionStore = new pgSession({
+            pool: pool,
+            tableName: 'user_sessions',
+            createTableIfMissing: false // هذا اللي كان مسبب المشكلة وحليناه
+        });
+    } else {
+        sessionStore = new session.MemoryStore();
+    }
 
-    app.use(cors({
-        origin: process.env.DASHBOARD_URL || true,
-        credentials: true,
-    }));
+    app.set('trust proxy', 1);
+    app.use(express.static('public'));
 
-    const globalLimiter = rateLimit({
-        windowMs: 15 * 60 * 1000,
-        max: 300,
-        standardHeaders: true,
-        legacyHeaders: false,
-        message: { error: 'طلبات كثيرة جداً، حاول لاحقاً.' },
-    });
-    app.use(globalLimiter);
-
-    const authLimiter = rateLimit({
-        windowMs: 10 * 60 * 1000,
-        max: 20,
-        message: { error: 'محاولات دخول كثيرة، حاول لاحقاً.' },
-    });
-
-    app.use(express_json_middleware());
-    app.use(express_urlencoded_middleware());
-
-    // ============================================================
-    // الجلسات
-    // ============================================================
-    const sessionConfig = {
-        name: 'zeno.sid',
-        secret: SESSION_SECRET,
+    // 2. إعداد الجلسات
+    app.use(session({
+        store: sessionStore,
+        secret: process.env.SESSION_SECRET || 'ZENO_TICKETS_SUPER_SECRET',
         resave: false,
         saveUninitialized: false,
         cookie: {
-            maxAge: 1000 * 60 * 60 * 24 * 7,
-            httpOnly: true,
+            maxAge: 86400000,
             secure: process.env.NODE_ENV === 'production',
-            sameSite: 'lax',
-        },
-    };
-
-    if (MONGO_URI) {
-        const MongoStore = require('connect-mongo');
-        sessionConfig.store = MongoStore.create({ mongoUrl: MONGO_URI });
-    }
-
-    app.use(session(sessionConfig));
-    app.use(passport.initialize());
-    app.use(passport.session());
-
-    // ============================================================
-    // Passport + Discord Strategy
-    // ============================================================
-    passport.serializeUser((user, done) => done(null, user));
-    passport.deserializeUser((obj, done) => done(null, obj));
-
-    passport.use(new DiscordStrategy({
-        clientID: CLIENT_ID,
-        clientSecret: CLIENT_SECRET,
-        callbackURL: CALLBACK_URL,
-        scope: ['identify', 'guilds'],
-    }, (accessToken, refreshToken, profile, done) => {
-        profile.accessToken = accessToken;
-        process.nextTick(() => done(null, profile));
+            sameSite: 'lax'
+        }
     }));
 
-    function ensureAuthenticated(req, res, next) {
-        if (req.isAuthenticated()) return next();
-        return res.status(401).json({ error: 'يجب تسجيل الدخول أولاً', loginUrl: '/auth/discord' });
-    }
-
-    // ============================================================
-    // مسارات المصادقة
-    // ============================================================
-    app.get('/auth/discord', authLimiter, passport.authenticate('discord'));
-
-    app.get('/auth/discord/callback', authLimiter,
-        passport.authenticate('discord', { failureRedirect: '/' }),
-        (req, res) => {
-            res.redirect('/dashboard');
-        }
-    );
-
-    app.get('/auth/logout', (req, res, next) => {
-        req.logout((err) => {
-            if (err) return next(err);
-            req.session.destroy(() => {
-                res.clearCookie('zeno.sid');
-                res.redirect('/');
-            });
-        });
-    });
-
-    // ============================================================
-    // المستخدم والسيرفرات
-    // ============================================================
-    app.get('/api/user', ensureAuthenticated, (req, res) => {
-        const { id, username, discriminator, avatar, email } = req.user;
-        res.json({
-            id,
-            username,
-            discriminator,
-            email: email || null,
-            avatarUrl: avatar
-                ? `https://cdn.discordapp.com/avatars/${id}/${avatar}.png?size=256`
-                : `https://cdn.discordapp.com/embed/avatars/${(discriminator || 0) % 5}.png`,
-        });
-    });
-
-    const MANAGE_GUILD = 0x20;
-
-    app.get('/api/guilds', ensureAuthenticated, async (req, res) => {
-        try {
-            const manageable = req.user.guilds.filter((g) => {
-                const perms = BigInt(g.permissions);
-                return g.owner || (perms & BigInt(MANAGE_GUILD)) === BigInt(MANAGE_GUILD);
-            });
-
-            let botGuildIds = new Set();
-            if (botClient && botClient.isReady && botClient.isReady()) {
-                botGuildIds = new Set(botClient.guilds.cache.map((g) => g.id));
+    // ==========================================
+    // الصفحة الرئيسية
+    // ==========================================
+    app.get('/', (req, res) => {
+        const user = req.session?.user;
+        res.send(`
+        <!DOCTYPE html>
+        <html lang="ar" dir="rtl" class="dark">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>ZENO TICKETS</title>
+            <script src="https://cdn.tailwindcss.com"></script>
+            <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+            <style>
+                body { background-color: #121317; color: #ffffff; font-family: 'Cairo', sans-serif; }
+            </style>
+        </head>
+        <body class="flex flex-col items-center justify-center min-h-screen">
+            <h1 class="text-5xl font-extrabold mb-4">اصنع خادم ديسكورد <span class="text-purple-500">احترافي!</span></h1>
+            <p class="text-gray-400 mb-8 max-w-lg text-center leading-relaxed">بوت متعدد الأغراض قابل للتخصيص جدًا حيث يوفر لك تخصيص رسائل ترحيبية وسجلات متعمقة وأدوات إشراف قوية.</p>
+            ${user
+                ? `<a href="/dashboard" class="px-8 py-3 bg-purple-600 hover:bg-purple-700 rounded-lg font-bold transition">الذهاب للوحة التحكم</a>`
+                : `<a href="/auth/discord" class="px-8 py-3 bg-[#5865F2] hover:bg-[#4752C4] rounded-lg font-bold transition flex items-center gap-2">إضافة البوت في Discord</a>`
             }
+        </body>
+        </html>
+        `);
+    });
 
-            const result = manageable.map((g) => ({
-                id: g.id,
-                name: g.name,
-                icon: g.icon
-                    ? `https://cdn.discordapp.com/icons/${g.id}/${g.icon}.png?size=128`
-                    : null,
-                botInGuild: botGuildIds.has(g.id),
-                inviteUrl: `${INVITE_URL}&guild_id=${g.id}&disable_guild_select=true&permissions=8&scope=bot%20applications.commands`,
-            }));
+    // ==========================================
+    // المصادقة مع ديسكورد
+    // ==========================================
+    app.get('/auth/discord', (req, res) => {
+        const clientId = process.env.DISCORD_CLIENT_ID || process.env.CLIENT_ID;
+        const redirectUri = encodeURIComponent(`${req.headers['x-forwarded-proto'] || req.protocol}://${req.get('host')}/auth/discord/callback`);
+        res.redirect(`https://discord.com/api/oauth2/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=identify%20guilds`);
+    });
 
-            res.json({ guilds: result });
-        } catch (err) {
-            console.error(err);
-            res.status(500).json({ error: 'تعذر جلب السيرفرات' });
+    app.get('/auth/discord/callback', async (req, res) => {
+        const code = req.query.code;
+        if (!code) return res.redirect('/');
+        try {
+            const clientId = process.env.DISCORD_CLIENT_ID || process.env.CLIENT_ID;
+            const clientSecret = process.env.CLIENT_SECRET || process.env.DISCORD_CLIENT_SECRET;
+            const redirectUri = `${req.headers['x-forwarded-proto'] || req.protocol}://${req.get('host')}/auth/discord/callback`;
+
+            const tokenRes = await fetch('https://discord.com/api/oauth2/token', {
+                method: 'POST',
+                body: new URLSearchParams({ client_id: clientId, client_secret: clientSecret, grant_type: 'authorization_code', code, redirect_uri: redirectUri }),
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+            });
+            const tokenData = await tokenRes.json();
+
+            const [userRes, guildsRes] = await Promise.all([
+                fetch('https://discord.com/api/users/@me', { headers: { authorization: `Bearer ${tokenData.access_token}` } }),
+                fetch('https://discord.com/api/users/@me/guilds', { headers: { authorization: `Bearer ${tokenData.access_token}` } })
+            ]);
+
+            req.session.user = await userRes.json();
+            const allGuilds = await guildsRes.json();
+            req.session.guilds = Array.isArray(allGuilds) ? allGuilds.filter(g => (g.permissions & 0x8) === 0x8 || (g.permissions & 0x20) === 0x20) : [];
+
+            req.session.save(() => res.redirect('/dashboard'));
+        } catch (error) {
+            res.redirect('/');
         }
     });
 
-    app.get('/api/guilds/:guildId', ensureAuthenticated, async (req, res) => {
-        const { guildId } = req.params;
+    // ==========================================
+    // لوحة التحكم (بتصميم مستوحى من ProBot)
+    // ==========================================
+    app.get('/dashboard', (req, res) => {
+        if (!req.session?.user) return res.redirect('/auth/discord');
+        const user = req.session.user;
+        const guilds = req.session.guilds || [];
 
-        const userGuild = req.user.guilds.find((g) => g.id === guildId);
-        if (!userGuild) {
-            return res.status(403).json({ error: 'لا تملك صلاحية على هذا السيرفر' });
-        }
+        const userAvatar = user.avatar ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png` : 'https://cdn.discordapp.com/embed/avatars/0.png';
 
-        if (!botClient || !botClient.isReady || !botClient.isReady()) {
-            return res.status(503).json({ error: 'البوت غير متصل حالياً' });
-        }
+        const guildsHtml = guilds.length > 0 ? guilds.map(guild => `
+            <a href="/dashboard/${guild.id}" class="bg-[#1f2026] border border-[#2a2b33] rounded-xl p-5 flex items-center justify-between hover:border-purple-500 transition group">
+                <div class="flex items-center gap-4">
+                    <img src="${guild.icon ? `https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.png` : 'https://cdn.discordapp.com/embed/avatars/0.png'}" class="w-14 h-14 rounded-full bg-[#121317]">
+                    <div>
+                        <h3 class="font-bold text-white group-hover:text-purple-400 transition">${guild.name}</h3>
+                        <p class="text-xs text-gray-500 mt-1">مدير السيرفر</p>
+                    </div>
+                </div>
+                <div class="bg-[#2a2b33] p-2 rounded-lg text-gray-400 group-hover:bg-purple-600 group-hover:text-white transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                </div>
+            </a>
+        `).join('') : '<p class="text-gray-400">لا توجد سيرفرات.</p>';
 
-        const guild = botClient.guilds.cache.get(guildId);
-        if (!guild) {
-            return res.status(404).json({ error: 'البوت غير موجود في هذا السيرفر', inviteUrl: INVITE_URL });
-        }
+        res.send(`
+        <!DOCTYPE html>
+        <html lang="ar" dir="rtl" class="dark">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>لوحة التحكم | ZENO</title>
+            <script src="https://cdn.tailwindcss.com"></script>
+            <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+            <style>
+                body { background-color: #121317; color: #d1d5db; font-family: 'Cairo', sans-serif; overflow-x: hidden; }
+                .sidebar-bg { background-color: #1a1b20; border-left: 1px solid #23242a; }
+            </style>
+        </head>
+        <body class="flex h-screen overflow-hidden">
+            
+            <!-- الشريط الجانبي (مستوحى من برو بوت) -->
+            <aside class="w-72 sidebar-bg h-full flex flex-col hidden md:flex">
+                <div class="p-6 border-b border-[#23242a] flex items-center gap-3">
+                    <div class="w-10 h-10 bg-purple-600 rounded-lg flex items-center justify-center font-bold text-white text-xl">Z</div>
+                    <span class="font-black text-xl text-white">ZENO BOT</span>
+                </div>
+                
+                <div class="flex-1 overflow-y-auto p-4 space-y-6 scrollbar-hide">
+                    <!-- البروفايل -->
+                    <div class="flex flex-col items-center bg-[#23242a] p-4 rounded-xl">
+                        <img src="${userAvatar}" class="w-20 h-20 rounded-full border-4 border-[#1a1b20] mb-2">
+                        <h2 class="font-bold text-white">${user.username}</h2>
+                        <a href="/logout" class="text-xs text-red-400 hover:text-red-300 mt-2">تسجيل الخروج</a>
+                    </div>
 
-        res.json({
-            id: guild.id,
-            name: guild.name,
-            memberCount: guild.memberCount,
-            icon: guild.iconURL({ size: 256 }),
-            channels: guild.channels.cache.size,
-            roles: guild.roles.cache.size,
-            createdAt: guild.createdAt,
-        });
+                    <!-- القائمة -->
+                    <div>
+                        <h4 class="text-xs font-bold text-gray-500 mb-2 px-2">قائمة الخصائص</h4>
+                        <ul class="space-y-1">
+                            <li><a href="#" class="block px-3 py-2 text-sm text-white bg-purple-600 rounded-lg font-semibold">🏠 اختيار السيرفر</a></li>
+                            <li><a href="#" class="block px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-[#23242a] rounded-lg transition">⚙️ إعدادات الحساب</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- المحتوى الرئيسي -->
+            <main class="flex-1 h-full overflow-y-auto bg-[#121317] p-8 md:p-12">
+                <header class="flex justify-between items-center mb-10">
+                    <div>
+                        <h2 class="text-3xl font-bold text-white">اختيار السيرفر</h2>
+                        <p class="text-gray-400 mt-2 text-sm">قم باختيار السيرفر الذي ترغب بإدارته من القائمة أدناه.</p>
+                    </div>
+                </header>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    ${guildsHtml}
+                </div>
+            </main>
+
+        </body>
+        </html>
+        `);
     });
 
-    // ============================================================
-    // إحصائيات عامة عن البوت
-    // ============================================================
-    app.get('/api/bot-stats', async (req, res) => {
-        if (!botClient || !botClient.isReady || !botClient.isReady()) {
-            return res.json({ online: false, servers: null, users: null, ping: null });
-        }
-
-        const servers = botClient.guilds.cache.size;
-        const users = botClient.guilds.cache.reduce((acc, g) => acc + g.memberCount, 0);
-
-        res.json({
-            online: true,
-            servers,
-            users,
-            ping: Math.round(botClient.ws.ping),
-            supportServer: SUPPORT_SERVER,
-            inviteUrl: INVITE_URL,
-        });
+    app.get('/logout', (req, res) => {
+        req.session.destroy(() => res.redirect('/'));
     });
-
-    app.get('/api/links', (req, res) => {
-        res.json({ support: SUPPORT_SERVER, invite: INVITE_URL });
-    });
-
-    // ============================================================
-    // صفحات الداشبورد
-    // ============================================================
-    app.get('/dashboard', ensureAuthenticated, (req, res) => {
-        res.sendFile(path.join(process.cwd(), 'public', 'dashboard.html'));
-    });
-
-    console.log('✅ تم تركيب مسارات الداشبورد بنجاح');
-    console.log(`🔗 رابط الدعوة: ${INVITE_URL}`);
-    console.log(`🛠️  سيرفر الدعم الفني: ${SUPPORT_SERVER}`);
-}
-
-// دوال مساعدة صغيرة بدل استدعاء express() كامل (نتجنب إنشاء تطبيق جديد)
-function express_json_middleware() {
-    return require('express').json();
-}
-function express_urlencoded_middleware() {
-    return require('express').urlencoded({ extended: true });
-}
-
-module.exports = mountDashboard;
+};
