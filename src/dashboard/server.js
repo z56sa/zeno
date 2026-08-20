@@ -479,54 +479,54 @@ module.exports = function (app) {
                     <!-- المحتوى الرئيسي -->
                     <main class="flex-1 p-6 md:p-10 z-10 text-right">
 
-                        <!-- عنوان الصفحة مع toggle رئيسي -->
-                        <div class="flex flex-col md:flex-row-reverse items-start md:items-center justify-between gap-4 mb-8">
-                            <div class="text-right">
-                                <h2 class="text-2xl font-black text-white">التسلية</h2>
-                                <p class="text-gray-400 text-xs mt-1">يضيف متعة إلى سيرفرك بميزات مثيرة مثل الروليت وكت تويت، مع المزيد من الألعاب في الطريق.</p>
-                            </div>
+                        <!-- عنوان الصفحة مع toggle رئيسي (مثل ProBot تماماً) -->
+                        <div class="flex items-center justify-between gap-4 mb-8 pb-6 border-b border-[#232430]">
                             <label class="toggle">
                                 <input type="checkbox" checked onchange="toggleFun(this)">
                                 <span class="slider"></span>
                             </label>
+                            <div class="text-right">
+                                <h2 class="text-2xl font-black text-white">التسلية</h2>
+                                <p class="text-gray-400 text-xs mt-1">يضيف متعة إلى سيرفرك بميزات مثيرة مثل الروليت وكت تويت، مع المزيد من الألعاب في الطريق.</p>
+                            </div>
                         </div>
 
-                        <!-- تبويبات مثل ProBot -->
-                        <div class="border-b border-purple-900/20 mb-8 flex gap-6 justify-end">
+                        <!-- تبويبات مثل ProBot تماماً (اليمين لليسار) -->
+                        <div class="border-b border-[#232430] mb-8 flex gap-8 justify-end">
                             <button onclick="switchTab('fun-tab')" class="tab-btn active pb-3 text-sm font-bold" id="btn-fun">الألعاب</button>
                             <button onclick="switchTab('mini-tab')" class="tab-btn pb-3 text-sm font-bold text-gray-400" id="btn-mini">الألعاب الصغيرة</button>
-                            <button onclick="switchTab('cat-tab')" class="tab-btn pb-3 text-sm font-bold text-gray-400" id="btn-cat">كك تويت</button>
+                            <button onclick="switchTab('cat-tab')" class="tab-btn pb-3 text-sm font-bold text-gray-400" id="btn-cat">كت تويت</button>
                         </div>
 
                         <!-- تبويب: الألعاب الرئيسية -->
                         <div id="fun-tab" class="tab-content active">
                             <!-- قسم الألعاب -->
-                            <div class="bg-[#13141b]/80 border border-purple-500/10 rounded-2xl p-6 mb-6">
+                            <div class="bg-[#12131a] border border-[#1e1f2b] rounded-2xl p-6 mb-6 shadow-xl">
                                 <h3 class="text-base font-black text-white mb-5 text-right">الألعاب</h3>
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
                                     <!-- روليت -->
-                                    <div class="game-card bg-[#0f1016] border border-purple-500/10 rounded-xl p-4 flex items-center justify-between">
+                                    <div class="game-card bg-[#181924] border border-[#232432] rounded-xl p-4 flex items-center justify-between">
                                         <div class="flex items-center gap-3">
-                                            <div class="w-10 h-10 bg-[#1a1b24] rounded-xl flex items-center justify-center text-xl">🎰</div>
+                                            <div class="w-10 h-10 bg-[#222332] rounded-xl flex items-center justify-center text-xl shadow-inner">🎲</div>
                                             <span class="font-bold text-white text-sm">روليت</span>
                                         </div>
-                                        <div class="flex items-center gap-2">
-                                            <button class="text-gray-500 hover:text-purple-400 transition p-1.5 hover:bg-purple-500/10 rounded-lg">
+                                        <div class="flex items-center gap-3">
+                                            <button class="text-gray-500 hover:text-purple-400 transition p-2 hover:bg-purple-500/10 rounded-lg">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                                             </button>
                                             <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
                                         </div>
                                     </div>
 
-                                    <!-- الكراسي الموسيقية -->
-                                    <div class="game-card bg-[#0f1016] border border-purple-500/10 rounded-xl p-4 flex items-center justify-between">
+                                    <!-- الكراسي -->
+                                    <div class="game-card bg-[#181924] border border-[#232432] rounded-xl p-4 flex items-center justify-between">
                                         <div class="flex items-center gap-3">
-                                            <div class="w-10 h-10 bg-[#1a1b24] rounded-xl flex items-center justify-center text-xl">🪑</div>
+                                            <div class="w-10 h-10 bg-[#222332] rounded-xl flex items-center justify-center text-xl shadow-inner">🪑</div>
                                             <span class="font-bold text-white text-sm">الكراسي</span>
                                         </div>
-                                        <div class="flex items-center gap-2">
-                                            <button class="text-gray-500 hover:text-purple-400 transition p-1.5 hover:bg-purple-500/10 rounded-lg">
+                                        <div class="flex items-center gap-3">
+                                            <button class="text-gray-500 hover:text-purple-400 transition p-2 hover:bg-purple-500/10 rounded-lg">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                                             </button>
                                             <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
@@ -534,13 +534,13 @@ module.exports = function (app) {
                                     </div>
 
                                     <!-- الغميضة -->
-                                    <div class="game-card bg-[#0f1016] border border-purple-500/10 rounded-xl p-4 flex items-center justify-between">
+                                    <div class="game-card bg-[#181924] border border-[#232432] rounded-xl p-4 flex items-center justify-between">
                                         <div class="flex items-center gap-3">
-                                            <div class="w-10 h-10 bg-[#1a1b24] rounded-xl flex items-center justify-center text-xl">🙈</div>
+                                            <div class="w-10 h-10 bg-[#222332] rounded-xl flex items-center justify-center text-xl shadow-inner">👁️</div>
                                             <span class="font-bold text-white text-sm">الغميضة</span>
                                         </div>
-                                        <div class="flex items-center gap-2">
-                                            <button class="text-gray-500 hover:text-purple-400 transition p-1.5 hover:bg-purple-500/10 rounded-lg">
+                                        <div class="flex items-center gap-3">
+                                            <button class="text-gray-500 hover:text-purple-400 transition p-2 hover:bg-purple-500/10 rounded-lg">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                                             </button>
                                             <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
@@ -548,13 +548,13 @@ module.exports = function (app) {
                                     </div>
 
                                     <!-- مافيا -->
-                                    <div class="game-card bg-[#0f1016] border border-purple-500/10 rounded-xl p-4 flex items-center justify-between">
+                                    <div class="game-card bg-[#181924] border border-[#232432] rounded-xl p-4 flex items-center justify-between">
                                         <div class="flex items-center gap-3">
-                                            <div class="w-10 h-10 bg-[#1a1b24] rounded-xl flex items-center justify-center text-xl">🔫</div>
+                                            <div class="w-10 h-10 bg-[#222332] rounded-xl flex items-center justify-center text-xl shadow-inner">🎭</div>
                                             <span class="font-bold text-white text-sm">مافيا</span>
                                         </div>
-                                        <div class="flex items-center gap-2">
-                                            <button class="text-gray-500 hover:text-purple-400 transition p-1.5 hover:bg-purple-500/10 rounded-lg">
+                                        <div class="flex items-center gap-3">
+                                            <button class="text-gray-500 hover:text-purple-400 transition p-2 hover:bg-purple-500/10 rounded-lg">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                                             </button>
                                             <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
@@ -565,74 +565,46 @@ module.exports = function (app) {
                             </div>
 
                             <!-- قسم الأوامر -->
-                            <div class="bg-[#13141b]/80 border border-purple-500/10 rounded-2xl p-6">
+                            <div class="bg-[#12131a] border border-[#1e1f2b] rounded-2xl p-6 shadow-xl">
                                 <h3 class="text-base font-black text-white mb-5 text-right">الأوامر</h3>
                                 <div class="flex flex-col gap-3">
 
                                     <!-- points -->
-                                    <div class="bg-[#0f1016] border border-purple-500/10 rounded-xl p-4 flex items-center justify-between">
-                                        <div class="flex items-center gap-2">
-                                            <div class="w-8 h-8 bg-[#1a1b24] rounded-lg flex items-center justify-center text-purple-400">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                                            </div>
-                                            <button class="text-gray-500 hover:text-purple-400 transition p-1.5 hover:bg-purple-500/10 rounded-lg">
+                                    <div class="bg-[#181924] border border-[#232432] rounded-xl p-4 flex items-center justify-between">
+                                        <div class="flex items-center gap-3">
+                                            <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                            <button class="text-gray-500 hover:text-purple-400 transition p-2 hover:bg-purple-500/10 rounded-lg">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                                             </button>
                                         </div>
-                                        <div class="text-right flex-1 mx-4">
-                                            <p class="font-bold text-white text-sm">roulette</p>
-                                            <p class="text-gray-500 text-xs">لعبة الروليت - البوت يختار ضحية عشوائية من السيرفر!</p>
+                                        <div class="flex items-center gap-3 text-right">
+                                            <div>
+                                                <p class="font-bold text-white text-sm">points</p>
+                                                <p class="text-gray-400 text-xs">نظام نقاط على مستوى السيرفر يمكن للمشرفين منحه للمستخدمين، ويُستخدم أيضاً لتتبع الإيفنتات.</p>
+                                            </div>
+                                            <div class="w-8 h-8 bg-[#222332] rounded-lg flex items-center justify-center text-purple-400 font-mono text-xs">
+                                                &gt;_
+                                            </div>
                                         </div>
-                                        <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
                                     </div>
 
                                     <!-- game stop -->
-                                    <div class="bg-[#0f1016] border border-purple-500/10 rounded-xl p-4 flex items-center justify-between">
-                                        <div class="flex items-center gap-2">
-                                            <div class="w-8 h-8 bg-[#1a1b24] rounded-lg flex items-center justify-center text-purple-400">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                                            </div>
-                                            <button class="text-gray-500 hover:text-purple-400 transition p-1.5 hover:bg-purple-500/10 rounded-lg">
+                                    <div class="bg-[#181924] border border-[#232432] rounded-xl p-4 flex items-center justify-between">
+                                        <div class="flex items-center gap-3">
+                                            <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                            <button class="text-gray-500 hover:text-purple-400 transition p-2 hover:bg-purple-500/10 rounded-lg">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                                             </button>
                                         </div>
-                                        <div class="text-right flex-1 mx-4">
-                                            <p class="font-bold text-white text-sm">mafia</p>
-                                            <p class="text-gray-500 text-xs">لعبة المافيا الاجتماعية مع توزيع أدوار سرية لكل لاعب!</p>
-                                        </div>
-                                        <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
-                                    </div>
-
-                                    <div class="bg-[#0f1016] border border-purple-500/10 rounded-xl p-4 flex items-center justify-between">
-                                        <div class="flex items-center gap-2">
-                                            <div class="w-8 h-8 bg-[#1a1b24] rounded-lg flex items-center justify-center text-purple-400">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                        <div class="flex items-center gap-3 text-right">
+                                            <div>
+                                                <p class="font-bold text-white text-sm">game stop</p>
+                                                <p class="text-gray-400 text-xs">إيقاف لعبة في القناة الحالية</p>
                                             </div>
-                                            <button class="text-gray-500 hover:text-purple-400 transition p-1.5 hover:bg-purple-500/10 rounded-lg">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-                                            </button>
-                                        </div>
-                                        <div class="text-right flex-1 mx-4">
-                                            <p class="font-bold text-white text-sm">chairs</p>
-                                            <p class="text-gray-500 text-xs">الكراسي الموسيقية - ينضم اللاعبون ويُحذف من لم يحصل على كرسي!</p>
-                                        </div>
-                                        <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
-                                    </div>
-
-                                    <div class="bg-[#0f1016] border border-purple-500/10 rounded-xl p-4 flex items-center justify-between">
-                                        <div class="flex items-center gap-2">
-                                            <div class="w-8 h-8 bg-[#1a1b24] rounded-lg flex items-center justify-center text-purple-400">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                            <div class="w-8 h-8 bg-[#222332] rounded-lg flex items-center justify-center text-purple-400 font-mono text-xs">
+                                                &gt;_
                                             </div>
-                                            <button class="text-gray-500 hover:text-purple-400 transition p-1.5 hover:bg-purple-500/10 rounded-lg">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-                                            </button>
                                         </div>
-                                        <div class="text-right flex-1 mx-4">
-                                            <p class="font-bold text-white text-sm">hideseek</p>
-                                            <p class="text-gray-500 text-xs">لعبة الغميضة - شخص يختبئ والباقون يبحثون عنه!</p>
-                                        </div>
-                                        <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
                                     </div>
 
                                 </div>
