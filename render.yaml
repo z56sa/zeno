@@ -12,5 +12,6 @@ services:
       - key: PORT
         value: 10000
       - key: DEPLOY_TRIGGER
-        value: v1.0.1
+        value: v1.0.2
+
 
