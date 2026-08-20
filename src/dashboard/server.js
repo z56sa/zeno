@@ -5,13 +5,11 @@ const express = require('express');
 const session = require('express-session');
 
 module.exports = function (app) {
-    // استخدمنا الذاكرة المؤقتة لتجاوز مشاكل قاعدة البيانات حالياً
     const sessionStore = new session.MemoryStore();
 
     app.set('trust proxy', 1);
     app.use(express.static('public'));
 
-    // إعداد الجلسات
     app.use(session({
         store: sessionStore,
         secret: process.env.SESSION_SECRET || 'ZENO_TICKETS_SUPER_SECRET',
@@ -19,13 +17,13 @@ module.exports = function (app) {
         saveUninitialized: false,
         cookie: {
             maxAge: 86400000,
-            secure: false, // تم تعطيلها مؤقتاً لتجنب مشاكل التشفير
+            secure: false,
             sameSite: 'lax'
         }
     }));
 
     // ==========================================
-    // الصفحة الرئيسية
+    // الصفحة الرئيسية (بتصميم ProBot)
     // ==========================================
     app.get('/', (req, res) => {
         try {
@@ -41,15 +39,53 @@ module.exports = function (app) {
                 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
                 <style>
                     body { background-color: #121317; color: #ffffff; font-family: 'Cairo', sans-serif; }
+                    .nav-link { transition: color 0.2s; }
+                    .nav-link:hover { color: #a78bfa; }
                 </style>
             </head>
-            <body class="flex flex-col items-center justify-center min-h-screen">
-                <h1 class="text-5xl font-extrabold mb-4">اصنع خادم ديسكورد <span class="text-purple-500">احترافي!</span></h1>
-                <p class="text-gray-400 mb-8 max-w-lg text-center leading-relaxed">بوت متعدد الأغراض قابل للتخصيص جدًا حيث يوفر لك تخصيص رسائل ترحيبية وسجلات متعمقة وأدوات إشراف قوية.</p>
-                ${user
-                    ? `<a href="/dashboard" class="px-8 py-3 bg-purple-600 hover:bg-purple-700 rounded-lg font-bold transition">الذهاب للوحة التحكم</a>`
-                    : `<a href="/auth/discord" class="px-8 py-3 bg-[#5865F2] hover:bg-[#4752C4] rounded-lg font-bold transition flex items-center gap-2">إضافة البوت في Discord</a>`
+            <body class="min-h-screen flex flex-col">
+                
+                <!-- الشريط العلوي -->
+                <nav class="flex items-center justify-between px-6 md:px-12 py-4">
+                    <!-- اللوجو -->
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center font-bold text-white text-xl">Z</div>
+                        <span class="font-black text-xl text-white tracking-wide">ZENO</span>
+                    </div>
+
+                    <!-- الروابط (تظهر في الشاشات الكبيرة) -->
+                    <div class="hidden md:flex gap-8 text-gray-300 font-semibold text-sm">
+                        <a href="#" class="nav-link">المميزات</a>
+                        <a href="#" class="nav-link">المصادر</a>
+                        <a href="#" class="nav-link text-yellow-500 flex items-center gap-1">✨ بريميوم</a>
+                    </div>
+
+                    <!-- زر تسجيل الدخول / صورة البروفايل -->
+                    <div>
+                        ${user
+                    ? `<a href="/dashboard"><img src="${user.avatar ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png` : 'https://cdn.discordapp.com/embed/avatars/0.png'}" class="w-10 h-10 rounded-full border border-gray-600 hover:border-purple-500 transition cursor-pointer"></a>`
+                    : `<a href="/auth/discord" class="text-sm font-bold bg-transparent hover:bg-[#23242a] text-white px-5 py-2 rounded-lg transition">تسجيل الدخول</a>`
                 }
+                    </div>
+                </nav>
+
+                <!-- المحتوى الرئيسي بالمنتصف -->
+                <main class="flex-1 flex flex-col items-center justify-center px-4 text-center pb-20">
+                    <span class="bg-transparent border border-[#23242a] text-gray-400 px-5 py-1.5 rounded-full text-xs font-bold mb-8">جديد: نظام التذاكر</span>
+                    
+                    <h1 class="text-4xl md:text-5xl font-extrabold mb-6 leading-tight">اصنع خادم ديسكورد <br> احترافي!</h1>
+                    
+                    <p class="text-gray-400 mb-10 max-w-lg mx-auto leading-relaxed text-sm md:text-base">
+                        بوت متعدد الأغراض قابل للتخصيص جدًا حيث يوفر لك تخصيص صورة كرسالة ترحيبية وسجلات متعمقة وأوامر اجتماعية وإشراف وأكثر ...
+                    </p>
+                    
+                    <!-- الأزرار -->
+                    <div class="flex flex-col sm:flex-row gap-4 items-center justify-center w-full sm:w-auto">
+                        <a href="/dashboard" class="px-8 py-3 bg-[#1a1b20] hover:bg-[#23242a] border border-[#23242a] rounded-lg font-bold transition text-white w-full sm:w-auto text-sm">لوحة التحكم</a>
+                        <a href="/auth/discord" class="px-8 py-3 bg-[#5865F2] hover:bg-[#4752C4] rounded-lg font-bold transition flex items-center justify-center w-full sm:w-auto text-sm">إضافة البوت في Discord</a>
+                    </div>
+                </main>
+
             </body>
             </html>
             `);
@@ -93,13 +129,12 @@ module.exports = function (app) {
 
             req.session.save(() => res.redirect('/dashboard'));
         } catch (error) {
-            console.error("Auth Error:", error);
             res.redirect('/');
         }
     });
 
     // ==========================================
-    // لوحة التحكم (بتصميم مستوحى من ProBot)
+    // لوحة التحكم
     // ==========================================
     app.get('/dashboard', (req, res) => {
         try {
@@ -140,7 +175,6 @@ module.exports = function (app) {
             </head>
             <body class="flex h-screen overflow-hidden">
                 
-                <!-- الشريط الجانبي (مستوحى من برو بوت) -->
                 <aside class="w-72 sidebar-bg h-full flex flex-col hidden md:flex">
                     <div class="p-6 border-b border-[#23242a] flex items-center gap-3">
                         <div class="w-10 h-10 bg-purple-600 rounded-lg flex items-center justify-center font-bold text-white text-xl">Z</div>
@@ -148,14 +182,11 @@ module.exports = function (app) {
                     </div>
                     
                     <div class="flex-1 overflow-y-auto p-4 space-y-6 scrollbar-hide">
-                        <!-- البروفايل -->
                         <div class="flex flex-col items-center bg-[#23242a] p-4 rounded-xl">
                             <img src="${userAvatar}" class="w-20 h-20 rounded-full border-4 border-[#1a1b20] mb-2">
                             <h2 class="font-bold text-white">${user.username}</h2>
                             <a href="/logout" class="text-xs text-red-400 hover:text-red-300 mt-2">تسجيل الخروج</a>
                         </div>
-
-                        <!-- القائمة -->
                         <div>
                             <h4 class="text-xs font-bold text-gray-500 mb-2 px-2">قائمة الخصائص</h4>
                             <ul class="space-y-1">
@@ -166,7 +197,6 @@ module.exports = function (app) {
                     </div>
                 </aside>
 
-                <!-- المحتوى الرئيسي -->
                 <main class="flex-1 h-full overflow-y-auto bg-[#121317] p-8 md:p-12">
                     <header class="flex justify-between items-center mb-10">
                         <div>
@@ -174,12 +204,10 @@ module.exports = function (app) {
                             <p class="text-gray-400 mt-2 text-sm">قم باختيار السيرفر الذي ترغب بإدارته من القائمة أدناه.</p>
                         </div>
                     </header>
-
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         ${guildsHtml}
                     </div>
                 </main>
-
             </body>
             </html>
             `);
