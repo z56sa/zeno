@@ -1,209 +1,436 @@
-const { Pool } = require('pg');
+// ========================================================
+// FILE: src/database/index.js
+// قاعدة بيانات SQLite متزامنة (Synchronous) باستخدام better-sqlite3
+// ========================================================
+const Database = require('better-sqlite3');
+const path = require('path');
+const fs = require('fs');
 
-if (!process.env.DATABASE_URL) {
-    console.warn('⚠️ تحذير: متغير البيئة DATABASE_URL غير معرف!');
+// مجلد البيانات
+const dataDir = path.join(__dirname, '../../data');
+if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
+
+const db = new Database(path.join(dataDir, 'zeno.db'));
+
+// تحسين الأداء
+db.pragma('journal_mode = WAL');
+db.pragma('foreign_keys = ON');
+
+// ==========================================
+// إنشاء الجداول
+// ==========================================
+db.exec(`
+  CREATE TABLE IF NOT EXISTS guild_settings (
+    guild_id TEXT PRIMARY KEY,
+    prefix TEXT DEFAULT '#',
+    welcome_channel TEXT,
+    welcome_message TEXT,
+    welcome_image INTEGER DEFAULT 1,
+    log_channel TEXT,
+    ticket_category TEXT,
+    ticket_log_channel TEXT,
+    support_role TEXT,
+    auto_role TEXT,
+    leveling_enabled INTEGER DEFAULT 1,
+    level_message TEXT,
+    level_channel TEXT DEFAULT 'current',
+    level_multiplier REAL DEFAULT 1.0,
+    anti_link INTEGER DEFAULT 0,
+    anti_spam INTEGER DEFAULT 0,
+    anti_caps INTEGER DEFAULT 0,
+    anti_emoji_spam INTEGER DEFAULT 0,
+    anti_line_spam INTEGER DEFAULT 0,
+    anti_mass_mention INTEGER DEFAULT 0,
+    max_mentions INTEGER DEFAULT 4,
+    max_emojis INTEGER DEFAULT 5,
+    max_lines INTEGER DEFAULT 8,
+    bad_words_enabled INTEGER DEFAULT 0,
+    bad_words_list TEXT DEFAULT '',
+    automod_action TEXT DEFAULT 'warn',
+    automod_whitelist_role TEXT,
+    automod_whitelist_channel TEXT,
+    anti_alt_days INTEGER DEFAULT 0,
+    verification_enabled INTEGER DEFAULT 0,
+    verification_type TEXT DEFAULT 'button',
+    verification_role TEXT,
+    anti_nuke_enabled INTEGER DEFAULT 0,
+    anti_nuke_action TEXT DEFAULT 'kick',
+    temp_voice_enabled INTEGER DEFAULT 0,
+    temp_voice_category TEXT,
+    temp_voice_channel TEXT
+  );
+
+  CREATE TABLE IF NOT EXISTS users (
+    user_id TEXT NOT NULL,
+    guild_id TEXT NOT NULL,
+    xp INTEGER DEFAULT 0,
+    level INTEGER DEFAULT 1,
+    coins INTEGER DEFAULT 0,
+    reputation INTEGER DEFAULT 0,
+    last_daily INTEGER DEFAULT 0,
+    last_message_xp INTEGER DEFAULT 0,
+    wallpaper TEXT DEFAULT 'default',
+    warnings INTEGER DEFAULT 0,
+    PRIMARY KEY (user_id, guild_id)
+  );
+
+  CREATE TABLE IF NOT EXISTS tickets (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    guild_id TEXT NOT NULL,
+    channel_id TEXT NOT NULL UNIQUE,
+    user_id TEXT NOT NULL,
+    category TEXT DEFAULT 'General',
+    status TEXT DEFAULT 'open',
+    created_at INTEGER DEFAULT (strftime('%s','now')),
+    closed_at INTEGER
+  );
+
+  CREATE TABLE IF NOT EXISTS warnings (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    guild_id TEXT NOT NULL,
+    user_id TEXT NOT NULL,
+    moderator_id TEXT NOT NULL,
+    reason TEXT,
+    created_at INTEGER DEFAULT (strftime('%s','now'))
+  );
+
+  CREATE TABLE IF NOT EXISTS reaction_roles (
+    custom_id TEXT PRIMARY KEY,
+    guild_id TEXT NOT NULL,
+    role_id TEXT NOT NULL,
+    message_id TEXT,
+    channel_id TEXT
+  );
+
+  CREATE TABLE IF NOT EXISTS auto_responders (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    guild_id TEXT NOT NULL,
+    trigger_word TEXT NOT NULL,
+    reply_text TEXT NOT NULL
+  );
+
+  CREATE TABLE IF NOT EXISTS level_rewards (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    guild_id TEXT NOT NULL,
+    level INTEGER NOT NULL,
+    role_id TEXT NOT NULL
+  );
+
+  CREATE TABLE IF NOT EXISTS giveaways (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    guild_id TEXT NOT NULL,
+    channel_id TEXT NOT NULL,
+    message_id TEXT UNIQUE,
+    prize TEXT NOT NULL,
+    winners_count INTEGER DEFAULT 1,
+    host_id TEXT NOT NULL,
+    end_time INTEGER NOT NULL,
+    status TEXT DEFAULT 'active',
+    entries TEXT DEFAULT '[]'
+  );
+
+  CREATE TABLE IF NOT EXISTS stars (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    guild_id TEXT NOT NULL,
+    giver_id TEXT NOT NULL,
+    receiver_id TEXT NOT NULL,
+    message_id TEXT,
+    created_at INTEGER DEFAULT (strftime('%s','now'))
+  );
+`);
+
+console.log('[DB] ✅ SQLite database initialized successfully');
+
+// ==========================================
+// Guild Settings
+// ==========================================
+function getGuildSettings(guildId) {
+  let row = db.prepare('SELECT * FROM guild_settings WHERE guild_id = ?').get(guildId);
+  if (!row) {
+    db.prepare('INSERT OR IGNORE INTO guild_settings (guild_id) VALUES (?)').run(guildId);
+    row = db.prepare('SELECT * FROM guild_settings WHERE guild_id = ?').get(guildId);
+  }
+  return row || { guild_id: guildId, prefix: '#' };
 }
 
-const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-    ssl: process.env.DATABASE_URL?.includes('localhost') ? false : { rejectUnauthorized: false }
-});
-
-const ALLOWED_SETTINGS = [
-    'prefix',
-    'welcome_channel',
-    'log_channel',
-    'ticket_category',
-    'ticket_log_channel',
-    'support_role',
-    'auto_role'
-];
-
-async function initDatabase() {
-    const query = `
-        CREATE TABLE IF NOT EXISTS users (
-            user_id VARCHAR(32) PRIMARY KEY,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        );
-
-        CREATE TABLE IF NOT EXISTS guild_settings (
-            guild_id VARCHAR(32) PRIMARY KEY,
-            prefix VARCHAR(10) DEFAULT '!',
-            welcome_channel VARCHAR(32),
-            log_channel VARCHAR(32),
-            ticket_category VARCHAR(32),
-            ticket_log_channel VARCHAR(32),
-            support_role VARCHAR(32),
-            auto_role VARCHAR(32)
-        );
-
-        CREATE TABLE IF NOT EXISTS tickets (
-            id SERIAL PRIMARY KEY,
-            guild_id VARCHAR(32) NOT NULL,
-            channel_id VARCHAR(32) NOT NULL UNIQUE,
-            user_id VARCHAR(32) NOT NULL,
-            category VARCHAR(64) DEFAULT 'General',
-            status VARCHAR(16) DEFAULT 'open',
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            closed_at TIMESTAMP
-        );
-    `;
-    try {
-        await pool.query(query);
-        console.log('✅ تم تجهيز قاعدة البيانات والجداول بنجاح.');
-    } catch (err) {
-        console.error('❌ خطأ في تهيئة قاعدة البيانات:', err);
-    }
+function setGuildSetting(guildId, key, value) {
+  // تأكد السجل موجود
+  db.prepare('INSERT OR IGNORE INTO guild_settings (guild_id) VALUES (?)').run(guildId);
+  // قائمة الأعمدة المسموحة
+  const allowed = [
+    'prefix','welcome_channel','welcome_message','welcome_image',
+    'log_channel','ticket_category','ticket_log_channel','support_role','auto_role',
+    'leveling_enabled','level_message','level_channel','level_multiplier',
+    'anti_link','anti_spam','anti_caps','anti_emoji_spam','anti_line_spam',
+    'anti_mass_mention','max_mentions','max_emojis','max_lines',
+    'bad_words_enabled','bad_words_list','automod_action',
+    'automod_whitelist_role','automod_whitelist_channel','anti_alt_days',
+    'verification_enabled','verification_type','verification_role',
+    'anti_nuke_enabled','anti_nuke_action',
+    'temp_voice_enabled','temp_voice_category','temp_voice_channel'
+  ];
+  if (!allowed.includes(key)) throw new Error(`حقل غير مسموح: ${key}`);
+  db.prepare(`UPDATE guild_settings SET ${key} = ? WHERE guild_id = ?`).run(value, guildId);
 }
 
-initDatabase();
-
-async function getUser(userId) {
-    try {
-        const result = await pool.query('SELECT * FROM users WHERE user_id = $1', [userId]);
-        return result.rows[0] || null;
-    } catch (err) {
-        console.error('Database Error (getUser):', err);
-        return null;
-    }
+// alias
+function updateGuildSetting(guildId, key, value) {
+  return setGuildSetting(guildId, key, value);
 }
 
-async function createUser(userId) {
-    try {
-        const result = await pool.query(
-            'INSERT INTO users (user_id) VALUES ($1) ON CONFLICT (user_id) DO NOTHING RETURNING *;',
-            [userId]
-        );
-        return result.rows[0] || null;
-    } catch (err) {
-        console.error('Database Error (createUser):', err);
-        return null;
-    }
+// ==========================================
+// Users / XP / Economy
+// ==========================================
+function getUser(userId, guildId) {
+  let row = db.prepare('SELECT * FROM users WHERE user_id = ? AND guild_id = ?').get(userId, guildId);
+  if (!row) {
+    db.prepare('INSERT OR IGNORE INTO users (user_id, guild_id) VALUES (?, ?)').run(userId, guildId);
+    row = db.prepare('SELECT * FROM users WHERE user_id = ? AND guild_id = ?').get(userId, guildId);
+  }
+  return row || { user_id: userId, guild_id: guildId, xp: 0, level: 1, coins: 0, reputation: 0, last_daily: 0, last_message_xp: 0, wallpaper: 'default', warnings: 0 };
 }
 
-async function getGuildSettings(guildId) {
-    try {
-        const result = await pool.query('SELECT * FROM guild_settings WHERE guild_id = $1', [guildId]);
-        return result.rows[0] || { guild_id: guildId, prefix: '!' };
-    } catch (err) {
-        console.error('Database Error (getGuildSettings):', err);
-        return null;
-    }
+function addXp(userId, guildId, amount) {
+  const user = getUser(userId, guildId);
+  const newXp = user.xp + amount;
+  const xpRequired = user.level * 100;
+  let newLevel = user.level;
+  let leveledUp = false;
+
+  if (newXp >= xpRequired) {
+    newLevel = user.level + 1;
+    leveledUp = true;
+  }
+
+  db.prepare(`
+    UPDATE users SET xp = ?, level = ?, last_message_xp = ?
+    WHERE user_id = ? AND guild_id = ?
+  `).run(newXp >= xpRequired ? newXp - xpRequired : newXp, newLevel, Date.now(), userId, guildId);
+
+  return { level: newLevel, leveledUp };
 }
 
-async function updateGuildSetting(guildId, settingKey, settingValue) {
-    if (!ALLOWED_SETTINGS.includes(settingKey)) {
-        throw new Error(`حقل غير مصرح بتعديله: ${settingKey}`);
-    }
-    try {
-        const query = `
-            INSERT INTO guild_settings (guild_id, ${settingKey})
-            VALUES ($1, $2)
-            ON CONFLICT (guild_id) 
-            DO UPDATE SET ${settingKey} = $2;
-        `;
-        await pool.query(query, [guildId, settingValue]);
-    } catch (err) {
-        console.error('Database Error (updateGuildSetting):', err);
-        throw err;
-    }
+function addCoins(userId, guildId, amount) {
+  getUser(userId, guildId);
+  db.prepare('UPDATE users SET coins = coins + ? WHERE user_id = ? AND guild_id = ?').run(amount, userId, guildId);
 }
 
-async function createTicket(guildId, channelId, userId, category = 'General') {
-    try {
-        const query = `
-            INSERT INTO tickets (guild_id, channel_id, user_id, category, status)
-            VALUES ($1, $2, $3, $4, 'open')
-            RETURNING *;
-        `;
-        const result = await pool.query(query, [guildId, channelId, userId, category]);
-        return result.rows[0];
-    } catch (err) {
-        console.error('Database Error (createTicket):', err);
-        throw err;
-    }
+function removeCoins(userId, guildId, amount) {
+  getUser(userId, guildId);
+  db.prepare('UPDATE users SET coins = MAX(0, coins - ?) WHERE user_id = ? AND guild_id = ?').run(amount, userId, guildId);
 }
 
-async function closeTicket(channelId) {
-    try {
-        const query = `
-            UPDATE tickets 
-            SET status = 'closed', closed_at = CURRENT_TIMESTAMP 
-            WHERE channel_id = $1
-            RETURNING *;
-        `;
-        const result = await pool.query(query, [channelId]);
-        return result.rows[0] || null;
-    } catch (err) {
-        console.error('Database Error (closeTicket):', err);
-        throw err;
-    }
+function setCoins(userId, guildId, amount) {
+  getUser(userId, guildId);
+  db.prepare('UPDATE users SET coins = ? WHERE user_id = ? AND guild_id = ?').run(amount, userId, guildId);
 }
 
-async function getTicketByChannel(channelId) {
-    try {
-        const result = await pool.query('SELECT * FROM tickets WHERE channel_id = $1', [channelId]);
-        return result.rows[0] || null;
-    } catch (err) {
-        console.error('Database Error (getTicketByChannel):', err);
-        return null;
-    }
+function setLastDaily(userId, guildId, timestamp) {
+  getUser(userId, guildId);
+  db.prepare('UPDATE users SET last_daily = ? WHERE user_id = ? AND guild_id = ?').run(timestamp, userId, guildId);
 }
 
-async function getUserActiveTickets(guildId, userId) {
-    try {
-        const result = await pool.query(
-            "SELECT * FROM tickets WHERE guild_id = $1 AND user_id = $2 AND status = 'open';",
-            [guildId, userId]
-        );
-        return result.rows;
-    } catch (err) {
-        console.error('Database Error (getUserActiveTickets):', err);
-        return [];
-    }
+function setWallpaper(userId, guildId, wallpaper) {
+  getUser(userId, guildId);
+  db.prepare('UPDATE users SET wallpaper = ? WHERE user_id = ? AND guild_id = ?').run(wallpaper, userId, guildId);
 }
 
-async function getGuildTickets(guildId, limit = 50) {
-    try {
-        const result = await pool.query(
-            'SELECT * FROM tickets WHERE guild_id = $1 ORDER BY created_at DESC LIMIT $2;',
-            [guildId, limit]
-        );
-        return result.rows;
-    } catch (err) {
-        console.error('Database Error (getGuildTickets):', err);
-        return [];
-    }
+function getLeaderboard(guildId, limit = 10) {
+  return db.prepare('SELECT * FROM users WHERE guild_id = ? ORDER BY xp DESC, level DESC LIMIT ?').all(guildId, limit);
 }
 
-async function getSystemStats() {
-    try {
-        const usersCount = await pool.query('SELECT COUNT(*) FROM users');
-        const guildsCount = await pool.query('SELECT COUNT(*) FROM guild_settings');
-        const openTicketsCount = await pool.query("SELECT COUNT(*) FROM tickets WHERE status = 'open'");
-
-        return {
-            totalUsers: parseInt(usersCount.rows[0].count, 10) || 0,
-            totalGuilds: parseInt(guildsCount.rows[0].count, 10) || 0,
-            openTickets: parseInt(openTicketsCount.rows[0].count, 10) || 0
-        };
-    } catch (err) {
-        console.error('Database Error (getSystemStats):', err);
-        return { totalUsers: 0, totalGuilds: 0, openTickets: 0 };
-    }
+function getCoinsLeaderboard(guildId, limit = 10) {
+  return db.prepare('SELECT * FROM users WHERE guild_id = ? ORDER BY coins DESC LIMIT ?').all(guildId, limit);
 }
 
+// ==========================================
+// Warnings
+// ==========================================
+function addWarning(guildId, userId, moderatorId, reason = 'لا يوجد سبب') {
+  db.prepare('INSERT INTO warnings (guild_id, user_id, moderator_id, reason) VALUES (?, ?, ?, ?)').run(guildId, userId, moderatorId, reason);
+  const count = db.prepare('SELECT COUNT(*) as count FROM warnings WHERE guild_id = ? AND user_id = ?').get(guildId, userId);
+  db.prepare('UPDATE users SET warnings = ? WHERE user_id = ? AND guild_id = ?').run(count.count, userId, guildId);
+  return count.count;
+}
+
+function getWarnings(guildId, userId) {
+  return db.prepare('SELECT * FROM warnings WHERE guild_id = ? AND user_id = ? ORDER BY created_at DESC').all(guildId, userId);
+}
+
+function clearWarnings(guildId, userId) {
+  db.prepare('DELETE FROM warnings WHERE guild_id = ? AND user_id = ?').run(guildId, userId);
+  db.prepare('UPDATE users SET warnings = 0 WHERE user_id = ? AND guild_id = ?').run(userId, guildId);
+}
+
+// ==========================================
+// Tickets
+// ==========================================
+function createTicket(guildId, channelId, userId, category = 'General') {
+  db.prepare('INSERT OR IGNORE INTO tickets (guild_id, channel_id, user_id, category) VALUES (?, ?, ?, ?)').run(guildId, channelId, userId, category);
+  return db.prepare('SELECT * FROM tickets WHERE channel_id = ?').get(channelId);
+}
+
+function closeTicket(channelId) {
+  db.prepare("UPDATE tickets SET status = 'closed', closed_at = strftime('%s','now') WHERE channel_id = ?").run(channelId);
+  return db.prepare('SELECT * FROM tickets WHERE channel_id = ?').get(channelId);
+}
+
+function getTicketByChannel(channelId) {
+  return db.prepare('SELECT * FROM tickets WHERE channel_id = ?').get(channelId);
+}
+
+function getUserActiveTickets(guildId, userId) {
+  return db.prepare("SELECT * FROM tickets WHERE guild_id = ? AND user_id = ? AND status = 'open'").all(guildId, userId);
+}
+
+function getGuildTickets(guildId, limit = 50) {
+  return db.prepare('SELECT * FROM tickets WHERE guild_id = ? ORDER BY created_at DESC LIMIT ?').all(guildId, limit);
+}
+
+// ==========================================
+// Reaction Roles
+// ==========================================
+function setReactionRole(customId, guildId, roleId, messageId, channelId) {
+  db.prepare('INSERT OR REPLACE INTO reaction_roles (custom_id, guild_id, role_id, message_id, channel_id) VALUES (?, ?, ?, ?, ?)').run(customId, guildId, roleId, messageId, channelId);
+}
+
+function getReactionRole(customId) {
+  return db.prepare('SELECT * FROM reaction_roles WHERE custom_id = ?').get(customId);
+}
+
+function getGuildReactionRoles(guildId) {
+  return db.prepare('SELECT * FROM reaction_roles WHERE guild_id = ?').all(guildId);
+}
+
+function deleteReactionRole(customId) {
+  db.prepare('DELETE FROM reaction_roles WHERE custom_id = ?').run(customId);
+}
+
+// ==========================================
+// Auto Responders
+// ==========================================
+function addAutoResponder(guildId, triggerWord, replyText) {
+  db.prepare('INSERT INTO auto_responders (guild_id, trigger_word, reply_text) VALUES (?, ?, ?)').run(guildId, triggerWord.toLowerCase(), replyText);
+}
+
+function getAutoResponders(guildId) {
+  return db.prepare('SELECT * FROM auto_responders WHERE guild_id = ?').all(guildId);
+}
+
+function deleteAutoResponder(guildId, triggerWord) {
+  db.prepare('DELETE FROM auto_responders WHERE guild_id = ? AND trigger_word = ?').run(guildId, triggerWord.toLowerCase());
+}
+
+// ==========================================
+// Level Rewards
+// ==========================================
+function addLevelReward(guildId, level, roleId) {
+  db.prepare('INSERT OR REPLACE INTO level_rewards (guild_id, level, role_id) VALUES (?, ?, ?)').run(guildId, level, roleId);
+}
+
+function getLevelRewards(guildId) {
+  return db.prepare('SELECT * FROM level_rewards WHERE guild_id = ? ORDER BY level ASC').all(guildId);
+}
+
+function removeLevelReward(guildId, level) {
+  db.prepare('DELETE FROM level_rewards WHERE guild_id = ? AND level = ?').run(guildId, level);
+}
+
+// ==========================================
+// Stars
+// ==========================================
+function addStar(guildId, giverId, receiverId, messageId) {
+  // منع التقييم المزدوج
+  const exists = db.prepare('SELECT id FROM stars WHERE guild_id = ? AND giver_id = ? AND message_id = ?').get(guildId, giverId, messageId);
+  if (exists) return false;
+  db.prepare('INSERT INTO stars (guild_id, giver_id, receiver_id, message_id) VALUES (?, ?, ?, ?)').run(guildId, giverId, receiverId, messageId);
+  return true;
+}
+
+function getStars(guildId, userId) {
+  const row = db.prepare('SELECT COUNT(*) as count FROM stars WHERE guild_id = ? AND receiver_id = ?').get(guildId, userId);
+  return row ? row.count : 0;
+}
+
+// ==========================================
+// Giveaways
+// ==========================================
+function createGiveaway(guildId, channelId, messageId, prize, winnersCount, hostId, endTime) {
+  db.prepare('INSERT INTO giveaways (guild_id, channel_id, message_id, prize, winners_count, host_id, end_time) VALUES (?, ?, ?, ?, ?, ?, ?)').run(guildId, channelId, messageId, prize, winnersCount, hostId, endTime);
+  return db.prepare('SELECT * FROM giveaways WHERE message_id = ?').get(messageId);
+}
+
+function getGiveaway(messageId) {
+  return db.prepare('SELECT * FROM giveaways WHERE message_id = ?').get(messageId);
+}
+
+function getActiveGiveaways() {
+  return db.prepare("SELECT * FROM giveaways WHERE status = 'active' AND end_time <= ?").all(Date.now());
+}
+
+function updateGiveawayEntries(messageId, entries) {
+  db.prepare('UPDATE giveaways SET entries = ? WHERE message_id = ?').run(JSON.stringify(entries), messageId);
+}
+
+function endGiveaway(messageId) {
+  db.prepare("UPDATE giveaways SET status = 'ended' WHERE message_id = ?").run(messageId);
+}
+
+// ==========================================
+// Stats
+// ==========================================
+function getSystemStats() {
+  const users = db.prepare('SELECT COUNT(DISTINCT user_id) as count FROM users').get();
+  const guilds = db.prepare('SELECT COUNT(*) as count FROM guild_settings').get();
+  const tickets = db.prepare("SELECT COUNT(*) as count FROM tickets WHERE status = 'open'").get();
+  return {
+    totalUsers: users?.count || 0,
+    totalGuilds: guilds?.count || 0,
+    openTickets: tickets?.count || 0
+  };
+}
+
+// ==========================================
+// Export
+// ==========================================
 module.exports = {
-    pool,
-    initDatabase,
-    getUser,
-    createUser,
-    getGuildSettings,
-    updateGuildSetting,
-    createTicket,
-    closeTicket,
-    getTicketByChannel,
-    getUserActiveTickets,
-    getGuildTickets,
-    getSystemStats
+  db,
+  getGuildSettings,
+  setGuildSetting,
+  updateGuildSetting,
+  getUser,
+  addXp,
+  addCoins,
+  removeCoins,
+  setCoins,
+  setLastDaily,
+  setWallpaper,
+  getLeaderboard,
+  getCoinsLeaderboard,
+  addWarning,
+  getWarnings,
+  clearWarnings,
+  createTicket,
+  closeTicket,
+  getTicketByChannel,
+  getUserActiveTickets,
+  getGuildTickets,
+  setReactionRole,
+  getReactionRole,
+  getGuildReactionRoles,
+  deleteReactionRole,
+  addAutoResponder,
+  getAutoResponders,
+  deleteAutoResponder,
+  addLevelReward,
+  getLevelRewards,
+  removeLevelReward,
+  addStar,
+  getStars,
+  createGiveaway,
+  getGiveaway,
+  getActiveGiveaways,
+  updateGiveawayEntries,
+  endGiveaway,
+  getSystemStats
 };
