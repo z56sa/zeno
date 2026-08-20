@@ -159,14 +159,13 @@ module.exports = function (app) {
     });
 
     // ==========================================
-    // لوحة التحكم الفريدة لاختيار السيرفر
+    // لوحة التحكم لاختيار السيرفر
     // ==========================================
     app.get('/dashboard', (req, res) => {
         try {
             if (!req.session?.user) return res.redirect('/auth/discord');
             const user = req.session.user;
             const guilds = req.session.guilds || [];
-
             const userAvatar = user.avatar ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png` : 'https://cdn.discordapp.com/embed/avatars/0.png';
 
             const guildsHtml = guilds.length > 0 ? guilds.map(guild => `
@@ -199,18 +198,9 @@ module.exports = function (app) {
                 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
                 <style>
                     body { background-color: #0b0c10; color: #d1d5db; font-family: 'Cairo', sans-serif; overflow-x: hidden; }
-                    .mesh-bg {
-                        position: absolute;
-                        top: 0; left: 0; width: 100%; height: 300px;
-                        background: linear-gradient(135deg, rgba(147, 51, 234, 0.1) 0%, rgba(11, 12, 16, 0) 100%);
-                        z-index: 0;
-                        pointer-events: none;
-                    }
                 </style>
             </head>
             <body class="min-h-screen flex flex-col relative">
-                <div class="mesh-bg"></div>
-
                 <header class="w-full px-6 md:px-16 py-5 border-b border-purple-900/20 backdrop-blur-xl bg-[#0b0c10]/80 sticky top-0 z-50 flex items-center justify-between">
                     <div class="flex items-center gap-4">
                         <div class="w-10 h-10 bg-gradient-to-tr from-purple-700 to-indigo-500 rounded-xl flex items-center justify-center shadow-lg shadow-purple-600/30 text-white font-black text-xl border border-purple-400/30">Z</div>
@@ -219,25 +209,19 @@ module.exports = function (app) {
                             <p class="text-[11px] text-purple-400 font-bold">لوحة الإدارة المركزية</p>
                         </div>
                     </div>
-
                     <div class="flex items-center gap-4">
                         <a href="/" class="px-4 py-2 bg-[#13141b] hover:bg-[#1a1b24] text-gray-300 hover:text-white rounded-xl border border-purple-500/20 text-xs font-bold transition shadow-sm">الرئيسية</a>
                         <div class="flex items-center gap-3 bg-[#13141b] px-3 py-1.5 rounded-2xl border border-purple-500/20">
                             <img src="${userAvatar}" class="w-8 h-8 rounded-full border border-purple-500/40">
                             <span class="text-xs font-bold text-white hidden sm:inline">${user.username}</span>
-                            <a href="/logout" title="تسجيل الخروج" class="text-red-400 hover:text-red-300 p-1 transition">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
-                            </a>
                         </div>
                     </div>
                 </header>
-
                 <main class="flex-1 px-6 md:px-16 py-10 z-10 max-w-7xl mx-auto w-full">
                     <div class="mb-10">
                         <h2 class="text-3xl font-black text-white tracking-tight">اختر السيرفر للبدء</h2>
                         <p class="text-gray-400 mt-2 text-sm font-medium">قم باختيار الخادم الذي تود التحكم بإعداداته وتخصيص ميزاته بالكامل.</p>
                     </div>
-
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         ${guildsHtml}
                     </div>
@@ -251,7 +235,7 @@ module.exports = function (app) {
     });
 
     // ==========================================
-    // صفحة إدارة السيرفر المتكاملة (تضم جميع الوحدات بدون القائمة الجانبية القديمة)
+    // صفحة إدارة السيرفر (تصميم احترافي مطابق للصورة مع القائمة الجانبية وصورة البوت)
     // ==========================================
     app.get('/dashboard/:guildId', (req, res) => {
         try {
@@ -259,8 +243,11 @@ module.exports = function (app) {
             const guildId = req.params.guildId;
             const guilds = req.session.guilds || [];
             const guild = guilds.find(g => g.id === guildId);
+            const user = req.session.user;
 
             if (!guild) return res.redirect('/dashboard');
+
+            const userAvatar = user.avatar ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png` : 'https://cdn.discordapp.com/embed/avatars/0.png';
 
             res.send(`
             <!DOCTYPE html>
@@ -272,94 +259,190 @@ module.exports = function (app) {
                 <script src="https://cdn.tailwindcss.com"></script>
                 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
                 <style>
-                    body { background-color: #0b0c10; color: #d1d5db; font-family: 'Cairo', sans-serif; }
+                    body { background-color: #0b0c10; color: #d1d5db; font-family: 'Cairo', sans-serif; overflow-x: hidden; }
+                    ::-webkit-scrollbar { width: 6px; }
+                    ::-webkit-scrollbar-thumb { background: #232430; border-radius: 10px; }
                 </style>
             </head>
-            <body class="min-h-screen flex flex-col">
+            <body class="min-h-screen flex flex-col bg-[#0b0c10] text-gray-200">
                 
-                <header class="w-full px-6 md:px-16 py-5 border-b border-purple-900/20 backdrop-blur-xl bg-[#0b0c10]/80 sticky top-0 z-50 flex items-center justify-between">
-                    <div class="flex items-center gap-4">
-                        <img src="${guild.icon ? `https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.png` : 'https://cdn.discordapp.com/embed/avatars/0.png'}" class="w-11 h-11 rounded-2xl border border-purple-500/30">
-                        <div>
-                            <h1 class="font-black text-lg text-white">${guild.name}</h1>
-                            <p class="text-[11px] text-purple-400 font-bold">لوحة تحكم الخادم وإدارة الوحدات</p>
-                        </div>
+                <!-- الشريط العلوى (Top Bar) -->
+                <header class="w-full px-6 py-4 border-b border-purple-900/20 bg-[#13141b]/90 backdrop-blur sticky top-0 z-50 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <a href="/dashboard" class="flex items-center gap-2 px-3 py-1.5 bg-[#0b0c10] hover:bg-[#1a1b24] text-gray-300 rounded-xl border border-purple-500/20 text-xs font-bold transition">
+                            <svg class="w-4 h-4 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                            <span>العودة للخوادم</span>
+                        </a>
+                        <span class="text-gray-500">|</span>
+                        <span class="text-sm font-extrabold text-white">${guild.name}</span>
                     </div>
-                    <a href="/dashboard" class="px-5 py-2.5 bg-[#13141b] hover:bg-[#1a1b24] text-white rounded-2xl border border-purple-500/25 text-xs font-bold transition shadow-md flex items-center gap-2">
-                        <span>العودة للسيرفرات</span>
-                    </a>
+
+                    <!-- صورة وبطاقة البوت في المنتصف/اليمين العلوي -->
+                    <div class="flex items-center gap-3">
+                        <div class="flex items-center gap-2 bg-[#0b0c10] px-3 py-1.5 rounded-2xl border border-purple-500/20 shadow-inner">
+                            <span class="text-xs font-bold text-white hidden sm:inline">ZENO BOT</span>
+                            <div class="w-8 h-8 bg-gradient-to-tr from-purple-600 to-indigo-500 rounded-xl flex items-center justify-center text-white font-black text-sm shadow-md border border-purple-400/40">Z</div>
+                        </div>
+                        <img src="${userAvatar}" class="w-9 h-9 rounded-full border border-purple-500/30">
+                    </div>
                 </header>
 
-                <main class="flex-1 px-6 md:px-16 py-10 max-w-7xl mx-auto w-full">
-                    <div class="mb-10">
-                        <h2 class="text-3xl font-black text-white">إدارة الإضافات والوحدات الكاملة</h2>
-                        <p class="text-gray-400 mt-2 text-sm">تحكم بجميع خصائص وأوامر البوت في سيرفر ${guild.name} بسهولة تامة.</p>
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="flex-1 flex flex-col lg:flex-row">
+                    
+                    <!-- المحتوى الرئيسي (Main Panel) -->
+                    <main class="flex-1 p-6 md:p-10">
                         
-                        <!-- نظام التذاكر -->
-                        <div class="bg-[#13141b] border border-purple-500/10 hover:border-purple-500/40 rounded-3xl p-6 flex flex-col justify-between transition group">
-                            <div>
-                                <div class="w-12 h-12 bg-purple-600/10 rounded-2xl flex items-center justify-center text-purple-400 mb-4 border border-purple-500/20 text-xl font-bold">🎫</div>
-                                <h3 class="font-bold text-white text-lg mb-2">نظام التذاكر المتقدم</h3>
-                                <p class="text-gray-400 text-xs leading-relaxed">إنشاء وتخصيص غرف الدعم الفني والتذاكر للأعضاء وصلاحيات المشرفين.</p>
-                            </div>
-                            <button class="mt-8 w-full py-3 bg-purple-600 hover:bg-purple-500 text-white rounded-2xl font-bold text-sm transition shadow-lg shadow-purple-600/20">تعديل الإعدادات</button>
+                        <!-- شريط البحث السريع -->
+                        <div class="mb-8">
+                            <input type="text" placeholder="Search plugins..." class="w-full md:w-80 bg-[#13141b] border border-purple-500/20 focus:border-purple-500 rounded-2xl px-4 py-3 text-xs text-gray-200 outline-none transition shadow-inner">
                         </div>
 
-                        <!-- الترحيب والمغادرة -->
-                        <div class="bg-[#13141b] border border-purple-500/10 hover:border-purple-500/40 rounded-3xl p-6 flex flex-col justify-between transition group">
-                            <div>
-                                <div class="w-12 h-12 bg-purple-600/10 rounded-2xl flex items-center justify-center text-purple-400 mb-4 border border-purple-500/20 text-xl font-bold">👋</div>
-                                <h3 class="font-bold text-white text-lg mb-2">الترحيب والمغادرة</h3>
-                                <p class="text-gray-400 text-xs leading-relaxed">إرسال رسائل ترحيب مخصصة وصور احترافية للأعضاء الجدد عند الانضمام.</p>
+                        <!-- قسم Fast Access -->
+                        <div class="mb-10">
+                            <h3 class="text-xs font-extrabold text-purple-400 uppercase tracking-widest mb-4">Fast Access</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                                
+                                <div class="bg-[#13141b] border border-purple-500/10 hover:border-purple-500/30 rounded-2xl p-5 flex flex-col justify-between transition group">
+                                    <div class="flex items-center justify-between mb-3">
+                                        <h4 class="font-bold text-white text-sm">نظرة عامة</h4>
+                                        <span class="p-2 bg-purple-600/10 rounded-xl text-purple-400">👁️</span>
+                                    </div>
+                                    <p class="text-gray-400 text-[11px] mb-6">Get main information about your server settings</p>
+                                    <button class="w-full py-2.5 bg-[#1a1b24] hover:bg-purple-600 hover:text-white text-gray-300 rounded-xl font-bold text-xs transition border border-purple-500/10">Visit</button>
+                                </div>
+
+                                <div class="bg-[#13141b] border border-purple-500/10 hover:border-purple-500/30 rounded-2xl p-5 flex flex-col justify-between transition group">
+                                    <div class="flex items-center justify-between mb-3">
+                                        <h4 class="font-bold text-white text-sm">إعدادات السيرفر</h4>
+                                        <span class="p-2 bg-purple-600/10 rounded-xl text-purple-400">⚙️</span>
+                                    </div>
+                                    <p class="text-gray-400 text-[11px] mb-6">Manage your server settings</p>
+                                    <button class="w-full py-2.5 bg-[#1a1b24] hover:bg-purple-600 hover:text-white text-gray-300 rounded-xl font-bold text-xs transition border border-purple-500/10">Visit</button>
+                                </div>
+
+                                <div class="bg-[#13141b] border border-purple-500/10 hover:border-purple-500/30 rounded-2xl p-5 flex flex-col justify-between transition group">
+                                    <div class="flex items-center justify-between mb-3">
+                                        <h4 class="font-bold text-white text-sm">رسائل الإيمبد</h4>
+                                        <span class="p-2 bg-purple-600/10 rounded-xl text-purple-400">💬</span>
+                                    </div>
+                                    <p class="text-gray-400 text-[11px] mb-6">Create and manage embed messages</p>
+                                    <button class="w-full py-2.5 bg-[#1a1b24] hover:bg-purple-600 hover:text-white text-gray-300 rounded-xl font-bold text-xs transition border border-purple-500/10">Visit</button>
+                                </div>
+
                             </div>
-                            <button class="mt-8 w-full py-3 bg-[#1a1b24] hover:bg-[#232430] text-white rounded-2xl font-bold text-sm transition border border-purple-500/15">تعديل الإعدادات</button>
                         </div>
 
-                        <!-- الإشراف والحماية -->
-                        <div class="bg-[#13141b] border border-purple-500/10 hover:border-purple-500/40 rounded-3xl p-6 flex flex-col justify-between transition group">
-                            <div>
-                                <div class="w-12 h-12 bg-purple-600/10 rounded-2xl flex items-center justify-center text-purple-400 mb-4 border border-purple-500/20 text-xl font-bold">🛡️</div>
-                                <h3 class="font-bold text-white text-lg mb-2">الإشراف والحماية التلقائية</h3>
-                                <p class="text-gray-400 text-xs leading-relaxed">حماية السيرفر من السبام، الروابط الضارة، والكلمات المسيئة بإعدادات متقدمة.</p>
+                        <!-- قسم Modules -->
+                        <div>
+                            <h3 class="text-xs font-extrabold text-purple-400 uppercase tracking-widest mb-4">Modules (12 Plugins)</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                                
+                                <div class="bg-[#13141b] border border-purple-500/10 rounded-2xl p-5 flex flex-col justify-between">
+                                    <div class="flex items-center justify-between mb-3">
+                                        <h4 class="font-bold text-white text-sm">الأوامر العامة</h4>
+                                        <div class="flex items-center gap-2">
+                                            <input type="checkbox" checked class="accent-purple-600 w-4 h-4 cursor-pointer">
+                                        </div>
+                                    </div>
+                                    <p class="text-gray-400 text-[11px] mb-6">Utility commands and features</p>
+                                    <button class="w-full py-2.5 bg-[#1a1b24] hover:bg-[#232430] text-gray-300 rounded-xl font-bold text-xs transition border border-purple-500/10">Configure</button>
+                                </div>
+
+                                <div class="bg-[#13141b] border border-purple-500/10 rounded-2xl p-5 flex flex-col justify-between">
+                                    <div class="flex items-center justify-between mb-3">
+                                        <h4 class="font-bold text-white text-sm">الإشراف</h4>
+                                        <div class="flex items-center gap-2">
+                                            <input type="checkbox" checked class="accent-purple-600 w-4 h-4 cursor-pointer">
+                                        </div>
+                                    </div>
+                                    <p class="text-gray-400 text-[11px] mb-6">Moderation tools and commands</p>
+                                    <button class="w-full py-2.5 bg-[#1a1b24] hover:bg-[#232430] text-gray-300 rounded-xl font-bold text-xs transition border border-purple-500/10">Configure</button>
+                                </div>
+
+                                <div class="bg-[#13141b] border border-purple-500/10 rounded-2xl p-5 flex flex-col justify-between">
+                                    <div class="flex items-center justify-between mb-3">
+                                        <h4 class="font-bold text-white text-sm">الرقابة التلقائية</h4>
+                                        <div class="flex items-center gap-2">
+                                            <input type="checkbox" checked class="accent-purple-600 w-4 h-4 cursor-pointer">
+                                        </div>
+                                    </div>
+                                    <p class="text-gray-400 text-[11px] mb-6">Automatic moderation features</p>
+                                    <button class="w-full py-2.5 bg-[#1a1b24] hover:bg-[#232430] text-gray-300 rounded-xl font-bold text-xs transition border border-purple-500/10">Configure</button>
+                                </div>
+
+                                <div class="bg-[#13141b] border border-purple-500/10 rounded-2xl p-5 flex flex-col justify-between">
+                                    <div class="flex items-center justify-between mb-3">
+                                        <h4 class="font-bold text-white text-sm">نظام التذاكر</h4>
+                                        <div class="flex items-center gap-2">
+                                            <input type="checkbox" checked class="accent-purple-600 w-4 h-4 cursor-pointer">
+                                        </div>
+                                    </div>
+                                    <p class="text-gray-400 text-[11px] mb-6">Advanced support ticket system</p>
+                                    <button class="w-full py-2.5 bg-[#1a1b24] hover:bg-[#232430] text-gray-300 rounded-xl font-bold text-xs transition border border-purple-500/10">Configure</button>
+                                </div>
+
+                                <div class="bg-[#13141b] border border-purple-500/10 rounded-2xl p-5 flex flex-col justify-between">
+                                    <div class="flex items-center justify-between mb-3">
+                                        <h4 class="font-bold text-white text-sm">الترحيب والمغادرة</h4>
+                                        <div class="flex items-center gap-2">
+                                            <input type="checkbox" checked class="accent-purple-600 w-4 h-4 cursor-pointer">
+                                        </div>
+                                    </div>
+                                    <p class="text-gray-400 text-[11px] mb-6">Custom welcome & leave cards</p>
+                                    <button class="w-full py-2.5 bg-[#1a1b24] hover:bg-[#232430] text-gray-300 rounded-xl font-bold text-xs transition border border-purple-500/10">Configure</button>
+                                </div>
+
                             </div>
-                            <button class="mt-8 w-full py-3 bg-[#1a1b24] hover:bg-[#232430] text-white rounded-2xl font-bold text-sm transition border border-purple-500/15">تعديل الإعدادات</button>
                         </div>
 
-                        <!-- الأوامر العامة -->
-                        <div class="bg-[#13141b] border border-purple-500/10 hover:border-purple-500/40 rounded-3xl p-6 flex flex-col justify-between transition group">
-                            <div>
-                                <div class="w-12 h-12 bg-purple-600/10 rounded-2xl flex items-center justify-center text-purple-400 mb-4 border border-purple-500/20 text-xl font-bold">⚡</div>
-                                <h3 class="font-bold text-white text-lg mb-2">الأوامر العامة</h3>
-                                <p class="text-gray-400 text-xs leading-relaxed">تفعيل وتعطيل الأوامر الترفيهية والعامة المتاحة لجميع الأعضاء.</p>
-                            </div>
-                            <button class="mt-8 w-full py-3 bg-[#1a1b24] hover:bg-[#232430] text-white rounded-2xl font-bold text-sm transition border border-purple-500/15">تعديل الإعدادات</button>
-                        </div>
+                    </main>
 
-                        <!-- رسائل الإيمبد -->
-                        <div class="bg-[#13141b] border border-purple-500/10 hover:border-purple-500/40 rounded-3xl p-6 flex flex-col justify-between transition group">
-                            <div>
-                                <div class="w-12 h-12 bg-purple-600/10 rounded-2xl flex items-center justify-center text-purple-400 mb-4 border border-purple-500/20 text-xl font-bold">💬</div>
-                                <h3 class="font-bold text-white text-lg mb-2">رسائل الإيمبد المخصصة</h3>
-                                <p class="text-gray-400 text-xs leading-relaxed">تصميم وإرسال رسائل إيمبد احترافية ومتناسقة للقنوات العامة والإعلانات.</p>
-                            </div>
-                            <button class="mt-8 w-full py-3 bg-[#1a1b24] hover:bg-[#232430] text-white rounded-2xl font-bold text-sm transition border border-purple-500/15">تعديل الإعدادات</button>
-                        </div>
+                    <!-- القائمة الجانبية اليمنى (Plugins Sidebar) المطابقة للصورة -->
+                    <aside class="w-full lg:w-72 bg-[#101116] border-t lg:border-t-0 lg:border-r border-purple-900/10 p-4 flex flex-col gap-1 text-xs">
+                        <div class="text-[10px] text-gray-500 font-bold uppercase tracking-wider px-3 mb-2">General</div>
+                        <a href="#" class="flex items-center justify-between px-3 py-2 rounded-xl bg-purple-600/10 text-purple-400 font-bold">
+                            <span>⚡ نظرة عامة</span>
+                            <span class="w-2 h-2 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500"></span>
+                        </a>
+                        <a href="#" class="flex items-center justify-between px-3 py-2 rounded-xl hover:bg-[#161720] text-gray-300 transition">
+                            <span>⚙️ إعدادات السيرفر</span>
+                            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                        </a>
+                        <a href="#" class="flex items-center justify-between px-3 py-2 rounded-xl hover:bg-[#161720] text-gray-300 transition">
+                            <span>💬 رسائل الإيمبد</span>
+                            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                        </a>
+                        <a href="#" class="flex items-center justify-between px-3 py-2 rounded-xl hover:bg-[#161720] text-gray-300 transition">
+                            <span>🎫 التذاكر</span>
+                            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                        </a>
 
-                        <!-- إعدادات السيرفر العامة -->
-                        <div class="bg-[#13141b] border border-purple-500/10 hover:border-purple-500/40 rounded-3xl p-6 flex flex-col justify-between transition group">
-                            <div>
-                                <div class="w-12 h-12 bg-purple-600/10 rounded-2xl flex items-center justify-center text-purple-400 mb-4 border border-purple-500/20 text-xl font-bold">🔧</div>
-                                <h3 class="font-bold text-white text-lg mb-2">إعدادات الخادم العامة</h3>
-                                <p class="text-gray-400 text-xs leading-relaxed">تخصيص بادئة البوت، لغة الأوامر، وصلاحيات المسؤولين الأساسية.</p>
-                            </div>
-                            <button class="mt-8 w-full py-3 bg-[#1a1b24] hover:bg-[#232430] text-white rounded-2xl font-bold text-sm transition border border-purple-500/15">تعديل الإعدادات</button>
-                        </div>
+                        <div class="text-[10px] text-gray-500 font-bold uppercase tracking-wider px-3 mt-4 mb-2">الإشراف</div>
+                        <a href="#" class="flex items-center justify-between px-3 py-2 rounded-xl hover:bg-[#161720] text-gray-300 transition">
+                            <span>🛡️ الإشراف</span>
+                            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                        </a>
+                        <a href="#" class="flex items-center justify-between px-3 py-2 rounded-xl hover:bg-[#161720] text-gray-300 transition">
+                            <span>📜 اللوق والسجلات</span>
+                            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                        </a>
+                        <a href="#" class="flex items-center justify-between px-3 py-2 rounded-xl hover:bg-[#161720] text-gray-300 transition">
+                            <span>🤖 الرقابة التلقائية</span>
+                            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                        </a>
 
-                    </div>
-                </main>
+                        <div class="text-[10px] text-gray-500 font-bold uppercase tracking-wider px-3 mt-4 mb-2">أخرى</div>
+                        <a href="#" class="flex items-center justify-between px-3 py-2 rounded-xl hover:bg-[#161720] text-gray-300 transition">
+                            <span>🛠️ الأوامر العامة</span>
+                            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                        </a>
+                        <a href="#" class="flex items-center justify-between px-3 py-2 rounded-xl hover:bg-[#161720] text-gray-300 transition">
+                            <span>👋 الترحيب والمغادرة</span>
+                            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                        </a>
+                    </aside>
+
+                </div>
             </body>
             </html>
             `);
