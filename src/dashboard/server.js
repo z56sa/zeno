@@ -294,24 +294,59 @@ module.exports = function (app, client) {
                             </div>
 
                             <!-- Nav Links -->
-                            <div class="flex flex-col gap-1 text-xs text-right">
+                            <div class="flex flex-col gap-1 text-xs text-right overflow-y-auto pr-1">
                                 <span class="text-[10px] font-bold text-gray-500 px-3 py-1">عام</span>
                                 <a href="/dashboard" class="px-3 py-2 rounded-xl bg-[#5865F2] text-white font-bold flex items-center justify-between">
                                     <span class="w-1.5 h-1.5 rounded-full bg-white"></span>
                                     <span>نظرة عامة</span>
                                 </a>
 
-                                <span class="text-[10px] font-bold text-gray-500 px-3 pt-3 pb-1">لوحة المتصدرين</span>
-                                <a href="/#leaderboard" class="px-3 py-2 rounded-xl text-gray-400 hover:text-white hover:bg-[#282937] font-medium text-right">أعلى 100 بواسطة XP</a>
-                                <a href="/#rich" class="px-3 py-2 rounded-xl text-gray-400 hover:text-white hover:bg-[#282937] font-medium text-right">أغنى 100 ملياردير</a>
+                                <span class="text-[10px] font-bold text-gray-500 px-3 pt-3 pb-1">متاجر الكريدت</span>
+                                <a href="#wallpapers" class="px-3 py-1.5 rounded-xl text-gray-400 hover:text-white hover:bg-[#282937] font-medium flex items-center justify-end gap-2">
+                                    <span>خلفيات البروفايل</span>
+                                    <span>🖼️</span>
+                                </a>
+                                <a href="#badges" class="px-3 py-1.5 rounded-xl text-gray-400 hover:text-white hover:bg-[#282937] font-medium flex items-center justify-end gap-2">
+                                    <span>شارات البروفايل</span>
+                                    <span>🎖️</span>
+                                </a>
+                                <a href="#identity" class="px-3 py-1.5 rounded-xl text-gray-400 hover:text-white hover:bg-[#282937] font-medium flex items-center justify-end gap-2">
+                                    <span>خلفيات الهوية</span>
+                                    <span>🪪</span>
+                                </a>
+
+                                <span class="text-[10px] font-bold text-gray-500 px-3 pt-3 pb-1">قائمة المتصدرين</span>
+                                <a href="/#leaderboard" class="px-3 py-1.5 rounded-xl text-gray-400 hover:text-white hover:bg-[#282937] font-medium flex items-center justify-end gap-2">
+                                    <span>أعلى 100 بواسطة XP</span>
+                                    <span>🏆</span>
+                                </a>
+                                <a href="/#rich" class="px-3 py-1.5 rounded-xl text-gray-400 hover:text-white hover:bg-[#282937] font-medium flex items-center justify-end gap-2">
+                                    <span>أغنى 100 ملياردير</span>
+                                    <span>💰</span>
+                                </a>
+                                <a href="#rep" class="px-3 py-1.5 rounded-xl text-gray-400 hover:text-white hover:bg-[#282937] font-medium flex items-center justify-end gap-2">
+                                    <span>أعلى 100 نقاط السمعة</span>
+                                    <span>⭐</span>
+                                </a>
 
                                 <span class="text-[10px] font-bold text-gray-500 px-3 pt-3 pb-1">أخرى</span>
-                                <a href="/#daily" class="px-3 py-2 rounded-xl text-gray-400 hover:text-white hover:bg-[#282937] font-medium text-right">احصل على مكافأتك اليومية</a>
+                                <a href="/#daily" class="px-3 py-1.5 rounded-xl text-gray-400 hover:text-white hover:bg-[#282937] font-medium flex items-center justify-end gap-2">
+                                    <span>احصل على مكافأتك اليومية</span>
+                                    <span>🎁</span>
+                                </a>
+                                <a href="#vote" class="px-3 py-1.5 rounded-xl text-gray-400 hover:text-white hover:bg-[#282937] font-medium flex items-center justify-end gap-2">
+                                    <span>التصويت</span>
+                                    <span>👍</span>
+                                </a>
+                                <a href="#transfers" class="px-3 py-1.5 rounded-xl text-gray-400 hover:text-white hover:bg-[#282937] font-medium flex items-center justify-end gap-2">
+                                    <span>سجل عمليات الكريدت</span>
+                                    <span>🔄</span>
+                                </a>
                             </div>
                         </div>
 
                         <!-- Logout -->
-                        <a href="/logout" class="px-3 py-2.5 rounded-xl text-red-400 hover:bg-red-500/10 text-xs font-bold text-right flex items-center justify-end gap-2 transition">
+                        <a href="/logout" class="px-3 py-2.5 rounded-xl text-red-400 hover:bg-red-500/10 text-xs font-bold text-right flex items-center justify-end gap-2 transition mt-2 border-t border-[#282937] pt-3">
                             <span>خروج</span>
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
                         </a>
@@ -555,39 +590,83 @@ module.exports = function (app, client) {
                         </div>
 
                         <!-- Menu Items -->
-                        <div class="flex flex-col gap-1 text-xs text-right">
+                        <div class="flex flex-col gap-1 text-xs text-right overflow-y-auto pr-1">
                             <span class="text-[10px] font-bold text-gray-500 px-3 py-1">عام</span>
                             <a href="/dashboard/${guildId}" class="px-3 py-2 rounded-xl bg-[#5865F2] text-white font-bold flex items-center justify-between">
                                 <span class="w-1.5 h-1.5 rounded-full bg-white"></span>
                                 <span>نظرة عامة</span>
                             </a>
-                            <a href="/dashboard/${guildId}" class="px-3 py-2 rounded-xl text-gray-400 hover:text-white hover:bg-[#282937] font-medium text-right">إعدادات السيرفر</a>
-                            <a href="/dashboard/${guildId}" class="px-3 py-2 rounded-xl text-gray-400 hover:text-white hover:bg-[#282937] font-medium text-right">رسائل الإيمبد</a>
+                            <a href="/dashboard/${guildId}" class="px-3 py-1.5 rounded-xl text-gray-400 hover:text-white hover:bg-[#282937] font-medium flex items-center justify-end gap-2">
+                                <span>إعدادات السيرفر</span>
+                                <span>⚙️</span>
+                            </a>
+                            <a href="/dashboard/${guildId}" class="px-3 py-1.5 rounded-xl text-gray-400 hover:text-white hover:bg-[#282937] font-medium flex items-center justify-end gap-2">
+                                <span>رسائل الإيمبد</span>
+                                <span>📄</span>
+                            </a>
 
                             <span class="text-[10px] font-bold text-gray-500 px-3 pt-3 pb-1">قائمة الخصائص</span>
-                            <a href="/dashboard/${guildId}/fun" class="px-3 py-2 rounded-xl text-emerald-400 hover:bg-[#282937] font-bold flex items-center justify-between">
-                                <span>●</span>
-                                <span>التسلية والألعاب</span>
+                            <a href="/dashboard/${guildId}/fun" class="px-3 py-1.5 rounded-xl text-gray-300 hover:text-white hover:bg-[#282937] font-medium flex items-center justify-between">
+                                <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                                <span class="flex items-center gap-1.5"><span>التسلية والألعاب</span><span>🎮</span></span>
                             </a>
-                            <a href="#" class="px-3 py-2 rounded-xl text-gray-400 hover:text-white hover:bg-[#282937] font-medium flex items-center justify-between">
-                                <span class="text-emerald-400">●</span>
-                                <span>الأوامر العامة</span>
+                            <a href="/dashboard/${guildId}" class="px-3 py-1.5 rounded-xl text-gray-300 hover:text-white hover:bg-[#282937] font-medium flex items-center justify-between">
+                                <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                                <span class="flex items-center gap-1.5"><span>الأوامر العامة</span><span>⚙️</span></span>
                             </a>
-                            <a href="#" class="px-3 py-2 rounded-xl text-gray-400 hover:text-white hover:bg-[#282937] font-medium flex items-center justify-between">
-                                <span class="text-emerald-400">●</span>
-                                <span>الترحيب & المغادرة</span>
+                            <a href="/dashboard/${guildId}" class="px-3 py-1.5 rounded-xl text-gray-300 hover:text-white hover:bg-[#282937] font-medium flex items-center justify-between">
+                                <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                                <span class="flex items-center gap-1.5"><span>الترحيب & المغادرة</span><span>👋</span></span>
                             </a>
-                            <a href="#" class="px-3 py-2 rounded-xl text-gray-400 hover:text-white hover:bg-[#282937] font-medium flex items-center justify-between">
-                                <span class="text-emerald-400">●</span>
-                                <span>الرد التلقائي</span>
+                            <a href="/dashboard/${guildId}" class="px-3 py-1.5 rounded-xl text-gray-300 hover:text-white hover:bg-[#282937] font-medium flex items-center justify-between">
+                                <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                                <span class="flex items-center gap-1.5"><span>الرد التلقائي</span><span>💬</span></span>
                             </a>
-                            <a href="#" class="px-3 py-2 rounded-xl text-gray-400 hover:text-white hover:bg-[#282937] font-medium flex items-center justify-between">
-                                <span class="text-emerald-400">●</span>
-                                <span>الرتب التلقائية</span>
+                            <a href="/dashboard/${guildId}" class="px-3 py-1.5 rounded-xl text-gray-300 hover:text-white hover:bg-[#282937] font-medium flex items-center justify-between">
+                                <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                                <span class="flex items-center gap-1.5"><span>نظام اللفلات</span><span>📈</span></span>
                             </a>
-                            <a href="#" class="px-3 py-2 rounded-xl text-gray-400 hover:text-white hover:bg-[#282937] font-medium flex items-center justify-between">
-                                <span class="text-emerald-400">●</span>
-                                <span>الرومات المؤقتة</span>
+                            <a href="/dashboard/${guildId}" class="px-3 py-1.5 rounded-xl text-gray-300 hover:text-white hover:bg-[#282937] font-medium flex items-center justify-between">
+                                <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                                <span class="flex items-center gap-1.5"><span>الرتب التلقائية</span><span>🎖️</span></span>
+                            </a>
+                            <a href="/dashboard/${guildId}" class="px-3 py-1.5 rounded-xl text-gray-300 hover:text-white hover:bg-[#282937] font-medium flex items-center justify-between">
+                                <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                                <span class="flex items-center gap-1.5"><span>الألوان</span><span>🎨</span></span>
+                            </a>
+                            <a href="/dashboard/${guildId}" class="px-3 py-1.5 rounded-xl text-gray-300 hover:text-white hover:bg-[#282937] font-medium flex items-center justify-between">
+                                <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                                <span class="flex items-center gap-1.5"><span>الرومات المؤقتة</span><span>🔊</span></span>
+                            </a>
+                            <a href="/dashboard/${guildId}" class="px-3 py-1.5 rounded-xl text-gray-300 hover:text-white hover:bg-[#282937] font-medium flex items-center justify-between">
+                                <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                                <span class="flex items-center gap-1.5"><span>ستاربورد</span><span>⭐</span></span>
+                            </a>
+                            <a href="/dashboard/${guildId}" class="px-3 py-1.5 rounded-xl text-gray-300 hover:text-white hover:bg-[#282937] font-medium flex items-center justify-between">
+                                <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                                <span class="flex items-center gap-1.5"><span>التذاكر</span><span>🎫</span></span>
+                            </a>
+
+                            <span class="text-[10px] font-bold text-gray-500 px-3 pt-3 pb-1">الإشراف</span>
+                            <a href="/dashboard/${guildId}" class="px-3 py-1.5 rounded-xl text-gray-300 hover:text-white hover:bg-[#282937] font-medium flex items-center justify-between">
+                                <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                                <span class="flex items-center gap-1.5"><span>الإشراف</span><span>🔨</span></span>
+                            </a>
+                            <a href="/dashboard/${guildId}" class="px-3 py-1.5 rounded-xl text-gray-300 hover:text-white hover:bg-[#282937] font-medium flex items-center justify-between">
+                                <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                                <span class="flex items-center gap-1.5"><span>اللوق (Logs)</span><span>📋</span></span>
+                            </a>
+                            <a href="/dashboard/${guildId}" class="px-3 py-1.5 rounded-xl text-gray-300 hover:text-white hover:bg-[#282937] font-medium flex items-center justify-between">
+                                <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                                <span class="flex items-center gap-1.5"><span>الرقابة التلقائية</span><span>🤖</span></span>
+                            </a>
+                            <a href="/dashboard/${guildId}" class="px-3 py-1.5 rounded-xl text-gray-300 hover:text-white hover:bg-[#282937] font-medium flex items-center justify-between">
+                                <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                                <span class="flex items-center gap-1.5"><span>مكافحة الغزو (Anti-Raid)</span><span>🛡️</span></span>
+                            </a>
+                            <a href="/dashboard/${guildId}" class="px-3 py-1.5 rounded-xl text-gray-300 hover:text-white hover:bg-[#282937] font-medium flex items-center justify-between">
+                                <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                                <span class="flex items-center gap-1.5"><span>الحماية الخاصة (Anti-Nuke)</span><span>🔒</span></span>
                             </a>
                         </div>
                     </aside>
