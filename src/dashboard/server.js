@@ -103,7 +103,7 @@ module.exports = function (app, client) {
                     <!-- Right: Logo -->
                     <div class="flex items-center gap-3">
                         <span class="font-black text-xl tracking-wider text-white">ZENO</span>
-                        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-purple-600 to-indigo-600 flex items-center justify-center font-black text-white text-sm shadow-lg shadow-purple-900/40">Z</div>
+                        <img src="/logo.png" class="w-9 h-9 rounded-xl object-cover border border-purple-500/40 shadow-lg shadow-purple-900/50" alt="ZENO">
                     </div>
                 </header>
 
@@ -370,7 +370,7 @@ module.exports = function (app, client) {
                     </div>
                     <div class="flex items-center gap-2">
                         <span class="font-black text-sm text-white tracking-wide">ZENO</span>
-                        <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-purple-600 to-indigo-600 flex items-center justify-center text-white font-black text-xs shadow-lg shadow-purple-900/30">Z</div>
+                        <img src="/logo.png" class="w-8 h-8 rounded-xl object-cover border border-purple-500/40 shadow-lg shadow-purple-900/50" alt="ZENO">
                     </div>
                 </header>
 
@@ -920,7 +920,7 @@ module.exports = function (app, client) {
                     </div>
                     <div class="flex items-center gap-2">
                         <span class="font-black text-sm text-white tracking-wide">ZENO</span>
-                        <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-purple-600 to-indigo-600 flex items-center justify-center text-white font-black text-xs shadow-lg shadow-purple-900/30">Z</div>
+                        <img src="/logo.png" class="w-8 h-8 rounded-xl object-cover border border-purple-500/40 shadow-lg shadow-purple-900/50" alt="ZENO">
                     </div>
                 </header>
 
@@ -4555,7 +4555,7 @@ module.exports = function (app, client) {
                     </div>
                     <div class="flex items-center gap-2">
                         <span class="font-black text-sm text-white tracking-wide">ZENO</span>
-                        <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-purple-600 to-indigo-600 flex items-center justify-center text-white font-black text-xs shadow-lg shadow-purple-900/30">Z</div>
+                        <img src="/logo.png" class="w-8 h-8 rounded-xl object-cover border border-purple-500/40 shadow-lg shadow-purple-900/50" alt="ZENO">
                     </div>
                 </header>
 

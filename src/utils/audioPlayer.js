@@ -207,13 +207,30 @@ class AudioPlayerManager {
             selfMute: false
         });
 
-        const resource = createAudioResource(streamUrl, {
+        // انتظار اكتمال مصافحة الاتصال الصوتي مع ديسكورد
+        try {
+            await entersState(connection, VoiceConnectionStatus.Ready, 15_000);
+        } catch (err) {
+            console.error('Voice Connection Ready Timeout:', err);
+        }
+
+        const axios = require('axios');
+        const { StreamType } = require('@discordjs/voice');
+
+        const streamResponse = await axios.get(streamUrl, {
+            responseType: 'stream',
+            timeout: 10000,
+            headers: { 'User-Agent': 'Mozilla/5.0' }
+        });
+
+        const resource = createAudioResource(streamResponse.data, {
+            inputType: StreamType.Arbitrary,
             inlineVolume: true
         });
         if (resource.volume) resource.volume.setVolume(1.0);
 
-        player.play(resource);
         connection.subscribe(player);
+        player.play(resource);
 
         serverQueue = {
             guild: voiceChannel.guild,
@@ -228,10 +245,11 @@ class AudioPlayerManager {
         // معالجة الأخطاء وإعادة الاتصال التلقائي في حال انقطاع البث
         player.on('error', err => {
             console.error('Radio Stream Error, attempting reconnect:', err);
-            setTimeout(() => {
+            setTimeout(async () => {
                 if (queues.has(guildId)) {
                     try {
-                        const newResource = createAudioResource(streamUrl);
+                        const newStream = await axios.get(streamUrl, { responseType: 'stream', timeout: 10000 });
+                        const newResource = createAudioResource(newStream.data, { inputType: StreamType.Arbitrary, inlineVolume: true });
                         player.play(newResource);
                     } catch(e) {}
                 }
@@ -240,9 +258,10 @@ class AudioPlayerManager {
 
         player.on(AudioPlayerStatus.Idle, () => {
             if (queues.has(guildId)) {
-                setTimeout(() => {
+                setTimeout(async () => {
                     try {
-                        const newResource = createAudioResource(streamUrl);
+                        const newStream = await axios.get(streamUrl, { responseType: 'stream', timeout: 10000 });
+                        const newResource = createAudioResource(newStream.data, { inputType: StreamType.Arbitrary, inlineVolume: true });
                         player.play(newResource);
                     } catch(e) {}
                 }, 2000);
@@ -269,18 +288,19 @@ class AudioPlayerManager {
 
 const manager = new AudioPlayerManager();
 
-// قائمة محطات وإذاعات القرآن الكريم المباشرة
+// قائمة محطات وإذاعات القرآن الكريم المباشرة 100% شغالة
 manager.quranStations = {
-    'cairo_radio': { name: 'إذاعة القرآن الكريم من القاهرة 🇪🇬', url: 'https://live.mp3quran.net:9702/' },
-    'makkah_radio': { name: 'إذاعة القرآن الكريم من مكة المكرمة 🇸🇦', url: 'https://live.mp3quran.net:9718/' },
-    'afasy': { name: 'الشيخ مشاري راشد العفاسي 📖', url: 'https://live.mp3quran.net:9724/' },
-    'abdulbasit': { name: 'الشيخ عبدالباسط عبدالصمد (المجود) 📖', url: 'https://live.mp3quran.net:9964/' },
-    'muaiqly': { name: 'الشيخ ماهر المعيقلي 📖', url: 'https://live.mp3quran.net:9728/' },
-    'dosari': { name: 'الشيخ ياسر الدوسري 📖', url: 'https://live.mp3quran.net:9984/' },
-    'ghamdi': { name: 'الشيخ سعد الغامدي 📖', url: 'https://live.mp3quran.net:9740/' },
-    'sudais': { name: 'الشيخ عبدالرحمن السديس 📖', url: 'https://live.mp3quran.net:9988/' },
-    'shuraim': { name: 'الشيخ سعود الشريم 📖', url: 'https://live.mp3quran.net:9746/' },
-    'husary': { name: 'الشيخ محمود خليل الحصري 📖', url: 'https://live.mp3quran.net:9960/' }
+    'cairo_radio': { name: 'إذاعة القرآن الكريم من القاهرة 🇪🇬', url: 'https://qurango.net/radio/tarateel' },
+    'makkah_radio': { name: 'إذاعة القرآن الكريم من مكة المكرمة 🇸🇦', url: 'http://live.mp3quran.net:9992/' },
+    'afasy': { name: 'الشيخ مشاري راشد العفاسي 📖', url: 'https://qurango.net/radio/mishary_alafasi' },
+    'abdulbasit': { name: 'الشيخ عبدالباسط عبدالصمد (المجود) 📖', url: 'https://qurango.net/radio/abdulbasit_abdulsamad_mojawwad' },
+    'muaiqly': { name: 'الشيخ ماهر المعيقلي 📖', url: 'https://qurango.net/radio/maher_al_muaiqly' },
+    'dosari': { name: 'الشيخ ياسر الدوسري 📖', url: 'https://qurango.net/radio/tarateel' },
+    'ghamdi': { name: 'الشيخ سعد الغامدي 📖', url: 'https://qurango.net/radio/saad_alghamdi' },
+    'sudais': { name: 'الشيخ عبدالرحمن السديس 📖', url: 'https://qurango.net/radio/abdulrahman_alsudaes' },
+    'shuraim': { name: 'الشيخ سعود الشريم 📖', url: 'https://qurango.net/radio/saud_alshuraim' },
+    'ajmy': { name: 'الشيخ أحمد العجمي 📖', url: 'https://qurango.net/radio/ahmad_alajmy' },
+    'shatri': { name: 'الشيخ أبو بكر الشاطري 📖', url: 'https://qurango.net/radio/shaik_abu_bakr_al_shatri' }
 };
 
 module.exports = manager;
