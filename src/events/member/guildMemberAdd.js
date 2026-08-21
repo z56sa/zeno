@@ -120,7 +120,7 @@ module.exports = {
       }
     }
 
-    // 2. نظام الترحيب (Welcome Message & Canvas Card)
+    // 2. نظام الترحيب (Welcome Message, Embed, DM & Canvas Card)
     if (settings.welcome_channel) {
       const welcomeChannel = guild.channels.cache.get(settings.welcome_channel);
       if (welcomeChannel) {
@@ -135,20 +135,52 @@ module.exports = {
           .replace(/\[memberCount\]/gi, guild.memberCount.toString())
           .replace(/\{memberCount\}/gi, guild.memberCount.toString());
 
-        const sendPayload = { content: msg };
+        const sendPayload = {};
+
+        if (settings.welcome_embed_enabled) {
+          const welcomeEmbed = new EmbedBuilder()
+            .setColor(config.colors.primary || '#9333ea')
+            .setTitle(`🎉 مرحباً بك في ${guild.name}!`)
+            .setDescription(msg)
+            .setThumbnail(member.user.displayAvatarURL({ dynamic: true, size: 256 }))
+            .setFooter({ text: `العضو رقم #${guild.memberCount}`, iconURL: guild.iconURL() || undefined })
+            .setTimestamp();
+          sendPayload.embeds = [welcomeEmbed];
+        } else {
+          sendPayload.content = msg;
+        }
 
         if (settings.welcome_image) {
           try {
             const cardBuffer = await canvasUtil.createWelcomeCard(member);
-            const attachment = new AttachmentBuilder(cardBuffer, { name: 'welcome.png' });
-            sendPayload.files = [attachment];
+            if (cardBuffer) {
+              const attachment = new AttachmentBuilder(cardBuffer, { name: 'welcome.png' });
+              sendPayload.files = [attachment];
+            }
           } catch (err) {
-            console.error('فشل إنشاء بطاقة الترحيب:', err);
+            console.error('فشل إنشاء بطاقة الترحيب عبر Canvas:', err.message);
           }
         }
 
-        welcomeChannel.send(sendPayload).catch(() => {});
+        welcomeChannel.send(sendPayload).catch((e) => console.error('فشل إرسال رسالة الترحيب:', e.message));
       }
+    }
+
+    // 2.5 رسالة الترحيب في الخاص (DM Welcome Message)
+    if (settings.welcome_dm_enabled && settings.welcome_dm_message) {
+      try {
+        let dmMsg = settings.welcome_dm_message
+          .replace(/\[user\]/gi, `<@${member.id}>`)
+          .replace(/\{user\}/gi, `<@${member.id}>`)
+          .replace(/\[userName\]/gi, member.user.username)
+          .replace(/\{userName\}/gi, member.user.username)
+          .replace(/\[server\]/gi, guild.name)
+          .replace(/\{server\}/gi, guild.name)
+          .replace(/\[memberCount\]/gi, guild.memberCount.toString())
+          .replace(/\{memberCount\}/gi, guild.memberCount.toString());
+
+        await member.send({ content: dmMsg }).catch(() => {});
+      } catch (err) {}
     }
 
     // 3. سجل انضمام الأعضاء (Join Log)
@@ -156,7 +188,7 @@ module.exports = {
       const logChannel = guild.channels.cache.get(settings.log_channel);
       if (logChannel) {
         const joinEmbed = new EmbedBuilder()
-          .setColor(config.colors.success)
+          .setColor(config.colors.success || '#10b981')
           .setTitle('📥 عضو جديد انضم إلى السيرفر')
           .setThumbnail(member.user.displayAvatarURL({ dynamic: true }))
           .addFields(

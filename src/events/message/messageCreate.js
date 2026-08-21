@@ -280,9 +280,10 @@ module.exports = {
     const autoResponders = db.getAutoResponders(guildId);
     if (autoResponders && autoResponders.length > 0) {
       const lowerContent = message.content.toLowerCase().trim();
-      const match = autoResponders.find(r => lowerContent === r.trigger_word || lowerContent.includes(r.trigger_word));
-      if (match) {
-        message.reply({ content: match.reply_text }).catch(() => {});
+      const matches = autoResponders.filter(r => lowerContent === r.trigger_word || lowerContent.includes(r.trigger_word));
+      if (matches.length > 0) {
+        const chosen = matches[Math.floor(Math.random() * matches.length)];
+        message.reply({ content: chosen.reply_text }).catch(() => {});
       }
     }
 

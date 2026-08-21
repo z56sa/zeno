@@ -346,15 +346,19 @@ function deleteReactionRole(customId) {
 // Auto Responders
 // ==========================================
 function addAutoResponder(guildId, triggerWord, replyText) {
-  db.prepare('INSERT INTO auto_responders (guild_id, trigger_word, reply_text) VALUES (?, ?, ?)').run(guildId, triggerWord.toLowerCase(), replyText);
+  db.prepare('INSERT INTO auto_responders (guild_id, trigger_word, reply_text) VALUES (?, ?, ?)').run(guildId, triggerWord.toLowerCase().trim(), replyText);
 }
 
 function getAutoResponders(guildId) {
-  return db.prepare('SELECT * FROM auto_responders WHERE guild_id = ?').all(guildId);
+  return db.prepare('SELECT * FROM auto_responders WHERE guild_id = ? ORDER BY id DESC').all(guildId);
 }
 
-function deleteAutoResponder(guildId, triggerWord) {
-  db.prepare('DELETE FROM auto_responders WHERE guild_id = ? AND trigger_word = ?').run(guildId, triggerWord.toLowerCase());
+function deleteAutoResponder(guildId, idOrTrigger) {
+  if (typeof idOrTrigger === 'number' || !isNaN(idOrTrigger)) {
+    db.prepare('DELETE FROM auto_responders WHERE guild_id = ? AND id = ?').run(guildId, Number(idOrTrigger));
+  } else {
+    db.prepare('DELETE FROM auto_responders WHERE guild_id = ? AND trigger_word = ?').run(guildId, String(idOrTrigger).toLowerCase().trim());
+  }
 }
 
 // ==========================================

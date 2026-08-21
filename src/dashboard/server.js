@@ -803,20 +803,20 @@ module.exports = function (app, client) {
                                 showToast(data.error || 'حدث خطأ أثناء الاستلام', true);
                                 if (btn) {
                                     btn.disabled = false;
-                                    btn.innerText = '🎁 استلام المكافأة اليومية الآن (+500 ¢)';
+                                    btn.innerText = '🎁 استلام المكافأة اليومية الآن (+500 ⭐)';
                                 }
                             }
                         } catch (err) {
                             showToast('فشل الاتصال بالخادم', true);
                             if (btn) {
                                 btn.disabled = false;
-                                btn.innerText = '🎁 استلام المكافأة اليومية الآن (+500 ¢)';
+                                btn.innerText = '🎁 استلام المكافأة اليومية الآن (+500 ⭐)';
                             }
                         }
                     }
 
                     async function buyItem(type, name, price, btn) {
-                        if (!confirm('هل أنت متأكد من شراء وتجهيز: ' + name + ' مقابل ' + price.toLocaleString() + ' ¢؟')) return;
+                        if (!confirm('هل أنت متأكد من شراء وتجهيز: ' + name + ' مقابل ' + price.toLocaleString() + ' ⭐؟')) return;
                         
                         const originalText = btn ? btn.innerText : '';
                         if (btn) {
@@ -950,7 +950,7 @@ module.exports = function (app, client) {
                                         <h4 class="font-bold text-white text-xs">نظرة عامة</h4>
                                     </div>
                                     <p class="text-gray-400 text-[11px] mb-4 text-right">Get main information about your server settings</p>
-                                    <a href="/dashboard/${guildId}/general" class="w-full py-2 bg-purple-950/30 hover:bg-purple-600 hover:text-white text-purple-300 border border-purple-900/30 rounded-xl text-xs font-bold text-center transition">&gt; Visit</a>
+                                    <a href="/dashboard/${guildId}/overview" class="w-full py-2 bg-purple-950/30 hover:bg-purple-600 hover:text-white text-purple-300 border border-purple-900/30 rounded-xl text-xs font-bold text-center transition">&gt; Visit</a>
                                 </div>
 
                                 <!-- إعدادات السيرفر -->
@@ -1579,6 +1579,7 @@ module.exports = function (app, client) {
             `).join('') : '';
 
             const sectionTitles = {
+                'overview': 'نظرة عامة على السيرفر 📊',
                 'moderation': 'الإشراف وإدارة الأعضاء 🔨',
                 'automod': 'الرقابة التلقائية وفلاتر السب والشات 🤖',
                 'welcome': 'رسائل وبطاقات الترحيب والمغادرة 👋',
@@ -1595,7 +1596,7 @@ module.exports = function (app, client) {
                 'colors': 'نظام اختيار ألوان الرتب 🎨',
                 'logs': 'قنوات السجلات واللوق الشامل 📋',
                 'fun': 'التسلية والألعاب والمنافسات 🎮',
-                'general': 'الأوامر العامة والإعدادات الأساسية ⚙️',
+                'general': 'الأوامر العامة والخدمية للأعضاء ⚙️',
                 'settings': 'إعدادات السيرفر العامة ⚙️',
                 'boost': 'البوستات - رسالة الشكر للداعمين 🚀'
             };
@@ -2027,11 +2028,122 @@ module.exports = function (app, client) {
                         </div>
                     </div>
                 `;
+            } else if (section === 'overview') {
+                const botGuild = client?.guilds?.cache?.get(guildId);
+                const totalMembers = botGuild ? botGuild.memberCount : (guild.memberCount || 0);
+                const totalBots = botGuild ? botGuild.members?.cache?.filter(m => m.user?.bot)?.size || 0 : 0;
+                const totalChannels = botGuild ? botGuild.channels?.cache?.size || 0 : 0;
+                const totalRoles = botGuild ? botGuild.roles?.cache?.size || 0 : 0;
+                const boostCount = botGuild ? (botGuild.premiumSubscriptionCount || 0) : 0;
+                const boostTier = botGuild ? (botGuild.premiumTier || 0) : 0;
+
+                formFieldsHtml = `
+                    <div class="space-y-6">
+                        <!-- Server Overview Card -->
+                        <div class="bg-[#12131c] border border-purple-950/40 p-6 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-4">
+                            <div class="flex items-center gap-4 text-right">
+                                <img src="${guildIcon}" class="w-16 h-16 rounded-2xl border-2 border-purple-600 shadow-lg shadow-purple-900/40 object-cover">
+                                <div>
+                                    <h3 class="font-black text-white text-lg">${guild.name}</h3>
+                                    <p class="text-gray-400 text-xs font-mono">ID: ${guildId}</p>
+                                    <div class="flex items-center gap-2 mt-1.5 justify-end">
+                                        <span class="px-2.5 py-0.5 bg-purple-950/60 text-purple-300 border border-purple-800/40 rounded-lg text-[10px] font-bold">مستوى البوست: Level ${boostTier} (${boostCount} بوست) 🚀</span>
+                                        <span class="px-2.5 py-0.5 bg-emerald-950/60 text-emerald-300 border border-emerald-800/40 rounded-lg text-[10px] font-bold">البوت متصل ✅</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <a href="/dashboard/${guildId}/settings" class="px-4 py-2 bg-purple-950/60 hover:bg-purple-800/60 text-purple-200 border border-purple-800/40 rounded-xl text-xs font-bold transition">⚙️ إعدادات السيرفر</a>
+                                <a href="/dashboard/${guildId}/embed" class="px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold transition shadow-md">📄 إرسال إيمبد</a>
+                            </div>
+                        </div>
+
+                        <!-- 4 Stat Cards -->
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div class="bg-[#12131c] border border-purple-950/40 p-4 rounded-2xl text-right">
+                                <span class="text-gray-400 text-[11px] block">إجمالي الأعضاء</span>
+                                <h4 class="text-xl font-black text-white mt-1">${totalMembers.toLocaleString()}</h4>
+                                <span class="text-[10px] text-purple-400">👤 أعضاء السيرفر</span>
+                            </div>
+                            <div class="bg-[#12131c] border border-purple-950/40 p-4 rounded-2xl text-right">
+                                <span class="text-gray-400 text-[11px] block">البوتات المساعدة</span>
+                                <h4 class="text-xl font-black text-indigo-300 mt-1">${totalBots}</h4>
+                                <span class="text-[10px] text-indigo-400">🤖 حسابات بوتات</span>
+                            </div>
+                            <div class="bg-[#12131c] border border-purple-950/40 p-4 rounded-2xl text-right">
+                                <span class="text-gray-400 text-[11px] block">القنوات والرومات</span>
+                                <h4 class="text-xl font-black text-purple-300 mt-1">${totalChannels}</h4>
+                                <span class="text-[10px] text-purple-400">💬 صوتية وكتابية</span>
+                            </div>
+                            <div class="bg-[#12131c] border border-purple-950/40 p-4 rounded-2xl text-right">
+                                <span class="text-gray-400 text-[11px] block">الرتب والمسميات</span>
+                                <h4 class="text-xl font-black text-amber-300 mt-1">${totalRoles}</h4>
+                                <span class="text-[10px] text-amber-400">🎖️ رتبة مسجلة</span>
+                            </div>
+                        </div>
+
+                        <!-- Active Plugins Status Overview -->
+                        <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl space-y-3">
+                            <h4 class="font-bold text-white text-sm text-right">حالة موديولات وخصائص السيرفر ⚡</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                                
+                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                    <span class="px-2 py-0.5 bg-purple-950/60 text-purple-300 rounded-lg text-[10px] font-bold">${settings.anti_nuke_enabled ? 'مفعّل ✅' : 'معطّل ❌'}</span>
+                                    <div class="flex items-center gap-2">
+                                        <span class="font-bold text-white text-xs">جدار الحماية</span>
+                                        <span>🛡️</span>
+                                    </div>
+                                </div>
+
+                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                    <span class="px-2 py-0.5 bg-purple-950/60 text-purple-300 rounded-lg text-[10px] font-bold">${settings.welcome_channel ? 'مفعّل ✅' : 'معطّل ❌'}</span>
+                                    <div class="flex items-center gap-2">
+                                        <span class="font-bold text-white text-xs">الترحيب & المغادرة</span>
+                                        <span>👋</span>
+                                    </div>
+                                </div>
+
+                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                    <span class="px-2 py-0.5 bg-purple-950/60 text-purple-300 rounded-lg text-[10px] font-bold">${settings.fun_enabled !== 0 ? 'مفعّل ✅' : 'معطّل ❌'}</span>
+                                    <div class="flex items-center gap-2">
+                                        <span class="font-bold text-white text-xs">التسلية والألعاب</span>
+                                        <span>🎮</span>
+                                    </div>
+                                </div>
+
+                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                    <span class="px-2 py-0.5 bg-purple-950/60 text-purple-300 rounded-lg text-[10px] font-bold">${settings.bad_words_enabled || settings.anti_spam ? 'مفعّل ✅' : 'معطّل ❌'}</span>
+                                    <div class="flex items-center gap-2">
+                                        <span class="font-bold text-white text-xs">الرقابة التلقائية</span>
+                                        <span>🤖</span>
+                                    </div>
+                                </div>
+
+                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                    <span class="px-2 py-0.5 bg-purple-950/60 text-purple-300 rounded-lg text-[10px] font-bold">${settings.autoresponder_enabled !== 0 ? 'مفعّل ✅' : 'معطّل ❌'}</span>
+                                    <div class="flex items-center gap-2">
+                                        <span class="font-bold text-white text-xs">الرد التلقائي</span>
+                                        <span>💬</span>
+                                    </div>
+                                </div>
+
+                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                    <span class="px-2 py-0.5 bg-purple-950/60 text-purple-300 rounded-lg text-[10px] font-bold">${settings.boost_channel ? 'مفعّل ✅' : 'معطّل ❌'}</span>
+                                    <div class="flex items-center gap-2">
+                                        <span class="font-bold text-white text-xs">شكر البوستات</span>
+                                        <span>🚀</span>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                `;
             } else if (section === 'autoresponder') {
                 const autoRespondersList = database.getAutoResponders ? database.getAutoResponders(guildId) : [];
                 const respondersHtml = autoRespondersList && autoRespondersList.length > 0 ? autoRespondersList.map(r => `
                     <div class="bg-[#0b0c10] border border-purple-950/40 p-4 rounded-xl flex items-center justify-between">
-                        <button type="button" onclick="deleteResponder('${guildId}', '${r.trigger_word}')" class="px-3 py-1.5 bg-red-950/40 hover:bg-red-900/60 text-red-300 border border-red-900/30 rounded-lg text-xs font-bold transition">حذف 🗑️</button>
+                        <button type="button" onclick="deleteResponder('${guildId}', '${r.id || r.trigger_word}')" class="px-3 py-1.5 bg-red-950/40 hover:bg-red-900/60 text-red-300 border border-red-900/30 rounded-lg text-xs font-bold transition">حذف 🗑️</button>
                         <div class="text-right">
                             <p class="font-bold text-white text-xs">إذا كتب العضو: <span class="text-purple-300 font-mono bg-purple-950/40 px-2 py-0.5 rounded">"${r.trigger_word}"</span></p>
                             <p class="text-gray-300 text-xs mt-1">يرد البوت: <span class="text-gray-200">"${r.reply_text}"</span></p>
@@ -2044,7 +2156,7 @@ module.exports = function (app, client) {
                         <!-- Current Responders List -->
                         <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl">
                             <h4 class="font-bold text-white text-sm mb-3 text-right">قائمة الردود التلقائية النشطة (${autoRespondersList.length})</h4>
-                            <div class="space-y-2.5 max-h-60 overflow-y-auto">
+                            <div class="space-y-2.5 max-h-60 overflow-y-auto pr-1">
                                 ${respondersHtml}
                             </div>
                         </div>
@@ -2052,7 +2164,7 @@ module.exports = function (app, client) {
                         <!-- Add New Responder Form -->
                         <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl text-right">
                             <h4 class="font-bold text-white text-sm mb-1">إضافة رد تلقائي جديد 💬</h4>
-                            <p class="text-gray-400 text-xs mb-4">يقوم البوت بالرد التلقائي فوراً في الشات بمجرد كتابة الكلمة المحددة.</p>
+                            <p class="text-gray-400 text-xs mb-4">يقوم البوت بالرد التلقائي فوراً في الشات بمجرد كتابة الكلمة المحددة (يمكنك إضافة أكثر من رد لنفس الكلمة أو لكلمات متعددة).</p>
                             
                             <div class="space-y-4">
                                 <div>
@@ -2084,10 +2196,7 @@ module.exports = function (app, client) {
                                 </div>
                                 <img src="${guildIcon}" class="w-12 h-12 rounded-2xl border border-purple-900/40 object-cover">
                             </div>
-                            <div class="flex items-center gap-2">
-                                <label class="toggle"><input type="checkbox" name="bot_enabled" value="1" ${settings.bot_enabled !== 0 ? 'checked' : ''}><span class="slider"></span></label>
-                                <span class="text-xs font-bold text-purple-300">تشغيل البوت في السيرفر</span>
-                            </div>
+                            <span class="px-3 py-1 bg-purple-950/60 text-purple-300 border border-purple-800/40 rounded-xl text-xs font-bold">إعدادات السيرفر ⚙️</span>
                         </div>
 
                         <!-- Core Server Settings Form -->
@@ -2128,7 +2237,7 @@ module.exports = function (app, client) {
             } else if (section === 'general') {
                 formFieldsHtml = `
                     <div class="space-y-6">
-                        <!-- General Commands Overview -->
+                        <!-- General Commands Overview matching Image 3 -->
                         <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl flex items-center justify-between">
                             <span class="px-3 py-1 bg-purple-950/60 text-purple-300 border border-purple-800/40 rounded-xl text-xs font-bold">12 أمراً متاحاً</span>
                             <div class="text-right">
@@ -2137,7 +2246,7 @@ module.exports = function (app, client) {
                             </div>
                         </div>
 
-                        <!-- 12 General Member Commands Only (No moderation commands) -->
+                        <!-- 12 General Member Commands Only matching Image 3 -->
                         <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl">
                             <h4 class="font-bold text-white text-sm mb-4 text-right">قائمة الأوامر الخدمية والعامة</h4>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -2145,7 +2254,7 @@ module.exports = function (app, client) {
                                 <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
                                     <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
                                     <div class="text-right">
-                                        <p class="font-bold text-white text-xs">/help & #help</p>
+                                        <p class="font-bold text-white text-xs">help & #help</p>
                                         <p class="text-gray-400 text-[10px]">قائمة المساعدة التفاعلية المنسدلة لجميع الأوامر</p>
                                     </div>
                                 </div>
@@ -2153,7 +2262,7 @@ module.exports = function (app, client) {
                                 <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
                                     <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
                                     <div class="text-right">
-                                        <p class="font-bold text-white text-xs">/profile & /id</p>
+                                        <p class="font-bold text-white text-xs">profile & /id</p>
                                         <p class="text-gray-400 text-[10px]">بطاقة البروفايل التفاعلية مع الرصيد والمستوى والسمعة</p>
                                     </div>
                                 </div>
@@ -2161,7 +2270,7 @@ module.exports = function (app, client) {
                                 <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
                                     <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
                                     <div class="text-right">
-                                        <p class="font-bold text-white text-xs">/avatar & #avatar</p>
+                                        <p class="font-bold text-white text-xs">avatar & #avatar</p>
                                         <p class="text-gray-400 text-[10px]">عرض وتحميل الصورة الرمزية للعضو أو السيرفر</p>
                                     </div>
                                 </div>
@@ -2169,7 +2278,7 @@ module.exports = function (app, client) {
                                 <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
                                     <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
                                     <div class="text-right">
-                                        <p class="font-bold text-white text-xs">/banner & #banner</p>
+                                        <p class="font-bold text-white text-xs">banner & #banner</p>
                                         <p class="text-gray-400 text-[10px]">عرض بنر الملف الشخصي أو بنر السيرفر بجودة عالية</p>
                                     </div>
                                 </div>
@@ -2177,7 +2286,7 @@ module.exports = function (app, client) {
                                 <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
                                     <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
                                     <div class="text-right">
-                                        <p class="font-bold text-white text-xs">/server & #server</p>
+                                        <p class="font-bold text-white text-xs">server & #server</p>
                                         <p class="text-gray-400 text-[10px]">عرض معلومات السيرفر والأونر وتاريخ الإنشاء والإحصائيات</p>
                                     </div>
                                 </div>
@@ -2185,7 +2294,7 @@ module.exports = function (app, client) {
                                 <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
                                     <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
                                     <div class="text-right">
-                                        <p class="font-bold text-white text-xs">/user & #user</p>
+                                        <p class="font-bold text-white text-xs">user & #user</p>
                                         <p class="text-gray-400 text-[10px]">عرض بطاقة معلومات العضو ورتبه وتاريخ الانضمام</p>
                                     </div>
                                 </div>
@@ -2193,7 +2302,7 @@ module.exports = function (app, client) {
                                 <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
                                     <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
                                     <div class="text-right">
-                                        <p class="font-bold text-white text-xs">/ping & #ping</p>
+                                        <p class="font-bold text-white text-xs">ping & #ping</p>
                                         <p class="text-gray-400 text-[10px]">فحص سرعة استجابة البوت وسيرفرات ديسكورد</p>
                                     </div>
                                 </div>
@@ -2201,7 +2310,7 @@ module.exports = function (app, client) {
                                 <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
                                     <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
                                     <div class="text-right">
-                                        <p class="font-bold text-white text-xs">/tax & #tax</p>
+                                        <p class="font-bold text-white text-xs">tax & #tax</p>
                                         <p class="text-gray-400 text-[10px]">حاسبة ضريبة بروبوت والتحويلات الذكية</p>
                                     </div>
                                 </div>
@@ -2209,7 +2318,7 @@ module.exports = function (app, client) {
                                 <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
                                     <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
                                     <div class="text-right">
-                                        <p class="font-bold text-white text-xs">/stars & #stars</p>
+                                        <p class="font-bold text-white text-xs">stars & #stars</p>
                                         <p class="text-gray-400 text-[10px]">استعراض رصيد النجوم والسمعة وإعطاء النجوم للأعضاء</p>
                                     </div>
                                 </div>
@@ -2217,7 +2326,7 @@ module.exports = function (app, client) {
                                 <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
                                     <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
                                     <div class="text-right">
-                                        <p class="font-bold text-white text-xs">/roles & #roles</p>
+                                        <p class="font-bold text-white text-xs">roles & #roles</p>
                                         <p class="text-gray-400 text-[10px]">عرض قائمة جميع رتب السيرفر وأعداد أعضائها</p>
                                     </div>
                                 </div>
@@ -2225,7 +2334,7 @@ module.exports = function (app, client) {
                                 <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
                                     <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
                                     <div class="text-right">
-                                        <p class="font-bold text-white text-xs">/channels & #channels</p>
+                                        <p class="font-bold text-white text-xs">channels & #channels</p>
                                         <p class="text-gray-400 text-[10px]">إحصائيات القنوات الصوتية والنصية والكاتيجوري</p>
                                     </div>
                                 </div>
@@ -2233,7 +2342,7 @@ module.exports = function (app, client) {
                                 <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
                                     <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
                                     <div class="text-right">
-                                        <p class="font-bold text-white text-xs">/emojis & #emojis</p>
+                                        <p class="font-bold text-white text-xs">emojis & #emojis</p>
                                         <p class="text-gray-400 text-[10px]">استعراض وإحصاء جميع إيموجيات وستيكرات السيرفر</p>
                                     </div>
                                 </div>
@@ -2461,97 +2570,233 @@ module.exports = function (app, client) {
             } else if (section === 'fun') {
                 formFieldsHtml = `
                     <div class="space-y-6">
-                        <!-- Fun Games Header Master Toggle -->
-                        <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl flex items-center justify-between">
+                        <!-- Fun Games Header Master Toggle matching Image 4 -->
+                        <div class="bg-[#12131c] border border-purple-950/40 p-6 rounded-2xl flex items-center justify-between">
                             <label class="toggle"><input type="checkbox" name="fun_enabled" value="1" ${settings.fun_enabled !== 0 ? 'checked' : ''}><span class="slider"></span></label>
                             <div class="text-right">
-                                <h4 class="font-bold text-white text-sm">أوامر التسلية والألعاب والكازينو 🎮</h4>
-                                <p class="text-gray-400 text-xs mt-0.5">تفعيل أو تعطيل الألعاب التفاعلية والمراهنات والمسابقات بين الأعضاء</p>
+                                <h3 class="font-black text-white text-base">التسلية 🎮</h3>
+                                <p class="text-gray-400 text-xs mt-1">يضيف متعة إلى سيرفرك بميزات مثل الروليت، الكراسي، المافيا، الغميضة مع المزيد من الألعاب.</p>
                             </div>
                         </div>
 
-                        <!-- All 12 Fun Games Toggles -->
-                        <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl">
-                            <h4 class="font-bold text-white text-sm mb-4 text-right">الألعاب المتاحة في السيرفر</h4>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <!-- Games Grid matching Image 4 -->
+                        <div class="bg-[#12131c] border border-purple-950/40 p-6 rounded-2xl">
+                            <h4 class="font-bold text-white text-sm mb-4 text-right">الألعاب</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
                                 
-                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
-                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
-                                    <div class="text-right">
-                                        <p class="font-bold text-white text-xs">🎲 /dice & #dice</p>
-                                        <p class="text-gray-400 text-[10px]">لعبة رمي النرد مع مراهنات النجوم ضد البوت</p>
+                                <!-- روليت -->
+                                <div class="bg-[#0b0c10] border border-purple-950/40 p-4 rounded-xl flex items-center justify-between">
+                                    <div class="flex items-center gap-3">
+                                        <button type="button" class="text-gray-500 hover:text-purple-400 p-1 rounded-lg">⚙️</button>
+                                        <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                    </div>
+                                    <div class="flex items-center gap-3 text-right">
+                                        <div>
+                                            <p class="font-bold text-white text-sm">روليت</p>
+                                            <p class="text-gray-400 text-[10px]">روليت الكازينو الأوروبي ومضاعفة أرباح النجوم</p>
+                                        </div>
+                                        <div class="w-10 h-10 bg-purple-950/30 rounded-xl flex items-center justify-center text-xl">🎲</div>
                                     </div>
                                 </div>
 
-                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
-                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
-                                    <div class="text-right">
-                                        <p class="font-bold text-white text-xs">🪙 /coinflip & #coinflip</p>
-                                        <p class="text-gray-400 text-[10px]">رمي العملة (ملك أو كتابة) مع رهانات حماسية</p>
+                                <!-- الكراسي -->
+                                <div class="bg-[#0b0c10] border border-purple-950/40 p-4 rounded-xl flex items-center justify-between">
+                                    <div class="flex items-center gap-3">
+                                        <button type="button" class="text-gray-500 hover:text-purple-400 p-1 rounded-lg">⚙️</button>
+                                        <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                    </div>
+                                    <div class="flex items-center gap-3 text-right">
+                                        <div>
+                                            <p class="font-bold text-white text-sm">الكراسي</p>
+                                            <p class="text-gray-400 text-[10px]">لعبة الكراسي الموسيقية التفاعلية في الشات</p>
+                                        </div>
+                                        <div class="w-10 h-10 bg-purple-950/30 rounded-xl flex items-center justify-center text-xl">🪑</div>
                                     </div>
                                 </div>
 
-                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
-                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
-                                    <div class="text-right">
-                                        <p class="font-bold text-white text-xs">❓ /trivia & #trivia</p>
-                                        <p class="text-gray-400 text-[10px]">مسابقات وأسئلة ثقافية وإسلامية وجوائز نجوم</p>
+                                <!-- مافيا -->
+                                <div class="bg-[#0b0c10] border border-purple-950/40 p-4 rounded-xl flex items-center justify-between">
+                                    <div class="flex items-center gap-3">
+                                        <button type="button" class="text-gray-500 hover:text-purple-400 p-1 rounded-lg">⚙️</button>
+                                        <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                    </div>
+                                    <div class="flex items-center gap-3 text-right">
+                                        <div>
+                                            <p class="font-bold text-white text-sm">مافيا</p>
+                                            <p class="text-gray-400 text-[10px]">لعبة المافيا والغموض بين الأعضاء</p>
+                                        </div>
+                                        <div class="w-10 h-10 bg-purple-950/30 rounded-xl flex items-center justify-center text-xl">🎭</div>
                                     </div>
                                 </div>
 
-                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
-                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
-                                    <div class="text-right">
-                                        <p class="font-bold text-white text-xs">⚔️ /fight & #fight</p>
-                                        <p class="text-gray-400 text-[10px]">مبارزات وقتال PvP حماسي بين الأعضاء بنظام النقاط</p>
+                                <!-- الغميضة -->
+                                <div class="bg-[#0b0c10] border border-purple-950/40 p-4 rounded-xl flex items-center justify-between">
+                                    <div class="flex items-center gap-3">
+                                        <button type="button" class="text-gray-500 hover:text-purple-400 p-1 rounded-lg">⚙️</button>
+                                        <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                    </div>
+                                    <div class="flex items-center gap-3 text-right">
+                                        <div>
+                                            <p class="font-bold text-white text-sm">الغميضة</p>
+                                            <p class="text-gray-400 text-[10px]">لعبة الغميضة والبحث عن المختبئين</p>
+                                        </div>
+                                        <div class="w-10 h-10 bg-purple-950/30 rounded-xl flex items-center justify-center text-xl">🙈</div>
                                     </div>
                                 </div>
 
-                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
-                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
-                                    <div class="text-right">
-                                        <p class="font-bold text-white text-xs">🎰 /roulette & #roulette</p>
-                                        <p class="text-gray-400 text-[10px]">روليت الكازينو الأوروبي ومضاعفة أرباح النجوم</p>
+                                <!-- رمي العملة -->
+                                <div class="bg-[#0b0c10] border border-purple-950/40 p-4 rounded-xl flex items-center justify-between">
+                                    <div class="flex items-center gap-3">
+                                        <button type="button" class="text-gray-500 hover:text-purple-400 p-1 rounded-lg">⚙️</button>
+                                        <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                    </div>
+                                    <div class="flex items-center gap-3 text-right">
+                                        <div>
+                                            <p class="font-bold text-white text-sm">رمي العملة (Coinflip)</p>
+                                            <p class="text-gray-400 text-[10px]">ملك أو كتابة مع رهانات حماسية</p>
+                                        </div>
+                                        <div class="w-10 h-10 bg-purple-950/30 rounded-xl flex items-center justify-center text-xl">🪙</div>
                                     </div>
                                 </div>
 
-                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
-                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
-                                    <div class="text-right">
-                                        <p class="font-bold text-white text-xs">🃏 /blackjack & /gamble</p>
-                                        <p class="text-gray-400 text-[10px]">لعبة 21 والورق والتحديات المالية السريعة</p>
+                                <!-- قتال ومبارزات -->
+                                <div class="bg-[#0b0c10] border border-purple-950/40 p-4 rounded-xl flex items-center justify-between">
+                                    <div class="flex items-center gap-3">
+                                        <button type="button" class="text-gray-500 hover:text-purple-400 p-1 rounded-lg">⚙️</button>
+                                        <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                    </div>
+                                    <div class="flex items-center gap-3 text-right">
+                                        <div>
+                                            <p class="font-bold text-white text-sm">قتال ومبارزة (Fight)</p>
+                                            <p class="text-gray-400 text-[10px]">تحديات PvP حماسية بين الأعضاء بنظام النقاط</p>
+                                        </div>
+                                        <div class="w-10 h-10 bg-purple-950/30 rounded-xl flex items-center justify-center text-xl">⚔️</div>
                                     </div>
                                 </div>
 
-                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
-                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
-                                    <div class="text-right">
-                                        <p class="font-bold text-white text-xs">🐸 /meme & #meme</p>
-                                        <p class="text-gray-400 text-[10px]">جلب ميمز وصور طريفة عشوائية من ريديت</p>
+                                <!-- مسابقات وسين جيم -->
+                                <div class="bg-[#0b0c10] border border-purple-950/40 p-4 rounded-xl flex items-center justify-between">
+                                    <div class="flex items-center gap-3">
+                                        <button type="button" class="text-gray-500 hover:text-purple-400 p-1 rounded-lg">⚙️</button>
+                                        <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                    </div>
+                                    <div class="flex items-center gap-3 text-right">
+                                        <div>
+                                            <p class="font-bold text-white text-sm">مسابقات وأسئلة (Trivia)</p>
+                                            <p class="text-gray-400 text-[10px]">أسئلة إسلامية وثقافية وجوائز نجوم</p>
+                                        </div>
+                                        <div class="w-10 h-10 bg-purple-950/30 rounded-xl flex items-center justify-center text-xl">❓</div>
                                     </div>
                                 </div>
 
-                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
-                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
-                                    <div class="text-right">
-                                        <p class="font-bold text-white text-xs">🎱 /8ball & #8ball</p>
-                                        <p class="text-gray-400 text-[10px]">الكرة السحرية للإجابة على جميع الأسئلة والتوقعات</p>
+                                <!-- بلاك جاك -->
+                                <div class="bg-[#0b0c10] border border-purple-950/40 p-4 rounded-xl flex items-center justify-between">
+                                    <div class="flex items-center gap-3">
+                                        <button type="button" class="text-gray-500 hover:text-purple-400 p-1 rounded-lg">⚙️</button>
+                                        <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                    </div>
+                                    <div class="flex items-center gap-3 text-right">
+                                        <div>
+                                            <p class="font-bold text-white text-sm">بلاك جاك (Blackjack)</p>
+                                            <p class="text-gray-400 text-[10px]">لعبة 21 والورق والتحديات المالية السريعة</p>
+                                        </div>
+                                        <div class="w-10 h-10 bg-purple-950/30 rounded-xl flex items-center justify-center text-xl">🃏</div>
                                     </div>
                                 </div>
 
-                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
-                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
-                                    <div class="text-right">
-                                        <p class="font-bold text-white text-xs">✂️ /rps & #rps</p>
-                                        <p class="text-gray-400 text-[10px]">لعبة حجر ورقة مقص ضد البوت أو الأعضاء</p>
+                                <!-- ميمز -->
+                                <div class="bg-[#0b0c10] border border-purple-950/40 p-4 rounded-xl flex items-center justify-between">
+                                    <div class="flex items-center gap-3">
+                                        <button type="button" class="text-gray-500 hover:text-purple-400 p-1 rounded-lg">⚙️</button>
+                                        <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                    </div>
+                                    <div class="flex items-center gap-3 text-right">
+                                        <div>
+                                            <p class="font-bold text-white text-sm">ميمز (Meme)</p>
+                                            <p class="text-gray-400 text-[10px]">جلب صور ونكت مضحكة عشوائية من ريديت</p>
+                                        </div>
+                                        <div class="w-10 h-10 bg-purple-950/30 rounded-xl flex items-center justify-center text-xl">🐸</div>
                                     </div>
                                 </div>
 
-                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
-                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
-                                    <div class="text-right">
-                                        <p class="font-bold text-white text-xs">🪑 /chairs</p>
-                                        <p class="text-gray-400 text-[10px]">لعبة الكراسي الموسيقية التفاعلية في الشات</p>
+                                <!-- الكرة السحرية -->
+                                <div class="bg-[#0b0c10] border border-purple-950/40 p-4 rounded-xl flex items-center justify-between">
+                                    <div class="flex items-center gap-3">
+                                        <button type="button" class="text-gray-500 hover:text-purple-400 p-1 rounded-lg">⚙️</button>
+                                        <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                    </div>
+                                    <div class="flex items-center gap-3 text-right">
+                                        <div>
+                                            <p class="font-bold text-white text-sm">الكرة السحرية (8Ball)</p>
+                                            <p class="text-gray-400 text-[10px]">الإجابة على التساؤلات والتوقعات الغامضة</p>
+                                        </div>
+                                        <div class="w-10 h-10 bg-purple-950/30 rounded-xl flex items-center justify-center text-xl">🎱</div>
+                                    </div>
+                                </div>
+
+                                <!-- حجر ورقة مقص -->
+                                <div class="bg-[#0b0c10] border border-purple-950/40 p-4 rounded-xl flex items-center justify-between">
+                                    <div class="flex items-center gap-3">
+                                        <button type="button" class="text-gray-500 hover:text-purple-400 p-1 rounded-lg">⚙️</button>
+                                        <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                    </div>
+                                    <div class="flex items-center gap-3 text-right">
+                                        <div>
+                                            <p class="font-bold text-white text-sm">حجر ورقة مقص (RPS)</p>
+                                            <p class="text-gray-400 text-[10px]">لعبة حجر ورقة مقص ضد البوت أو الأعضاء</p>
+                                        </div>
+                                        <div class="w-10 h-10 bg-purple-950/30 rounded-xl flex items-center justify-center text-xl">✂️</div>
+                                    </div>
+                                </div>
+
+                                <!-- رمي النرد -->
+                                <div class="bg-[#0b0c10] border border-purple-950/40 p-4 rounded-xl flex items-center justify-between">
+                                    <div class="flex items-center gap-3">
+                                        <button type="button" class="text-gray-500 hover:text-purple-400 p-1 rounded-lg">⚙️</button>
+                                        <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                    </div>
+                                    <div class="flex items-center gap-3 text-right">
+                                        <div>
+                                            <p class="font-bold text-white text-sm">رمي النرد (Dice)</p>
+                                            <p class="text-gray-400 text-[10px]">لعبة رمي النرد والمراهنة على الأرقام</p>
+                                        </div>
+                                        <div class="w-10 h-10 bg-purple-950/30 rounded-xl flex items-center justify-center text-xl">🎲</div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <!-- Commands Section matching Image 4 -->
+                        <div class="bg-[#12131c] border border-purple-950/40 p-6 rounded-2xl space-y-4">
+                            <h4 class="font-bold text-white text-sm text-right">الأوامر</h4>
+                            <div class="space-y-3">
+                                
+                                <div class="bg-[#0b0c10] border border-purple-950/40 p-4 rounded-xl flex items-center justify-between">
+                                    <div class="flex items-center gap-3">
+                                        <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                        <button type="button" class="text-gray-500 hover:text-purple-400">✏️</button>
+                                    </div>
+                                    <div class="flex items-center gap-3 text-right">
+                                        <div>
+                                            <p class="font-bold text-white text-sm">points</p>
+                                            <p class="text-gray-400 text-xs">نظام نقاط وتصنيف اللاعبين على مستوى السيرفر</p>
+                                        </div>
+                                        <div class="w-8 h-8 bg-purple-950/40 rounded-lg flex items-center justify-center text-purple-400 font-mono text-xs">&gt;_</div>
+                                    </div>
+                                </div>
+
+                                <div class="bg-[#0b0c10] border border-purple-950/40 p-4 rounded-xl flex items-center justify-between">
+                                    <div class="flex items-center gap-3">
+                                        <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                        <button type="button" class="text-gray-500 hover:text-purple-400">✏️</button>
+                                    </div>
+                                    <div class="flex items-center gap-3 text-right">
+                                        <div>
+                                            <p class="font-bold text-white text-sm">game stop</p>
+                                            <p class="text-gray-400 text-xs">إيقاف وإنهاء أي لعبة جارية في القناة الحالية فوراً</p>
+                                        </div>
+                                        <div class="w-8 h-8 bg-purple-950/40 rounded-lg flex items-center justify-center text-purple-400 font-mono text-xs">&gt;_</div>
                                     </div>
                                 </div>
 
@@ -2968,7 +3213,7 @@ module.exports = function (app, client) {
             if (!req.session?.user) return res.status(401).json({ success: false, error: 'يجب تسجيل الدخول أولاً' });
             const userId = req.session.user.id;
             
-            const userRow = rawDb.prepare('SELECT coins, last_daily FROM users WHERE user_id = ? LIMIT 1').get(userId);
+            const userRow = rawDb.prepare('SELECT MAX(last_daily) as last_daily, SUM(coins) as coins FROM users WHERE user_id = ?').get(userId);
             const now = Date.now();
             const dailyCooldown = 24 * 60 * 60 * 1000;
             const lastDaily = userRow?.last_daily || 0;
@@ -2984,7 +3229,8 @@ module.exports = function (app, client) {
             }
 
             const reward = 500;
-            if (!userRow) {
+            const existingCount = rawDb.prepare('SELECT COUNT(*) as count FROM users WHERE user_id = ?').get(userId)?.count || 0;
+            if (existingCount === 0) {
                 rawDb.prepare('INSERT INTO users (user_id, guild_id, coins, last_daily) VALUES (?, ?, ?, ?)').run(userId, 'global', reward, now);
             } else {
                 rawDb.prepare('UPDATE users SET coins = coins + ?, last_daily = ? WHERE user_id = ?').run(reward, now, userId);
@@ -2993,7 +3239,7 @@ module.exports = function (app, client) {
             const updated = rawDb.prepare('SELECT SUM(coins) as coins FROM users WHERE user_id = ?').get(userId);
             return res.json({
                 success: true,
-                message: `تم استلام مكافأتك اليومية بنجاح (+${reward} ¢)!`,
+                message: `تم استلام مكافأتك اليومية بنجاح (+${reward} ⭐)!`,
                 newCoins: updated?.coins || reward
             });
         } catch (err) {
@@ -3015,7 +3261,7 @@ module.exports = function (app, client) {
             if (userCoins < cost) {
                 return res.status(400).json({
                     success: false,
-                    error: `عذراً، رصيدك غير كافٍ! تحتاج إلى ${cost.toLocaleString()} ¢ بينما رصيدك الحالي ${userCoins.toLocaleString()} ¢`
+                    error: `عذراً، رصيدك غير كافٍ! تحتاج إلى ${cost.toLocaleString()} ⭐ بينما رصيدك الحالي ${userCoins.toLocaleString()} ⭐`
                 });
             }
 
