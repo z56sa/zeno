@@ -552,7 +552,7 @@ module.exports = function (app, client) {
                                         </div>
                                     </div>
                                     <p class="text-gray-400 text-[11px] mb-4 text-right">Utility commands and features</p>
-                                    <a href="/dashboard/${guildId}" class="w-full py-2 bg-[#282937] hover:bg-[#5865F2] hover:text-white text-gray-300 rounded-lg text-xs font-bold text-center transition">&gt; Visit</a>
+                                    <a href="/dashboard/${guildId}/general" class="w-full py-2 bg-[#282937] hover:bg-[#5865F2] hover:text-white text-gray-300 rounded-lg text-xs font-bold text-center transition">&gt; Visit</a>
                                 </div>
 
                                 <!-- الإشراف -->
@@ -565,7 +565,7 @@ module.exports = function (app, client) {
                                         </div>
                                     </div>
                                     <p class="text-gray-400 text-[11px] mb-4 text-right">Moderation tools and commands</p>
-                                    <a href="/dashboard/${guildId}" class="w-full py-2 bg-[#282937] hover:bg-[#5865F2] hover:text-white text-gray-300 rounded-lg text-xs font-bold text-center transition">&gt; Visit</a>
+                                    <a href="/dashboard/${guildId}/moderation" class="w-full py-2 bg-[#282937] hover:bg-[#5865F2] hover:text-white text-gray-300 rounded-lg text-xs font-bold text-center transition">&gt; Visit</a>
                                 </div>
 
                                 <!-- الرقابة التلقائية -->
@@ -578,7 +578,7 @@ module.exports = function (app, client) {
                                         </div>
                                     </div>
                                     <p class="text-gray-400 text-[11px] mb-4 text-right">Automatic moderation features</p>
-                                    <a href="/dashboard/${guildId}" class="w-full py-2 bg-[#282937] hover:bg-[#5865F2] hover:text-white text-gray-300 rounded-lg text-xs font-bold text-center transition">&gt; Visit</a>
+                                    <a href="/dashboard/${guildId}/automod" class="w-full py-2 bg-[#282937] hover:bg-[#5865F2] hover:text-white text-gray-300 rounded-lg text-xs font-bold text-center transition">&gt; Visit</a>
                                 </div>
 
                                 <!-- الترحيب والمغادرة -->
@@ -591,7 +591,7 @@ module.exports = function (app, client) {
                                         </div>
                                     </div>
                                     <p class="text-gray-400 text-[11px] mb-4 text-right">Welcome card canvas and messages</p>
-                                    <a href="/dashboard/${guildId}" class="w-full py-2 bg-[#282937] hover:bg-[#5865F2] hover:text-white text-gray-300 rounded-lg text-xs font-bold text-center transition">&gt; Visit</a>
+                                    <a href="/dashboard/${guildId}/welcome" class="w-full py-2 bg-[#282937] hover:bg-[#5865F2] hover:text-white text-gray-300 rounded-lg text-xs font-bold text-center transition">&gt; Visit</a>
                                 </div>
 
                                 <!-- الرد التلقائي -->
@@ -604,7 +604,7 @@ module.exports = function (app, client) {
                                         </div>
                                     </div>
                                     <p class="text-gray-400 text-[11px] mb-4 text-right">Custom automatic responders</p>
-                                    <a href="/dashboard/${guildId}" class="w-full py-2 bg-[#282937] hover:bg-[#5865F2] hover:text-white text-gray-300 rounded-lg text-xs font-bold text-center transition">&gt; Visit</a>
+                                    <a href="/dashboard/${guildId}/autoresponder" class="w-full py-2 bg-[#282937] hover:bg-[#5865F2] hover:text-white text-gray-300 rounded-lg text-xs font-bold text-center transition">&gt; Visit</a>
                                 </div>
 
                             </div>
@@ -936,6 +936,185 @@ module.exports = function (app, client) {
             </html>
             `);
         } catch (error) {
+            res.status(500).send("Error");
+        }
+    });
+
+    // ========================================================
+    // 5. واجهة برمجية لحفظ التعديلات والتحديث الفوري في ديسكورد (Real-time Discord Sync)
+    // ========================================================
+    app.post('/api/guild/:guildId/module', express.json(), (req, res) => {
+        try {
+            if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
+            const { guildId } = req.params;
+            const { module, enabled } = req.body;
+
+            // تحديث في قاعدة بيانات SQLite فوراً
+            db.updateGuildSetting(guildId, module, enabled ? 1 : 0);
+
+            // إرسال إشعار في سيرفر الديسكورد إذا كانت هناك قناة سجلات
+            const guildSettings = db.getGuildSettings(guildId);
+            if (guildSettings?.log_channel && client?.channels?.cache) {
+                const logCh = client.channels.cache.get(guildSettings.log_channel);
+                if (logCh) {
+                    logCh.send(`⚙️ **تحديث لوحة التحكم:** تم ${enabled ? 'تفعيل ✅' : 'تعطيل ❌'} موديول (\`${module}\`) بواسطة المشرف **${req.session.user.username}**`).catch(() => {});
+                }
+            }
+
+            res.json({ success: true, guildId, module, enabled });
+        } catch (e) {
+            res.status(500).json({ success: false, error: e.message });
+        }
+    });
+
+    app.post('/api/guild/:guildId/settings', express.json(), (req, res) => {
+        try {
+            if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
+            const { guildId } = req.params;
+            const { key, value } = req.body;
+
+            db.updateGuildSetting(guildId, key, value);
+            res.json({ success: true, guildId, key, value });
+        } catch (e) {
+            res.status(500).json({ success: false, error: e.message });
+        }
+    });
+
+    // صفحات فرعية لجميع الأزرار (Moderation, Automod, Welcome, Tickets, Protection)
+    app.get('/dashboard/:guildId/:section', (req, res) => {
+        try {
+            if (!req.session?.user) return res.redirect('/auth/discord');
+            const { guildId, section } = req.params;
+            const guilds = req.session.guilds || [];
+            const guild = guilds.find(g => g.id === guildId);
+            const user = req.session.user;
+            if (!guild) return res.redirect('/dashboard');
+
+            const settings = db.getGuildSettings(guildId) || {};
+            const guildIcon = guild.icon ? `https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.png` : 'https://cdn.discordapp.com/embed/avatars/0.png';
+
+            const serverRailHtml = guilds.map(g => `
+                <a href="/dashboard/${g.id}" title="${g.name}" class="group relative flex items-center justify-center">
+                    <img src="${g.icon ? `https://cdn.discordapp.com/icons/${g.id}/${g.icon}.png` : 'https://cdn.discordapp.com/embed/avatars/0.png'}" 
+                         class="w-11 h-11 rounded-2xl ${g.id === guildId ? 'border-2 border-[#5865F2]' : 'border border-transparent'} hover:rounded-xl object-cover transition-all">
+                </a>
+            `).join('');
+
+            const sectionTitles = {
+                'moderation': 'الإشراف وإدارة الأعضاء 🔨',
+                'automod': 'الرقابة التلقائية وفلاتر السب والشات 🤖',
+                'welcome': 'رسائل وبطاقات الترحيب والمغادرة 👋',
+                'autoresponder': 'الرد التلقائي على الكلمات 💬',
+                'tickets': 'نظام التذاكر والدعم الفني 🎫',
+                'protection': 'جدار الحماية الشامل ومكافحة التخريب 🛡️',
+                'levels': 'نظام الرتب واللفلات التفاعلي 📈',
+                'tempvoice': 'الرومات الصوتية المؤقتة 🔊'
+            };
+
+            const title = sectionTitles[section] || 'إعدادات ' + section;
+
+            res.send(`
+            <!DOCTYPE html>
+            <html lang="ar" dir="rtl" class="dark">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>${title} | ${guild.name}</title>
+                <script src="https://cdn.tailwindcss.com"></script>
+                <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+                <style>
+                    body { background-color: #171821; color: #d1d5db; font-family: 'Cairo', sans-serif; }
+                    .toggle { position: relative; display: inline-block; width: 42px; height: 22px; }
+                    .toggle input { opacity: 0; width: 0; height: 0; }
+                    .slider { position: absolute; cursor: pointer; inset: 0; background: #282937; border-radius: 24px; transition: .2s; }
+                    .slider:before { content: ''; position: absolute; width: 16px; height: 16px; left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: .2s; }
+                    input:checked + .slider { background: #5865F2; }
+                    input:checked + .slider:before { transform: translateX(20px); }
+                </style>
+            </head>
+            <body class="min-h-screen flex flex-col bg-[#171821] text-gray-200">
+                
+                <!-- Header -->
+                <header class="h-14 bg-[#1e1f2b] border-b border-[#282937] px-6 flex items-center justify-between z-50">
+                    <div class="flex items-center gap-4">
+                        <a href="https://discord.gg/uxqQDtbVMz" target="_blank" class="text-xs text-gray-400 hover:text-white">الدعم الفني</a>
+                        <span class="text-gray-600">|</span>
+                        <a href="/dashboard/${guildId}" class="text-xs text-[#5865F2] hover:underline font-bold">الرجوع للوحة التحكم</a>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="font-black text-sm text-white tracking-wide">ZENO</span>
+                        <div class="w-7 h-7 rounded-lg bg-[#5865F2] flex items-center justify-center text-white font-black text-xs">Z</div>
+                    </div>
+                </header>
+
+                <div class="flex-1 flex overflow-hidden">
+                    <main class="flex-1 p-8 overflow-y-auto max-w-4xl mx-auto">
+                        <div class="bg-[#1e1f2b] border border-[#282937] rounded-2xl p-6 shadow-2xl mb-8">
+                            <div class="flex items-center justify-between pb-6 mb-6 border-b border-[#282937]">
+                                <label class="toggle"><input type="checkbox" onchange="toggleModule('${guildId}', '${section}_enabled', this.checked)" checked><span class="slider"></span></label>
+                                <div>
+                                    <h2 class="text-2xl font-black text-white">${title}</h2>
+                                    <p class="text-gray-400 text-xs mt-1">يتم تطبيق كل التعديلات وحفظها مباشرة في سيرفر الديسكورد لحظياً.</p>
+                                </div>
+                            </div>
+
+                            <form id="settingsForm" class="space-y-6">
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-300 mb-2 text-right">روم السجلات (Log Channel ID)</label>
+                                    <input type="text" name="log_channel" value="${settings.log_channel || ''}" placeholder="ضع ID القناة..." class="w-full bg-[#171821] border border-[#282937] focus:border-[#5865F2] rounded-xl px-4 py-3 text-xs text-white outline-none text-right font-mono">
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-300 mb-2 text-right">البرفكس الافتراضي (Prefix)</label>
+                                    <input type="text" name="prefix" value="${settings.prefix || '#'}" class="w-full bg-[#171821] border border-[#282937] focus:border-[#5865F2] rounded-xl px-4 py-3 text-xs text-white outline-none text-right font-mono">
+                                </div>
+
+                                <div class="pt-4 flex items-center justify-between">
+                                    <span id="saveStatus" class="text-xs text-emerald-400 font-bold hidden">✅ تم الحفظ بنجاح وتحديث البوت في الديسكورد!</span>
+                                    <button type="submit" class="px-8 py-3 bg-[#5865F2] hover:bg-[#4752C4] text-white text-xs font-bold rounded-xl transition shadow-lg shadow-[#5865F2]/25">
+                                        حفظ التغييرات
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </main>
+
+                    <!-- Server Rail -->
+                    <div class="w-16 bg-[#12131a] border-l border-[#282937] py-4 flex flex-col items-center gap-3 shrink-0 overflow-y-auto">
+                        <a href="/dashboard" title="الرئيسية" class="w-11 h-11 rounded-2xl bg-[#5865F2] flex items-center justify-center text-white font-black text-sm shadow">Z</a>
+                        <div class="w-8 h-[1px] bg-[#282937]"></div>
+                        ${serverRailHtml}
+                    </div>
+                </div>
+
+                <script>
+                    function toggleModule(guildId, key, val) {
+                        fetch('/api/guild/' + guildId + '/module', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ module: key, enabled: val })
+                        });
+                    }
+
+                    document.getElementById('settingsForm').addEventListener('submit', async (e) => {
+                        e.preventDefault();
+                        const formData = new FormData(e.target);
+                        for (let [key, value] of formData.entries()) {
+                            await fetch('/api/guild/${guildId}/settings', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ key, value })
+                            });
+                        }
+                        const status = document.getElementById('saveStatus');
+                        status.classList.remove('hidden');
+                        setTimeout(() => status.classList.add('hidden'), 4000);
+                    });
+                </script>
+            </body>
+            </html>
+            `);
+        } catch (e) {
             res.status(500).send("Error");
         }
     });
