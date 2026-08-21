@@ -25,7 +25,7 @@ module.exports = {
     const userData = db.getUser(user.id, guildId);
     const now = Date.now();
     const cooldown = 24 * 60 * 60 * 1000;
-    const lastDaily = userData.last_daily || 0;
+    const lastDaily = db.getLastDaily(user.id);
 
     if (now - lastDaily < cooldown) {
       const remaining = cooldown - (now - lastDaily);

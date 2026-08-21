@@ -256,11 +256,12 @@ module.exports = function (app, client) {
                 if (cIndex !== -1) userRankCoins = cIndex + 1;
             } catch (err) {}
 
-            // التحقق من حالة المكافأة اليومية
+            // التحقق من حالة المكافأة اليومية (Global 24H Cooldown)
             const now = Date.now();
             const dailyCooldown = 24 * 60 * 60 * 1000;
             const timePassed = now - userLastDaily;
             const canClaimDaily = timePassed >= dailyCooldown;
+            const unlockTimestamp = userLastDaily + dailyCooldown;
             const timeLeftMs = Math.max(0, dailyCooldown - timePassed);
             const hoursLeft = Math.floor(timeLeftMs / (1000 * 60 * 60));
             const minsLeft = Math.floor((timeLeftMs % (1000 * 60 * 60)) / (1000 * 60));
@@ -679,8 +680,9 @@ module.exports = function (app, client) {
                                             🎁 استلام المكافأة اليومية الآن (+500 ⭐)
                                         </button>
                                     ` : `
-                                        <button disabled class="w-full py-3.5 bg-purple-950/40 border border-purple-900/30 text-gray-400 font-bold text-xs rounded-xl cursor-not-allowed">
-                                            ⏳ تم الاستلام مسبقاً! يتبقى حوالي ${hoursLeft} ساعة و ${minsLeft} دقيقة
+                                        <button id="claimDailyBtnDisabled" disabled class="w-full py-3.5 bg-purple-950/40 border border-purple-900/30 text-gray-400 font-bold text-xs rounded-xl cursor-not-allowed flex items-center justify-center gap-2">
+                                            <span>⏳</span>
+                                            <span id="dailyCountdownText">تم الاستلام اليوم! عد بعد: ${hoursLeft} ساعة و ${minsLeft} دقيقة</span>
                                         </button>
                                     `}
                                 </div>
@@ -783,6 +785,28 @@ module.exports = function (app, client) {
                         }
                     }
 
+                    let dailyUnlockTime = ${canClaimDaily ? 0 : unlockTimestamp};
+
+                    function updateDailyCountdown() {
+                        const cdText = document.getElementById('dailyCountdownText');
+                        const box = document.getElementById('dailyActionBox');
+                        if (!dailyUnlockTime || dailyUnlockTime <= Date.now()) {
+                            if (box && !document.getElementById('claimDailyBtn')) {
+                                box.innerHTML = '<button id="claimDailyBtn" onclick="claimDaily()" class="w-full py-3.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-black text-xs rounded-xl shadow-lg shadow-purple-900/40 transition transform active:scale-95">🎁 استلام المكافأة اليومية الآن (+500 ⭐)</button>';
+                            }
+                            return;
+                        }
+                        const diff = dailyUnlockTime - Date.now();
+                        const h = Math.floor(diff / (1000 * 60 * 60));
+                        const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                        const s = Math.floor((diff % (1000 * 60)) / 1000);
+                        if (cdText) {
+                            cdText.innerText = 'تم الاستلام اليوم! عد بعد: ' + h + ' ساعة و ' + m + ' دقيقة و ' + s + ' ثانية';
+                        }
+                    }
+                    setInterval(updateDailyCountdown, 1000);
+                    updateDailyCountdown();
+
                     async function claimDaily() {
                         const btn = document.getElementById('claimDailyBtn');
                         if (btn) {
@@ -798,8 +822,10 @@ module.exports = function (app, client) {
                                 if (d) d.innerText = Number(data.newCoins).toLocaleString();
                                 document.querySelectorAll('.user-coins-val').forEach(el => el.innerText = Number(data.newCoins).toLocaleString());
                                 const box = document.getElementById('dailyActionBox');
+                                dailyUnlockTime = Date.now() + 24 * 60 * 60 * 1000;
                                 if (box) {
-                                    box.innerHTML = '<button disabled class="w-full py-3.5 bg-purple-950/40 border border-purple-900/30 text-gray-400 font-bold text-xs rounded-xl cursor-not-allowed">⏳ تم استلام المكافأة بنجاح! عد غداً للحصول على مكافأة جديدة.</button>';
+                                    box.innerHTML = '<button id="claimDailyBtnDisabled" disabled class="w-full py-3.5 bg-purple-950/40 border border-purple-900/30 text-gray-400 font-bold text-xs rounded-xl cursor-not-allowed flex items-center justify-center gap-2"><span>⏳</span><span id="dailyCountdownText">تم استلام المكافأة بنجاح! عد غداً للحصول على مكافأة جديدة.</span></button>';
+                                    updateDailyCountdown();
                                 }
                             } else {
                                 showToast(data.error || 'حدث خطأ أثناء الاستلام', true);

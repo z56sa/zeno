@@ -321,9 +321,14 @@ function setCoins(userId, guildId, amount) {
   db.prepare('UPDATE users SET coins = ? WHERE user_id = ? AND guild_id = ?').run(amount, userId, guildId);
 }
 
+function getLastDaily(userId) {
+  const row = db.prepare('SELECT MAX(last_daily) as last_daily FROM users WHERE user_id = ?').get(userId);
+  return row?.last_daily || 0;
+}
+
 function setLastDaily(userId, guildId, timestamp) {
   getUser(userId, guildId);
-  db.prepare('UPDATE users SET last_daily = ? WHERE user_id = ? AND guild_id = ?').run(timestamp, userId, guildId);
+  db.prepare('UPDATE users SET last_daily = ? WHERE user_id = ?').run(timestamp, userId);
 }
 
 function setWallpaper(userId, guildId, wallpaper) {
@@ -593,6 +598,7 @@ module.exports = {
   addCoins,
   removeCoins,
   setCoins,
+  getLastDaily,
   setLastDaily,
   setWallpaper,
   getLeaderboard,
