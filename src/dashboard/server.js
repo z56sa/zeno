@@ -1056,6 +1056,7 @@ module.exports = function (app, client) {
                 'embed': 'صانع رسائل الإيمبد المتقدم 📄',
                 'colors': 'نظام اختيار ألوان الرتب 🎨',
                 'logs': 'قنوات السجلات واللوق الشامل 📋',
+                'fun': 'التسلية والألعاب والمنافسات 🎮',
                 'general': 'الأوامر العامة والإعدادات الأساسية ⚙️',
                 'settings': 'إعدادات السيرفر العامة ⚙️'
             };
@@ -1417,6 +1418,210 @@ module.exports = function (app, client) {
                             <div>
                                 <label class="block text-xs font-bold text-gray-300 mb-2 text-right">محتوى الإيمبد (Description)</label>
                                 <textarea rows="4" placeholder="اكتب تفاصيل الرسالة هنا..." class="w-full bg-[#0b0c10] border border-purple-950/40 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else if (section === 'general' || section === 'settings') {
+                formFieldsHtml = `
+                    <div class="space-y-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-gray-300 mb-2 text-right">برفكس البوت الافتراضي (Default Prefix)</label>
+                                <input type="text" name="prefix" value="${settings.prefix || '#'}" class="w-full bg-[#12131c] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right font-mono">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-300 mb-2 text-right">قناة السجلات العامة (General Logs Channel ID)</label>
+                                <input type="text" name="log_channel" value="${settings.log_channel || ''}" placeholder="ضع ID القناة..." class="w-full bg-[#12131c] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right font-mono">
+                            </div>
+                        </div>
+
+                        <!-- General Commands Toggles -->
+                        <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl">
+                            <h4 class="font-bold text-white text-sm mb-4 text-right">الأوامر العامة والخدمية</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                    <div class="text-right">
+                                        <p class="font-bold text-white text-xs">/ping & /bot</p>
+                                        <p class="text-gray-400 text-[10px]">عرض سرعة الاستجابة ومعلومات البوت الكاملة</p>
+                                    </div>
+                                </div>
+                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                    <div class="text-right">
+                                        <p class="font-bold text-white text-xs">/server & /user</p>
+                                        <p class="text-gray-400 text-[10px]">عرض معلومات تفصيلية عن السيرفر والعضو</p>
+                                    </div>
+                                </div>
+                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                    <div class="text-right">
+                                        <p class="font-bold text-white text-xs">/avatar & /banner</p>
+                                        <p class="text-gray-400 text-[10px]">عرض وتنزيل الصورة الرمزية وبنر السيرفر والأعضاء</p>
+                                    </div>
+                                </div>
+                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                    <div class="text-right">
+                                        <p class="font-bold text-white text-xs">/roles & /channels</p>
+                                        <p class="text-gray-400 text-[10px]">إحصائيات وقائمة الرتب والقنوات</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else if (section === 'autoroles') {
+                formFieldsHtml = `
+                    <div class="space-y-6">
+                        <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl">
+                            <h4 class="font-bold text-white text-sm mb-2 text-right">إعدادات الرتب التلقائية (Auto Roles)</h4>
+                            <p class="text-gray-400 text-xs mb-4 text-right">يتم إعطاء هذه الرتب تلقائياً للأعضاء الجدد فور انضمامهم للسيرفر.</p>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-300 mb-2 text-right">رتبة الأعضاء الجدد (Member Role ID)</label>
+                                    <input type="text" name="auto_role" value="${settings.auto_role || ''}" placeholder="ضع ID الرتبة..." class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right font-mono">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-300 mb-2 text-right">رتبة البوتات التلقائية (Bot Role ID)</label>
+                                    <input type="text" placeholder="ضع ID رتبة البوتات..." class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right font-mono">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else if (section === 'starboard') {
+                formFieldsHtml = `
+                    <div class="space-y-6">
+                        <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl">
+                            <h4 class="font-bold text-white text-sm mb-2 text-right">نظام ستاربورد (Starboard) ⭐</h4>
+                            <p class="text-gray-400 text-xs mb-4 text-right">نشر الرسائل المميزة تلقائياً في روم المشاهير عند تفاعل الأعضاء عليها بإيموجي النجمة ⭐.</p>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-300 mb-2 text-right">قناة الستاربورد (Starboard Channel ID)</label>
+                                    <input type="text" placeholder="ضع ID القناة..." class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right font-mono">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-300 mb-2 text-right">الحد الأدنى للنجوم (Star Threshold)</label>
+                                    <input type="number" value="3" min="1" max="50" class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right font-mono">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else if (section === 'colors') {
+                formFieldsHtml = `
+                    <div class="space-y-6">
+                        <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl text-right">
+                            <h4 class="font-bold text-white text-sm mb-2">نظام ألوان الرتب التفاعلي (Color Roles) 🎨</h4>
+                            <p class="text-gray-400 text-xs mb-4">يتيح للأعضاء اختيار لون اسمهم في السيرفر عبر القائمة أو الأزرار التفاعلية.</p>
+                            
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                                <div class="p-3 bg-[#0b0c10] border border-purple-950/40 rounded-xl text-center">
+                                    <span class="w-6 h-6 rounded-full bg-purple-500 inline-block mb-1 shadow-lg shadow-purple-500/50"></span>
+                                    <p class="text-xs font-bold text-white">أرجواني الملكي</p>
+                                </div>
+                                <div class="p-3 bg-[#0b0c10] border border-purple-950/40 rounded-xl text-center">
+                                    <span class="w-6 h-6 rounded-full bg-blue-500 inline-block mb-1 shadow-lg shadow-blue-500/50"></span>
+                                    <p class="text-xs font-bold text-white">أزرق سماوي</p>
+                                </div>
+                                <div class="p-3 bg-[#0b0c10] border border-purple-950/40 rounded-xl text-center">
+                                    <span class="w-6 h-6 rounded-full bg-emerald-500 inline-block mb-1 shadow-lg shadow-emerald-500/50"></span>
+                                    <p class="text-xs font-bold text-white">أخضر زمردي</p>
+                                </div>
+                                <div class="p-3 bg-[#0b0c10] border border-purple-950/40 rounded-xl text-center">
+                                    <span class="w-6 h-6 rounded-full bg-amber-500 inline-block mb-1 shadow-lg shadow-amber-500/50"></span>
+                                    <p class="text-xs font-bold text-white">ذهبي متألق</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else if (section === 'logs') {
+                formFieldsHtml = `
+                    <div class="space-y-6">
+                        <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl">
+                            <h4 class="font-bold text-white text-sm mb-4 text-right">قنوات السجلات واللوق الشامل (Full Audit Logging) 📋</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-300 mb-2 text-right">سجلات الرسائل المحذوفة والمعدلة</label>
+                                    <input type="text" name="log_channel" value="${settings.log_channel || ''}" placeholder="Channel ID..." class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right font-mono">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-300 mb-2 text-right">سجلات دخول وخروج الأعضاء</label>
+                                    <input type="text" value="${settings.welcome_channel || ''}" placeholder="Channel ID..." class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right font-mono">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-300 mb-2 text-right">سجلات الرومات الصوتية</label>
+                                    <input type="text" placeholder="Channel ID..." class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right font-mono">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-300 mb-2 text-right">سجلات الرتب والصلاحيات</label>
+                                    <input type="text" placeholder="Channel ID..." class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right font-mono">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else if (section === 'antiraid') {
+                formFieldsHtml = `
+                    <div class="space-y-6">
+                        <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl">
+                            <h4 class="font-bold text-white text-sm mb-4 text-right">مكافحة الغزو والهجمات (Anti-Raid Protection) 🚨</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-300 mb-2 text-right">الحد الأقصى لدخول الأعضاء في 10 ثوانٍ</label>
+                                    <input type="number" value="5" min="2" max="50" class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right font-mono">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-300 mb-2 text-right">الإجراء الفوري عند كشف هجوم</label>
+                                    <select class="w-full bg-[#0b0c10] border border-purple-950/40 rounded-xl px-4 py-3 text-xs text-white outline-none">
+                                        <option value="lockdown">إغلاق السيرفر مؤقتاً (Lockdown)</option>
+                                        <option value="kick">طرد الأعضاء الجدد فوراً (Kick New Joins)</option>
+                                        <option value="ban">حظر المهاجمين (Mass Ban)</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else if (section === 'fun') {
+                formFieldsHtml = `
+                    <div class="space-y-6">
+                        <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl">
+                            <h4 class="font-bold text-white text-sm mb-4 text-right">ألعاب ومنافسات البوت التفاعلية 🎮</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                    <div class="text-right">
+                                        <p class="font-bold text-white text-xs">/roulette & #roulette</p>
+                                        <p class="text-gray-400 text-[10px]">لعبة الروليت الكلاسيكية مع عجلة متحركة وتحديات حظ</p>
+                                    </div>
+                                </div>
+                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                    <div class="text-right">
+                                        <p class="font-bold text-white text-xs">/fight & #fight</p>
+                                        <p class="text-gray-400 text-[10px]">قتال ومبارزة PvP تفاعلية بنقاط صحة HP مع الأصدقاء</p>
+                                    </div>
+                                </div>
+                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                    <div class="text-right">
+                                        <p class="font-bold text-white text-xs">/trivia & /quiz</p>
+                                        <p class="text-gray-400 text-[10px]">مسابقات وأسئلة إسلامية وعامة مع مؤقت زمني</p>
+                                    </div>
+                                </div>
+                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                    <div class="text-right">
+                                        <p class="font-bold text-white text-xs">/coinflip & /dice</p>
+                                        <p class="text-gray-400 text-[10px]">رمي النرد وملك أو كتابة مع مكافآت عملات</p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
