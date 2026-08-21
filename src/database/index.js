@@ -66,14 +66,6 @@ db.exec(`
     boost_embed_enabled INTEGER DEFAULT 0
   );
 
-  // Alter table migrations for new columns
-  try { db.exec("ALTER TABLE guild_settings ADD COLUMN boost_enabled INTEGER DEFAULT 1;"); } catch(e) {}
-  try { db.exec("ALTER TABLE guild_settings ADD COLUMN boost_channel TEXT;"); } catch(e) {}
-  try { db.exec("ALTER TABLE guild_settings ADD COLUMN boost_message TEXT;"); } catch(e) {}
-  try { db.exec("ALTER TABLE guild_settings ADD COLUMN boost_dm_enabled INTEGER DEFAULT 0;"); } catch(e) {}
-  try { db.exec("ALTER TABLE guild_settings ADD COLUMN boost_dm_message TEXT;"); } catch(e) {}
-  try { db.exec("ALTER TABLE guild_settings ADD COLUMN boost_embed_enabled INTEGER DEFAULT 0;"); } catch(e) {}
-
   CREATE TABLE IF NOT EXISTS users (
     user_id TEXT NOT NULL,
     guild_id TEXT NOT NULL,
@@ -152,6 +144,14 @@ db.exec(`
     created_at INTEGER DEFAULT (strftime('%s','now'))
   );
 `);
+
+// Migrations - إضافة أعمدة البوست للسيرفرات القديمة بشكل آمن
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN boost_enabled INTEGER DEFAULT 1;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN boost_channel TEXT;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN boost_message TEXT;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN boost_dm_enabled INTEGER DEFAULT 0;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN boost_dm_message TEXT;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN boost_embed_enabled INTEGER DEFAULT 0;"); } catch(e) {}
 
 console.log('[DB] ✅ SQLite database initialized successfully');
 
