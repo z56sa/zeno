@@ -511,12 +511,7 @@ module.exports = function (app, client) {
                                 <button onclick="switchTab('tabDaily', this)" class="nav-btn px-3 py-1.5 rounded-xl text-gray-400 hover:text-purple-300 hover:bg-purple-950/30 font-medium flex items-center justify-end gap-2 transition w-full">
                                     <span>احصل على مكافأتك اليومية</span>
                                     <span>🎁</span>
-                                    <span>👍</span>
-                                </a>
-                                <a href="#transfers" class="px-3 py-1.5 rounded-xl text-gray-400 hover:text-purple-300 hover:bg-purple-950/30 font-medium flex items-center justify-end gap-2 transition">
-                                    <span>سجل عمليات الكريدت</span>
-                                    <span>🔄</span>
-                                </a>
+                                </button>
                             </div>
                         </div>
 
