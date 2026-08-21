@@ -534,7 +534,8 @@ module.exports = function (app, client) {
             </html>
             `);
         } catch (error) {
-            res.status(500).send("Error");
+            console.error("Dashboard /dashboard error:", error);
+            res.status(500).send(`<pre style="color:red;background:#111;padding:20px;font-family:monospace">${error.stack || error.message || error}</pre>`);
         }
     });
 
