@@ -2,12 +2,15 @@ const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, Butt
 const db = require('../../database');
 const canvasUtil = require('../../utils/canvas');
 
-// دالة مساعدة لضمان جلب بيانات المستخدم حتى لو اختلفت التسمية في ملف الـ database
+// دالة مساعدة لضمان جلب بيانات المستخدم
 const fetchUserData = (userId, guildId) => {
-  if (typeof db.getUser === 'function') return db.getUser(userId, guildId);
-  if (typeof db.getUserData === 'function') return db.getUserData(userId, guildId);
-  if (typeof db.findUser === 'function') return db.findUser(userId, guildId);
-  return { credits: 0, wallpaper_url: null };
+  const user = db.getUser(userId, guildId) || {};
+  return {
+    ...user,
+    coins: Number(user.coins ?? user.credits ?? 0),
+    credits: Number(user.coins ?? user.credits ?? 0),
+    wallpaper_url: user.wallpaper || null
+  };
 };
 
 module.exports = {

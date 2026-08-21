@@ -407,14 +407,32 @@ const canvasUtil = {
     const statGap = 16;
     const statsStartX = infoStartX;
 
-    const creditsNum = Number(userData.credits || 0);
-    const starText = creditsNum >= 999999999999999 ? 'UNLIMITED' : `$${numFmt.format(creditsNum)}`;
+    const coinsAmount = Number(userData.coins ?? userData.credits ?? 0);
+    const starText = coinsAmount >= 999999999999999 ? 'UNLIMITED' : numFmt.format(coinsAmount);
+
+    const repAmount = Number(userData.reputation ?? userData.rep ?? 0);
 
     const stats = [
-      { label: 'STAR COIN', val: starText, color: '#FFD700', icon: '⭐' },
-      { label: 'RANK', val: `#${numFmt.format(rankData.rank || 1)}`, color: '#2ed573', icon: '🏆' },
-      { label: 'REPUTATION', val: `+${numFmt.format(userData.rep || 100)} REP`, color: '#a55eea', icon: '💎' }
+      { label: 'STAR COIN', val: starText, color: '#FFD700', isCoin: true },
+      { label: 'RANK', val: `#${numFmt.format(rankData.rank || 1)}`, color: '#2ed573' },
+      { label: 'REPUTATION', val: `+${numFmt.format(repAmount)} REP`, color: '#a55eea' }
     ];
+
+    function drawVectorStar(targetCtx, cx, cy, r, color) {
+      targetCtx.save();
+      targetCtx.fillStyle = color;
+      targetCtx.beginPath();
+      for (let i = 0; i < 5; i++) {
+        const aOuter = (i * 4 * Math.PI) / 5 - Math.PI / 2;
+        const xO = cx + Math.cos(aOuter) * r;
+        const yO = cy + Math.sin(aOuter) * r;
+        if (i === 0) targetCtx.moveTo(xO, yO);
+        else targetCtx.lineTo(xO, yO);
+      }
+      targetCtx.closePath();
+      targetCtx.fill();
+      targetCtx.restore();
+    }
 
     stats.forEach((s, idx) => {
       const bx = statsStartX + (idx * (statBoxWidth + statGap));
@@ -444,6 +462,12 @@ const canvasUtil = {
       ctx.fillStyle = s.color;
       ctx.font = 'bold 17px sans-serif';
       ctx.fillText(s.val, bx + 16, statsY + 48);
+
+      // رسم النجمة الفيكتور لخانة STAR COIN
+      if (s.isCoin) {
+        const textWidth = ctx.measureText(s.val).width;
+        drawVectorStar(ctx, bx + 16 + textWidth + 12, statsY + 42, 7, '#FFD700');
+      }
     });
 
     // 9. شريط تقدم الخبرة الفاخر (XP Bar)
