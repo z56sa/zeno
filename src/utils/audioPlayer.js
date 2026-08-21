@@ -76,6 +76,8 @@ class AudioPlayerManager {
                     channelId: channel.id,
                     guildId: guildId,
                     adapterCreator: interaction.guild.voiceAdapterCreator,
+                    selfDeaf: false,
+                    selfMute: false
                 });
 
                 serverQueue.connection = connection;
@@ -201,7 +203,7 @@ class AudioPlayerManager {
             channelId: voiceChannel.id,
             guildId: guildId,
             adapterCreator: voiceChannel.guild.voiceAdapterCreator,
-            selfDeaf: true,
+            selfDeaf: false,
             selfMute: false
         });
 

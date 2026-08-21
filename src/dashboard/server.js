@@ -1165,6 +1165,45 @@ module.exports = function (app, client) {
                                     <a href="/dashboard/${guildId}/quran" class="w-full py-2 bg-emerald-950/30 hover:bg-gradient-to-r hover:from-emerald-600 hover:to-teal-600 hover:text-white text-emerald-300 border border-emerald-900/30 rounded-xl text-xs font-bold text-center transition">&gt; Visit</a>
                                 </div>
 
+                                <!-- نظام التقديمات (Applications) -->
+                                <div class="bg-[#10111a] border border-indigo-950/40 hover:border-indigo-600/40 rounded-2xl p-5 flex flex-col justify-between transition shadow-lg">
+                                    <div class="flex items-center justify-between mb-3">
+                                        <label class="toggle"><input type="checkbox" onchange="toggleModule('${guildId}', 'applications_enabled', this.checked)" checked><span class="slider"></span></label>
+                                        <div class="flex items-center gap-2">
+                                            <h4 class="font-bold text-white text-sm">نظام التقديمات</h4>
+                                            <span class="text-lg">📝</span>
+                                        </div>
+                                    </div>
+                                    <p class="text-gray-400 text-[11px] mb-4 text-right">إنشاء وتخصيص استمارات التقديم مع لوحة أزرار تفاعلية ومراجعة الطلبات</p>
+                                    <a href="/dashboard/${guildId}/applications" class="w-full py-2 bg-indigo-950/30 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 hover:text-white text-indigo-300 border border-indigo-900/30 rounded-xl text-xs font-bold text-center transition">&gt; Visit</a>
+                                </div>
+
+                                <!-- الإحصائيات والتحليلات (Analytics) -->
+                                <div class="bg-[#10111a] border border-purple-950/40 hover:border-purple-600/40 rounded-2xl p-5 flex flex-col justify-between transition shadow-lg">
+                                    <div class="flex items-center justify-between mb-3">
+                                        <span class="px-2 py-0.5 bg-purple-950/60 text-purple-300 rounded-lg text-[10px] font-bold">مباشر 📊</span>
+                                        <div class="flex items-center gap-2">
+                                            <h4 class="font-bold text-white text-sm">الإحصائيات & التحليلات</h4>
+                                            <span class="text-lg">📊</span>
+                                        </div>
+                                    </div>
+                                    <p class="text-gray-400 text-[11px] mb-4 text-right">تحليلات بيانية دقيقة لتفاعل الرسائل، دخول وخروج الأعضاء، والرومات الصوتية</p>
+                                    <a href="/dashboard/${guildId}/analytics" class="w-full py-2 bg-purple-950/30 hover:bg-gradient-to-r hover:from-purple-600 hover:to-indigo-600 hover:text-white text-purple-300 border border-purple-900/30 rounded-xl text-xs font-bold text-center transition">&gt; Visit</a>
+                                </div>
+
+                                <!-- مظهر البوت (Bot Appearance) -->
+                                <div class="bg-[#10111a] border border-amber-950/40 hover:border-amber-600/40 rounded-2xl p-5 flex flex-col justify-between transition shadow-lg">
+                                    <div class="flex items-center justify-between mb-3">
+                                        <span class="px-2 py-0.5 bg-amber-950/60 text-amber-300 rounded-lg text-[10px] font-bold">مجاني 👑</span>
+                                        <div class="flex items-center gap-2">
+                                            <h4 class="font-bold text-white text-sm">مظهر البوت</h4>
+                                            <span class="text-lg">🎨</span>
+                                        </div>
+                                    </div>
+                                    <p class="text-gray-400 text-[11px] mb-4 text-right">تخصيص الاسم المستعار، الأفاتار، البانر، وحالة ونوع النشاط مجاناً</p>
+                                    <a href="/dashboard/${guildId}/appearance" class="w-full py-2 bg-amber-950/30 hover:bg-gradient-to-r hover:from-amber-600 hover:to-yellow-600 hover:text-white text-amber-300 border border-amber-900/30 rounded-xl text-xs font-bold text-center transition">&gt; Visit</a>
+                                </div>
+
                             </div>
                         </div>
 
@@ -3805,6 +3844,12 @@ module.exports = function (app, client) {
                     </div>
                 `;
             } else if (section === 'quran' || section === 'radio') {
+                const botGuild = client.guilds.cache.get(guildId);
+                const voiceChannels = botGuild ? botGuild.channels.cache.filter(c => c.isVoiceBased()).map(c => ({ id: c.id, name: c.name })) : [];
+                const voiceChannelOptions = voiceChannels.map(vc => `
+                    <option value="${vc.id}" ${settings.quran_channel === vc.id ? 'selected' : ''}>🔊 ${vc.name}</option>
+                `).join('');
+
                 const stations = [
                     { id: 'cairo_radio', name: '📻 إذاعة القرآن الكريم من القاهرة 🇪🇬 (بث مباشر 24/7)' },
                     { id: 'makkah_radio', name: '📻 إذاعة القرآن الكريم من مكة المكرمة 🇸🇦 (بث مباشر 24/7)' },
@@ -3824,43 +3869,64 @@ module.exports = function (app, client) {
                 formFieldsHtml = `
                     <div class="space-y-6">
                         <!-- حالة البث الحالية والمشغل الحي -->
-                        <div class="bg-gradient-to-r from-emerald-950/40 via-[#12131c] to-teal-950/40 border border-emerald-900/40 p-6 rounded-2xl flex items-center justify-between">
+                        <div class="bg-gradient-to-r from-emerald-950/40 via-[#12131c] to-teal-950/40 border border-emerald-900/40 p-6 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-4">
                             <div class="flex items-center gap-3">
-                                <button type="button" onclick="stopRadioDirect()" id="stopRadioBtn" class="px-4 py-2 bg-rose-950/60 hover:bg-rose-600 text-rose-300 hover:text-white border border-rose-800/40 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-lg">
+                                <button type="button" onclick="stopRadioDirect()" id="stopRadioBtn" class="px-5 py-2.5 bg-rose-950/60 hover:bg-rose-600 text-rose-300 hover:text-white border border-rose-800/40 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-lg">
                                     <span>⏹️ إيقاف البث</span>
                                 </button>
-                                <button type="button" onclick="startRadioDirect()" id="startRadioBtn" class="px-5 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-lg shadow-emerald-900/40">
+                                <button type="button" onclick="startRadioDirect()" id="startRadioBtn" class="px-6 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-lg shadow-emerald-900/40">
                                     <span>▶️ تشغيل الآن</span>
                                 </button>
                             </div>
                             <div class="text-right">
                                 <div class="flex items-center gap-2 justify-end mb-1">
-                                    <span id="radioLiveBadge" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-gray-800 text-gray-400 border border-gray-700">جاري فحص الحالة...</span>
-                                    <h4 class="font-bold text-white text-sm">البث المباشر لإذاعات وتلاوات القرآن الكريم 📻</h4>
+                                    <div id="equalizerAnim" class="hidden flex items-center gap-1">
+                                        <span class="w-1 h-3 bg-emerald-400 rounded-full animate-bounce"></span>
+                                        <span class="w-1 h-5 bg-emerald-400 rounded-full animate-pulse"></span>
+                                        <span class="w-1 h-4 bg-teal-400 rounded-full animate-bounce"></span>
+                                        <span class="w-1 h-6 bg-teal-300 rounded-full animate-pulse"></span>
+                                        <span class="w-1 h-3 bg-emerald-400 rounded-full animate-bounce"></span>
+                                    </div>
+                                    <span id="radioLiveBadge" class="px-3 py-1 rounded-full text-[10px] font-bold bg-gray-800 text-gray-400 border border-gray-700">جاري فحص الحالة...</span>
+                                    <h4 class="font-bold text-white text-base">إذاعات وتلاوات القرآن الكريم 24/7 📻</h4>
                                 </div>
-                                <p class="text-gray-400 text-xs">تشغيل متواصل 24/7 بأعلى جودة صوتية وبدون انقطاع داخل السيرفر</p>
+                                <div class="flex items-center gap-2 justify-end text-gray-400 text-xs mt-1">
+                                    <span class="text-emerald-400 font-mono text-[10px] bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-800/40">HQ 320kbps Crystal Sound</span>
+                                    <span class="text-purple-300 font-bold text-[10px] bg-purple-950/60 px-2 py-0.5 rounded border border-purple-800/40">بدون ديفن (Non-Deafened) 🔊</span>
+                                </div>
                             </div>
                         </div>
 
                         <!-- إعدادات الروم الصوتي والمحطة -->
                         <div class="bg-[#12131c] border border-purple-950/40 p-6 rounded-2xl space-y-4 text-right">
-                            <h4 class="font-bold text-white text-sm mb-1">إعدادات الروم والمحطة ⚙️</h4>
+                            <div class="flex items-center justify-between border-b border-purple-950/40 pb-3">
+                                <span class="text-xs text-gray-400 font-bold">اختر الروم الصوتي أو ضع الـ ID يدوياً</span>
+                                <h4 class="font-bold text-white text-sm">إعدادات الروم والمحطة ⚙️</h4>
+                            </div>
+                            
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <label class="block text-xs font-bold text-gray-300 mb-2">الروم الصوتي (Voice Channel ID) <span class="text-emerald-400">*</span></label>
-                                    <input type="text" id="quranChannelInput" name="quran_channel" value="${settings.quran_channel || ''}" placeholder="ضع ID الروم الصوتي هنا..." class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-emerald-500 rounded-xl px-4 py-3 text-xs text-white outline-none font-mono text-right">
+                                    <label class="block text-xs font-bold text-gray-300 mb-2">اختر الروم الصوتي من السيرفر <span class="text-emerald-400">*</span></label>
+                                    ${voiceChannels.length > 0 ? `
+                                        <select id="voiceChannelSelect" onchange="document.getElementById('quranChannelInput').value = this.value" class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-emerald-500 rounded-xl px-4 py-3 text-xs text-white outline-none text-right cursor-pointer mb-2">
+                                            <option value="">-- اختر من قائمة الرومات --</option>
+                                            ${voiceChannelOptions}
+                                        </select>
+                                    ` : ''}
+                                    <input type="text" id="quranChannelInput" name="quran_channel" value="${settings.quran_channel || ''}" placeholder="أو اكتب ID الروم الصوتي هنا..." class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-emerald-500 rounded-xl px-4 py-2.5 text-xs text-white outline-none font-mono text-right">
                                 </div>
+
                                 <div>
-                                    <label class="block text-xs font-bold text-gray-300 mb-2">المحطة أو القارئ المفضل (Radio Station / Reciter) <span class="text-emerald-400">*</span></label>
-                                    <select id="quranStationSelect" name="quran_station" class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-emerald-500 rounded-xl px-4 py-3 text-xs text-white outline-none text-right">
+                                    <label class="block text-xs font-bold text-gray-300 mb-2">المحطة أو القارئ المفضل <span class="text-emerald-400">*</span></label>
+                                    <select id="quranStationSelect" name="quran_station" class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-emerald-500 rounded-xl px-4 py-3 text-xs text-white outline-none text-right cursor-pointer">
                                         ${stationOptions}
                                     </select>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- إعدادات التشغيل المستمر 24/7 -->
-                        <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl space-y-3 text-right">
+                        <!-- إعدادات التشغيل المستمر 24/7 والديفن -->
+                        <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl space-y-4 text-right">
                             <div class="flex items-center justify-between">
                                 <label class="toggle"><input type="checkbox" name="quran_enabled" value="1" ${settings.quran_enabled ? 'checked' : ''}><span class="slider"></span></label>
                                 <div>
@@ -3870,7 +3936,7 @@ module.exports = function (app, client) {
                             </div>
                         </div>
 
-                        <div id="quranStatusMsg" class="text-xs font-bold text-center hidden py-2 px-4 rounded-xl border"></div>
+                        <div id="quranStatusMsg" class="text-xs font-bold text-center hidden py-3 px-4 rounded-xl border"></div>
                     </div>
 
                     <script>
@@ -3879,12 +3945,15 @@ module.exports = function (app, client) {
                             const res = await fetch('/api/guild/${guildId}/quran/status');
                             const data = await res.json();
                             const badge = document.getElementById('radioLiveBadge');
+                            const eqAnim = document.getElementById('equalizerAnim');
                             if (data.isPlaying) {
-                                badge.className = 'px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-950 text-emerald-300 border border-emerald-700 animate-pulse';
+                                badge.className = 'px-3 py-1 rounded-full text-[10px] font-bold bg-emerald-950 text-emerald-300 border border-emerald-700 animate-pulse';
                                 badge.innerText = '🟢 البث يعمل الآن: ' + (data.channelName || 'في الروم الصوتي');
+                                if (eqAnim) eqAnim.classList.remove('hidden');
                             } else {
-                                badge.className = 'px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-gray-800 text-gray-400 border border-gray-700';
+                                badge.className = 'px-3 py-1 rounded-full text-[10px] font-bold bg-gray-800 text-gray-400 border border-gray-700';
                                 badge.innerText = '🔴 البوت غير متصل حالياً';
+                                if (eqAnim) eqAnim.classList.add('hidden');
                             }
                         } catch(e) {}
                     }
@@ -3897,13 +3966,13 @@ module.exports = function (app, client) {
                         const btn = document.getElementById('startRadioBtn');
 
                         if (!channelId) {
-                            alert('يرجى كتابة ID الروم الصوتي أولاً!');
+                            alert('يرجى اختيار أو كتابة ID الروم الصوتي أولاً!');
                             return;
                         }
 
                         btn.disabled = true;
                         btn.innerHTML = '⏳ جارٍ البدء...';
-                        statusMsg.className = 'text-xs font-bold text-center text-purple-400 mt-2 block bg-purple-950/30 border border-purple-800/40 py-2 px-4 rounded-xl';
+                        statusMsg.className = 'text-xs font-bold text-center text-purple-400 mt-2 block bg-purple-950/30 border border-purple-800/40 py-2.5 px-4 rounded-xl';
                         statusMsg.innerText = 'جارٍ تشغيل الراديو في الروم الصوتي...';
 
                         try {
@@ -3914,15 +3983,15 @@ module.exports = function (app, client) {
                             });
                             const data = await res.json();
                             if (data.success) {
-                                statusMsg.className = 'text-xs font-bold text-center text-emerald-400 mt-2 block bg-emerald-950/40 border border-emerald-800 py-2 px-4 rounded-xl';
+                                statusMsg.className = 'text-xs font-bold text-center text-emerald-400 mt-2 block bg-emerald-950/40 border border-emerald-800 py-2.5 px-4 rounded-xl';
                                 statusMsg.innerText = '✅ تم تشغيل ' + (data.stationName || 'إذاعة القرآن') + ' بنجاح في ' + (data.channelName || 'الروم الصوتي') + '!';
                                 checkRadioStatus();
                             } else {
-                                statusMsg.className = 'text-xs font-bold text-center text-rose-400 mt-2 block bg-rose-950/40 border border-rose-800 py-2 px-4 rounded-xl';
+                                statusMsg.className = 'text-xs font-bold text-center text-rose-400 mt-2 block bg-rose-950/40 border border-rose-800 py-2.5 px-4 rounded-xl';
                                 statusMsg.innerText = '❌ خطأ: ' + (data.error || 'فشل الاتصال بالروم الصوتي');
                             }
                         } catch(e) {
-                            statusMsg.className = 'text-xs font-bold text-center text-rose-400 mt-2 block bg-rose-950/40 border border-rose-800 py-2 px-4 rounded-xl';
+                            statusMsg.className = 'text-xs font-bold text-center text-rose-400 mt-2 block bg-rose-950/40 border border-rose-800 py-2.5 px-4 rounded-xl';
                             statusMsg.innerText = '❌ حدث خطأ أثناء الاتصال بالخادم';
                         } finally {
                             btn.disabled = false;
@@ -3941,7 +4010,7 @@ module.exports = function (app, client) {
                             const res = await fetch('/api/guild/${guildId}/quran/stop', { method: 'POST' });
                             const data = await res.json();
                             if (data.success) {
-                                statusMsg.className = 'text-xs font-bold text-center text-amber-400 mt-2 block bg-amber-950/40 border border-amber-800 py-2 px-4 rounded-xl';
+                                statusMsg.className = 'text-xs font-bold text-center text-amber-400 mt-2 block bg-amber-950/40 border border-amber-800 py-2.5 px-4 rounded-xl';
                                 statusMsg.innerText = '⏹️ تم إيقاف الراديو ومغادرة الروم الصوتي.';
                                 checkRadioStatus();
                             }
