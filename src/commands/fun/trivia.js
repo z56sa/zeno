@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType } = require('discord.js');
 const db = require('../../database');
 
 const TRIVIA_QUESTIONS = [
@@ -24,80 +24,154 @@ const TRIVIA_QUESTIONS = [
   { q: 'ما هو أسرع حيوان بري؟', options: ['الأسد', 'الفهد', 'النمر', 'الحصان'], answer: 1 },
 ];
 
-const ACTIVE_TRIVIA = new Map();
+const activeGames = new Map();
 
 module.exports = {
   name: 'trivia',
-  description: 'سؤال معلومات عامة واربح Star Coin! 🧠',
+  description: 'مسابقة معلومات عامة - تنافس مع الآخرين! 🧠',
   aliases: ['سؤال', 'مسابقة'],
   data: new SlashCommandBuilder()
     .setName('trivia')
-    .setDescription('سؤال معلومات عامة واربح Star Coin ⭐ 🧠'),
+    .setDescription('مسابقة معلومات عامة - انضم وتنافس على Star Coins! 🧠'),
 
   async execute(interaction) {
-    if (ACTIVE_TRIVIA.has(interaction.user.id))
-      return interaction.reply({ content: '⚠️ لديك سؤال قيد الانتظار بالفعل!', ephemeral: true });
-
-    const q = TRIVIA_QUESTIONS[Math.floor(Math.random() * TRIVIA_QUESTIONS.length)];
-    const reward = Math.floor(Math.random() * 101) + 50; // 50-150
-
-    const embed = new EmbedBuilder()
-      .setColor('#9b59b6')
-      .setTitle('🧠 سؤال معلومات عامة')
-      .setDescription(`**${q.q}**`)
-      .setFooter({ text: `⏱️ لديك 30 ثانية للإجابة | 🎁 المكافأة: +${reward} ⭐` });
-
-    const labels = ['أ', 'ب', 'ج', 'د'];
-    const buttons = q.options.map((opt, i) =>
-      new ButtonBuilder()
-        .setCustomId(`trivia_${i}`)
-        .setLabel(`${labels[i]}) ${opt}`)
-        .setStyle(ButtonStyle.Primary)
-    );
-
-    const rows = [];
-    for (let i = 0; i < buttons.length; i += 2) {
-      rows.push(new ActionRowBuilder().addComponents(buttons.slice(i, i + 2)));
+    if (activeGames.has(interaction.channelId)) {
+      return interaction.reply({ content: '⚠️ يوجد مسابقة جارية في هذه القناة!', ephemeral: true });
     }
 
-    const msg = await interaction.reply({ embeds: [embed], components: rows, fetchReply: true });
-    ACTIVE_TRIVIA.set(interaction.user.id, { answer: q.answer, reward, messageId: msg.id });
+    const players = new Set([interaction.user.id]);
+    activeGames.set(interaction.channelId, true);
 
-    const collector = msg.createMessageComponentCollector({
-      filter: i => i.user.id === interaction.user.id && i.customId.startsWith('trivia_'),
-      time: 30000,
-      max: 1
-    });
+    const buildLobbyEmbed = () => new EmbedBuilder()
+      .setColor('#9b59b6')
+      .setTitle('🧠 مسابقة المعلومات العامة!')
+      .setDescription(
+        `**${interaction.user.username}** فتح جلسة مسابقة!\n\n` +
+        `📋 **القواعد:**\n` +
+        `• سيُطرح سؤال على الجميع في نفس الوقت\n` +
+        `• أول من يجيب صحيحاً يربح **Star Coins ⭐**\n` +
+        `• لديكم **30 ثانية** للإجابة\n\n` +
+        `👥 **المشتركون (${players.size}):** ${[...players].map(id => `<@${id}>`).join(', ')}`
+      )
+      .setFooter({ text: 'تنتهي الدعوة بعد 60 ثانية | صاحب الغرفة يضغط ابدأ' })
+      .setTimestamp();
 
-    collector.on('collect', async (i) => {
-      const chosen = parseInt(i.customId.split('_')[1]);
-      const correct = chosen === q.answer;
-      ACTIVE_TRIVIA.delete(interaction.user.id);
+    const lobbyRow = new ActionRowBuilder().addComponents(
+      new ButtonBuilder().setCustomId('trv_join').setLabel('🧠 انضم للمسابقة').setStyle(ButtonStyle.Primary),
+      new ButtonBuilder().setCustomId('trv_start').setLabel('▶️ ابدأ المسابقة').setStyle(ButtonStyle.Success),
+      new ButtonBuilder().setCustomId('trv_cancel').setLabel('❌ إلغاء').setStyle(ButtonStyle.Danger)
+    );
 
-      if (correct) db.addCoins(interaction.user.id, interaction.guild.id, reward);
+    const msg = await interaction.reply({ embeds: [buildLobbyEmbed()], components: [lobbyRow], fetchReply: true });
 
-      const resultEmbed = new EmbedBuilder()
-        .setColor(correct ? '#2ecc71' : '#e74c3c')
-        .setTitle(correct ? '✅ إجابة صحيحة!' : '❌ إجابة خاطئة!')
-        .setDescription(`**السؤال:** ${q.q}\n\n**الإجابة الصحيحة:** ${q.options[q.answer]}`)
-        .addFields({ name: correct ? '🎁 ربحت' : '💔 لم تربح', value: correct ? `+${reward} ⭐` : '0 ⭐', inline: true })
-        .setTimestamp();
+    const lobbyCollector = msg.createMessageComponentCollector({ componentType: ComponentType.Button, time: 60000 });
 
-      await i.update({ embeds: [resultEmbed], components: [] });
-    });
-
-    collector.on('end', (collected) => {
-      ACTIVE_TRIVIA.delete(interaction.user.id);
-      if (collected.size === 0) {
-        const timeoutEmbed = new EmbedBuilder().setColor('#95a5a6')
-          .setTitle('⏰ انتهى الوقت!')
-          .setDescription(`الإجابة الصحيحة كانت: **${q.options[q.answer]}**`);
-        msg.edit({ embeds: [timeoutEmbed], components: [] }).catch(() => {});
+    lobbyCollector.on('collect', async (btn) => {
+      if (btn.customId === 'trv_join') {
+        if (players.has(btn.user.id)) return btn.reply({ content: '⚠️ أنت بالفعل في المسابقة!', ephemeral: true });
+        players.add(btn.user.id);
+        await msg.edit({ embeds: [buildLobbyEmbed()] });
+        await btn.reply({ content: `✅ انضممت للمسابقة! عدد المشتركين: **${players.size}**`, ephemeral: true });
       }
+
+      if (btn.customId === 'trv_start') {
+        if (btn.user.id !== interaction.user.id) return btn.reply({ content: '❌ فقط صاحب الغرفة يستطيع البدء!', ephemeral: true });
+        await btn.deferUpdate();
+        lobbyCollector.stop('start');
+      }
+
+      if (btn.customId === 'trv_cancel') {
+        if (btn.user.id !== interaction.user.id) return btn.reply({ content: '❌ فقط صاحب الغرفة!', ephemeral: true });
+        await btn.deferUpdate();
+        lobbyCollector.stop('cancel');
+      }
+    });
+
+    lobbyCollector.on('end', async (collected, reason) => {
+      activeGames.delete(interaction.channelId);
+
+      if (reason === 'cancel') {
+        return msg.edit({
+          embeds: [new EmbedBuilder().setColor('#ED4245').setTitle('❌ مسابقة - ألغيت').setDescription('تم إلغاء المسابقة.')],
+          components: []
+        });
+      }
+
+      // بدء السؤال
+      const q = TRIVIA_QUESTIONS[Math.floor(Math.random() * TRIVIA_QUESTIONS.length)];
+      const reward = Math.floor(Math.random() * 101) + 50;
+      const answered = new Set(); // من أجاب بالفعل
+
+      const questionEmbed = new EmbedBuilder()
+        .setColor('#9b59b6')
+        .setTitle('🧠 سؤال المسابقة')
+        .setDescription(`**${q.q}**`)
+        .setFooter({ text: `⏱️ لديكم 30 ثانية | 🎁 المكافأة: +${reward} ⭐ لأول مجيب صحيح | 👥 المشتركون: ${players.size}` });
+
+      const labels = ['أ', 'ب', 'ج', 'د'];
+      const buttons = q.options.map((opt, i) =>
+        new ButtonBuilder()
+          .setCustomId(`trv_ans_${i}`)
+          .setLabel(`${labels[i]}) ${opt}`)
+          .setStyle(ButtonStyle.Primary)
+      );
+
+      const rows = [];
+      for (let i = 0; i < buttons.length; i += 2) {
+        rows.push(new ActionRowBuilder().addComponents(buttons.slice(i, i + 2)));
+      }
+
+      await msg.edit({ embeds: [questionEmbed], components: rows });
+
+      let winner = null;
+      activeGames.set(interaction.channelId, true);
+
+      const answerCollector = msg.createMessageComponentCollector({
+        filter: i => players.has(i.user.id) && i.customId.startsWith('trv_ans_'),
+        time: 30000
+      });
+
+      answerCollector.on('collect', async (i) => {
+        if (answered.has(i.user.id)) {
+          return i.reply({ content: '⚠️ لقد أجبت بالفعل!', ephemeral: true });
+        }
+
+        answered.add(i.user.id);
+        const chosen = parseInt(i.customId.split('_')[2]);
+        const correct = chosen === q.answer;
+
+        if (correct && !winner) {
+          winner = i.user;
+          db.addCoins(i.user.id, interaction.guild.id, reward);
+          await i.reply({ content: `🎉 **إجابة صحيحة!** ربحت +\`${reward}\` ⭐`, ephemeral: true });
+          answerCollector.stop('winner');
+        } else if (correct && winner) {
+          await i.reply({ content: `✅ إجابة صحيحة! لكن **${winner.username}** كان أسرع منك.`, ephemeral: true });
+        } else {
+          await i.reply({ content: `❌ إجابة خاطئة! حاول مرة أخرى في السؤال القادم.`, ephemeral: true });
+        }
+      });
+
+      answerCollector.on('end', async (collected, reason) => {
+        activeGames.delete(interaction.channelId);
+        const resultEmbed = new EmbedBuilder()
+          .setColor(winner ? '#2ecc71' : '#95a5a6')
+          .setTitle(winner ? `🏆 ${winner.username} فاز بالمسابقة!` : '⏰ انتهى الوقت!')
+          .setDescription(
+            `**السؤال:** ${q.q}\n\n` +
+            `**✅ الإجابة الصحيحة:** ${q.options[q.answer]}\n\n` +
+            (winner ? `🎁 **${winner.username}** ربح \`+${reward}\` ⭐!` : `😔 لم يجب أحد بشكل صحيح!`) +
+            `\n\n**👥 المشتركون:** ${[...players].map(id => `<@${id}>`).join(', ')}`
+          )
+          .addFields({ name: '📊 الإجابات', value: `${answered.size}/${players.size} لاعب أجاب` })
+          .setTimestamp();
+
+        await msg.edit({ embeds: [resultEmbed], components: [] });
+      });
     });
   },
 
   async executePrefix(message) {
-    return message.reply('❌ هذا الأمر يعمل كـ Slash Command فقط. استخدم `/trivia`');
+    return message.reply('❌ استخدم `/trivia` لبدء مسابقة معلومات عامة.');
   }
 };
