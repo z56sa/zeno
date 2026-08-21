@@ -1060,6 +1060,8 @@ module.exports = function (app, client) {
                 'settings': 'إعدادات السيرفر العامة ⚙️'
             };
 
+            const title = sectionTitles[section] || ('إعدادات ' + section);
+
             // ==========================================
             // بناء استمارة الإعدادات الحقيقية المخصصة لكل موديول (ProBot Full Settings)
             // ==========================================
