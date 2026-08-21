@@ -180,9 +180,23 @@ db.exec(`
     message_id TEXT,
     created_at INTEGER DEFAULT (strftime('%s','now'))
   );
+
+  CREATE TABLE IF NOT EXISTS social_feeds (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    guild_id TEXT NOT NULL,
+    platform TEXT NOT NULL, -- youtube, twitch, tiktok
+    account_id TEXT NOT NULL, -- channel id, username, handle
+    channel_id TEXT NOT NULL, -- Discord channel ID
+    role_id TEXT, -- role to mention (optional)
+    custom_message TEXT, -- custom notification message
+    last_video_id TEXT, -- prevent duplicate alerts
+    enabled INTEGER DEFAULT 1,
+    created_at INTEGER DEFAULT (strftime('%s','now'))
+  );
 `);
 
 // Migrations - إضافة الأعمدة الجديدة بشكل آمن
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN social_alerts_enabled INTEGER DEFAULT 1;"); } catch(e) {}
 try { db.exec("ALTER TABLE guild_settings ADD COLUMN boost_enabled INTEGER DEFAULT 1;"); } catch(e) {}
 try { db.exec("ALTER TABLE guild_settings ADD COLUMN boost_channel TEXT;"); } catch(e) {}
 try { db.exec("ALTER TABLE guild_settings ADD COLUMN boost_message TEXT;"); } catch(e) {}
@@ -572,6 +586,49 @@ function endGiveaway(messageId) {
 }
 
 // ==========================================
+// Social Media Feeds / Notifier
+// ==========================================
+function addSocialFeed(guildId, platform, accountId, channelId, roleId = null, customMessage = null) {
+  const stmt = db.prepare(`
+    INSERT INTO social_feeds (guild_id, platform, account_id, channel_id, role_id, custom_message, enabled)
+    VALUES (?, ?, ?, ?, ?, ?, 1)
+  `);
+  const res = stmt.run(guildId, platform.toLowerCase(), accountId, channelId, roleId, customMessage);
+  return db.prepare('SELECT * FROM social_feeds WHERE id = ?').get(res.lastInsertRowid);
+}
+
+function getGuildSocialFeeds(guildId) {
+  return db.prepare('SELECT * FROM social_feeds WHERE guild_id = ? ORDER BY created_at DESC').all(guildId);
+}
+
+function getSocialFeed(id) {
+  return db.prepare('SELECT * FROM social_feeds WHERE id = ?').get(id);
+}
+
+function deleteSocialFeed(id, guildId = null) {
+  if (guildId) {
+    return db.prepare('DELETE FROM social_feeds WHERE id = ? AND guild_id = ?').run(id, guildId);
+  }
+  return db.prepare('DELETE FROM social_feeds WHERE id = ?').run(id);
+}
+
+function toggleSocialFeed(id, enabled) {
+  return db.prepare('UPDATE social_feeds SET enabled = ? WHERE id = ?').run(enabled ? 1 : 0, id);
+}
+
+function updateSocialFeedLastId(id, lastVideoId) {
+  return db.prepare('UPDATE social_feeds SET last_video_id = ? WHERE id = ?').run(lastVideoId, id);
+}
+
+function getAllActiveSocialFeeds() {
+  return db.prepare(`
+    SELECT sf.* FROM social_feeds sf
+    LEFT JOIN guild_settings gs ON sf.guild_id = gs.guild_id
+    WHERE sf.enabled = 1 AND (gs.social_alerts_enabled IS NULL OR gs.social_alerts_enabled = 1)
+  `).all();
+}
+
+// ==========================================
 // Stats
 // ==========================================
 function getSystemStats() {
@@ -641,6 +698,13 @@ module.exports = {
   setUserApplicationPoints,
   addApplicationPoint,
   resetApplicationPoints,
+  addSocialFeed,
+  getGuildSocialFeeds,
+  getSocialFeed,
+  deleteSocialFeed,
+  toggleSocialFeed,
+  updateSocialFeedLastId,
+  getAllActiveSocialFeeds,
   // Compatibility aliases
   getTopXp: getLeaderboard,
   getTopCredits: getCoinsLeaderboard,

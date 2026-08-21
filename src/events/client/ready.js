@@ -26,5 +26,13 @@ module.exports = {
       ],
       status: 'online'
     });
+
+    // تشغيل محرك تنبيهات السوشيال ميديا (YouTube / Twitch / TikTok)
+    try {
+      const { startSocialNotifier } = require('../../utils/socialNotifier');
+      startSocialNotifier(client);
+    } catch (notifierErr) {
+      logger.error('Failed to start social notifier:', notifierErr.message);
+    }
   }
 };
