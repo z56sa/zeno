@@ -1875,11 +1875,11 @@ module.exports = function (app, client) {
             const { guildId, section } = req.params;
             const guilds = req.session.guilds || [];
 
-            // ─── Social Notifier: صفحة مخصصة كاملة ───
+            // ─── Social Notifier: صفحة NotifyMe Style ───
             if (section === 'social' || section === 'notifier') {
                 const botGuild = client.guilds.cache.get(guildId);
                 if (!botGuild) return res.redirect('/dashboard');
-                const feeds = database.getGuildSocialFeeds ? (database.getGuildSocialFeeds(guildId) || []) : [];
+                const allFeeds = database.getGuildSocialFeeds ? (database.getGuildSocialFeeds(guildId) || []) : [];
                 const textChannels = botGuild.channels.cache
                     .filter(c => c.isTextBased && c.isTextBased() && !c.isThread())
                     .sort((a, b) => a.rawPosition - b.rawPosition)
@@ -1888,166 +1888,513 @@ module.exports = function (app, client) {
                     .filter(r => r.name !== '@everyone')
                     .sort((a, b) => b.position - a.position)
                     .map(r => ({ id: r.id, name: r.name }));
-                const platformIcon = { youtube: '📺', twitch: '🔴', tiktok: '🎵' };
-                const feedsHTML = feeds.length === 0
-                    ? `<div class="text-center py-16 text-gray-500"><div class="text-5xl mb-4">📭</div><p class="text-sm">لا توجد حسابات مضافة بعد</p></div>`
-                    : feeds.map(f => `
-                        <div class="bg-[#0f1018] border border-purple-900/30 rounded-2xl p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-                            <div class="flex items-center gap-3">
-                                <span class="text-3xl">${platformIcon[f.platform] || '🔔'}</span>
-                                <div>
-                                    <div class="font-bold text-white">@${f.account_id}</div>
-                                    <div class="text-xs text-gray-400 capitalize mt-0.5">${f.platform} • #${(textChannels.find(c => c.id === f.channel_id) || {}).name || f.channel_id}</div>
-                                    ${f.custom_message ? `<div class="text-xs text-purple-300 mt-0.5">"${f.custom_message}"</div>` : ''}
-                                </div>
-                            </div>
-                            <div class="flex items-center gap-2 flex-wrap">
-                                <button onclick="toggleFeed(${f.id}, ${f.enabled ? 0 : 1})" class="px-3 py-1.5 rounded-lg text-xs font-bold ${f.enabled ? 'bg-green-500/20 text-green-400 border border-green-500/30' : 'bg-gray-700/50 text-gray-400 border border-gray-600/30'}">${f.enabled ? '✅ مفعل' : '⏸ موقوف'}</button>
-                                <button onclick="testFeed(${f.id})" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-blue-500/20 text-blue-400 border border-blue-500/30">🧪 اختبار</button>
-                                <button onclick="deleteFeed(${f.id})" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-red-500/20 text-red-400 border border-red-500/30">🗑️ حذف</button>
-                            </div>
-                        </div>`).join('');
-                const channelOptions = textChannels.map(c => `<option value="${c.id}">#${c.name}</option>`).join('');
-                const roleOptions = `<option value="">-- بدون منشن --</option>` + guildRolesList.map(r => `<option value="${r.id}">@${r.name}</option>`).join('');
+
+                const channelOptionsHtml = textChannels.map(c => '<option value="' + c.id + '">#' + c.name + '</option>').join('');
+                const roleOptionsHtml = '<option value="">-- بدون منشن --</option>' + guildRolesList.map(r => '<option value="' + r.id + '">@' + r.name + '</option>').join('');
+
+                const platforms = [
+                    { id: 'youtube', name: 'YouTube', icon: '▶', color: '#FF0000', bg: '#1a0000' },
+                    { id: 'twitch',  name: 'Twitch',  icon: '◉', color: '#9146FF', bg: '#0d0019' },
+                    { id: 'tiktok',  name: 'TikTok',  icon: '♪', color: '#00F2FE', bg: '#001a1c' }
+                ];
+
+                const feedsJson = JSON.stringify(allFeeds);
+                const channelsJson = JSON.stringify(textChannels);
+                const rolesJson = JSON.stringify(guildRolesList);
+                const botIcon = botGuild.iconURL ? (botGuild.iconURL() || 'https://cdn.discordapp.com/embed/avatars/0.png') : 'https://cdn.discordapp.com/embed/avatars/0.png';
+
+                const platformsHtml = platforms.map(p => 
+                    '<div>' +
+                        '<button class="platform-btn" id="plat-' + p.id + '" onclick="selectPlatform(\'' + p.id + '\')">' +
+                            '<span class="platform-icon" style="background:' + p.bg + ';color:' + p.color + ';">' + p.icon + '</span>' +
+                            '<span>' + p.name + '</span>' +
+                            '<span id="count-' + p.id + '" style="margin-right:auto;background:rgba(139,92,246,0.2);color:#c4b5fd;border-radius:20px;padding:2px 8px;font-size:0.7rem;font-weight:bold;" class="hidden">0</span>' +
+                        '</button>' +
+                        '<div id="sub-' + p.id + '" class="hidden">' +
+                            '<button class="sub-btn active" id="sub-' + p.id + '-accounts" onclick="selectSubPage(\'' + p.id + '\',\'accounts\')">' +
+                                '<span style="margin-left:8px;">👥</span> الحسابات' +
+                            '</button>' +
+                            '<button class="sub-btn" id="sub-' + p.id + '-settings" onclick="selectSubPage(\'' + p.id + '\',\'settings\')">' +
+                                '<span style="margin-left:8px;">✨</span> تخصيص الإشعارات' +
+                            '</button>' +
+                        '</div>' +
+                    '</div>'
+                ).join('');
+
                 return res.send(`<!DOCTYPE html>
-<html lang="ar" dir="rtl" class="dark">
+<html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>تنبيهات السوشيال ميديا - ZENO</title>
+<title>Social Notifier - ZENO Dashboard</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <style>
-body { background: #0b0c10; color: #fff; font-family: 'Cairo', sans-serif; }
-.card { background: #12131c; border: 1px solid rgba(139,92,246,0.2); border-radius: 1rem; padding: 1.5rem; }
-input, select { background: #0b0c10; border: 1px solid rgba(139,92,246,0.3); border-radius: 0.75rem; padding: 0.6rem 1rem; color: #fff; width: 100%; font-family: 'Cairo', sans-serif; font-size: 0.85rem; outline: none; }
-input:focus, select:focus { border-color: #7c3aed; }
+* { box-sizing: border-box; }
+body { background: #0a0a0f; color: #e2e8f0; font-family: 'Cairo', sans-serif; margin: 0; min-height: 100vh; }
+::-webkit-scrollbar { width: 4px; } ::-webkit-scrollbar-track { background: #111; } ::-webkit-scrollbar-thumb { background: #4a1d96; border-radius: 4px; }
+.sidebar { width: 250px; min-height: 100vh; background: #0c0d14; border-left: 1px solid rgba(139,92,246,0.15); padding: 1.2rem 0; flex-shrink: 0; }
+.platform-btn { display: flex; align-items: center; gap: 12px; width: calc(100% - 24px); margin: 3px 12px; padding: 10px 14px; border-radius: 12px; cursor: pointer; transition: all 0.2s; border: none; background: transparent; color: #94a3b8; font-family: 'Cairo', sans-serif; font-size: 0.85rem; font-weight: 700; text-align: right; }
+.platform-btn:hover { background: rgba(139,92,246,0.12); color: #c4b5fd; }
+.platform-btn.active { background: rgba(139,92,246,0.22); color: #a78bfa; border: 1px solid rgba(139,92,246,0.3); }
+.platform-icon { width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; flex-shrink: 0; }
+.sub-btn { display: flex; align-items: center; width: calc(100% - 36px); margin: 2px 12px 2px 24px; padding: 8px 12px; border-radius: 10px; cursor: pointer; transition: all 0.2s; border: none; background: transparent; color: #64748b; font-family: 'Cairo', sans-serif; font-size: 0.8rem; font-weight: 600; text-align: right; }
+.sub-btn:hover { background: rgba(139,92,246,0.08); color: #94a3b8; }
+.sub-btn.active { background: rgba(139,92,246,0.18); color: #c4b5fd; font-weight: 700; }
+.divider { height: 1px; background: rgba(139,92,246,0.1); margin: 14px 16px; }
+.content { flex: 1; padding: 2rem 2.5rem; overflow-y: auto; }
+.card { background: #11121c; border: 1px solid rgba(139,92,246,0.18); border-radius: 16px; }
+.banner-promo { background: linear-gradient(90deg, #16122b 0%, #1e133d 100%); border: 1px solid rgba(139,92,246,0.3); border-radius: 16px; padding: 1.25rem 1.5rem; margin-bottom: 2rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+.banner-badge { display: flex; align-items: center; gap: 8px; font-size: 0.78rem; color: #cbd5e1; font-weight: 600; }
+.banner-badge svg { color: #3b82f6; flex-shrink: 0; }
+.modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 50; align-items: center; justify-content: center; backdrop-filter: blur(6px); }
+.modal-bg.show { display: flex; }
+.modal { background: #12131e; border: 1px solid rgba(139,92,246,0.35); border-radius: 20px; width: 90%; max-width: 620px; max-height: 90vh; overflow-y: auto; padding: 2rem; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7); }
+input, select, textarea { background: #0a0a0f; border: 1px solid rgba(139,92,246,0.3); border-radius: 12px; padding: 0.75rem 1rem; color: #e2e8f0; width: 100%; font-family: 'Cairo', sans-serif; font-size: 0.85rem; outline: none; transition: border-color 0.2s; }
+input:focus, select:focus, textarea:focus { border-color: #8b5cf6; }
+label { display: block; font-size: 0.8rem; font-weight: 700; color: #94a3b8; margin-bottom: 6px; }
+.btn-primary { background: #3b82f6; color: white; border: none; border-radius: 12px; padding: 0.65rem 1.4rem; font-weight: 700; font-family: 'Cairo', sans-serif; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; }
+.btn-primary:hover { background: #2563eb; }
+.btn-secondary { background: #1e1f2e; color: #cbd5e1; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 0.65rem 1.4rem; font-weight: 700; font-family: 'Cairo', sans-serif; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; }
+.btn-secondary:hover { background: #2d2e3f; }
+.btn-danger { background: rgba(239,68,68,0.12); color: #f87171; border: 1px solid rgba(239,68,68,0.25); border-radius: 10px; padding: 0.45rem 0.9rem; font-weight: 700; font-family: 'Cairo', sans-serif; font-size: 0.78rem; cursor: pointer; transition: all 0.2s; }
+.btn-danger:hover { background: rgba(239,68,68,0.25); }
+.btn-test { background: rgba(59,130,246,0.12); color: #60a5fa; border: 1px solid rgba(59,130,246,0.25); border-radius: 10px; padding: 0.45rem 0.9rem; font-weight: 700; font-family: 'Cairo', sans-serif; font-size: 0.78rem; cursor: pointer; transition: all 0.2s; }
+.btn-test:hover { background: rgba(59,130,246,0.25); }
+.toggle { position: relative; width: 44px; height: 24px; flex-shrink: 0; }
+.toggle input { opacity: 0; width: 0; height: 0; }
+.slider { position: absolute; cursor: pointer; inset: 0; background: #232433; border-radius: 24px; transition: .3s; }
+.slider:before { content: ""; position: absolute; height: 18px; width: 18px; right: 3px; bottom: 3px; background: white; border-radius: 50%; transition: .3s; }
+input:checked + .slider { background: #3b82f6; }
+input:checked + .slider:before { transform: translateX(-20px); }
+.account-row { display: flex; align-items: center; justify-content: space-between; padding: 18px 24px; border-bottom: 1px solid rgba(139,92,246,0.08); gap: 16px; flex-wrap: wrap; }
+.account-row:last-child { border-bottom: none; }
+.status-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+.status-dot.active { background: #22c55e; box-shadow: 0 0 8px #22c55e; }
+.status-dot.paused { background: #64748b; }
+.search-box { background: #11121c; border: 1px solid rgba(139,92,246,0.2); border-radius: 12px; padding: 0.65rem 1rem 0.65rem 2.6rem; color: #e2e8f0; width: 100%; font-family: 'Cairo', sans-serif; font-size: 0.85rem; outline: none; }
+.badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 700; }
+.badge-yt  { background: rgba(255,0,0,0.15);   color: #f87171; }
+.badge-tw  { background: rgba(145,70,255,0.15); color: #a78bfa; }
+.badge-tt  { background: rgba(0,242,254,0.15);  color: #67e8f9; }
 </style>
 </head>
-<body class="min-h-screen bg-[#0b0c10]">
-<div class="max-w-4xl mx-auto px-4 py-10">
-    <a href="/dashboard/${guildId}" class="inline-flex items-center gap-2 text-purple-400 hover:text-purple-300 text-sm mb-8 transition">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-        العودة للداشبورد
-    </a>
-    <div class="flex items-center gap-3 mb-2">
-        <span class="text-4xl">📡</span>
-        <div>
-            <h1 class="text-3xl font-black text-white">تنبيهات السوشيال ميديا</h1>
-            <p class="text-gray-400 text-sm">إشعارات تلقائية عند نزول محتوى جديد على YouTube / Twitch / TikTok</p>
+<body>
+<div style="display:flex; min-height:100vh;">
+
+<!-- ═══ SIDEBAR ═══ -->
+<div class="sidebar">
+    <!-- Guild Header -->
+    <div style="padding: 0 16px 14px; display:flex; align-items:center; justify-content:space-between;">
+        <div style="display:flex; align-items:center; gap:10px;">
+            <img src="${botIcon}" style="width:36px;height:36px;border-radius:10px;object-fit:cover;" onerror="this.src='https://cdn.discordapp.com/embed/avatars/0.png'">
+            <div>
+                <div style="font-size:0.85rem;font-weight:800;color:#f1f5f9;max-width:140px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${botGuild.name}</div>
+                <div style="font-size:0.7rem;color:#64748b;">Social Notifier</div>
+            </div>
         </div>
+        <a href="/dashboard/${guildId}" title="العودة للداشبورد" style="color:#64748b;display:flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:8px;background:rgba(255,255,255,0.05);transition:all 0.2s;">
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        </a>
     </div>
-    <div class="grid grid-cols-3 gap-3 my-8">
-        <div class="card text-center"><div class="text-2xl mb-1">📺</div><div class="text-xs text-gray-400">YouTube</div><div class="text-xs text-green-400 mt-1">فيديو جديد → إشعار فوري</div></div>
-        <div class="card text-center"><div class="text-2xl mb-1">🔴</div><div class="text-xs text-gray-400">Twitch</div><div class="text-xs text-green-400 mt-1">بث مباشر → إشعار فوري</div></div>
-        <div class="card text-center"><div class="text-2xl mb-1">🎵</div><div class="text-xs text-gray-400">TikTok</div><div class="text-xs text-green-400 mt-1">فيديو جديد → إشعار فوري</div></div>
+    <div class="divider"></div>
+
+    <!-- Platforms -->
+    <div style="padding: 4px 0;">
+        <div style="padding:4px 20px 8px;font-size:0.7rem;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:0.05em;">المنصات التفاعلية</div>
+        ${platformsHtml}
     </div>
 
-    <!-- Add Form -->
-    <div class="card mb-8">
-        <h2 class="text-lg font-bold mb-5 flex items-center gap-2">➕ إضافة حساب جديد</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div class="divider"></div>
+
+    <div style="padding: 0 14px;">
+        <a href="https://discord.gg/uxqQDtbVMz" target="_blank" class="sub-btn" style="width:100%;margin:0;">
+            <span style="margin-left:8px;">🎧</span> الدعم الفني
+        </a>
+        <a href="/dashboard/${guildId}" class="sub-btn" style="width:100%;margin:4px 0 0;">
+            <span style="margin-left:8px;">🔙</span> لوحة التحكم
+        </a>
+    </div>
+</div>
+
+<!-- ═══ CONTENT ═══ -->
+<div class="content">
+
+    <!-- Premium / Features Bar Style NotifyMe -->
+    <div class="banner-promo">
+        <div style="display:flex; align-items:center; gap:12px;">
+            <button class="btn-primary" style="background:#2563eb;" onclick="openAddModal()">
+                🚀 إضافة تنبيه الآن
+            </button>
+        </div>
+        <div style="display:flex; align-items:center; gap:20px; flex-wrap:wrap;">
+            <div class="banner-badge"><svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg> إشعارات فورية</div>
+            <div class="banner-badge"><svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg> حسابات غير محدودة</div>
+            <div class="banner-badge"><svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg> تخصيص الرسائل والإيمبد</div>
+            <div class="banner-badge"><svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg> منع التكرار الذكي</div>
+        </div>
+    </div>
+
+    <!-- Header Section -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:16px;">
+        <div style="display:flex;align-items:center;gap:14px;">
+            <h1 id="hdr-breadcrumb" style="font-size:1.4rem;font-weight:900;color:white;margin:0;display:flex;align-items:center;gap:8px;">
+                <span id="hdr-plat-name">YouTube</span>
+                <span style="color:#64748b;">›</span>
+                <span id="hdr-sub-name" style="color:#94a3b8;">Accounts</span>
+                <span id="hdr-count-badge" style="background:rgba(59,130,246,0.15);color:#60a5fa;border-radius:20px;padding:2px 10px;font-size:0.75rem;font-weight:800;">0/10</span>
+            </h1>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;">
+            <button onclick="location.reload()" class="btn-secondary" style="display:inline-flex;align-items:center;gap:6px;font-size:0.8rem;padding:0.6rem 1rem;">
+                🔄 تحديث البيانات
+            </button>
+            <button id="btn-add-account" onclick="openAddModal()" class="btn-primary">
+                + Add Account
+            </button>
+        </div>
+    </div>
+
+    <!-- Search Bar -->
+    <div style="margin-bottom: 20px;">
+        <div style="position:relative;">
+            <svg style="position:absolute;right:14px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:#64748b;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0"/></svg>
+            <input id="searchInput" type="text" placeholder="Search accounts..." class="search-box" oninput="filterFeeds()">
+        </div>
+    </div>
+
+    <!-- Accounts View -->
+    <div id="view-accounts">
+        <div id="empty-state" style="text-align:center;padding:60px 20px;background:#11121c;border:1px dashed rgba(139,92,246,0.2);border-radius:16px;">
+            <div style="font-size:3.5rem;margin-bottom:12px;">📭</div>
+            <div style="font-size:1.1rem;font-weight:800;color:#e2e8f0;margin-bottom:6px;">لا توجد حسابات مضافة لهذه المنصة</div>
+            <div style="font-size:0.82rem;color:#64748b;margin-bottom:18px;">أضف حسابك لتصلك إشعارات فورية بمجرد نشر أي فيديو أو بدء بث!</div>
+            <button onclick="openAddModal()" class="btn-primary">+ إضافة حساب الآن</button>
+        </div>
+        <div id="accounts-container" class="card" style="display:none;overflow:hidden;">
+            <div id="accounts-list"></div>
+        </div>
+    </div>
+
+    <!-- Settings / Customization View -->
+    <div id="view-settings" style="display:none;">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Messages Template -->
+            <div class="card" style="padding:24px;">
+                <h2 style="font-size:1.05rem;font-weight:800;margin:0 0 16px;color:white;display:flex;align-items:center;gap:8px;">
+                    📝 تخصيص نصوص الإشعار
+                </h2>
+                <div style="display:grid;gap:16px;">
+                    <div>
+                        <label>رسالة الفيديو الجديد (Video Message)</label>
+                        <input type="text" id="setting-video-msg" value="**{channel}** just posted a new video! 🔥">
+                    </div>
+                    <div>
+                        <label>رسالة البث المباشر (Live Message)</label>
+                        <input type="text" id="setting-live-msg" value="**{channel}** is live now! 🔴">
+                    </div>
+                </div>
+                <div style="background:rgba(139,92,246,0.08);border-radius:12px;padding:12px;margin-top:16px;font-size:0.75rem;color:#94a3b8;">
+                    <span style="color:#c4b5fd;font-weight:bold;">المتغيرات المتاحة:</span><br>
+                    • <code>{channel}</code> : اسم الحساب/القناة<br>
+                    • <code>{title}</code> : عنوان المقطع أو البث<br>
+                    • <code>{url}</code> : رابط المشاهدة المباشر
+                </div>
+            </div>
+
+            <!-- Embed Preview Style -->
+            <div class="card" style="padding:24px;">
+                <h2 style="font-size:1.05rem;font-weight:800;margin:0 0 16px;color:white;display:flex;align-items:center;gap:8px;">
+                    🎨 معاينة الإيمبد (Embed Preview)
+                </h2>
+                <div style="background:#1a1c26;border-right:4px solid #3b82f6;border-radius:12px;padding:16px;">
+                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                        <span style="font-size:1.1rem;">📺</span>
+                        <span style="font-weight:800;font-size:0.85rem;color:#60a5fa;">ZENO Social Notifier</span>
+                    </div>
+                    <div style="font-weight:800;font-size:0.95rem;color:white;margin-bottom:6px;">🎉 فيديو جديد نزل على القناة!</div>
+                    <div style="font-size:0.78rem;color:#94a3b8;margin-bottom:12px;">اضغط على الرابط بالأسفل للمشاهدة الآن والتفاعل.</div>
+                    <div style="background:#0f1017;height:120px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#475569;font-size:0.8rem;border:1px dashed rgba(255,255,255,0.1);">
+                        صورة الفيديو (Thumbnail) 🖼️
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+</div>
+
+<!-- ═══ ADD ACCOUNT MODAL ═══ -->
+<div class="modal-bg" id="addModal">
+<div class="modal">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+        <h2 id="modal-title" style="font-size:1.15rem;font-weight:900;color:white;margin:0;">Add YouTube Account</h2>
+        <button onclick="closeAddModal()" style="background:rgba(255,255,255,0.08);color:#94a3b8;border:none;width:32px;height:32px;border-radius:10px;cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center;">✕</button>
+    </div>
+
+    <div style="display:grid;gap:16px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
             <div>
-                <label class="text-xs text-gray-400 mb-1.5 block font-bold">المنصة</label>
-                <select id="platform">
-                    <option value="youtube">📺 YouTube</option>
-                    <option value="twitch">🔴 Twitch</option>
-                    <option value="tiktok">🎵 TikTok</option>
+                <label>Account URL أو المعرف *</label>
+                <input id="acc-url" type="text" placeholder="https://youtube.com/@...">
+            </div>
+            <div>
+                <label>Account Status *</label>
+                <select id="acc-status">
+                    <option value="running">🟢 Running (مفعل)</option>
+                    <option value="paused">⏸ Paused (موقوف)</option>
                 </select>
             </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
             <div>
-                <label class="text-xs text-gray-400 mb-1.5 block font-bold">اسم الحساب أو Channel ID</label>
-                <input id="account" type="text" placeholder="@MrBeast أو UCX6OQ3DkcsbYNE6H8uQQuVA">
+                <label>Discord Channel *</label>
+                <select id="acc-channel">${channelOptionsHtml}</select>
             </div>
             <div>
-                <label class="text-xs text-gray-400 mb-1.5 block font-bold">روم استقبال الإشعارات</label>
-                <select id="channelId">${channelOptions}</select>
-            </div>
-            <div>
-                <label class="text-xs text-gray-400 mb-1.5 block font-bold">منشن رول (اختياري)</label>
-                <select id="roleId">${roleOptions}</select>
-            </div>
-            <div class="md:col-span-2">
-                <label class="text-xs text-gray-400 mb-1.5 block font-bold">رسالة مخصصة (اختياري)</label>
-                <input id="message" type="text" placeholder="مثال: 🔥 محتوى جديد نزل! تعال شوف!">
+                <label>Ping Role (منشن رول)</label>
+                <select id="acc-role">${roleOptionsHtml}</select>
             </div>
         </div>
-        <div id="addStatus" class="mt-3 text-sm hidden"></div>
-        <button onclick="addFeed()" class="mt-5 px-8 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold rounded-xl transition text-sm shadow-lg shadow-purple-900/30">
-            ➕ إضافة الحساب
-        </button>
+        <div>
+            <label>Video Message (رسالة مخصصة)</label>
+            <input id="acc-message" type="text" placeholder="**{channel}** just posted a new video! 🔥">
+        </div>
     </div>
 
-    <!-- Feeds List -->
-    <div class="mb-4 flex items-center justify-between">
-        <h2 class="text-lg font-bold">📋 الحسابات المضافة (${feeds.length})</h2>
+    <div id="add-status" style="display:none;margin-top:14px;font-size:0.85rem;padding:12px 16px;border-radius:12px;"></div>
+
+    <div style="display:flex;gap:12px;justify-content:flex-end;margin-top:24px;">
+        <button onclick="closeAddModal()" class="btn-secondary">Cancel</button>
+        <button onclick="submitAddFeed()" class="btn-primary" id="btn-submit-add">Add Account</button>
     </div>
-    <div id="feedsList" class="space-y-3">${feedsHTML}</div>
+</div>
 </div>
 
 <script>
 const GID = '${guildId}';
+let allFeeds = ${feedsJson};
+let textChannels = ${channelsJson};
+let guildRoles = ${rolesJson};
+let currentPlatform = 'youtube';
+let currentSubPage = 'accounts';
 
-async function addFeed() {
-    const platform = document.getElementById('platform').value;
-    const account = document.getElementById('account').value.trim();
-    const channelId = document.getElementById('channelId').value;
-    const roleId = document.getElementById('roleId').value;
-    const message = document.getElementById('message').value.trim();
-    const statusEl = document.getElementById('addStatus');
-    if (!account) { statusEl.textContent = '❌ أدخل اسم الحساب!'; statusEl.className = 'mt-3 text-sm text-red-400'; statusEl.classList.remove('hidden'); return; }
-    try {
-        const r = await fetch('/api/guild/' + GID + '/social/add', {
-            method: 'POST', headers: {'Content-Type':'application/json'},
-            body: JSON.stringify({ platform, account, channelId, roleId, message })
-        });
-        const d = await r.json();
-        if (d.success) {
-            statusEl.textContent = '✅ تمت الإضافة بنجاح!';
-            statusEl.className = 'mt-3 text-sm text-green-400';
-            statusEl.classList.remove('hidden');
-            setTimeout(() => location.reload(), 1200);
-        } else {
-            statusEl.textContent = '❌ خطأ: ' + d.error;
-            statusEl.className = 'mt-3 text-sm text-red-400';
-            statusEl.classList.remove('hidden');
-        }
-    } catch(e) {
-        statusEl.textContent = '❌ خطأ في الاتصال: ' + e.message;
-        statusEl.className = 'mt-3 text-sm text-red-400';
-        statusEl.classList.remove('hidden');
+const platformMeta = {
+    youtube: { name: 'YouTube', icon: '▶', color: '#FF0000', badge: 'badge-yt', placeholder: 'https://youtube.com/@Channel أو معرف القناة' },
+    twitch:  { name: 'Twitch',  icon: '◉', color: '#9146FF', badge: 'badge-tw', placeholder: 'https://twitch.tv/username' },
+    tiktok:  { name: 'TikTok',  icon: '♪', color: '#00F2FE', badge: 'badge-tt', placeholder: 'https://tiktok.com/@username' }
+};
+
+function updateCounts() {
+    ['youtube','twitch','tiktok'].forEach(p => {
+        const cnt = allFeeds.filter(f => f.platform === p).length;
+        const el = document.getElementById('count-' + p);
+        if (cnt > 0) { el.textContent = cnt; el.classList.remove('hidden'); }
+        else el.classList.add('hidden');
+    });
+}
+
+function selectPlatform(p) {
+    currentPlatform = p;
+    ['youtube','twitch','tiktok'].forEach(id => {
+        const btn = document.getElementById('plat-' + id);
+        if (btn) btn.classList.remove('active');
+        const sub = document.getElementById('sub-' + id);
+        if (sub) sub.classList.add('hidden');
+    });
+    const platBtn = document.getElementById('plat-' + p);
+    if (platBtn) platBtn.classList.add('active');
+    const subContainer = document.getElementById('sub-' + p);
+    if (subContainer) subContainer.classList.remove('hidden');
+
+    const meta = platformMeta[p] || platformMeta.youtube;
+    document.getElementById('hdr-plat-name').textContent = meta.name;
+    document.getElementById('modal-title').textContent = 'Add ' + meta.name + ' Account';
+    document.getElementById('acc-url').placeholder = meta.placeholder;
+
+    selectSubPage(p, 'accounts');
+}
+
+function selectSubPage(p, sub) {
+    currentSubPage = sub;
+    ['accounts','settings'].forEach(s => {
+        const el = document.getElementById('sub-' + p + '-' + s);
+        if (el) el.classList.remove('active');
+    });
+    const activeEl = document.getElementById('sub-' + p + '-' + sub);
+    if (activeEl) activeEl.classList.add('active');
+
+    document.getElementById('hdr-sub-name').textContent = sub === 'accounts' ? 'Accounts' : 'Customize Notifications';
+
+    if (sub === 'accounts') {
+        document.getElementById('view-accounts').style.display = '';
+        document.getElementById('view-settings').style.display = 'none';
+        renderFeeds();
+    } else {
+        document.getElementById('view-accounts').style.display = 'none';
+        document.getElementById('view-settings').style.display = '';
     }
 }
 
-async function deleteFeed(id) {
+function renderFeeds(query = '') {
+    if (!currentPlatform) return;
+    const filtered = allFeeds.filter(f =>
+        f.platform === currentPlatform &&
+        (f.account_id.toLowerCase().includes(query.toLowerCase()) || !query)
+    );
+    const container = document.getElementById('accounts-container');
+    const empty = document.getElementById('empty-state');
+    const list = document.getElementById('accounts-list');
+    const badgeEl = document.getElementById('hdr-count-badge');
+
+    const platformFeedsCount = allFeeds.filter(f => f.platform === currentPlatform).length;
+    badgeEl.textContent = platformFeedsCount + '/10';
+
+    if (filtered.length === 0) {
+        container.style.display = 'none';
+        empty.style.display = '';
+    } else {
+        empty.style.display = 'none';
+        container.style.display = '';
+        const channelMap = Object.fromEntries(textChannels.map(c => [c.id, c.name]));
+        list.innerHTML = filtered.map(f => {
+            const chName = channelMap[f.channel_id] ? '#' + channelMap[f.channel_id] : f.channel_id;
+            const meta = platformMeta[f.platform] || {};
+            return '<div class="account-row" id="row-' + f.id + '">' +
+                '<div style="display:flex;align-items:center;gap:14px;flex:1;min-width:0;">' +
+                    '<div class="status-dot ' + (f.enabled ? 'active' : 'paused') + '" title="' + (f.enabled ? 'Running' : 'Paused') + '"></div>' +
+                    '<div style="font-size:1.5rem;">' + (meta.icon || '🔔') + '</div>' +
+                    '<div style="min-width:0;">' +
+                        '<div style="font-weight:800;color:white;font-size:0.92rem;display:flex;align-items:center;gap:8px;">' +
+                            '<span>@' + f.account_id + '</span>' +
+                            '<span class="badge ' + (meta.badge || '') + '">' + (meta.name || f.platform) + '</span>' +
+                        '</div>' +
+                        '<div style="font-size:0.78rem;color:#64748b;margin-top:2px;">' +
+                            '<span style="color:#a78bfa;">' + chName + '</span>' + (f.custom_message ? ' • "' + f.custom_message + '"' : '') +
+                        '</div>' +
+                    '</div>' +
+                '</div>' +
+                '<div style="display:flex;align-items:center;gap:10px;flex-shrink:0;">' +
+                    '<label class="toggle" title="' + (f.enabled ? 'إيقاف' : 'تشغيل') + '">' +
+                        '<input type="checkbox" ' + (f.enabled ? 'checked' : '') + ' onchange="toggleFeed(' + f.id + ', this.checked)">' +
+                        '<span class="slider"></span>' +
+                    '</label>' +
+                    '<button onclick="testFeedBtn(' + f.id + ')" class="btn-test">🧪 Test</button>' +
+                    '<button onclick="deleteFeedBtn(' + f.id + ')" class="btn-danger">🗑️ Delete</button>' +
+                '</div>' +
+            '</div>';
+        }).join('');
+    }
+}
+
+function filterFeeds() {
+    const q = document.getElementById('searchInput').value;
+    renderFeeds(q);
+}
+
+function openAddModal() {
+    document.getElementById('addModal').classList.add('show');
+    document.getElementById('acc-url').value = '';
+    document.getElementById('acc-message').value = '';
+    document.getElementById('acc-status').value = 'running';
+    document.getElementById('add-status').style.display = 'none';
+}
+
+function closeAddModal() {
+    document.getElementById('addModal').classList.remove('show');
+}
+
+async function submitAddFeed() {
+    const url = document.getElementById('acc-url').value.trim();
+    const channelId = document.getElementById('acc-channel').value;
+    const roleId = document.getElementById('acc-role').value;
+    const message = document.getElementById('acc-message').value.trim();
+    const statusVal = document.getElementById('acc-status').value;
+    const statusEl = document.getElementById('add-status');
+
+    if (!url) {
+        statusEl.textContent = '❌ أدخل رابط الحساب أو المعرف!';
+        statusEl.style.cssText = 'display:block;background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.3);color:#f87171;border-radius:12px;padding:12px 16px;';
+        return;
+    }
+
+    const btn = document.getElementById('btn-submit-add');
+    btn.disabled = true; btn.textContent = 'Adding...';
+
+    try {
+        const r = await fetch('/api/guild/' + GID + '/social/add', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ platform: currentPlatform, account: url, channelId, roleId, message, enabled: statusVal === 'running' ? 1 : 0 })
+        });
+        const d = await r.json();
+        if (d.success) {
+            statusEl.textContent = '✅ تمت إضافة الحساب بنجاح!';
+            statusEl.style.cssText = 'display:block;background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.3);color:#4ade80;border-radius:12px;padding:12px 16px;';
+            if (d.feed) { allFeeds.push(d.feed); updateCounts(); renderFeeds(); }
+            setTimeout(() => closeAddModal(), 1200);
+        } else {
+            statusEl.textContent = '❌ خطأ: ' + d.error;
+            statusEl.style.cssText = 'display:block;background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.3);color:#f87171;border-radius:12px;padding:12px 16px;';
+        }
+    } catch(e) {
+        statusEl.textContent = '❌ خطأ في الاتصال: ' + e.message;
+        statusEl.style.cssText = 'display:block;background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.3);color:#f87171;border-radius:12px;padding:12px 16px;';
+    }
+    btn.disabled = false; btn.textContent = 'Add Account';
+}
+
+async function deleteFeedBtn(id) {
     if (!confirm('هل أنت متأكد من حذف هذا الحساب؟')) return;
     const r = await fetch('/api/guild/' + GID + '/social/delete', {
-        method: 'POST', headers: {'Content-Type':'application/json'},
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id })
     });
     const d = await r.json();
-    if (d.success) location.reload();
-    else alert('❌ خطأ: ' + d.error);
+    if (d.success) {
+        allFeeds = allFeeds.filter(f => f.id !== id);
+        updateCounts();
+        renderFeeds();
+    } else alert('❌ خطأ: ' + d.error);
 }
 
 async function toggleFeed(id, enable) {
     const r = await fetch('/api/guild/' + GID + '/social/toggle', {
-        method: 'POST', headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({ id, enable })
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, enable: enable ? 1 : 0 })
     });
     const d = await r.json();
-    if (d.success) location.reload();
-    else alert('❌ خطأ: ' + d.error);
+    if (d.success) {
+        const feed = allFeeds.find(f => f.id === id);
+        if (feed) feed.enabled = enable ? 1 : 0;
+        renderFeeds();
+    } else alert('❌ خطأ: ' + d.error);
 }
 
-async function testFeed(id) {
-    if (!confirm('سيتم إرسال رسالة اختبار للروم المحدد. متأكد؟')) return;
+async function testFeedBtn(id) {
+    const btn = event.target;
+    btn.disabled = true; btn.textContent = '⏳ Testing...';
     const r = await fetch('/api/guild/' + GID + '/social/test', {
-        method: 'POST', headers: {'Content-Type':'application/json'},
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id })
     });
     const d = await r.json();
-    alert(d.success ? '✅ تم إرسال رسالة الاختبار بنجاح!' : '❌ خطأ: ' + d.error);
+    btn.disabled = false; btn.textContent = '🧪 Test';
+    if (d.success) {
+        btn.textContent = '✅ Sent!';
+        btn.style.background = 'rgba(34,197,94,0.15)';
+        btn.style.color = '#4ade80';
+        setTimeout(() => { btn.textContent = '🧪 Test'; btn.style.background = ''; btn.style.color = ''; }, 2500);
+    } else alert('❌ ' + (d.error || 'فشل الاختبار'));
 }
+
+// Initial selection
+selectPlatform('youtube');
+updateCounts();
+
+document.getElementById('addModal').addEventListener('click', function(e) {
+    if (e.target === this) closeAddModal();
+});
 </script>
 </body>
 </html>`);
