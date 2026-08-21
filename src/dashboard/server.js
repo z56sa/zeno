@@ -1034,6 +1034,42 @@ module.exports = function (app, client) {
         }
     });
 
+    // إرسال رسالة إيمبد مباشرة إلى الديسكورد (Send Embed API)
+    app.post('/api/guild/:guildId/embed', express.json(), async (req, res) => {
+        try {
+            if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
+            const { guildId } = req.params;
+            const { channel_id, color, title, description, author, footer, image_url, thumbnail_url } = req.body;
+
+            if (!channel_id || !description) {
+                return res.status(400).json({ success: false, error: 'Channel ID and description are required' });
+            }
+
+            const channel = client.channels.cache.get(channel_id);
+            if (!channel) {
+                return res.status(404).json({ success: false, error: 'Channel not found or bot lacks access' });
+            }
+
+            const { EmbedBuilder } = require('discord.js');
+            const embed = new EmbedBuilder()
+                .setColor(color || '#9333ea')
+                .setDescription(description)
+                .setTimestamp();
+
+            if (title) embed.setTitle(title);
+            if (author) embed.setAuthor({ name: author });
+            if (footer) embed.setFooter({ text: footer });
+            if (image_url) embed.setImage(image_url);
+            if (thumbnail_url) embed.setThumbnail(thumbnail_url);
+
+            await channel.send({ embeds: [embed] });
+            res.json({ success: true });
+        } catch (e) {
+            console.error('Embed send error:', e);
+            res.status(500).json({ success: false, error: e.message });
+        }
+    });
+
     // صفحات فرعية لجميع الأزرار (Moderation, Automod, Welcome, Tickets, Protection)
     app.get('/dashboard/:guildId/:section', (req, res) => {
         try {
@@ -1593,27 +1629,69 @@ module.exports = function (app, client) {
                 `;
             } else if (section === 'embed') {
                 formFieldsHtml = `
-                    <div class="space-y-5">
-                        <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl space-y-4">
+                    <div class="space-y-6">
+                        <!-- Embed Controls -->
+                        <div class="bg-[#12131c] border border-purple-950/40 p-6 rounded-2xl space-y-5">
+                            <h4 class="font-bold text-white text-sm text-right">صانع الإيمبد المتقدم (Interactive Embed Builder) 📄</h4>
+                            
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <label class="block text-xs font-bold text-gray-300 mb-2 text-right">القناة المستهدفة (Channel ID)</label>
-                                    <input type="text" placeholder="ضع ID القناة..." class="w-full bg-[#0b0c10] border border-purple-950/40 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right font-mono">
+                                    <label class="block text-xs font-bold text-gray-300 mb-2 text-right">القناة المستهدفة (Channel ID) <span class="text-purple-400">*</span></label>
+                                    <input type="text" id="embedChannelInput" placeholder="ضع ID الروم هنا..." class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right font-mono">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-gray-300 mb-2 text-right">لون الإيمبد (Hex Color)</label>
-                                    <input type="text" placeholder="#9333ea" value="#9333ea" class="w-full bg-[#0b0c10] border border-purple-950/40 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right font-mono">
+                                    <div class="flex items-center gap-2">
+                                        <input type="color" id="embedColorPicker" value="#9333ea" onchange="document.getElementById('embedColorInput').value = this.value; updateEmbedPreview()" class="w-10 h-9 rounded-xl bg-transparent border-0 cursor-pointer">
+                                        <input type="text" id="embedColorInput" value="#9333ea" oninput="updateEmbedPreview()" placeholder="#9333ea" class="flex-1 bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-2 text-xs text-white outline-none text-right font-mono">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-300 mb-2 text-right">اسم الكاتب (Author Name)</label>
+                                    <input type="text" id="embedAuthorInput" oninput="updateEmbedPreview()" placeholder="اسم الكاتب أو الإدارة..." class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-300 mb-2 text-right">عنوان الرسالة (Embed Title)</label>
+                                    <input type="text" id="embedTitleInput" oninput="updateEmbedPreview()" placeholder="اكتب العنوان الرئيسي هنا..." class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right">
                                 </div>
                             </div>
 
                             <div>
-                                <label class="block text-xs font-bold text-gray-300 mb-2 text-right">عنوان الرسالة (Embed Title)</label>
-                                <input type="text" placeholder="اكتب العنوان الرئيسي..." class="w-full bg-[#0b0c10] border border-purple-950/40 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right">
+                                <label class="block text-xs font-bold text-gray-300 mb-2 text-right">محتوى الرسالة (Description) <span class="text-purple-400">*</span></label>
+                                <textarea id="embedDescInput" oninput="updateEmbedPreview()" rows="4" placeholder="اكتب تفاصيل الرسالة والإعلان والتنسيق هنا..." class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right leading-relaxed"></textarea>
                             </div>
 
-                            <div>
-                                <label class="block text-xs font-bold text-gray-300 mb-2 text-right">محتوى الإيمبد (Description)</label>
-                                <textarea rows="4" placeholder="اكتب تفاصيل الرسالة هنا..." class="w-full bg-[#0b0c10] border border-purple-950/40 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right"></textarea>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-300 mb-2 text-right">رابط صورة البنر الكبيرة (Banner Image URL)</label>
+                                    <input type="text" id="embedImageInput" oninput="updateEmbedPreview()" placeholder="https://..." class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-left font-mono">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-300 mb-2 text-right">النص السفلي (Footer Text)</label>
+                                    <input type="text" id="embedFooterInput" oninput="updateEmbedPreview()" placeholder="حقوق السيرفر أو نص التذييل..." class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right">
+                                </div>
+                            </div>
+
+                            <!-- Live Interactive Preview Box -->
+                            <div class="pt-4 border-t border-purple-950/40">
+                                <h5 class="text-xs font-bold text-gray-400 mb-3 text-right">المعاينة الحية لرسالة الإيمبد (Discord Live Preview)</h5>
+                                <div id="previewCard" class="bg-[#2b2d31] p-4 rounded-xl border-r-4 border-[#9333ea] text-right space-y-2 max-w-lg mx-auto shadow-xl">
+                                    <p id="previewAuthor" class="text-[11px] font-bold text-gray-300 hidden"></p>
+                                    <h4 id="previewTitle" class="text-sm font-bold text-white">عنوان الرسالة التجريبي</h4>
+                                    <p id="previewDesc" class="text-xs text-gray-300 whitespace-pre-wrap">محتوى رسالة الإيمبد يظهر هنا كما سيبدو تماماً في الديسكورد...</p>
+                                    <p id="previewFooter" class="text-[10px] text-gray-400 pt-2 border-t border-gray-700/40 hidden"></p>
+                                </div>
+                            </div>
+
+                            <div class="pt-3 flex items-center justify-between">
+                                <span id="embedSendStatus" class="text-xs font-bold text-emerald-400 hidden">✅ تم إرسال رسالة الإيمبد إلى الروم في الديسكورد بنجاح!</span>
+                                <button type="button" onclick="sendEmbedToDiscord('${guildId}')" class="px-8 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-bold rounded-xl transition shadow-lg shadow-purple-900/40 flex items-center gap-2">
+                                    <span>🚀</span>
+                                    <span>إرسال الإيمبد إلى ديسكورد الآن</span>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -1621,6 +1699,18 @@ module.exports = function (app, client) {
             } else if (section === 'general' || section === 'settings') {
                 formFieldsHtml = `
                     <div class="space-y-6">
+                        <!-- Server Overview Card -->
+                        <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="text-right">
+                                    <h4 class="font-bold text-white text-sm">${guild.name}</h4>
+                                    <p class="text-gray-400 text-xs font-mono">ID: ${guildId}</p>
+                                </div>
+                                <img src="${guildIcon}" class="w-12 h-12 rounded-2xl border border-purple-900/40 object-cover">
+                            </div>
+                            <span class="px-3 py-1 bg-purple-950/60 text-purple-300 border border-purple-800/40 rounded-xl text-xs font-bold">سيرفر نشط ✅</span>
+                        </div>
+
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-xs font-bold text-gray-300 mb-2 text-right">برفكس البوت الافتراضي (Default Prefix)</label>
@@ -1632,38 +1722,107 @@ module.exports = function (app, client) {
                             </div>
                         </div>
 
-                        <!-- General Commands Toggles -->
+                        <!-- All 12 General & Utility Commands Suite -->
                         <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl">
-                            <h4 class="font-bold text-white text-sm mb-4 text-right">الأوامر العامة والخدمية</h4>
+                            <h4 class="font-bold text-white text-sm mb-4 text-right">جميع الأوامر العامة والخدمية المتاحة (12 أمراً)</h4>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                
                                 <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
                                     <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
                                     <div class="text-right">
-                                        <p class="font-bold text-white text-xs">/ping & /bot</p>
-                                        <p class="text-gray-400 text-[10px]">عرض سرعة الاستجابة ومعلومات البوت الكاملة</p>
+                                        <p class="font-bold text-white text-xs">/ping & #ping</p>
+                                        <p class="text-gray-400 text-[10px]">فحص سرعة استجابة البوت وسيرفرات ديسكورد</p>
                                     </div>
                                 </div>
+
                                 <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
                                     <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
                                     <div class="text-right">
-                                        <p class="font-bold text-white text-xs">/server & /user</p>
-                                        <p class="text-gray-400 text-[10px]">عرض معلومات تفصيلية عن السيرفر والعضو</p>
+                                        <p class="font-bold text-white text-xs">/bot & #bot</p>
+                                        <p class="text-gray-400 text-[10px]">عرض معلومات ومواصفات وإحصائيات البوت</p>
                                     </div>
                                 </div>
+
                                 <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
                                     <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
                                     <div class="text-right">
-                                        <p class="font-bold text-white text-xs">/avatar & /banner</p>
-                                        <p class="text-gray-400 text-[10px]">عرض وتنزيل الصورة الرمزية وبنر السيرفر والأعضاء</p>
+                                        <p class="font-bold text-white text-xs">/server & #server</p>
+                                        <p class="text-gray-400 text-[10px]">عرض معلومات السيرفر والأونر وتاريخ الإنشاء</p>
                                     </div>
                                 </div>
+
                                 <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
                                     <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
                                     <div class="text-right">
-                                        <p class="font-bold text-white text-xs">/roles & /channels</p>
-                                        <p class="text-gray-400 text-[10px]">إحصائيات وقائمة الرتب والقنوات</p>
+                                        <p class="font-bold text-white text-xs">/user & #user</p>
+                                        <p class="text-gray-400 text-[10px]">عرض بطاقة معلومات العضو ورتبه وتاريخ الانضمام</p>
                                     </div>
                                 </div>
+
+                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                    <div class="text-right">
+                                        <p class="font-bold text-white text-xs">/avatar & #avatar</p>
+                                        <p class="text-gray-400 text-[10px]">عرض وتحميل الصورة الرمزية للعضو أو السيرفر</p>
+                                    </div>
+                                </div>
+
+                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                    <div class="text-right">
+                                        <p class="font-bold text-white text-xs">/banner & #banner</p>
+                                        <p class="text-gray-400 text-[10px]">عرض بنر الملف الشخصي أو بنر السيرفر</p>
+                                    </div>
+                                </div>
+
+                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                    <div class="text-right">
+                                        <p class="font-bold text-white text-xs">/roles & #roles</p>
+                                        <p class="text-gray-400 text-[10px]">عرض قائمة جميع رتب السيرفر وأعداد أعضائها</p>
+                                    </div>
+                                </div>
+
+                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                    <div class="text-right">
+                                        <p class="font-bold text-white text-xs">/channels & #channels</p>
+                                        <p class="text-gray-400 text-[10px]">إحصائيات القنوات الصوتية والنصية والكاتيجوري</p>
+                                    </div>
+                                </div>
+
+                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                    <div class="text-right">
+                                        <p class="font-bold text-white text-xs">/help & #help</p>
+                                        <p class="text-gray-400 text-[10px]">قائمة المساعدة التفاعلية المنسدلة لجميع الأوامر</p>
+                                    </div>
+                                </div>
+
+                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                    <div class="text-right">
+                                        <p class="font-bold text-white text-xs">/profile & /id</p>
+                                        <p class="text-gray-400 text-[10px]">بطاقة البروفايل التفاعلية مع الرصيد والمستوى</p>
+                                    </div>
+                                </div>
+
+                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                    <div class="text-right">
+                                        <p class="font-bold text-white text-xs">/emojis & #emojis</p>
+                                        <p class="text-gray-400 text-[10px]">استعراض وإحصاء جميع إيموجيات وستيكرات السيرفر</p>
+                                    </div>
+                                </div>
+
+                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                    <div class="text-right">
+                                        <p class="font-bold text-white text-xs">/tax & #tax</p>
+                                        <p class="text-gray-400 text-[10px]">حاسبة ضريبة بروبوت والتحويلات الذكية</p>
+                                    </div>
+                                </div>
+
                             </div>
                         </div>
                     </div>
@@ -1938,6 +2097,75 @@ module.exports = function (app, client) {
                             if (res.ok) {
                                 location.reload();
                             }
+                        }
+                    }
+
+                    function updateEmbedPreview() {
+                        const title = document.getElementById('embedTitleInput')?.value || 'عنوان الرسالة التجريبي';
+                        const desc = document.getElementById('embedDescInput')?.value || 'محتوى رسالة الإيمبد يظهر هنا كما سيبدو تماماً في الديسكورد...';
+                        const color = document.getElementById('embedColorInput')?.value || '#9333ea';
+                        const author = document.getElementById('embedAuthorInput')?.value || '';
+                        const footer = document.getElementById('embedFooterInput')?.value || '';
+
+                        const previewCard = document.getElementById('previewCard');
+                        const pTitle = document.getElementById('previewTitle');
+                        const pDesc = document.getElementById('previewDesc');
+                        const pAuthor = document.getElementById('previewAuthor');
+                        const pFooter = document.getElementById('previewFooter');
+
+                        if (previewCard) previewCard.style.borderColor = color;
+                        if (pTitle) pTitle.innerText = title;
+                        if (pDesc) pDesc.innerText = desc;
+
+                        if (pAuthor) {
+                            if (author) {
+                                pAuthor.innerText = author;
+                                pAuthor.classList.remove('hidden');
+                            } else {
+                                pAuthor.classList.add('hidden');
+                            }
+                        }
+
+                        if (pFooter) {
+                            if (footer) {
+                                pFooter.innerText = footer;
+                                pFooter.classList.remove('hidden');
+                            } else {
+                                pFooter.classList.add('hidden');
+                            }
+                        }
+                    }
+
+                    async function sendEmbedToDiscord(guildId) {
+                        const channel_id = document.getElementById('embedChannelInput')?.value?.trim();
+                        const color = document.getElementById('embedColorInput')?.value?.trim() || '#9333ea';
+                        const title = document.getElementById('embedTitleInput')?.value?.trim();
+                        const description = document.getElementById('embedDescInput')?.value?.trim();
+                        const author = document.getElementById('embedAuthorInput')?.value?.trim();
+                        const footer = document.getElementById('embedFooterInput')?.value?.trim();
+                        const image_url = document.getElementById('embedImageInput')?.value?.trim();
+
+                        if (!channel_id || !description) {
+                            alert('الرجاء إدخال ID القناة المستهدفة ومحتوى الرسالة (Description)!');
+                            return;
+                        }
+
+                        const res = await fetch('/api/guild/' + guildId + '/embed', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ channel_id, color, title, description, author, footer, image_url })
+                        });
+
+                        const status = document.getElementById('embedSendStatus');
+                        if (res.ok) {
+                            if (status) {
+                                status.innerText = '✅ تم إرسال رسالة الإيمبد إلى الروم في الديسكورد بنجاح!';
+                                status.classList.remove('hidden');
+                                setTimeout(() => status.classList.add('hidden'), 5000);
+                            }
+                        } else {
+                            const data = await res.json();
+                            alert('حدث خطأ أثناء الإرسال: ' + (data.error || 'تأكد من صحة ID الروم وصلاحيات البوت'));
                         }
                     }
 
