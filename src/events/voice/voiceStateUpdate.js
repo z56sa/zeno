@@ -16,11 +16,11 @@ module.exports = {
     // ==========================================
     if (settings.temp_voice_channel && newState.channelId === settings.temp_voice_channel) {
       try {
-        const parentCategory = newState.channel?.parent;
+        const categoryId = settings.temp_voice_category || newState.channel?.parentId;
         const tempVoiceChannel = await guild.channels.create({
           name: `🔊 | ${member.user.username}`,
           type: ChannelType.GuildVoice,
-          parent: parentCategory || null,
+          parent: categoryId || null,
           permissionOverwrites: [
             {
               id: member.id,
@@ -36,8 +36,14 @@ module.exports = {
           ]
         });
 
-        db.createTempVoice(tempVoiceChannel.id, guild.id, member.id);
-        await member.voice.setChannel(tempVoiceChannel);
+        if (db.createTempVoice) {
+          db.createTempVoice(tempVoiceChannel.id, guild.id, member.id);
+        }
+
+        // نقل العضو فوراً إلى الروم الصوتي الجديد
+        await member.voice.setChannel(tempVoiceChannel).catch(err => {
+          console.error('فشل في نقل العضو للروم المؤقت (تأكد من صلاحية Move Members للبوت):', err);
+        });
       } catch (err) {
         console.error('فشل في إنشاء الروم الصوتي المؤقت:', err);
       }
@@ -45,13 +51,13 @@ module.exports = {
 
     // حذف الروم المؤقت تلقائياً عند خروج الجميع منه
     if (oldState.channelId && oldState.channelId !== settings.temp_voice_channel) {
-      const isTemp = db.isTempVoice(oldState.channelId);
+      const isTemp = db.isTempVoice ? db.isTempVoice(oldState.channelId) : false;
       if (isTemp) {
-        const channel = guild.channels.cache.get(oldState.channelId);
+        const channel = guild.channels.cache.get(oldState.channelId) || await guild.channels.fetch(oldState.channelId).catch(() => null);
         if (channel && channel.members.size === 0) {
           try {
-            db.deleteTempVoice(oldState.channelId);
-            await channel.delete();
+            if (db.deleteTempVoice) db.deleteTempVoice(oldState.channelId);
+            await channel.delete().catch(() => {});
           } catch (err) {
             console.error('فشل في حذف الروم المؤقت:', err);
           }

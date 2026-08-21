@@ -135,6 +135,13 @@ db.exec(`
     entries TEXT DEFAULT '[]'
   );
 
+  CREATE TABLE IF NOT EXISTS temp_voices (
+    channel_id TEXT PRIMARY KEY,
+    guild_id TEXT NOT NULL,
+    user_id TEXT NOT NULL,
+    created_at INTEGER DEFAULT (strftime('%s','now'))
+  );
+
   CREATE TABLE IF NOT EXISTS stars (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     guild_id TEXT NOT NULL,
@@ -159,6 +166,29 @@ try { db.exec("ALTER TABLE guild_settings ADD COLUMN leave_message TEXT;"); } ca
 try { db.exec("ALTER TABLE guild_settings ADD COLUMN welcome_dm_enabled INTEGER DEFAULT 0;"); } catch(e) {}
 try { db.exec("ALTER TABLE guild_settings ADD COLUMN welcome_dm_message TEXT;"); } catch(e) {}
 try { db.exec("ALTER TABLE guild_settings ADD COLUMN welcome_embed_enabled INTEGER DEFAULT 0;"); } catch(e) {}
+
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN verify_enabled INTEGER DEFAULT 0;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN verify_channel TEXT;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN verify_role TEXT;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN verify_message TEXT;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN verification_enabled INTEGER DEFAULT 0;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN verification_channel TEXT;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN verification_role TEXT;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN verification_type TEXT DEFAULT 'button';"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN unverified_role TEXT;"); } catch(e) {}
+
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN ticket_enabled INTEGER DEFAULT 1;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN ticket_max_open INTEGER DEFAULT 1;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN ticket_welcome_msg TEXT;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN ticket_panel_channel TEXT;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN ticket_panel_title TEXT;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN ticket_panel_desc TEXT;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN ticket_role TEXT;"); } catch(e) {}
+
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN economy_enabled INTEGER DEFAULT 1;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN daily_amount INTEGER DEFAULT 500;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN work_cooldown INTEGER DEFAULT 4;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN transfer_tax REAL DEFAULT 5.0;"); } catch(e) {}
 
 try { db.exec("ALTER TABLE guild_settings ADD COLUMN bot_language TEXT DEFAULT 'ar';"); } catch(e) {}
 try { db.exec("ALTER TABLE guild_settings ADD COLUMN admin_role TEXT;"); } catch(e) {}
@@ -187,26 +217,23 @@ function getGuildSettings(guildId) {
 function setGuildSetting(guildId, key, value) {
   // تأكد السجل موجود
   db.prepare('INSERT OR IGNORE INTO guild_settings (guild_id) VALUES (?)').run(guildId);
-  // قائمة الأعمدة المسموحة
-  const allowed = [
-    'prefix','welcome_channel','welcome_message','welcome_image',
-    'welcome_dm_enabled','welcome_dm_message','welcome_embed_enabled',
-    'leave_enabled','leave_channel','leave_message',
-    'log_channel','ticket_category','ticket_log_channel','support_role','auto_role',
-    'leveling_enabled','level_message','level_channel','level_multiplier',
-    'anti_link','anti_spam','anti_caps','anti_emoji_spam','anti_line_spam',
-    'anti_mass_mention','max_mentions','max_emojis','max_lines',
-    'bad_words_enabled','bad_words_list','automod_action',
-    'automod_whitelist_role','automod_whitelist_channel','anti_alt_days',
-    'verification_enabled','verification_type','verification_role',
-    'anti_nuke_enabled','anti_nuke_action',
-    'temp_voice_enabled','temp_voice_category','temp_voice_channel',
-    'boost_enabled','boost_channel','boost_message','boost_dm_enabled','boost_dm_message','boost_embed_enabled',
-    'bot_language','admin_role','announcements_channel','bot_enabled','fun_enabled','autoresponder_enabled',
-    'min_bet','max_bet','game_rewards_multiplier'
-  ];
-  if (!allowed.includes(key)) throw new Error(`حقل غير مسموح: ${key}`);
-  db.prepare(`UPDATE guild_settings SET ${key} = ? WHERE guild_id = ?`).run(value, guildId);
+  
+  // تأكد أن العمود موجود في الجدول، وإذا لم يكن موجوداً يتم إنشاؤه تلقائياً
+  try {
+    db.prepare(`UPDATE guild_settings SET ${key} = ? WHERE guild_id = ?`).run(value, guildId);
+  } catch (err) {
+    if (err.message && err.message.includes('no such column')) {
+      try {
+        const colType = typeof value === 'number' ? 'INTEGER' : 'TEXT';
+        db.exec(`ALTER TABLE guild_settings ADD COLUMN ${key} ${colType};`);
+        db.prepare(`UPDATE guild_settings SET ${key} = ? WHERE guild_id = ?`).run(value, guildId);
+      } catch (addErr) {
+        console.error(`Failed to add column ${key}:`, addErr);
+      }
+    } else {
+      console.error(`Failed to update setting ${key}:`, err);
+    }
+  }
 }
 
 // alias
@@ -328,6 +355,26 @@ function getUserActiveTickets(guildId, userId) {
 
 function getGuildTickets(guildId, limit = 50) {
   return db.prepare('SELECT * FROM tickets WHERE guild_id = ? ORDER BY created_at DESC LIMIT ?').all(guildId, limit);
+}
+
+// ==========================================
+// Temp Voice Channels
+// ==========================================
+function createTempVoice(channelId, guildId, userId) {
+  return db.prepare('INSERT OR REPLACE INTO temp_voices (channel_id, guild_id, user_id) VALUES (?, ?, ?)').run(channelId, guildId, userId);
+}
+
+function isTempVoice(channelId) {
+  const row = db.prepare('SELECT 1 FROM temp_voices WHERE channel_id = ?').get(channelId);
+  return !!row;
+}
+
+function getTempVoice(channelId) {
+  return db.prepare('SELECT * FROM temp_voices WHERE channel_id = ?').get(channelId);
+}
+
+function deleteTempVoice(channelId) {
+  return db.prepare('DELETE FROM temp_voices WHERE channel_id = ?').run(channelId);
 }
 
 // ==========================================
@@ -464,6 +511,10 @@ module.exports = {
   getTicketByChannel,
   getUserActiveTickets,
   getGuildTickets,
+  createTempVoice,
+  isTempVoice,
+  getTempVoice,
+  deleteTempVoice,
   setReactionRole,
   getReactionRole,
   getGuildReactionRoles,
