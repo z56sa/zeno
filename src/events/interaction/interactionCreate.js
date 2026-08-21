@@ -813,6 +813,7 @@ module.exports = {
 
         return interaction.editReply({ embeds: [updatedEmbed], components: [] });
       }
+    } catch (err) {
       logger.error('خطأ في interactionCreate:', err);
     }
   }
