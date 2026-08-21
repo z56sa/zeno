@@ -303,24 +303,165 @@ module.exports = function (app, client) {
                             </div>
                         </div>
 
-                        <!-- خوادمك للبدء -->
-                        <div class="bg-[#10111a] border border-purple-950/40 rounded-3xl p-6 shadow-xl">
-                            <h3 class="text-sm font-black text-white mb-4 text-right">خوادمك المتاحة للإدارة</h3>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                                ${guilds.map(g => `
-                                    <a href="/dashboard/${g.id}" class="bg-[#12131c] hover:bg-[#181926] border border-purple-950/40 hover:border-purple-600/50 p-4 rounded-2xl flex items-center justify-between transition-all group shadow-md">
-                                        <div class="w-8 h-8 rounded-xl bg-purple-950/40 flex items-center justify-center text-purple-400 group-hover:text-white transition">
-                                            <svg class="w-4 h-4 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-                                        </div>
-                                        <div class="flex items-center gap-3 text-right">
-                                            <div>
-                                                <h4 class="text-xs font-bold text-white group-hover:text-purple-300 transition truncate max-w-[150px]">${g.name}</h4>
-                                                <span class="text-[10px] text-purple-400/60 font-bold">صلاحية إدارية</span>
+                        <!-- Tab 1: نظرة عامة والخوادم (Default Overview) -->
+                        <div id="tabOverview">
+                            <div class="bg-[#10111a] border border-purple-950/40 rounded-3xl p-6 shadow-xl">
+                                <h3 class="text-sm font-black text-white mb-4 text-right">خوادمك المتاحة للإدارة</h3>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                                    ${guilds.map(g => `
+                                        <a href="/dashboard/${g.id}" class="bg-[#12131c] hover:bg-[#181926] border border-purple-950/40 hover:border-purple-600/50 p-4 rounded-2xl flex items-center justify-between transition-all group shadow-md">
+                                            <div class="w-8 h-8 rounded-xl bg-purple-950/40 flex items-center justify-center text-purple-400 group-hover:text-white transition">
+                                                <svg class="w-4 h-4 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
                                             </div>
-                                            <img src="${g.icon ? `https://cdn.discordapp.com/icons/${g.id}/${g.icon}.png` : 'https://cdn.discordapp.com/embed/avatars/0.png'}" class="w-10 h-10 rounded-xl object-cover bg-[#0f1016] border border-purple-950/40">
+                                            <div class="flex items-center gap-3 text-right">
+                                                <div>
+                                                    <h4 class="text-xs font-bold text-white group-hover:text-purple-300 transition truncate max-w-[150px]">${g.name}</h4>
+                                                    <span class="text-[10px] text-purple-400/60 font-bold">صلاحية إدارية</span>
+                                                </div>
+                                                <img src="${g.icon ? `https://cdn.discordapp.com/icons/${g.id}/${g.icon}.png` : 'https://cdn.discordapp.com/embed/avatars/0.png'}" class="w-10 h-10 rounded-xl object-cover bg-[#0f1016] border border-purple-950/40">
+                                            </div>
+                                        </a>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tab 2: متجر خلفيات البروفايل (Wallpapers Shop) -->
+                        <div id="tabWallpapers" class="hidden space-y-6">
+                            <div class="bg-[#10111a] border border-purple-950/40 rounded-3xl p-6 shadow-xl">
+                                <div class="flex items-center justify-between pb-4 mb-4 border-b border-purple-950/40">
+                                    <span class="text-xs text-purple-400 font-bold">رصيدك: ${userCoins.toLocaleString()} ¢</span>
+                                    <h3 class="text-sm font-black text-white text-right">متجر خلفيات البروفايل (Rank & Profile Backgrounds) 🖼️</h3>
+                                </div>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                                    <div class="bg-[#12131c] border border-purple-950/40 rounded-2xl overflow-hidden shadow-lg group">
+                                        <div class="h-28 bg-gradient-to-r from-purple-900 via-indigo-950 to-purple-950 flex items-center justify-center text-3xl">🌌</div>
+                                        <div class="p-4 text-right">
+                                            <h4 class="text-xs font-bold text-white">Galaxy Neon</h4>
+                                            <p class="text-[10px] text-gray-400 mt-0.5">خلفية النجوم والنيون الأرجواني</p>
+                                            <div class="mt-3 flex items-center justify-between">
+                                                <button onclick="buyItem('Galaxy Neon', 5000)" class="px-4 py-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-xs font-bold shadow-md hover:from-purple-500 hover:to-indigo-500 transition">شراء (5,000 ¢)</button>
+                                                <span class="text-xs font-mono text-purple-300 font-bold">5,000 ¢</span>
+                                            </div>
                                         </div>
-                                    </a>
-                                `).join('')}
+                                    </div>
+
+                                    <div class="bg-[#12131c] border border-purple-950/40 rounded-2xl overflow-hidden shadow-lg group">
+                                        <div class="h-28 bg-gradient-to-r from-emerald-950 via-slate-900 to-teal-950 flex items-center justify-center text-3xl">🌲</div>
+                                        <div class="p-4 text-right">
+                                            <h4 class="text-xs font-bold text-white">Emerald Forest</h4>
+                                            <p class="text-[10px] text-gray-400 mt-0.5">خلفية الطبيعة والزمرد الفخم</p>
+                                            <div class="mt-3 flex items-center justify-between">
+                                                <button onclick="buyItem('Emerald Forest', 7500)" class="px-4 py-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-xs font-bold shadow-md hover:from-purple-500 hover:to-indigo-500 transition">شراء (7,500 ¢)</button>
+                                                <span class="text-xs font-mono text-purple-300 font-bold">7,500 ¢</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="bg-[#12131c] border border-purple-950/40 rounded-2xl overflow-hidden shadow-lg group">
+                                        <div class="h-28 bg-gradient-to-r from-rose-950 via-zinc-900 to-amber-950 flex items-center justify-center text-3xl">🔥</div>
+                                        <div class="p-4 text-right">
+                                            <h4 class="text-xs font-bold text-white">Cyberpunk Gold</h4>
+                                            <p class="text-[10px] text-gray-400 mt-0.5">خلفية اللهب والذهب الخالص</p>
+                                            <div class="mt-3 flex items-center justify-between">
+                                                <button onclick="buyItem('Cyberpunk Gold', 12000)" class="px-4 py-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-xs font-bold shadow-md hover:from-purple-500 hover:to-indigo-500 transition">شراء (12,000 ¢)</button>
+                                                <span class="text-xs font-mono text-purple-300 font-bold">12,000 ¢</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tab 3: شارات البروفايل (Badges Shop) -->
+                        <div id="tabBadges" class="hidden space-y-6">
+                            <div class="bg-[#10111a] border border-purple-950/40 rounded-3xl p-6 shadow-xl">
+                                <div class="flex items-center justify-between pb-4 mb-4 border-b border-purple-950/40">
+                                    <span class="text-xs text-purple-400 font-bold">رصيدك: ${userCoins.toLocaleString()} ¢</span>
+                                    <h3 class="text-sm font-black text-white text-right">متجر شارات وأوسمة البروفايل 🎖️</h3>
+                                </div>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                                    <div class="bg-[#12131c] border border-purple-950/40 p-4 rounded-2xl text-center space-y-2">
+                                        <span class="text-3xl block">👑</span>
+                                        <h4 class="text-xs font-bold text-white">تاج الأساطير</h4>
+                                        <p class="text-[10px] text-gray-400">شارة ملكية ذهبية</p>
+                                        <button onclick="buyItem('Crown Badge', 10000)" class="w-full py-1.5 bg-purple-900/40 hover:bg-purple-800/60 text-purple-200 border border-purple-700/40 rounded-xl text-xs font-bold transition">10,000 ¢</button>
+                                    </div>
+                                    <div class="bg-[#12131c] border border-purple-950/40 p-4 rounded-2xl text-center space-y-2">
+                                        <span class="text-3xl block">💎</span>
+                                        <h4 class="text-xs font-bold text-white">الماسة اللامعة</h4>
+                                        <p class="text-[10px] text-gray-400">شارة النقاء والتميز</p>
+                                        <button onclick="buyItem('Diamond Badge', 15000)" class="w-full py-1.5 bg-purple-900/40 hover:bg-purple-800/60 text-purple-200 border border-purple-700/40 rounded-xl text-xs font-bold transition">15,000 ¢</button>
+                                    </div>
+                                    <div class="bg-[#12131c] border border-purple-950/40 p-4 rounded-2xl text-center space-y-2">
+                                        <span class="text-3xl block">⚡</span>
+                                        <h4 class="text-xs font-bold text-white">صاعقة النيون</h4>
+                                        <p class="text-[10px] text-gray-400">شارة السرعة والقوة</p>
+                                        <button onclick="buyItem('Lightning Badge', 8000)" class="w-full py-1.5 bg-purple-900/40 hover:bg-purple-800/60 text-purple-200 border border-purple-700/40 rounded-xl text-xs font-bold transition">8,000 ¢</button>
+                                    </div>
+                                    <div class="bg-[#12131c] border border-purple-950/40 p-4 rounded-2xl text-center space-y-2">
+                                        <span class="text-3xl block">🛡️</span>
+                                        <h4 class="text-xs font-bold text-white">درع الحارس</h4>
+                                        <p class="text-[10px] text-gray-400">شارة الشرف والحماية</p>
+                                        <button onclick="buyItem('Guardian Badge', 6000)" class="w-full py-1.5 bg-purple-900/40 hover:bg-purple-800/60 text-purple-200 border border-purple-700/40 rounded-xl text-xs font-bold transition">6,000 ¢</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tab 4: خلفيات الهوية (Identity Shop) -->
+                        <div id="tabIdentity" class="hidden space-y-6">
+                            <div class="bg-[#10111a] border border-purple-950/40 rounded-3xl p-6 shadow-xl text-right">
+                                <h3 class="text-sm font-black text-white mb-2">خلفيات وبطاقات الهوية الشخصية 🪪</h3>
+                                <p class="text-gray-400 text-xs mb-6">خصص بطاقة الهوية التي تظهر في الديسكورد عند كتابة أمر <span class="text-purple-400 font-mono">/id</span> أو <span class="text-purple-400 font-mono">/profile</span>.</p>
+                                
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div class="bg-[#12131c] border border-purple-950/40 p-4 rounded-2xl flex items-center justify-between">
+                                        <button onclick="buyItem('Dark Minimalist Card', 3000)" class="px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-xs font-bold">تفعيل (3,000 ¢)</button>
+                                        <div>
+                                            <h4 class="text-xs font-bold text-white">Dark Minimalist</h4>
+                                            <p class="text-[10px] text-gray-400">تصميم أسود داكن كلاسيكي فخم</p>
+                                        </div>
+                                    </div>
+                                    <div class="bg-[#12131c] border border-purple-950/40 p-4 rounded-2xl flex items-center justify-between">
+                                        <button onclick="buyItem('Purple Glow Card', 4500)" class="px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-xs font-bold">تفعيل (4,500 ¢)</button>
+                                        <div>
+                                            <h4 class="text-xs font-bold text-white">Purple Glow Pro</h4>
+                                            <p class="text-[10px] text-gray-400">توهج بنفسجي متدرج ملكي</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tab 5: قائمة المتصدرين (Leaderboards) -->
+                        <div id="tabLeaderboard" class="hidden space-y-6">
+                            <div class="bg-[#10111a] border border-purple-950/40 rounded-3xl p-6 shadow-xl">
+                                <h3 class="text-sm font-black text-white mb-4 text-right">قائمة المتصدرين في النقاط والمستويات 🏆</h3>
+                                <div class="space-y-3">
+                                    <div class="bg-[#12131c] border border-purple-950/40 p-4 rounded-2xl flex items-center justify-between">
+                                        <span class="text-xs font-bold text-amber-400 font-mono">Level ${userLevel} • ${userCoins.toLocaleString()} ¢</span>
+                                        <div class="flex items-center gap-3">
+                                            <div class="text-right">
+                                                <h4 class="text-xs font-bold text-white">${user.username} (أنت)</h4>
+                                                <p class="text-[10px] text-purple-400">الترتيب: #1 في السيرفر</p>
+                                            </div>
+                                            <img src="${userAvatar}" class="w-10 h-10 rounded-xl object-cover border border-purple-500">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tab 6: المكافأة اليومية والتصويت (Daily & Vote) -->
+                        <div id="tabDaily" class="hidden space-y-6">
+                            <div class="bg-[#10111a] border border-purple-950/40 rounded-3xl p-6 shadow-xl text-center space-y-4">
+                                <span class="text-5xl block">🎁</span>
+                                <h3 class="text-lg font-black text-white">مكافأتك اليومية (Daily Reward)</h3>
+                                <p class="text-gray-400 text-xs max-w-md mx-auto">احصل على ما يصل إلى 1,000 كريدت يومياً مجاناً مع الحفاظ على سلسلة الأيام المتتالية (Daily Streak)!</p>
+                                <button onclick="alert('✅ تم تسجيل مكافأتك اليومية! يمكنك استخدام أمر /daily في الديسكورد لاستلامها فوراً.')" class="px-8 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-purple-900/40 transition">
+                                    استلام المكافأة اليومية
+                                </button>
                             </div>
                         </div>
                     </main>
@@ -334,49 +475,42 @@ module.exports = function (app, client) {
                                 <h3 class="font-bold text-white text-sm">${user.username}</h3>
                             </div>
 
-                            <!-- Nav Links -->
+                            <!-- Nav Links with Active Tab Switchers -->
                             <div class="flex flex-col gap-1 text-xs text-right overflow-y-auto pr-1">
                                 <span class="text-[10px] font-bold text-purple-400/60 px-3 py-1">عام</span>
-                                <a href="/dashboard" class="px-3 py-2 rounded-xl bg-gradient-to-r from-purple-700 to-indigo-700 text-white font-bold flex items-center justify-between shadow-md">
+                                <button onclick="switchTab('tabOverview', this)" class="nav-btn px-3 py-2 rounded-xl bg-gradient-to-r from-purple-700 to-indigo-700 text-white font-bold flex items-center justify-between shadow-md w-full">
                                     <span class="w-1.5 h-1.5 rounded-full bg-white"></span>
                                     <span>نظرة عامة</span>
-                                </a>
+                                </button>
 
                                 <span class="text-[10px] font-bold text-purple-400/60 px-3 pt-3 pb-1">متاجر الكريدت</span>
-                                <a href="#wallpapers" class="px-3 py-1.5 rounded-xl text-gray-400 hover:text-purple-300 hover:bg-purple-950/30 font-medium flex items-center justify-end gap-2 transition">
+                                <button onclick="switchTab('tabWallpapers', this)" class="nav-btn px-3 py-1.5 rounded-xl text-gray-400 hover:text-purple-300 hover:bg-purple-950/30 font-medium flex items-center justify-end gap-2 transition w-full">
                                     <span>خلفيات البروفايل</span>
                                     <span>🖼️</span>
-                                </a>
-                                <a href="#badges" class="px-3 py-1.5 rounded-xl text-gray-400 hover:text-purple-300 hover:bg-purple-950/30 font-medium flex items-center justify-end gap-2 transition">
+                                </button>
+                                <button onclick="switchTab('tabBadges', this)" class="nav-btn px-3 py-1.5 rounded-xl text-gray-400 hover:text-purple-300 hover:bg-purple-950/30 font-medium flex items-center justify-end gap-2 transition w-full">
                                     <span>شارات البروفايل</span>
                                     <span>🎖️</span>
-                                </a>
-                                <a href="#identity" class="px-3 py-1.5 rounded-xl text-gray-400 hover:text-purple-300 hover:bg-purple-950/30 font-medium flex items-center justify-end gap-2 transition">
+                                </button>
+                                <button onclick="switchTab('tabIdentity', this)" class="nav-btn px-3 py-1.5 rounded-xl text-gray-400 hover:text-purple-300 hover:bg-purple-950/30 font-medium flex items-center justify-end gap-2 transition w-full">
                                     <span>خلفيات الهوية</span>
                                     <span>🪪</span>
-                                </a>
+                                </button>
 
                                 <span class="text-[10px] font-bold text-purple-400/60 px-3 pt-3 pb-1">قائمة المتصدرين</span>
-                                <a href="/#leaderboard" class="px-3 py-1.5 rounded-xl text-gray-400 hover:text-purple-300 hover:bg-purple-950/30 font-medium flex items-center justify-end gap-2 transition">
+                                <button onclick="switchTab('tabLeaderboard', this)" class="nav-btn px-3 py-1.5 rounded-xl text-gray-400 hover:text-purple-300 hover:bg-purple-950/30 font-medium flex items-center justify-end gap-2 transition w-full">
                                     <span>أعلى 100 بواسطة XP</span>
                                     <span>🏆</span>
-                                </a>
-                                <a href="/#rich" class="px-3 py-1.5 rounded-xl text-gray-400 hover:text-purple-300 hover:bg-purple-950/30 font-medium flex items-center justify-end gap-2 transition">
+                                </button>
+                                <button onclick="switchTab('tabLeaderboard', this)" class="nav-btn px-3 py-1.5 rounded-xl text-gray-400 hover:text-purple-300 hover:bg-purple-950/30 font-medium flex items-center justify-end gap-2 transition w-full">
                                     <span>أغنى 100 ملياردير</span>
                                     <span>💰</span>
-                                </a>
-                                <a href="#rep" class="px-3 py-1.5 rounded-xl text-gray-400 hover:text-purple-300 hover:bg-purple-950/30 font-medium flex items-center justify-end gap-2 transition">
-                                    <span>أعلى 100 نقاط السمعة</span>
-                                    <span>⭐</span>
-                                </a>
+                                </button>
 
                                 <span class="text-[10px] font-bold text-purple-400/60 px-3 pt-3 pb-1">أخرى</span>
-                                <a href="/#daily" class="px-3 py-1.5 rounded-xl text-gray-400 hover:text-purple-300 hover:bg-purple-950/30 font-medium flex items-center justify-end gap-2 transition">
+                                <button onclick="switchTab('tabDaily', this)" class="nav-btn px-3 py-1.5 rounded-xl text-gray-400 hover:text-purple-300 hover:bg-purple-950/30 font-medium flex items-center justify-end gap-2 transition w-full">
                                     <span>احصل على مكافأتك اليومية</span>
                                     <span>🎁</span>
-                                </a>
-                                <a href="#vote" class="px-3 py-1.5 rounded-xl text-gray-400 hover:text-purple-300 hover:bg-purple-950/30 font-medium flex items-center justify-end gap-2 transition">
-                                    <span>التصويت</span>
                                     <span>👍</span>
                                 </a>
                                 <a href="#transfers" class="px-3 py-1.5 rounded-xl text-gray-400 hover:text-purple-300 hover:bg-purple-950/30 font-medium flex items-center justify-end gap-2 transition">
