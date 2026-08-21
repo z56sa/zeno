@@ -1834,6 +1834,83 @@ module.exports = function (app, client) {
 
             const title = sectionTitles[section] || ('إعدادات ' + section);
 
+            const botGuild = client.guilds.cache.get(guildId);
+            const guildRoles = botGuild ? botGuild.roles.cache
+                .filter(r => r.name !== '@everyone')
+                .sort((a, b) => b.position - a.position)
+                .map(r => ({ id: r.id, name: r.name, color: r.hexColor !== '#000000' ? r.hexColor : '#99aab5' })) : [];
+
+            const guildTextChannels = botGuild ? botGuild.channels.cache
+                .filter(c => c.isTextBased() && !c.isVoiceBased() && !c.isThread())
+                .sort((a, b) => a.rawPosition - b.rawPosition)
+                .map(c => ({ id: c.id, name: c.name })) : [];
+
+            const guildVoiceChannels = botGuild ? botGuild.channels.cache
+                .filter(c => c.isVoiceBased())
+                .sort((a, b) => a.rawPosition - b.rawPosition)
+                .map(c => ({ id: c.id, name: c.name })) : [];
+
+            const guildCategories = botGuild ? botGuild.channels.cache
+                .filter(c => c.type === 4)
+                .sort((a, b) => a.rawPosition - b.rawPosition)
+                .map(c => ({ id: c.id, name: c.name })) : [];
+
+            function renderRoleSelect(inputName, selectedId, placeholder = '...اختر') {
+                return `
+                    <div class="relative">
+                        <select name="${inputName}" id="${inputName}" class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right cursor-pointer appearance-none">
+                            <option value="">${placeholder}</option>
+                            ${guildRoles.map(r => `<option value="${r.id}" ${String(selectedId) === String(r.id) ? 'selected' : ''}>${r.name} ⚪</option>`).join('')}
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center px-3 text-gray-400">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"/></svg>
+                        </div>
+                    </div>
+                `;
+            }
+
+            function renderChannelSelect(inputName, selectedId, placeholder = '...اختر') {
+                return `
+                    <div class="relative">
+                        <select name="${inputName}" id="${inputName}" class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right cursor-pointer appearance-none">
+                            <option value="">${placeholder}</option>
+                            ${guildTextChannels.map(c => `<option value="${c.id}" ${String(selectedId) === String(c.id) ? 'selected' : ''}># ${c.name}</option>`).join('')}
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center px-3 text-gray-400">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"/></svg>
+                        </div>
+                    </div>
+                `;
+            }
+
+            function renderVoiceSelect(inputName, selectedId, placeholder = '...اختر') {
+                return `
+                    <div class="relative">
+                        <select name="${inputName}" id="${inputName}" class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right cursor-pointer appearance-none">
+                            <option value="">${placeholder}</option>
+                            ${guildVoiceChannels.map(c => `<option value="${c.id}" ${String(selectedId) === String(c.id) ? 'selected' : ''}>🔊 ${c.name}</option>`).join('')}
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center px-3 text-gray-400">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"/></svg>
+                        </div>
+                    </div>
+                `;
+            }
+
+            function renderCategorySelect(inputName, selectedId, placeholder = '...اختر') {
+                return `
+                    <div class="relative">
+                        <select name="${inputName}" id="${inputName}" class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right cursor-pointer appearance-none">
+                            <option value="">${placeholder}</option>
+                            ${guildCategories.map(c => `<option value="${c.id}" ${String(selectedId) === String(c.id) ? 'selected' : ''}>📁 ${c.name}</option>`).join('')}
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center px-3 text-gray-400">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"/></svg>
+                        </div>
+                    </div>
+                `;
+            }
+
             // ==========================================
             // بناء استمارة الإعدادات الحقيقية المخصصة لكل موديول (ProBot Full Settings)
             // ==========================================
@@ -1855,8 +1932,8 @@ module.exports = function (app, client) {
 
                             <!-- قناة البوست -->
                             <div>
-                                <label class="block text-xs font-bold text-gray-300 mb-2">قناة إعلانات البوست (Channel ID) <span class="text-purple-400">*</span></label>
-                                <input type="text" name="boost_channel" value="${settings.boost_channel || ''}" placeholder="ضع ID روم إعلانات البوست هنا..." class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none font-mono text-right">
+                                <label class="block text-xs font-bold text-gray-300 mb-2">قناة إعلانات البوست (Boost Channel) <span class="text-purple-400">*</span></label>
+                                ${renderChannelSelect('boost_channel', settings.boost_channel)}
                             </div>
 
                             <!-- رسالة البوست مع التاغات -->
@@ -2090,12 +2167,12 @@ module.exports = function (app, client) {
                             <h4 class="font-bold text-white text-sm">إعدادات رسالة الترحيب في القناة 📢</h4>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <label class="block text-xs font-bold text-gray-300 mb-2">قناة الترحيب (Welcome Channel ID)</label>
-                                    <input type="text" name="welcome_channel" value="${settings.welcome_channel || ''}" placeholder="ضع ID روم الترحيب هنا..." class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none font-mono text-right">
+                                    <label class="block text-xs font-bold text-gray-300 mb-2">قناة الترحيب (Welcome Channel) <span class="text-purple-400">*</span></label>
+                                    ${renderChannelSelect('welcome_channel', settings.welcome_channel)}
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-bold text-gray-300 mb-2">الرتبة التلقائية للأعضاء (Auto-Role ID)</label>
-                                    <input type="text" name="auto_role" value="${settings.auto_role || ''}" placeholder="ضع ID الرتبة التلقائية..." class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none font-mono text-right">
+                                    <label class="block text-xs font-bold text-gray-300 mb-2">الرتبة التلقائية للأعضاء (Auto-Role)</label>
+                                    ${renderRoleSelect('auto_role', settings.auto_role)}
                                 </div>
                             </div>
 
@@ -2145,8 +2222,8 @@ module.exports = function (app, client) {
                             </div>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <label class="block text-xs font-bold text-gray-300 mb-2">قناة المغادرة (Leave Channel ID)</label>
-                                    <input type="text" name="leave_channel" value="${settings.leave_channel || ''}" placeholder="ضع ID روم المغادرة..." class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none font-mono text-right">
+                                    <label class="block text-xs font-bold text-gray-300 mb-2">قناة المغادرة (Leave Channel)</label>
+                                    ${renderChannelSelect('leave_channel', settings.leave_channel)}
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-gray-300 mb-2">نص رسالة المغادرة</label>
@@ -2173,16 +2250,16 @@ module.exports = function (app, client) {
                             <h4 class="font-bold text-white text-sm text-right">الإعدادات الأساسية للرومات والرتب ⚙️</h4>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-right">
                                 <div>
-                                    <label class="block text-xs font-bold text-gray-300 mb-2">كاتيجوري التذاكر المفتوحة (Category ID)</label>
-                                    <input type="text" name="ticket_category" value="${settings.ticket_category || ''}" placeholder="ضع ID الكاتيجوري..." class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none font-mono text-right">
+                                    <label class="block text-xs font-bold text-gray-300 mb-2">كاتيجوري التذاكر المفتوحة (Ticket Category)</label>
+                                    ${renderCategorySelect('ticket_category', settings.ticket_category)}
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-bold text-gray-300 mb-2">رتبة مسؤولي الدعم الفني (Support Staff Role ID)</label>
-                                    <input type="text" name="support_role" value="${settings.support_role || ''}" placeholder="ضع ID رتبة المشرفين..." class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none font-mono text-right">
+                                    <label class="block text-xs font-bold text-gray-300 mb-2">رتبة مسؤولي الدعم الفني (Support Role)</label>
+                                    ${renderRoleSelect('support_role', settings.support_role)}
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-bold text-gray-300 mb-2">قناة حفظ السجلات والترانسكريبت (Ticket Log Channel ID)</label>
-                                    <input type="text" name="ticket_log_channel" value="${settings.ticket_log_channel || ''}" placeholder="ضع ID روم حفظ السجلات..." class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none font-mono text-right">
+                                    <label class="block text-xs font-bold text-gray-300 mb-2">قناة حفظ السجلات والترانسكريبت (Ticket Log Channel)</label>
+                                    ${renderChannelSelect('ticket_log_channel', settings.ticket_log_channel)}
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-gray-300 mb-2">الحد الأقصى للتذاكر المفتوحة للعضو الواحد</label>
@@ -2210,8 +2287,8 @@ module.exports = function (app, client) {
                             
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <label class="block text-xs font-bold text-gray-300 mb-2">روم إرسال اللوحة (Channel ID) <span class="text-purple-400">*</span></label>
-                                    <input type="text" id="panelChannelInput" value="${settings.ticket_panel_channel || ''}" placeholder="ضع ID الروم الذي ستظهر فيه اللوحة..." class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none font-mono text-right">
+                                    <label class="block text-xs font-bold text-gray-300 mb-2">روم إرسال اللوحة (Channel) <span class="text-purple-400">*</span></label>
+                                    ${renderChannelSelect('ticket_panel_channel', settings.ticket_panel_channel)}
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-gray-300 mb-2">عنوان لوحة التذاكر</label>
@@ -2373,12 +2450,12 @@ module.exports = function (app, client) {
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-xs font-bold text-gray-300 mb-2 text-right">قناة الإنشاء الرئيسية (Join to Create Channel ID)</label>
-                                <input type="text" name="temp_voice_channel" value="${settings.temp_voice_channel || ''}" placeholder="ضع ID القناة الصوتية..." class="w-full bg-[#12131c] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right font-mono">
+                                <label class="block text-xs font-bold text-gray-300 mb-2 text-right">قناة الإنشاء الرئيسية (Join to Create Voice)</label>
+                                ${renderVoiceSelect('temp_voice_channel', settings.temp_voice_channel)}
                             </div>
                             <div>
-                                <label class="block text-xs font-bold text-gray-300 mb-2 text-right">كاتيجوري الرومات المؤقتة (Category ID)</label>
-                                <input type="text" name="temp_voice_category" value="${settings.temp_voice_category || ''}" placeholder="ضع ID الكاتيجوري..." class="w-full bg-[#12131c] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right font-mono">
+                                <label class="block text-xs font-bold text-gray-300 mb-2 text-right">كاتيجوري الرومات المؤقتة (Category)</label>
+                                ${renderCategorySelect('temp_voice_category', settings.temp_voice_category)}
                             </div>
                         </div>
                     </div>
@@ -2733,18 +2810,18 @@ module.exports = function (app, client) {
 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <label class="block text-xs font-bold text-gray-300 mb-2 text-right">رتبة مسؤولي وإدارة البوت (Bot Manager Role ID)</label>
-                                    <input type="text" name="admin_role" value="${settings.admin_role || ''}" placeholder="ضع ID الرتبة..." class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right font-mono">
+                                    <label class="block text-xs font-bold text-gray-300 mb-2 text-right">رتبة مسؤولي وإدارة البوت (Bot Manager Role)</label>
+                                    ${renderRoleSelect('admin_role', settings.admin_role)}
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-bold text-gray-300 mb-2 text-right">قناة الإعلانات والتحديثات (Announcements Channel ID)</label>
-                                    <input type="text" name="announcements_channel" value="${settings.announcements_channel || ''}" placeholder="ضع ID القناة..." class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right font-mono">
+                                    <label class="block text-xs font-bold text-gray-300 mb-2 text-right">قناة الإعلانات والتحديثات (Announcements Channel)</label>
+                                    ${renderChannelSelect('announcements_channel', settings.announcements_channel)}
                                 </div>
                             </div>
 
                             <div>
-                                <label class="block text-xs font-bold text-gray-300 mb-2 text-right">قناة السجلات العامة للبوت (General Logs Channel ID)</label>
-                                <input type="text" name="log_channel" value="${settings.log_channel || ''}" placeholder="ضع ID القناة..." class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right font-mono">
+                                <label class="block text-xs font-bold text-gray-300 mb-2 text-right">قناة السجلات العامة للبوت (General Logs Channel)</label>
+                                ${renderChannelSelect('log_channel', settings.log_channel)}
                             </div>
                         </div>
                     </div>
@@ -2908,8 +2985,8 @@ module.exports = function (app, client) {
                                 <input type="text" name="prefix" value="${settings.prefix || '#'}" class="w-full bg-[#12131c] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right font-mono">
                             </div>
                             <div>
-                                <label class="block text-xs font-bold text-gray-300 mb-2 text-right">قناة سجلات الإشراف (Log Channel ID)</label>
-                                <input type="text" name="log_channel" value="${settings.log_channel || ''}" placeholder="ضع ID القناة هنا..." class="w-full bg-[#12131c] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right font-mono">
+                                <label class="block text-xs font-bold text-gray-300 mb-2 text-right">قناة سجلات الإشراف (Moderation Logs)</label>
+                                ${renderChannelSelect('log_channel', settings.log_channel)}
                             </div>
                         </div>
 
@@ -3547,12 +3624,12 @@ module.exports = function (app, client) {
 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <label class="block text-xs font-bold text-gray-300 mb-2 text-right">رتبة الأعضاء الجدد (Member Role ID)</label>
-                                    <input type="text" name="auto_role" value="${settings.auto_role || ''}" placeholder="ضع ID الرتبة..." class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right font-mono">
+                                    <label class="block text-xs font-bold text-gray-300 mb-2 text-right">رتب التلقائية للأعضاء (Member Auto-Role)</label>
+                                    ${renderRoleSelect('auto_role', settings.auto_role)}
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-bold text-gray-300 mb-2 text-right">رتبة البوتات التلقائية (Bot Role ID)</label>
-                                    <input type="text" placeholder="ضع ID رتبة البوتات..." class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right font-mono">
+                                    <label class="block text-xs font-bold text-gray-300 mb-2 text-right">الرتب التلقائية للبيوتات (Bot Auto-Role)</label>
+                                    ${renderRoleSelect('auto_bot_role', settings.auto_bot_role)}
                                 </div>
                             </div>
                         </div>
@@ -3567,12 +3644,12 @@ module.exports = function (app, client) {
 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <label class="block text-xs font-bold text-gray-300 mb-2 text-right">قناة الستاربورد (Starboard Channel ID)</label>
-                                    <input type="text" placeholder="ضع ID القناة..." class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right font-mono">
+                                    <label class="block text-xs font-bold text-gray-300 mb-2 text-right">قناة الستاربورد (Starboard Channel)</label>
+                                    ${renderChannelSelect('starboard_channel', settings.starboard_channel)}
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-gray-300 mb-2 text-right">الحد الأدنى للنجوم (Star Threshold)</label>
-                                    <input type="number" value="3" min="1" max="50" class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right font-mono">
+                                    <input type="number" name="starboard_count" value="${settings.starboard_count || 3}" min="1" max="50" class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right font-mono">
                                 </div>
                             </div>
                         </div>
@@ -3614,19 +3691,19 @@ module.exports = function (app, client) {
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <label class="block text-xs font-bold text-gray-300 mb-2 text-right">سجلات الرسائل المحذوفة والمعدلة</label>
-                                    <input type="text" name="log_channel" value="${settings.log_channel || ''}" placeholder="Channel ID..." class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right font-mono">
+                                    ${renderChannelSelect('log_channel', settings.log_channel)}
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-gray-300 mb-2 text-right">سجلات دخول وخروج الأعضاء</label>
-                                    <input type="text" value="${settings.welcome_channel || ''}" placeholder="Channel ID..." class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right font-mono">
+                                    ${renderChannelSelect('welcome_channel', settings.welcome_channel)}
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-gray-300 mb-2 text-right">سجلات الرومات الصوتية</label>
-                                    <input type="text" placeholder="Channel ID..." class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right font-mono">
+                                    ${renderChannelSelect('log_voice_channel', settings.log_voice_channel)}
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-gray-300 mb-2 text-right">سجلات الرتب والصلاحيات</label>
-                                    <input type="text" placeholder="Channel ID..." class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right font-mono">
+                                    ${renderChannelSelect('log_roles_channel', settings.log_roles_channel)}
                                 </div>
                             </div>
                         </div>
@@ -3671,12 +3748,12 @@ module.exports = function (app, client) {
                             <h4 class="font-bold text-white text-sm">إعدادات الرتبة والروم ⚙️</h4>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <label class="block text-xs font-bold text-gray-300 mb-2">روم التحقق (Verification Channel ID) <span class="text-purple-400">*</span></label>
-                                    <input type="text" id="verifyChannelInput" name="verify_channel" value="${settings.verify_channel || ''}" placeholder="ضع ID روم التحقق..." class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right font-mono">
+                                    <label class="block text-xs font-bold text-gray-300 mb-2">روم التحقق (Verification Channel) <span class="text-purple-400">*</span></label>
+                                    ${renderChannelSelect('verify_channel', settings.verify_channel)}
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-bold text-gray-300 mb-2">الرتبة الممنوحة عند التفعيل (Verified Role ID) <span class="text-purple-400">*</span></label>
-                                    <input type="text" id="verifyRoleInput" name="verify_role" value="${settings.verify_role || ''}" placeholder="ضع ID الرتبة..." class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right font-mono">
+                                    <label class="block text-xs font-bold text-gray-300 mb-2">الرتبة الممنوحة عند التفعيل (Verified Role) <span class="text-purple-400">*</span></label>
+                                    ${renderRoleSelect('verify_role', settings.verify_role)}
                                 </div>
                             </div>
                         </div>
@@ -4079,12 +4156,12 @@ module.exports = function (app, client) {
                                         <input type="text" id="newAppDesc" placeholder="شروط أو توضيح بسيط للتقديم..." class="w-full bg-[#12131c] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none">
                                     </div>
                                     <div>
-                                        <label class="block text-xs font-bold text-gray-300 mb-1.5">روم استلام الطلبات (Log Channel ID)</label>
-                                        <input type="text" id="newAppLogChan" placeholder="ID الروم لإرسال الطلبات إليه للإدارة..." class="w-full bg-[#12131c] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none font-mono">
+                                        <label class="block text-xs font-bold text-gray-300 mb-1.5">روم استلام الطلبات (Log Channel)</label>
+                                        ${renderChannelSelect('newAppLogChan', '')}
                                     </div>
                                     <div>
-                                        <label class="block text-xs font-bold text-gray-300 mb-1.5">الرتبة الممنوحة عند القبول (Accepted Role ID)</label>
-                                        <input type="text" id="newAppRole" placeholder="ID الرتبة التي تُعطى للعضو فور قبوله..." class="w-full bg-[#12131c] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none font-mono">
+                                        <label class="block text-xs font-bold text-gray-300 mb-1.5">الرتبة الممنوحة عند القبول (Accepted Role)</label>
+                                        ${renderRoleSelect('newAppRole', '')}
                                     </div>
                                 </div>
                                 <div>
@@ -4180,7 +4257,7 @@ module.exports = function (app, client) {
                             <div class="bg-[#0b0c10] border border-purple-950/40 rounded-2xl p-4 space-y-3">
                                 <div class="flex items-center justify-between text-gray-400 text-[11px]">
                                     <div class="flex items-center gap-2">
-                                        <div class="w-6 h-6 rounded-full bg-purple-600 flex items-center justify-center text-white text-[10px] font-bold">Z</div>
+                                        <img src="/logo.png" class="w-6 h-6 rounded-full object-cover">
                                         <span class="font-bold text-white text-xs">ZENO</span>
                                         <span class="px-1.5 py-0.2 bg-purple-600 text-white rounded text-[9px] font-bold">APP</span>
                                         <span class="text-[10px]">Today at 08:23</span>
@@ -4193,17 +4270,17 @@ module.exports = function (app, client) {
 
                             <!-- Panel Options & Deploy Settings -->
                             <div class="space-y-4">
-                                <div class="flex items-center justify-between">
-                                    <div class="flex items-center gap-2">
-                                        <input type="text" id="panelDeployChannel" placeholder="ضع ID القناة هنا..." class="bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-2 text-xs text-white outline-none font-mono text-right w-60">
-                                        <label class="text-xs font-bold text-gray-300">القناة المستهدفة:</label>
-                                    </div>
-                                    <div class="flex items-center gap-2">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
+                                    <div class="flex items-center gap-2 justify-end">
                                         <span class="text-xs text-gray-400 font-bold">نوع العرض:</span>
                                         <div class="flex items-center bg-[#0b0c10] border border-purple-950/40 p-1 rounded-xl gap-1">
                                             <button type="button" onclick="setPanelType('buttons')" id="btnTypeButtons" class="px-3 py-1 rounded-lg text-xs font-bold bg-purple-600 text-white transition">ضغطة زر</button>
                                             <button type="button" onclick="setPanelType('select')" id="btnTypeSelect" class="px-3 py-1 rounded-lg text-xs font-bold text-gray-400 hover:text-white transition">قائمة الاختيار</button>
                                         </div>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold text-gray-300 mb-1.5 text-right">القناة المستهدفة لنشر اللوحة:</label>
+                                        ${renderChannelSelect('panelDeployChannel', '')}
                                     </div>
                                 </div>
 
