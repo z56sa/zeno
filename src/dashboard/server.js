@@ -45,71 +45,102 @@ module.exports = function (app, client) {
             <head>
                 <meta charset="UTF-8">
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>ZENO - بوت ديسكورد الشامل</title>
+                <title>ZENO - اصنع خادم ديسكورد احترافي!</title>
                 <script src="https://cdn.tailwindcss.com"></script>
                 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
                 <style>
-                    body { background-color: #12131a; color: #ffffff; font-family: 'Cairo', sans-serif; }
+                    body { background-color: #171821; color: #ffffff; font-family: 'Cairo', sans-serif; }
                 </style>
             </head>
-            <body class="min-h-screen flex flex-col bg-[#12131a]">
-                <!-- Navbar -->
-                <header class="w-full px-8 py-4 bg-[#181924]/80 backdrop-blur-md border-b border-[#232430] flex items-center justify-between sticky top-0 z-50">
-                    <div class="flex items-center gap-4">
+            <body class="min-h-screen flex flex-col bg-[#171821] text-gray-100 selection:bg-[#5865F2]">
+                
+                <!-- ProBot Navbar Exact -->
+                <header class="w-full px-8 py-4 bg-[#1e1f2b]/90 backdrop-blur-md border-b border-[#282937] flex items-center justify-between sticky top-0 z-50">
+                    
+                    <!-- Left: Profile or Login -->
+                    <div class="flex items-center gap-5">
                         ${user ? `
-                            <a href="/dashboard" class="flex items-center gap-2 px-4 py-2 bg-[#5865F2] hover:bg-[#4752C4] text-white text-xs font-bold rounded-xl transition shadow">
+                            <a href="/dashboard" class="flex items-center gap-2.5 px-5 py-2.5 bg-[#5865F2] hover:bg-[#4752C4] text-white text-sm font-black rounded-xl transition shadow-lg shadow-[#5865F2]/20">
+                                <img src="${user.avatar ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png` : 'https://cdn.discordapp.com/embed/avatars/0.png'}" class="w-6 h-6 rounded-full">
                                 <span>لوحة التحكم</span>
                             </a>
                         ` : `
-                            <a href="/auth/discord" class="flex items-center gap-2 px-5 py-2 bg-[#5865F2] hover:bg-[#4752C4] text-white text-xs font-bold rounded-xl transition shadow">
-                                <span>تسجيل الدخول</span>
+                            <a href="/auth/discord" class="px-6 py-2.5 bg-[#5865F2] hover:bg-[#4752C4] text-white text-sm font-black rounded-xl transition shadow-lg shadow-[#5865F2]/20">
+                                تسجيل الدخول
                             </a>
                         `}
-                        <a href="https://discord.gg/uxqQDtbVMz" target="_blank" class="text-gray-400 hover:text-white text-xs font-bold transition">الدعم الفني</a>
+                        <a href="https://discord.gg/uxqQDtbVMz" target="_blank" class="text-gray-300 hover:text-white text-sm font-bold transition">الدعم الفني</a>
+                        <a href="#commands" class="text-gray-300 hover:text-white text-sm font-bold transition">الأوامر</a>
                     </div>
+
+                    <!-- Center: Navigation Links (المميزات / المصادر) -->
+                    <nav class="hidden md:flex items-center gap-8 text-sm font-bold text-gray-300">
+                        <div class="relative group cursor-pointer">
+                            <span class="hover:text-white flex items-center gap-1">المميزات <svg class="w-3.5 h-3.5 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></span>
+                            <div class="absolute top-full right-0 mt-2 w-48 bg-[#1e1f2b] border border-[#282937] rounded-xl shadow-2xl p-2 hidden group-hover:block text-right">
+                                <a href="/dashboard" class="block px-3 py-2 text-xs hover:bg-[#282937] hover:text-white rounded-lg transition">🛡️ الحماية و Anti-Nuke</a>
+                                <a href="/dashboard" class="block px-3 py-2 text-xs hover:bg-[#282937] hover:text-white rounded-lg transition">💰 نظام الاقتصاد والبنك</a>
+                                <a href="/dashboard" class="block px-3 py-2 text-xs hover:bg-[#282937] hover:text-white rounded-lg transition">🎮 الألعاب التفاعلية</a>
+                                <a href="/dashboard" class="block px-3 py-2 text-xs hover:bg-[#282937] hover:text-white rounded-lg transition">🎫 نظام التذاكر</a>
+                            </div>
+                        </div>
+                        <div class="relative group cursor-pointer">
+                            <span class="hover:text-white flex items-center gap-1">المصادر <svg class="w-3.5 h-3.5 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></span>
+                            <div class="absolute top-full right-0 mt-2 w-48 bg-[#1e1f2b] border border-[#282937] rounded-xl shadow-2xl p-2 hidden group-hover:block text-right">
+                                <a href="https://discord.gg/uxqQDtbVMz" target="_blank" class="block px-3 py-2 text-xs hover:bg-[#282937] hover:text-white rounded-lg transition">سيرفر الدعم الفني</a>
+                                <a href="/dashboard" class="block px-3 py-2 text-xs hover:bg-[#282937] hover:text-white rounded-lg transition">سجل التحديثات</a>
+                            </div>
+                        </div>
+                    </nav>
+
+                    <!-- Right: Logo -->
                     <div class="flex items-center gap-3">
-                        <span class="font-black text-lg tracking-wider text-white">ZENO</span>
-                        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#5865F2] to-purple-600 flex items-center justify-center font-black text-white text-sm shadow">Z</div>
+                        <span class="font-black text-xl tracking-wider text-white">ZENO</span>
+                        <div class="w-10 h-10 rounded-2xl bg-[#5865F2] flex items-center justify-center font-black text-white text-base shadow-lg shadow-[#5865F2]/30">Z</div>
                     </div>
                 </header>
 
-                <!-- Hero Section -->
-                <main class="flex-1 flex flex-col items-center justify-center text-center px-4 py-20 max-w-4xl mx-auto">
-                    <span class="px-4 py-1.5 bg-purple-600/10 border border-purple-500/20 text-purple-300 text-xs font-bold rounded-full mb-6">
-                        ★ الجيل المتطور لإدارة وحماية سيرفرات Discord
+                <!-- Hero Section ProBot Exact -->
+                <main class="flex-1 flex flex-col items-center justify-center text-center px-4 py-24 max-w-4xl mx-auto">
+                    
+                    <span class="px-5 py-2 bg-[#282937]/80 border border-[#3b3d52] text-purple-300 text-xs font-black rounded-full mb-8">
+                        جديد: نظام التذاكر المتكامل 100% مجاني
                     </span>
-                    <h1 class="text-4xl md:text-6xl font-black text-white leading-tight mb-6">
-                        اصنع مجتمعاً متكاملاً مع <br><span class="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-indigo-300 to-white">ZENO</span>
+
+                    <h1 class="text-5xl md:text-7xl font-black text-white leading-tight mb-8">
+                        اصنع خادم ديسكورد<br>احترافي!
                     </h1>
-                    <p class="text-gray-400 text-sm md:text-base max-w-2xl mb-10 leading-relaxed">
-                        نظام سحابي ذكي وشامل يوفر لسيرفرك تذاكر دعم فني فورية مع تقييمات، جدار حماية صارم Anti-Nuke، عملة Star Coin ومتاجر افتراضية، ورومات صوتية تفاعلية.
+
+                    <p class="text-gray-300 text-base md:text-lg max-w-2xl mb-12 leading-relaxed font-semibold">
+                        بوت متعدد الأغراض قابل للتخصيص جدًا حيث يوفر لك تخصيص صورة كرسالة ترحيبية وسجلات متعمقة وأوامر اجتماعية وإشراف وأكثر ...
                     </p>
-                    <div class="flex flex-wrap gap-4 items-center justify-center">
-                        <a href="/auth/discord" class="px-8 py-3.5 bg-[#5865F2] hover:bg-[#4752C4] text-white text-sm font-bold rounded-xl transition shadow-lg shadow-[#5865F2]/25">
-                            🚀 دعوة البوت لسيرفرك
+
+                    <div class="flex flex-wrap gap-5 items-center justify-center w-full max-w-md">
+                        <a href="/auth/discord" class="flex-1 py-4 px-8 bg-[#5865F2] hover:bg-[#4752C4] text-white text-base font-black rounded-2xl transition shadow-xl shadow-[#5865F2]/30 text-center">
+                            إضافة البوت في Discord
                         </a>
-                        <a href="/dashboard" class="px-8 py-3.5 bg-[#1e1f2b] hover:bg-[#282937] text-gray-200 text-sm font-bold rounded-xl border border-[#2d2e3d] transition">
-                            ⚙️ الدخول للوحة التحكم
+                        <a href="/dashboard" class="flex-1 py-4 px-8 bg-[#1e1f2b] hover:bg-[#282937] text-white text-base font-black rounded-2xl border border-[#323444] transition text-center shadow-lg">
+                            لوحة التحكم
                         </a>
                     </div>
 
                     <!-- Live Stats -->
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 w-full mt-16 text-center">
-                        <div class="bg-[#181924] border border-[#232430] p-5 rounded-2xl">
-                            <p class="text-xl font-black text-white">${stats.guilds}</p>
-                            <p class="text-gray-400 text-xs mt-1">سيرفرات نشطة</p>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-5 w-full mt-20 text-center">
+                        <div class="bg-[#1e1f2b] border border-[#282937] p-6 rounded-2xl shadow-xl">
+                            <p class="text-3xl font-black text-white">${stats.guilds}</p>
+                            <p class="text-gray-400 text-xs font-bold mt-2">سيرفرات نشطة</p>
                         </div>
-                        <div class="bg-[#181924] border border-[#232430] p-5 rounded-2xl">
-                            <p class="text-xl font-black text-white">${stats.users}</p>
-                            <p class="text-gray-400 text-xs mt-1">أعضاء يخدمهم</p>
+                        <div class="bg-[#1e1f2b] border border-[#282937] p-6 rounded-2xl shadow-xl">
+                            <p class="text-3xl font-black text-white">${stats.users}</p>
+                            <p class="text-gray-400 text-xs font-bold mt-2">أعضاء يخدمهم</p>
                         </div>
-                        <div class="bg-[#181924] border border-[#232430] p-5 rounded-2xl">
-                            <p class="text-xl font-black text-emerald-400">${stats.ping}ms</p>
-                            <p class="text-gray-400 text-xs mt-1">استجابة البث الحية</p>
+                        <div class="bg-[#1e1f2b] border border-[#282937] p-6 rounded-2xl shadow-xl">
+                            <p class="text-3xl font-black text-emerald-400">${stats.ping}ms</p>
+                            <p class="text-gray-400 text-xs font-bold mt-2">استجابة البث الحية</p>
                         </div>
-                        <div class="bg-[#181924] border border-[#232430] p-5 rounded-2xl">
-                            <p class="text-xl font-black text-purple-400">100%</p>
-                            <p class="text-gray-400 text-xs mt-1">جاهزية الحماية (نشط)</p>
+                        <div class="bg-[#1e1f2b] border border-[#282937] p-6 rounded-2xl shadow-xl">
+                            <p class="text-3xl font-black text-purple-400">100%</p>
+                            <p class="text-gray-400 text-xs font-bold mt-2">جاهزية الحماية (نشط)</p>
                         </div>
                     </div>
                 </main>
@@ -512,72 +543,82 @@ module.exports = function (app, client) {
                                 </div>
 
                                 <!-- الأوامر العامة -->
-                                <div class="bg-[#1e1f2b] border border-[#282937] rounded-xl p-5 flex flex-col justify-between">
+                                <div class="bg-[#1e1f2b] border border-[#282937] hover:border-[#5865F2] rounded-xl p-5 flex flex-col justify-between transition">
                                     <div class="flex items-center justify-between mb-3">
-                                        <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                        <label class="toggle"><input type="checkbox" onchange="toggleModule('${guildId}', 'general_enabled', this.checked)" checked><span class="slider"></span></label>
                                         <div class="flex items-center gap-2">
                                             <h4 class="font-bold text-white text-sm">الأوامر العامة</h4>
                                             <span class="text-lg">⚙️</span>
                                         </div>
                                     </div>
                                     <p class="text-gray-400 text-[11px] mb-4 text-right">Utility commands and features</p>
-                                    <button class="w-full py-2 bg-[#282937] hover:bg-[#323444] text-gray-300 rounded-lg text-xs font-bold transition">&gt; Visit</button>
+                                    <a href="/dashboard/${guildId}" class="w-full py-2 bg-[#282937] hover:bg-[#5865F2] hover:text-white text-gray-300 rounded-lg text-xs font-bold text-center transition">&gt; Visit</a>
                                 </div>
 
                                 <!-- الإشراف -->
-                                <div class="bg-[#1e1f2b] border border-[#282937] rounded-xl p-5 flex flex-col justify-between">
+                                <div class="bg-[#1e1f2b] border border-[#282937] hover:border-[#5865F2] rounded-xl p-5 flex flex-col justify-between transition">
                                     <div class="flex items-center justify-between mb-3">
-                                        <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                        <label class="toggle"><input type="checkbox" onchange="toggleModule('${guildId}', 'moderation_enabled', this.checked)" checked><span class="slider"></span></label>
                                         <div class="flex items-center gap-2">
                                             <h4 class="font-bold text-white text-sm">الإشراف</h4>
                                             <span class="text-lg">🔨</span>
                                         </div>
                                     </div>
                                     <p class="text-gray-400 text-[11px] mb-4 text-right">Moderation tools and commands</p>
-                                    <button class="w-full py-2 bg-[#282937] hover:bg-[#323444] text-gray-300 rounded-lg text-xs font-bold transition">&gt; Visit</button>
+                                    <a href="/dashboard/${guildId}" class="w-full py-2 bg-[#282937] hover:bg-[#5865F2] hover:text-white text-gray-300 rounded-lg text-xs font-bold text-center transition">&gt; Visit</a>
                                 </div>
 
                                 <!-- الرقابة التلقائية -->
-                                <div class="bg-[#1e1f2b] border border-[#282937] rounded-xl p-5 flex flex-col justify-between">
+                                <div class="bg-[#1e1f2b] border border-[#282937] hover:border-[#5865F2] rounded-xl p-5 flex flex-col justify-between transition">
                                     <div class="flex items-center justify-between mb-3">
-                                        <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                        <label class="toggle"><input type="checkbox" onchange="toggleModule('${guildId}', 'automod_enabled', this.checked)" checked><span class="slider"></span></label>
                                         <div class="flex items-center gap-2">
                                             <h4 class="font-bold text-white text-sm">الرقابة التلقائية</h4>
                                             <span class="text-lg">🤖</span>
                                         </div>
                                     </div>
                                     <p class="text-gray-400 text-[11px] mb-4 text-right">Automatic moderation features</p>
-                                    <button class="w-full py-2 bg-[#282937] hover:bg-[#323444] text-gray-300 rounded-lg text-xs font-bold transition">&gt; Visit</button>
+                                    <a href="/dashboard/${guildId}" class="w-full py-2 bg-[#282937] hover:bg-[#5865F2] hover:text-white text-gray-300 rounded-lg text-xs font-bold text-center transition">&gt; Visit</a>
                                 </div>
 
                                 <!-- الترحيب والمغادرة -->
-                                <div class="bg-[#1e1f2b] border border-[#282937] rounded-xl p-5 flex flex-col justify-between">
+                                <div class="bg-[#1e1f2b] border border-[#282937] hover:border-[#5865F2] rounded-xl p-5 flex flex-col justify-between transition">
                                     <div class="flex items-center justify-between mb-3">
-                                        <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                        <label class="toggle"><input type="checkbox" onchange="toggleModule('${guildId}', 'welcome_enabled', this.checked)" checked><span class="slider"></span></label>
                                         <div class="flex items-center gap-2">
                                             <h4 class="font-bold text-white text-sm">الترحيب & المغادرة</h4>
                                             <span class="text-lg">👋</span>
                                         </div>
                                     </div>
                                     <p class="text-gray-400 text-[11px] mb-4 text-right">Welcome card canvas and messages</p>
-                                    <button class="w-full py-2 bg-[#282937] hover:bg-[#323444] text-gray-300 rounded-lg text-xs font-bold transition">&gt; Visit</button>
+                                    <a href="/dashboard/${guildId}" class="w-full py-2 bg-[#282937] hover:bg-[#5865F2] hover:text-white text-gray-300 rounded-lg text-xs font-bold text-center transition">&gt; Visit</a>
                                 </div>
 
                                 <!-- الرد التلقائي -->
-                                <div class="bg-[#1e1f2b] border border-[#282937] rounded-xl p-5 flex flex-col justify-between">
+                                <div class="bg-[#1e1f2b] border border-[#282937] hover:border-[#5865F2] rounded-xl p-5 flex flex-col justify-between transition">
                                     <div class="flex items-center justify-between mb-3">
-                                        <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                        <label class="toggle"><input type="checkbox" onchange="toggleModule('${guildId}', 'autoresponder_enabled', this.checked)" checked><span class="slider"></span></label>
                                         <div class="flex items-center gap-2">
                                             <h4 class="font-bold text-white text-sm">الرد التلقائي</h4>
                                             <span class="text-lg">💬</span>
                                         </div>
                                     </div>
                                     <p class="text-gray-400 text-[11px] mb-4 text-right">Custom automatic responders</p>
-                                    <button class="w-full py-2 bg-[#282937] hover:bg-[#323444] text-gray-300 rounded-lg text-xs font-bold transition">&gt; Visit</button>
+                                    <a href="/dashboard/${guildId}" class="w-full py-2 bg-[#282937] hover:bg-[#5865F2] hover:text-white text-gray-300 rounded-lg text-xs font-bold text-center transition">&gt; Visit</a>
                                 </div>
 
                             </div>
                         </div>
+
+                        <script>
+                            function toggleModule(guildId, moduleKey, status) {
+                                fetch('/api/guild/' + guildId + '/module', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ module: moduleKey, enabled: status })
+                                });
+                            }
+                        </script>
                     </main>
 
                     <!-- Server Settings Navigation Sidebar (ProBot Server Menu) -->
