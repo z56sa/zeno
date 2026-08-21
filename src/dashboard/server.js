@@ -3844,14 +3844,23 @@ module.exports = function (app, client) {
 
                     <script>
                     async function sendVerificationPanelDirect() {
-                        const channelId = document.getElementById('verifyChannelInput').value.trim();
-                        const roleId = document.getElementById('verifyRoleInput').value.trim();
-                        const message = document.getElementById('verifyMsgInput').value.trim();
+                        const channelSel = document.querySelector('select[name="verify_channel"]');
+                        const roleSel = document.querySelector('select[name="verify_role"]');
+                        const messageEl = document.getElementById('verifyMsgInput');
+
+                        const channelId = channelSel ? channelSel.value.trim() : '';
+                        const roleId = roleSel ? roleSel.value.trim() : '';
+                        const message = messageEl ? messageEl.value.trim() : '';
+
                         const statusEl = document.getElementById('verifySendStatus');
                         const btn = document.getElementById('sendVerifyBtn');
 
-                        if (!channelId || !roleId) {
-                            alert('يرجى تحديد ID روم التحقق و ID الرتبة الممنوحة أولاً!');
+                        if (!channelId || channelId === '') {
+                            alert('يرجى اختيار روم التحقق أولاً!');
+                            return;
+                        }
+                        if (!roleId || roleId === '') {
+                            alert('يرجى اختيار الرتبة الممنوحة عند التفعيل أولاً!');
                             return;
                         }
 

@@ -134,7 +134,7 @@ module.exports = {
       });
 
       messageCollector.on('collect', async (m) => {
-        if (answered.has(m.author.id)) return; // منع التكرار من نفس الشخص
+        if (answered.has(m.author.id)) return;
 
         const correct = checkAnswer(m.content, q.answers);
 
@@ -142,13 +142,17 @@ module.exports = {
           winner = m.author;
           answered.add(m.author.id);
           db.addCoins(m.author.id, interaction.guild.id, reward);
+          await m.react('✅').catch(() => {});
           await m.reply(`🎉 **إجابة صحيحة يا ${m.author.username}!** ربحت \`+${reward}\` ⭐`);
           messageCollector.stop('winner');
         } else if (correct && winner) {
           answered.add(m.author.id);
+          await m.react('✅').catch(() => {});
           await m.reply(`✅ إجابة صحيحة! لكن **${winner.username}** كان أسرع منك.`);
+        } else {
+          // إجابة خاطئة - أضف ردة فعل خطأ
+          await m.react('❌').catch(() => {});
         }
-        // لا نرد على الخطأ لتجنب التشويش في الشات
       });
 
       messageCollector.on('end', async (collected, reason) => {
@@ -254,11 +258,15 @@ module.exports = {
           winner = m.author;
           answered.add(m.author.id);
           db.addCoins(m.author.id, message.guild.id, reward);
+          await m.react('✅').catch(() => {});
           await m.reply(`🎉 **إجابة صحيحة يا ${m.author.username}!** ربحت \`+${reward}\` ⭐`);
           messageCollector.stop('winner');
         } else if (correct && winner) {
           answered.add(m.author.id);
+          await m.react('✅').catch(() => {});
           await m.reply(`✅ إجابة صحيحة! لكن **${winner.username}** كان أسرع منك.`);
+        } else {
+          await m.react('❌').catch(() => {});
         }
       });
 
