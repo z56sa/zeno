@@ -16,7 +16,6 @@ async function checkYouTube(channelIdOrHandle) {
     if (cleanId.startsWith('UC') && cleanId.length === 24) {
       url = `https://www.youtube.com/feeds/videos.xml?channel_id=${cleanId}`;
     } else {
-      // إزالة @ أو الرابط الكامل
       cleanId = cleanId.replace(/^https?:\/\/(www\.)?youtube\.com\//, '').replace(/^@/, '');
       if (cleanId.startsWith('channel/')) {
         const id = cleanId.replace('channel/', '');
@@ -36,7 +35,6 @@ async function checkYouTube(channelIdOrHandle) {
     const xml = response.data;
     if (!xml || typeof xml !== 'string') return null;
 
-    // استخراج بيانات أحدث فيديو من XML
     const entryMatch = xml.match(/<entry>([\s\S]*?)<\/entry>/);
     if (!entryMatch) return null;
 
@@ -57,9 +55,9 @@ async function checkYouTube(channelIdOrHandle) {
       id: videoId,
       title: videoTitle,
       url: `https://www.youtube.com/watch?v=${videoId}`,
-      channelName: channelName,
+      channelName,
       thumbnail: `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`,
-      published: published
+      published
     };
   } catch (err) {
     return null;
@@ -71,9 +69,10 @@ async function checkYouTube(channelIdOrHandle) {
  */
 async function checkTwitch(username) {
   try {
-    const cleanUser = username.trim().toLowerCase().replace(/^https?:\/\/(www\.)?twitch\.tv\//, '').replace(/^@/, '');
-    
-    // فحص صفحة القناة أو استخدام API مجاني
+    const cleanUser = username.trim().toLowerCase()
+      .replace(/^https?:\/\/(www\.)?twitch\.tv\//, '')
+      .replace(/^@/, '');
+
     const res = await axios.get(`https://www.twitch.tv/${cleanUser}`, {
       timeout: 8000,
       headers: {
@@ -86,7 +85,6 @@ async function checkTwitch(username) {
 
     if (!isLive) return null;
 
-    // محاولة استخراج العنوان
     const titleMatch = html.match(/<meta property="og:description" content="(.*?)"/i) || html.match(/"description":"(.*?)"/i);
     const streamTitle = titleMatch ? titleMatch[1] : `بث مباشر الآن على قناة ${cleanUser}!`;
 
@@ -108,18 +106,22 @@ async function checkTwitch(username) {
  */
 async function checkTikTok(username) {
   try {
-    const cleanUser = username.trim().replace(/^https?:\/\/(www\.)?tiktok\.com\/@?/, '').replace(/^@/, '');
-    
+    const cleanUser = username.trim()
+      .replace(/^https?:\/\/(www\.)?tiktok\.com\/@?/, '')
+      .replace(/^@/, '');
+
     const res = await axios.get(`https://www.tiktok.com/@${cleanUser}`, {
-      timeout: 8000,
+      timeout: 10000,
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Language': 'ar,en;q=0.5'
       }
     });
 
     const html = res.data;
-    // استخراج أحدث video ID من JSON المدمج
-    const idMatch = html.match(/"id":"(\d{15,22})"/);
+    // محاولة استخراج أحدث video ID من بيانات JSON المدمجة
+    const idMatch = html.match(/"id":"(\d{15,22})"/) || html.match(/video\/(\d{15,22})/);
     if (!idMatch) return null;
 
     const videoId = idMatch[1];
@@ -136,50 +138,27 @@ async function checkTikTok(username) {
 }
 
 /**
- * معالجة التنبيهات وإرسالها للسيرفر المحدد
+ * بناء وإرسال Embed التنبيه للقناة
  */
-async function processFeed(client, feed) {
+async function sendNotificationEmbed(client, feed, latest) {
   try {
-    const channel = client.channels.cache.get(feed.channel_id) || await client.channels.fetch(feed.channel_id).catch(() => null);
-    if (!channel || !channel.isTextBased()) return;
+    const channel = client.channels.cache.get(feed.channel_id)
+      || await client.channels.fetch(feed.channel_id).catch(() => null);
 
-    let latest = null;
-    let platformName = '';
-    let platformColor = '#FF0000';
-    let platformIcon = '📺';
-
-    if (feed.platform === 'youtube') {
-      latest = await checkYouTube(feed.account_id);
-      platformName = 'YouTube';
-      platformColor = '#FF0000';
-      platformIcon = '📺';
-    } else if (feed.platform === 'twitch') {
-      latest = await checkTwitch(feed.account_id);
-      platformName = 'Twitch';
-      platformColor = '#9146FF';
-      platformIcon = '🔴';
-    } else if (feed.platform === 'tiktok') {
-      latest = await checkTikTok(feed.account_id);
-      platformName = 'TikTok';
-      platformColor = '#00F2FE';
-      platformIcon = '🎵';
+    if (!channel || !channel.isTextBased()) {
+      logger.warn(`[Notifier] Channel ${feed.channel_id} not found or not text-based`);
+      return false;
     }
 
-    if (!latest || !latest.id) return;
+    const platformMeta = {
+      youtube: { name: 'YouTube', color: '#FF0000', icon: '📺' },
+      twitch:  { name: 'Twitch',  color: '#9146FF', icon: '🔴' },
+      tiktok:  { name: 'TikTok',  color: '#00F2FE', icon: '🎵' }
+    };
 
-    // منع التكرار: إذا كان نفس الفيديو الأخير لا نرسل مرة أخرى
-    if (feed.last_video_id === latest.id) return;
+    const meta = platformMeta[feed.platform] || { name: feed.platform, color: '#7c3aed', icon: '🔔' };
 
-    // إذا كانت أول مرة نسجل الفيديو بدون إرسال إشعار قديم إلا إذا رغبنا
-    if (!feed.last_video_id) {
-      db.updateSocialFeedLastId(feed.id, latest.id);
-      return;
-    }
-
-    // تحديث آخر ID في قاعدة البيانات
-    db.updateSocialFeedLastId(feed.id, latest.id);
-
-    // بناء الرسالة المخصصة
+    // بناء رسالة المنشن
     let messageContent = feed.custom_message || '';
     if (feed.role_id) {
       const mention = feed.role_id === 'everyone' ? '@everyone' : `<@&${feed.role_id}>`;
@@ -187,9 +166,9 @@ async function processFeed(client, feed) {
     }
 
     if (!messageContent) {
-      if (feed.platform === 'youtube') messageContent = `🔔 **${latest.channelName}** نزل فيديو جديد على YouTube!`;
-      else if (feed.platform === 'twitch') messageContent = `🔴 **${latest.channelName}** بدأ بث مباشر الآن على Twitch!`;
-      else messageContent = `🎵 **${latest.channelName}** نزل فيديو جديد على TikTok!`;
+      if (feed.platform === 'youtube')      messageContent = `🔔 **${latest.channelName}** نزل فيديو جديد على YouTube!`;
+      else if (feed.platform === 'twitch')  messageContent = `🔴 **${latest.channelName}** بدأ بث مباشر على Twitch!`;
+      else                                  messageContent = `🎵 **${latest.channelName}** نزل فيديو جديد على TikTok!`;
     } else {
       messageContent = messageContent
         .replace(/{channel}/g, latest.channelName)
@@ -198,24 +177,112 @@ async function processFeed(client, feed) {
     }
 
     const embed = new EmbedBuilder()
-      .setColor(platformColor)
-      .setTitle(`${platformIcon} ${latest.title}`)
+      .setColor(meta.color)
+      .setTitle(`${meta.icon} ${latest.title}`)
       .setURL(latest.url)
-      .setAuthor({ name: `${latest.channelName} (${platformName})`, url: latest.url })
-      .setDescription(`[اضغط هنا للمشاهدة الآن](${latest.url})\n\n**القناة:** ${latest.channelName}`)
-      .setImage(latest.thumbnail)
-      .setFooter({ text: `ZENO ${platformName} Notifier • تلقائي` })
+      .setAuthor({ name: `${latest.channelName} • ${meta.name}`, url: latest.url })
+      .setDescription(`[🔗 اضغط للمشاهدة](${latest.url})\n\n**الحساب:** @${latest.channelName}`)
+      .setFooter({ text: `ZENO ${meta.name} Notifier • تلقائي` })
       .setTimestamp();
 
+    if (latest.thumbnail) embed.setImage(latest.thumbnail);
+
     await channel.send({
-      content: messageContent ? `${messageContent}\n${latest.url}` : latest.url,
+      content: `${messageContent}\n${latest.url}`,
       embeds: [embed]
-    }).catch(err => {
-      logger.error(`Failed to send ${platformName} notification to channel ${feed.channel_id}:`, err.message);
     });
 
+    return true;
+  } catch (err) {
+    logger.error(`[Notifier] Failed to send embed:`, err.message);
+    return false;
+  }
+}
+
+/**
+ * معالجة feed واحد — يفحص المحتوى ويرسل لو في جديد
+ */
+async function processFeed(client, feed) {
+  try {
+    let latest = null;
+
+    if (feed.platform === 'youtube')      latest = await checkYouTube(feed.account_id);
+    else if (feed.platform === 'twitch')  latest = await checkTwitch(feed.account_id);
+    else if (feed.platform === 'tiktok')  latest = await checkTikTok(feed.account_id);
+
+    if (!latest || !latest.id) return;
+
+    // منع التكرار
+    if (feed.last_video_id && feed.last_video_id === latest.id) return;
+
+    // أول مرة: سجّل الـ ID بدون إرسال حتى لا يُرسل كل القديم
+    if (!feed.last_video_id) {
+      db.updateSocialFeedLastId(feed.id, latest.id);
+      return;
+    }
+
+    // فيديو جديد — أرسل الإشعار وحدّث الـ ID
+    await sendNotificationEmbed(client, feed, latest);
+    db.updateSocialFeedLastId(feed.id, latest.id);
+
   } catch (e) {
-    // تجاهل أخطاء الشبكة الفردية
+    logger.error('[Notifier] processFeed error:', e.message);
+  }
+}
+
+/**
+ * اختبار فوري لـ feed — يرسل embed تجريبي بدون تحقق من الجديد
+ */
+async function testFeed(client, feed) {
+  try {
+    const channel = client.channels.cache.get(feed.channel_id)
+      || await client.channels.fetch(feed.channel_id).catch(() => null);
+
+    if (!channel || !channel.isTextBased()) {
+      return { success: false, error: `لم يتم إيجاد القناة ${feed.channel_id}` };
+    }
+
+    const platformMeta = {
+      youtube: { name: 'YouTube', color: '#FF0000', icon: '📺', url: 'https://www.youtube.com', thumb: 'https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg' },
+      twitch:  { name: 'Twitch',  color: '#9146FF', icon: '🔴', url: 'https://twitch.tv',       thumb: '' },
+      tiktok:  { name: 'TikTok',  color: '#00F2FE', icon: '🎵', url: 'https://tiktok.com',      thumb: 'https://sf-tb-sg.ibytedtos.com/obj/eden-sg/uomluhz_lm_q/tiktok_icon.png' }
+    };
+
+    const meta = platformMeta[feed.platform] || { name: feed.platform, color: '#7c3aed', icon: '🔔', url: '#', thumb: '' };
+
+    const embed = new EmbedBuilder()
+      .setColor(meta.color)
+      .setTitle(`${meta.icon} هذه رسالة اختبار من نظام التنبيهات`)
+      .setURL(meta.url)
+      .setAuthor({ name: `@${feed.account_id} • ${meta.name}`, url: meta.url })
+      .setDescription(
+        `✅ **التنبيهات تعمل بشكل صحيح!**\n\n` +
+        `عند نزول محتوى جديد من **@${feed.account_id}**\n` +
+        `سيصل الإشعار تلقائياً في هذه القناة 🔔\n\n` +
+        `[رابط تجريبي](${meta.url})`
+      )
+      .addFields(
+        { name: '📡 المنصة', value: meta.name, inline: true },
+        { name: '👤 الحساب', value: `@${feed.account_id}`, inline: true },
+        { name: '📢 الروم', value: `<#${feed.channel_id}>`, inline: true }
+      )
+      .setFooter({ text: 'ZENO Social Notifier • رسالة اختبار' })
+      .setTimestamp();
+
+    if (meta.thumb) embed.setThumbnail(meta.thumb);
+
+    let content = `🧪 **رسالة اختبار** — تنبيهات ${meta.name}`;
+    if (feed.role_id) {
+      const mention = feed.role_id === 'everyone' ? '@everyone' : `<@&${feed.role_id}>`;
+      content = `${mention} ${content}`;
+    }
+
+    await channel.send({ content, embeds: [embed] });
+    return { success: true };
+
+  } catch (err) {
+    logger.error('[Notifier] testFeed error:', err.message);
+    return { success: false, error: err.message };
   }
 }
 
@@ -225,9 +292,9 @@ async function processFeed(client, feed) {
 function startSocialNotifier(client) {
   if (checkInterval) clearInterval(checkInterval);
 
-  logger.info('🚀 [Notifier] Social media notifier (YouTube / Twitch / TikTok) started.');
+  logger.info('🚀 [Notifier] Social media notifier started (YouTube / Twitch / TikTok).');
 
-  // فحص كل دقيقتين (120 ثانية)
+  // فحص كل دقيقتين
   checkInterval = setInterval(async () => {
     try {
       const activeFeeds = db.getAllActiveSocialFeeds();
@@ -235,7 +302,6 @@ function startSocialNotifier(client) {
 
       for (const feed of activeFeeds) {
         await processFeed(client, feed);
-        // تأخير بسيط لتجنب الـ Rate limit
         await new Promise(r => setTimeout(r, 1500));
       }
     } catch (err) {
@@ -243,7 +309,7 @@ function startSocialNotifier(client) {
     }
   }, 120000);
 
-  // تشغيل فحص أولي بعد 15 ثانية من الإقلاع
+  // فحص أولي بعد 30 ثانية من الإقلاع
   setTimeout(async () => {
     try {
       const activeFeeds = db.getAllActiveSocialFeeds();
@@ -251,7 +317,7 @@ function startSocialNotifier(client) {
         await processFeed(client, feed);
       }
     } catch (e) {}
-  }, 15000);
+  }, 30000);
 }
 
 module.exports = {
@@ -259,5 +325,6 @@ module.exports = {
   checkYouTube,
   checkTwitch,
   checkTikTok,
-  processFeed
+  processFeed,
+  testFeed
 };

@@ -5412,14 +5412,18 @@ async function testFeed(id) {
             if (!feed || feed.guild_id !== guildId) {
                 return res.status(404).json({ success: false, error: 'Feed not found' });
             }
-            const { processFeed } = require('../utils/socialNotifier');
-            const testFeed = { ...feed, last_video_id: 'test_force_' + Date.now() };
-            await processFeed(client, testFeed);
-            res.json({ success: true });
+            const { testFeed } = require('../utils/socialNotifier');
+            const result = await testFeed(client, feed);
+            if (result.success) {
+                res.json({ success: true });
+            } else {
+                res.status(500).json({ success: false, error: result.error });
+            }
         } catch (e) {
             res.status(500).json({ success: false, error: e.message });
         }
     });
+
 
     // Social Notifier Dashboard Page
     app.get('/dashboard/:guildId/social', async (req, res) => {
