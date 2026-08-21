@@ -17,46 +17,54 @@ module.exports = {
 
     // 2. نظام رسائل المغادرة (Leave / Goodbye Message)
     if (settings.leave_enabled && settings.leave_channel) {
-      const leaveChannel = guild.channels.cache.get(settings.leave_channel);
-      if (leaveChannel) {
-        let msg = settings.leave_message || 'وداعاً يا [userName]، نتمنى رؤيتك مجدداً 👋 (أصبح عدد الأعضاء [memberCount])';
-        msg = msg
-          .replace(/\[user\]/gi, `${member.user.tag}`)
-          .replace(/\{user\}/gi, `${member.user.tag}`)
-          .replace(/\[userName\]/gi, member.user.username)
-          .replace(/\{userName\}/gi, member.user.username)
-          .replace(/\[server\]/gi, guild.name)
-          .replace(/\{server\}/gi, guild.name)
-          .replace(/\[memberCount\]/gi, guild.memberCount.toString())
-          .replace(/\{memberCount\}/gi, guild.memberCount.toString());
+      try {
+        const leaveChannel = guild.channels.cache.get(settings.leave_channel) || await guild.channels.fetch(settings.leave_channel).catch(() => null);
+        if (leaveChannel && leaveChannel.isTextBased()) {
+          let msg = settings.leave_message || 'وداعاً يا [userName]، نتمنى رؤيتك مجدداً 👋 (أصبح عدد الأعضاء [memberCount])';
+          msg = msg
+            .replace(/\[user\]/gi, `${member.user.tag}`)
+            .replace(/\{user\}/gi, `${member.user.tag}`)
+            .replace(/\[userName\]/gi, member.user.username)
+            .replace(/\{userName\}/gi, member.user.username)
+            .replace(/\[server\]/gi, guild.name)
+            .replace(/\{server\}/gi, guild.name)
+            .replace(/\[memberCount\]/gi, guild.memberCount.toString())
+            .replace(/\{memberCount\}/gi, guild.memberCount.toString());
 
-        const leaveEmbed = new EmbedBuilder()
-          .setColor('#ef4444')
-          .setDescription(msg)
-          .setThumbnail(member.user.displayAvatarURL({ dynamic: true, size: 256 }))
-          .setFooter({ text: `عدد الأعضاء الحالي: ${guild.memberCount}` })
-          .setTimestamp();
+          const leaveEmbed = new EmbedBuilder()
+            .setColor('#ef4444')
+            .setDescription(msg)
+            .setThumbnail(member.user.displayAvatarURL({ dynamic: true, size: 256 }))
+            .setFooter({ text: `عدد الأعضاء الحالي: ${guild.memberCount}` })
+            .setTimestamp();
 
-        leaveChannel.send({ embeds: [leaveEmbed] }).catch(() => {});
+          await leaveChannel.send({ embeds: [leaveEmbed] }).catch(() => {});
+        }
+      } catch (leaveErr) {
+        console.error('خطأ في إرسال رسالة المغادرة:', leaveErr.message);
       }
     }
 
     // 3. سجل مغادرة الأعضاء (Leave Log)
     if (settings.log_channel) {
-      const logChannel = guild.channels.cache.get(settings.log_channel);
-      if (logChannel) {
-        const leaveLogEmbed = new EmbedBuilder()
-          .setColor('#ef4444')
-          .setTitle('📤 عضو غادر السيرفر')
-          .setThumbnail(member.user.displayAvatarURL({ dynamic: true }))
-          .addFields(
-            { name: '👤 العضو', value: `${member.user.tag} (${member.id})`, inline: true },
-            { name: '🆔 الأيدي', value: `${member.id}`, inline: true },
-            { name: '👥 الأعضاء المتبقين', value: `${guild.memberCount}`, inline: true }
-          )
-          .setTimestamp();
+      try {
+        const logChannel = guild.channels.cache.get(settings.log_channel) || await guild.channels.fetch(settings.log_channel).catch(() => null);
+        if (logChannel && logChannel.isTextBased()) {
+          const leaveLogEmbed = new EmbedBuilder()
+            .setColor('#ef4444')
+            .setTitle('📤 عضو غادر السيرفر')
+            .setThumbnail(member.user.displayAvatarURL({ dynamic: true }))
+            .addFields(
+              { name: '👤 العضو', value: `${member.user.tag} (${member.id})`, inline: true },
+              { name: '🆔 الأيدي', value: `${member.id}`, inline: true },
+              { name: '👥 الأعضاء المتبقين', value: `${guild.memberCount}`, inline: true }
+            )
+            .setTimestamp();
 
-        logChannel.send({ embeds: [leaveLogEmbed] }).catch(() => {});
+          await logChannel.send({ embeds: [leaveLogEmbed] }).catch(() => {});
+        }
+      } catch (logErr) {
+        console.error('خطأ في إرسال لوق المغادرة:', logErr.message);
       }
     }
   }

@@ -1211,228 +1211,6 @@ module.exports = function (app, client) {
     });
 
     // ========================================================
-    // 5. صفحة التسلية والألعاب (مطابقة تماماً للصورة)
-    // ========================================================
-    app.get('/dashboard/:guildId/fun', (req, res) => {
-        try {
-            if (!req.session?.user) return res.redirect('/auth/discord');
-            const guildId = req.params.guildId;
-            const guilds = req.session.guilds || [];
-            let guild = guilds.find(g => g.id === guildId);
-
-            if (!guild && client?.guilds?.cache) {
-                const botGuild = client.guilds.cache.get(guildId);
-                if (botGuild) {
-                    guild = { id: botGuild.id, name: botGuild.name, icon: botGuild.icon };
-                }
-            }
-
-            if (!guild) {
-                guild = { id: guildId, name: 'Discord Server', icon: null };
-            }
-
-            const user = req.session.user;
-
-            const guildIcon = guild.icon ? `https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.png` : 'https://cdn.discordapp.com/embed/avatars/0.png';
-
-            const serverRailHtml = guilds.map(g => `
-                <a href="/dashboard/${g.id}" title="${g.name}" class="group relative flex items-center justify-center">
-                    <img src="${g.icon ? `https://cdn.discordapp.com/icons/${g.id}/${g.icon}.png` : 'https://cdn.discordapp.com/embed/avatars/0.png'}" 
-                         class="w-11 h-11 rounded-2xl ${g.id === guildId ? 'border-2 border-[#5865F2]' : 'border border-transparent'} hover:rounded-xl object-cover transition-all">
-                </a>
-            `).join('');
-
-            res.send(`
-            <!DOCTYPE html>
-            <html lang="ar" dir="rtl" class="dark">
-            <head>
-                <meta charset="UTF-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>التسلية | ${guild.name}</title>
-                <script src="https://cdn.tailwindcss.com"></script>
-                <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
-                <style>
-                    body { background-color: #171821; color: #d1d5db; font-family: 'Cairo', sans-serif; }
-                    .toggle { position: relative; display: inline-block; width: 42px; height: 22px; }
-                    .toggle input { opacity: 0; width: 0; height: 0; }
-                    .slider { position: absolute; cursor: pointer; inset: 0; background: #282937; border-radius: 24px; transition: .2s; }
-                    .slider:before { content: ''; position: absolute; width: 16px; height: 16px; left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: .2s; }
-                    input:checked + .slider { background: #5865F2; }
-                    input:checked + .slider:before { transform: translateX(20px); }
-                    .tab-btn.active { color: #5865F2; border-bottom: 2px solid #5865F2; }
-                </style>
-            </head>
-            <body class="min-h-screen flex flex-col bg-[#171821] text-gray-200">
-
-                <!-- Header -->
-                <header class="h-14 bg-[#1e1f2b] border-b border-[#282937] px-6 flex items-center justify-between z-50">
-                    <div class="flex items-center gap-4">
-                        <a href="https://discord.gg/uxqQDtbVMz" target="_blank" class="text-xs text-gray-400 hover:text-white">الدعم الفني</a>
-                        <span class="text-gray-600">|</span>
-                        <a href="/dashboard/${guildId}" class="text-xs text-gray-400 hover:text-white">إدارة السيرفر</a>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <span class="font-black text-sm text-white tracking-wide">ZENO</span>
-                        <div class="w-7 h-7 rounded-lg bg-[#5865F2] flex items-center justify-center text-white font-black text-xs">Z</div>
-                    </div>
-                </header>
-
-                <div class="flex-1 flex overflow-hidden">
-                    
-                    <!-- Main Content -->
-                    <main class="flex-1 p-8 overflow-y-auto">
-                        
-                        <!-- Top Header Toggle -->
-                        <div class="flex items-center justify-between pb-6 mb-6 border-b border-[#282937]">
-                            <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
-                            <div class="text-right">
-                                <h2 class="text-2xl font-black text-white">التسلية</h2>
-                                <p class="text-gray-400 text-xs mt-1">يضيف متعة إلى سيرفرك بميزات مثيرة مثل الروليت وكت تويت، مع المزيد من الألعاب في الطريق.</p>
-                            </div>
-                        </div>
-
-                        <!-- Tabs (Right Aligned) -->
-                        <div class="border-b border-[#282937] mb-8 flex gap-8 justify-end">
-                            <button class="tab-btn active pb-3 text-sm font-bold">الألعاب</button>
-                            <button class="tab-btn pb-3 text-sm font-bold text-gray-400 hover:text-white">الألعاب الصغيرة</button>
-                            <button class="tab-btn pb-3 text-sm font-bold text-gray-400 hover:text-white">كت تويت</button>
-                        </div>
-
-                        <!-- Games Section -->
-                        <div class="bg-[#1e1f2b] border border-[#282937] rounded-2xl p-6 mb-6 shadow-xl">
-                            <h3 class="text-sm font-black text-white mb-4 text-right">الألعاب</h3>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-
-                                <!-- روليت -->
-                                <div class="bg-[#171821] border border-[#282937] rounded-xl p-4 flex items-center justify-between">
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-10 h-10 bg-[#282937] rounded-xl flex items-center justify-center text-xl">🎲</div>
-                                        <span class="font-bold text-white text-sm">روليت</span>
-                                    </div>
-                                    <div class="flex items-center gap-3">
-                                        <button class="text-gray-500 hover:text-[#5865F2] p-1.5 rounded-lg">⚙️</button>
-                                        <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
-                                    </div>
-                                </div>
-
-                                <!-- الكراسي -->
-                                <div class="bg-[#171821] border border-[#282937] rounded-xl p-4 flex items-center justify-between">
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-10 h-10 bg-[#282937] rounded-xl flex items-center justify-center text-xl">🪑</div>
-                                        <span class="font-bold text-white text-sm">الكراسي</span>
-                                    </div>
-                                    <div class="flex items-center gap-3">
-                                        <button class="text-gray-500 hover:text-[#5865F2] p-1.5 rounded-lg">⚙️</button>
-                                        <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
-                                    </div>
-                                </div>
-
-                                <!-- الغميضة -->
-                                <div class="bg-[#171821] border border-[#282937] rounded-xl p-4 flex items-center justify-between">
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-10 h-10 bg-[#282937] rounded-xl flex items-center justify-center text-xl">👁️</div>
-                                        <span class="font-bold text-white text-sm">الغميضة</span>
-                                    </div>
-                                    <div class="flex items-center gap-3">
-                                        <button class="text-gray-500 hover:text-[#5865F2] p-1.5 rounded-lg">⚙️</button>
-                                        <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
-                                    </div>
-                                </div>
-
-                                <!-- مافيا -->
-                                <div class="bg-[#171821] border border-[#282937] rounded-xl p-4 flex items-center justify-between">
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-10 h-10 bg-[#282937] rounded-xl flex items-center justify-center text-xl">🎭</div>
-                                        <span class="font-bold text-white text-sm">مافيا</span>
-                                    </div>
-                                    <div class="flex items-center gap-3">
-                                        <button class="text-gray-500 hover:text-[#5865F2] p-1.5 rounded-lg">⚙️</button>
-                                        <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
-                                    </div>
-                                </div>
-
-                            </div>
-                        </div>
-
-                        <!-- Commands Section -->
-                        <div class="bg-[#1e1f2b] border border-[#282937] rounded-2xl p-6 shadow-xl">
-                            <h3 class="text-sm font-black text-white mb-4 text-right">الأوامر</h3>
-                            <div class="flex flex-col gap-3">
-
-                                <div class="bg-[#171821] border border-[#282937] rounded-xl p-4 flex items-center justify-between">
-                                    <div class="flex items-center gap-3">
-                                        <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
-                                        <button class="text-gray-500 hover:text-[#5865F2]">✏️</button>
-                                    </div>
-                                    <div class="flex items-center gap-3 text-right">
-                                        <div>
-                                            <p class="font-bold text-white text-sm">points</p>
-                                            <p class="text-gray-400 text-xs">نظام نقاط على مستوى السيرفر</p>
-                                        </div>
-                                        <div class="w-8 h-8 bg-[#282937] rounded-lg flex items-center justify-center text-[#5865F2] font-mono text-xs">&gt;_</div>
-                                    </div>
-                                </div>
-
-                                <div class="bg-[#171821] border border-[#282937] rounded-xl p-4 flex items-center justify-between">
-                                    <div class="flex items-center gap-3">
-                                        <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
-                                        <button class="text-gray-500 hover:text-[#5865F2]">✏️</button>
-                                    </div>
-                                    <div class="flex items-center gap-3 text-right">
-                                        <div>
-                                            <p class="font-bold text-white text-sm">game stop</p>
-                                            <p class="text-gray-400 text-xs">إيقاف لعبة في القناة الحالية</p>
-                                        </div>
-                                        <div class="w-8 h-8 bg-[#282937] rounded-lg flex items-center justify-center text-[#5865F2] font-mono text-xs">&gt;_</div>
-                                    </div>
-                                </div>
-
-                            </div>
-                        </div>
-
-                    </main>
-
-                    <!-- Sidebar Right -->
-                    <aside class="w-64 bg-[#1e1f2b] border-l border-[#282937] p-5 flex flex-col shrink-0 overflow-y-auto">
-                        <div class="flex flex-col items-center text-center pb-5 mb-4 border-b border-[#282937]">
-                            <img src="${guildIcon}" class="w-16 h-16 rounded-2xl bg-[#171821] mb-2 object-cover shadow-lg border border-[#282937]">
-                            <h3 class="font-bold text-white text-sm truncate max-w-[200px]">${guild.name}</h3>
-                        </div>
-
-                        <div class="flex flex-col gap-1 text-xs text-right">
-                            <span class="text-[10px] font-bold text-gray-500 px-3 py-1">عام</span>
-                            <a href="/dashboard/${guildId}" class="px-3 py-2 rounded-xl text-gray-400 hover:text-white hover:bg-[#282937] font-medium text-right">نظرة عامة</a>
-                            <a href="/dashboard/${guildId}" class="px-3 py-2 rounded-xl text-gray-400 hover:text-white hover:bg-[#282937] font-medium text-right">إعدادات السيرفر</a>
-                            
-                            <span class="text-[10px] font-bold text-gray-500 px-3 pt-3 pb-1">قائمة الخصائص</span>
-                            <a href="/dashboard/${guildId}/fun" class="px-3 py-2 rounded-xl bg-[#5865F2] text-white font-bold flex items-center justify-between">
-                                <span class="w-1.5 h-1.5 rounded-full bg-white"></span>
-                                <span>التسلية والألعاب</span>
-                            </a>
-                            <a href="#" class="px-3 py-2 rounded-xl text-gray-400 hover:text-white hover:bg-[#282937] font-medium flex items-center justify-between">
-                                <span class="text-emerald-400">●</span>
-                                <span>الأوامر العامة</span>
-                            </a>
-                        </div>
-                    </aside>
-
-                    <!-- Server Rail -->
-                    <div class="w-16 bg-[#12131a] border-l border-[#282937] py-4 flex flex-col items-center gap-3 shrink-0 overflow-y-auto">
-                        <a href="/dashboard" title="الرئيسية" class="w-11 h-11 rounded-2xl bg-[#5865F2] flex items-center justify-center text-white font-black text-sm shadow">Z</a>
-                        <div class="w-8 h-[1px] bg-[#282937]"></div>
-                        ${serverRailHtml}
-                    </div>
-
-                </div>
-            </body>
-            </html>
-            `);
-        } catch (error) {
-            res.status(500).send("Error");
-        }
-    });
-
-    // ========================================================
     // 5. واجهة برمجية لحفظ التعديلات والتحديث الفوري في ديسكورد (Real-time Discord Sync)
     // ========================================================
     app.post('/api/guild/:guildId/module', express.json(), (req, res) => {
@@ -2347,6 +2125,38 @@ module.exports = function (app, client) {
                                     </div>
                                 </div>
 
+                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                    <div class="text-right">
+                                        <p class="font-bold text-white text-xs">giveaway & #giveaway</p>
+                                        <p class="text-gray-400 text-[10px]">إنشاء وإدارة مسابقات الجيف أواي وتحديد الفائزين</p>
+                                    </div>
+                                </div>
+
+                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                    <div class="text-right">
+                                        <p class="font-bold text-white text-xs">poll & #poll</p>
+                                        <p class="text-gray-400 text-[10px]">إنشاء استطلاعات وتصويت تفاعلي للأعضاء</p>
+                                    </div>
+                                </div>
+
+                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                    <div class="text-right">
+                                        <p class="font-bold text-white text-xs">quran & #quran</p>
+                                        <p class="text-gray-400 text-[10px]">الاستماع لآيات وسور القرآن الكريم والتفاسير</p>
+                                    </div>
+                                </div>
+
+                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                    <div class="text-right">
+                                        <p class="font-bold text-white text-xs">radio & #radio</p>
+                                        <p class="text-gray-400 text-[10px]">تشغيل إذاعة القرآن الكريم على مدار الساعة</p>
+                                    </div>
+                                </div>
+
                             </div>
                         </div>
                     </div>
@@ -2795,6 +2605,174 @@ module.exports = function (app, client) {
                                         <div>
                                             <p class="font-bold text-white text-sm">game stop</p>
                                             <p class="text-gray-400 text-xs">إيقاف وإنهاء أي لعبة جارية في القناة الحالية فوراً</p>
+                                        </div>
+                                        <div class="w-8 h-8 bg-purple-950/40 rounded-lg flex items-center justify-center text-purple-400 font-mono text-xs">&gt;_</div>
+                                    </div>
+                                </div>
+
+                                <div class="bg-[#0b0c10] border border-purple-950/40 p-4 rounded-xl flex items-center justify-between">
+                                    <div class="flex items-center gap-3">
+                                        <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                        <button type="button" class="text-gray-500 hover:text-purple-400">✏️</button>
+                                    </div>
+                                    <div class="flex items-center gap-3 text-right">
+                                        <div>
+                                            <p class="font-bold text-white text-sm">dice</p>
+                                            <p class="text-gray-400 text-xs">رمي النرد والمراهنة على الأرقام والنتائج</p>
+                                        </div>
+                                        <div class="w-8 h-8 bg-purple-950/40 rounded-lg flex items-center justify-center text-purple-400 font-mono text-xs">&gt;_</div>
+                                    </div>
+                                </div>
+
+                                <div class="bg-[#0b0c10] border border-purple-950/40 p-4 rounded-xl flex items-center justify-between">
+                                    <div class="flex items-center gap-3">
+                                        <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                        <button type="button" class="text-gray-500 hover:text-purple-400">✏️</button>
+                                    </div>
+                                    <div class="flex items-center gap-3 text-right">
+                                        <div>
+                                            <p class="font-bold text-white text-sm">coinflip</p>
+                                            <p class="text-gray-400 text-xs">رمي العملة ملك أو كتابة مع رهانات حماسية</p>
+                                        </div>
+                                        <div class="w-8 h-8 bg-purple-950/40 rounded-lg flex items-center justify-center text-purple-400 font-mono text-xs">&gt;_</div>
+                                    </div>
+                                </div>
+
+                                <div class="bg-[#0b0c10] border border-purple-950/40 p-4 rounded-xl flex items-center justify-between">
+                                    <div class="flex items-center gap-3">
+                                        <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                        <button type="button" class="text-gray-500 hover:text-purple-400">✏️</button>
+                                    </div>
+                                    <div class="flex items-center gap-3 text-right">
+                                        <div>
+                                            <p class="font-bold text-white text-sm">fight</p>
+                                            <p class="text-gray-400 text-xs">تحديات وقتال PvP حماسي بين الأعضاء بنقاط صحة HP</p>
+                                        </div>
+                                        <div class="w-8 h-8 bg-purple-950/40 rounded-lg flex items-center justify-center text-purple-400 font-mono text-xs">&gt;_</div>
+                                    </div>
+                                </div>
+
+                                <div class="bg-[#0b0c10] border border-purple-950/40 p-4 rounded-xl flex items-center justify-between">
+                                    <div class="flex items-center gap-3">
+                                        <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                        <button type="button" class="text-gray-500 hover:text-purple-400">✏️</button>
+                                    </div>
+                                    <div class="flex items-center gap-3 text-right">
+                                        <div>
+                                            <p class="font-bold text-white text-sm">trivia</p>
+                                            <p class="text-gray-400 text-xs">مسابقات وسين جيم إسلامية وثقافية مع جوائز نجوم</p>
+                                        </div>
+                                        <div class="w-8 h-8 bg-purple-950/40 rounded-lg flex items-center justify-center text-purple-400 font-mono text-xs">&gt;_</div>
+                                    </div>
+                                </div>
+
+                                <div class="bg-[#0b0c10] border border-purple-950/40 p-4 rounded-xl flex items-center justify-between">
+                                    <div class="flex items-center gap-3">
+                                        <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                        <button type="button" class="text-gray-500 hover:text-purple-400">✏️</button>
+                                    </div>
+                                    <div class="flex items-center gap-3 text-right">
+                                        <div>
+                                            <p class="font-bold text-white text-sm">roulette</p>
+                                            <p class="text-gray-400 text-xs">روليت الكازينو الأوروبي ومضاعفة أرباح النجوم</p>
+                                        </div>
+                                        <div class="w-8 h-8 bg-purple-950/40 rounded-lg flex items-center justify-center text-purple-400 font-mono text-xs">&gt;_</div>
+                                    </div>
+                                </div>
+
+                                <div class="bg-[#0b0c10] border border-purple-950/40 p-4 rounded-xl flex items-center justify-between">
+                                    <div class="flex items-center gap-3">
+                                        <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                        <button type="button" class="text-gray-500 hover:text-purple-400">✏️</button>
+                                    </div>
+                                    <div class="flex items-center gap-3 text-right">
+                                        <div>
+                                            <p class="font-bold text-white text-sm">blackjack</p>
+                                            <p class="text-gray-400 text-xs">لعبة 21 والورق والتحديات المالية السريعة</p>
+                                        </div>
+                                        <div class="w-8 h-8 bg-purple-950/40 rounded-lg flex items-center justify-center text-purple-400 font-mono text-xs">&gt;_</div>
+                                    </div>
+                                </div>
+
+                                <div class="bg-[#0b0c10] border border-purple-950/40 p-4 rounded-xl flex items-center justify-between">
+                                    <div class="flex items-center gap-3">
+                                        <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                        <button type="button" class="text-gray-500 hover:text-purple-400">✏️</button>
+                                    </div>
+                                    <div class="flex items-center gap-3 text-right">
+                                        <div>
+                                            <p class="font-bold text-white text-sm">meme</p>
+                                            <p class="text-gray-400 text-xs">جلب صور ونكت وميمز مضحكة عشوائية من ريديت</p>
+                                        </div>
+                                        <div class="w-8 h-8 bg-purple-950/40 rounded-lg flex items-center justify-center text-purple-400 font-mono text-xs">&gt;_</div>
+                                    </div>
+                                </div>
+
+                                <div class="bg-[#0b0c10] border border-purple-950/40 p-4 rounded-xl flex items-center justify-between">
+                                    <div class="flex items-center gap-3">
+                                        <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                        <button type="button" class="text-gray-500 hover:text-purple-400">✏️</button>
+                                    </div>
+                                    <div class="flex items-center gap-3 text-right">
+                                        <div>
+                                            <p class="font-bold text-white text-sm">8ball</p>
+                                            <p class="text-gray-400 text-xs">الكرة السحرية للإجابة على جميع الأسئلة والتوقعات</p>
+                                        </div>
+                                        <div class="w-8 h-8 bg-purple-950/40 rounded-lg flex items-center justify-center text-purple-400 font-mono text-xs">&gt;_</div>
+                                    </div>
+                                </div>
+
+                                <div class="bg-[#0b0c10] border border-purple-950/40 p-4 rounded-xl flex items-center justify-between">
+                                    <div class="flex items-center gap-3">
+                                        <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                        <button type="button" class="text-gray-500 hover:text-purple-400">✏️</button>
+                                    </div>
+                                    <div class="flex items-center gap-3 text-right">
+                                        <div>
+                                            <p class="font-bold text-white text-sm">rps</p>
+                                            <p class="text-gray-400 text-xs">لعبة حجر ورقة مقص ضد البوت أو الأعضاء</p>
+                                        </div>
+                                        <div class="w-8 h-8 bg-purple-950/40 rounded-lg flex items-center justify-center text-purple-400 font-mono text-xs">&gt;_</div>
+                                    </div>
+                                </div>
+
+                                <div class="bg-[#0b0c10] border border-purple-950/40 p-4 rounded-xl flex items-center justify-between">
+                                    <div class="flex items-center gap-3">
+                                        <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                        <button type="button" class="text-gray-500 hover:text-purple-400">✏️</button>
+                                    </div>
+                                    <div class="flex items-center gap-3 text-right">
+                                        <div>
+                                            <p class="font-bold text-white text-sm">chairs</p>
+                                            <p class="text-gray-400 text-xs">لعبة الكراسي الموسيقية التفاعلية في الشات</p>
+                                        </div>
+                                        <div class="w-8 h-8 bg-purple-950/40 rounded-lg flex items-center justify-center text-purple-400 font-mono text-xs">&gt;_</div>
+                                    </div>
+                                </div>
+
+                                <div class="bg-[#0b0c10] border border-purple-950/40 p-4 rounded-xl flex items-center justify-between">
+                                    <div class="flex items-center gap-3">
+                                        <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                        <button type="button" class="text-gray-500 hover:text-purple-400">✏️</button>
+                                    </div>
+                                    <div class="flex items-center gap-3 text-right">
+                                        <div>
+                                            <p class="font-bold text-white text-sm">mafia</p>
+                                            <p class="text-gray-400 text-xs">لعبة المافيا والغموض بين الأعضاء في الشات</p>
+                                        </div>
+                                        <div class="w-8 h-8 bg-purple-950/40 rounded-lg flex items-center justify-center text-purple-400 font-mono text-xs">&gt;_</div>
+                                    </div>
+                                </div>
+
+                                <div class="bg-[#0b0c10] border border-purple-950/40 p-4 rounded-xl flex items-center justify-between">
+                                    <div class="flex items-center gap-3">
+                                        <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                        <button type="button" class="text-gray-500 hover:text-purple-400">✏️</button>
+                                    </div>
+                                    <div class="flex items-center gap-3 text-right">
+                                        <div>
+                                            <p class="font-bold text-white text-sm">hideseek</p>
+                                            <p class="text-gray-400 text-xs">لعبة الغميضة والبحث عن الأعضاء المختبئين</p>
                                         </div>
                                         <div class="w-8 h-8 bg-purple-950/40 rounded-lg flex items-center justify-center text-purple-400 font-mono text-xs">&gt;_</div>
                                     </div>

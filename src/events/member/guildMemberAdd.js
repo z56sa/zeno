@@ -111,33 +111,50 @@ module.exports = {
     const autoRoleId = settings.auto_role || settings.autorole_id;
     if (autoRoleId) {
       try {
-        const role = guild.roles.cache.get(autoRoleId);
-        if (role) {
-          await member.roles.add(role);
+        const role = guild.roles.cache.get(autoRoleId) || await guild.roles.fetch(autoRoleId).catch(() => null);
+        if (role && guild.members.me?.permissions.has('ManageRoles') && role.position < (guild.members.me.roles.highest?.position || 0)) {
+          await member.roles.add(role).catch(e => console.error('فشل إعطاء الرتبة التلقائية:', e.message));
         }
       } catch (err) {
-        console.error('فشل في إعطاء الرتبة التلقائية:', err);
+        console.error('خطأ في إعطاء الرتبة التلقائية:', err.message);
       }
     }
 
     // 2. نظام الترحيب (Welcome Message, Embed, DM & Canvas Card)
-    if (settings.welcome_channel) {
-      const welcomeChannel = guild.channels.cache.get(settings.welcome_channel);
-      if (welcomeChannel) {
+    try {
+      let welcomeChannel = null;
+      if (settings.welcome_channel) {
+        welcomeChannel = guild.channels.cache.get(settings.welcome_channel) || await guild.channels.fetch(settings.welcome_channel).catch(() => null);
+      }
+      
+      // Fallback: If no custom channel set or not found, check system channel
+      if (!welcomeChannel && settings.welcome_enabled) {
+        welcomeChannel = guild.systemChannel;
+      }
+
+      if (welcomeChannel && welcomeChannel.isTextBased()) {
         let msg = settings.welcome_message || 'أهلاً بك يا [user] في سيرفر **[server]**! 🎉 أنت العضو رقم [memberCount]';
         msg = msg
           .replace(/\[user\]/gi, `<@${member.id}>`)
           .replace(/\{user\}/gi, `<@${member.id}>`)
+          .replace(/\[mention\]/gi, `<@${member.id}>`)
+          .replace(/\{mention\}/gi, `<@${member.id}>`)
           .replace(/\[userName\]/gi, member.user.username)
           .replace(/\{userName\}/gi, member.user.username)
+          .replace(/\[name\]/gi, member.user.username)
+          .replace(/\{name\}/gi, member.user.username)
           .replace(/\[server\]/gi, guild.name)
           .replace(/\{server\}/gi, guild.name)
+          .replace(/\[serverName\]/gi, guild.name)
+          .replace(/\{serverName\}/gi, guild.name)
           .replace(/\[memberCount\]/gi, guild.memberCount.toString())
-          .replace(/\{memberCount\}/gi, guild.memberCount.toString());
+          .replace(/\{memberCount\}/gi, guild.memberCount.toString())
+          .replace(/\[members\]/gi, guild.memberCount.toString())
+          .replace(/\{members\}/gi, guild.memberCount.toString());
 
         const sendPayload = {};
 
-        if (settings.welcome_embed_enabled) {
+        if (settings.welcome_embed_enabled !== 0) {
           const welcomeEmbed = new EmbedBuilder()
             .setColor(config.colors.primary || '#9333ea')
             .setTitle(`🎉 مرحباً بك في ${guild.name}!`)
@@ -158,12 +175,14 @@ module.exports = {
               sendPayload.files = [attachment];
             }
           } catch (err) {
-            console.error('فشل إنشاء بطاقة الترحيب عبر Canvas:', err.message);
+            console.error('فشل إنشاء بطاقة الترحيب عبر Canvas، سيتم إرسال الإيمبد/الرسالة كبديل:', err.message);
           }
         }
 
-        welcomeChannel.send(sendPayload).catch((e) => console.error('فشل إرسال رسالة الترحيب:', e.message));
+        await welcomeChannel.send(sendPayload).catch((e) => console.error('فشل إرسال رسالة الترحيب:', e.message));
       }
+    } catch (welcomeErr) {
+      console.error('خطأ في معالجة الترحيب:', welcomeErr);
     }
 
     // 2.5 رسالة الترحيب في الخاص (DM Welcome Message)
@@ -185,21 +204,25 @@ module.exports = {
 
     // 3. سجل انضمام الأعضاء (Join Log)
     if (settings.log_channel) {
-      const logChannel = guild.channels.cache.get(settings.log_channel);
-      if (logChannel) {
-        const joinEmbed = new EmbedBuilder()
-          .setColor(config.colors.success || '#10b981')
-          .setTitle('📥 عضو جديد انضم إلى السيرفر')
-          .setThumbnail(member.user.displayAvatarURL({ dynamic: true }))
-          .addFields(
-            { name: '👤 العضو', value: `<@${member.id}> (${member.user.tag})`, inline: true },
-            { name: '🆔 الأيدي', value: `${member.id}`, inline: true },
-            { name: '📅 تاريخ إنشاء الحساب', value: `<t:${Math.floor(member.user.createdTimestamp / 1000)}:R>`, inline: false },
-            { name: '👥 إجمالي الأعضاء', value: `${guild.memberCount}`, inline: true }
-          )
-          .setTimestamp();
+      try {
+        const logChannel = guild.channels.cache.get(settings.log_channel) || await guild.channels.fetch(settings.log_channel).catch(() => null);
+        if (logChannel && logChannel.isTextBased()) {
+          const joinEmbed = new EmbedBuilder()
+            .setColor(config.colors.success || '#10b981')
+            .setTitle('📥 عضو جديد انضم إلى السيرفر')
+            .setThumbnail(member.user.displayAvatarURL({ dynamic: true }))
+            .addFields(
+              { name: '👤 العضو', value: `<@${member.id}> (${member.user.tag})`, inline: true },
+              { name: '🆔 الأيدي', value: `${member.id}`, inline: true },
+              { name: '📅 تاريخ إنشاء الحساب', value: `<t:${Math.floor(member.user.createdTimestamp / 1000)}:R>`, inline: false },
+              { name: '👥 إجمالي الأعضاء', value: `${guild.memberCount}`, inline: true }
+            )
+            .setTimestamp();
 
-        logChannel.send({ embeds: [joinEmbed] }).catch(() => {});
+          await logChannel.send({ embeds: [joinEmbed] }).catch(() => {});
+        }
+      } catch (logErr) {
+        console.error('خطأ في إرسال لوق الانضمام:', logErr.message);
       }
     }
   }
