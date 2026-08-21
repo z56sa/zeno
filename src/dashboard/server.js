@@ -1085,6 +1085,71 @@ module.exports = function (app, client) {
                                     <a href="/dashboard/${guildId}/boost" class="w-full py-2 bg-pink-950/30 hover:bg-gradient-to-r hover:from-pink-600 hover:to-purple-600 hover:text-white text-pink-300 border border-pink-900/30 rounded-xl text-xs font-bold text-center transition">&gt; Visit</a>
                                 </div>
 
+                                <!-- التذاكر والدعم الفني -->
+                                <div class="bg-[#10111a] border border-purple-950/40 hover:border-purple-600/40 rounded-2xl p-5 flex flex-col justify-between transition shadow-lg">
+                                    <div class="flex items-center justify-between mb-3">
+                                        <label class="toggle"><input type="checkbox" onchange="toggleModule('${guildId}', 'ticket_enabled', this.checked)" checked><span class="slider"></span></label>
+                                        <div class="flex items-center gap-2">
+                                            <h4 class="font-bold text-white text-sm">نظام التذاكر</h4>
+                                            <span class="text-lg">🎫</span>
+                                        </div>
+                                    </div>
+                                    <p class="text-gray-400 text-[11px] mb-4 text-right">لوحات دعم فني مخصصة وترانسكريبت</p>
+                                    <a href="/dashboard/${guildId}/tickets" class="w-full py-2 bg-purple-950/30 hover:bg-gradient-to-r hover:from-purple-600 hover:to-indigo-600 hover:text-white text-purple-300 border border-purple-900/30 rounded-xl text-xs font-bold text-center transition">&gt; Visit</a>
+                                </div>
+
+                                <!-- المستويات واللفلات -->
+                                <div class="bg-[#10111a] border border-purple-950/40 hover:border-purple-600/40 rounded-2xl p-5 flex flex-col justify-between transition shadow-lg">
+                                    <div class="flex items-center justify-between mb-3">
+                                        <label class="toggle"><input type="checkbox" onchange="toggleModule('${guildId}', 'leveling_enabled', this.checked)" checked><span class="slider"></span></label>
+                                        <div class="flex items-center gap-2">
+                                            <h4 class="font-bold text-white text-sm">المستويات & XP</h4>
+                                            <span class="text-lg">📈</span>
+                                        </div>
+                                    </div>
+                                    <p class="text-gray-400 text-[11px] mb-4 text-right">نظام الرتب ونقاط الخبرة وبطاقات الرانك</p>
+                                    <a href="/dashboard/${guildId}/levels" class="w-full py-2 bg-purple-950/30 hover:bg-gradient-to-r hover:from-purple-600 hover:to-indigo-600 hover:text-white text-purple-300 border border-purple-900/30 rounded-xl text-xs font-bold text-center transition">&gt; Visit</a>
+                                </div>
+
+                                <!-- الرومات المؤقتة -->
+                                <div class="bg-[#10111a] border border-purple-950/40 hover:border-purple-600/40 rounded-2xl p-5 flex flex-col justify-between transition shadow-lg">
+                                    <div class="flex items-center justify-between mb-3">
+                                        <label class="toggle"><input type="checkbox" onchange="toggleModule('${guildId}', 'temp_voice_enabled', this.checked)" checked><span class="slider"></span></label>
+                                        <div class="flex items-center gap-2">
+                                            <h4 class="font-bold text-white text-sm">رومات مؤقتة</h4>
+                                            <span class="text-lg">🔊</span>
+                                        </div>
+                                    </div>
+                                    <p class="text-gray-400 text-[11px] mb-4 text-right">إنشاء قنوات صوتية خاصة تلقائياً</p>
+                                    <a href="/dashboard/${guildId}/tempvoice" class="w-full py-2 bg-purple-950/30 hover:bg-gradient-to-r hover:from-purple-600 hover:to-indigo-600 hover:text-white text-purple-300 border border-purple-900/30 rounded-xl text-xs font-bold text-center transition">&gt; Visit</a>
+                                </div>
+
+                                <!-- التحقق والتفعيل -->
+                                <div class="bg-[#10111a] border border-purple-950/40 hover:border-purple-600/40 rounded-2xl p-5 flex flex-col justify-between transition shadow-lg">
+                                    <div class="flex items-center justify-between mb-3">
+                                        <label class="toggle"><input type="checkbox" onchange="toggleModule('${guildId}', 'verify_enabled', this.checked)" checked><span class="slider"></span></label>
+                                        <div class="flex items-center gap-2">
+                                            <h4 class="font-bold text-white text-sm">التحقق & التفعيل</h4>
+                                            <span class="text-lg">🛡️</span>
+                                        </div>
+                                    </div>
+                                    <p class="text-gray-400 text-[11px] mb-4 text-right">لوحة تفعيل الأعضاء بالأزرار التفاعلية</p>
+                                    <a href="/dashboard/${guildId}/verification" class="w-full py-2 bg-purple-950/30 hover:bg-gradient-to-r hover:from-purple-600 hover:to-indigo-600 hover:text-white text-purple-300 border border-purple-900/30 rounded-xl text-xs font-bold text-center transition">&gt; Visit</a>
+                                </div>
+
+                                <!-- الاقتصاد والنجوم -->
+                                <div class="bg-[#10111a] border border-amber-950/40 hover:border-amber-600/40 rounded-2xl p-5 flex flex-col justify-between transition shadow-lg">
+                                    <div class="flex items-center justify-between mb-3">
+                                        <label class="toggle"><input type="checkbox" onchange="toggleModule('${guildId}', 'economy_enabled', this.checked)" checked><span class="slider"></span></label>
+                                        <div class="flex items-center gap-2">
+                                            <h4 class="font-bold text-white text-sm">الاقتصاد والنجوم</h4>
+                                            <span class="text-lg">⭐</span>
+                                        </div>
+                                    </div>
+                                    <p class="text-gray-400 text-[11px] mb-4 text-right">البنك، الوظائف، تحويلات النجوم، والمكافآت</p>
+                                    <a href="/dashboard/${guildId}/economy" class="w-full py-2 bg-amber-950/30 hover:bg-gradient-to-r hover:from-amber-600 hover:to-yellow-600 hover:text-white text-amber-300 border border-amber-900/30 rounded-xl text-xs font-bold text-center transition">&gt; Visit</a>
+                                </div>
+
                             </div>
                         </div>
 
@@ -2917,38 +2982,125 @@ module.exports = function (app, client) {
                         </div>
                     </div>
                 `;
-            } else if (section === 'fun') {
+            } else if (section === 'verification') {
                 formFieldsHtml = `
                     <div class="space-y-6">
-                        <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl">
-                            <h4 class="font-bold text-white text-sm mb-4 text-right">ألعاب ومنافسات البوت التفاعلية 🎮</h4>
+                        <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl flex items-center justify-between">
+                            <label class="toggle"><input type="checkbox" name="verify_enabled" value="1" ${settings.verify_enabled ? 'checked' : ''}><span class="slider"></span></label>
+                            <div class="text-right">
+                                <h4 class="font-bold text-white text-sm">نظام التحقق والتفعيل التفاعلي (Verification System) 🛡️</h4>
+                                <p class="text-gray-400 text-xs mt-0.5">إعطاء رتبة معينة للأعضاء تلقائياً بعد ضغطهم على زر التحقق "تحقق الآن"</p>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-gray-300 mb-2 text-right">روم التحقق (Verification Channel ID) <span class="text-purple-400">*</span></label>
+                                <input type="text" name="verify_channel" value="${settings.verify_channel || ''}" placeholder="ضع ID روم التحقق..." class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right font-mono">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-300 mb-2 text-right">الرتبة الممنوحة عند التفعيل (Verified Role ID) <span class="text-purple-400">*</span></label>
+                                <input type="text" name="verify_role" value="${settings.verify_role || ''}" placeholder="ضع ID الرتبة..." class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right font-mono">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-gray-300 mb-2 text-right">رسالة لوحة التحقق (Verification Embed Text)</label>
+                            <textarea name="verify_message" rows="3" placeholder="مرحباً بك في السيرفر! يرجى الضغط على زر التحقق بالأسفل للدخول والاطلاع على القنوات." class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right leading-relaxed">${settings.verify_message || ''}</textarea>
+                        </div>
+                    </div>
+                `;
+            } else if (section === 'reactionroles') {
+                formFieldsHtml = `
+                    <div class="space-y-6">
+                        <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl text-right">
+                            <h4 class="font-bold text-white text-sm mb-1">الرتب التفاعلية بالأزرار (Reaction & Button Roles) 🔘</h4>
+                            <p class="text-gray-400 text-xs mb-4">إنشاء رسالة بأزرار تفاعلية تمكن الأعضاء من إعطاء أو إزالة الرتب عن أنفسهم بنقرة واحدة.</p>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-right">
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-300 mb-2">روم إرسال الرسالة (Channel ID) <span class="text-purple-400">*</span></label>
+                                    <input type="text" id="rrChannel" placeholder="ضع ID القناة..." class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none font-mono text-right">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-300 mb-2">الرتبة المراد إعطاؤها (Role ID) <span class="text-purple-400">*</span></label>
+                                    <input type="text" id="rrRole" placeholder="ضع ID الرتبة..." class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none font-mono text-right">
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 text-right">
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-300 mb-2">نص الزر (Button Label)</label>
+                                    <input type="text" id="rrLabel" placeholder="مثال: الإشعارات 🔔 أو الأخبار" class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-300 mb-2">عنوان رسالة الإيمبد (Embed Title)</label>
+                                    <input type="text" id="rrTitle" placeholder="مثال: اختر رتبتك من هنا" class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right">
+                                </div>
+                            </div>
+
+                            <div class="mt-4">
+                                <label class="block text-xs font-bold text-gray-300 mb-2 text-right">وصف الرسالة (Description)</label>
+                                <textarea id="rrDesc" rows="3" placeholder="اضغط على الزر بالأسفل للحصول على الرتبة أو إزالتها..." class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else if (section === 'economy') {
+                formFieldsHtml = `
+                    <div class="space-y-6">
+                        <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl flex items-center justify-between">
+                            <label class="toggle"><input type="checkbox" name="economy_enabled" value="1" ${settings.economy_enabled !== 0 ? 'checked' : ''}><span class="slider"></span></label>
+                            <div class="text-right">
+                                <h4 class="font-bold text-white text-sm">نظام اقتصاد وعملة السيرفر (Economy & Star System) 💰</h4>
+                                <p class="text-gray-400 text-xs mt-0.5">تفعيل نظام النجوم، البنك، التحويلات، العمل والوظائف، وسوق الرتب والمراهنات</p>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-gray-300 mb-2 text-right">المكافأة اليومية الأساسية (/daily)</label>
+                                <input type="number" name="daily_amount" value="${settings.daily_amount || 500}" min="50" class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none font-mono text-right">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-300 mb-2 text-right">مدة انتظار أمر العمل (/work بالساعات)</label>
+                                <input type="number" name="work_cooldown" value="${settings.work_cooldown || 4}" min="1" max="24" class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none font-mono text-right">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-300 mb-2 text-right">نسبة ضريبة التحويل (/pay %)</label>
+                                <input type="number" step="0.5" name="transfer_tax" value="${settings.transfer_tax || 5}" min="0" max="20" class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none font-mono text-right">
+                            </div>
+                        </div>
+
+                        <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl text-right">
+                            <h4 class="font-bold text-white text-sm mb-3">أوامر الاقتصاد المتوفرة بالأعضاء 💳</h4>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
-                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
-                                    <div class="text-right">
-                                        <p class="font-bold text-white text-xs">/roulette & #roulette</p>
-                                        <p class="text-gray-400 text-[10px]">لعبة الروليت الكلاسيكية مع عجلة متحركة وتحديات حظ</p>
+                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3 rounded-xl flex items-center justify-between">
+                                    <span class="text-xs text-emerald-400 font-bold">نشط ✅</span>
+                                    <div>
+                                        <p class="font-bold text-white text-xs">/bank (deposit & withdraw)</p>
+                                        <p class="text-gray-400 text-[10px]">إيداع وسحب وحماية النجوم في الحساب البنكي</p>
                                     </div>
                                 </div>
-                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
-                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
-                                    <div class="text-right">
-                                        <p class="font-bold text-white text-xs">/fight & #fight</p>
-                                        <p class="text-gray-400 text-[10px]">قتال ومبارزة PvP تفاعلية بنقاط صحة HP مع الأصدقاء</p>
+                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3 rounded-xl flex items-center justify-between">
+                                    <span class="text-xs text-emerald-400 font-bold">نشط ✅</span>
+                                    <div>
+                                        <p class="font-bold text-white text-xs">/work</p>
+                                        <p class="text-gray-400 text-[10px]">العمل في وظائف عشوائية وكسب المكافآت</p>
                                     </div>
                                 </div>
-                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
-                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
-                                    <div class="text-right">
-                                        <p class="font-bold text-white text-xs">/trivia & /quiz</p>
-                                        <p class="text-gray-400 text-[10px]">مسابقات وأسئلة إسلامية وعامة مع مؤقت زمني</p>
+                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3 rounded-xl flex items-center justify-between">
+                                    <span class="text-xs text-emerald-400 font-bold">نشط ✅</span>
+                                    <div>
+                                        <p class="font-bold text-white text-xs">/gamble & /casino</p>
+                                        <p class="text-gray-400 text-[10px]">المراهنة ومضاعفة النجوم في ألعاب الكازينو</p>
                                     </div>
                                 </div>
-                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
-                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
-                                    <div class="text-right">
-                                        <p class="font-bold text-white text-xs">/coinflip & /dice</p>
-                                        <p class="text-gray-400 text-[10px]">رمي النرد وملك أو كتابة مع مكافآت عملات</p>
+                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3 rounded-xl flex items-center justify-between">
+                                    <span class="text-xs text-emerald-400 font-bold">نشط ✅</span>
+                                    <div>
+                                        <p class="font-bold text-white text-xs">/leaderboard</p>
+                                        <p class="text-gray-400 text-[10px]">قائمة أثرياء ومتصدري النجوم والخبرة XP</p>
                                     </div>
                                 </div>
                             </div>
