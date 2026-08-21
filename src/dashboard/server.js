@@ -1874,6 +1874,187 @@ module.exports = function (app, client) {
             if (!req.session?.user) return res.redirect('/auth/discord');
             const { guildId, section } = req.params;
             const guilds = req.session.guilds || [];
+
+            // ─── Social Notifier: صفحة مخصصة كاملة ───
+            if (section === 'social' || section === 'notifier') {
+                const botGuild = client.guilds.cache.get(guildId);
+                if (!botGuild) return res.redirect('/dashboard');
+                const feeds = database.getGuildSocialFeeds ? (database.getGuildSocialFeeds(guildId) || []) : [];
+                const textChannels = botGuild.channels.cache
+                    .filter(c => c.isTextBased && c.isTextBased() && !c.isThread())
+                    .sort((a, b) => a.rawPosition - b.rawPosition)
+                    .map(c => ({ id: c.id, name: c.name }));
+                const guildRolesList = botGuild.roles.cache
+                    .filter(r => r.name !== '@everyone')
+                    .sort((a, b) => b.position - a.position)
+                    .map(r => ({ id: r.id, name: r.name }));
+                const platformIcon = { youtube: '📺', twitch: '🔴', tiktok: '🎵' };
+                const feedsHTML = feeds.length === 0
+                    ? `<div class="text-center py-16 text-gray-500"><div class="text-5xl mb-4">📭</div><p class="text-sm">لا توجد حسابات مضافة بعد</p></div>`
+                    : feeds.map(f => `
+                        <div class="bg-[#0f1018] border border-purple-900/30 rounded-2xl p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                            <div class="flex items-center gap-3">
+                                <span class="text-3xl">${platformIcon[f.platform] || '🔔'}</span>
+                                <div>
+                                    <div class="font-bold text-white">@${f.account_id}</div>
+                                    <div class="text-xs text-gray-400 capitalize mt-0.5">${f.platform} • #${(textChannels.find(c => c.id === f.channel_id) || {}).name || f.channel_id}</div>
+                                    ${f.custom_message ? `<div class="text-xs text-purple-300 mt-0.5">"${f.custom_message}"</div>` : ''}
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <button onclick="toggleFeed(${f.id}, ${f.enabled ? 0 : 1})" class="px-3 py-1.5 rounded-lg text-xs font-bold ${f.enabled ? 'bg-green-500/20 text-green-400 border border-green-500/30' : 'bg-gray-700/50 text-gray-400 border border-gray-600/30'}">${f.enabled ? '✅ مفعل' : '⏸ موقوف'}</button>
+                                <button onclick="testFeed(${f.id})" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-blue-500/20 text-blue-400 border border-blue-500/30">🧪 اختبار</button>
+                                <button onclick="deleteFeed(${f.id})" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-red-500/20 text-red-400 border border-red-500/30">🗑️ حذف</button>
+                            </div>
+                        </div>`).join('');
+                const channelOptions = textChannels.map(c => `<option value="${c.id}">#${c.name}</option>`).join('');
+                const roleOptions = `<option value="">-- بدون منشن --</option>` + guildRolesList.map(r => `<option value="${r.id}">@${r.name}</option>`).join('');
+                return res.send(`<!DOCTYPE html>
+<html lang="ar" dir="rtl" class="dark">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تنبيهات السوشيال ميديا - ZENO</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+body { background: #0b0c10; color: #fff; font-family: 'Cairo', sans-serif; }
+.card { background: #12131c; border: 1px solid rgba(139,92,246,0.2); border-radius: 1rem; padding: 1.5rem; }
+input, select { background: #0b0c10; border: 1px solid rgba(139,92,246,0.3); border-radius: 0.75rem; padding: 0.6rem 1rem; color: #fff; width: 100%; font-family: 'Cairo', sans-serif; font-size: 0.85rem; outline: none; }
+input:focus, select:focus { border-color: #7c3aed; }
+</style>
+</head>
+<body class="min-h-screen bg-[#0b0c10]">
+<div class="max-w-4xl mx-auto px-4 py-10">
+    <a href="/dashboard/${guildId}" class="inline-flex items-center gap-2 text-purple-400 hover:text-purple-300 text-sm mb-8 transition">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+        العودة للداشبورد
+    </a>
+    <div class="flex items-center gap-3 mb-2">
+        <span class="text-4xl">📡</span>
+        <div>
+            <h1 class="text-3xl font-black text-white">تنبيهات السوشيال ميديا</h1>
+            <p class="text-gray-400 text-sm">إشعارات تلقائية عند نزول محتوى جديد على YouTube / Twitch / TikTok</p>
+        </div>
+    </div>
+    <div class="grid grid-cols-3 gap-3 my-8">
+        <div class="card text-center"><div class="text-2xl mb-1">📺</div><div class="text-xs text-gray-400">YouTube</div><div class="text-xs text-green-400 mt-1">فيديو جديد → إشعار فوري</div></div>
+        <div class="card text-center"><div class="text-2xl mb-1">🔴</div><div class="text-xs text-gray-400">Twitch</div><div class="text-xs text-green-400 mt-1">بث مباشر → إشعار فوري</div></div>
+        <div class="card text-center"><div class="text-2xl mb-1">🎵</div><div class="text-xs text-gray-400">TikTok</div><div class="text-xs text-green-400 mt-1">فيديو جديد → إشعار فوري</div></div>
+    </div>
+
+    <!-- Add Form -->
+    <div class="card mb-8">
+        <h2 class="text-lg font-bold mb-5 flex items-center gap-2">➕ إضافة حساب جديد</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <label class="text-xs text-gray-400 mb-1.5 block font-bold">المنصة</label>
+                <select id="platform">
+                    <option value="youtube">📺 YouTube</option>
+                    <option value="twitch">🔴 Twitch</option>
+                    <option value="tiktok">🎵 TikTok</option>
+                </select>
+            </div>
+            <div>
+                <label class="text-xs text-gray-400 mb-1.5 block font-bold">اسم الحساب أو Channel ID</label>
+                <input id="account" type="text" placeholder="@MrBeast أو UCX6OQ3DkcsbYNE6H8uQQuVA">
+            </div>
+            <div>
+                <label class="text-xs text-gray-400 mb-1.5 block font-bold">روم استقبال الإشعارات</label>
+                <select id="channelId">${channelOptions}</select>
+            </div>
+            <div>
+                <label class="text-xs text-gray-400 mb-1.5 block font-bold">منشن رول (اختياري)</label>
+                <select id="roleId">${roleOptions}</select>
+            </div>
+            <div class="md:col-span-2">
+                <label class="text-xs text-gray-400 mb-1.5 block font-bold">رسالة مخصصة (اختياري)</label>
+                <input id="message" type="text" placeholder="مثال: 🔥 محتوى جديد نزل! تعال شوف!">
+            </div>
+        </div>
+        <div id="addStatus" class="mt-3 text-sm hidden"></div>
+        <button onclick="addFeed()" class="mt-5 px-8 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold rounded-xl transition text-sm shadow-lg shadow-purple-900/30">
+            ➕ إضافة الحساب
+        </button>
+    </div>
+
+    <!-- Feeds List -->
+    <div class="mb-4 flex items-center justify-between">
+        <h2 class="text-lg font-bold">📋 الحسابات المضافة (${feeds.length})</h2>
+    </div>
+    <div id="feedsList" class="space-y-3">${feedsHTML}</div>
+</div>
+
+<script>
+const GID = '${guildId}';
+
+async function addFeed() {
+    const platform = document.getElementById('platform').value;
+    const account = document.getElementById('account').value.trim();
+    const channelId = document.getElementById('channelId').value;
+    const roleId = document.getElementById('roleId').value;
+    const message = document.getElementById('message').value.trim();
+    const statusEl = document.getElementById('addStatus');
+    if (!account) { statusEl.textContent = '❌ أدخل اسم الحساب!'; statusEl.className = 'mt-3 text-sm text-red-400'; statusEl.classList.remove('hidden'); return; }
+    try {
+        const r = await fetch('/api/guild/' + GID + '/social/add', {
+            method: 'POST', headers: {'Content-Type':'application/json'},
+            body: JSON.stringify({ platform, account, channelId, roleId, message })
+        });
+        const d = await r.json();
+        if (d.success) {
+            statusEl.textContent = '✅ تمت الإضافة بنجاح!';
+            statusEl.className = 'mt-3 text-sm text-green-400';
+            statusEl.classList.remove('hidden');
+            setTimeout(() => location.reload(), 1200);
+        } else {
+            statusEl.textContent = '❌ خطأ: ' + d.error;
+            statusEl.className = 'mt-3 text-sm text-red-400';
+            statusEl.classList.remove('hidden');
+        }
+    } catch(e) {
+        statusEl.textContent = '❌ خطأ في الاتصال: ' + e.message;
+        statusEl.className = 'mt-3 text-sm text-red-400';
+        statusEl.classList.remove('hidden');
+    }
+}
+
+async function deleteFeed(id) {
+    if (!confirm('هل أنت متأكد من حذف هذا الحساب؟')) return;
+    const r = await fetch('/api/guild/' + GID + '/social/delete', {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ id })
+    });
+    const d = await r.json();
+    if (d.success) location.reload();
+    else alert('❌ خطأ: ' + d.error);
+}
+
+async function toggleFeed(id, enable) {
+    const r = await fetch('/api/guild/' + GID + '/social/toggle', {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ id, enable })
+    });
+    const d = await r.json();
+    if (d.success) location.reload();
+    else alert('❌ خطأ: ' + d.error);
+}
+
+async function testFeed(id) {
+    if (!confirm('سيتم إرسال رسالة اختبار للروم المحدد. متأكد؟')) return;
+    const r = await fetch('/api/guild/' + GID + '/social/test', {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ id })
+    });
+    const d = await r.json();
+    alert(d.success ? '✅ تم إرسال رسالة الاختبار بنجاح!' : '❌ خطأ: ' + d.error);
+}
+</script>
+</body>
+</html>`);
+            }
+            // ─── End Social Section ───
+
+
             let guild = guilds.find(g => g.id === guildId);
             
             // إذا لم يتم العثور على السيرفر في الجلسة، نبحث عنه في كاش البوت مباشرة
