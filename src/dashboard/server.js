@@ -217,12 +217,12 @@ module.exports = function (app, client) {
             // جلب بيانات المستخدم من SQLite
             let userCoins = 0, userLevel = 1, userStars = 0;
             try {
-                const userRow = rawDb.prepare('SELECT SUM(coins) as coins, MAX(level) as level, SUM(xp) as xp FROM users WHERE user_id = ?').get(user.id);
+                const userRow = rawDb.prepare('SELECT SUM(coins) as coins, MAX(level) as level, SUM(reputation) as rep FROM users WHERE user_id = ?').get(user.id);
                 userCoins = userRow?.coins || 0;
                 userLevel = userRow?.level || 1;
-                userStars = rawDb.prepare('SELECT COUNT(*) as count FROM stars WHERE receiver_id = ?').get(user.id)?.count || 0;
+                userStars = userRow?.rep || 0;
             } catch (err) {
-                console.error("Error reading user stats:", err);
+                // ignore DB errors, use defaults
             }
 
             // قائمة السيرفرات على الشريط الرأسي الأيمن (Server Rail)
