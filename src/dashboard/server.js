@@ -3284,7 +3284,6 @@ module.exports = function (app, client) {
                                 <!-- روليت -->
                                 <div class="bg-[#0b0c10] border border-purple-950/40 p-4 rounded-xl flex items-center justify-between">
                                     <div class="flex items-center gap-3">
-                                        <button type="button" class="text-gray-500 hover:text-purple-400 p-1 rounded-lg">⚙️</button>
                                         <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
                                     </div>
                                     <div class="flex items-center gap-3 text-right">
@@ -3299,7 +3298,6 @@ module.exports = function (app, client) {
                                 <!-- الكراسي -->
                                 <div class="bg-[#0b0c10] border border-purple-950/40 p-4 rounded-xl flex items-center justify-between">
                                     <div class="flex items-center gap-3">
-                                        <button type="button" class="text-gray-500 hover:text-purple-400 p-1 rounded-lg">⚙️</button>
                                         <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
                                     </div>
                                     <div class="flex items-center gap-3 text-right">
@@ -3314,7 +3312,6 @@ module.exports = function (app, client) {
                                 <!-- مافيا -->
                                 <div class="bg-[#0b0c10] border border-purple-950/40 p-4 rounded-xl flex items-center justify-between">
                                     <div class="flex items-center gap-3">
-                                        <button type="button" class="text-gray-500 hover:text-purple-400 p-1 rounded-lg">⚙️</button>
                                         <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
                                     </div>
                                     <div class="flex items-center gap-3 text-right">
@@ -3329,7 +3326,6 @@ module.exports = function (app, client) {
                                 <!-- الغميضة -->
                                 <div class="bg-[#0b0c10] border border-purple-950/40 p-4 rounded-xl flex items-center justify-between">
                                     <div class="flex items-center gap-3">
-                                        <button type="button" class="text-gray-500 hover:text-purple-400 p-1 rounded-lg">⚙️</button>
                                         <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
                                     </div>
                                     <div class="flex items-center gap-3 text-right">
@@ -3344,7 +3340,6 @@ module.exports = function (app, client) {
                                 <!-- رمي العملة -->
                                 <div class="bg-[#0b0c10] border border-purple-950/40 p-4 rounded-xl flex items-center justify-between">
                                     <div class="flex items-center gap-3">
-                                        <button type="button" class="text-gray-500 hover:text-purple-400 p-1 rounded-lg">⚙️</button>
                                         <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
                                     </div>
                                     <div class="flex items-center gap-3 text-right">
@@ -3359,7 +3354,6 @@ module.exports = function (app, client) {
                                 <!-- قتال ومبارزات -->
                                 <div class="bg-[#0b0c10] border border-purple-950/40 p-4 rounded-xl flex items-center justify-between">
                                     <div class="flex items-center gap-3">
-                                        <button type="button" class="text-gray-500 hover:text-purple-400 p-1 rounded-lg">⚙️</button>
                                         <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
                                     </div>
                                     <div class="flex items-center gap-3 text-right">
@@ -3374,7 +3368,6 @@ module.exports = function (app, client) {
                                 <!-- مسابقات وسين جيم -->
                                 <div class="bg-[#0b0c10] border border-purple-950/40 p-4 rounded-xl flex items-center justify-between">
                                     <div class="flex items-center gap-3">
-                                        <button type="button" class="text-gray-500 hover:text-purple-400 p-1 rounded-lg">⚙️</button>
                                         <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
                                     </div>
                                     <div class="flex items-center gap-3 text-right">
@@ -3389,7 +3382,6 @@ module.exports = function (app, client) {
                                 <!-- بلاك جاك -->
                                 <div class="bg-[#0b0c10] border border-purple-950/40 p-4 rounded-xl flex items-center justify-between">
                                     <div class="flex items-center gap-3">
-                                        <button type="button" class="text-gray-500 hover:text-purple-400 p-1 rounded-lg">⚙️</button>
                                         <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
                                     </div>
                                     <div class="flex items-center gap-3 text-right">
@@ -3404,7 +3396,6 @@ module.exports = function (app, client) {
                                 <!-- ميمز -->
                                 <div class="bg-[#0b0c10] border border-purple-950/40 p-4 rounded-xl flex items-center justify-between">
                                     <div class="flex items-center gap-3">
-                                        <button type="button" class="text-gray-500 hover:text-purple-400 p-1 rounded-lg">⚙️</button>
                                         <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
                                     </div>
                                     <div class="flex items-center gap-3 text-right">
@@ -3419,7 +3410,6 @@ module.exports = function (app, client) {
                                 <!-- الكرة السحرية -->
                                 <div class="bg-[#0b0c10] border border-purple-950/40 p-4 rounded-xl flex items-center justify-between">
                                     <div class="flex items-center gap-3">
-                                        <button type="button" class="text-gray-500 hover:text-purple-400 p-1 rounded-lg">⚙️</button>
                                         <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
                                     </div>
                                     <div class="flex items-center gap-3 text-right">
@@ -3434,7 +3424,6 @@ module.exports = function (app, client) {
                                 <!-- حجر ورقة مقص -->
                                 <div class="bg-[#0b0c10] border border-purple-950/40 p-4 rounded-xl flex items-center justify-between">
                                     <div class="flex items-center gap-3">
-                                        <button type="button" class="text-gray-500 hover:text-purple-400 p-1 rounded-lg">⚙️</button>
                                         <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
                                     </div>
                                     <div class="flex items-center gap-3 text-right">
@@ -3449,7 +3438,6 @@ module.exports = function (app, client) {
                                 <!-- رمي النرد -->
                                 <div class="bg-[#0b0c10] border border-purple-950/40 p-4 rounded-xl flex items-center justify-between">
                                     <div class="flex items-center gap-3">
-                                        <button type="button" class="text-gray-500 hover:text-purple-400 p-1 rounded-lg">⚙️</button>
                                         <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
                                     </div>
                                     <div class="flex items-center gap-3 text-right">

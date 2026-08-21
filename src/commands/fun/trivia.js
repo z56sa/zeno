@@ -1,38 +1,50 @@
 const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType } = require('discord.js');
 const db = require('../../database');
 
+// أسئلة بدون خيارات - اللاعب يكتب الإجابة
 const TRIVIA_QUESTIONS = [
-  { q: 'ما عاصمة المملكة العربية السعودية؟', options: ['الرياض', 'جدة', 'مكة', 'الدمام'], answer: 0 },
-  { q: 'كم عدد سور القرآن الكريم؟', options: ['110', '114', '120', '100'], answer: 1 },
-  { q: 'من هو أول رئيس وزراء في تاريخ بريطانيا؟', options: ['ونستون تشرشل', 'روبرت والبول', 'توني بلير', 'مارغريت ثاتشر'], answer: 1 },
-  { q: 'ما هو أكبر محيط في العالم؟', options: ['المحيط الأطلسي', 'المحيط الهندي', 'المحيط الهادئ', 'المحيط المتجمد'], answer: 2 },
-  { q: 'ما هو الكوكب الأقرب إلى الشمس؟', options: ['الزهرة', 'عطارد', 'المريخ', 'الأرض'], answer: 1 },
-  { q: 'كم تساوي قيمة π (باي) تقريباً؟', options: ['3.14', '2.71', '1.41', '3.17'], answer: 0 },
-  { q: 'من اخترع الهاتف؟', options: ['توماس إديسون', 'ألكساندر غراهام بيل', 'نيكولا تسلا', 'ماركوني'], answer: 1 },
-  { q: 'ما هي اللغة الأكثر انتشاراً في العالم؟', options: ['الإنجليزية', 'الصينية (الماندرين)', 'الإسبانية', 'العربية'], answer: 1 },
-  { q: 'كم يوم في السنة الكبيسة؟', options: ['365', '366', '364', '367'], answer: 1 },
-  { q: 'أي دولة اخترعت لعبة الشطرنج؟', options: ['الصين', 'الفارسية (إيران)', 'الهند', 'اليونان'], answer: 2 },
-  { q: 'ما هو أطول نهر في العالم؟', options: ['الأمازون', 'النيل', 'المسيسيبي', 'اليانغتسي'], answer: 1 },
-  { q: 'ما هو أصغر دولة في العالم؟', options: ['موناكو', 'سان مارينو', 'الفاتيكان', 'ليختنشتاين'], answer: 2 },
-  { q: 'كم عدد لاعبي كرة القدم في كل فريق؟', options: ['10', '11', '12', '9'], answer: 1 },
-  { q: 'ما هو عنصر الهواء الأكثر وفرة؟', options: ['الأكسجين', 'النيتروجين', 'ثاني أكسيد الكربون', 'الهيدروجين'], answer: 1 },
-  { q: 'في أي عام وُلد النبي محمد ﷺ؟', options: ['570 م', '571 م', '569 م', '572 م'], answer: 0 },
-  { q: 'ما عاصمة اليابان؟', options: ['أوساكا', 'كيوتو', 'طوكيو', 'هيروشيما'], answer: 2 },
-  { q: 'كم عدد القارات؟', options: ['5', '6', '7', '8'], answer: 2 },
-  { q: 'ما هو الرمز الكيميائي للذهب؟', options: ['Go', 'Gd', 'Au', 'Ag'], answer: 2 },
-  { q: 'من رسم لوحة الموناليزا؟', options: ['مايكل أنجلو', 'ليوناردو دافينشي', 'رافائيل', 'فان غوخ'], answer: 1 },
-  { q: 'ما هو أسرع حيوان بري؟', options: ['الأسد', 'الفهد', 'النمر', 'الحصان'], answer: 1 },
+  { q: 'ما عاصمة المملكة العربية السعودية؟', answers: ['الرياض', 'riyadh'] },
+  { q: 'كم عدد سور القرآن الكريم؟', answers: ['114'] },
+  { q: 'ما هو أكبر محيط في العالم؟', answers: ['الهادئ', 'المحيط الهادئ', 'pacific'] },
+  { q: 'ما هو الكوكب الأقرب إلى الشمس؟', answers: ['عطارد', 'mercury'] },
+  { q: 'من اخترع الهاتف؟', answers: ['ألكساندر غراهام بيل', 'غراهام بيل', 'alexander graham bell', 'graham bell'] },
+  { q: 'كم يوم في السنة الكبيسة؟', answers: ['366'] },
+  { q: 'ما هو أطول نهر في العالم؟', answers: ['النيل', 'nile'] },
+  { q: 'ما هو أصغر دولة في العالم؟', answers: ['الفاتيكان', 'vatican'] },
+  { q: 'كم عدد لاعبي كرة القدم في كل فريق أثناء اللعب؟', answers: ['11', 'أحد عشر'] },
+  { q: 'ما هو عنصر الهواء الأكثر وفرة؟', answers: ['النيتروجين', 'nitrogen'] },
+  { q: 'في أي عام وُلد النبي محمد ﷺ؟', answers: ['570'] },
+  { q: 'ما عاصمة اليابان؟', answers: ['طوكيو', 'tokyo'] },
+  { q: 'كم عدد القارات في العالم؟', answers: ['7', 'سبع', 'سبعة'] },
+  { q: 'ما هو الرمز الكيميائي للذهب؟', answers: ['au'] },
+  { q: 'من رسم لوحة الموناليزا؟', answers: ['ليوناردو دافينشي', 'دافينشي', 'da vinci', 'leonardo da vinci'] },
+  { q: 'ما هو أسرع حيوان بري في العالم؟', answers: ['الفهد', 'cheetah'] },
+  { q: 'ما اسم أول إنسان مشى على سطح القمر؟', answers: ['نيل أرمسترونج', 'armstrong', 'neil armstrong'] },
+  { q: 'ما هي عاصمة فرنسا؟', answers: ['باريس', 'paris'] },
+  { q: 'كم عدد أيام شهر فبراير في السنة العادية؟', answers: ['28', 'ثمانية وعشرون'] },
+  { q: 'ما هي أكبر قارة في العالم؟', answers: ['آسيا', 'asia'] },
+  { q: 'من هو مؤسس شركة Microsoft؟', answers: ['بيل غيتس', 'bill gates', 'غيتس'] },
+  { q: 'ما هي عاصمة مصر؟', answers: ['القاهرة', 'cairo'] },
+  { q: 'كم عدد أضلاع المثلث؟', answers: ['3', 'ثلاثة'] },
+  { q: 'ما هي لغة البرمجة التي تستخدمها هذا البوت؟', answers: ['javascript', 'جافاسكريبت', 'js'] },
+  { q: 'ما اسم أطول جدار في العالم؟', answers: ['سور الصين العظيم', 'great wall of china', 'سور الصين'] },
 ];
 
 const activeGames = new Map();
 
+// تحقق من الإجابة بشكل مرن (بدون تحسس حروف، تجاهل مسافات)
+function checkAnswer(userAnswer, correctAnswers) {
+  const normalized = userAnswer.trim().toLowerCase();
+  return correctAnswers.some(ans => ans.toLowerCase() === normalized || normalized.includes(ans.toLowerCase()));
+}
+
 module.exports = {
   name: 'trivia',
-  description: 'مسابقة معلومات عامة - تنافس مع الآخرين! 🧠',
+  description: 'مسابقة معلومات عامة - اكتب إجابتك! 🧠',
   aliases: ['سؤال', 'مسابقة'],
   data: new SlashCommandBuilder()
     .setName('trivia')
-    .setDescription('مسابقة معلومات عامة - انضم وتنافس على Star Coins! 🧠'),
+    .setDescription('مسابقة معلومات عامة - اكتب إجابتك وتنافس! 🧠'),
 
   async execute(interaction) {
     if (activeGames.has(interaction.channelId)) {
@@ -49,7 +61,8 @@ module.exports = {
         `**${interaction.user.username}** فتح جلسة مسابقة!\n\n` +
         `📋 **القواعد:**\n` +
         `• سيُطرح سؤال على الجميع في نفس الوقت\n` +
-        `• أول من يجيب صحيحاً يربح **Star Coins ⭐**\n` +
+        `• **اكتب إجابتك مباشرة في الشات** (بدون ضغط أزرار)\n` +
+        `• أول من يكتب الإجابة الصحيحة يربح **Star Coins ⭐**\n` +
         `• لديكم **30 ثانية** للإجابة\n\n` +
         `👥 **المشتركون (${players.size}):** ${[...players].map(id => `<@${id}>`).join(', ')}`
       )
@@ -97,81 +110,171 @@ module.exports = {
         });
       }
 
-      // بدء السؤال
+      // اختيار سؤال عشوائي
       const q = TRIVIA_QUESTIONS[Math.floor(Math.random() * TRIVIA_QUESTIONS.length)];
-      const reward = Math.floor(Math.random() * 101) + 50;
-      const answered = new Set(); // من أجاب بالفعل
+      const reward = Math.floor(Math.random() * 101) + 50; // 50-150
+      activeGames.set(interaction.channelId, true);
 
       const questionEmbed = new EmbedBuilder()
         .setColor('#9b59b6')
         .setTitle('🧠 سؤال المسابقة')
         .setDescription(`**${q.q}**`)
-        .setFooter({ text: `⏱️ لديكم 30 ثانية | 🎁 المكافأة: +${reward} ⭐ لأول مجيب صحيح | 👥 المشتركون: ${players.size}` });
+        .setFooter({ text: `✍️ اكتب إجابتك في الشات | ⏱️ لديكم 30 ثانية | 🎁 المكافأة: +${reward} ⭐ | 👥 المشتركون: ${players.size}` })
+        .setTimestamp();
 
-      const labels = ['أ', 'ب', 'ج', 'د'];
-      const buttons = q.options.map((opt, i) =>
-        new ButtonBuilder()
-          .setCustomId(`trv_ans_${i}`)
-          .setLabel(`${labels[i]}) ${opt}`)
-          .setStyle(ButtonStyle.Primary)
-      );
+      await msg.edit({ embeds: [questionEmbed], components: [] });
 
-      const rows = [];
-      for (let i = 0; i < buttons.length; i += 2) {
-        rows.push(new ActionRowBuilder().addComponents(buttons.slice(i, i + 2)));
-      }
-
-      await msg.edit({ embeds: [questionEmbed], components: rows });
-
+      // مستمع رسائل الشات
       let winner = null;
-      activeGames.set(interaction.channelId, true);
+      const answered = new Set();
 
-      const answerCollector = msg.createMessageComponentCollector({
-        filter: i => players.has(i.user.id) && i.customId.startsWith('trv_ans_'),
+      const messageCollector = interaction.channel.createMessageCollector({
+        filter: m => players.has(m.author.id) && !m.author.bot,
         time: 30000
       });
 
-      answerCollector.on('collect', async (i) => {
-        if (answered.has(i.user.id)) {
-          return i.reply({ content: '⚠️ لقد أجبت بالفعل!', ephemeral: true });
-        }
+      messageCollector.on('collect', async (m) => {
+        if (answered.has(m.author.id)) return; // منع التكرار من نفس الشخص
 
-        answered.add(i.user.id);
-        const chosen = parseInt(i.customId.split('_')[2]);
-        const correct = chosen === q.answer;
+        const correct = checkAnswer(m.content, q.answers);
 
         if (correct && !winner) {
-          winner = i.user;
-          db.addCoins(i.user.id, interaction.guild.id, reward);
-          await i.reply({ content: `🎉 **إجابة صحيحة!** ربحت +\`${reward}\` ⭐`, ephemeral: true });
-          answerCollector.stop('winner');
+          winner = m.author;
+          answered.add(m.author.id);
+          db.addCoins(m.author.id, interaction.guild.id, reward);
+          await m.reply(`🎉 **إجابة صحيحة يا ${m.author.username}!** ربحت \`+${reward}\` ⭐`);
+          messageCollector.stop('winner');
         } else if (correct && winner) {
-          await i.reply({ content: `✅ إجابة صحيحة! لكن **${winner.username}** كان أسرع منك.`, ephemeral: true });
-        } else {
-          await i.reply({ content: `❌ إجابة خاطئة! حاول مرة أخرى في السؤال القادم.`, ephemeral: true });
+          answered.add(m.author.id);
+          await m.reply(`✅ إجابة صحيحة! لكن **${winner.username}** كان أسرع منك.`);
         }
+        // لا نرد على الخطأ لتجنب التشويش في الشات
       });
 
-      answerCollector.on('end', async (collected, reason) => {
+      messageCollector.on('end', async (collected, reason) => {
         activeGames.delete(interaction.channelId);
+
         const resultEmbed = new EmbedBuilder()
           .setColor(winner ? '#2ecc71' : '#95a5a6')
-          .setTitle(winner ? `🏆 ${winner.username} فاز بالمسابقة!` : '⏰ انتهى الوقت!')
+          .setTitle(winner ? `🏆 ${winner.username} فاز بالمسابقة!` : '⏰ انتهى الوقت بدون فائز!')
           .setDescription(
-            `**السؤال:** ${q.q}\n\n` +
-            `**✅ الإجابة الصحيحة:** ${q.options[q.answer]}\n\n` +
+            `**❓ السؤال:** ${q.q}\n\n` +
+            `**✅ الإجابة الصحيحة:** \`${q.answers[0]}\`\n\n` +
             (winner ? `🎁 **${winner.username}** ربح \`+${reward}\` ⭐!` : `😔 لم يجب أحد بشكل صحيح!`) +
             `\n\n**👥 المشتركون:** ${[...players].map(id => `<@${id}>`).join(', ')}`
           )
-          .addFields({ name: '📊 الإجابات', value: `${answered.size}/${players.size} لاعب أجاب` })
           .setTimestamp();
 
-        await msg.edit({ embeds: [resultEmbed], components: [] });
+        await msg.edit({ embeds: [resultEmbed] });
       });
     });
   },
 
-  async executePrefix(message) {
-    return message.reply('❌ استخدم `/trivia` لبدء مسابقة معلومات عامة.');
+  async executePrefix(message, args) {
+    if (activeGames.has(message.channelId)) {
+      return message.reply('⚠️ يوجد مسابقة جارية في هذه القناة!');
+    }
+
+    const players = new Set([message.author.id]);
+    activeGames.set(message.channelId, true);
+
+    const buildLobbyEmbed = () => new EmbedBuilder()
+      .setColor('#9b59b6')
+      .setTitle('🧠 مسابقة المعلومات العامة!')
+      .setDescription(
+        `**${message.author.username}** فتح جلسة مسابقة!\n\n` +
+        `✍️ **اكتب إجابتك مباشرة في الشات!**\n` +
+        `أول من يكتب الصح يربح **Star Coins ⭐**\n\n` +
+        `👥 **المشتركون (${players.size}):** ${[...players].map(id => `<@${id}>`).join(', ')}`
+      )
+      .setFooter({ text: 'تنتهي الدعوة بعد 60 ثانية' })
+      .setTimestamp();
+
+    const lobbyRow = new ActionRowBuilder().addComponents(
+      new ButtonBuilder().setCustomId('trv_join_p').setLabel('🧠 انضم').setStyle(ButtonStyle.Primary),
+      new ButtonBuilder().setCustomId('trv_start_p').setLabel('▶️ ابدأ').setStyle(ButtonStyle.Success),
+      new ButtonBuilder().setCustomId('trv_cancel_p').setLabel('❌ إلغاء').setStyle(ButtonStyle.Danger)
+    );
+
+    const msg = await message.reply({ embeds: [buildLobbyEmbed()], components: [lobbyRow] });
+
+    const lobbyCollector = msg.createMessageComponentCollector({ componentType: ComponentType.Button, time: 60000 });
+
+    lobbyCollector.on('collect', async (btn) => {
+      if (btn.customId === 'trv_join_p') {
+        if (players.has(btn.user.id)) return btn.reply({ content: '⚠️ أنت بالفعل في المسابقة!', ephemeral: true });
+        players.add(btn.user.id);
+        await msg.edit({ embeds: [buildLobbyEmbed()] });
+        await btn.reply({ content: `✅ انضممت! عدد المشتركين: **${players.size}**`, ephemeral: true });
+      }
+      if (btn.customId === 'trv_start_p') {
+        if (btn.user.id !== message.author.id) return btn.reply({ content: '❌ فقط صاحب الغرفة!', ephemeral: true });
+        await btn.deferUpdate();
+        lobbyCollector.stop('start');
+      }
+      if (btn.customId === 'trv_cancel_p') {
+        if (btn.user.id !== message.author.id) return btn.reply({ content: '❌ فقط صاحب الغرفة!', ephemeral: true });
+        await btn.deferUpdate();
+        lobbyCollector.stop('cancel');
+      }
+    });
+
+    lobbyCollector.on('end', async (collected, reason) => {
+      activeGames.delete(message.channelId);
+
+      if (reason === 'cancel') {
+        return msg.edit({ embeds: [new EmbedBuilder().setColor('#ED4245').setTitle('❌ مسابقة - ألغيت').setDescription('تم إلغاء المسابقة.')], components: [] });
+      }
+
+      const q = TRIVIA_QUESTIONS[Math.floor(Math.random() * TRIVIA_QUESTIONS.length)];
+      const reward = Math.floor(Math.random() * 101) + 50;
+      activeGames.set(message.channelId, true);
+
+      const questionEmbed = new EmbedBuilder()
+        .setColor('#9b59b6')
+        .setTitle('🧠 سؤال المسابقة')
+        .setDescription(`**${q.q}**`)
+        .setFooter({ text: `✍️ اكتب إجابتك | ⏱️ 30 ثانية | 🎁 +${reward} ⭐` })
+        .setTimestamp();
+
+      await msg.edit({ embeds: [questionEmbed], components: [] });
+
+      let winner = null;
+      const answered = new Set();
+
+      const messageCollector = message.channel.createMessageCollector({
+        filter: m => players.has(m.author.id) && !m.author.bot,
+        time: 30000
+      });
+
+      messageCollector.on('collect', async (m) => {
+        if (answered.has(m.author.id)) return;
+        const correct = checkAnswer(m.content, q.answers);
+        if (correct && !winner) {
+          winner = m.author;
+          answered.add(m.author.id);
+          db.addCoins(m.author.id, message.guild.id, reward);
+          await m.reply(`🎉 **إجابة صحيحة يا ${m.author.username}!** ربحت \`+${reward}\` ⭐`);
+          messageCollector.stop('winner');
+        } else if (correct && winner) {
+          answered.add(m.author.id);
+          await m.reply(`✅ إجابة صحيحة! لكن **${winner.username}** كان أسرع منك.`);
+        }
+      });
+
+      messageCollector.on('end', async () => {
+        activeGames.delete(message.channelId);
+        const resultEmbed = new EmbedBuilder()
+          .setColor(winner ? '#2ecc71' : '#95a5a6')
+          .setTitle(winner ? `🏆 ${winner.username} فاز!` : '⏰ انتهى الوقت!')
+          .setDescription(
+            `**❓ السؤال:** ${q.q}\n\n` +
+            `**✅ الإجابة الصحيحة:** \`${q.answers[0]}\`\n\n` +
+            (winner ? `🎁 **${winner.username}** ربح \`+${reward}\` ⭐!` : `😔 لم يجب أحد!`)
+          )
+          .setTimestamp();
+        await msg.edit({ embeds: [resultEmbed] });
+      });
+    });
   }
 };
