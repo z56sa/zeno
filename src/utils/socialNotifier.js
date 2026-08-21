@@ -128,7 +128,7 @@ async function checkTwitch(username) {
 }
 
 /**
- * فحص فيديوهات TikTok وجلب أحدث فيديو
+ * فحص فيديوهات TikTok وجلب أحدث فيديو مباشر
  */
 async function checkTikTok(username) {
   try {
@@ -136,23 +136,48 @@ async function checkTikTok(username) {
       .replace(/^https?:\/\/(www\.)?tiktok\.com\/@?/, '')
       .replace(/^@/, '');
 
+    // 1. محاولة جلب الفيديو عبر Feed/Embed endpoint المباشر
+    try {
+      const oembed = await axios.get(`https://www.tiktok.com/oembed?url=https://www.tiktok.com/@${cleanUser}`, {
+        timeout: 6000,
+        headers: { 'User-Agent': 'Mozilla/5.0' }
+      });
+      if (oembed.data && oembed.data.title) {
+        // oembed يعطينا معلومات الحساب الأساسية
+      }
+    } catch(e) {}
+
+    // 2. جلب صفحة الحساب لاستخراج أحدث video ID
     const res = await axios.get(`https://www.tiktok.com/@${cleanUser}`, {
       timeout: 10000,
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-        'Accept-Language': 'en-US,en;q=0.5'
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.9,ar;q=0.8',
+        'Cache-Control': 'no-cache'
       }
     });
 
     const html = res.data;
-    const idMatch = html.match(/"id":"(\d{15,22})"/) || html.match(/\/video\/(\d{15,22})/);
-    const titleMatch = html.match(/<meta property="og:description" content="(.*?)"/i)
-                    || html.match(/<meta name="description" content="(.*?)"/i);
+    
+    // استخراج معرّف أحدث فيديو من نصوص الـ HTML والـ JSON المتعددة
+    const videoMatches = html.match(/"id":"(\d{18,20})"/g) || html.match(/\/video\/(\d{18,20})/g) || [];
+    let videoId = null;
+    
+    for (const m of videoMatches) {
+      const cleanNum = m.replace(/[^0-9]/g, '');
+      if (cleanNum && cleanNum.length >= 18) {
+        videoId = cleanNum;
+        break;
+      }
+    }
 
-    if (idMatch) {
-      const videoId = idMatch[1];
-      const videoDesc = titleMatch ? titleMatch[1] : `أحدث فيديو من @${cleanUser} على تيك توك 🎵`;
+    // استخراج الوصف
+    const titleMatch = html.match(/<meta property="og:description" content="([^"]+)"/i)
+                    || html.match(/<meta name="description" content="([^"]+)"/i);
+    const videoDesc = titleMatch ? titleMatch[1] : `أحدث فيديو من @${cleanUser} على تيك توك 🎵`;
+
+    if (videoId) {
       return {
         id: videoId,
         title: videoDesc,
@@ -162,10 +187,10 @@ async function checkTikTok(username) {
       };
     }
 
-    // إذا لم نجد فيديو محدد، نرجع رابط الحساب الأساسي
+    // إذا تعذر استخراج ID الفيديو، نضع رابط الحساب المباشر مع توجيه لتبويب الفيديوهات
     return {
       id: `tt_${cleanUser}`,
-      title: `حساب @${cleanUser} على تيك توك 🎵`,
+      title: videoDesc,
       url: `https://www.tiktok.com/@${cleanUser}`,
       channelName: cleanUser,
       thumbnail: 'https://sf-tb-sg.ibytedtos.com/obj/eden-sg/uomluhz_lm_q/tiktok_icon.png'

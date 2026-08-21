@@ -5415,13 +5415,17 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                 <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
                 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
                 <style>
-                    body { background-color: #0b0c10; color: #e2e8f0; font-family: 'Cairo', sans-serif; }
-                    .toggle { position: relative; display: inline-block; width: 40px; height: 20px; }
+                    body { background-color: #08080d; color: #e2e8f0; font-family: 'Cairo', sans-serif; }
+                    .toggle { position: relative; display: inline-block; width: 44px; height: 24px; }
                     .toggle input { opacity: 0; width: 0; height: 0; }
-                    .slider { position: absolute; cursor: pointer; inset: 0; background: #1f212d; border-radius: 20px; transition: .2s; }
-                    .slider:before { content: ''; position: absolute; width: 14px; height: 14px; left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: .2s; }
-                    input:checked + .slider { background: #9333ea; }
-                    input:checked + .slider:before { transform: translateX(20px); }
+                    .slider { position: absolute; cursor: pointer; inset: 0; background: #1c1d28; border: 1px solid rgba(139,92,246,0.25); border-radius: 24px; transition: .25s ease-in-out; }
+                    .slider:before { content: ''; position: absolute; width: 16px; height: 16px; left: 3px; bottom: 3px; background: #f8fafc; border-radius: 50%; transition: .25s ease-in-out; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
+                    input:checked + .slider { background: linear-gradient(135deg, #9333ea, #6366f1); border-color: #a855f7; }
+                    input:checked + .slider:before { transform: translateX(20px); background: #ffffff; }
+                    select, input[type="text"], textarea { background-color: #0d0e15 !important; border: 1px solid rgba(139,92,246,0.25) !important; border-radius: 12px !important; color: #f1f5f9 !important; transition: all 0.2s ease; }
+                    select:focus, input[type="text"]:focus, textarea:focus { border-color: #a855f7 !important; outline: none; box-shadow: 0 0 0 3px rgba(168,85,247,0.15); }
+                    .card-box { background: #10111a; border: 1px solid rgba(139,92,246,0.2); border-radius: 20px; transition: all 0.2s; }
+                    .card-box:hover { border-color: rgba(139,92,246,0.35); }
                 </style>
             </head>
             <body class="min-h-screen flex flex-col bg-[#0b0c10] text-gray-200">
