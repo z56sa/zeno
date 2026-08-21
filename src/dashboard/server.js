@@ -674,16 +674,40 @@ module.exports = function (app, client) {
                                     </div>
                                 </div>
 
-                                <div id="dailyActionBox">
+                                <div id="dailyActionBox" class="space-y-4">
                                     ${canClaimDaily ? `
-                                        <button id="claimDailyBtn" onclick="claimDaily()" class="w-full py-3.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-black text-xs rounded-xl shadow-lg shadow-purple-900/40 transition transform active:scale-95">
-                                            🎁 استلام المكافأة اليومية الآن (+500 ⭐)
+                                        <button id="claimDailyBtn" onclick="claimDaily()" class="w-full py-4 bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 hover:from-purple-500 hover:to-indigo-500 text-white font-black text-sm rounded-2xl shadow-xl shadow-purple-900/40 transition transform active:scale-95 flex items-center justify-center gap-2">
+                                            <span>🎁</span>
+                                            <span>استلام المكافأة اليومية الآن (+500 ⭐)</span>
                                         </button>
                                     ` : `
-                                        <button id="claimDailyBtnDisabled" disabled class="w-full py-3.5 bg-purple-950/40 border border-purple-900/30 text-gray-400 font-bold text-xs rounded-xl cursor-not-allowed flex items-center justify-center gap-2">
-                                            <span>⏳</span>
-                                            <span id="dailyCountdownText">تم الاستلام اليوم! عد بعد: ${hoursLeft} ساعة و ${minsLeft} دقيقة</span>
-                                        </button>
+                                        <div class="bg-[#0b0c10] border border-purple-950/60 rounded-2xl p-5 space-y-4">
+                                            <div class="flex items-center justify-between text-xs font-bold text-gray-300">
+                                                <span class="flex items-center gap-1 text-purple-400"><span>⏰</span><span>المكافأة القادمة</span></span>
+                                                <span class="text-gray-400">الوقت المتبقي بالضبط</span>
+                                            </div>
+
+                                            <!-- Digital Countdown Cards -->
+                                            <div class="grid grid-cols-3 gap-3">
+                                                <div class="bg-[#12131c] border border-purple-900/40 rounded-xl p-3 text-center shadow-inner">
+                                                    <span id="cdHours" class="text-2xl font-black text-white font-mono block">${String(hoursLeft).padStart(2, '0')}</span>
+                                                    <span class="text-[10px] text-gray-400 font-bold mt-0.5 block">ساعة</span>
+                                                </div>
+                                                <div class="bg-[#12131c] border border-purple-900/40 rounded-xl p-3 text-center shadow-inner">
+                                                    <span id="cdMins" class="text-2xl font-black text-white font-mono block">${String(minsLeft).padStart(2, '0')}</span>
+                                                    <span class="text-[10px] text-gray-400 font-bold mt-0.5 block">دقيقة</span>
+                                                </div>
+                                                <div class="bg-[#12131c] border border-purple-900/40 rounded-xl p-3 text-center shadow-inner">
+                                                    <span id="cdSecs" class="text-2xl font-black text-purple-400 font-mono block">00</span>
+                                                    <span class="text-[10px] text-gray-400 font-bold mt-0.5 block">ثانية</span>
+                                                </div>
+                                            </div>
+
+                                            <button disabled class="w-full py-3 bg-purple-950/30 border border-purple-900/30 text-gray-400 font-bold text-xs rounded-xl cursor-not-allowed flex items-center justify-center gap-2">
+                                                <span>⌛</span>
+                                                <span>تم استلام مكافأة اليوم! عد بعد انتهاء الوقت أعلاه</span>
+                                            </button>
+                                        </div>
                                     `}
                                 </div>
                             </div>
@@ -787,22 +811,48 @@ module.exports = function (app, client) {
 
                     let dailyUnlockTime = ${canClaimDaily ? 0 : unlockTimestamp};
 
-                    function updateDailyCountdown() {
-                        const cdText = document.getElementById('dailyCountdownText');
+                    function renderDailyBox(canClaim) {
                         const box = document.getElementById('dailyActionBox');
+                        if (!box) return;
+                        if (canClaim) {
+                            box.innerHTML = '<button id="claimDailyBtn" onclick="claimDaily()" class="w-full py-4 bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 hover:from-purple-500 hover:to-indigo-500 text-white font-black text-sm rounded-2xl shadow-xl shadow-purple-900/40 transition transform active:scale-95 flex items-center justify-center gap-2"><span>🎁</span><span>استلام المكافأة اليومية الآن (+500 ⭐)</span></button>';
+                        } else {
+                            box.innerHTML = '<div class="bg-[#0b0c10] border border-purple-950/60 rounded-2xl p-5 space-y-4">'
+                                + '<div class="flex items-center justify-between text-xs font-bold text-gray-300"><span class="flex items-center gap-1 text-purple-400"><span>⏰</span><span>المكافأة القادمة</span></span><span class="text-gray-400">الوقت المتبقي بالضبط</span></div>'
+                                + '<div class="grid grid-cols-3 gap-3">'
+                                + '<div class="bg-[#12131c] border border-purple-900/40 rounded-xl p-3 text-center shadow-inner"><span id="cdHours" class="text-2xl font-black text-white font-mono block">00</span><span class="text-[10px] text-gray-400 font-bold mt-0.5 block">ساعة</span></div>'
+                                + '<div class="bg-[#12131c] border border-purple-900/40 rounded-xl p-3 text-center shadow-inner"><span id="cdMins" class="text-2xl font-black text-white font-mono block">00</span><span class="text-[10px] text-gray-400 font-bold mt-0.5 block">دقيقة</span></div>'
+                                + '<div class="bg-[#12131c] border border-purple-900/40 rounded-xl p-3 text-center shadow-inner"><span id="cdSecs" class="text-2xl font-black text-purple-400 font-mono block">00</span><span class="text-[10px] text-gray-400 font-bold mt-0.5 block">ثانية</span></div>'
+                                + '</div>'
+                                + '<button disabled class="w-full py-3 bg-purple-950/30 border border-purple-900/30 text-gray-400 font-bold text-xs rounded-xl cursor-not-allowed flex items-center justify-center gap-2"><span>⌛</span><span>تم استلام مكافأة اليوم! عد بعد انتهاء الوقت أعلاه</span></button>'
+                                + '</div>';
+                        }
+                    }
+
+                    function updateDailyCountdown() {
                         if (!dailyUnlockTime || dailyUnlockTime <= Date.now()) {
-                            if (box && !document.getElementById('claimDailyBtn')) {
-                                box.innerHTML = '<button id="claimDailyBtn" onclick="claimDaily()" class="w-full py-3.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-black text-xs rounded-xl shadow-lg shadow-purple-900/40 transition transform active:scale-95">🎁 استلام المكافأة اليومية الآن (+500 ⭐)</button>';
+                            if (!document.getElementById('claimDailyBtn')) {
+                                renderDailyBox(true);
                             }
                             return;
                         }
-                        const diff = dailyUnlockTime - Date.now();
+                        
+                        if (!document.getElementById('cdHours')) {
+                            renderDailyBox(false);
+                        }
+
+                        const diff = Math.max(0, dailyUnlockTime - Date.now());
                         const h = Math.floor(diff / (1000 * 60 * 60));
                         const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
                         const s = Math.floor((diff % (1000 * 60)) / 1000);
-                        if (cdText) {
-                            cdText.innerText = 'تم الاستلام اليوم! عد بعد: ' + h + ' ساعة و ' + m + ' دقيقة و ' + s + ' ثانية';
-                        }
+
+                        const hEl = document.getElementById('cdHours');
+                        const mEl = document.getElementById('cdMins');
+                        const sEl = document.getElementById('cdSecs');
+
+                        if (hEl) hEl.innerText = String(h).padStart(2, '0');
+                        if (mEl) mEl.innerText = String(m).padStart(2, '0');
+                        if (sEl) sEl.innerText = String(s).padStart(2, '0');
                     }
                     setInterval(updateDailyCountdown, 1000);
                     updateDailyCountdown();
@@ -821,12 +871,9 @@ module.exports = function (app, client) {
                                 const d = document.getElementById('userCoinsDisplay');
                                 if (d) d.innerText = Number(data.newCoins).toLocaleString();
                                 document.querySelectorAll('.user-coins-val').forEach(el => el.innerText = Number(data.newCoins).toLocaleString());
-                                const box = document.getElementById('dailyActionBox');
                                 dailyUnlockTime = Date.now() + 24 * 60 * 60 * 1000;
-                                if (box) {
-                                    box.innerHTML = '<button id="claimDailyBtnDisabled" disabled class="w-full py-3.5 bg-purple-950/40 border border-purple-900/30 text-gray-400 font-bold text-xs rounded-xl cursor-not-allowed flex items-center justify-center gap-2"><span>⏳</span><span id="dailyCountdownText">تم استلام المكافأة بنجاح! عد غداً للحصول على مكافأة جديدة.</span></button>';
-                                    updateDailyCountdown();
-                                }
+                                renderDailyBox(false);
+                                updateDailyCountdown();
                             } else {
                                 showToast(data.error || 'حدث خطأ أثناء الاستلام', true);
                                 if (btn) {
