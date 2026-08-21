@@ -127,33 +127,18 @@ module.exports = {
       // مستمع رسائل الشات
       let winner = null;
       const answered = new Set();
-      const strikes = new Map();
-      const MAX_STRIKES = 1;
-
-      const getStrikeEmoji = (count) => '🔴 طُرد من اللعبة!';
-
-      const updateQuestionEmbed = () => {
-        const remaining = [...players].filter(id => !answered.has(id));
-        const eliminatedList = [...players].filter(id => (strikes.get(id) || 0) >= MAX_STRIKES);
-        return new EmbedBuilder()
-          .setColor('#9b59b6')
-          .setTitle('🧠 سؤال المسابقة')
-          .setDescription(`**${q.q}**`)
-          .setFooter({ text: `✍️ اكتب إجابتك | ⏱️ 30 ثانية | 🎁 +${reward} ⭐ | 👥 متبقي: ${remaining.length - eliminatedList.length}` })
-          .setTimestamp();
-      };
+      const eliminated = new Set(); // اللاعبون المطرودون
 
       const messageCollector = interaction.channel.createMessageCollector({
-        filter: m => players.has(m.author.id) && !m.author.bot,
+        filter: m => players.has(m.author.id) && !m.author.bot && !eliminated.has(m.author.id),
         time: 30000
       });
 
       messageCollector.on('collect', async (m) => {
         const userId = m.author.id;
-        const userStrikes = strikes.get(userId) || 0;
 
-        // تجاهل المطرودين أو من أجاب بالفعل
-        if (userStrikes >= MAX_STRIKES || answered.has(userId)) return;
+        // تجاهل المطرودين أو الفائزين
+        if (eliminated.has(userId) || answered.has(userId)) return;
 
         const correct = checkAnswer(m.content, q.answers);
 
@@ -164,24 +149,32 @@ module.exports = {
           await m.react('✅').catch(() => {});
           await m.reply(`🎉 **إجابة صحيحة يا ${m.author.username}!** ربحت \`+${reward}\` ⭐`);
           messageCollector.stop('winner');
+
         } else if (correct && winner) {
           answered.add(userId);
           await m.react('✅').catch(() => {});
           await m.reply(`✅ إجابة صحيحة! لكن **${winner.username}** كان أسرع منك.`);
+
         } else {
-          // إجابة خاطئة - إنذار
-          const newStrikes = userStrikes + 1;
-          strikes.set(userId, newStrikes);
-          await m.react('❌').catch(() => {});
+          // إجابة خاطئة — طرد فوري
+          eliminated.add(userId);
+          players.delete(userId);
 
-          if (newStrikes >= MAX_STRIKES) {
-            // طرد اللاعب من اللعبة فوراً عند أول خطأ
-            players.delete(userId);
-            await m.reply(`💀 **${m.author.username}** أخطأ وتم طرده من المسابقة!`);
+          const lossEmbed = new EmbedBuilder()
+            .setColor('#ED4245')
+            .setTitle('💀 خرجت من المسابقة!')
+            .setDescription(
+              `يا **${m.author.username}**، أجبت بـ \`${m.content}\` وهي إجابة **خاطئة**!\n\n` +
+              `❌ **تم استبعادك** من المسابقة ولا تستطيع المشاركة مجدداً.\n\n` +
+              `⏳ انتظر النتيجة النهائية...`
+            )
+            .setThumbnail(m.author.displayAvatarURL())
+            .setTimestamp();
 
-            if (players.size === 0) {
-              messageCollector.stop('no_players');
-            }
+          await interaction.channel.send({ embeds: [lossEmbed] });
+
+          if (players.size === 0) {
+            messageCollector.stop('no_players');
           }
         }
       });
