@@ -94,6 +94,21 @@ module.exports = {
         ).setTimestamp();
 
       await i.update({ content: '', embeds: [resultEmbed], components: [] });
+
+      // رسالة خسارة للخاسر
+      if (winner && loser) {
+        const lossEmbed = new EmbedBuilder()
+          .setColor('#ED4245')
+          .setTitle('💀 خسرت المعركة!')
+          .setDescription(
+            `يا **${loser.username}**، هُزمت أمام **${winner.username}**! 🥊\n\n` +
+            `❌ **خسرت** \`${bet.toLocaleString()}\` ⭐ من رصيدك.\n\n` +
+            `😤 ربما المرة القادمة تكون أقوى!`
+          )
+          .setTimestamp();
+        await i.channel.send({ embeds: [lossEmbed] });
+      }
+
       ACTIVE_FIGHTS.delete(interaction.user.id);
       ACTIVE_FIGHTS.delete(opponent.id);
     });

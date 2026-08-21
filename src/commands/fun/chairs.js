@@ -19,25 +19,23 @@ module.exports = {
     const players = new Set();
     players.add(interaction.user.id);
 
-    const embed = new EmbedBuilder()
+    const buildEmbed = () => new EmbedBuilder()
       .setColor('#9B59B6')
       .setTitle('🪑 لعبة الكراسي الموسيقية!')
-      .setDescription(`**${interaction.user.username}** بدأ لعبة الكراسي الموسيقية!\n\nاضغط **انضم للعبة** خلال 30 ثانية للمشاركة.\n\n👥 **اللاعبون:** ${interaction.user.username}`)
+      .setDescription(
+        `**${interaction.user.username}** بدأ لعبة الكراسي الموسيقية!\n\n` +
+        `اضغط **انضم للعبة** خلال 30 ثانية للمشاركة.\n\n` +
+        `👥 **اللاعبون (${players.size}):** ${[...players].map(id => `<@${id}>`).join(', ')}`
+      )
       .setFooter({ text: 'ستبدأ اللعبة تلقائياً بعد 30 ثانية' })
       .setTimestamp();
 
     const joinRow = new ActionRowBuilder().addComponents(
-      new ButtonBuilder()
-        .setCustomId('chairs_join')
-        .setLabel('🪑 انضم للعبة')
-        .setStyle(ButtonStyle.Primary),
-      new ButtonBuilder()
-        .setCustomId('chairs_start')
-        .setLabel('▶️ ابدأ الآن')
-        .setStyle(ButtonStyle.Success)
+      new ButtonBuilder().setCustomId('chairs_join').setLabel('🪑 انضم للعبة').setStyle(ButtonStyle.Primary),
+      new ButtonBuilder().setCustomId('chairs_start').setLabel('▶️ ابدأ الآن').setStyle(ButtonStyle.Success)
     );
 
-    const msg = await interaction.reply({ embeds: [embed], components: [joinRow], fetchReply: true });
+    const msg = await interaction.reply({ embeds: [buildEmbed()], components: [joinRow], fetchReply: true });
     activeGames.set(interaction.channelId, { players, hostId: interaction.user.id });
 
     const collector = msg.createMessageComponentCollector({ componentType: ComponentType.Button, time: 30000 });
@@ -48,38 +46,41 @@ module.exports = {
           return btnInt.reply({ content: '⚠️ أنت بالفعل في اللعبة!', ephemeral: true });
         }
         players.add(btnInt.user.id);
-        const playersList = [...players].map(id => `<@${id}>`).join(', ');
-        
-        const updatedEmbed = EmbedBuilder.from(embed)
-          .setDescription(`**${interaction.user.username}** بدأ لعبة الكراسي الموسيقية!\n\nاضغط **انضم للعبة** خلال 30 ثانية للمشاركة.\n\n👥 **اللاعبون (${players.size}):** ${playersList}`);
-        
-        await msg.edit({ embeds: [updatedEmbed] });
+        await msg.edit({ embeds: [buildEmbed()] });
         await btnInt.reply({ content: `✅ انضممت للعبة! عدد اللاعبين: **${players.size}**`, ephemeral: true });
       }
-
       if (btnInt.customId === 'chairs_start' && btnInt.user.id === interaction.user.id) {
+        if (players.size < 2) return btnInt.reply({ content: '❌ يجب لاعبَيْن على الأقل!', ephemeral: true });
+        await btnInt.deferUpdate();
         collector.stop('manual_start');
       }
     });
 
     collector.on('end', async () => {
       activeGames.delete(interaction.channelId);
-      
+
       if (players.size < 2) {
-        const failEmbed = new EmbedBuilder()
-          .setColor('#ED4245')
-          .setTitle('❌ لعبة الكراسي الموسيقية')
-          .setDescription('لم يكفِ عدد اللاعبين! يجب وجود لاعبَيْن على الأقل.');
-        return msg.edit({ embeds: [failEmbed], components: [] });
+        return msg.edit({
+          embeds: [new EmbedBuilder().setColor('#ED4245').setTitle('❌ لعبة الكراسي الموسيقية').setDescription('لم يكفِ عدد اللاعبين! يجب وجود لاعبَيْن على الأقل.')],
+          components: []
+        });
       }
 
-      // عدد الكراسي = عدد اللاعبين - 1
       const chairCount = players.size - 1;
       const playerArray = [...players].sort(() => Math.random() - 0.5);
-      
-      // من لم يحصل على كرسي (آخر لاعب في المصفوفة المختلطة)
-      const eliminated = playerArray[playerArray.length - 1];
+      const eliminatedId = playerArray[playerArray.length - 1];
       const survivors = playerArray.slice(0, chairCount);
+
+      // رسالة خسارة للمطرود
+      const lossEmbed = new EmbedBuilder()
+        .setColor('#ED4245')
+        .setTitle('💀 خرجت من اللعبة!')
+        .setDescription(
+          `يا <@${eliminatedId}>، لم تجد كرسياً وقفت عليه! 🪑\n\n` +
+          `❌ **تم استبعادك** من هذه الجولة!\n\n` +
+          `**الناجون:** ${survivors.map(id => `<@${id}>`).join(', ')}`
+        )
+        .setTimestamp();
 
       const resultEmbed = new EmbedBuilder()
         .setColor('#9B59B6')
@@ -88,11 +89,12 @@ module.exports = {
           `**🪑 عدد الكراسي:** ${chairCount}\n` +
           `**👥 عدد اللاعبين:** ${players.size}\n\n` +
           `**💺 الناجون:** ${survivors.map(id => `<@${id}>`).join(', ')}\n\n` +
-          `**💀 المحذوف:** <@${eliminated}> لم يجد كرسياً!`
+          `**💀 المحذوف:** <@${eliminatedId}> لم يجد كرسياً!`
         )
         .setTimestamp();
 
       await msg.edit({ embeds: [resultEmbed], components: [] });
+      await interaction.channel.send({ embeds: [lossEmbed] });
     });
   },
 
@@ -104,42 +106,37 @@ module.exports = {
     const players = new Set();
     players.add(message.author.id);
 
-    const embed = new EmbedBuilder()
+    const buildEmbed = () => new EmbedBuilder()
       .setColor('#9B59B6')
       .setTitle('🪑 لعبة الكراسي الموسيقية!')
-      .setDescription(`**${message.author.username}** بدأ لعبة الكراسي الموسيقية!\n\nاضغط **انضم للعبة** خلال 30 ثانية.\n\n👥 **اللاعبون:** ${message.author.username}`)
+      .setDescription(
+        `**${message.author.username}** بدأ لعبة الكراسي الموسيقية!\n\n` +
+        `اضغط **انضم للعبة** خلال 30 ثانية.\n\n` +
+        `👥 **اللاعبون (${players.size}):** ${[...players].map(id => `<@${id}>`).join(', ')}`
+      )
       .setFooter({ text: 'ستبدأ اللعبة تلقائياً بعد 30 ثانية' })
       .setTimestamp();
 
     const joinRow = new ActionRowBuilder().addComponents(
-      new ButtonBuilder()
-        .setCustomId('chairs_join_p')
-        .setLabel('🪑 انضم للعبة')
-        .setStyle(ButtonStyle.Primary),
-      new ButtonBuilder()
-        .setCustomId('chairs_start_p')
-        .setLabel('▶️ ابدأ الآن')
-        .setStyle(ButtonStyle.Success)
+      new ButtonBuilder().setCustomId('chairs_join_p').setLabel('🪑 انضم للعبة').setStyle(ButtonStyle.Primary),
+      new ButtonBuilder().setCustomId('chairs_start_p').setLabel('▶️ ابدأ الآن').setStyle(ButtonStyle.Success)
     );
 
-    const msg = await message.reply({ embeds: [embed], components: [joinRow] });
+    const msg = await message.reply({ embeds: [buildEmbed()], components: [joinRow] });
     activeGames.set(message.channelId, { players, hostId: message.author.id });
 
     const collector = msg.createMessageComponentCollector({ componentType: ComponentType.Button, time: 30000 });
 
     collector.on('collect', async (btnInt) => {
       if (btnInt.customId === 'chairs_join_p') {
-        if (players.has(btnInt.user.id)) {
-          return btnInt.reply({ content: '⚠️ أنت بالفعل في اللعبة!', ephemeral: true });
-        }
+        if (players.has(btnInt.user.id)) return btnInt.reply({ content: '⚠️ أنت بالفعل في اللعبة!', ephemeral: true });
         players.add(btnInt.user.id);
-        const playersList = [...players].map(id => `<@${id}>`).join(', ');
-        const updatedEmbed = EmbedBuilder.from(embed)
-          .setDescription(`**${message.author.username}** بدأ لعبة الكراسي الموسيقية!\n\n👥 **اللاعبون (${players.size}):** ${playersList}`);
-        await msg.edit({ embeds: [updatedEmbed] });
+        await msg.edit({ embeds: [buildEmbed()] });
         await btnInt.reply({ content: `✅ انضممت! عدد اللاعبين: **${players.size}**`, ephemeral: true });
       }
       if (btnInt.customId === 'chairs_start_p' && btnInt.user.id === message.author.id) {
+        if (players.size < 2) return btnInt.reply({ content: '❌ يجب لاعبَيْن على الأقل!', ephemeral: true });
+        await btnInt.deferUpdate();
         collector.stop('manual_start');
       }
     });
@@ -149,16 +146,34 @@ module.exports = {
       if (players.size < 2) {
         return msg.edit({ embeds: [new EmbedBuilder().setColor('#ED4245').setTitle('❌ لعبة الكراسي').setDescription('لم يكفِ عدد اللاعبين!')], components: [] });
       }
+
       const chairCount = players.size - 1;
       const playerArray = [...players].sort(() => Math.random() - 0.5);
-      const eliminated = playerArray[playerArray.length - 1];
+      const eliminatedId = playerArray[playerArray.length - 1];
       const survivors = playerArray.slice(0, chairCount);
+
+      const lossEmbed = new EmbedBuilder()
+        .setColor('#ED4245')
+        .setTitle('💀 خرجت من اللعبة!')
+        .setDescription(
+          `يا <@${eliminatedId}>، لم تجد كرسياً وقفت عليه! 🪑\n\n` +
+          `❌ **تم استبعادك** من هذه الجولة!\n\n` +
+          `**الناجون:** ${survivors.map(id => `<@${id}>`).join(', ')}`
+        )
+        .setTimestamp();
+
       const resultEmbed = new EmbedBuilder()
         .setColor('#9B59B6')
         .setTitle('🎵 الكراسي الموسيقية - انتهت الموسيقى!')
-        .setDescription(`**🪑 الكراسي:** ${chairCount} | **👥 اللاعبون:** ${players.size}\n\n**💺 الناجون:** ${survivors.map(id => `<@${id}>`).join(', ')}\n**💀 المحذوف:** <@${eliminated}>`)
+        .setDescription(
+          `**🪑 الكراسي:** ${chairCount} | **👥 اللاعبون:** ${players.size}\n\n` +
+          `**💺 الناجون:** ${survivors.map(id => `<@${id}>`).join(', ')}\n` +
+          `**💀 المحذوف:** <@${eliminatedId}>`
+        )
         .setTimestamp();
+
       await msg.edit({ embeds: [resultEmbed], components: [] });
+      await message.channel.send({ embeds: [lossEmbed] });
     });
   }
 };

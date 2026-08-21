@@ -134,6 +134,18 @@ module.exports = {
           .setTimestamp();
 
         await btn.update({ content: '', embeds: [resultEmbed], components: [] });
+
+        // رسالة خسارة للخاسر
+        const lossEmbed = new EmbedBuilder()
+          .setColor('#ED4245')
+          .setTitle('💀 خسرت الرهان!')
+          .setDescription(
+            `يا **${loser.username}**، العملة لم تكن في صفّك! 🪙\n\n` +
+            `❌ **خسرت** \`${bet.toLocaleString()}\` ⭐ لصالح **${winner.username}**.\n\n` +
+            `😅 الحظ مع **${winner.username}** هذه المرة!`
+          )
+          .setTimestamp();
+        await btn.channel.send({ embeds: [lossEmbed] });
       });
 
       collector.on('end', (collected) => {

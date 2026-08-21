@@ -153,6 +153,19 @@ module.exports = {
         .setTimestamp();
 
       await msg.edit({ embeds: [resultEmbed], components: [] });
+
+      // رسالة خسارة للضحية
+      const lossEmbed = new EmbedBuilder()
+        .setColor('#ED4245')
+        .setTitle('💀 أنت الضحية!')
+        .setDescription(
+          `يا <@${victim}>، الروليت اختارك هذه المرة! 🎰\n\n` +
+          `❌ **تم استبعادك** كضحية هذه الجولة!\n` +
+          (bet > 0 ? `💸 **خسرت** \`${(bet * survivors.length).toLocaleString()}\` ⭐\n` : '') +
+          `\n😤 ربما المرة القادمة الحظ يكون معك!`
+        )
+        .setTimestamp();
+      await interaction.channel.send({ embeds: [lossEmbed] });
     });
   },
 
