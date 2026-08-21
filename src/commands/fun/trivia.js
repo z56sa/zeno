@@ -127,6 +127,21 @@ module.exports = {
       // مستمع رسائل الشات
       let winner = null;
       const answered = new Set();
+      const strikes = new Map();
+      const MAX_STRIKES = 1;
+
+      const getStrikeEmoji = (count) => '🔴 طُرد من اللعبة!';
+
+      const updateQuestionEmbed = () => {
+        const remaining = [...players].filter(id => !answered.has(id));
+        const eliminatedList = [...players].filter(id => (strikes.get(id) || 0) >= MAX_STRIKES);
+        return new EmbedBuilder()
+          .setColor('#9b59b6')
+          .setTitle('🧠 سؤال المسابقة')
+          .setDescription(`**${q.q}**`)
+          .setFooter({ text: `✍️ اكتب إجابتك | ⏱️ 30 ثانية | 🎁 +${reward} ⭐ | 👥 متبقي: ${remaining.length - eliminatedList.length}` })
+          .setTimestamp();
+      };
 
       const messageCollector = interaction.channel.createMessageCollector({
         filter: m => players.has(m.author.id) && !m.author.bot,
@@ -134,24 +149,40 @@ module.exports = {
       });
 
       messageCollector.on('collect', async (m) => {
-        if (answered.has(m.author.id)) return;
+        const userId = m.author.id;
+        const userStrikes = strikes.get(userId) || 0;
+
+        // تجاهل المطرودين أو من أجاب بالفعل
+        if (userStrikes >= MAX_STRIKES || answered.has(userId)) return;
 
         const correct = checkAnswer(m.content, q.answers);
 
         if (correct && !winner) {
           winner = m.author;
-          answered.add(m.author.id);
-          db.addCoins(m.author.id, interaction.guild.id, reward);
+          answered.add(userId);
+          db.addCoins(userId, interaction.guild.id, reward);
           await m.react('✅').catch(() => {});
           await m.reply(`🎉 **إجابة صحيحة يا ${m.author.username}!** ربحت \`+${reward}\` ⭐`);
           messageCollector.stop('winner');
         } else if (correct && winner) {
-          answered.add(m.author.id);
+          answered.add(userId);
           await m.react('✅').catch(() => {});
           await m.reply(`✅ إجابة صحيحة! لكن **${winner.username}** كان أسرع منك.`);
         } else {
-          // إجابة خاطئة - أضف ردة فعل خطأ
+          // إجابة خاطئة - إنذار
+          const newStrikes = userStrikes + 1;
+          strikes.set(userId, newStrikes);
           await m.react('❌').catch(() => {});
+
+          if (newStrikes >= MAX_STRIKES) {
+            // طرد اللاعب من اللعبة فوراً عند أول خطأ
+            players.delete(userId);
+            await m.reply(`💀 **${m.author.username}** أخطأ وتم طرده من المسابقة!`);
+
+            if (players.size === 0) {
+              messageCollector.stop('no_players');
+            }
+          }
         }
       });
 
@@ -159,13 +190,12 @@ module.exports = {
         activeGames.delete(interaction.channelId);
 
         const resultEmbed = new EmbedBuilder()
-          .setColor(winner ? '#2ecc71' : '#95a5a6')
-          .setTitle(winner ? `🏆 ${winner.username} فاز بالمسابقة!` : '⏰ انتهى الوقت بدون فائز!')
+          .setColor(winner ? '#2ecc71' : reason === 'no_players' ? '#ED4245' : '#95a5a6')
+          .setTitle(winner ? `🏆 ${winner.username} فاز بالمسابقة!` : reason === 'no_players' ? '💀 انتهت المسابقة - كل اللاعبين طُردوا!' : '⏰ انتهى الوقت بدون فائز!')
           .setDescription(
             `**❓ السؤال:** ${q.q}\n\n` +
             `**✅ الإجابة الصحيحة:** \`${q.answers[0]}\`\n\n` +
-            (winner ? `🎁 **${winner.username}** ربح \`+${reward}\` ⭐!` : `😔 لم يجب أحد بشكل صحيح!`) +
-            `\n\n**👥 المشتركون:** ${[...players].map(id => `<@${id}>`).join(', ')}`
+            (winner ? `🎁 **${winner.username}** ربح \`+${reward}\` ⭐!` : reason === 'no_players' ? `😵 جميع اللاعبين طُردوا بسبب الأخطاء!` : `😔 لم يجب أحد بشكل صحيح!`)
           )
           .setTimestamp();
 
