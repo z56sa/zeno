@@ -49,46 +49,52 @@ module.exports = function (app, client) {
                 <script src="https://cdn.tailwindcss.com"></script>
                 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
                 <style>
-                    body { background-color: #171821; color: #ffffff; font-family: 'Cairo', sans-serif; }
+                    body { background-color: #0b0c10; color: #ffffff; font-family: 'Cairo', sans-serif; }
                 </style>
             </head>
-            <body class="min-h-screen flex flex-col bg-[#171821] text-gray-100 selection:bg-[#5865F2]">
-                
-                <!-- ProBot Navbar Exact -->
-                <header class="w-full px-8 py-4 bg-[#1e1f2b]/90 backdrop-blur-md border-b border-[#282937] flex items-center justify-between sticky top-0 z-50">
-                    
+            <body class="min-h-screen flex flex-col bg-[#0b0c10] text-gray-200 relative overflow-x-hidden selection:bg-purple-600 selection:text-white">
+
+                <!-- Ambient Purple Glows & Black Mesh -->
+                <div class="fixed inset-0 pointer-events-none z-0">
+                    <div class="absolute -top-40 right-1/4 w-[600px] h-[600px] bg-purple-900/20 rounded-full blur-[140px]"></div>
+                    <div class="absolute top-1/3 -left-40 w-[500px] h-[500px] bg-indigo-900/15 rounded-full blur-[130px]"></div>
+                    <div class="absolute -bottom-40 right-1/3 w-[600px] h-[600px] bg-purple-800/10 rounded-full blur-[150px]"></div>
+                </div>
+
+                <!-- Header -->
+                <header class="h-20 bg-[#0f1016]/80 backdrop-blur-md border-b border-purple-900/20 px-8 flex items-center justify-between sticky top-0 z-50">
                     <!-- Left: Profile or Login -->
                     <div class="flex items-center gap-5">
                         ${user ? `
-                            <a href="/dashboard" class="flex items-center gap-2.5 px-5 py-2.5 bg-[#5865F2] hover:bg-[#4752C4] text-white text-sm font-black rounded-xl transition shadow-lg shadow-[#5865F2]/20">
-                                <img src="${user.avatar ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png` : 'https://cdn.discordapp.com/embed/avatars/0.png'}" class="w-6 h-6 rounded-full">
+                            <a href="/dashboard" class="flex items-center gap-2.5 px-4 py-2 bg-gradient-to-r from-purple-600 to-[#5865F2] hover:from-purple-500 hover:to-[#4752C4] text-white text-xs font-black rounded-xl transition shadow-lg shadow-purple-900/30">
+                                <img src="${user.avatar ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png` : 'https://cdn.discordapp.com/embed/avatars/0.png'}" class="w-5 h-5 rounded-full">
                                 <span>لوحة التحكم</span>
                             </a>
                         ` : `
-                            <a href="/auth/discord" class="px-6 py-2.5 bg-[#5865F2] hover:bg-[#4752C4] text-white text-sm font-black rounded-xl transition shadow-lg shadow-[#5865F2]/20">
+                            <a href="/auth/discord" class="px-5 py-2 bg-gradient-to-r from-purple-600 to-[#5865F2] hover:from-purple-500 hover:to-[#4752C4] text-white text-xs font-black rounded-xl transition shadow-lg shadow-purple-900/30">
                                 تسجيل الدخول
                             </a>
                         `}
-                        <a href="https://discord.gg/uxqQDtbVMz" target="_blank" class="text-gray-300 hover:text-white text-sm font-bold transition">الدعم الفني</a>
-                        <a href="#commands" class="text-gray-300 hover:text-white text-sm font-bold transition">الأوامر</a>
+                        <a href="https://discord.gg/uxqQDtbVMz" target="_blank" class="text-gray-400 hover:text-purple-300 text-xs font-bold transition">الدعم الفني</a>
+                        <a href="#commands" class="text-gray-400 hover:text-purple-300 text-xs font-bold transition">الأوامر</a>
                     </div>
 
                     <!-- Center: Navigation Links (المميزات / المصادر) -->
-                    <nav class="hidden md:flex items-center gap-8 text-sm font-bold text-gray-300">
+                    <nav class="hidden md:flex items-center gap-8 text-xs font-bold text-gray-300">
                         <div class="relative group cursor-pointer">
-                            <span class="hover:text-white flex items-center gap-1">المميزات <svg class="w-3.5 h-3.5 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></span>
-                            <div class="absolute top-full right-0 mt-2 w-48 bg-[#1e1f2b] border border-[#282937] rounded-xl shadow-2xl p-2 hidden group-hover:block text-right">
-                                <a href="/dashboard" class="block px-3 py-2 text-xs hover:bg-[#282937] hover:text-white rounded-lg transition">🛡️ الحماية و Anti-Nuke</a>
-                                <a href="/dashboard" class="block px-3 py-2 text-xs hover:bg-[#282937] hover:text-white rounded-lg transition">💰 نظام الاقتصاد والبنك</a>
-                                <a href="/dashboard" class="block px-3 py-2 text-xs hover:bg-[#282937] hover:text-white rounded-lg transition">🎮 الألعاب التفاعلية</a>
-                                <a href="/dashboard" class="block px-3 py-2 text-xs hover:bg-[#282937] hover:text-white rounded-lg transition">🎫 نظام التذاكر</a>
+                            <span class="hover:text-purple-300 flex items-center gap-1">المميزات <svg class="w-3.5 h-3.5 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></span>
+                            <div class="absolute top-full right-0 mt-2 w-48 bg-[#12131c] border border-purple-900/30 rounded-xl shadow-2xl p-2 hidden group-hover:block text-right backdrop-blur-lg">
+                                <a href="/dashboard" class="block px-3 py-2 text-xs hover:bg-purple-950/40 hover:text-purple-300 rounded-lg transition">🛡️ الحماية و Anti-Nuke</a>
+                                <a href="/dashboard" class="block px-3 py-2 text-xs hover:bg-purple-950/40 hover:text-purple-300 rounded-lg transition">💰 نظام الاقتصاد والبنك</a>
+                                <a href="/dashboard" class="block px-3 py-2 text-xs hover:bg-purple-950/40 hover:text-purple-300 rounded-lg transition">🎮 الألعاب التفاعلية</a>
+                                <a href="/dashboard" class="block px-3 py-2 text-xs hover:bg-purple-950/40 hover:text-purple-300 rounded-lg transition">🎫 نظام التذاكر</a>
                             </div>
                         </div>
                         <div class="relative group cursor-pointer">
-                            <span class="hover:text-white flex items-center gap-1">المصادر <svg class="w-3.5 h-3.5 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></span>
-                            <div class="absolute top-full right-0 mt-2 w-48 bg-[#1e1f2b] border border-[#282937] rounded-xl shadow-2xl p-2 hidden group-hover:block text-right">
-                                <a href="https://discord.gg/uxqQDtbVMz" target="_blank" class="block px-3 py-2 text-xs hover:bg-[#282937] hover:text-white rounded-lg transition">سيرفر الدعم الفني</a>
-                                <a href="/dashboard" class="block px-3 py-2 text-xs hover:bg-[#282937] hover:text-white rounded-lg transition">سجل التحديثات</a>
+                            <span class="hover:text-purple-300 flex items-center gap-1">المصادر <svg class="w-3.5 h-3.5 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></span>
+                            <div class="absolute top-full right-0 mt-2 w-48 bg-[#12131c] border border-purple-900/30 rounded-xl shadow-2xl p-2 hidden group-hover:block text-right backdrop-blur-lg">
+                                <a href="https://discord.gg/uxqQDtbVMz" target="_blank" class="block px-3 py-2 text-xs hover:bg-purple-950/40 hover:text-purple-300 rounded-lg transition">سيرفر الدعم الفني</a>
+                                <a href="/dashboard" class="block px-3 py-2 text-xs hover:bg-purple-950/40 hover:text-purple-300 rounded-lg transition">سجل التحديثات</a>
                             </div>
                         </div>
                     </nav>
@@ -96,51 +102,53 @@ module.exports = function (app, client) {
                     <!-- Right: Logo -->
                     <div class="flex items-center gap-3">
                         <span class="font-black text-xl tracking-wider text-white">ZENO</span>
-                        <div class="w-10 h-10 rounded-2xl bg-[#5865F2] flex items-center justify-center font-black text-white text-base shadow-lg shadow-[#5865F2]/30">Z</div>
+                        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-purple-600 to-indigo-600 flex items-center justify-center font-black text-white text-sm shadow-lg shadow-purple-900/40">Z</div>
                     </div>
                 </header>
 
-                <!-- Hero Section ProBot Exact -->
-                <main class="flex-1 flex flex-col items-center justify-center text-center px-4 py-24 max-w-4xl mx-auto">
+                <!-- Hero Section ProBot Exact with Deep Black & Purple -->
+                <main class="flex-1 flex flex-col items-center justify-center text-center px-4 py-20 max-w-4xl mx-auto z-10">
                     
-                    <span class="px-5 py-2 bg-[#282937]/80 border border-[#3b3d52] text-purple-300 text-xs font-black rounded-full mb-8">
-                        جديد: نظام التذاكر المتكامل 100% مجاني
+                    <span class="px-4 py-1.5 bg-purple-950/60 border border-purple-800/40 text-purple-300 text-xs font-bold rounded-full mb-8 backdrop-blur-sm shadow-inner">
+                        ✨ جديد: نظام التذاكر والحماية 100% مجاني بدون قيود
                     </span>
 
-                    <h1 class="text-5xl md:text-7xl font-black text-white leading-tight mb-8">
-                        اصنع خادم ديسكورد<br>احترافي!
+                    <h1 class="text-5xl md:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-b from-white via-gray-100 to-purple-200 leading-tight mb-6 tracking-tight drop-shadow-sm">
+                        اصنع خادم ديسكورد<br><span class="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-purple-300 to-indigo-300">احترافي!</span>
                     </h1>
 
-                    <p class="text-gray-300 text-base md:text-lg max-w-2xl mb-12 leading-relaxed font-semibold">
-                        بوت متعدد الأغراض قابل للتخصيص جدًا حيث يوفر لك تخصيص صورة كرسالة ترحيبية وسجلات متعمقة وأوامر اجتماعية وإشراف وأكثر ...
+                    <p class="text-gray-400 text-sm md:text-base max-w-2xl mb-10 leading-relaxed font-medium">
+                        بوت متعدد الأغراض قابل للتخصيص الكامل يوفر لك بطاقات الترحيب، حماية ضد التخريب، أوامر الإشراف، الألعاب، واقتصاد وبنك متكامل.
                     </p>
 
-                    <div class="flex flex-wrap gap-5 items-center justify-center w-full max-w-md">
-                        <a href="/auth/discord" class="flex-1 py-4 px-8 bg-[#5865F2] hover:bg-[#4752C4] text-white text-base font-black rounded-2xl transition shadow-xl shadow-[#5865F2]/30 text-center">
-                            إضافة البوت في Discord
+                    <!-- Buttons with smaller size for Add Bot -->
+                    <div class="flex flex-wrap gap-4 items-center justify-center">
+                        <a href="/auth/discord" class="py-2.5 px-6 bg-gradient-to-r from-purple-600 to-[#5865F2] hover:from-purple-500 hover:to-[#4752C4] text-white text-xs font-bold rounded-xl transition shadow-lg shadow-purple-900/30 flex items-center gap-2">
+                            <span>إضافة البوت في Discord</span>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                         </a>
-                        <a href="/dashboard" class="flex-1 py-4 px-8 bg-[#1e1f2b] hover:bg-[#282937] text-white text-base font-black rounded-2xl border border-[#323444] transition text-center shadow-lg">
+                        <a href="/dashboard" class="py-2.5 px-6 bg-[#13141d]/90 hover:bg-[#1a1c29] text-gray-200 text-xs font-bold rounded-xl border border-purple-900/30 transition shadow-md hover:text-white">
                             لوحة التحكم
                         </a>
                     </div>
 
-                    <!-- Live Stats -->
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-5 w-full mt-20 text-center">
-                        <div class="bg-[#1e1f2b] border border-[#282937] p-6 rounded-2xl shadow-xl">
-                            <p class="text-3xl font-black text-white">${stats.guilds}</p>
-                            <p class="text-gray-400 text-xs font-bold mt-2">سيرفرات نشطة</p>
+                    <!-- Live Stats Cards with Black/Purple borders -->
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 w-full mt-16 text-center">
+                        <div class="bg-[#101118]/80 border border-purple-900/20 hover:border-purple-600/40 p-5 rounded-2xl shadow-xl backdrop-blur-sm transition">
+                            <p class="text-2xl font-black text-white">${stats.guilds}</p>
+                            <p class="text-gray-400 text-[11px] font-bold mt-1.5">سيرفرات نشطة</p>
                         </div>
-                        <div class="bg-[#1e1f2b] border border-[#282937] p-6 rounded-2xl shadow-xl">
-                            <p class="text-3xl font-black text-white">${stats.users}</p>
-                            <p class="text-gray-400 text-xs font-bold mt-2">أعضاء يخدمهم</p>
+                        <div class="bg-[#101118]/80 border border-purple-900/20 hover:border-purple-600/40 p-5 rounded-2xl shadow-xl backdrop-blur-sm transition">
+                            <p class="text-2xl font-black text-white">${stats.users}</p>
+                            <p class="text-gray-400 text-[11px] font-bold mt-1.5">أعضاء يخدمهم</p>
                         </div>
-                        <div class="bg-[#1e1f2b] border border-[#282937] p-6 rounded-2xl shadow-xl">
-                            <p class="text-3xl font-black text-emerald-400">${stats.ping}ms</p>
-                            <p class="text-gray-400 text-xs font-bold mt-2">استجابة البث الحية</p>
+                        <div class="bg-[#101118]/80 border border-purple-900/20 hover:border-purple-600/40 p-5 rounded-2xl shadow-xl backdrop-blur-sm transition">
+                            <p class="text-2xl font-black text-emerald-400">${stats.ping}ms</p>
+                            <p class="text-gray-400 text-[11px] font-bold mt-1.5">استجابة البث الحية</p>
                         </div>
-                        <div class="bg-[#1e1f2b] border border-[#282937] p-6 rounded-2xl shadow-xl">
-                            <p class="text-3xl font-black text-purple-400">100%</p>
-                            <p class="text-gray-400 text-xs font-bold mt-2">جاهزية الحماية (نشط)</p>
+                        <div class="bg-[#101118]/80 border border-purple-900/20 hover:border-purple-600/40 p-5 rounded-2xl shadow-xl backdrop-blur-sm transition">
+                            <p class="text-2xl font-black text-purple-400">100%</p>
+                            <p class="text-gray-400 text-[11px] font-bold mt-1.5">جاهزية الحماية (نشط)</p>
                         </div>
                     </div>
                 </main>
