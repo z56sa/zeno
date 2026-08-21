@@ -57,8 +57,22 @@ db.exec(`
     anti_nuke_action TEXT DEFAULT 'kick',
     temp_voice_enabled INTEGER DEFAULT 0,
     temp_voice_category TEXT,
-    temp_voice_channel TEXT
+    temp_voice_channel TEXT,
+    boost_enabled INTEGER DEFAULT 1,
+    boost_channel TEXT,
+    boost_message TEXT DEFAULT '🎉 شكراً [user] لدعمك السيرفر بالبوست! أصبح عدد البوستات الآن [totalBoosts] بوست!',
+    boost_dm_enabled INTEGER DEFAULT 0,
+    boost_dm_message TEXT DEFAULT 'شكراً جزيلاً لدعمك سيرفر [serverName] بالبوست! 🚀',
+    boost_embed_enabled INTEGER DEFAULT 0
   );
+
+  // Alter table migrations for new columns
+  try { db.exec("ALTER TABLE guild_settings ADD COLUMN boost_enabled INTEGER DEFAULT 1;"); } catch(e) {}
+  try { db.exec("ALTER TABLE guild_settings ADD COLUMN boost_channel TEXT;"); } catch(e) {}
+  try { db.exec("ALTER TABLE guild_settings ADD COLUMN boost_message TEXT;"); } catch(e) {}
+  try { db.exec("ALTER TABLE guild_settings ADD COLUMN boost_dm_enabled INTEGER DEFAULT 0;"); } catch(e) {}
+  try { db.exec("ALTER TABLE guild_settings ADD COLUMN boost_dm_message TEXT;"); } catch(e) {}
+  try { db.exec("ALTER TABLE guild_settings ADD COLUMN boost_embed_enabled INTEGER DEFAULT 0;"); } catch(e) {}
 
   CREATE TABLE IF NOT EXISTS users (
     user_id TEXT NOT NULL,
@@ -167,7 +181,8 @@ function setGuildSetting(guildId, key, value) {
     'automod_whitelist_role','automod_whitelist_channel','anti_alt_days',
     'verification_enabled','verification_type','verification_role',
     'anti_nuke_enabled','anti_nuke_action',
-    'temp_voice_enabled','temp_voice_category','temp_voice_channel'
+    'temp_voice_enabled','temp_voice_category','temp_voice_channel',
+    'boost_enabled','boost_channel','boost_message','boost_dm_enabled','boost_dm_message','boost_embed_enabled'
   ];
   if (!allowed.includes(key)) throw new Error(`حقل غير مسموح: ${key}`);
   db.prepare(`UPDATE guild_settings SET ${key} = ? WHERE guild_id = ?`).run(value, guildId);

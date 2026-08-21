@@ -479,39 +479,39 @@ module.exports = function (app, client) {
                             <!-- Nav Links with Active Tab Switchers -->
                             <div class="flex flex-col gap-1 text-xs text-right overflow-y-auto pr-1">
                                 <span class="text-[10px] font-bold text-purple-400/60 px-3 py-1">عام</span>
-                                <button onclick="switchTab('tabOverview', this)" class="nav-btn px-3 py-2 rounded-xl bg-gradient-to-r from-purple-700 to-indigo-700 text-white font-bold flex items-center justify-between shadow-md w-full">
+                                <button onclick="switchTab('tabOverview', this)" class="nav-btn px-3 py-2 rounded-xl bg-gradient-to-r from-purple-700 to-indigo-700 text-white font-bold flex items-center justify-between shadow-md w-full transition">
                                     <span class="w-1.5 h-1.5 rounded-full bg-white"></span>
                                     <span>نظرة عامة</span>
                                 </button>
 
                                 <span class="text-[10px] font-bold text-purple-400/60 px-3 pt-3 pb-1">متاجر الكريدت</span>
-                                <button onclick="switchTab('tabWallpapers', this)" class="nav-btn px-3 py-1.5 rounded-xl text-gray-400 hover:text-purple-300 hover:bg-purple-950/30 font-medium flex items-center justify-end gap-2 transition w-full">
+                                <button onclick="switchTab('tabWallpapers', this)" class="nav-btn px-3 py-2 rounded-xl text-gray-400 hover:text-purple-300 hover:bg-purple-950/30 font-medium flex items-center justify-between transition w-full">
+                                    <span class="text-base">🖼️</span>
                                     <span>خلفيات البروفايل</span>
-                                    <span>🖼️</span>
                                 </button>
-                                <button onclick="switchTab('tabBadges', this)" class="nav-btn px-3 py-1.5 rounded-xl text-gray-400 hover:text-purple-300 hover:bg-purple-950/30 font-medium flex items-center justify-end gap-2 transition w-full">
+                                <button onclick="switchTab('tabBadges', this)" class="nav-btn px-3 py-2 rounded-xl text-gray-400 hover:text-purple-300 hover:bg-purple-950/30 font-medium flex items-center justify-between transition w-full">
+                                    <span class="text-base">🎖️</span>
                                     <span>شارات البروفايل</span>
-                                    <span>🎖️</span>
                                 </button>
-                                <button onclick="switchTab('tabIdentity', this)" class="nav-btn px-3 py-1.5 rounded-xl text-gray-400 hover:text-purple-300 hover:bg-purple-950/30 font-medium flex items-center justify-end gap-2 transition w-full">
+                                <button onclick="switchTab('tabIdentity', this)" class="nav-btn px-3 py-2 rounded-xl text-gray-400 hover:text-purple-300 hover:bg-purple-950/30 font-medium flex items-center justify-between transition w-full">
+                                    <span class="text-base">🪪</span>
                                     <span>خلفيات الهوية</span>
-                                    <span>🪪</span>
                                 </button>
 
                                 <span class="text-[10px] font-bold text-purple-400/60 px-3 pt-3 pb-1">قائمة المتصدرين</span>
-                                <button onclick="switchTab('tabLeaderboard', this)" class="nav-btn px-3 py-1.5 rounded-xl text-gray-400 hover:text-purple-300 hover:bg-purple-950/30 font-medium flex items-center justify-end gap-2 transition w-full">
+                                <button onclick="switchTab('tabLeaderboard', this)" class="nav-btn px-3 py-2 rounded-xl text-gray-400 hover:text-purple-300 hover:bg-purple-950/30 font-medium flex items-center justify-between transition w-full">
+                                    <span class="text-base">🏆</span>
                                     <span>أعلى 100 بواسطة XP</span>
-                                    <span>🏆</span>
                                 </button>
-                                <button onclick="switchTab('tabLeaderboard', this)" class="nav-btn px-3 py-1.5 rounded-xl text-gray-400 hover:text-purple-300 hover:bg-purple-950/30 font-medium flex items-center justify-end gap-2 transition w-full">
+                                <button onclick="switchTab('tabLeaderboard', this)" class="nav-btn px-3 py-2 rounded-xl text-gray-400 hover:text-purple-300 hover:bg-purple-950/30 font-medium flex items-center justify-between transition w-full">
+                                    <span class="text-base">💰</span>
                                     <span>أغنى 100 ملياردير</span>
-                                    <span>💰</span>
                                 </button>
 
                                 <span class="text-[10px] font-bold text-purple-400/60 px-3 pt-3 pb-1">أخرى</span>
-                                <button onclick="switchTab('tabDaily', this)" class="nav-btn px-3 py-1.5 rounded-xl text-gray-400 hover:text-purple-300 hover:bg-purple-950/30 font-medium flex items-center justify-end gap-2 transition w-full">
+                                <button onclick="switchTab('tabDaily', this)" class="nav-btn px-3 py-2 rounded-xl text-gray-400 hover:text-purple-300 hover:bg-purple-950/30 font-medium flex items-center justify-between transition w-full">
+                                    <span class="text-base">🎁</span>
                                     <span>احصل على مكافأتك اليومية</span>
-                                    <span>🎁</span>
                                 </button>
                             </div>
                         </div>
@@ -750,6 +750,19 @@ module.exports = function (app, client) {
                                     <a href="/dashboard/${guildId}/autoresponder" class="w-full py-2 bg-purple-950/30 hover:bg-gradient-to-r hover:from-purple-600 hover:to-indigo-600 hover:text-white text-purple-300 border border-purple-900/30 rounded-xl text-xs font-bold text-center transition">&gt; Visit</a>
                                 </div>
 
+                                <!-- البوستات -->
+                                <div class="bg-[#10111a] border border-pink-950/40 hover:border-pink-600/40 rounded-2xl p-5 flex flex-col justify-between transition shadow-lg">
+                                    <div class="flex items-center justify-between mb-3">
+                                        <label class="toggle"><input type="checkbox" onchange="toggleModule('${guildId}', 'boost_enabled', this.checked)" ${true ? 'checked' : ''}><span class="slider"></span></label>
+                                        <div class="flex items-center gap-2">
+                                            <h4 class="font-bold text-white text-sm">البوستات</h4>
+                                            <span class="text-lg">🚀</span>
+                                        </div>
+                                    </div>
+                                    <p class="text-gray-400 text-[11px] mb-4 text-right">رسائل شكر تلقائية للداعمين بالبوست</p>
+                                    <a href="/dashboard/${guildId}/boost" class="w-full py-2 bg-pink-950/30 hover:bg-gradient-to-r hover:from-pink-600 hover:to-purple-600 hover:text-white text-pink-300 border border-pink-900/30 rounded-xl text-xs font-bold text-center transition">&gt; Visit</a>
+                                </div>
+
                             </div>
                         </div>
 
@@ -801,6 +814,10 @@ module.exports = function (app, client) {
                             <a href="/dashboard/${guildId}/welcome" class="px-3 py-1.5 rounded-xl text-gray-300 hover:text-purple-300 hover:bg-purple-950/30 font-medium flex items-center justify-between transition">
                                 <span class="w-2 h-2 rounded-full bg-purple-400"></span>
                                 <span class="flex items-center gap-1.5"><span>الترحيب & المغادرة</span><span>👋</span></span>
+                            </a>
+                            <a href="/dashboard/${guildId}/boost" class="px-3 py-1.5 rounded-xl text-gray-300 hover:text-purple-300 hover:bg-purple-950/30 font-medium flex items-center justify-between transition">
+                                <span class="w-2 h-2 rounded-full bg-pink-400"></span>
+                                <span class="flex items-center gap-1.5"><span>البوستات</span><span>🚀</span></span>
                             </a>
                             <a href="/dashboard/${guildId}/autoresponder" class="px-3 py-1.5 rounded-xl text-gray-300 hover:text-purple-300 hover:bg-purple-950/30 font-medium flex items-center justify-between transition">
                                 <span class="w-2 h-2 rounded-full bg-purple-400"></span>
@@ -1257,7 +1274,8 @@ module.exports = function (app, client) {
                 'logs': 'قنوات السجلات واللوق الشامل 📋',
                 'fun': 'التسلية والألعاب والمنافسات 🎮',
                 'general': 'الأوامر العامة والإعدادات الأساسية ⚙️',
-                'settings': 'إعدادات السيرفر العامة ⚙️'
+                'settings': 'إعدادات السيرفر العامة ⚙️',
+                'boost': 'البوستات - رسالة الشكر للداعمين 🚀'
             };
 
             const title = sectionTitles[section] || ('إعدادات ' + section);
@@ -1267,7 +1285,122 @@ module.exports = function (app, client) {
             // ==========================================
             let formFieldsHtml = '';
 
-            if (section === 'protection' || section === 'antinuke') {
+            if (section === 'boost') {
+                formFieldsHtml = `
+                    <div class="space-y-6">
+
+                        <!-- إعدادات البوستات الرئيسية -->
+                        <div class="bg-[#12131c] border border-purple-950/40 p-6 rounded-2xl space-y-5 text-right">
+                            <div class="flex items-center justify-between">
+                                <label class="toggle"><input type="checkbox" name="boost_enabled" ${settings.boost_enabled !== 0 ? 'checked' : ''} onchange="saveSetting('boost_enabled', this.checked ? 1 : 0)"><span class="slider"></span></label>
+                                <div>
+                                    <h4 class="font-bold text-white text-sm">رسائل البوست (Server Boost Messages)</h4>
+                                    <p class="text-gray-400 text-[11px]">إرسال رسالة تلقائية عندما يقوم أحد الأعضاء بعمل بوست للسيرفر 🚀</p>
+                                </div>
+                            </div>
+
+                            <!-- قناة البوست -->
+                            <div>
+                                <label class="block text-xs font-bold text-gray-300 mb-2">قناة إعلانات البوست (Channel ID) <span class="text-purple-400">*</span></label>
+                                <input type="text" name="boost_channel" value="${settings.boost_channel || ''}" placeholder="ضع ID روم إعلانات البوست هنا..." class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none font-mono text-right">
+                            </div>
+
+                            <!-- رسالة البوست مع التاغات -->
+                            <div>
+                                <div class="flex items-center justify-between mb-2">
+                                    <div class="flex items-center gap-1.5 flex-wrap">
+                                        <button type="button" onclick="insertBoostTag('[user]')" class="px-2 py-1 bg-purple-950/50 hover:bg-purple-800/60 text-purple-300 border border-purple-900/40 rounded-lg text-[10px] font-mono transition">+ [user]</button>
+                                        <button type="button" onclick="insertBoostTag('[globalName]')" class="px-2 py-1 bg-purple-950/50 hover:bg-purple-800/60 text-purple-300 border border-purple-900/40 rounded-lg text-[10px] font-mono transition">+ [globalName]</button>
+                                        <button type="button" onclick="insertBoostTag('[totalBoosts]')" class="px-2 py-1 bg-purple-950/50 hover:bg-purple-800/60 text-purple-300 border border-purple-900/40 rounded-lg text-[10px] font-mono transition">+ [totalBoosts]</button>
+                                        <button type="button" onclick="insertBoostTag('[serverName]')" class="px-2 py-1 bg-purple-950/50 hover:bg-purple-800/60 text-purple-300 border border-purple-900/40 rounded-lg text-[10px] font-mono transition">+ [serverName]</button>
+                                    </div>
+                                    <label class="text-xs font-bold text-gray-300">رسالة البوست في القناة</label>
+                                </div>
+                                <textarea id="boostTextarea" name="boost_message" rows="4" placeholder="🎉 شكراً [user] لدعمك السيرفر بالبوست! أصبح عدد البوستات الآن [totalBoosts] بوست!" class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right leading-relaxed">${settings.boost_message || ''}</textarea>
+                            </div>
+
+                            <!-- معاينة حية -->
+                            <div class="bg-[#2b2d31] border-r-4 border-[#f47fff] p-4 rounded-xl text-right max-w-md">
+                                <div class="flex items-center gap-3 mb-2">
+                                    <div class="w-8 h-8 rounded-full bg-[#f47fff]/20 flex items-center justify-center text-lg">🚀</div>
+                                    <span class="text-xs font-bold text-[#f47fff]">ZENO Bot</span>
+                                </div>
+                                <p class="text-xs text-gray-300">${settings.boost_message || '🎉 شكراً [user] لدعمك السيرفر بالبوست! أصبح عدد البوستات الآن [totalBoosts] بوست!'}</p>
+                            </div>
+                        </div>
+
+                        <!-- إرسال إلى الخاص (DM) -->
+                        <div class="bg-[#12131c] border border-purple-950/40 p-6 rounded-2xl space-y-4 text-right">
+                            <div class="flex items-center justify-between">
+                                <label class="toggle"><input type="checkbox" name="boost_dm_enabled" ${settings.boost_dm_enabled ? 'checked' : ''} onchange="saveSetting('boost_dm_enabled', this.checked ? 1 : 0)"><span class="slider"></span></label>
+                                <div>
+                                    <h4 class="font-bold text-white text-sm">إرسال رسالة شكر في الخاص (DM Thank You)</h4>
+                                    <p class="text-gray-400 text-[11px]">إرسال رسالة شخصية في الخاص لكل عضو يقوم بعمل بوست</p>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-300 mb-2">رسالة الخاص (DM Message)</label>
+                                <textarea name="boost_dm_message" rows="3" placeholder="شكراً جزيلاً لدعمك سيرفر [serverName] بالبوست! 🚀" class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right leading-relaxed">${settings.boost_dm_message || ''}</textarea>
+                            </div>
+                        </div>
+
+                        <!-- إرسال كـ Embed -->
+                        <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl text-right">
+                            <div class="flex items-center justify-between">
+                                <label class="toggle"><input type="checkbox" name="boost_embed_enabled" ${settings.boost_embed_enabled ? 'checked' : ''} onchange="saveSetting('boost_embed_enabled', this.checked ? 1 : 0)"><span class="slider"></span></label>
+                                <div>
+                                    <h4 class="font-bold text-white text-sm">إرسال كرسالة Embed ملوّنة بالوردي</h4>
+                                    <p class="text-gray-400 text-[11px]">رسالة منسقة بلون Nitro الوردي مع معلومات العضو وعدد البوستات</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- متغيرات البوست -->
+                        <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl text-right">
+                            <h4 class="font-bold text-white text-sm mb-3">المتغيرات المدعومة 🏷️</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                                <div class="flex justify-between items-center py-2 border-b border-purple-950/30">
+                                    <span class="text-gray-400">منشن العضو الداعم</span>
+                                    <code class="text-purple-400 bg-purple-950/30 px-2 py-0.5 rounded">[user]</code>
+                                </div>
+                                <div class="flex justify-between items-center py-2 border-b border-purple-950/30">
+                                    <span class="text-gray-400">الاسم العام للعضو</span>
+                                    <code class="text-purple-400 bg-purple-950/30 px-2 py-0.5 rounded">[globalName]</code>
+                                </div>
+                                <div class="flex justify-between items-center py-2 border-b border-purple-950/30">
+                                    <span class="text-gray-400">اسم المستخدم</span>
+                                    <code class="text-purple-400 bg-purple-950/30 px-2 py-0.5 rounded">[userName]</code>
+                                </div>
+                                <div class="flex justify-between items-center py-2 border-b border-purple-950/30">
+                                    <span class="text-gray-400">إجمالي البوستات في السيرفر</span>
+                                    <code class="text-purple-400 bg-purple-950/30 px-2 py-0.5 rounded">[totalBoosts]</code>
+                                </div>
+                                <div class="flex justify-between items-center py-2">
+                                    <span class="text-gray-400">اسم السيرفر</span>
+                                    <code class="text-purple-400 bg-purple-950/30 px-2 py-0.5 rounded">[serverName]</code>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <script>
+                    function insertBoostTag(tag) {
+                        const ta = document.getElementById('boostTextarea');
+                        if (!ta) return;
+                        const start = ta.selectionStart, end = ta.selectionEnd;
+                        ta.value = ta.value.substring(0, start) + tag + ta.value.substring(end);
+                        ta.selectionStart = ta.selectionEnd = start + tag.length;
+                        ta.focus();
+                    }
+                    function saveSetting(key, value) {
+                        fetch('/api/guild/${guildId}/settings', {
+                            method: 'POST',
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify({ key, value })
+                        });
+                    }
+                    </script>
+                `;
+            } else if (section === 'protection' || section === 'antinuke') {
                 formFieldsHtml = `
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl">
