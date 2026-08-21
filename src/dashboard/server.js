@@ -34,11 +34,11 @@ module.exports = function (app, client) {
     app.get('/', (req, res) => {
         try {
             const user = req.session?.user;
-            const stats = db.prepare ? {
+            const stats = {
                 guilds: client?.guilds?.cache?.size || 0,
                 users: client?.users?.cache?.size || 0,
                 ping: client?.ws?.ping || 24
-            } : { guilds: 0, users: 0, ping: 24 };
+            };
 
             res.send(`
             <!DOCTYPE html>
@@ -157,7 +157,8 @@ module.exports = function (app, client) {
             </html>
             `);
         } catch (e) {
-            res.status(500).send("Error");
+            console.error("Dashboard / error:", e);
+            res.status(500).send(`<pre style="color:red;background:#111;padding:20px;font-family:monospace">${e.stack || e.message || e}</pre>`);
         }
     });
 
