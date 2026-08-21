@@ -1134,31 +1134,52 @@ module.exports = function (app, client) {
                 `;
             } else if (section === 'welcome') {
                 formFieldsHtml = `
-                    <div class="space-y-5">
+                    <div class="space-y-6">
+                        <!-- Welcome Toggle & Live Card Preview -->
                         <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl">
                             <div class="flex items-center justify-between mb-4">
                                 <label class="toggle"><input type="checkbox" name="welcome_image" value="1" ${settings.welcome_image ? 'checked' : ''}><span class="slider"></span></label>
                                 <div class="text-right">
-                                    <h4 class="font-bold text-white text-sm">توليد بطاقة ترحيب مصممة (Canvas Card Image)</h4>
-                                    <p class="text-gray-400 text-[11px]">إرسال صورة ترحيبية احترافية باسم وافتار العضو الجديد</p>
+                                    <h4 class="font-bold text-white text-sm">توليد بطاقة ترحيب مصممة بالاسم والافتار (Canvas Card)</h4>
+                                    <p class="text-gray-400 text-[11px]">إرسال صورة ترحيبية احترافية تلقائياً لكل عضو ينضم للسيرفر</p>
                                 </div>
+                            </div>
+                            <!-- Live Preview Visual -->
+                            <div class="mt-4 p-4 rounded-xl bg-gradient-to-r from-purple-950/40 via-[#0d0e15] to-indigo-950/40 border border-purple-900/30 flex items-center justify-between">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-12 h-12 rounded-full border-2 border-purple-500 bg-[#1f212d] flex items-center justify-center text-lg">👤</div>
+                                    <div class="text-right">
+                                        <p class="text-xs font-bold text-white">WELCOME TO THE SERVER</p>
+                                        <p class="text-[11px] text-purple-300 font-mono">Member #124</p>
+                                    </div>
+                                </div>
+                                <span class="text-[10px] bg-purple-900/50 text-purple-200 px-2.5 py-1 rounded-lg border border-purple-700/40">معاينة مباشرة</span>
                             </div>
                         </div>
 
+                        <!-- Channels & Roles Selection -->
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-xs font-bold text-gray-300 mb-2 text-right">قناة الترحيب (Welcome Channel ID)</label>
-                                <input type="text" name="welcome_channel" value="${settings.welcome_channel || ''}" placeholder="ضع ID روم الترحيب..." class="w-full bg-[#12131c] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right font-mono">
+                                <input type="text" name="welcome_channel" value="${settings.welcome_channel || ''}" placeholder="ضع ID روم الترحيب هنا..." class="w-full bg-[#12131c] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right font-mono">
                             </div>
                             <div>
-                                <label class="block text-xs font-bold text-gray-300 mb-2 text-right">الرتبة التلقائية للأعضاء (Auto-Role ID)</label>
-                                <input type="text" name="auto_role" value="${settings.auto_role || ''}" placeholder="ضع ID رتبة الدخول..." class="w-full bg-[#12131c] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right font-mono">
+                                <label class="block text-xs font-bold text-gray-300 mb-2 text-right">الرتبة التلقائية للأعضاء الجدد (Auto-Role ID)</label>
+                                <input type="text" name="auto_role" value="${settings.auto_role || ''}" placeholder="ضع ID الرتبة التلقائية..." class="w-full bg-[#12131c] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right font-mono">
                             </div>
                         </div>
 
+                        <!-- Custom Message with Quick Insert Tags -->
                         <div>
-                            <label class="block text-xs font-bold text-gray-300 mb-2 text-right">نص رسالة الترحيب (المتغيرات: [user] [server] [memberCount])</label>
-                            <textarea name="welcome_message" rows="4" placeholder="أهلاً بك [user] في سيرفر [server]! أنت العضو رقم [memberCount] 🎉" class="w-full bg-[#12131c] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right">${settings.welcome_message || ''}</textarea>
+                            <div class="flex items-center justify-between mb-2">
+                                <div class="flex items-center gap-1.5">
+                                    <button type="button" onclick="insertTag('[user]')" class="px-2 py-1 bg-purple-950/50 hover:bg-purple-800/60 text-purple-300 border border-purple-900/40 rounded-lg text-[10px] font-mono transition">+ منشن العضو [user]</button>
+                                    <button type="button" onclick="insertTag('[server]')" class="px-2 py-1 bg-purple-950/50 hover:bg-purple-800/60 text-purple-300 border border-purple-900/40 rounded-lg text-[10px] font-mono transition">+ اسم السيرفر [server]</button>
+                                    <button type="button" onclick="insertTag('[memberCount]')" class="px-2 py-1 bg-purple-950/50 hover:bg-purple-800/60 text-purple-300 border border-purple-900/40 rounded-lg text-[10px] font-mono transition">+ رقم العضو [memberCount]</button>
+                                </div>
+                                <label class="text-xs font-bold text-gray-300">رسالة الترحيب النصية</label>
+                            </div>
+                            <textarea id="welcomeTextarea" name="welcome_message" rows="4" placeholder="أهلاً بك [user] في سيرفر [server]! أنت العضو رقم [memberCount] 🎉 نتمنى لك قضاء وقت ممتع معنا!" class="w-full bg-[#12131c] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right leading-relaxed">${settings.welcome_message || ''}</textarea>
                         </div>
                     </div>
                 `;
@@ -1691,11 +1712,15 @@ module.exports = function (app, client) {
                             <form id="settingsForm" class="space-y-6">
                                 ${formFieldsHtml}
 
-                                <div class="pt-6 border-t border-purple-950/40 flex items-center justify-between">
-                                    <span id="saveStatus" class="text-xs text-emerald-400 font-bold hidden">✅ تم الحفظ بنجاح وتحديث البوت في الديسكورد لحظياً!</span>
-                                    <button type="submit" class="px-8 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-bold rounded-xl transition shadow-lg shadow-purple-900/30">
-                                        حفظ التغييرات
+                                <div class="pt-6 border-t border-purple-950/40 flex items-center justify-between flex-row-reverse">
+                                    <button type="submit" class="px-8 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-bold rounded-xl transition shadow-lg shadow-purple-900/30 flex items-center gap-2">
+                                        <span>💾</span>
+                                        <span>حفظ التغييرات</span>
                                     </button>
+                                    <span id="saveStatus" class="text-xs text-emerald-400 font-bold hidden flex items-center gap-1.5">
+                                        <span>✅</span>
+                                        <span>تم الحفظ وتطبيق التغييرات في السيرفر بنجاح!</span>
+                                    </span>
                                 </div>
                             </form>
                         </div>
@@ -1710,6 +1735,14 @@ module.exports = function (app, client) {
                 </div>
 
                 <script>
+                    function insertTag(tag) {
+                        const area = document.getElementById('welcomeTextarea');
+                        if (area) {
+                            area.value += ' ' + tag;
+                            area.focus();
+                        }
+                    }
+
                     function toggleModule(guildId, key, val) {
                         fetch('/api/guild/' + guildId + '/module', {
                             method: 'POST',
