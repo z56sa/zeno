@@ -744,10 +744,20 @@ module.exports = function (app, client) {
             if (!req.session?.user) return res.redirect('/auth/discord');
             const guildId = req.params.guildId;
             const guilds = req.session.guilds || [];
-            const guild = guilds.find(g => g.id === guildId);
-            const user = req.session.user;
+            let guild = guilds.find(g => g.id === guildId);
 
-            if (!guild) return res.redirect('/dashboard');
+            if (!guild && client?.guilds?.cache) {
+                const botGuild = client.guilds.cache.get(guildId);
+                if (botGuild) {
+                    guild = { id: botGuild.id, name: botGuild.name, icon: botGuild.icon };
+                }
+            }
+
+            if (!guild) {
+                guild = { id: guildId, name: 'Discord Server', icon: null };
+            }
+
+            const user = req.session.user;
 
             const guildIcon = guild.icon ? `https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.png` : 'https://cdn.discordapp.com/embed/avatars/0.png';
 
@@ -994,10 +1004,21 @@ module.exports = function (app, client) {
             if (!req.session?.user) return res.redirect('/auth/discord');
             const { guildId, section } = req.params;
             const guilds = req.session.guilds || [];
-            const guild = guilds.find(g => g.id === guildId);
-            const user = req.session.user;
-            if (!guild) return res.redirect('/dashboard');
+            let guild = guilds.find(g => g.id === guildId);
+            
+            // إذا لم يتم العثور على السيرفر في الجلسة، نبحث عنه في كاش البوت مباشرة
+            if (!guild && client?.guilds?.cache) {
+                const botGuild = client.guilds.cache.get(guildId);
+                if (botGuild) {
+                    guild = { id: botGuild.id, name: botGuild.name, icon: botGuild.icon };
+                }
+            }
 
+            if (!guild) {
+                guild = { id: guildId, name: 'Discord Server', icon: null };
+            }
+
+            const user = req.session.user;
             const settings = db.getGuildSettings(guildId) || {};
             const guildIcon = guild.icon ? `https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.png` : 'https://cdn.discordapp.com/embed/avatars/0.png';
 
