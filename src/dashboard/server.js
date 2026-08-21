@@ -1002,6 +1002,38 @@ module.exports = function (app, client) {
         }
     });
 
+    // إضافة رد تلقائي جديد (Auto Responder API)
+    app.post('/api/guild/:guildId/autoresponder', express.json(), (req, res) => {
+        try {
+            if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
+            const { guildId } = req.params;
+            const { trigger_word, reply_text } = req.body;
+
+            if (trigger_word && reply_text) {
+                database.addAutoResponder(guildId, trigger_word, reply_text);
+            }
+            res.json({ success: true, guildId });
+        } catch (e) {
+            res.status(500).json({ success: false, error: e.message });
+        }
+    });
+
+    // حذف رد تلقائي (Delete Auto Responder API)
+    app.post('/api/guild/:guildId/autoresponder/delete', express.json(), (req, res) => {
+        try {
+            if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
+            const { guildId } = req.params;
+            const { trigger_word } = req.body;
+
+            if (trigger_word) {
+                database.deleteAutoResponder(guildId, trigger_word);
+            }
+            res.json({ success: true, guildId });
+        } catch (e) {
+            res.status(500).json({ success: false, error: e.message });
+        }
+    });
+
     // صفحات فرعية لجميع الأزرار (Moderation, Automod, Welcome, Tickets, Protection)
     app.get('/dashboard/:guildId/:section', (req, res) => {
         try {
@@ -1287,26 +1319,169 @@ module.exports = function (app, client) {
                     </div>
                 `;
             } else if (section === 'autoresponder') {
+                const autoRespondersList = database.getAutoResponders ? database.getAutoResponders(guildId) : [];
+                const respondersHtml = autoRespondersList && autoRespondersList.length > 0 ? autoRespondersList.map(r => `
+                    <div class="bg-[#0b0c10] border border-purple-950/40 p-4 rounded-xl flex items-center justify-between">
+                        <button type="button" onclick="deleteResponder('${guildId}', '${r.trigger_word}')" class="px-3 py-1.5 bg-red-950/40 hover:bg-red-900/60 text-red-300 border border-red-900/30 rounded-lg text-xs font-bold transition">حذف 🗑️</button>
+                        <div class="text-right">
+                            <p class="font-bold text-white text-xs">إذا كتب العضو: <span class="text-purple-300 font-mono bg-purple-950/40 px-2 py-0.5 rounded">"${r.trigger_word}"</span></p>
+                            <p class="text-gray-300 text-xs mt-1">يرد البوت: <span class="text-gray-200">"${r.reply_text}"</span></p>
+                        </div>
+                    </div>
+                `).join('') : '<p class="text-gray-500 text-xs text-center py-4">لا توجد ردود تلقائية مضافة حالياً. أضف ردك الأول بالأسفل!</p>';
+
                 formFieldsHtml = `
-                    <div class="space-y-5">
+                    <div class="space-y-6">
+                        <!-- Current Responders List -->
+                        <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl">
+                            <h4 class="font-bold text-white text-sm mb-3 text-right">قائمة الردود التلقائية النشطة (${autoRespondersList.length})</h4>
+                            <div class="space-y-2.5 max-h-60 overflow-y-auto">
+                                ${respondersHtml}
+                            </div>
+                        </div>
+
+                        <!-- Add New Responder Form -->
                         <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl text-right">
-                            <h4 class="font-bold text-white text-sm mb-1">الردود التلقائية المخصصة (Auto Responder)</h4>
-                            <p class="text-gray-400 text-xs mb-4">يقوم البوت بالرد التلقائي فور كتابة الأعضاء للكلمات المحددة.</p>
+                            <h4 class="font-bold text-white text-sm mb-1">إضافة رد تلقائي جديد 💬</h4>
+                            <p class="text-gray-400 text-xs mb-4">يقوم البوت بالرد التلقائي فوراً في الشات بمجرد كتابة الكلمة المحددة.</p>
                             
                             <div class="space-y-4">
                                 <div>
                                     <label class="block text-xs font-bold text-gray-300 mb-1 text-right">الكلمة المفتاحية (Trigger Word)</label>
-                                    <input type="text" placeholder="مثال: السلام عليكم أو رابط السيرفر" class="w-full bg-[#0b0c10] border border-purple-950/40 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right">
+                                    <input type="text" id="triggerWordInput" placeholder="مثال: السلام عليكم أو رابط السيرفر" class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-gray-300 mb-1 text-right">الرد التلقائي للبوت (Response Message)</label>
-                                    <textarea rows="3" placeholder="مثال: وعليكم السلام ورحمة الله وبركاته، أهلاً بك!" class="w-full bg-[#0b0c10] border border-purple-950/40 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right"></textarea>
+                                    <textarea id="replyTextInput" rows="3" placeholder="مثال: وعليكم السلام ورحمة الله وبركاته، أهلاً وسهلاً بك في سيرفرنا!" class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right"></textarea>
+                                </div>
+                                <div class="pt-2">
+                                    <button type="button" onclick="addAutoResponder('${guildId}')" class="w-full py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-bold rounded-xl transition shadow-lg shadow-purple-900/30">
+                                        + إضافة وحفظ الرد التلقائي
+                                    </button>
                                 </div>
                             </div>
                         </div>
                     </div>
                 `;
-            } else if (section === 'moderation') {
+            } else if (section === 'general' || section === 'settings') {
+                formFieldsHtml = `
+                    <div class="space-y-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-gray-300 mb-2 text-right">برفكس البوت الافتراضي (Default Prefix)</label>
+                                <input type="text" name="prefix" value="${settings.prefix || '#'}" class="w-full bg-[#12131c] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right font-mono">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-300 mb-2 text-right">قناة السجلات العامة (General Logs Channel ID)</label>
+                                <input type="text" name="log_channel" value="${settings.log_channel || ''}" placeholder="ضع ID القناة..." class="w-full bg-[#12131c] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right font-mono">
+                            </div>
+                        </div>
+
+                        <!-- All 12 General & Utility Commands Suite -->
+                        <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl">
+                            <h4 class="font-bold text-white text-sm mb-4 text-right">جميع الأوامر العامة والخدمية المتاحة (12 أمراً)</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                
+                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                    <div class="text-right">
+                                        <p class="font-bold text-white text-xs">/ping & #ping</p>
+                                        <p class="text-gray-400 text-[10px]">فحص سرعة استجابة البوت وسيرفرات ديسكورد</p>
+                                    </div>
+                                </div>
+
+                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                    <div class="text-right">
+                                        <p class="font-bold text-white text-xs">/bot & #bot</p>
+                                        <p class="text-gray-400 text-[10px]">عرض معلومات ومواصفات وإحصائيات البوت</p>
+                                    </div>
+                                </div>
+
+                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                    <div class="text-right">
+                                        <p class="font-bold text-white text-xs">/server & #server</p>
+                                        <p class="text-gray-400 text-[10px]">عرض معلومات السيرفر والأونر وتاريخ الإنشاء</p>
+                                    </div>
+                                </div>
+
+                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                    <div class="text-right">
+                                        <p class="font-bold text-white text-xs">/user & #user</p>
+                                        <p class="text-gray-400 text-[10px]">عرض بطاقة معلومات العضو ورتبه وتاريخ الانضمام</p>
+                                    </div>
+                                </div>
+
+                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                    <div class="text-right">
+                                        <p class="font-bold text-white text-xs">/avatar & #avatar</p>
+                                        <p class="text-gray-400 text-[10px]">عرض وتحميل الصورة الرمزية للعضو أو السيرفر</p>
+                                    </div>
+                                </div>
+
+                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                    <div class="text-right">
+                                        <p class="font-bold text-white text-xs">/banner & #banner</p>
+                                        <p class="text-gray-400 text-[10px]">عرض بنر الملف الشخصي أو بنر السيرفر</p>
+                                    </div>
+                                </div>
+
+                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                    <div class="text-right">
+                                        <p class="font-bold text-white text-xs">/roles & #roles</p>
+                                        <p class="text-gray-400 text-[10px]">عرض قائمة جميع رتب السيرفر وأعداد أعضائها</p>
+                                    </div>
+                                </div>
+
+                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                    <div class="text-right">
+                                        <p class="font-bold text-white text-xs">/channels & #channels</p>
+                                        <p class="text-gray-400 text-[10px]">إحصائيات القنوات الصوتية والنصية والكاتيجوري</p>
+                                    </div>
+                                </div>
+
+                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                    <div class="text-right">
+                                        <p class="font-bold text-white text-xs">/help & #help</p>
+                                        <p class="text-gray-400 text-[10px]">قائمة المساعدة التفاعلية المنسدلة لجميع الأوامر</p>
+                                    </div>
+                                </div>
+
+                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                    <div class="text-right">
+                                        <p class="font-bold text-white text-xs">/profile & /id</p>
+                                        <p class="text-gray-400 text-[10px]">بطاقة البروفايل التفاعلية مع الرصيد والمستوى</p>
+                                    </div>
+                                </div>
+
+                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                    <div class="text-right">
+                                        <p class="font-bold text-white text-xs">/emojis & #emojis</p>
+                                        <p class="text-gray-400 text-[10px]">استعراض وإحصاء جميع إيموجيات وستيكرات السيرفر</p>
+                                    </div>
+                                </div>
+
+                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                    <div class="text-right">
+                                        <p class="font-bold text-white text-xs">/tax & #tax</p>
+                                        <p class="text-gray-400 text-[10px]">حاسبة ضريبة بروبوت والتحويلات الذكية</p>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                `;
                 formFieldsHtml = `
                     <div class="space-y-6">
                         <!-- Quick Stats & Settings -->
@@ -1735,6 +1910,37 @@ module.exports = function (app, client) {
                 </div>
 
                 <script>
+                    async function addAutoResponder(guildId) {
+                        const trigger = document.getElementById('triggerWordInput')?.value?.trim();
+                        const reply = document.getElementById('replyTextInput')?.value?.trim();
+                        if (!trigger || !reply) {
+                            alert('الرجاء كتابة الكلمة المفتاحية ونص الرد!');
+                            return;
+                        }
+
+                        const res = await fetch('/api/guild/' + guildId + '/autoresponder', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ trigger_word: trigger, reply_text: reply })
+                        });
+                        if (res.ok) {
+                            location.reload();
+                        }
+                    }
+
+                    async function deleteResponder(guildId, word) {
+                        if (confirm('هل أنت متأكد من رغبتك في حذف هذا الرد التلقائي؟')) {
+                            const res = await fetch('/api/guild/' + guildId + '/autoresponder/delete', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ trigger_word: word })
+                            });
+                            if (res.ok) {
+                                location.reload();
+                            }
+                        }
+                    }
+
                     function insertTag(tag) {
                         const area = document.getElementById('welcomeTextarea');
                         if (area) {
