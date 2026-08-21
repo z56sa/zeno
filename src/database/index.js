@@ -145,13 +145,30 @@ db.exec(`
   );
 `);
 
-// Migrations - إضافة أعمدة البوست للسيرفرات القديمة بشكل آمن
+// Migrations - إضافة الأعمدة الجديدة بشكل آمن
 try { db.exec("ALTER TABLE guild_settings ADD COLUMN boost_enabled INTEGER DEFAULT 1;"); } catch(e) {}
 try { db.exec("ALTER TABLE guild_settings ADD COLUMN boost_channel TEXT;"); } catch(e) {}
 try { db.exec("ALTER TABLE guild_settings ADD COLUMN boost_message TEXT;"); } catch(e) {}
 try { db.exec("ALTER TABLE guild_settings ADD COLUMN boost_dm_enabled INTEGER DEFAULT 0;"); } catch(e) {}
 try { db.exec("ALTER TABLE guild_settings ADD COLUMN boost_dm_message TEXT;"); } catch(e) {}
 try { db.exec("ALTER TABLE guild_settings ADD COLUMN boost_embed_enabled INTEGER DEFAULT 0;"); } catch(e) {}
+
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN leave_enabled INTEGER DEFAULT 0;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN leave_channel TEXT;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN leave_message TEXT;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN welcome_dm_enabled INTEGER DEFAULT 0;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN welcome_dm_message TEXT;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN welcome_embed_enabled INTEGER DEFAULT 0;"); } catch(e) {}
+
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN bot_language TEXT DEFAULT 'ar';"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN admin_role TEXT;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN announcements_channel TEXT;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN bot_enabled INTEGER DEFAULT 1;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN fun_enabled INTEGER DEFAULT 1;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN autoresponder_enabled INTEGER DEFAULT 1;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN min_bet INTEGER DEFAULT 10;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN max_bet INTEGER DEFAULT 50000;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN game_rewards_multiplier REAL DEFAULT 1.0;"); } catch(e) {}
 
 console.log('[DB] ✅ SQLite database initialized successfully');
 
@@ -173,6 +190,8 @@ function setGuildSetting(guildId, key, value) {
   // قائمة الأعمدة المسموحة
   const allowed = [
     'prefix','welcome_channel','welcome_message','welcome_image',
+    'welcome_dm_enabled','welcome_dm_message','welcome_embed_enabled',
+    'leave_enabled','leave_channel','leave_message',
     'log_channel','ticket_category','ticket_log_channel','support_role','auto_role',
     'leveling_enabled','level_message','level_channel','level_multiplier',
     'anti_link','anti_spam','anti_caps','anti_emoji_spam','anti_line_spam',
@@ -182,7 +201,9 @@ function setGuildSetting(guildId, key, value) {
     'verification_enabled','verification_type','verification_role',
     'anti_nuke_enabled','anti_nuke_action',
     'temp_voice_enabled','temp_voice_category','temp_voice_channel',
-    'boost_enabled','boost_channel','boost_message','boost_dm_enabled','boost_dm_message','boost_embed_enabled'
+    'boost_enabled','boost_channel','boost_message','boost_dm_enabled','boost_dm_message','boost_embed_enabled',
+    'bot_language','admin_role','announcements_channel','bot_enabled','fun_enabled','autoresponder_enabled',
+    'min_bet','max_bet','game_rewards_multiplier'
   ];
   if (!allowed.includes(key)) throw new Error(`حقل غير مسموح: ${key}`);
   db.prepare(`UPDATE guild_settings SET ${key} = ? WHERE guild_id = ?`).run(value, guildId);
