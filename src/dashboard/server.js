@@ -1,11 +1,12 @@
 const express = require('express');
 const session = require('express-session');
 const SqliteStore = require('better-sqlite3-session-store')(session);
-const { db } = require('../database');
+const database = require('../database');
+const rawDb = database.db;
 
 module.exports = function (app, client) {
     const sessionStore = new SqliteStore({
-        client: db,
+        client: rawDb,
         expired: {
             clear: true,
             intervalMs: 900000 // تنظيف كل 15 دقيقة
@@ -214,10 +215,15 @@ module.exports = function (app, client) {
             const userAvatar = user.avatar ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png` : 'https://cdn.discordapp.com/embed/avatars/0.png';
 
             // جلب بيانات المستخدم من SQLite
-            const userRow = db.prepare('SELECT SUM(coins) as coins, MAX(level) as level, SUM(xp) as xp FROM users WHERE user_id = ?').get(user.id);
-            const userCoins = userRow?.coins || 0;
-            const userLevel = userRow?.level || 1;
-            const userStars = db.prepare('SELECT COUNT(*) as count FROM stars WHERE receiver_id = ?').get(user.id)?.count || 0;
+            let userCoins = 0, userLevel = 1, userStars = 0;
+            try {
+                const userRow = rawDb.prepare('SELECT SUM(coins) as coins, MAX(level) as level, SUM(xp) as xp FROM users WHERE user_id = ?').get(user.id);
+                userCoins = userRow?.coins || 0;
+                userLevel = userRow?.level || 1;
+                userStars = rawDb.prepare('SELECT COUNT(*) as count FROM stars WHERE receiver_id = ?').get(user.id)?.count || 0;
+            } catch (err) {
+                console.error("Error reading user stats:", err);
+            }
 
             // قائمة السيرفرات على الشريط الرأسي الأيمن (Server Rail)
             const serverRailHtml = guilds.map(g => `
@@ -966,10 +972,10 @@ module.exports = function (app, client) {
             const { module, enabled } = req.body;
 
             // تحديث في قاعدة بيانات SQLite فوراً
-            db.updateGuildSetting(guildId, module, enabled ? 1 : 0);
+            database.updateGuildSetting(guildId, module, enabled ? 1 : 0);
 
             // إرسال إشعار في سيرفر الديسكورد إذا كانت هناك قناة سجلات
-            const guildSettings = db.getGuildSettings(guildId);
+            const guildSettings = database.getGuildSettings(guildId);
             if (guildSettings?.log_channel && client?.channels?.cache) {
                 const logCh = client.channels.cache.get(guildSettings.log_channel);
                 if (logCh) {
@@ -989,7 +995,7 @@ module.exports = function (app, client) {
             const { guildId } = req.params;
             const { key, value } = req.body;
 
-            db.updateGuildSetting(guildId, key, value);
+            database.updateGuildSetting(guildId, key, value);
             res.json({ success: true, guildId, key, value });
         } catch (e) {
             res.status(500).json({ success: false, error: e.message });
@@ -1017,15 +1023,22 @@ module.exports = function (app, client) {
             }
 
             const user = req.session.user;
-            const settings = db.getGuildSettings(guildId) || {};
+            let settings = {};
+            try {
+                settings = database.getGuildSettings ? database.getGuildSettings(guildId) : {};
+            } catch (err) {
+                console.error("Error reading guild settings:", err);
+            }
+            if (!settings) settings = {};
+
             const guildIcon = guild.icon ? `https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.png` : 'https://cdn.discordapp.com/embed/avatars/0.png';
 
-            const serverRailHtml = guilds.map(g => `
+            const serverRailHtml = Array.isArray(guilds) && guilds.length > 0 ? guilds.map(g => `
                 <a href="/dashboard/${g.id}" title="${g.name}" class="group relative flex items-center justify-center">
                     <img src="${g.icon ? `https://cdn.discordapp.com/icons/${g.id}/${g.icon}.png` : 'https://cdn.discordapp.com/embed/avatars/0.png'}" 
-                         class="w-11 h-11 rounded-2xl ${g.id === guildId ? 'border-2 border-[#5865F2]' : 'border border-transparent'} hover:rounded-xl object-cover transition-all">
+                         class="w-11 h-11 rounded-2xl ${g.id === guildId ? 'border-2 border-purple-500 shadow-lg shadow-purple-900/50' : 'border border-transparent'} hover:rounded-xl object-cover transition-all">
                 </a>
-            `).join('');
+            `).join('') : '';
 
             const sectionTitles = {
                 'moderation': 'الإشراف وإدارة الأعضاء 🔨',
