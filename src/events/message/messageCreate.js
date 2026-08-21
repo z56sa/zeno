@@ -244,33 +244,56 @@ module.exports = {
 
         if (leveledUp) {
           // فحص مكافآت الرتب للمستوى الجديد وإعطاؤها للعضو
-          const rewards = db.getLevelRewards(guildId).filter(r => r.level <= level);
-          for (const rew of rewards) {
-            const roleObj = message.guild.roles.cache.get(rew.role_id);
-            if (roleObj && !message.member.roles.cache.has(roleObj.id)) {
-              await message.member.roles.add(roleObj).catch(() => {});
+          try {
+            const rewards = db.getLevelRewards ? db.getLevelRewards(guildId).filter(r => r.level <= level) : [];
+            for (const rew of rewards) {
+              const roleObj = message.guild.roles.cache.get(rew.role_id) || await message.guild.roles.fetch(rew.role_id).catch(() => null);
+              if (roleObj && !message.member.roles.cache.has(roleObj.id)) {
+                await message.member.roles.add(roleObj).catch(() => {});
+              }
             }
-          }
+          } catch (e) {}
 
           // تجهيز رسالة رفع المستوى
-          const rawMsg = settings.level_message || '🎉 مبروك يا {user}! لقد ارتفع مستواك إلى **المستوى {level}**! 🚀';
+          let rawMsg = settings.level_message || '🎉 مبروك يا [user]! لقد ارتفع مستواك إلى **المستوى [level]**! 🚀';
           const formattedMsg = rawMsg
-            .replace(/{user}/g, `${message.author}`)
-            .replace(/{level}/g, `${level}`)
-            .replace(/{server}/g, `${message.guild.name}`);
+            .replace(/\[user\]/gi, `<@${message.author.id}>`)
+            .replace(/\{user\}/gi, `<@${message.author.id}>`)
+            .replace(/\[mention\]/gi, `<@${message.author.id}>`)
+            .replace(/\{mention\}/gi, `<@${message.author.id}>`)
+            .replace(/\[userName\]/gi, message.author.username)
+            .replace(/\{userName\}/gi, message.author.username)
+            .replace(/\[level\]/gi, level.toString())
+            .replace(/\{level\}/gi, level.toString())
+            .replace(/\[server\]/gi, message.guild.name)
+            .replace(/\{server\}/gi, message.guild.name);
+
+          const levelEmbed = new EmbedBuilder()
+            .setColor(config.colors.primary || '#9333ea')
+            .setAuthor({ name: `ترقية مستوى جديد! (Level Up) 🎉`, iconURL: message.guild.iconURL() || undefined })
+            .setDescription(formattedMsg)
+            .setThumbnail(message.author.displayAvatarURL({ dynamic: true, size: 256 }))
+            .addFields(
+              { name: '🎖️ المستوى الجديد', value: `\`Level ${level}\``, inline: true },
+              { name: '👤 العضو', value: `<@${message.author.id}>`, inline: true }
+            )
+            .setFooter({ text: `${message.guild.name} • Leveling System` })
+            .setTimestamp();
 
           const channelMode = settings.level_channel || 'current';
           if (channelMode === 'disabled') {
             // معطلة بدون إرسال رسالة
           } else if (channelMode === 'dm') {
-            message.author.send(formattedMsg).catch(() => {});
+            message.author.send({ embeds: [levelEmbed] }).catch(() => {});
           } else if (channelMode === 'current') {
-            const lvlMsg = await message.channel.send(formattedMsg).catch(() => {});
-            if (lvlMsg) setTimeout(() => lvlMsg.delete().catch(() => {}), 8000);
+            const lvlMsg = await message.channel.send({ embeds: [levelEmbed] }).catch(() => {});
+            if (lvlMsg) setTimeout(() => lvlMsg.delete().catch(() => {}), 10000);
           } else {
             // روم مخصص
-            const targetChan = message.guild.channels.cache.get(channelMode);
-            if (targetChan) targetChan.send(formattedMsg).catch(() => {});
+            const targetChan = message.guild.channels.cache.get(channelMode) || await message.guild.channels.fetch(channelMode).catch(() => null);
+            if (targetChan && targetChan.isTextBased()) {
+              targetChan.send({ embeds: [levelEmbed] }).catch(() => {});
+            }
           }
         }
       }

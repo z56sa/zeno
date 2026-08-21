@@ -7,11 +7,11 @@ const GAMBLE_COOLDOWN = 10000; // 10 ثوانٍ
 
 module.exports = {
   name: 'gamble',
-  description: 'راهن كريدتك! 🎰',
+  description: 'راهن بـ Star Coin! 🎰',
   aliases: ['مراهنة', 'كازينو'],
   data: new SlashCommandBuilder()
     .setName('gamble')
-    .setDescription('راهن كريدتك في الكازينو 🎰')
+    .setDescription('راهن بعملات Star Coin في الكازينو 🎰')
     .addIntegerOption(opt => opt.setName('amount').setDescription('المبلغ (10 - 50000)').setRequired(true).setMinValue(10).setMaxValue(50000)),
 
   async execute(interaction) {

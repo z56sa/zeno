@@ -26,11 +26,11 @@ const JOBS = [
 
 module.exports = {
   name: 'work',
-  description: 'اعمل لتكسب كريدت (كل 4 ساعات)',
+  description: 'اعمل لتكسب Star Coin (كل 4 ساعات)',
   aliases: ['اشتغل', 'شغل'],
   data: new SlashCommandBuilder()
     .setName('work')
-    .setDescription('اعمل لتكسب كريدت 💼'),
+    .setDescription('اعمل لتكسب Star Coin ⭐ 💼'),
 
   async execute(interaction) {
     await interaction.deferReply();

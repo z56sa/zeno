@@ -4,7 +4,7 @@ const config = require('../../config.json');
 
 module.exports = {
   name: 'leaderboard',
-  description: 'عرض قائمة المتصدرين في السيرفر (المستويات أو الكريدت)',
+  description: 'عرض قائمة المتصدرين في السيرفر (المستويات أو Star Coin)',
   aliases: ['top', 'توب', 'متصدرين'],
   data: new SlashCommandBuilder()
     .setName('leaderboard')
@@ -15,7 +15,7 @@ module.exports = {
         .setRequired(false)
         .addChoices(
           { name: '🏆 المستويات (XP)', value: 'xp' },
-          { name: '💰 الكريدت (Credits)', value: 'credits' }
+          { name: '⭐ نجوم (Star Coin)', value: 'credits' }
         )
     ),
 
@@ -26,7 +26,7 @@ module.exports = {
   },
 
   async executePrefix(message, args) {
-    const type = args[0]?.toLowerCase() === 'credits' || args[0]?.toLowerCase() === 'credit' ? 'credits' : 'xp';
+    const type = args[0]?.toLowerCase() === 'credits' || args[0]?.toLowerCase() === 'credit' || args[0]?.toLowerCase() === 'star' || args[0]?.toLowerCase() === 'coins' ? 'credits' : 'xp';
     const embed = await this.buildEmbed(message.guild, type);
     await message.reply({ embeds: [embed] });
   },
@@ -51,7 +51,7 @@ module.exports = {
       embed.setDescription(list);
     } else {
       const topUsers = db.getCoinsLeaderboard(guild.id, 10);
-      embed.setTitle(`💰 توب الأثرياء في الكريدت | ${guild.name}`);
+      embed.setTitle(`⭐ توب الأثرياء في Star Coin | ${guild.name}`);
 
       if (!topUsers || topUsers.length === 0) {
         embed.setDescription('لا توجد بيانات أرصدة بعد.');

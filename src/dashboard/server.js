@@ -1383,6 +1383,46 @@ module.exports = function (app, client) {
         }
     });
 
+    // إرسال لوحة التذاكر التفاعلية مباشرة إلى الديسكورد (Send Ticket Panel API)
+    app.post('/api/guild/:guildId/send-ticket-panel', express.json(), async (req, res) => {
+        try {
+            if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
+            const { guildId } = req.params;
+            const { channelId, title, desc } = req.body;
+
+            if (!channelId) {
+                return res.status(400).json({ success: false, error: 'Channel ID is required' });
+            }
+
+            const channel = client.channels.cache.get(channelId) || await client.channels.fetch(channelId).catch(() => null);
+            if (!channel || !channel.isTextBased()) {
+                return res.status(404).json({ success: false, error: 'لم يتم العثور على القناة أو البوت يفتقر لصلاحيات الوصول إليها.' });
+            }
+
+            const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+            const panelEmbed = new EmbedBuilder()
+                .setColor('#9333ea')
+                .setTitle(title || '🎫 نظام الدعم الفني والمساعدة')
+                .setDescription(desc || 'لفتح تذكرة جديدة والتواصل مع فريق الإدارة والدعم الفني، يرجى الضغط على الزر بالأسفل.')
+                .setFooter({ text: `${channel.guild?.name || 'Server'} • Ticket System` })
+                .setTimestamp();
+
+            const row = new ActionRowBuilder().addComponents(
+                new ButtonBuilder()
+                    .setCustomId('open_ticket')
+                    .setLabel('فتح تذكرة | Open Ticket')
+                    .setEmoji('📩')
+                    .setStyle(ButtonStyle.Primary)
+            );
+
+            await channel.send({ embeds: [panelEmbed], components: [row] });
+            res.json({ success: true });
+        } catch (e) {
+            console.error('Ticket panel send error:', e);
+            res.status(500).json({ success: false, error: e.message });
+        }
+    });
+
     // صفحات فرعية لجميع الأزرار (Moderation, Automod, Welcome, Tickets, Protection)
     app.get('/dashboard/:guildId/:section', (req, res) => {
         try {
@@ -1770,53 +1810,177 @@ module.exports = function (app, client) {
                 `;
             } else if (section === 'tickets') {
                 formFieldsHtml = `
-                    <div class="space-y-5">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-xs font-bold text-gray-300 mb-2 text-right">كاتيجوري التذاكر (Category ID)</label>
-                                <input type="text" name="ticket_category" value="${settings.ticket_category || ''}" placeholder="ضع ID الكاتيجوري..." class="w-full bg-[#12131c] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right font-mono">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold text-gray-300 mb-2 text-right">رتبة الدعم الفني (Support Role ID)</label>
-                                <input type="text" name="support_role" value="${settings.support_role || ''}" placeholder="ضع ID رتبة المشرفين..." class="w-full bg-[#12131c] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right font-mono">
+                    <div class="space-y-6">
+                        <!-- Master Toggle Card -->
+                        <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl flex items-center justify-between">
+                            <label class="toggle"><input type="checkbox" name="ticket_enabled" value="1" ${settings.ticket_enabled !== 0 ? 'checked' : ''}><span class="slider"></span></label>
+                            <div class="text-right">
+                                <h4 class="font-bold text-white text-sm">نظام التذاكر والدعم الفني المتقدم (Pro Tickets) 🎫</h4>
+                                <p class="text-gray-400 text-xs mt-0.5">فتح وإدارة تذاكر الدعم الفني للأعضاء مع أقسام متعددة وأزرار سريعة وحفظ السجلات (Transcripts)</p>
                             </div>
                         </div>
 
-                        <div>
-                            <label class="block text-xs font-bold text-gray-300 mb-2 text-right">قناة حفظ السجلات والترانسكريبت (Ticket Log Channel ID)</label>
-                            <input type="text" name="ticket_log_channel" value="${settings.ticket_log_channel || ''}" placeholder="ضع ID روم حفظ السجلات..." class="w-full bg-[#12131c] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right font-mono">
-                        </div>
-                    </div>
-                `;
-            } else if (section === 'levels') {
-                formFieldsHtml = `
-                    <div class="space-y-5">
-                        <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl">
-                            <div class="flex items-center justify-between mb-4">
-                                <label class="toggle"><input type="checkbox" name="leveling_enabled" value="1" ${settings.leveling_enabled ? 'checked' : ''}><span class="slider"></span></label>
-                                <div class="text-right">
-                                    <h4 class="font-bold text-white text-sm">تفعيل نظام اللفلات واكتساب XP</h4>
-                                    <p class="text-gray-400 text-[11px]">يحصل الأعضاء على نقاط خبرة وتصنيف عند التفاعل</p>
+                        <!-- Core Setup Grid -->
+                        <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl space-y-4">
+                            <h4 class="font-bold text-white text-sm text-right">الإعدادات الأساسية للرومات والرتب ⚙️</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-right">
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-300 mb-2">كاتيجوري التذاكر المفتوحة (Category ID)</label>
+                                    <input type="text" name="ticket_category" value="${settings.ticket_category || ''}" placeholder="ضع ID الكاتيجوري..." class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none font-mono text-right">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-300 mb-2">رتبة مسؤولي الدعم الفني (Support Staff Role ID)</label>
+                                    <input type="text" name="support_role" value="${settings.support_role || ''}" placeholder="ضع ID رتبة المشرفين..." class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none font-mono text-right">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-300 mb-2">قناة حفظ السجلات والترانسكريبت (Ticket Log Channel ID)</label>
+                                    <input type="text" name="ticket_log_channel" value="${settings.ticket_log_channel || ''}" placeholder="ضع ID روم حفظ السجلات..." class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none font-mono text-right">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-300 mb-2">الحد الأقصى للتذاكر المفتوحة للعضو الواحد</label>
+                                    <input type="number" name="ticket_max_open" value="${settings.ticket_max_open || 1}" min="1" max="5" class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none font-mono text-right">
                                 </div>
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-xs font-bold text-gray-300 mb-2 text-right">مضاعف نقاط الـ XP (Multiplier)</label>
-                                <input type="number" step="0.1" name="level_multiplier" value="${settings.level_multiplier || 1.0}" class="w-full bg-[#12131c] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right font-mono">
+                        <!-- Ticket Message & Greeting -->
+                        <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl space-y-3 text-right">
+                            <div class="flex items-center justify-between">
+                                <span class="text-[11px] text-gray-400 font-mono">[user] [userName] [server]</span>
+                                <h4 class="font-bold text-white text-sm">رسالة الترحيب داخل التذكرة الجديدة 📩</h4>
                             </div>
-                            <div>
-                                <label class="block text-xs font-bold text-gray-300 mb-2 text-right">قناة إرسال الترقية (Level Up Channel ID)</label>
-                                <input type="text" name="level_channel" value="${settings.level_channel || 'current'}" placeholder="current أو ID القناة..." class="w-full bg-[#12131c] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right font-mono">
+                            <textarea name="ticket_welcome_msg" rows="3" placeholder="مرحباً بك [user] في تذكرتك الخاصة! يرجى توضيح استفسارك أو مشكلتك بالتفصيل وسيقوم فريق الدعم بالرد عليك قريباً." class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right leading-relaxed">${settings.ticket_welcome_msg || ''}</textarea>
+                        </div>
+
+                        <!-- Interactive Ticket Panel Deployer -->
+                        <div class="bg-[#12131c] border border-purple-950/40 p-6 rounded-2xl space-y-4 text-right">
+                            <div class="flex items-center justify-between">
+                                <span class="px-2.5 py-1 bg-purple-950/60 text-purple-300 border border-purple-800/40 rounded-lg text-xs font-bold">🚀 إرسال فوري</span>
+                                <h4 class="font-bold text-white text-sm">إنشاء وإرسال لوحة التذاكر التفاعلية إلى الديسكورد 🔘</h4>
+                            </div>
+                            <p class="text-gray-400 text-xs">قم بتحديد روم الدعم الفني بالأسفل واضغط زر الإرسال لينشر البوت لوحة التذاكر التفاعلية بالأزرار فوراً في السيرفر:</p>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-300 mb-2">روم إرسال اللوحة (Channel ID) <span class="text-purple-400">*</span></label>
+                                    <input type="text" id="panelChannelInput" value="${settings.ticket_panel_channel || ''}" placeholder="ضع ID الروم الذي ستظهر فيه اللوحة..." class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none font-mono text-right">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-300 mb-2">عنوان لوحة التذاكر</label>
+                                    <input type="text" id="panelTitleInput" value="${settings.ticket_panel_title || '🎫 نظام الدعم الفني والمساعدة'}" class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right">
+                                </div>
+                            </div>
+
+                            <div class="mt-2">
+                                <label class="block text-xs font-bold text-gray-300 mb-2">وصف لوحة التذاكر</label>
+                                <textarea id="panelDescInput" rows="2" class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right">${settings.ticket_panel_desc || 'لفتح تذكرة جديدة والتواصل مع فريق الإدارة والدعم الفني، يرجى الضغط على الزر بالأسفل.'}</textarea>
+                            </div>
+
+                            <div class="pt-2 flex justify-end">
+                                <button type="button" onclick="sendTicketPanelDirect()" id="sendPanelBtn" class="px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold transition shadow-lg flex items-center gap-2">
+                                    <span>🚀 إرسال لوحة التذاكر إلى الروم المحدد</span>
+                                </button>
+                            </div>
+                            <div id="panelSendStatus" class="text-xs font-bold text-center hidden mt-2"></div>
+                        </div>
+                    </div>
+
+                    <script>
+                    async function sendTicketPanelDirect() {
+                        const channelId = document.getElementById('panelChannelInput').value.trim();
+                        const title = document.getElementById('panelTitleInput').value.trim();
+                        const desc = document.getElementById('panelDescInput').value.trim();
+                        const statusEl = document.getElementById('panelSendStatus');
+                        const btn = document.getElementById('sendPanelBtn');
+
+                        if (!channelId) {
+                            alert('يرجى كتابة ID القناة أولاً!');
+                            return;
+                        }
+
+                        btn.disabled = true;
+                        btn.innerHTML = '⏳ جارٍ الإرسال...';
+                        statusEl.className = 'text-xs font-bold text-center text-purple-400 mt-2 block';
+                        statusEl.innerText = 'جارٍ إرسال لوحة التذاكر إلى ديسكورد...';
+
+                        try {
+                            const res = await fetch('/api/guild/${guildId}/send-ticket-panel', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ channelId, title, desc })
+                            });
+                            const data = await res.json();
+                            if (data.success) {
+                                statusEl.className = 'text-xs font-bold text-center text-emerald-400 mt-2 block';
+                                statusEl.innerText = '✅ تم إرسال لوحة التذاكر بنجاح إلى الروم في السيرفر!';
+                            } else {
+                                statusEl.className = 'text-xs font-bold text-center text-rose-400 mt-2 block';
+                                statusEl.innerText = '❌ خطأ: ' + (data.error || 'فشل إرسال اللوحة، تأكد من صلاحيات البوت في الروم');
+                            }
+                        } catch (err) {
+                            statusEl.className = 'text-xs font-bold text-center text-rose-400 mt-2 block';
+                            statusEl.innerText = '❌ حدث خطأ أثناء الاتصال بالخادم';
+                        } finally {
+                            btn.disabled = false;
+                            btn.innerHTML = '<span>🚀 إرسال لوحة التذاكر إلى الروم المحدد</span>';
+                        }
+                    }
+                    </script>
+                `;
+            } else if (section === 'levels') {
+                formFieldsHtml = `
+                    <div class="space-y-6">
+                        <!-- Master Leveling Toggle Card -->
+                        <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl flex items-center justify-between">
+                            <label class="toggle"><input type="checkbox" name="leveling_enabled" value="1" ${settings.leveling_enabled !== 0 ? 'checked' : ''}><span class="slider"></span></label>
+                            <div class="text-right">
+                                <h4 class="font-bold text-white text-sm">نظام المستويات واللفلات التفاعلي (Leveling & XP) 📈</h4>
+                                <p class="text-gray-400 text-xs mt-0.5">منح نقاط خبرة XP للأعضاء عند التفاعل في الشات وإرسال إشعارات الترقية وبطاقات الرانك</p>
                             </div>
                         </div>
 
-                        <div>
-                            <label class="block text-xs font-bold text-gray-300 mb-2 text-right">رسالة الترقية (المتغيرات: [user] [level])</label>
-                            <input type="text" name="level_message" value="${settings.level_message || 'مبروك [user] لقد وصلت إلى المستوى [level]! 🎉'}" class="w-full bg-[#12131c] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right">
+                        <!-- Core Leveling Configuration -->
+                        <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl space-y-4 text-right">
+                            <h4 class="font-bold text-white text-sm">إعدادات الخبرة XP والإعلانات ⚙️</h4>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-300 mb-2">مضاعف نقاط الـ XP (XP Multiplier)</label>
+                                    <input type="number" step="0.1" name="level_multiplier" value="${settings.level_multiplier || 1.0}" min="0.1" max="10.0" class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none font-mono text-right">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-300 mb-2">قناة إرسال رسائل الترقية (Level Up Channel)</label>
+                                    <input type="text" name="level_channel" value="${settings.level_channel || 'current'}" placeholder="current (نفس الروم) أو ضع ID الروم..." class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none font-mono text-right">
+                                    <p class="text-[10px] text-gray-400 mt-1">اكتب <code class="text-purple-400">current</code> للإرسال بنفس الروم، أو <code class="text-purple-400">dm</code> للخاص، أو <code class="text-purple-400">disabled</code> لتعطيل الرسائل، أو ID روم مخصص.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Level Up Message Customizer -->
+                        <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl space-y-3 text-right">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-1.5 flex-wrap">
+                                    <button type="button" onclick="insertLevelTag('[user]')" class="px-2 py-1 bg-purple-950/50 hover:bg-purple-800/60 text-purple-300 border border-purple-900/40 rounded-lg text-[10px] font-mono transition">+ [user]</button>
+                                    <button type="button" onclick="insertLevelTag('[level]')" class="px-2 py-1 bg-purple-950/50 hover:bg-purple-800/60 text-purple-300 border border-purple-900/40 rounded-lg text-[10px] font-mono transition">+ [level]</button>
+                                    <button type="button" onclick="insertLevelTag('[userName]')" class="px-2 py-1 bg-purple-950/50 hover:bg-purple-800/60 text-purple-300 border border-purple-900/40 rounded-lg text-[10px] font-mono transition">+ [userName]</button>
+                                    <button type="button" onclick="insertLevelTag('[server]')" class="px-2 py-1 bg-purple-950/50 hover:bg-purple-800/60 text-purple-300 border border-purple-900/40 rounded-lg text-[10px] font-mono transition">+ [server]</button>
+                                </div>
+                                <h4 class="font-bold text-white text-sm">نص رسالة الترقية (Level Up Message) 🎉</h4>
+                            </div>
+                            <textarea id="levelMsgTextarea" name="level_message" rows="3" placeholder="🎉 مبروك يا [user]! لقد وصلت إلى المستوى [level]! 🚀" class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none leading-relaxed text-right">${settings.level_message || '🎉 مبروك يا [user]! لقد وصلت إلى المستوى [level]! 🚀'}</textarea>
                         </div>
                     </div>
+
+                    <script>
+                    function insertLevelTag(tag) {
+                        const ta = document.getElementById('levelMsgTextarea');
+                        if (!ta) return;
+                        const start = ta.selectionStart, end = ta.selectionEnd;
+                        ta.value = ta.value.substring(0, start) + tag + ta.value.substring(end);
+                        ta.selectionStart = ta.selectionEnd = start + tag.length;
+                        ta.focus();
+                    }
+                    </script>
                 `;
             } else if (section === 'automod') {
                 formFieldsHtml = `

@@ -3,11 +3,11 @@ const db = require('../../database');
 
 module.exports = {
   name: 'coinflip',
-  description: 'ارمِ العملة وراهن كريدتك 🪙',
+  description: 'ارمِ العملة وراهن بـ Star Coin 🪙',
   aliases: ['عملة', 'قلب'],
   data: new SlashCommandBuilder()
     .setName('coinflip')
-    .setDescription('ارمِ العملة وراهن 🪙')
+    .setDescription('ارمِ العملة وراهن بـ Star Coin ⭐ 🪙')
     .addStringOption(opt => opt.setName('choice').setDescription('وجه العملة').setRequired(true)
       .addChoices({ name: '👑 وجه (Heads)', value: 'heads' }, { name: '🦅 ذيل (Tails)', value: 'tails' }))
     .addIntegerOption(opt => opt.setName('bet').setDescription('مبلغ الرهان (الحد الأدنى 10)').setRequired(true).setMinValue(10)),

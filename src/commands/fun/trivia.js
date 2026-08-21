@@ -28,11 +28,11 @@ const ACTIVE_TRIVIA = new Map();
 
 module.exports = {
   name: 'trivia',
-  description: 'اختبر معلوماتك واربح كريدت! 🧠',
-  aliases: ['سؤال', 'معلومة'],
+  description: 'سؤال معلومات عامة واربح Star Coin! 🧠',
+  aliases: ['سؤال', 'مسابقة'],
   data: new SlashCommandBuilder()
     .setName('trivia')
-    .setDescription('سؤال معلومات عامة واربح كريدت! 🧠'),
+    .setDescription('سؤال معلومات عامة واربح Star Coin ⭐ 🧠'),
 
   async execute(interaction) {
     if (ACTIVE_TRIVIA.has(interaction.user.id))
