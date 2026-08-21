@@ -748,7 +748,9 @@ module.exports = function (app, client) {
 
                     <!-- Server Rail (Far Right Column) -->
                     <div class="w-16 bg-[#08080c] border-l border-purple-950/40 py-4 flex flex-col items-center gap-3 shrink-0 overflow-y-auto">
-                        <a href="/dashboard" class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-purple-600 to-indigo-600 flex items-center justify-center text-white font-black text-sm shadow-lg shadow-purple-900/40">Z</a>
+                        <a href="/dashboard" title="${user.username}" class="group relative flex items-center justify-center">
+                            <img src="${userAvatar}" class="w-11 h-11 rounded-2xl border-2 border-purple-500 shadow-lg shadow-purple-900/50 hover:rounded-xl object-cover transition-all" alt="${user.username}">
+                        </a>
                         <div class="w-8 h-[1px] bg-purple-950/40"></div>
                         ${serverRailHtml}
                     </div>
@@ -1150,6 +1152,19 @@ module.exports = function (app, client) {
                                     <a href="/dashboard/${guildId}/economy" class="w-full py-2 bg-amber-950/30 hover:bg-gradient-to-r hover:from-amber-600 hover:to-yellow-600 hover:text-white text-amber-300 border border-amber-900/30 rounded-xl text-xs font-bold text-center transition">&gt; Visit</a>
                                 </div>
 
+                                <!-- القرآن الكريم والراديو 24/7 -->
+                                <div class="bg-[#10111a] border border-emerald-950/40 hover:border-emerald-600/40 rounded-2xl p-5 flex flex-col justify-between transition shadow-lg">
+                                    <div class="flex items-center justify-between mb-3">
+                                        <label class="toggle"><input type="checkbox" onchange="toggleModule('${guildId}', 'quran_enabled', this.checked)" checked><span class="slider"></span></label>
+                                        <div class="flex items-center gap-2">
+                                            <h4 class="font-bold text-white text-sm">القرآن الكريم & الراديو</h4>
+                                            <span class="text-lg">📻</span>
+                                        </div>
+                                    </div>
+                                    <p class="text-gray-400 text-[11px] mb-4 text-right">بث تلاوات وإذاعات القرآن الكريم 24/7 في الروم الصوتي</p>
+                                    <a href="/dashboard/${guildId}/quran" class="w-full py-2 bg-emerald-950/30 hover:bg-gradient-to-r hover:from-emerald-600 hover:to-teal-600 hover:text-white text-emerald-300 border border-emerald-900/30 rounded-xl text-xs font-bold text-center transition">&gt; Visit</a>
+                                </div>
+
                             </div>
                         </div>
 
@@ -1179,6 +1194,10 @@ module.exports = function (app, client) {
                             <a href="/dashboard/${guildId}" class="px-3 py-2 rounded-xl bg-gradient-to-r from-purple-700 to-indigo-700 text-white font-bold flex items-center justify-between shadow-lg shadow-purple-950/50">
                                 <span class="w-1.5 h-1.5 rounded-full bg-white"></span>
                                 <span>نظرة عامة</span>
+                            </a>
+                            <a href="/dashboard/${guildId}/analytics" class="px-3 py-1.5 rounded-xl text-gray-400 hover:text-purple-300 hover:bg-purple-950/30 font-medium flex items-center justify-end gap-2 transition">
+                                <span>الإحصائيات</span>
+                                <span>📊</span>
                             </a>
                             <a href="/dashboard/${guildId}/general" class="px-3 py-1.5 rounded-xl text-gray-400 hover:text-purple-300 hover:bg-purple-950/30 font-medium flex items-center justify-end gap-2 transition">
                                 <span>إعدادات السيرفر</span>
@@ -1234,6 +1253,18 @@ module.exports = function (app, client) {
                                 <span class="w-2 h-2 rounded-full bg-purple-400"></span>
                                 <span class="flex items-center gap-1.5"><span>التذاكر</span><span>🎫</span></span>
                             </a>
+                            <a href="/dashboard/${guildId}/quran" class="px-3 py-1.5 rounded-xl text-emerald-300 hover:text-emerald-200 hover:bg-emerald-950/30 font-medium flex items-center justify-between transition">
+                                <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                                <span class="flex items-center gap-1.5"><span>القرآن & الراديو</span><span>📻</span></span>
+                            </a>
+                            <a href="/dashboard/${guildId}/applications" class="px-3 py-1.5 rounded-xl text-indigo-300 hover:text-indigo-200 hover:bg-indigo-950/30 font-medium flex items-center justify-between transition">
+                                <span class="w-2 h-2 rounded-full bg-indigo-400"></span>
+                                <span class="flex items-center gap-1.5"><span>التقديمات</span><span>📝</span></span>
+                            </a>
+                            <a href="/dashboard/${guildId}/appearance" class="px-3 py-1.5 rounded-xl text-amber-300 hover:text-amber-200 hover:bg-amber-950/30 font-medium flex items-center justify-between transition">
+                                <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+                                <span class="flex items-center gap-1.5"><span>مظهر البوت</span><span>🎨</span></span>
+                            </a>
 
                             <span class="text-[10px] font-bold text-purple-400/60 px-3 pt-3 pb-1">الإشراف</span>
                             <a href="/dashboard/${guildId}/moderation" class="px-3 py-1.5 rounded-xl text-gray-300 hover:text-purple-300 hover:bg-purple-950/30 font-medium flex items-center justify-between transition">
@@ -1261,7 +1292,9 @@ module.exports = function (app, client) {
 
                     <!-- Server Rail Column (Far Right) -->
                     <div class="w-16 bg-[#08080c] border-l border-purple-950/40 py-4 flex flex-col items-center gap-3 shrink-0 overflow-y-auto">
-                        <a href="/dashboard" title="الرئيسية" class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-purple-600 to-indigo-600 flex items-center justify-center text-white font-black text-sm shadow-lg shadow-purple-900/40">Z</a>
+                        <a href="/dashboard" title="${user.username}" class="group relative flex items-center justify-center">
+                            <img src="${userAvatar}" class="w-11 h-11 rounded-2xl border-2 border-purple-500 shadow-lg shadow-purple-900/50 hover:rounded-xl object-cover transition-all" alt="${user.username}">
+                        </a>
                         <div class="w-8 h-[1px] bg-purple-950/40"></div>
                         ${serverRailHtml}
                     </div>
@@ -1471,6 +1504,225 @@ module.exports = function (app, client) {
         }
     });
 
+    // تشغيل إذاعة القرآن الكريم المباشرة 24/7 من الداشبورد
+    app.post('/api/guild/:guildId/quran/start', express.json(), async (req, res) => {
+        try {
+            if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
+            const { guildId } = req.params;
+            const { channelId, stationKey } = req.body;
+
+            if (!channelId) {
+                return res.status(400).json({ success: false, error: 'يرجى تحديد ID الروم الصوتي أولاً' });
+            }
+
+            const channel = client.channels.cache.get(channelId) || await client.channels.fetch(channelId).catch(() => null);
+            if (!channel || !channel.isVoiceBased()) {
+                return res.status(404).json({ success: false, error: 'لم يتم العثور على القناة الصوتية أو أن البوت يفتقر لصلاحية الدخول والتحدث.' });
+            }
+
+            const audioManager = require('../utils/audioPlayer');
+            const station = audioManager.quranStations[stationKey] || audioManager.quranStations['cairo_radio'];
+
+            database.updateGuildSetting(guildId, 'quran_enabled', 1);
+            database.updateGuildSetting(guildId, 'quran_channel', channelId);
+            if (stationKey) database.updateGuildSetting(guildId, 'quran_station', stationKey);
+
+            await audioManager.playStream(channel, station.url, station.name);
+
+            res.json({ success: true, stationName: station.name, channelName: channel.name });
+        } catch (e) {
+            console.error('Quran start error:', e);
+            res.status(500).json({ success: false, error: e.message });
+        }
+    });
+
+    // إيقاف إذاعة القرآن الكريم من الداشبورد ومغادرة الروم
+    app.post('/api/guild/:guildId/quran/stop', async (req, res) => {
+        try {
+            if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
+            const { guildId } = req.params;
+            const audioManager = require('../utils/audioPlayer');
+            audioManager.stop(guildId);
+            database.updateGuildSetting(guildId, 'quran_enabled', 0);
+            res.json({ success: true });
+        } catch (e) {
+            console.error('Quran stop error:', e);
+            res.status(500).json({ success: false, error: e.message });
+        }
+    });
+
+    // فحص حالة الراديو الحالية
+    app.get('/api/guild/:guildId/quran/status', (req, res) => {
+        try {
+            const { guildId } = req.params;
+            const audioManager = require('../utils/audioPlayer');
+            const status = audioManager.getRadioStatus(guildId);
+            res.json({ success: true, ...status });
+        } catch (e) {
+            res.status(500).json({ success: false, error: e.message });
+        }
+    });
+
+    // إنشاء نموذج تقديم جديد
+    app.post('/api/guild/:guildId/applications/create', express.json(), async (req, res) => {
+        try {
+            if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
+            const { guildId } = req.params;
+            const { title, description, log_channel, accepted_role, questions } = req.body;
+
+            if (!title) return res.status(400).json({ success: false, error: 'يرجى كتابة عنوان التقديم' });
+
+            const qList = Array.isArray(questions) ? questions.filter(q => q && q.trim().length > 0) : (questions ? questions.split('\n').filter(q => q.trim().length > 0) : ['ما هو سبب تقديمك؟']);
+
+            const appObj = database.createApplication(guildId, title, description || '', qList, log_channel || null, accepted_role || null);
+            res.json({ success: true, app: appObj });
+        } catch (e) {
+            console.error('Create application error:', e);
+            res.status(500).json({ success: false, error: e.message });
+        }
+    });
+
+    // حذف نموذج تقديم
+    app.post('/api/guild/:guildId/applications/delete', express.json(), async (req, res) => {
+        try {
+            if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
+            const { id } = req.body;
+            database.deleteApplication(id);
+            res.json({ success: true });
+        } catch (e) {
+            console.error('Delete application error:', e);
+            res.status(500).json({ success: false, error: e.message });
+        }
+    });
+
+    // إرسال لوحة التقديمات إلى الروم في الديسكورد
+    app.post('/api/guild/:guildId/applications/send-panel', express.json(), async (req, res) => {
+        try {
+            if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
+            const { guildId } = req.params;
+            const { channelId, messageText, panelType, embedTitle, embedDescription, embedColor } = req.body;
+
+            if (!channelId) return res.status(400).json({ success: false, error: 'يرجى تحديد ID القناة' });
+
+            const channel = client.channels.cache.get(channelId) || await client.channels.fetch(channelId).catch(() => null);
+            if (!channel || !channel.isTextBased()) {
+                return res.status(404).json({ success: false, error: 'لم يتم العثور على القناة النصية أو البوت يفتقر للصلاحية' });
+            }
+
+            const apps = database.getApplications(guildId);
+            if (!apps || apps.length === 0) {
+                return res.status(400).json({ success: false, error: 'لا توجد أي استمارات تقديم تم إنشاؤها بعد' });
+            }
+
+            let payload = {};
+            if (messageText) {
+                payload.content = messageText;
+            }
+
+            if (embedTitle || embedDescription) {
+                const { EmbedBuilder } = require('discord.js');
+                const embed = new EmbedBuilder()
+                    .setColor(embedColor || '#9333ea')
+                    .setTitle(embedTitle || '📝 لوحة استمارات التقديم')
+                    .setDescription(embedDescription || 'اضغط على الزر أدناه أو اختر التقديم المناسب لتعبئة الاستمارة:')
+                    .setFooter({ text: channel.guild.name, iconURL: channel.guild.iconURL({ dynamic: true }) })
+                    .setTimestamp();
+                payload.embeds = [embed];
+            }
+
+            const { ActionRowBuilder, ButtonBuilder, ButtonStyle, StringSelectMenuBuilder } = require('discord.js');
+            const row = new ActionRowBuilder();
+
+            if (panelType === 'select') {
+                const selectMenu = new StringSelectMenuBuilder()
+                    .setCustomId('select_apply_form')
+                    .setPlaceholder('اختر استمارة التقديم من القائمة...')
+                    .addOptions(
+                        apps.slice(0, 25).map(a => ({
+                            label: a.title,
+                            value: a.id.toString(),
+                            description: (a.description || 'اضغط لتعبئة النموذج').slice(0, 90),
+                            emoji: '📝'
+                        }))
+                    );
+                row.addComponents(selectMenu);
+            } else {
+                apps.slice(0, 5).forEach(a => {
+                    row.addComponents(
+                        new ButtonBuilder()
+                            .setCustomId(`btn_apply_${a.id}`)
+                            .setLabel(a.title.slice(0, 80))
+                            .setEmoji('📝')
+                            .setStyle(ButtonStyle.Primary)
+                    );
+                });
+            }
+
+            payload.components = [row];
+            await channel.send(payload);
+            res.json({ success: true });
+        } catch (e) {
+            console.error('Send application panel error:', e);
+            res.status(500).json({ success: false, error: e.message });
+        }
+    });
+
+    // حفظ وتطبيق مظهر البوت وحالته (Bot Appearance & Presence) مجاناً
+    app.post('/api/guild/:guildId/appearance/save', express.json(), async (req, res) => {
+        try {
+            if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
+            const { guildId } = req.params;
+            const { bot_name, bot_status, bot_activity_type, bot_activity_text, bot_avatar_url, bot_banner_url } = req.body;
+
+            const botGuild = client.guilds.cache.get(guildId);
+            if (botGuild && botGuild.members?.me) {
+                // 1. تغيير اسم البوت المستعار داخل السيرفر
+                if (bot_name !== undefined) {
+                    await botGuild.members.me.setNickname(bot_name || null).catch(() => {});
+                }
+            }
+
+            // 2. تحديث حالة ونشاط البوت
+            if (client.user) {
+                const presenceStatus = ['online', 'idle', 'dnd', 'invisible'].includes(bot_status) ? bot_status : 'online';
+                
+                const { ActivityType } = require('discord.js');
+                let actType = ActivityType.Playing;
+                if (bot_activity_type === 'watching' || bot_activity_type === '3') actType = ActivityType.Watching;
+                else if (bot_activity_type === 'listening' || bot_activity_type === '2') actType = ActivityType.Listening;
+                else if (bot_activity_type === 'streaming' || bot_activity_type === '1') actType = ActivityType.Streaming;
+                else if (bot_activity_type === 'competing' || bot_activity_type === '5') actType = ActivityType.Competing;
+
+                const actName = bot_activity_text || `${client.guilds.cache.size} Servers | #help`;
+                
+                client.user.setPresence({
+                    status: presenceStatus,
+                    activities: [{ name: actName, type: actType }]
+                });
+
+                // 3. تحديث صورة الأفاتار إن تم توفير رابط جديد
+                if (bot_avatar_url && bot_avatar_url.startsWith('http') && bot_avatar_url !== client.user.displayAvatarURL()) {
+                    await client.user.setAvatar(bot_avatar_url).catch(err => {
+                        console.log('Avatar update note (rate limits may apply):', err.message);
+                    });
+                }
+            }
+
+            // 4. حفظ الإعدادات في قاعدة البيانات
+            if (bot_name !== undefined) database.updateGuildSetting(guildId, 'bot_nickname', bot_name);
+            if (bot_status !== undefined) database.updateGuildSetting(guildId, 'bot_status', bot_status);
+            if (bot_activity_type !== undefined) database.updateGuildSetting(guildId, 'bot_activity_type', bot_activity_type);
+            if (bot_activity_text !== undefined) database.updateGuildSetting(guildId, 'bot_activity_text', bot_activity_text);
+            if (bot_avatar_url !== undefined) database.updateGuildSetting(guildId, 'bot_avatar_url', bot_avatar_url);
+            if (bot_banner_url !== undefined) database.updateGuildSetting(guildId, 'bot_banner_url', bot_banner_url);
+
+            res.json({ success: true });
+        } catch (e) {
+            console.error('Bot appearance save error:', e);
+            res.status(500).json({ success: false, error: e.message });
+        }
+    });
+
     // صفحات فرعية لجميع الأزرار (Moderation, Automod, Welcome, Tickets, Protection)
     app.get('/dashboard/:guildId/:section', (req, res) => {
         try {
@@ -1501,6 +1753,7 @@ module.exports = function (app, client) {
             if (!settings) settings = {};
 
             const guildIcon = guild.icon ? `https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.png` : 'https://cdn.discordapp.com/embed/avatars/0.png';
+            const userAvatar = user.avatar ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png` : 'https://cdn.discordapp.com/embed/avatars/0.png';
 
             const serverRailHtml = Array.isArray(guilds) && guilds.length > 0 ? guilds.map(g => `
                 <a href="/dashboard/${g.id}" title="${g.name}" class="group relative flex items-center justify-center">
@@ -1511,6 +1764,8 @@ module.exports = function (app, client) {
 
             const sectionTitles = {
                 'overview': 'نظرة عامة على السيرفر 📊',
+                'analytics': 'الإحصائيات والتحليلات 📊',
+                'stats': 'الإحصائيات والتحليلات 📊',
                 'moderation': 'الإشراف وإدارة الأعضاء 🔨',
                 'automod': 'الرقابة التلقائية وفلاتر السب والشات 🤖',
                 'welcome': 'رسائل وبطاقات الترحيب والمغادرة 👋',
@@ -1529,7 +1784,13 @@ module.exports = function (app, client) {
                 'fun': 'التسلية والألعاب والمنافسات 🎮',
                 'general': 'الأوامر العامة والخدمية للأعضاء ⚙️',
                 'settings': 'إعدادات السيرفر العامة ⚙️',
-                'boost': 'البوستات - رسالة الشكر للداعمين 🚀'
+                'boost': 'البوستات - رسالة الشكر للداعمين 🚀',
+                'quran': 'إذاعات وتلاوات القرآن الكريم 24/7 📻',
+                'radio': 'إذاعات وتلاوات القرآن الكريم 24/7 📻',
+                'applications': 'نظام التقديمات 📝',
+                'apply': 'نظام التقديمات 📝',
+                'appearance': 'مظهر البوت 🎨',
+                'bot-appearance': 'مظهر البوت 🎨'
             };
 
             const title = sectionTitles[section] || ('إعدادات ' + section);
@@ -2083,7 +2344,7 @@ module.exports = function (app, client) {
                         </div>
                     </div>
                 `;
-            } else if (section === 'overview') {
+            } else if (section === 'overview' || section === 'analytics' || section === 'stats') {
                 const botGuild = client?.guilds?.cache?.get(guildId);
                 const totalMembers = botGuild ? botGuild.memberCount : (guild.memberCount || 0);
                 const totalBots = botGuild ? botGuild.members?.cache?.filter(m => m.user?.bot)?.size || 0 : 0;
@@ -2094,26 +2355,24 @@ module.exports = function (app, client) {
 
                 formFieldsHtml = `
                     <div class="space-y-6">
-                        <!-- Server Overview Card -->
+                        <!-- Header & Duration Selector -->
                         <div class="bg-[#12131c] border border-purple-950/40 p-6 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-4">
-                            <div class="flex items-center gap-4 text-right">
-                                <img src="${guildIcon}" class="w-16 h-16 rounded-2xl border-2 border-purple-600 shadow-lg shadow-purple-900/40 object-cover">
-                                <div>
-                                    <h3 class="font-black text-white text-lg">${guild.name}</h3>
-                                    <p class="text-gray-400 text-xs font-mono">ID: ${guildId}</p>
-                                    <div class="flex items-center gap-2 mt-1.5 justify-end">
-                                        <span class="px-2.5 py-0.5 bg-purple-950/60 text-purple-300 border border-purple-800/40 rounded-lg text-[10px] font-bold">مستوى البوست: Level ${boostTier} (${boostCount} بوست) 🚀</span>
-                                        <span class="px-2.5 py-0.5 bg-emerald-950/60 text-emerald-300 border border-emerald-800/40 rounded-lg text-[10px] font-bold">البوت متصل ✅</span>
-                                    </div>
-                                </div>
+                            <div class="flex items-center gap-3 justify-end w-full md:w-auto">
+                                <label class="text-xs font-bold text-gray-400">المدة</label>
+                                <select id="statsDurationSelect" onchange="changeStatsDuration(this.value)" class="bg-[#0b0c10] border border-purple-950/40 text-white rounded-xl px-4 py-2.5 text-xs font-bold outline-none focus:border-purple-600 cursor-pointer">
+                                    <option value="7d" selected>7 أيام</option>
+                                    <option value="24h">24 ساعة</option>
+                                    <option value="14d">14 يوم</option>
+                                    <option value="30d">30 يوم</option>
+                                </select>
                             </div>
-                            <div class="flex items-center gap-2">
-                                <a href="/dashboard/${guildId}/settings" class="px-4 py-2 bg-purple-950/60 hover:bg-purple-800/60 text-purple-200 border border-purple-800/40 rounded-xl text-xs font-bold transition">⚙️ إعدادات السيرفر</a>
-                                <a href="/dashboard/${guildId}/embed" class="px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold transition shadow-md">📄 إرسال إيمبد</a>
+                            <div class="text-right w-full md:w-auto">
+                                <h3 class="font-black text-white text-xl">الإحصائيات</h3>
+                                <p class="text-gray-400 text-xs mt-1">يوفر إحصاءات وتحليلات تفصيلية عن نشاط السيرفر بما في ذلك تفاعل الأعضاء، الرسائل، والمزيد من المقاييس.</p>
                             </div>
                         </div>
 
-                        <!-- 4 Stat Cards -->
+                        <!-- 4 Stat Cards Row -->
                         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                             <div class="bg-[#12131c] border border-purple-950/40 p-4 rounded-2xl text-right">
                                 <span class="text-gray-400 text-[11px] block">إجمالي الأعضاء</span>
@@ -2131,68 +2390,230 @@ module.exports = function (app, client) {
                                 <span class="text-[10px] text-purple-400">💬 صوتية وكتابية</span>
                             </div>
                             <div class="bg-[#12131c] border border-purple-950/40 p-4 rounded-2xl text-right">
-                                <span class="text-gray-400 text-[11px] block">الرتب والمسميات</span>
-                                <h4 class="text-xl font-black text-amber-300 mt-1">${totalRoles}</h4>
-                                <span class="text-[10px] text-amber-400">🎖️ رتبة مسجلة</span>
+                                <span class="text-gray-400 text-[11px] block">مستوى البوست</span>
+                                <h4 class="text-xl font-black text-pink-400 mt-1">Level ${boostTier}</h4>
+                                <span class="text-[10px] text-pink-400">🚀 ${boostCount} Boosts</span>
                             </div>
                         </div>
 
-                        <!-- Active Plugins Status Overview -->
-                        <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl space-y-3">
-                            <h4 class="font-bold text-white text-sm text-right">حالة موديولات وخصائص السيرفر ⚡</h4>
-                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                                
-                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
-                                    <span class="px-2 py-0.5 bg-purple-950/60 text-purple-300 rounded-lg text-[10px] font-bold">${settings.anti_nuke_enabled ? 'مفعّل ✅' : 'معطّل ❌'}</span>
-                                    <div class="flex items-center gap-2">
-                                        <span class="font-bold text-white text-xs">جدار الحماية</span>
-                                        <span>🛡️</span>
-                                    </div>
-                                </div>
-
-                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
-                                    <span class="px-2 py-0.5 bg-purple-950/60 text-purple-300 rounded-lg text-[10px] font-bold">${settings.welcome_channel ? 'مفعّل ✅' : 'معطّل ❌'}</span>
-                                    <div class="flex items-center gap-2">
-                                        <span class="font-bold text-white text-xs">الترحيب & المغادرة</span>
-                                        <span>👋</span>
-                                    </div>
-                                </div>
-
-                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
-                                    <span class="px-2 py-0.5 bg-purple-950/60 text-purple-300 rounded-lg text-[10px] font-bold">${settings.fun_enabled !== 0 ? 'مفعّل ✅' : 'معطّل ❌'}</span>
-                                    <div class="flex items-center gap-2">
-                                        <span class="font-bold text-white text-xs">التسلية والألعاب</span>
-                                        <span>🎮</span>
-                                    </div>
-                                </div>
-
-                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
-                                    <span class="px-2 py-0.5 bg-purple-950/60 text-purple-300 rounded-lg text-[10px] font-bold">${settings.bad_words_enabled || settings.anti_spam ? 'مفعّل ✅' : 'معطّل ❌'}</span>
-                                    <div class="flex items-center gap-2">
-                                        <span class="font-bold text-white text-xs">الرقابة التلقائية</span>
-                                        <span>🤖</span>
-                                    </div>
-                                </div>
-
-                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
-                                    <span class="px-2 py-0.5 bg-purple-950/60 text-purple-300 rounded-lg text-[10px] font-bold">${settings.autoresponder_enabled !== 0 ? 'مفعّل ✅' : 'معطّل ❌'}</span>
-                                    <div class="flex items-center gap-2">
-                                        <span class="font-bold text-white text-xs">الرد التلقائي</span>
-                                        <span>💬</span>
-                                    </div>
-                                </div>
-
-                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
-                                    <span class="px-2 py-0.5 bg-purple-950/60 text-purple-300 rounded-lg text-[10px] font-bold">${settings.boost_channel ? 'مفعّل ✅' : 'معطّل ❌'}</span>
-                                    <div class="flex items-center gap-2">
-                                        <span class="font-bold text-white text-xs">شكر البوستات</span>
-                                        <span>🚀</span>
-                                    </div>
-                                </div>
-
+                        <!-- Chart 1: الرسائل (Messages Chart) -->
+                        <div class="bg-[#12131c] border border-purple-950/40 rounded-2xl p-6 shadow-xl space-y-4 text-right">
+                            <div class="flex items-center justify-between">
+                                <button type="button" class="text-gray-500 hover:text-purple-400 text-sm">☰</button>
+                                <h4 class="font-bold text-white text-sm">الرسائل</h4>
                             </div>
+                            <div id="messagesChartContainer" class="w-full h-72"></div>
+                        </div>
+
+                        <!-- Chart 2: دخول/خروج (Joins & Leaves Chart) -->
+                        <div class="bg-[#12131c] border border-purple-950/40 rounded-2xl p-6 shadow-xl space-y-4 text-right">
+                            <div class="flex items-center justify-between">
+                                <button type="button" class="text-gray-500 hover:text-purple-400 text-sm">☰</button>
+                                <h4 class="font-bold text-white text-sm">دخول/خروج</h4>
+                            </div>
+                            <div id="joinsLeavesChartContainer" class="w-full h-80"></div>
+                        </div>
+
+                        <!-- Chart 3: المتصلين بالرومات الصوتية (Voice Active Members Chart) -->
+                        <div class="bg-[#12131c] border border-purple-950/40 rounded-2xl p-6 shadow-xl space-y-4 text-right">
+                            <div class="flex items-center justify-between">
+                                <button type="button" class="text-gray-500 hover:text-purple-400 text-sm">☰</button>
+                                <h4 class="font-bold text-white text-sm">المتصلين بالرومات الصوتية</h4>
+                            </div>
+                            <div id="voiceChartContainer" class="w-full h-80"></div>
                         </div>
                     </div>
+
+                    <script>
+                    let messagesChartInstance = null;
+                    let joinsLeavesChartInstance = null;
+                    let voiceChartInstance = null;
+
+                    const statsDataset = {
+                        '7d': {
+                            msgCategories: ['18 Aug 06:00', '18 Aug 12:00', '18 Aug 18:00', '19 Aug 00:00', '19 Aug 06:00', '19 Aug 12:00', '19 Aug 18:00', '20 Aug 00:00', '20 Aug 06:00', '20 Aug 12:00', '20 Aug 18:00'],
+                            msgData: [12, 45, 98, 140, 110, 65, 30, 22, 50, 85, 105],
+                            jlCategories: ['18 Aug 00:00', '18 Aug 12:00', '19 Aug 00:00', '19 Aug 12:00', '20 Aug 00:00', '20 Aug 12:00', '21 Aug 00:00'],
+                            leaves: [0, 0, 0, 0, 0, 5, 0],
+                            joins: [0, 1, 0, 2, 0, 4, 0],
+                            voiceCategories: ['18 Aug 00:00', '18 Aug 12:00', '19 Aug 00:00', '19 Aug 12:00', '20 Aug 00:00', '20 Aug 12:00', '21 Aug 00:00'],
+                            voiceWithBots: [0, 0, 0, 0, 0, 0, 1],
+                            voiceNoBots: [0, 0, 0, 0, 0, 0, 1]
+                        },
+                        '24h': {
+                            msgCategories: ['00:00', '03:00', '06:00', '09:00', '12:00', '15:00', '18:00', '21:00'],
+                            msgData: [15, 8, 5, 35, 78, 92, 115, 60],
+                            jlCategories: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00'],
+                            leaves: [0, 0, 1, 2, 1, 1],
+                            joins: [1, 0, 2, 3, 1, 2],
+                            voiceCategories: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00'],
+                            voiceWithBots: [0, 0, 1, 2, 3, 2],
+                            voiceNoBots: [0, 0, 1, 2, 2, 1]
+                        },
+                        '14d': {
+                            msgCategories: ['Day 1', 'Day 3', 'Day 5', 'Day 7', 'Day 9', 'Day 11', 'Day 13'],
+                            msgData: [80, 120, 210, 340, 290, 420, 380],
+                            jlCategories: ['Day 1', 'Day 3', 'Day 5', 'Day 7', 'Day 9', 'Day 11', 'Day 13'],
+                            leaves: [2, 1, 4, 3, 5, 2, 3],
+                            joins: [5, 4, 8, 12, 9, 15, 11],
+                            voiceCategories: ['Day 1', 'Day 3', 'Day 5', 'Day 7', 'Day 9', 'Day 11', 'Day 13'],
+                            voiceWithBots: [1, 2, 3, 5, 4, 6, 5],
+                            voiceNoBots: [1, 1, 2, 4, 3, 5, 4]
+                        },
+                        '30d': {
+                            msgCategories: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+                            msgData: [520, 890, 1450, 1890],
+                            jlCategories: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+                            leaves: [8, 14, 19, 12],
+                            joins: [24, 45, 68, 85],
+                            voiceCategories: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+                            voiceWithBots: [4, 8, 12, 16],
+                            voiceNoBots: [3, 6, 10, 14]
+                        }
+                    };
+
+                    function initAllCharts(period = '7d') {
+                        const data = statsDataset[period] || statsDataset['7d'];
+
+                        // 1. Messages Chart (Area Spline with Purple Gradient)
+                        const msgOptions = {
+                            series: [{ name: 'الرسائل', data: data.msgData }],
+                            chart: {
+                                height: 280,
+                                type: 'area',
+                                toolbar: { show: false },
+                                background: 'transparent'
+                            },
+                            dataLabels: { enabled: false },
+                            stroke: { curve: 'smooth', width: 3, colors: ['#a855f7'] },
+                            fill: {
+                                type: 'gradient',
+                                gradient: {
+                                    shadeIntensity: 1,
+                                    opacityFrom: 0.65,
+                                    opacityTo: 0.05,
+                                    stops: [0, 90, 100],
+                                    colorStops: [
+                                        { offset: 0, color: '#9333ea', opacity: 0.7 },
+                                        { offset: 100, color: '#3b0764', opacity: 0.05 }
+                                    ]
+                                }
+                            },
+                            grid: { borderColor: '#1f212d', strokeDashArray: 3 },
+                            xaxis: {
+                                categories: data.msgCategories,
+                                labels: { style: { colors: '#94a3b8', fontSize: '10px' } },
+                                axisBorder: { color: '#1f212d' }
+                            },
+                            yaxis: { labels: { style: { colors: '#94a3b8', fontSize: '10px' } } },
+                            tooltip: { theme: 'dark' }
+                        };
+
+                        if (messagesChartInstance) messagesChartInstance.destroy();
+                        messagesChartInstance = new ApexCharts(document.querySelector("#messagesChartContainer"), msgOptions);
+                        messagesChartInstance.render();
+
+                        // 2. Joins & Leaves Chart (Dual Column Bar)
+                        const jlOptions = {
+                            series: [
+                                { name: 'خروج الأعضاء', data: data.leaves },
+                                { name: 'انضمام الأعضاء', data: data.joins }
+                            ],
+                            chart: {
+                                height: 300,
+                                type: 'bar',
+                                toolbar: { show: false },
+                                background: 'transparent'
+                            },
+                            colors: ['#dc2626', '#16a34a'],
+                            plotOptions: {
+                                bar: {
+                                    horizontal: false,
+                                    columnWidth: '55%',
+                                    borderRadius: 6,
+                                    dataLabels: { position: 'top' }
+                                }
+                            },
+                            dataLabels: {
+                                enabled: true,
+                                formatter: (val) => val > 0 ? val : '',
+                                style: { fontSize: '12px', colors: ['#ffffff'], fontWeight: 'bold' },
+                                offsetY: -20
+                            },
+                            grid: { borderColor: '#1f212d', strokeDashArray: 3 },
+                            xaxis: {
+                                categories: data.jlCategories,
+                                labels: { style: { colors: '#94a3b8', fontSize: '10px' } },
+                                axisBorder: { color: '#1f212d' }
+                            },
+                            yaxis: { labels: { style: { colors: '#94a3b8', fontSize: '10px' } } },
+                            legend: {
+                                position: 'bottom',
+                                labels: { colors: '#cbd5e1' },
+                                markers: { radius: 4 }
+                            },
+                            tooltip: { theme: 'dark' }
+                        };
+
+                        if (joinsLeavesChartInstance) joinsLeavesChartInstance.destroy();
+                        joinsLeavesChartInstance = new ApexCharts(document.querySelector("#joinsLeavesChartContainer"), jlOptions);
+                        joinsLeavesChartInstance.render();
+
+                        // 3. Voice Connections Chart
+                        const voiceOptions = {
+                            series: [
+                                { name: 'العدد يشمل البوتات', data: data.voiceWithBots },
+                                { name: 'العدد باستثناء البوتات', data: data.voiceNoBots }
+                            ],
+                            chart: {
+                                height: 300,
+                                type: 'bar',
+                                toolbar: { show: false },
+                                background: 'transparent'
+                            },
+                            colors: ['#6366f1', '#a855f7'],
+                            plotOptions: {
+                                bar: {
+                                    horizontal: false,
+                                    columnWidth: '40%',
+                                    borderRadius: 6,
+                                    dataLabels: { position: 'top' }
+                                }
+                            },
+                            dataLabels: {
+                                enabled: true,
+                                formatter: (val) => val > 0 ? val : '',
+                                style: { fontSize: '12px', colors: ['#ffffff'], fontWeight: 'bold' },
+                                offsetY: -20
+                            },
+                            grid: { borderColor: '#1f212d', strokeDashArray: 3 },
+                            xaxis: {
+                                categories: data.voiceCategories,
+                                labels: { style: { colors: '#94a3b8', fontSize: '10px' } },
+                                axisBorder: { color: '#1f212d' }
+                            },
+                            yaxis: { labels: { style: { colors: '#94a3b8', fontSize: '10px' } } },
+                            legend: {
+                                position: 'bottom',
+                                labels: { colors: '#cbd5e1' },
+                                markers: { radius: 4 }
+                            },
+                            tooltip: { theme: 'dark' }
+                        };
+
+                        if (voiceChartInstance) voiceChartInstance.destroy();
+                        voiceChartInstance = new ApexCharts(document.querySelector("#voiceChartContainer"), voiceOptions);
+                        voiceChartInstance.render();
+                    }
+
+                    function changeStatsDuration(period) {
+                        initAllCharts(period);
+                    }
+
+                    window.addEventListener('DOMContentLoaded', () => {
+                        initAllCharts('7d');
+                    });
+                    </script>
                 `;
             } else if (section === 'autoresponder') {
                 const autoRespondersList = database.getAutoResponders ? database.getAutoResponders(guildId) : [];
@@ -3383,6 +3804,640 @@ module.exports = function (app, client) {
                         </div>
                     </div>
                 `;
+            } else if (section === 'quran' || section === 'radio') {
+                const stations = [
+                    { id: 'cairo_radio', name: '📻 إذاعة القرآن الكريم من القاهرة 🇪🇬 (بث مباشر 24/7)' },
+                    { id: 'makkah_radio', name: '📻 إذاعة القرآن الكريم من مكة المكرمة 🇸🇦 (بث مباشر 24/7)' },
+                    { id: 'afasy', name: '📖 الشيخ مشاري راشد العفاسي (تلاوات خاشعة)' },
+                    { id: 'abdulbasit', name: '📖 الشيخ عبدالباسط عبدالصمد (المصحف المجود)' },
+                    { id: 'muaiqly', name: '📖 الشيخ ماهر المعيقلي (تلاوة الحرم المكي)' },
+                    { id: 'dosari', name: '📖 الشيخ ياسر الدوسري (تلاوة مؤثرة خاشعة)' },
+                    { id: 'ghamdi', name: '📖 الشيخ سعد الغامدي (المصحف المرتل)' },
+                    { id: 'sudais', name: '📖 الشيخ عبدالرحمن السديس (أجمل التلاوات)' },
+                    { id: 'shuraim', name: '📖 الشيخ سعود الشريم (تلاوات مميزة)' },
+                    { id: 'husary', name: '📖 الشيخ محمود خليل الحصري (المصحف المرتل)' }
+                ];
+                const stationOptions = stations.map(s => `
+                    <option value="${s.id}" ${(settings.quran_station || 'cairo_radio') === s.id ? 'selected' : ''}>${s.name}</option>
+                `).join('');
+
+                formFieldsHtml = `
+                    <div class="space-y-6">
+                        <!-- حالة البث الحالية والمشغل الحي -->
+                        <div class="bg-gradient-to-r from-emerald-950/40 via-[#12131c] to-teal-950/40 border border-emerald-900/40 p-6 rounded-2xl flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <button type="button" onclick="stopRadioDirect()" id="stopRadioBtn" class="px-4 py-2 bg-rose-950/60 hover:bg-rose-600 text-rose-300 hover:text-white border border-rose-800/40 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-lg">
+                                    <span>⏹️ إيقاف البث</span>
+                                </button>
+                                <button type="button" onclick="startRadioDirect()" id="startRadioBtn" class="px-5 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-lg shadow-emerald-900/40">
+                                    <span>▶️ تشغيل الآن</span>
+                                </button>
+                            </div>
+                            <div class="text-right">
+                                <div class="flex items-center gap-2 justify-end mb-1">
+                                    <span id="radioLiveBadge" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-gray-800 text-gray-400 border border-gray-700">جاري فحص الحالة...</span>
+                                    <h4 class="font-bold text-white text-sm">البث المباشر لإذاعات وتلاوات القرآن الكريم 📻</h4>
+                                </div>
+                                <p class="text-gray-400 text-xs">تشغيل متواصل 24/7 بأعلى جودة صوتية وبدون انقطاع داخل السيرفر</p>
+                            </div>
+                        </div>
+
+                        <!-- إعدادات الروم الصوتي والمحطة -->
+                        <div class="bg-[#12131c] border border-purple-950/40 p-6 rounded-2xl space-y-4 text-right">
+                            <h4 class="font-bold text-white text-sm mb-1">إعدادات الروم والمحطة ⚙️</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-300 mb-2">الروم الصوتي (Voice Channel ID) <span class="text-emerald-400">*</span></label>
+                                    <input type="text" id="quranChannelInput" name="quran_channel" value="${settings.quran_channel || ''}" placeholder="ضع ID الروم الصوتي هنا..." class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-emerald-500 rounded-xl px-4 py-3 text-xs text-white outline-none font-mono text-right">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-300 mb-2">المحطة أو القارئ المفضل (Radio Station / Reciter) <span class="text-emerald-400">*</span></label>
+                                    <select id="quranStationSelect" name="quran_station" class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-emerald-500 rounded-xl px-4 py-3 text-xs text-white outline-none text-right">
+                                        ${stationOptions}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- إعدادات التشغيل المستمر 24/7 -->
+                        <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl space-y-3 text-right">
+                            <div class="flex items-center justify-between">
+                                <label class="toggle"><input type="checkbox" name="quran_enabled" value="1" ${settings.quran_enabled ? 'checked' : ''}><span class="slider"></span></label>
+                                <div>
+                                    <h4 class="font-bold text-white text-sm">البقاء متصلاً دائماً 24/7 (Always-On 24/7)</h4>
+                                    <p class="text-gray-400 text-xs mt-0.5">يقوم البوت بإعادة الاتصال بالروم الصوتي وتشغيل التلاوة تلقائياً في حال إعادة تشغيل البوت أو انقطاع الاتصال.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="quranStatusMsg" class="text-xs font-bold text-center hidden py-2 px-4 rounded-xl border"></div>
+                    </div>
+
+                    <script>
+                    async function checkRadioStatus() {
+                        try {
+                            const res = await fetch('/api/guild/${guildId}/quran/status');
+                            const data = await res.json();
+                            const badge = document.getElementById('radioLiveBadge');
+                            if (data.isPlaying) {
+                                badge.className = 'px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-950 text-emerald-300 border border-emerald-700 animate-pulse';
+                                badge.innerText = '🟢 البث يعمل الآن: ' + (data.channelName || 'في الروم الصوتي');
+                            } else {
+                                badge.className = 'px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-gray-800 text-gray-400 border border-gray-700';
+                                badge.innerText = '🔴 البوت غير متصل حالياً';
+                            }
+                        } catch(e) {}
+                    }
+                    checkRadioStatus();
+
+                    async function startRadioDirect() {
+                        const channelId = document.getElementById('quranChannelInput').value.trim();
+                        const stationKey = document.getElementById('quranStationSelect').value;
+                        const statusMsg = document.getElementById('quranStatusMsg');
+                        const btn = document.getElementById('startRadioBtn');
+
+                        if (!channelId) {
+                            alert('يرجى كتابة ID الروم الصوتي أولاً!');
+                            return;
+                        }
+
+                        btn.disabled = true;
+                        btn.innerHTML = '⏳ جارٍ البدء...';
+                        statusMsg.className = 'text-xs font-bold text-center text-purple-400 mt-2 block bg-purple-950/30 border border-purple-800/40 py-2 px-4 rounded-xl';
+                        statusMsg.innerText = 'جارٍ تشغيل الراديو في الروم الصوتي...';
+
+                        try {
+                            const res = await fetch('/api/guild/${guildId}/quran/start', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ channelId, stationKey })
+                            });
+                            const data = await res.json();
+                            if (data.success) {
+                                statusMsg.className = 'text-xs font-bold text-center text-emerald-400 mt-2 block bg-emerald-950/40 border border-emerald-800 py-2 px-4 rounded-xl';
+                                statusMsg.innerText = '✅ تم تشغيل ' + (data.stationName || 'إذاعة القرآن') + ' بنجاح في ' + (data.channelName || 'الروم الصوتي') + '!';
+                                checkRadioStatus();
+                            } else {
+                                statusMsg.className = 'text-xs font-bold text-center text-rose-400 mt-2 block bg-rose-950/40 border border-rose-800 py-2 px-4 rounded-xl';
+                                statusMsg.innerText = '❌ خطأ: ' + (data.error || 'فشل الاتصال بالروم الصوتي');
+                            }
+                        } catch(e) {
+                            statusMsg.className = 'text-xs font-bold text-center text-rose-400 mt-2 block bg-rose-950/40 border border-rose-800 py-2 px-4 rounded-xl';
+                            statusMsg.innerText = '❌ حدث خطأ أثناء الاتصال بالخادم';
+                        } finally {
+                            btn.disabled = false;
+                            btn.innerHTML = '<span>▶️ تشغيل الآن</span>';
+                        }
+                    }
+
+                    async function stopRadioDirect() {
+                        const statusMsg = document.getElementById('quranStatusMsg');
+                        const btn = document.getElementById('stopRadioBtn');
+
+                        btn.disabled = true;
+                        btn.innerHTML = '⏳ جارٍ الإيقاف...';
+
+                        try {
+                            const res = await fetch('/api/guild/${guildId}/quran/stop', { method: 'POST' });
+                            const data = await res.json();
+                            if (data.success) {
+                                statusMsg.className = 'text-xs font-bold text-center text-amber-400 mt-2 block bg-amber-950/40 border border-amber-800 py-2 px-4 rounded-xl';
+                                statusMsg.innerText = '⏹️ تم إيقاف الراديو ومغادرة الروم الصوتي.';
+                                checkRadioStatus();
+                            }
+                        } catch(e) {
+                            alert('حدث خطأ أثناء الإيقاف');
+                        } finally {
+                            btn.disabled = false;
+                            btn.innerHTML = '<span>⏹️ إيقاف البث</span>';
+                        }
+                    }
+                    </script>
+                `;
+            } else if (section === 'applications' || section === 'apply') {
+                const appsList = database.getApplications ? database.getApplications(guildId) : [];
+                const appsCountFormatted = appsList.length.toString().padStart(2, '0');
+
+                const appsCardsHtml = appsList.length > 0 ? appsList.map(a => {
+                    let qList = [];
+                    try { qList = typeof a.questions === 'string' ? JSON.parse(a.questions) : a.questions; } catch(e) { qList = []; }
+                    return `
+                        <div class="bg-[#0b0c10] border border-purple-950/40 p-4 rounded-xl flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <button type="button" onclick="deleteAppForm('${a.id}')" class="px-3 py-1.5 bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 border border-rose-900/30 rounded-lg text-xs font-bold transition">حذف 🗑️</button>
+                                <span class="px-2.5 py-1 bg-purple-950/60 text-purple-300 rounded-lg text-[10px] font-bold">${qList.length} أسئلة</span>
+                            </div>
+                            <div class="text-right">
+                                <h5 class="font-bold text-white text-xs">${a.title}</h5>
+                                <p class="text-gray-400 text-[11px] mt-0.5">${a.description || 'بدون وصف'}</p>
+                            </div>
+                        </div>
+                    `;
+                }).join('') : '';
+
+                formFieldsHtml = `
+                    <div class="space-y-6">
+                        <!-- Top Card: التقديمات Header & Form Creator -->
+                        <div class="bg-[#12131c] border border-purple-950/40 rounded-2xl p-6 shadow-xl space-y-4 text-right">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-1 bg-[#0b0c10] border border-purple-950/40 px-3 py-1 rounded-xl text-xs font-mono font-bold text-gray-300">
+                                    <span class="text-purple-400">${appsCountFormatted}</span>
+                                    <span>/</span>
+                                    <span class="text-gray-500">00</span>
+                                </div>
+                                <h4 class="font-bold text-white text-base">التقديمات</h4>
+                            </div>
+
+                            <!-- Dashed Create Button -->
+                            <div onclick="toggleCreateAppForm()" class="border-2 border-dashed border-purple-950/70 hover:border-purple-600/70 bg-[#0b0c10]/40 hover:bg-purple-950/20 rounded-2xl p-6 flex items-center justify-center gap-2 cursor-pointer transition text-gray-300 hover:text-white">
+                                <span class="text-xs font-bold">إنشاء تقديم</span>
+                                <span class="w-5 h-5 rounded-full bg-purple-900/60 flex items-center justify-center text-xs font-bold text-purple-300">➕</span>
+                            </div>
+
+                            <!-- Inline Form for Creating an Application (Hidden by default) -->
+                            <div id="createAppModal" class="hidden bg-[#0b0c10] border border-purple-900/40 rounded-2xl p-5 space-y-4 mt-4">
+                                <div class="flex items-center justify-between border-b border-purple-950/40 pb-3">
+                                    <button type="button" onclick="toggleCreateAppForm()" class="text-gray-500 hover:text-white text-xs font-bold">✕ إلغاء</button>
+                                    <h5 class="font-bold text-purple-300 text-xs">✨ إضافة استمارة تقديم جديدة</h5>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-xs font-bold text-gray-300 mb-1.5">عنوان التقديم <span class="text-rose-400">*</span></label>
+                                        <input type="text" id="newAppTitle" placeholder="مثال: تقديم إدارة السيرفر / دعم فني" class="w-full bg-[#12131c] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold text-gray-300 mb-1.5">وصف التقديم (اختياري)</label>
+                                        <input type="text" id="newAppDesc" placeholder="شروط أو توضيح بسيط للتقديم..." class="w-full bg-[#12131c] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold text-gray-300 mb-1.5">روم استلام الطلبات (Log Channel ID)</label>
+                                        <input type="text" id="newAppLogChan" placeholder="ID الروم لإرسال الطلبات إليه للإدارة..." class="w-full bg-[#12131c] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none font-mono">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold text-gray-300 mb-1.5">الرتبة الممنوحة عند القبول (Accepted Role ID)</label>
+                                        <input type="text" id="newAppRole" placeholder="ID الرتبة التي تُعطى للعضو فور قبوله..." class="w-full bg-[#12131c] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none font-mono">
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-300 mb-1.5">أسئلة الاستمارة (سؤال في كل سطر - حتى 5 أسئلة)</label>
+                                    <textarea id="newAppQuestions" rows="4" placeholder="1. كم عمرك؟&#10;2. ما هي خبراتك السابقة في الإدارة؟&#10;3. كم ساعة تتواجد يومياً في الديسكورد؟" class="w-full bg-[#12131c] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none"></textarea>
+                                </div>
+                                <div class="flex justify-end pt-2">
+                                    <button type="button" onclick="submitCreateApp()" class="px-6 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold transition shadow-lg flex items-center gap-1.5">
+                                        <span>💾 حفظ الاستمارة</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- List of Current Applications -->
+                            <div class="space-y-2 mt-3">
+                                ${appsCardsHtml}
+                            </div>
+                        </div>
+
+                        <!-- Section 2: الأوامر (Commands list) -->
+                        <div class="bg-[#12131c] border border-purple-950/40 rounded-2xl p-6 shadow-xl space-y-3 text-right">
+                            <h4 class="font-bold text-white text-base mb-3">الأوامر</h4>
+
+                            <!-- Command 1: applications pending -->
+                            <div class="bg-[#0b0c10] border border-purple-950/30 p-4 rounded-xl flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                    <button type="button" class="w-7 h-7 rounded-lg bg-purple-950/40 text-gray-400 hover:text-white flex items-center justify-center text-xs">✏️</button>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <div class="text-right">
+                                        <div class="font-mono font-bold text-white text-xs">applications pending</div>
+                                        <p class="text-gray-400 text-[11px] mt-0.5">عرض التقديمات قيد الانتظار</p>
+                                    </div>
+                                    <div class="w-6 h-6 rounded-md bg-purple-950/60 text-purple-300 flex items-center justify-center text-xs font-mono font-bold">&gt;_</div>
+                                </div>
+                            </div>
+
+                            <!-- Command 2: applications points list -->
+                            <div class="bg-[#0b0c10] border border-purple-950/30 p-4 rounded-xl flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                    <button type="button" class="w-7 h-7 rounded-lg bg-purple-950/40 text-gray-400 hover:text-white flex items-center justify-center text-xs">✏️</button>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <div class="text-right">
+                                        <div class="font-mono font-bold text-white text-xs">applications points list</div>
+                                        <p class="text-gray-400 text-[11px] mt-0.5">عرض نقاط التقديمات الخاصة بك أو الخاصة بعضو آخر</p>
+                                    </div>
+                                    <div class="w-6 h-6 rounded-md bg-purple-950/60 text-purple-300 flex items-center justify-center text-xs font-mono font-bold">&gt;_</div>
+                                </div>
+                            </div>
+
+                            <!-- Command 3: applications points reset -->
+                            <div class="bg-[#0b0c10] border border-purple-950/30 p-4 rounded-xl flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                    <button type="button" class="w-7 h-7 rounded-lg bg-purple-950/40 text-gray-400 hover:text-white flex items-center justify-center text-xs">✏️</button>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <div class="text-right">
+                                        <div class="font-mono font-bold text-white text-xs">applications points reset_user|reset_server</div>
+                                        <p class="text-gray-400 text-[11px] mt-0.5">إعادة تعيين نقاط التقديمات لسيرفر أو لعضو</p>
+                                    </div>
+                                    <div class="w-6 h-6 rounded-md bg-purple-950/60 text-purple-300 flex items-center justify-center text-xs font-mono font-bold">&gt;_</div>
+                                </div>
+                            </div>
+
+                            <!-- Command 4: applications points set -->
+                            <div class="bg-[#0b0c10] border border-purple-950/30 p-4 rounded-xl flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                    <button type="button" class="w-7 h-7 rounded-lg bg-purple-950/40 text-gray-400 hover:text-white flex items-center justify-center text-xs">✏️</button>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <div class="text-right">
+                                        <div class="font-mono font-bold text-white text-xs">applications points set</div>
+                                        <p class="text-gray-400 text-[11px] mt-0.5">تعيين نقاط التقديمات لعضو</p>
+                                    </div>
+                                    <div class="w-6 h-6 rounded-md bg-purple-950/60 text-purple-300 flex items-center justify-center text-xs font-mono font-bold">&gt;_</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Section 3: منشئ الرسالة الواحدة (Single Message Panel Deployer) -->
+                        <div class="bg-[#12131c] border border-purple-950/40 rounded-2xl p-6 shadow-xl space-y-5 text-right">
+                            <div>
+                                <h4 class="font-bold text-white text-base">منشئ الرسالة الواحدة</h4>
+                                <p class="text-gray-400 text-xs mt-0.5">أنشئ وأرسل رسالة واحدة تتضمن جميع التقديمات لسهولة عرضها.</p>
+                            </div>
+
+                            <!-- Discord Message Preview Box -->
+                            <div class="bg-[#0b0c10] border border-purple-950/40 rounded-2xl p-4 space-y-3">
+                                <div class="flex items-center justify-between text-gray-400 text-[11px]">
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-6 h-6 rounded-full bg-purple-600 flex items-center justify-center text-white text-[10px] font-bold">Z</div>
+                                        <span class="font-bold text-white text-xs">ZENO</span>
+                                        <span class="px-1.5 py-0.2 bg-purple-600 text-white rounded text-[9px] font-bold">APP</span>
+                                        <span class="text-[10px]">Today at 08:23</span>
+                                    </div>
+                                    <span id="charCounter" class="font-mono text-gray-500">17/2000</span>
+                                </div>
+
+                                <textarea id="panelMessageText" oninput="updateCharCount(this)" rows="2" placeholder="Your message here..." class="w-full bg-transparent border-none text-xs text-gray-200 outline-none resize-none leading-relaxed">يرجى الضغط على الزر أدناه أو اختيار الاستمارة المناسبة للتقديم:</textarea>
+                            </div>
+
+                            <!-- Panel Options & Deploy Settings -->
+                            <div class="space-y-4">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-2">
+                                        <input type="text" id="panelDeployChannel" placeholder="ضع ID القناة هنا..." class="bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-2 text-xs text-white outline-none font-mono text-right w-60">
+                                        <label class="text-xs font-bold text-gray-300">القناة المستهدفة:</label>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-xs text-gray-400 font-bold">نوع العرض:</span>
+                                        <div class="flex items-center bg-[#0b0c10] border border-purple-950/40 p-1 rounded-xl gap-1">
+                                            <button type="button" onclick="setPanelType('buttons')" id="btnTypeButtons" class="px-3 py-1 rounded-lg text-xs font-bold bg-purple-600 text-white transition">ضغطة زر</button>
+                                            <button type="button" onclick="setPanelType('select')" id="btnTypeSelect" class="px-3 py-1 rounded-lg text-xs font-bold text-gray-400 hover:text-white transition">قائمة الاختيار</button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="flex justify-end pt-2">
+                                    <button type="button" onclick="sendApplicationPanelDirect()" id="sendAppPanelBtn" class="px-8 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold transition shadow-lg flex items-center gap-2">
+                                        <span>إرسال اللوحة ➔</span>
+                                    </button>
+                                </div>
+                                <div id="panelSendStatus" class="text-xs font-bold text-center hidden py-2 px-4 rounded-xl border"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <script>
+                    let currentPanelType = 'buttons';
+
+                    function toggleCreateAppForm() {
+                        const modal = document.getElementById('createAppModal');
+                        modal.classList.toggle('hidden');
+                    }
+
+                    function updateCharCount(el) {
+                        const counter = document.getElementById('charCounter');
+                        counter.innerText = el.value.length + '/2000';
+                    }
+
+                    function setPanelType(type) {
+                        currentPanelType = type;
+                        const btnButtons = document.getElementById('btnTypeButtons');
+                        const btnSelect = document.getElementById('btnTypeSelect');
+                        if (type === 'buttons') {
+                            btnButtons.className = 'px-3 py-1 rounded-lg text-xs font-bold bg-purple-600 text-white transition';
+                            btnSelect.className = 'px-3 py-1 rounded-lg text-xs font-bold text-gray-400 hover:text-white transition';
+                        } else {
+                            btnSelect.className = 'px-3 py-1 rounded-lg text-xs font-bold bg-purple-600 text-white transition';
+                            btnButtons.className = 'px-3 py-1 rounded-lg text-xs font-bold text-gray-400 hover:text-white transition';
+                        }
+                    }
+
+                    async function submitCreateApp() {
+                        const title = document.getElementById('newAppTitle').value.trim();
+                        const description = document.getElementById('newAppDesc').value.trim();
+                        const log_channel = document.getElementById('newAppLogChan').value.trim();
+                        const accepted_role = document.getElementById('newAppRole').value.trim();
+                        const questionsRaw = document.getElementById('newAppQuestions').value.trim();
+
+                        if (!title) {
+                            alert('يرجى كتابة عنوان التقديم أولاً!');
+                            return;
+                        }
+
+                        const questions = questionsRaw.split('\\n').filter(q => q.trim().length > 0);
+
+                        try {
+                            const res = await fetch('/api/guild/${guildId}/applications/create', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ title, description, log_channel, accepted_role, questions })
+                            });
+                            const data = await res.json();
+                            if (data.success) {
+                                location.reload();
+                            } else {
+                                alert('خطأ: ' + (data.error || 'فشل حفظ الاستمارة'));
+                            }
+                        } catch(e) {
+                            alert('حدث خطأ أثناء الاتصال بالخادم');
+                        }
+                    }
+
+                    async function deleteAppForm(id) {
+                        if (!confirm('هل أنت متأكد من رغبتك في حذف هذا التقديم؟')) return;
+                        try {
+                            const res = await fetch('/api/guild/${guildId}/applications/delete', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ id })
+                            });
+                            const data = await res.json();
+                            if (data.success) {
+                                location.reload();
+                            }
+                        } catch(e) {
+                            alert('خطأ أثناء الحذف');
+                        }
+                    }
+
+                    async function sendApplicationPanelDirect() {
+                        const channelId = document.getElementById('panelDeployChannel').value.trim();
+                        const messageText = document.getElementById('panelMessageText').value.trim();
+                        const statusEl = document.getElementById('panelSendStatus');
+                        const btn = document.getElementById('sendAppPanelBtn');
+
+                        if (!channelId) {
+                            alert('يرجى كتابة ID القناة المستهدفة أولاً!');
+                            return;
+                        }
+
+                        btn.disabled = true;
+                        btn.innerHTML = '⏳ جارٍ الإرسال...';
+                        statusEl.className = 'text-xs font-bold text-center text-purple-400 mt-2 block bg-purple-950/30 border border-purple-800/40 py-2 px-4 rounded-xl';
+                        statusEl.innerText = 'جارٍ نشر لوحة التقديمات في ديسكورد...';
+
+                        try {
+                            const res = await fetch('/api/guild/${guildId}/applications/send-panel', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    channelId,
+                                    messageText,
+                                    panelType: currentPanelType,
+                                    embedTitle: '📝 استمارات التقديم المتاحة',
+                                    embedDescription: 'اضغط على الزر أدناه أو اختر التقديم المناسب لتعبئة الاستمارة:'
+                                })
+                            });
+                            const data = await res.json();
+                            if (data.success) {
+                                statusEl.className = 'text-xs font-bold text-center text-emerald-400 mt-2 block bg-emerald-950/40 border border-emerald-800 py-2 px-4 rounded-xl';
+                                statusEl.innerText = '✅ تم نشر لوحة التقديمات بنجاح في القناة المحددة!';
+                            } else {
+                                statusEl.className = 'text-xs font-bold text-center text-rose-400 mt-2 block bg-rose-950/40 border border-rose-800 py-2 px-4 rounded-xl';
+                                statusEl.innerText = '❌ خطأ: ' + (data.error || 'فشل النشر، تأكد من وجود استمارات وصلاحيات البوت');
+                            }
+                        } catch(e) {
+                            statusEl.className = 'text-xs font-bold text-center text-rose-400 mt-2 block bg-rose-950/40 border border-rose-800 py-2 px-4 rounded-xl';
+                            statusEl.innerText = '❌ حدث خطأ أثناء الاتصال بالخادم';
+                        } finally {
+                            btn.disabled = false;
+                            btn.innerHTML = '<span>إرسال اللوحة ➔</span>';
+                        }
+                    }
+                    </script>
+                `;
+            } else if (section === 'appearance' || section === 'bot-appearance') {
+                const botGuild = client.guilds.cache.get(guildId);
+                const botMember = botGuild?.members?.me;
+                const botNameVal = settings.bot_nickname || botMember?.nickname || client.user?.username || 'ZENO';
+                const botAvatarVal = settings.bot_avatar_url || client.user?.displayAvatarURL() || '';
+                const botBannerVal = settings.bot_banner_url || '';
+                const botStatusVal = settings.bot_status || 'online';
+                const botActTypeVal = settings.bot_activity_type || 'playing';
+                const botActTextVal = settings.bot_activity_text || 'ZENO Bot | #help';
+
+                formFieldsHtml = `
+                    <div class="space-y-6">
+                        <!-- Top Header -->
+                        <div class="text-right">
+                            <h2 class="text-2xl font-black text-white">مظهر البوت</h2>
+                            <p class="text-gray-400 text-xs mt-1">يعرض ويخصص ملف تعريف البوت، بما في ذلك المعلومات مثل الحالة والصورة الرمزية والتفاصيل المخصصة الأخرى.</p>
+                        </div>
+
+                        <!-- Appearance Card (Free & Unlocked) -->
+                        <div class="bg-[#12131c] border border-purple-950/40 rounded-3xl p-7 shadow-2xl space-y-6 text-right relative overflow-hidden">
+                            <!-- Header with Golden Crown -->
+                            <div class="flex items-center justify-between border-b border-purple-950/40 pb-4">
+                                <span class="px-3 py-1 bg-gradient-to-r from-amber-500/20 to-yellow-500/20 border border-amber-500/40 text-amber-300 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-md">
+                                    <span>✨ ميزة مجانية للجميع</span>
+                                </span>
+                                <div class="flex items-center gap-2">
+                                    <h4 class="font-bold text-white text-base">مظهر</h4>
+                                    <span class="text-amber-400 text-lg">👑</span>
+                                </div>
+                            </div>
+
+                            <!-- Avatar & Banner Visual Boxes -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+                                <!-- Banner Box -->
+                                <div class="space-y-2">
+                                    <label class="block text-xs font-bold text-gray-400">خلفية (Banner)</label>
+                                    <div class="h-32 rounded-2xl bg-[#0b0c10] border-2 border-dashed border-purple-950/60 hover:border-purple-600/50 flex flex-col items-center justify-center relative overflow-hidden transition group">
+                                        <div id="bannerPreview" class="absolute inset-0 bg-cover bg-center ${botBannerVal ? '' : 'hidden'}" style="background-image: url('${botBannerVal}');"></div>
+                                        <div class="flex flex-col items-center gap-1 z-10 text-gray-500 group-hover:text-purple-300">
+                                            <span class="text-2xl">🖼️</span>
+                                            <span class="text-[10px] font-bold">ضع رابط الخلفية بالأسفل</span>
+                                        </div>
+                                    </div>
+                                    <input type="text" id="botBannerInput" oninput="updateBannerPreview(this.value)" value="${botBannerVal}" placeholder="رابط صورة الخلفية (URL)..." class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none font-mono text-right">
+                                </div>
+
+                                <!-- Avatar Box -->
+                                <div class="space-y-2 flex flex-col items-end">
+                                    <label class="block text-xs font-bold text-gray-400">الصورة الرمزية (Avatar)</label>
+                                    <div class="w-28 h-28 rounded-full bg-[#0b0c10] border-2 border-purple-600/60 shadow-xl shadow-purple-900/30 overflow-hidden flex items-center justify-center relative group">
+                                        <img id="avatarPreview" src="${botAvatarVal}" class="w-full h-full object-cover">
+                                    </div>
+                                    <input type="text" id="botAvatarInput" oninput="updateAvatarPreview(this.value)" value="${botAvatarVal}" placeholder="رابط الصورة الرمزية (URL)..." class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none font-mono text-right mt-1">
+                                </div>
+                            </div>
+
+                            <!-- Bot Name with 0/32 character counter -->
+                            <div class="space-y-1.5 pt-2">
+                                <div class="flex items-center justify-between text-xs">
+                                    <span id="botNameCharCount" class="font-mono text-gray-500">${botNameVal.length}/32</span>
+                                    <label class="font-bold text-gray-300">أسم البوت في السيرفر (Bot Nickname)</label>
+                                </div>
+                                <input type="text" id="botNameInput" maxlength="32" oninput="updateBotNameCount(this)" value="${botNameVal}" placeholder="Nova Bot / ZENO" class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right font-bold">
+                            </div>
+
+                            <!-- Bot Status Dropdown -->
+                            <div class="space-y-1.5">
+                                <label class="block text-xs font-bold text-gray-300">الحالة (Presence Status)</label>
+                                <select id="botStatusSelect" class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right cursor-pointer">
+                                    <option value="online" ${botStatusVal === 'online' ? 'selected' : ''}>🟢 متصل (Online)</option>
+                                    <option value="idle" ${botStatusVal === 'idle' ? 'selected' : ''}>🟡 خامل (Idle)</option>
+                                    <option value="dnd" ${botStatusVal === 'dnd' ? 'selected' : ''}>🔴 عدم الإزعاج (Do Not Disturb)</option>
+                                    <option value="invisible" ${botStatusVal === 'invisible' ? 'selected' : ''}>⚪ غير متصل (Invisible)</option>
+                                </select>
+                            </div>
+
+                            <!-- Activity Type Dropdown -->
+                            <div class="space-y-1.5">
+                                <label class="block text-xs font-bold text-gray-300">نوع النشاط (Activity Type)</label>
+                                <select id="botActTypeSelect" class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right cursor-pointer">
+                                    <option value="playing" ${botActTypeVal === 'playing' ? 'selected' : ''}>🎮 يلعب (Playing)</option>
+                                    <option value="watching" ${botActTypeVal === 'watching' ? 'selected' : ''}>📺 يشاهد (Watching)</option>
+                                    <option value="listening" ${botActTypeVal === 'listening' ? 'selected' : ''}>🎧 يستمع إلى (Listening)</option>
+                                    <option value="streaming" ${botActTypeVal === 'streaming' ? 'selected' : ''}>📡 يبث مباشر (Streaming)</option>
+                                    <option value="competing" ${botActTypeVal === 'competing' ? 'selected' : ''}>🏆 ينافس في (Competing)</option>
+                                </select>
+                            </div>
+
+                            <!-- Activity Status Text -->
+                            <div class="space-y-1.5">
+                                <label class="block text-xs font-bold text-gray-300">نص النشاط المخصص (Activity Text)</label>
+                                <input type="text" id="botActTextInput" value="${botActTextVal}" placeholder="ZENO Bot | #help | حماية وسيرفرات" class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right">
+                            </div>
+
+                            <!-- Save Button (Green Button matching image) -->
+                            <div class="pt-4 border-t border-purple-950/40 flex items-center justify-between">
+                                <div id="appearanceSaveStatus" class="text-xs font-bold hidden"></div>
+                                <button type="button" onclick="saveAppearanceDirect()" id="saveAppearanceBtn" class="px-8 py-3 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl transition shadow-lg shadow-emerald-950/50 flex items-center gap-2">
+                                    <span>حفظ</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <script>
+                    function updateBotNameCount(el) {
+                        document.getElementById('botNameCharCount').innerText = el.value.length + '/32';
+                    }
+
+                    function updateAvatarPreview(url) {
+                        if (url && url.startsWith('http')) {
+                            document.getElementById('avatarPreview').src = url;
+                        }
+                    }
+
+                    function updateBannerPreview(url) {
+                        const preview = document.getElementById('bannerPreview');
+                        if (url && url.startsWith('http')) {
+                            preview.style.backgroundImage = 'url(' + url + ')';
+                            preview.classList.remove('hidden');
+                        } else {
+                            preview.classList.add('hidden');
+                        }
+                    }
+
+                    async function saveAppearanceDirect() {
+                        const bot_name = document.getElementById('botNameInput').value.trim();
+                        const bot_status = document.getElementById('botStatusSelect').value;
+                        const bot_activity_type = document.getElementById('botActTypeSelect').value;
+                        const bot_activity_text = document.getElementById('botActTextInput').value.trim();
+                        const bot_avatar_url = document.getElementById('botAvatarInput').value.trim();
+                        const bot_banner_url = document.getElementById('botBannerInput').value.trim();
+
+                        const btn = document.getElementById('saveAppearanceBtn');
+                        const statusEl = document.getElementById('appearanceSaveStatus');
+
+                        btn.disabled = true;
+                        btn.innerHTML = '⏳ جارٍ الحفظ...';
+
+                        try {
+                            const res = await fetch('/api/guild/${guildId}/appearance/save', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    bot_name,
+                                    bot_status,
+                                    bot_activity_type,
+                                    bot_activity_text,
+                                    bot_avatar_url,
+                                    bot_banner_url
+                                })
+                            });
+                            const data = await res.json();
+                            if (data.success) {
+                                statusEl.className = 'text-xs font-bold text-emerald-400 block';
+                                statusEl.innerText = '✅ تم تطبيق وحفظ مظهر البوت بنجاح في السيرفر!';
+                            } else {
+                                statusEl.className = 'text-xs font-bold text-rose-400 block';
+                                statusEl.innerText = '❌ خطأ: ' + (data.error || 'فشل حفظ الإعدادات');
+                            }
+                        } catch(e) {
+                            statusEl.className = 'text-xs font-bold text-rose-400 block';
+                            statusEl.innerText = '❌ حدث خطأ أثناء الاتصال بالخادم';
+                        } finally {
+                            btn.disabled = false;
+                            btn.innerHTML = '<span>حفظ</span>';
+                        }
+                    }
+                    </script>
+                `;
             } else {
                 formFieldsHtml = `
                     <div class="space-y-5">
@@ -3408,6 +4463,7 @@ module.exports = function (app, client) {
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
                 <title>${title} | ${guild.name}</title>
                 <script src="https://cdn.tailwindcss.com"></script>
+                <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
                 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
                 <style>
                     body { background-color: #0b0c10; color: #e2e8f0; font-family: 'Cairo', sans-serif; }
@@ -3464,7 +4520,9 @@ module.exports = function (app, client) {
 
                     <!-- Server Rail -->
                     <div class="w-16 bg-[#08080c] border-l border-purple-950/40 py-4 flex flex-col items-center gap-3 shrink-0 overflow-y-auto">
-                        <a href="/dashboard" title="الرئيسية" class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-purple-600 to-indigo-600 flex items-center justify-center text-white font-black text-sm shadow-lg shadow-purple-900/40">Z</a>
+                        <a href="/dashboard" title="${user.username}" class="group relative flex items-center justify-center">
+                            <img src="${userAvatar}" class="w-11 h-11 rounded-2xl border-2 border-purple-500 shadow-lg shadow-purple-900/50 hover:rounded-xl object-cover transition-all" alt="${user.username}">
+                        </a>
                         <div class="w-8 h-[1px] bg-purple-950/40"></div>
                         ${serverRailHtml}
                     </div>

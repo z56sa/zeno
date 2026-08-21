@@ -621,7 +621,198 @@ module.exports = {
 
         return interaction.editReply({ content: '🌟 تم إرسال تقييمك بنجاح للإدارة! شكراً جزيلاً لوقتك وملاحظاتك.' });
       }
-    } catch (err) {
+
+      // ==========================================
+      // 10. نظام التقديمات (Applications System Handlers)
+      // ==========================================
+      // فتح نموذج التقديم عبر اختيار من القائمة أو ضغطة زر
+      if ((interaction.isStringSelectMenu() && interaction.customId === 'select_apply_form') || (interaction.isButton() && interaction.customId.startsWith('btn_apply_'))) {
+        const appId = interaction.isStringSelectMenu() ? interaction.values[0] : interaction.customId.replace('btn_apply_', '');
+        const app = db.getApplication(appId);
+
+        if (!app || app.status !== 'open') {
+          return interaction.reply({ content: '❌ استمارة التقديم هذه غير متاحة أو تم إغلاقها.', ephemeral: true });
+        }
+
+        let questions = [];
+        try {
+          questions = typeof app.questions === 'string' ? JSON.parse(app.questions) : app.questions;
+        } catch (e) {
+          questions = ['ما هو سبب تقديمك؟', 'ما هي خبراتك السابقة؟'];
+        }
+
+        const modal = new ModalBuilder()
+          .setCustomId(`modal_submit_app_${app.id}`)
+          .setTitle(`📝 ${app.title.slice(0, 40)}`);
+
+        questions.slice(0, 5).forEach((q, idx) => {
+          const input = new TextInputBuilder()
+            .setCustomId(`q_${idx}`)
+            .setLabel(q.slice(0, 45))
+            .setStyle(TextInputStyle.Paragraph)
+            .setRequired(true)
+            .setMaxLength(1000);
+          modal.addComponents(new ActionRowBuilder().addComponents(input));
+        });
+
+        return interaction.showModal(modal);
+      }
+
+      // استلام إجابات التقديم وحفظها وإرسالها للإدارة
+      if (interaction.isModalSubmit() && interaction.customId.startsWith('modal_submit_app_')) {
+        await interaction.deferReply({ ephemeral: true }).catch(() => { });
+        const appId = interaction.customId.replace('modal_submit_app_', '');
+        const app = db.getApplication(appId);
+
+        if (!app) {
+          return interaction.editReply({ content: '❌ لم يتم العثور على نموذج التقديم.' });
+        }
+
+        let questions = [];
+        try {
+          questions = typeof app.questions === 'string' ? JSON.parse(app.questions) : app.questions;
+        } catch (e) {
+          questions = [];
+        }
+
+        const answers = [];
+        questions.slice(0, 5).forEach((q, idx) => {
+          const ans = interaction.fields.getTextInputValue(`q_${idx}`) || 'لا توجد إجابة';
+          answers.push({ question: q, answer: ans });
+        });
+
+        const submission = db.createSubmission(interaction.guild.id, app.id, interaction.user.id, answers);
+
+        // إرسال الطلب لقناة السجلات / المراجعة
+        const logChannelId = app.log_channel || db.getGuildSettings(interaction.guild.id)?.log_channel;
+        if (logChannelId) {
+          const logChan = interaction.guild.channels.cache.get(logChannelId);
+          if (logChan) {
+            const reviewEmbed = new EmbedBuilder()
+              .setColor(config.colors.primary)
+              .setTitle(`📋 طلب تقديم جديد: ${app.title} (#${submission.id})`)
+              .setDescription(`👤 **مقدم الطلب:** ${interaction.user} (\`${interaction.user.tag}\`)\n🆔 **الآيدي:** \`${interaction.user.id}\`\n📅 **تاريخ التقديم:** <t:${submission.submitted_at}:F>`)
+              .setThumbnail(interaction.user.displayAvatarURL({ dynamic: true }))
+              .setFooter({ text: `نموذج #${app.id} • بانتظار قرار الإدارة` })
+              .setTimestamp();
+
+            answers.forEach((item, i) => {
+              reviewEmbed.addFields({
+                name: `❓ ${i + 1}. ${item.question}`,
+                value: `\`\`\`${item.answer.slice(0, 1000)}\`\`\``
+              });
+            });
+
+            const actionRow = new ActionRowBuilder().addComponents(
+              new ButtonBuilder()
+                .setCustomId(`btn_app_accept_${submission.id}`)
+                .setLabel('✅ قبول الطلب')
+                .setStyle(ButtonStyle.Success),
+              new ButtonBuilder()
+                .setCustomId(`btn_app_reject_${submission.id}`)
+                .setLabel('❌ رفض الطلب')
+                .setStyle(ButtonStyle.Danger)
+            );
+
+            await logChan.send({ embeds: [reviewEmbed], components: [actionRow] }).catch(() => { });
+          }
+        }
+
+        return interaction.editReply({
+          content: `✅ **تم استلام طلب تقديمك بنجاح!**\nتم إرسال إجاباتك إلى إدارة السيرفر لمراجعتها، وسيتم إشعارك بالنتيجة فور اتخاذ القرار.`
+        });
+      }
+
+      // قبول طلب التقديم (Accept Application)
+      if (interaction.isButton() && interaction.customId.startsWith('btn_app_accept_')) {
+        if (!interaction.member.permissions.has(PermissionFlagsBits.ManageGuild) && !interaction.member.permissions.has(PermissionFlagsBits.ManageRoles)) {
+          return interaction.reply({ content: '❌ ليس لديك صلاحية لمراجعة وقبول التقديمات.', ephemeral: true });
+        }
+
+        await interaction.deferUpdate().catch(() => { });
+        const subId = interaction.customId.replace('btn_app_accept_', '');
+        const submission = db.getSubmission(subId);
+
+        if (!submission || submission.status !== 'pending') {
+          return interaction.followUp({ content: '⚠️ هذا الطلب تمت مراجعته مسبقاً!', ephemeral: true });
+        }
+
+        const app = db.getApplication(submission.app_id);
+        db.updateSubmissionStatus(subId, 'accepted', interaction.user.id);
+        db.addApplicationPoint(interaction.guild.id, interaction.user.id);
+
+        // إعطاء الرتبة للمتقدم إن وجدت
+        if (app && app.accepted_role) {
+          const role = interaction.guild.roles.cache.get(app.accepted_role);
+          const member = interaction.guild.members.cache.get(submission.user_id) || await interaction.guild.members.fetch(submission.user_id).catch(() => null);
+          if (role && member) {
+            await member.roles.add(role).catch(() => { });
+          }
+        }
+
+        // إشعار العضو بالخاص
+        const applicantUser = client.users.cache.get(submission.user_id) || await client.users.fetch(submission.user_id).catch(() => null);
+        if (applicantUser) {
+          applicantUser.send({
+            embeds: [new EmbedBuilder()
+              .setColor(config.colors.success)
+              .setTitle('🎉 تهانينا! تم قبول طلب تقديمك')
+              .setDescription(`تمت الموافقة على طلب تقديمك على **${app ? app.title : 'الرتبة'}** في سيرفر **${interaction.guild.name}**.\nنتمنى لك كل التوفيق! 🌟`)
+              .setFooter({ text: interaction.guild.name, iconURL: interaction.guild.iconURL({ dynamic: true }) })
+              .setTimestamp()
+            ]
+          }).catch(() => { });
+        }
+
+        const oldEmbed = interaction.message.embeds[0];
+        const updatedEmbed = EmbedBuilder.from(oldEmbed)
+          .setColor(config.colors.success)
+          .setTitle(oldEmbed.title + ' [مقبول ✅]')
+          .addFields({ name: '✨ تم القبول بواسطة', value: `${interaction.user} (<t:${Math.floor(Date.now() / 1000)}:R>)`, inline: false });
+
+        return interaction.editReply({ embeds: [updatedEmbed], components: [] });
+      }
+
+      // رفض طلب التقديم (Reject Application)
+      if (interaction.isButton() && interaction.customId.startsWith('btn_app_reject_')) {
+        if (!interaction.member.permissions.has(PermissionFlagsBits.ManageGuild) && !interaction.member.permissions.has(PermissionFlagsBits.ManageRoles)) {
+          return interaction.reply({ content: '❌ ليس لديك صلاحية لمراجعة ورفض التقديمات.', ephemeral: true });
+        }
+
+        await interaction.deferUpdate().catch(() => { });
+        const subId = interaction.customId.replace('btn_app_reject_', '');
+        const submission = db.getSubmission(subId);
+
+        if (!submission || submission.status !== 'pending') {
+          return interaction.followUp({ content: '⚠️ هذا الطلب تمت مراجعته مسبقاً!', ephemeral: true });
+        }
+
+        const app = db.getApplication(submission.app_id);
+        db.updateSubmissionStatus(subId, 'rejected', interaction.user.id);
+        db.addApplicationPoint(interaction.guild.id, interaction.user.id);
+
+        // إشعار العضو بالخاص
+        const applicantUser = client.users.cache.get(submission.user_id) || await client.users.fetch(submission.user_id).catch(() => null);
+        if (applicantUser) {
+          applicantUser.send({
+            embeds: [new EmbedBuilder()
+              .setColor(config.colors.danger)
+              .setTitle('❌ نعتذر منك! لم يتم قبول طلب تقديمك')
+              .setDescription(`نأسف لإبلاغك بأنه لم يتم قبول طلب تقديمك على **${app ? app.title : 'الرتبة'}** في سيرفر **${interaction.guild.name}** حالياً.\nشكراً جزيلاً لاهتمامك ووقتك!`)
+              .setFooter({ text: interaction.guild.name, iconURL: interaction.guild.iconURL({ dynamic: true }) })
+              .setTimestamp()
+            ]
+          }).catch(() => { });
+        }
+
+        const oldEmbed = interaction.message.embeds[0];
+        const updatedEmbed = EmbedBuilder.from(oldEmbed)
+          .setColor(config.colors.danger)
+          .setTitle(oldEmbed.title + ' [مرفوض ❌]')
+          .addFields({ name: '🚫 تم الرفض بواسطة', value: `${interaction.user} (<t:${Math.floor(Date.now() / 1000)}:R>)`, inline: false });
+
+        return interaction.editReply({ embeds: [updatedEmbed], components: [] });
+      }
       logger.error('خطأ في interactionCreate:', err);
     }
   }

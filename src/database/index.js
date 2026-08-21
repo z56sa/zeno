@@ -142,6 +142,36 @@ db.exec(`
     created_at INTEGER DEFAULT (strftime('%s','now'))
   );
 
+  CREATE TABLE IF NOT EXISTS applications (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    guild_id TEXT NOT NULL,
+    title TEXT NOT NULL,
+    description TEXT,
+    questions TEXT NOT NULL,
+    log_channel TEXT,
+    accepted_role TEXT,
+    status TEXT DEFAULT 'open',
+    created_at INTEGER DEFAULT (strftime('%s','now'))
+  );
+
+  CREATE TABLE IF NOT EXISTS application_submissions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    guild_id TEXT NOT NULL,
+    app_id INTEGER NOT NULL,
+    user_id TEXT NOT NULL,
+    answers TEXT NOT NULL,
+    status TEXT DEFAULT 'pending',
+    reviewed_by TEXT,
+    submitted_at INTEGER DEFAULT (strftime('%s','now'))
+  );
+
+  CREATE TABLE IF NOT EXISTS application_points (
+    guild_id TEXT NOT NULL,
+    user_id TEXT NOT NULL,
+    points INTEGER DEFAULT 0,
+    PRIMARY KEY (guild_id, user_id)
+  );
+
   CREATE TABLE IF NOT EXISTS stars (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     guild_id TEXT NOT NULL,
@@ -378,6 +408,72 @@ function deleteTempVoice(channelId) {
 }
 
 // ==========================================
+// Applications (نظام التقديمات)
+// ==========================================
+function createApplication(guildId, title, description, questions, logChannel, acceptedRole) {
+  const qStr = typeof questions === 'string' ? questions : JSON.stringify(questions);
+  const result = db.prepare(`
+    INSERT INTO applications (guild_id, title, description, questions, log_channel, accepted_role)
+    VALUES (?, ?, ?, ?, ?, ?)
+  `).run(guildId, title, description, qStr, logChannel, acceptedRole);
+  return db.prepare('SELECT * FROM applications WHERE id = ?').get(result.lastInsertRowid);
+}
+
+function getApplications(guildId) {
+  return db.prepare('SELECT * FROM applications WHERE guild_id = ? ORDER BY id DESC').all(guildId);
+}
+
+function getApplication(id) {
+  return db.prepare('SELECT * FROM applications WHERE id = ?').get(id);
+}
+
+function deleteApplication(id) {
+  return db.prepare('DELETE FROM applications WHERE id = ?').run(id);
+}
+
+function createSubmission(guildId, appId, userId, answers) {
+  const aStr = typeof answers === 'string' ? answers : JSON.stringify(answers);
+  const result = db.prepare(`
+    INSERT INTO application_submissions (guild_id, app_id, user_id, answers)
+    VALUES (?, ?, ?, ?)
+  `).run(guildId, appId, userId, aStr);
+  return db.prepare('SELECT * FROM application_submissions WHERE id = ?').get(result.lastInsertRowid);
+}
+
+function getSubmission(id) {
+  return db.prepare('SELECT * FROM application_submissions WHERE id = ?').get(id);
+}
+
+function getPendingSubmissions(guildId) {
+  return db.prepare("SELECT * FROM application_submissions WHERE guild_id = ? AND status = 'pending' ORDER BY id DESC").all(guildId);
+}
+
+function updateSubmissionStatus(id, status, reviewedBy) {
+  return db.prepare('UPDATE application_submissions SET status = ?, reviewed_by = ? WHERE id = ?').run(status, reviewedBy, id);
+}
+
+function getUserApplicationPoints(guildId, userId) {
+  const row = db.prepare('SELECT points FROM application_points WHERE guild_id = ? AND user_id = ?').get(guildId, userId);
+  return row ? row.points : 0;
+}
+
+function setUserApplicationPoints(guildId, userId, points) {
+  return db.prepare('INSERT OR REPLACE INTO application_points (guild_id, user_id, points) VALUES (?, ?, ?)').run(guildId, userId, points);
+}
+
+function addApplicationPoint(guildId, userId, amount = 1) {
+  const current = getUserApplicationPoints(guildId, userId);
+  return setUserApplicationPoints(guildId, userId, current + amount);
+}
+
+function resetApplicationPoints(guildId, userId = null) {
+  if (userId) {
+    return db.prepare('DELETE FROM application_points WHERE guild_id = ? AND user_id = ?').run(guildId, userId);
+  }
+  return db.prepare('DELETE FROM application_points WHERE guild_id = ?').run(guildId);
+}
+
+// ==========================================
 // Reaction Roles
 // ==========================================
 function setReactionRole(customId, guildId, roleId, messageId, channelId) {
@@ -527,6 +623,18 @@ module.exports = {
   removeLevelReward,
   addStar,
   getStars,
+  createApplication,
+  getApplications,
+  getApplication,
+  deleteApplication,
+  createSubmission,
+  getSubmission,
+  getPendingSubmissions,
+  updateSubmissionStatus,
+  getUserApplicationPoints,
+  setUserApplicationPoints,
+  addApplicationPoint,
+  resetApplicationPoints,
   // Compatibility aliases
   getTopXp: getLeaderboard,
   getTopCredits: getCoinsLeaderboard,

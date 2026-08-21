@@ -161,18 +161,124 @@ class AudioPlayerManager {
      * إيقاف البوت ومغادرة الروم الصوتي
      */
     stop(interaction) {
-        const serverQueue = queues.get(interaction.guild.id);
+        const guildId = typeof interaction === 'string' ? interaction : interaction?.guild?.id;
+        const serverQueue = queues.get(guildId);
         if (!serverQueue) {
-            return interaction.reply({ content: '❌ البوت ليس متصلاً بأي روم صوتي!', ephemeral: true });
+            if (typeof interaction === 'object' && interaction.reply) {
+                return interaction.reply({ content: '❌ البوت ليس متصلاً بأي روم صوتي!', ephemeral: true });
+            }
+            return false;
         }
 
         serverQueue.queue = [];
-        serverQueue.player.stop();
-        serverQueue.connection.destroy();
-        queues.delete(interaction.guild.id);
+        try { serverQueue.player.stop(); } catch(e) {}
+        try { serverQueue.connection.destroy(); } catch(e) {}
+        queues.delete(guildId);
 
-        return interaction.reply({ content: '⏹️ تم إيقاف المشغل ومغادرة الروم الصوتي.' });
+        if (typeof interaction === 'object' && interaction.reply) {
+            return interaction.reply({ content: '⏹️ تم إيقاف المشغل ومغادرة الروم الصوتي.' });
+        }
+        return true;
+    }
+
+    /**
+     * تشغيل بث راديو مباشر / إذاعة قرآن كريم 24/7
+     */
+    async playStream(voiceChannel, streamUrl, name = 'إذاعة القرآن الكريم') {
+        if (!voiceChannel) throw new Error('الروم الصوتي غير صالح');
+        const guildId = voiceChannel.guild.id;
+
+        // إيقاف أي بث سابق
+        let serverQueue = queues.get(guildId);
+        if (serverQueue) {
+            try { serverQueue.player.stop(); } catch(e) {}
+            try { serverQueue.connection.destroy(); } catch(e) {}
+            queues.delete(guildId);
+        }
+
+        const player = createAudioPlayer();
+        const connection = joinVoiceChannel({
+            channelId: voiceChannel.id,
+            guildId: guildId,
+            adapterCreator: voiceChannel.guild.voiceAdapterCreator,
+            selfDeaf: true,
+            selfMute: false
+        });
+
+        const resource = createAudioResource(streamUrl, {
+            inlineVolume: true
+        });
+        if (resource.volume) resource.volume.setVolume(1.0);
+
+        player.play(resource);
+        connection.subscribe(player);
+
+        serverQueue = {
+            guild: voiceChannel.guild,
+            channel: voiceChannel,
+            connection: connection,
+            player: player,
+            queue: [],
+            current: { title: name, url: streamUrl, isRadio: true }
+        };
+        queues.set(guildId, serverQueue);
+
+        // معالجة الأخطاء وإعادة الاتصال التلقائي في حال انقطاع البث
+        player.on('error', err => {
+            console.error('Radio Stream Error, attempting reconnect:', err);
+            setTimeout(() => {
+                if (queues.has(guildId)) {
+                    try {
+                        const newResource = createAudioResource(streamUrl);
+                        player.play(newResource);
+                    } catch(e) {}
+                }
+            }, 3000);
+        });
+
+        player.on(AudioPlayerStatus.Idle, () => {
+            if (queues.has(guildId)) {
+                setTimeout(() => {
+                    try {
+                        const newResource = createAudioResource(streamUrl);
+                        player.play(newResource);
+                    } catch(e) {}
+                }, 2000);
+            }
+        });
+
+        return serverQueue;
+    }
+
+    /**
+     * التحقق من حالة الراديو في سيرفر معين
+     */
+    getRadioStatus(guildId) {
+        const serverQueue = queues.get(guildId);
+        if (!serverQueue) return { isPlaying: false, channel: null, current: null };
+        return {
+            isPlaying: true,
+            channelId: serverQueue.channel?.id,
+            channelName: serverQueue.channel?.name,
+            current: serverQueue.current
+        };
     }
 }
 
-module.exports = new AudioPlayerManager();
+const manager = new AudioPlayerManager();
+
+// قائمة محطات وإذاعات القرآن الكريم المباشرة
+manager.quranStations = {
+    'cairo_radio': { name: 'إذاعة القرآن الكريم من القاهرة 🇪🇬', url: 'https://live.mp3quran.net:9702/' },
+    'makkah_radio': { name: 'إذاعة القرآن الكريم من مكة المكرمة 🇸🇦', url: 'https://live.mp3quran.net:9718/' },
+    'afasy': { name: 'الشيخ مشاري راشد العفاسي 📖', url: 'https://live.mp3quran.net:9724/' },
+    'abdulbasit': { name: 'الشيخ عبدالباسط عبدالصمد (المجود) 📖', url: 'https://live.mp3quran.net:9964/' },
+    'muaiqly': { name: 'الشيخ ماهر المعيقلي 📖', url: 'https://live.mp3quran.net:9728/' },
+    'dosari': { name: 'الشيخ ياسر الدوسري 📖', url: 'https://live.mp3quran.net:9984/' },
+    'ghamdi': { name: 'الشيخ سعد الغامدي 📖', url: 'https://live.mp3quran.net:9740/' },
+    'sudais': { name: 'الشيخ عبدالرحمن السديس 📖', url: 'https://live.mp3quran.net:9988/' },
+    'shuraim': { name: 'الشيخ سعود الشريم 📖', url: 'https://live.mp3quran.net:9746/' },
+    'husary': { name: 'الشيخ محمود خليل الحصري 📖', url: 'https://live.mp3quran.net:9960/' }
+};
+
+module.exports = manager;
