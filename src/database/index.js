@@ -228,22 +228,25 @@ function getUser(userId, guildId) {
 
 function addXp(userId, guildId, amount) {
   const user = getUser(userId, guildId);
-  const newXp = user.xp + amount;
-  const xpRequired = user.level * 100;
-  let newLevel = user.level;
+  let xp = (user.xp || 0) + amount;
+  let level = user.level || 1;
   let leveledUp = false;
 
-  if (newXp >= xpRequired) {
-    newLevel = user.level + 1;
+  // معادلة احترافية لحساب الخبرة المطلوبة لكل لفل
+  const getRequiredXp = (lvl) => Math.floor(lvl * 150 + 100);
+
+  while (xp >= getRequiredXp(level)) {
+    xp -= getRequiredXp(level);
+    level += 1;
     leveledUp = true;
   }
 
   db.prepare(`
     UPDATE users SET xp = ?, level = ?, last_message_xp = ?
     WHERE user_id = ? AND guild_id = ?
-  `).run(newXp >= xpRequired ? newXp - xpRequired : newXp, newLevel, Date.now(), userId, guildId);
+  `).run(xp, level, Date.now(), userId, guildId);
 
-  return { level: newLevel, leveledUp };
+  return { level, leveledUp, xp };
 }
 
 function addCoins(userId, guildId, amount) {
@@ -309,6 +312,10 @@ function createTicket(guildId, channelId, userId, category = 'General') {
 function closeTicket(channelId) {
   db.prepare("UPDATE tickets SET status = 'closed', closed_at = strftime('%s','now') WHERE channel_id = ?").run(channelId);
   return db.prepare('SELECT * FROM tickets WHERE channel_id = ?').get(channelId);
+}
+
+function deleteTicket(channelId) {
+  return db.prepare('DELETE FROM tickets WHERE channel_id = ?').run(channelId);
 }
 
 function getTicketByChannel(channelId) {
@@ -452,6 +459,8 @@ module.exports = {
   clearWarnings,
   createTicket,
   closeTicket,
+  deleteTicket,
+  getTicket: getTicketByChannel,
   getTicketByChannel,
   getUserActiveTickets,
   getGuildTickets,

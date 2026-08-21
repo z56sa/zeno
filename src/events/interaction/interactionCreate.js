@@ -50,18 +50,19 @@ module.exports = {
         return;
       }
 
-      // 2.4 نظام التحقق الأمني (Verification Button & Captcha)
-      if (interaction.isButton() && interaction.customId === 'btn_start_verification') {
+      // 2.4 نظام التحقق الأمني (Verification Button & Direct Role)
+      if (interaction.isButton() && (interaction.customId === 'btn_start_verification' || interaction.customId === 'btn_quick_verify' || interaction.customId === 'verify_button' || interaction.customId === 'verify_member')) {
         const settings = db.getGuildSettings(interaction.guild.id);
-        if (!settings.verification_enabled || !settings.verification_role) {
-          return interaction.reply({ content: '❌ نظام التحقق غير مفعل في هذا السيرفر.', ephemeral: true });
+        const roleId = settings.verify_role || settings.verification_role;
+        if (!roleId) {
+          return interaction.reply({ content: '❌ لم يتم تحديد رتبة التفعيل بعد في إعدادات السيرفر.', ephemeral: true });
         }
-        const verifiedRole = interaction.guild.roles.cache.get(settings.verification_role);
+        const verifiedRole = interaction.guild.roles.cache.get(roleId) || await interaction.guild.roles.fetch(roleId).catch(() => null);
         if (!verifiedRole) {
-          return interaction.reply({ content: '❌ رتبة التحقق غير موجودة. يرجى إبلاغ الإدارة.', ephemeral: true });
+          return interaction.reply({ content: '❌ لم يتم العثور على رتبة التحقق. يرجى مراجعة إعدادات الرتب.', ephemeral: true });
         }
         if (interaction.member.roles.cache.has(verifiedRole.id)) {
-          return interaction.reply({ content: '✅ أنت موثق مسبقاً ولديك الوصول الكامل للسيرفر!', ephemeral: true });
+          return interaction.reply({ content: '✅ أنت موثق ومفعل مسبقاً ولديك حق الوصول لجميع القنوات!', ephemeral: true });
         }
 
         // فحص عمر الحساب (Anti-Alt Check)
@@ -127,11 +128,11 @@ module.exports = {
                 logCh.send({
                   embeds: [new EmbedBuilder()
                     .setColor('#2ECC71')
-                    .setTitle('✅ توثيق عضو جديد')
+                    .setTitle('✅ توثيق وتفعيل عضو جديد')
                     .addFields(
                       { name: '👤 العضو', value: `${interaction.user.tag} (${interaction.user.id})`, inline: true },
-                      { name: '🔒 النوع', value: 'زر فوري', inline: true },
-                      { name: '📅 عمر الحساب', value: `<t:${Math.floor(interaction.user.createdTimestamp / 1000)}:R>`, inline: true }
+                      { name: '🎖️ الرتبة الممنوحة', value: `${verifiedRole.name}`, inline: true },
+                      { name: '📅 تاريخ الإنضمام', value: `<t:${Math.floor(interaction.member.joinedTimestamp / 1000)}:R>`, inline: true }
                     )
                     .setTimestamp()
                   ]
@@ -140,11 +141,11 @@ module.exports = {
             }
 
             return interaction.editReply({
-              content: `✅ **تم التحقق بنجاح!** مرحباً بك يا ${interaction.member} في **${interaction.guild.name}**!\nأصبح بإمكانك الوصول إلى جميع القنوات والتحدث مع الأعضاء. استمتع! 🎉`
+              content: `🎉 **تم تفعيلك بنجاح!**\nتم منحك رتبة **${verifiedRole.name}** وأصبح بإمكانك الوصول الكامل لجميع قنوات السيرفر. استمتع! 🚀`
             });
           } catch (err) {
             logger.error('فشل في إعطاء رتبة التحقق:', err);
-            return interaction.editReply({ content: '❌ حدث خطأ أثناء إعطاء رتبة التحقق. تواصل مع الإدارة.' });
+            return interaction.editReply({ content: '❌ حدث خطأ أثناء إعطاء رتبة التحقق. تأكد من أن رتبة البوت أعلى من الرتبة المراد إعطاؤها.' });
           }
         }
       }
@@ -434,15 +435,10 @@ module.exports = {
 
       // 4. إغلاق التذكرة
       if (interaction.isButton() && interaction.customId === 'close_ticket') {
-        const ticketData = db.getTicket(interaction.channel.id);
-        if (!ticketData) {
-          return interaction.reply({ content: '❌ هذه القناة ليست تذكرة مسجلة.', ephemeral: true });
-        }
-
         const confirmRow = new ActionRowBuilder().addComponents(
           new ButtonBuilder()
             .setCustomId('confirm_close_ticket')
-            .setLabel('تأكيد الإغلاق وحفظ السجل')
+            .setLabel('تأكيد الإغلاق وحذف التذكرة')
             .setEmoji('🗑️')
             .setStyle(ButtonStyle.Danger),
           new ButtonBuilder()
@@ -452,7 +448,7 @@ module.exports = {
         );
 
         return interaction.reply({
-          content: '⚠️ هل أنت متأكد من رغبتك في إغلاق وحذف هذه التذكرة؟ (سيتم حفظ نسخة Transcript تلقائياً)',
+          content: '⚠️ هل أنت متأكد من رغبتك في إغلاق وحذف هذه التذكرة؟ (سيتم حفظ نسخة Transcript باللوق تلقائياً)',
           components: [confirmRow],
           ephemeral: true
         });

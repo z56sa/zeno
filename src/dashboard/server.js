@@ -1423,6 +1423,54 @@ module.exports = function (app, client) {
         }
     });
 
+    // إرسال لوحة التحقق والتفعيل التفاعلية إلى الديسكورد (Send Verification Panel API)
+    app.post('/api/guild/:guildId/send-verification-panel', express.json(), async (req, res) => {
+        try {
+            if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
+            const { guildId } = req.params;
+            const { channelId, roleId, message } = req.body;
+
+            if (!channelId || !roleId) {
+                return res.status(400).json({ success: false, error: 'Channel ID and Role ID are required' });
+            }
+
+            const channel = client.channels.cache.get(channelId) || await client.channels.fetch(channelId).catch(() => null);
+            if (!channel || !channel.isTextBased()) {
+                return res.status(404).json({ success: false, error: 'لم يتم العثور على القناة أو البوت يفتقر لصلاحيات الوصول إليها.' });
+            }
+
+            // حفظ الإعدادات في قاعدة البيانات
+            database.updateGuildSetting(guildId, 'verify_enabled', 1);
+            database.updateGuildSetting(guildId, 'verification_enabled', 1);
+            database.updateGuildSetting(guildId, 'verify_channel', channelId);
+            database.updateGuildSetting(guildId, 'verification_channel', channelId);
+            database.updateGuildSetting(guildId, 'verify_role', roleId);
+            database.updateGuildSetting(guildId, 'verification_role', roleId);
+            if (message) database.updateGuildSetting(guildId, 'verify_message', message);
+
+            const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+            const verifyEmbed = new EmbedBuilder()
+                .setColor('#10b981')
+                .setTitle('📌 إثبات نفسك والتفعيل')
+                .setDescription(message || 'عشان تثبت نفسك، اضغط على الزر الموجود تحت الرسالة، وبكذا يتم تفعيلك وسترى جميع الرومات.')
+                .setFooter({ text: `${channel.guild?.name || 'Server'} • Verification System` })
+                .setTimestamp();
+
+            const row = new ActionRowBuilder().addComponents(
+                new ButtonBuilder()
+                    .setCustomId('btn_quick_verify')
+                    .setLabel('✅ تحقق الآن / إثبات نفسك')
+                    .setStyle(ButtonStyle.Success)
+            );
+
+            await channel.send({ embeds: [verifyEmbed], components: [row] });
+            res.json({ success: true });
+        } catch (e) {
+            console.error('Verification panel send error:', e);
+            res.status(500).json({ success: false, error: e.message });
+        }
+    });
+
     // صفحات فرعية لجميع الأزرار (Moderation, Automod, Welcome, Tickets, Protection)
     app.get('/dashboard/:guildId/:section', (req, res) => {
         try {
@@ -3149,6 +3197,7 @@ module.exports = function (app, client) {
             } else if (section === 'verification') {
                 formFieldsHtml = `
                     <div class="space-y-6">
+                        <!-- Master Verification Toggle -->
                         <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl flex items-center justify-between">
                             <label class="toggle"><input type="checkbox" name="verify_enabled" value="1" ${settings.verify_enabled ? 'checked' : ''}><span class="slider"></span></label>
                             <div class="text-right">
@@ -3157,22 +3206,85 @@ module.exports = function (app, client) {
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-xs font-bold text-gray-300 mb-2 text-right">روم التحقق (Verification Channel ID) <span class="text-purple-400">*</span></label>
-                                <input type="text" name="verify_channel" value="${settings.verify_channel || ''}" placeholder="ضع ID روم التحقق..." class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right font-mono">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold text-gray-300 mb-2 text-right">الرتبة الممنوحة عند التفعيل (Verified Role ID) <span class="text-purple-400">*</span></label>
-                                <input type="text" name="verify_role" value="${settings.verify_role || ''}" placeholder="ضع ID الرتبة..." class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right font-mono">
+                        <!-- Core Verification Settings -->
+                        <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl space-y-4 text-right">
+                            <h4 class="font-bold text-white text-sm">إعدادات الرتبة والروم ⚙️</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-300 mb-2">روم التحقق (Verification Channel ID) <span class="text-purple-400">*</span></label>
+                                    <input type="text" id="verifyChannelInput" name="verify_channel" value="${settings.verify_channel || ''}" placeholder="ضع ID روم التحقق..." class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right font-mono">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-300 mb-2">الرتبة الممنوحة عند التفعيل (Verified Role ID) <span class="text-purple-400">*</span></label>
+                                    <input type="text" id="verifyRoleInput" name="verify_role" value="${settings.verify_role || ''}" placeholder="ضع ID الرتبة..." class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right font-mono">
+                                </div>
                             </div>
                         </div>
 
-                        <div>
-                            <label class="block text-xs font-bold text-gray-300 mb-2 text-right">رسالة لوحة التحقق (Verification Embed Text)</label>
-                            <textarea name="verify_message" rows="3" placeholder="مرحباً بك في السيرفر! يرجى الضغط على زر التحقق بالأسفل للدخول والاطلاع على القنوات." class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right leading-relaxed">${settings.verify_message || ''}</textarea>
+                        <!-- Verification Message Customizer -->
+                        <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl space-y-3 text-right">
+                            <h4 class="font-bold text-white text-sm">رسالة لوحة التحقق (Verification Message) 📌</h4>
+                            <textarea id="verifyMsgInput" name="verify_message" rows="3" placeholder="📌 إثبات نفسك&#10;&#10;عشان تثبت نفسك، اضغط على الزر الموجود تحت الرسالة، وبكذا يتم تفعيلك وسترى جميع الرومات." class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right leading-relaxed">${settings.verify_message || '📌 إثبات نفسك\n\nعشان تثبت نفسك، اضغط على الزر الموجود تحت الرسالة، وبكذا يتم تفعيلك وسترى جميع الرومات.'}</textarea>
+                        </div>
+
+                        <!-- Interactive Verification Panel Deployer -->
+                        <div class="bg-[#12131c] border border-purple-950/40 p-6 rounded-2xl space-y-4 text-right">
+                            <div class="flex items-center justify-between">
+                                <span class="px-2.5 py-1 bg-purple-950/60 text-purple-300 border border-purple-800/40 rounded-lg text-xs font-bold">🚀 نشر مباشر</span>
+                                <h4 class="font-bold text-white text-sm">إرسال لوحة التحقق التفاعلية إلى الديسكورد 🔘</h4>
+                            </div>
+                            <p class="text-gray-400 text-xs">اضغط الزر بالأسفل ليقوم البوت بنشر رسالة التحقق مع الزر التفاعلي فوراً في الروم المحدد أعلاه، وعندما يضغط العضو على الزر سيحصل على الرتبة مباشرة:</p>
+                            
+                            <div class="pt-2 flex justify-end">
+                                <button type="button" onclick="sendVerificationPanelDirect()" id="sendVerifyBtn" class="px-6 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-xl text-xs font-bold transition shadow-lg flex items-center gap-2">
+                                    <span>🚀 إرسال ونشر لوحة التحقق في الروم الآن</span>
+                                </button>
+                            </div>
+                            <div id="verifySendStatus" class="text-xs font-bold text-center hidden mt-2"></div>
                         </div>
                     </div>
+
+                    <script>
+                    async function sendVerificationPanelDirect() {
+                        const channelId = document.getElementById('verifyChannelInput').value.trim();
+                        const roleId = document.getElementById('verifyRoleInput').value.trim();
+                        const message = document.getElementById('verifyMsgInput').value.trim();
+                        const statusEl = document.getElementById('verifySendStatus');
+                        const btn = document.getElementById('sendVerifyBtn');
+
+                        if (!channelId || !roleId) {
+                            alert('يرجى تحديد ID روم التحقق و ID الرتبة الممنوحة أولاً!');
+                            return;
+                        }
+
+                        btn.disabled = true;
+                        btn.innerHTML = '⏳ جارٍ النشر...';
+                        statusEl.className = 'text-xs font-bold text-center text-purple-400 mt-2 block';
+                        statusEl.innerText = 'جارٍ إرسال لوحة التفعيل إلى ديسكورد...';
+
+                        try {
+                            const res = await fetch('/api/guild/${guildId}/send-verification-panel', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ channelId, roleId, message })
+                            });
+                            const data = await res.json();
+                            if (data.success) {
+                                statusEl.className = 'text-xs font-bold text-center text-emerald-400 mt-2 block';
+                                statusEl.innerText = '✅ تم نشر رسالة وزر التفعيل بنجاح في القناة!';
+                            } else {
+                                statusEl.className = 'text-xs font-bold text-center text-rose-400 mt-2 block';
+                                statusEl.innerText = '❌ خطأ: ' + (data.error || 'فشل النشر، تأكد من صلاحيات البوت في القناة والرتبة');
+                            }
+                        } catch (err) {
+                            statusEl.className = 'text-xs font-bold text-center text-rose-400 mt-2 block';
+                            statusEl.innerText = '❌ حدث خطأ أثناء الاتصال بالخادم';
+                        } finally {
+                            btn.disabled = false;
+                            btn.innerHTML = '<span>🚀 إرسال ونشر لوحة التحقق في الروم الآن</span>';
+                        }
+                    }
+                    </script>
                 `;
             } else if (section === 'reactionroles') {
                 formFieldsHtml = `
