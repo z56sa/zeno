@@ -208,6 +208,8 @@ module.exports = function (app, client) {
     // ========================================================
     // 3. لوحة المستخدم واختيار السيرفرات (مطابقة تماماً لـ ProBot Dashboard)
     // ========================================================
+    // 3. صفحة الملف الشخصي ولوحة تحكم المستخدم الكاملة (User Dashboard)
+    // ========================================================
     app.get('/dashboard', (req, res) => {
         try {
             if (!req.session?.user) return res.redirect('/auth/discord');
@@ -215,16 +217,53 @@ module.exports = function (app, client) {
             const guilds = req.session.guilds || [];
             const userAvatar = user.avatar ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png` : 'https://cdn.discordapp.com/embed/avatars/0.png';
 
-            // جلب بيانات المستخدم من SQLite
-            let userCoins = 0, userLevel = 1, userStars = 0;
+            // جلب بيانات المستخدم الفعلية من SQLite
+            let userCoins = 0, userLevel = 1, userStars = 0, userXp = 0, userLastDaily = 0, userWallpaper = 'default';
+            let xpLeaderboard = [];
+            let coinsLeaderboard = [];
+            let userRankXp = 1;
+            let userRankCoins = 1;
+
             try {
-                const userRow = rawDb.prepare('SELECT SUM(coins) as coins, MAX(level) as level, SUM(reputation) as rep FROM users WHERE user_id = ?').get(user.id);
+                const userRow = rawDb.prepare('SELECT SUM(coins) as coins, MAX(level) as level, SUM(reputation) as rep, SUM(xp) as xp, MAX(last_daily) as last_daily, MAX(wallpaper) as wallpaper FROM users WHERE user_id = ?').get(user.id);
                 userCoins = userRow?.coins || 0;
                 userLevel = userRow?.level || 1;
                 userStars = userRow?.rep || 0;
-            } catch (err) {
-                // ignore DB errors, use defaults
-            }
+                userXp = userRow?.xp || 0;
+                userLastDaily = userRow?.last_daily || 0;
+                userWallpaper = userRow?.wallpaper || 'default';
+
+                xpLeaderboard = rawDb.prepare(`
+                    SELECT user_id, SUM(xp) as total_xp, MAX(level) as max_level, SUM(coins) as total_coins
+                    FROM users
+                    GROUP BY user_id
+                    ORDER BY total_xp DESC
+                    LIMIT 100
+                `).all();
+
+                coinsLeaderboard = rawDb.prepare(`
+                    SELECT user_id, SUM(coins) as total_coins, MAX(level) as max_level, SUM(xp) as total_xp
+                    FROM users
+                    GROUP BY user_id
+                    ORDER BY total_coins DESC
+                    LIMIT 100
+                `).all();
+
+                const xIndex = xpLeaderboard.findIndex(r => r.user_id === user.id);
+                if (xIndex !== -1) userRankXp = xIndex + 1;
+
+                const cIndex = coinsLeaderboard.findIndex(r => r.user_id === user.id);
+                if (cIndex !== -1) userRankCoins = cIndex + 1;
+            } catch (err) {}
+
+            // التحقق من حالة المكافأة اليومية
+            const now = Date.now();
+            const dailyCooldown = 24 * 60 * 60 * 1000;
+            const timePassed = now - userLastDaily;
+            const canClaimDaily = timePassed >= dailyCooldown;
+            const timeLeftMs = Math.max(0, dailyCooldown - timePassed);
+            const hoursLeft = Math.floor(timeLeftMs / (1000 * 60 * 60));
+            const minsLeft = Math.floor((timeLeftMs % (1000 * 60 * 60)) / (1000 * 60));
 
             // قائمة السيرفرات على الشريط الرأسي الأيمن (Server Rail)
             const serverRailHtml = guilds.map(g => `
@@ -233,6 +272,74 @@ module.exports = function (app, client) {
                          class="w-11 h-11 rounded-2xl bg-[#1e1f2b] hover:rounded-xl border border-transparent hover:border-[#5865F2] object-cover transition-all duration-200">
                 </a>
             `).join('');
+
+            // توليد قائمة متصدري الـ XP
+            const xpLeaderboardHtml = xpLeaderboard.length > 0 ? xpLeaderboard.map((item, idx) => {
+                const rank = idx + 1;
+                let medal = `#${rank}`;
+                let borderClass = 'border-purple-950/30';
+                if (rank === 1) { medal = '🥇'; borderClass = 'border-amber-500/40 bg-amber-950/10'; }
+                else if (rank === 2) { medal = '🥈'; borderClass = 'border-slate-400/40 bg-slate-900/20'; }
+                else if (rank === 3) { medal = '🥉'; borderClass = 'border-amber-700/40 bg-amber-950/10'; }
+
+                const isMe = item.user_id === user.id;
+                const cachedUser = client?.users?.cache?.get(item.user_id);
+                const displayName = isMe ? `${user.username} (أنت)` : (cachedUser ? cachedUser.username : `عضو #${item.user_id.slice(-4)}`);
+                const avatarUrl = isMe ? userAvatar : (cachedUser ? cachedUser.displayAvatarURL({ size: 64 }) : 'https://cdn.discordapp.com/embed/avatars/0.png');
+
+                return `
+                    <div class="bg-[#12131c] border ${borderClass} p-4 rounded-2xl flex items-center justify-between transition ${isMe ? 'ring-1 ring-purple-500' : ''}">
+                        <div class="flex items-center gap-4">
+                            <span class="text-xs font-mono font-bold text-purple-300">Level ${item.max_level || 1} • ${(item.total_xp || 0).toLocaleString()} XP</span>
+                            <span class="text-xs font-mono text-gray-400 font-bold hidden sm:inline">${(item.total_coins || 0).toLocaleString()} ¢</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="text-right">
+                                <h4 class="text-xs font-bold text-white">${displayName}</h4>
+                                <p class="text-[10px] text-purple-400 font-mono">الترتيب: #${rank}</p>
+                            </div>
+                            <img src="${avatarUrl}" class="w-9 h-9 rounded-xl object-cover border border-purple-950/40">
+                            <span class="text-base font-bold min-w-[28px] text-center">${medal}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('') : `
+                <div class="text-center py-10 text-gray-500 text-xs">لا توجد بيانات مستخدمين مسجلة بعد</div>
+            `;
+
+            // توليد قائمة متصدري الكريدت
+            const coinsLeaderboardHtml = coinsLeaderboard.length > 0 ? coinsLeaderboard.map((item, idx) => {
+                const rank = idx + 1;
+                let medal = `#${rank}`;
+                let borderClass = 'border-purple-950/30';
+                if (rank === 1) { medal = '👑'; borderClass = 'border-yellow-500/40 bg-yellow-950/10'; }
+                else if (rank === 2) { medal = '💎'; borderClass = 'border-cyan-400/40 bg-cyan-950/20'; }
+                else if (rank === 3) { medal = '💰'; borderClass = 'border-emerald-600/40 bg-emerald-950/10'; }
+
+                const isMe = item.user_id === user.id;
+                const cachedUser = client?.users?.cache?.get(item.user_id);
+                const displayName = isMe ? `${user.username} (أنت)` : (cachedUser ? cachedUser.username : `عضو #${item.user_id.slice(-4)}`);
+                const avatarUrl = isMe ? userAvatar : (cachedUser ? cachedUser.displayAvatarURL({ size: 64 }) : 'https://cdn.discordapp.com/embed/avatars/0.png');
+
+                return `
+                    <div class="bg-[#12131c] border ${borderClass} p-4 rounded-2xl flex items-center justify-between transition ${isMe ? 'ring-1 ring-purple-500' : ''}">
+                        <div class="flex items-center gap-4">
+                            <span class="text-xs font-mono font-bold text-amber-400">${(item.total_coins || 0).toLocaleString()} ¢</span>
+                            <span class="text-xs font-mono text-gray-400 font-bold hidden sm:inline">Level ${item.max_level || 1}</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="text-right">
+                                <h4 class="text-xs font-bold text-white">${displayName}</h4>
+                                <p class="text-[10px] text-amber-400 font-mono">الترتيب: #${rank}</p>
+                            </div>
+                            <img src="${avatarUrl}" class="w-9 h-9 rounded-xl object-cover border border-purple-950/40">
+                            <span class="text-base font-bold min-w-[28px] text-center">${medal}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('') : `
+                <div class="text-center py-10 text-gray-500 text-xs">لا توجد بيانات كريدت مسجلة بعد</div>
+            `;
 
             res.send(`
             <!DOCTYPE html>
@@ -251,8 +358,11 @@ module.exports = function (app, client) {
             </head>
             <body class="min-h-screen flex flex-col bg-[#0b0c10] text-gray-200">
 
+                <!-- Toast Notification Container -->
+                <div id="toast" class="fixed top-5 left-1/2 -translate-x-1/2 z-50 transition-all duration-300 transform -translate-y-20 opacity-0 pointer-events-none px-6 py-3 rounded-2xl shadow-2xl text-xs font-bold flex items-center gap-2"></div>
+
                 <!-- Header -->
-                <header class="h-16 bg-[#0f1016]/90 backdrop-blur-md border-b border-purple-950/40 px-6 flex items-center justify-between sticky top-0 z-50">
+                <header class="h-16 bg-[#0f1016]/90 backdrop-blur-md border-b border-purple-950/40 px-6 flex items-center justify-between sticky top-0 z-40">
                     <div class="flex items-center gap-4">
                         <a href="https://discord.gg/uxqQDtbVMz" target="_blank" class="text-xs text-gray-400 hover:text-purple-300 transition">الدعم الفني</a>
                         <span class="text-gray-700">|</span>
@@ -275,7 +385,7 @@ module.exports = function (app, client) {
                                 <div class="w-10 h-10 rounded-xl bg-purple-900/30 text-purple-400 flex items-center justify-center text-xl font-bold font-mono">¢</div>
                                 <div class="text-right">
                                     <span class="text-xs font-bold text-gray-400">الكريدت</span>
-                                    <h3 class="text-2xl font-black text-white mt-0.5">${userCoins.toLocaleString()}</h3>
+                                    <h3 id="userCoinsDisplay" class="text-2xl font-black text-white mt-0.5">${userCoins.toLocaleString()}</h3>
                                 </div>
                             </div>
                             <!-- المستوى -->
@@ -291,7 +401,7 @@ module.exports = function (app, client) {
                                 <div class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-xl">🏆</div>
                                 <div class="text-right">
                                     <span class="text-xs font-bold text-gray-400">الترتيب</span>
-                                    <h3 class="text-2xl font-black text-white mt-0.5">#1</h3>
+                                    <h3 class="text-2xl font-black text-white mt-0.5">#${userRankXp}</h3>
                                 </div>
                             </div>
                             <!-- السمعة -->
@@ -305,7 +415,7 @@ module.exports = function (app, client) {
                         </div>
 
                         <!-- Tab 1: نظرة عامة والخوادم (Default Overview) -->
-                        <div id="tabOverview">
+                        <div id="tabOverview" class="tab-content">
                             <div class="bg-[#10111a] border border-purple-950/40 rounded-3xl p-6 shadow-xl">
                                 <h3 class="text-sm font-black text-white mb-4 text-right">خوادمك المتاحة للإدارة</h3>
                                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -328,20 +438,21 @@ module.exports = function (app, client) {
                         </div>
 
                         <!-- Tab 2: متجر خلفيات البروفايل (Wallpapers Shop) -->
-                        <div id="tabWallpapers" class="hidden space-y-6">
+                        <div id="tabWallpapers" class="tab-content hidden space-y-6">
                             <div class="bg-[#10111a] border border-purple-950/40 rounded-3xl p-6 shadow-xl">
                                 <div class="flex items-center justify-between pb-4 mb-4 border-b border-purple-950/40">
-                                    <span class="text-xs text-purple-400 font-bold">رصيدك: ${userCoins.toLocaleString()} ¢</span>
-                                    <h3 class="text-sm font-black text-white text-right">متجر خلفيات البروفايل (Rank & Profile Backgrounds) 🖼️</h3>
+                                    <span class="text-xs text-purple-400 font-bold">رصيدك: <span class="user-coins-val">${userCoins.toLocaleString()}</span> ¢</span>
+                                    <h3 class="text-sm font-black text-white text-right">متجر خلفيات البروفايل (Profile Backgrounds) 🖼️</h3>
                                 </div>
                                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                                    
                                     <div class="bg-[#12131c] border border-purple-950/40 rounded-2xl overflow-hidden shadow-lg group">
                                         <div class="h-28 bg-gradient-to-r from-purple-900 via-indigo-950 to-purple-950 flex items-center justify-center text-3xl">🌌</div>
                                         <div class="p-4 text-right">
                                             <h4 class="text-xs font-bold text-white">Galaxy Neon</h4>
                                             <p class="text-[10px] text-gray-400 mt-0.5">خلفية النجوم والنيون الأرجواني</p>
                                             <div class="mt-3 flex items-center justify-between">
-                                                <button onclick="buyItem('Galaxy Neon', 5000)" class="px-4 py-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-xs font-bold shadow-md hover:from-purple-500 hover:to-indigo-500 transition">شراء (5,000 ¢)</button>
+                                                <button onclick="buyItem('wallpaper', 'Galaxy Neon', 5000, this)" class="px-4 py-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-xs font-bold shadow-md hover:from-purple-500 hover:to-indigo-500 transition">شراء وتجهيز (5,000 ¢)</button>
                                                 <span class="text-xs font-mono text-purple-300 font-bold">5,000 ¢</span>
                                             </div>
                                         </div>
@@ -353,7 +464,7 @@ module.exports = function (app, client) {
                                             <h4 class="text-xs font-bold text-white">Emerald Forest</h4>
                                             <p class="text-[10px] text-gray-400 mt-0.5">خلفية الطبيعة والزمرد الفخم</p>
                                             <div class="mt-3 flex items-center justify-between">
-                                                <button onclick="buyItem('Emerald Forest', 7500)" class="px-4 py-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-xs font-bold shadow-md hover:from-purple-500 hover:to-indigo-500 transition">شراء (7,500 ¢)</button>
+                                                <button onclick="buyItem('wallpaper', 'Emerald Forest', 7500, this)" class="px-4 py-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-xs font-bold shadow-md hover:from-purple-500 hover:to-indigo-500 transition">شراء وتجهيز (7,500 ¢)</button>
                                                 <span class="text-xs font-mono text-purple-300 font-bold">7,500 ¢</span>
                                             </div>
                                         </div>
@@ -365,20 +476,57 @@ module.exports = function (app, client) {
                                             <h4 class="text-xs font-bold text-white">Cyberpunk Gold</h4>
                                             <p class="text-[10px] text-gray-400 mt-0.5">خلفية اللهب والذهب الخالص</p>
                                             <div class="mt-3 flex items-center justify-between">
-                                                <button onclick="buyItem('Cyberpunk Gold', 12000)" class="px-4 py-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-xs font-bold shadow-md hover:from-purple-500 hover:to-indigo-500 transition">شراء (12,000 ¢)</button>
+                                                <button onclick="buyItem('wallpaper', 'Cyberpunk Gold', 12000, this)" class="px-4 py-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-xs font-bold shadow-md hover:from-purple-500 hover:to-indigo-500 transition">شراء وتجهيز (12,000 ¢)</button>
                                                 <span class="text-xs font-mono text-purple-300 font-bold">12,000 ¢</span>
                                             </div>
                                         </div>
                                     </div>
+
+                                    <div class="bg-[#12131c] border border-purple-950/40 rounded-2xl overflow-hidden shadow-lg group">
+                                        <div class="h-28 bg-gradient-to-r from-cyan-950 via-blue-900 to-indigo-950 flex items-center justify-center text-3xl">❄️</div>
+                                        <div class="p-4 text-right">
+                                            <h4 class="text-xs font-bold text-white">Arctic Frost</h4>
+                                            <p class="text-[10px] text-gray-400 mt-0.5">خلفية الجليد والكريستال السماوي</p>
+                                            <div class="mt-3 flex items-center justify-between">
+                                                <button onclick="buyItem('wallpaper', 'Arctic Frost', 6000, this)" class="px-4 py-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-xs font-bold shadow-md hover:from-purple-500 hover:to-indigo-500 transition">شراء وتجهيز (6,000 ¢)</button>
+                                                <span class="text-xs font-mono text-purple-300 font-bold">6,000 ¢</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="bg-[#12131c] border border-purple-950/40 rounded-2xl overflow-hidden shadow-lg group">
+                                        <div class="h-28 bg-gradient-to-r from-red-950 via-purple-950 to-neutral-900 flex items-center justify-center text-3xl">🩸</div>
+                                        <div class="p-4 text-right">
+                                            <h4 class="text-xs font-bold text-white">Crimson Samurai</h4>
+                                            <p class="text-[10px] text-gray-400 mt-0.5">خلفية الساموراي القرمزي الفخم</p>
+                                            <div class="mt-3 flex items-center justify-between">
+                                                <button onclick="buyItem('wallpaper', 'Crimson Samurai', 9000, this)" class="px-4 py-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-xs font-bold shadow-md hover:from-purple-500 hover:to-indigo-500 transition">شراء وتجهيز (9,000 ¢)</button>
+                                                <span class="text-xs font-mono text-purple-300 font-bold">9,000 ¢</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="bg-[#12131c] border border-purple-950/40 rounded-2xl overflow-hidden shadow-lg group">
+                                        <div class="h-28 bg-gradient-to-r from-yellow-950 via-amber-900 to-orange-950 flex items-center justify-center text-3xl">👑</div>
+                                        <div class="p-4 text-right">
+                                            <h4 class="text-xs font-bold text-white">Royal Empire</h4>
+                                            <p class="text-[10px] text-gray-400 mt-0.5">خلفية الإمبراطورية الملكية الذهبية</p>
+                                            <div class="mt-3 flex items-center justify-between">
+                                                <button onclick="buyItem('wallpaper', 'Royal Empire', 15000, this)" class="px-4 py-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-xs font-bold shadow-md hover:from-purple-500 hover:to-indigo-500 transition">شراء وتجهيز (15,000 ¢)</button>
+                                                <span class="text-xs font-mono text-purple-300 font-bold">15,000 ¢</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
                                 </div>
                             </div>
                         </div>
 
                         <!-- Tab 3: شارات البروفايل (Badges Shop) -->
-                        <div id="tabBadges" class="hidden space-y-6">
+                        <div id="tabBadges" class="tab-content hidden space-y-6">
                             <div class="bg-[#10111a] border border-purple-950/40 rounded-3xl p-6 shadow-xl">
                                 <div class="flex items-center justify-between pb-4 mb-4 border-b border-purple-950/40">
-                                    <span class="text-xs text-purple-400 font-bold">رصيدك: ${userCoins.toLocaleString()} ¢</span>
+                                    <span class="text-xs text-purple-400 font-bold">رصيدك: <span class="user-coins-val">${userCoins.toLocaleString()}</span> ¢</span>
                                     <h3 class="text-sm font-black text-white text-right">متجر شارات وأوسمة البروفايل 🎖️</h3>
                                 </div>
                                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -386,85 +534,159 @@ module.exports = function (app, client) {
                                         <span class="text-3xl block">👑</span>
                                         <h4 class="text-xs font-bold text-white">تاج الأساطير</h4>
                                         <p class="text-[10px] text-gray-400">شارة ملكية ذهبية</p>
-                                        <button onclick="buyItem('Crown Badge', 10000)" class="w-full py-1.5 bg-purple-900/40 hover:bg-purple-800/60 text-purple-200 border border-purple-700/40 rounded-xl text-xs font-bold transition">10,000 ¢</button>
+                                        <button onclick="buyItem('badge', 'Crown Badge', 10000, this)" class="w-full py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-xs font-bold transition shadow-md">شراء (10,000 ¢)</button>
                                     </div>
                                     <div class="bg-[#12131c] border border-purple-950/40 p-4 rounded-2xl text-center space-y-2">
                                         <span class="text-3xl block">💎</span>
                                         <h4 class="text-xs font-bold text-white">الماسة اللامعة</h4>
                                         <p class="text-[10px] text-gray-400">شارة النقاء والتميز</p>
-                                        <button onclick="buyItem('Diamond Badge', 15000)" class="w-full py-1.5 bg-purple-900/40 hover:bg-purple-800/60 text-purple-200 border border-purple-700/40 rounded-xl text-xs font-bold transition">15,000 ¢</button>
+                                        <button onclick="buyItem('badge', 'Diamond Badge', 15000, this)" class="w-full py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-xs font-bold transition shadow-md">شراء (15,000 ¢)</button>
                                     </div>
                                     <div class="bg-[#12131c] border border-purple-950/40 p-4 rounded-2xl text-center space-y-2">
                                         <span class="text-3xl block">⚡</span>
                                         <h4 class="text-xs font-bold text-white">صاعقة النيون</h4>
                                         <p class="text-[10px] text-gray-400">شارة السرعة والقوة</p>
-                                        <button onclick="buyItem('Lightning Badge', 8000)" class="w-full py-1.5 bg-purple-900/40 hover:bg-purple-800/60 text-purple-200 border border-purple-700/40 rounded-xl text-xs font-bold transition">8,000 ¢</button>
+                                        <button onclick="buyItem('badge', 'Lightning Badge', 8000, this)" class="w-full py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-xs font-bold transition shadow-md">شراء (8,000 ¢)</button>
                                     </div>
                                     <div class="bg-[#12131c] border border-purple-950/40 p-4 rounded-2xl text-center space-y-2">
                                         <span class="text-3xl block">🛡️</span>
                                         <h4 class="text-xs font-bold text-white">درع الحارس</h4>
                                         <p class="text-[10px] text-gray-400">شارة الشرف والحماية</p>
-                                        <button onclick="buyItem('Guardian Badge', 6000)" class="w-full py-1.5 bg-purple-900/40 hover:bg-purple-800/60 text-purple-200 border border-purple-700/40 rounded-xl text-xs font-bold transition">6,000 ¢</button>
+                                        <button onclick="buyItem('badge', 'Guardian Badge', 6000, this)" class="w-full py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-xs font-bold transition shadow-md">شراء (6,000 ¢)</button>
+                                    </div>
+                                    <div class="bg-[#12131c] border border-purple-950/40 p-4 rounded-2xl text-center space-y-2">
+                                        <span class="text-3xl block">🔥</span>
+                                        <h4 class="text-xs font-bold text-white">لهب العزيمة</h4>
+                                        <p class="text-[10px] text-gray-400">شارة النشاط والحماس</p>
+                                        <button onclick="buyItem('badge', 'Fire Badge', 7000, this)" class="w-full py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-xs font-bold transition shadow-md">شراء (7,000 ¢)</button>
+                                    </div>
+                                    <div class="bg-[#12131c] border border-purple-950/40 p-4 rounded-2xl text-center space-y-2">
+                                        <span class="text-3xl block">🚀</span>
+                                        <h4 class="text-xs font-bold text-white">رائد الفضاء</h4>
+                                        <p class="text-[10px] text-gray-400">شارة الوصول للقمة</p>
+                                        <button onclick="buyItem('badge', 'Rocket Badge', 12000, this)" class="w-full py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-xs font-bold transition shadow-md">شراء (12,000 ¢)</button>
+                                    </div>
+                                    <div class="bg-[#12131c] border border-purple-950/40 p-4 rounded-2xl text-center space-y-2">
+                                        <span class="text-3xl block">🌟</span>
+                                        <h4 class="text-xs font-bold text-white">النجم الساطع</h4>
+                                        <p class="text-[10px] text-gray-400">شارة التألق المستمر</p>
+                                        <button onclick="buyItem('badge', 'Star Badge', 9000, this)" class="w-full py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-xs font-bold transition shadow-md">شراء (9,000 ¢)</button>
+                                    </div>
+                                    <div class="bg-[#12131c] border border-purple-950/40 p-4 rounded-2xl text-center space-y-2">
+                                        <span class="text-3xl block">🎭</span>
+                                        <h4 class="text-xs font-bold text-white">قناع الغموض</h4>
+                                        <p class="text-[10px] text-gray-400">شارة الأسلوب الفريد</p>
+                                        <button onclick="buyItem('badge', 'Mask Badge', 5000, this)" class="w-full py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-xs font-bold transition shadow-md">شراء (5,000 ¢)</button>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
                         <!-- Tab 4: خلفيات الهوية (Identity Shop) -->
-                        <div id="tabIdentity" class="hidden space-y-6">
+                        <div id="tabIdentity" class="tab-content hidden space-y-6">
                             <div class="bg-[#10111a] border border-purple-950/40 rounded-3xl p-6 shadow-xl text-right">
                                 <h3 class="text-sm font-black text-white mb-2">خلفيات وبطاقات الهوية الشخصية 🪪</h3>
-                                <p class="text-gray-400 text-xs mb-6">خصص بطاقة الهوية التي تظهر في الديسكورد عند كتابة أمر <span class="text-purple-400 font-mono">/id</span> أو <span class="text-purple-400 font-mono">/profile</span>.</p>
+                                <p class="text-gray-400 text-xs mb-6">خصص تصميم بطاقة الهوية التي تظهر في الديسكورد عند كتابة أمر <span class="text-purple-400 font-mono">/id</span> أو <span class="text-purple-400 font-mono">/profile</span>.</p>
                                 
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div class="bg-[#12131c] border border-purple-950/40 p-4 rounded-2xl flex items-center justify-between">
-                                        <button onclick="buyItem('Dark Minimalist Card', 3000)" class="px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-xs font-bold">تفعيل (3,000 ¢)</button>
+                                        <button onclick="buyItem('identity', 'Dark Minimalist', 3000, this)" class="px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-xs font-bold">تفعيل (3,000 ¢)</button>
                                         <div>
                                             <h4 class="text-xs font-bold text-white">Dark Minimalist</h4>
                                             <p class="text-[10px] text-gray-400">تصميم أسود داكن كلاسيكي فخم</p>
                                         </div>
                                     </div>
                                     <div class="bg-[#12131c] border border-purple-950/40 p-4 rounded-2xl flex items-center justify-between">
-                                        <button onclick="buyItem('Purple Glow Card', 4500)" class="px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-xs font-bold">تفعيل (4,500 ¢)</button>
+                                        <button onclick="buyItem('identity', 'Purple Glow Pro', 4500, this)" class="px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-xs font-bold">تفعيل (4,500 ¢)</button>
                                         <div>
                                             <h4 class="text-xs font-bold text-white">Purple Glow Pro</h4>
                                             <p class="text-[10px] text-gray-400">توهج بنفسجي متدرج ملكي</p>
                                         </div>
                                     </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Tab 5: قائمة المتصدرين (Leaderboards) -->
-                        <div id="tabLeaderboard" class="hidden space-y-6">
-                            <div class="bg-[#10111a] border border-purple-950/40 rounded-3xl p-6 shadow-xl">
-                                <h3 class="text-sm font-black text-white mb-4 text-right">قائمة المتصدرين في النقاط والمستويات 🏆</h3>
-                                <div class="space-y-3">
                                     <div class="bg-[#12131c] border border-purple-950/40 p-4 rounded-2xl flex items-center justify-between">
-                                        <span class="text-xs font-bold text-amber-400 font-mono">Level ${userLevel} • ${userCoins.toLocaleString()} ¢</span>
-                                        <div class="flex items-center gap-3">
-                                            <div class="text-right">
-                                                <h4 class="text-xs font-bold text-white">${user.username} (أنت)</h4>
-                                                <p class="text-[10px] text-purple-400">الترتيب: #1 في السيرفر</p>
-                                            </div>
-                                            <img src="${userAvatar}" class="w-10 h-10 rounded-xl object-cover border border-purple-500">
+                                        <button onclick="buyItem('identity', 'Golden Executive', 8000, this)" class="px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-xs font-bold">تفعيل (8,000 ¢)</button>
+                                        <div>
+                                            <h4 class="text-xs font-bold text-white">Golden Executive</h4>
+                                            <p class="text-[10px] text-gray-400">بطاقة كبار الشخصيات بالذهب اللامع</p>
+                                        </div>
+                                    </div>
+                                    <div class="bg-[#12131c] border border-purple-950/40 p-4 rounded-2xl flex items-center justify-between">
+                                        <button onclick="buyItem('identity', 'Cyber Matrix', 6000, this)" class="px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-xs font-bold">تفعيل (6,000 ¢)</button>
+                                        <div>
+                                            <h4 class="text-xs font-bold text-white">Cyber Matrix</h4>
+                                            <p class="text-[10px] text-gray-400">بطاقة نيون إلكترونية مستقبلية</p>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Tab 6: المكافأة اليومية والتصويت (Daily & Vote) -->
-                        <div id="tabDaily" class="hidden space-y-6">
-                            <div class="bg-[#10111a] border border-purple-950/40 rounded-3xl p-6 shadow-xl text-center space-y-4">
-                                <span class="text-5xl block">🎁</span>
-                                <h3 class="text-lg font-black text-white">مكافأتك اليومية (Daily Reward)</h3>
-                                <p class="text-gray-400 text-xs max-w-md mx-auto">احصل على ما يصل إلى 1,000 كريدت يومياً مجاناً مع الحفاظ على سلسلة الأيام المتتالية (Daily Streak)!</p>
-                                <button onclick="alert('✅ تم تسجيل مكافأتك اليومية! يمكنك استخدام أمر /daily في الديسكورد لاستلامها فوراً.')" class="px-8 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-purple-900/40 transition">
-                                    استلام المكافأة اليومية
-                                </button>
+                        <!-- Tab 5: قائمة المتصدرين بالـ XP (Leaderboards XP) -->
+                        <div id="tabLeaderboard" class="tab-content hidden space-y-6">
+                            <div class="bg-[#10111a] border border-purple-950/40 rounded-3xl p-6 shadow-xl">
+                                <div class="flex items-center justify-between mb-4 border-b border-purple-950/40 pb-3">
+                                    <span class="text-xs text-purple-400 font-mono font-bold">ترتيبك الحالي: #${userRankXp}</span>
+                                    <h3 class="text-sm font-black text-white text-right">أعلى 100 عضو بواسطة نقاط الخبرة (XP Leaderboard) 🏆</h3>
+                                </div>
+                                <div class="space-y-2.5 max-h-[600px] overflow-y-auto pr-1">
+                                    ${xpLeaderboardHtml}
+                                </div>
                             </div>
                         </div>
+
+                        <!-- Tab 5B: قائمة أغنى 100 ملياردير (Coins Leaderboard) -->
+                        <div id="tabCoinsLeaderboard" class="tab-content hidden space-y-6">
+                            <div class="bg-[#10111a] border border-purple-950/40 rounded-3xl p-6 shadow-xl">
+                                <div class="flex items-center justify-between mb-4 border-b border-purple-950/40 pb-3">
+                                    <span class="text-xs text-amber-400 font-mono font-bold">ترتيبك المالي: #${userRankCoins}</span>
+                                    <h3 class="text-sm font-black text-white text-right">أغنى 100 عضو في السيرفر (Richest 100 Leaderboard) 💰</h3>
+                                </div>
+                                <div class="space-y-2.5 max-h-[600px] overflow-y-auto pr-1">
+                                    ${coinsLeaderboardHtml}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tab 6: المكافأة اليومية (Daily Reward) -->
+                        <div id="tabDaily" class="tab-content hidden space-y-6">
+                            <div class="bg-[#10111a] border border-purple-950/40 rounded-3xl p-8 shadow-xl text-center space-y-5 max-w-xl mx-auto">
+                                <div class="w-20 h-20 rounded-3xl bg-gradient-to-tr from-purple-600/30 to-indigo-600/30 border border-purple-500/40 flex items-center justify-center text-4xl mx-auto shadow-xl shadow-purple-900/30">
+                                    🎁
+                                </div>
+                                <div>
+                                    <h3 class="text-xl font-black text-white">المكافأة اليومية (Daily Reward)</h3>
+                                    <p class="text-gray-400 text-xs mt-2 leading-relaxed">
+                                        احصل على <span class="text-purple-300 font-bold">500 إلى 1,000 كريدت</span> مجاناً كل 24 ساعة!
+                                        حافظ على سلسلة أيامك المتتالية لمضاعفة أرباحك.
+                                    </p>
+                                </div>
+
+                                <div class="bg-[#12131c] border border-purple-950/40 rounded-2xl p-4 flex items-center justify-around text-xs">
+                                    <div>
+                                        <span class="text-gray-400 block text-[11px]">مكافأة اليوم</span>
+                                        <span class="text-amber-400 font-black font-mono text-sm">+500 ¢</span>
+                                    </div>
+                                    <div class="w-px h-8 bg-purple-950/50"></div>
+                                    <div>
+                                        <span class="text-gray-400 block text-[11px]">التكرار</span>
+                                        <span class="text-purple-300 font-bold">كل 24 ساعة</span>
+                                    </div>
+                                </div>
+
+                                <div id="dailyActionBox">
+                                    ${canClaimDaily ? `
+                                        <button id="claimDailyBtn" onclick="claimDaily()" class="w-full py-3.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-black text-xs rounded-xl shadow-lg shadow-purple-900/40 transition transform active:scale-95">
+                                            🎁 استلام المكافأة اليومية الآن (+500 ¢)
+                                        </button>
+                                    ` : `
+                                        <button disabled class="w-full py-3.5 bg-purple-950/40 border border-purple-900/30 text-gray-400 font-bold text-xs rounded-xl cursor-not-allowed">
+                                            ⏳ تم الاستلام مسبقاً! يتبقى حوالي ${hoursLeft} ساعة و ${minsLeft} دقيقة
+                                        </button>
+                                    `}
+                                </div>
+                            </div>
+                        </div>
+
                     </main>
 
                     <!-- Sidebar Right (ProBot Menu) -->
@@ -474,6 +696,7 @@ module.exports = function (app, client) {
                             <div class="flex flex-col items-center text-center pb-5 mb-4 border-b border-purple-950/40">
                                 <img src="${userAvatar}" class="w-16 h-16 rounded-full border-2 border-purple-600 shadow-lg shadow-purple-900/40 mb-2 object-cover">
                                 <h3 class="font-bold text-white text-sm">${user.username}</h3>
+                                <span class="text-[10px] text-purple-400 font-mono mt-0.5">${userCoins.toLocaleString()} ¢</span>
                             </div>
 
                             <!-- Nav Links with Active Tab Switchers -->
@@ -503,7 +726,7 @@ module.exports = function (app, client) {
                                     <span class="text-base">🏆</span>
                                     <span>أعلى 100 بواسطة XP</span>
                                 </button>
-                                <button onclick="switchTab('tabLeaderboard', this)" class="nav-btn px-3 py-2 rounded-xl text-gray-400 hover:text-purple-300 hover:bg-purple-950/30 font-medium flex items-center justify-between transition w-full">
+                                <button onclick="switchTab('tabCoinsLeaderboard', this)" class="nav-btn px-3 py-2 rounded-xl text-gray-400 hover:text-purple-300 hover:bg-purple-950/30 font-medium flex items-center justify-between transition w-full">
                                     <span class="text-base">💰</span>
                                     <span>أغنى 100 ملياردير</span>
                                 </button>
@@ -531,6 +754,105 @@ module.exports = function (app, client) {
                     </div>
 
                 </div>
+
+                <!-- Client Side Script -->
+                <script>
+                    function showToast(msg, isError = false) {
+                        const toast = document.getElementById('toast');
+                        toast.innerText = msg;
+                        toast.className = 'fixed top-5 left-1/2 -translate-x-1/2 z-50 transition-all duration-300 px-6 py-3 rounded-2xl shadow-2xl text-xs font-bold flex items-center gap-2 transform translate-y-0 opacity-100 ' + 
+                            (isError ? 'bg-red-900/90 text-red-200 border border-red-700' : 'bg-purple-900/90 text-purple-200 border border-purple-600');
+                        setTimeout(() => {
+                            toast.className = 'fixed top-5 left-1/2 -translate-x-1/2 z-50 transition-all duration-300 transform -translate-y-20 opacity-0 pointer-events-none px-6 py-3 rounded-2xl shadow-2xl text-xs font-bold flex items-center gap-2';
+                        }, 3500);
+                    }
+
+                    function switchTab(tabId, btn) {
+                        document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+                        const target = document.getElementById(tabId);
+                        if (target) target.classList.remove('hidden');
+
+                        document.querySelectorAll('.nav-btn').forEach(b => {
+                            b.className = 'nav-btn px-3 py-2 rounded-xl text-gray-400 hover:text-purple-300 hover:bg-purple-950/30 font-medium flex items-center justify-between transition w-full';
+                        });
+
+                        if (btn) {
+                            btn.className = 'nav-btn px-3 py-2 rounded-xl bg-gradient-to-r from-purple-700 to-indigo-700 text-white font-bold flex items-center justify-between shadow-md w-full transition';
+                        }
+                    }
+
+                    async function claimDaily() {
+                        const btn = document.getElementById('claimDailyBtn');
+                        if (btn) {
+                            btn.disabled = true;
+                            btn.innerText = '⏳ جاري الاستلام...';
+                        }
+                        try {
+                            const res = await fetch('/api/user/claim-daily', { method: 'POST' });
+                            const data = await res.json();
+                            if (data.success) {
+                                showToast('🎉 ' + data.message);
+                                const d = document.getElementById('userCoinsDisplay');
+                                if (d) d.innerText = Number(data.newCoins).toLocaleString();
+                                document.querySelectorAll('.user-coins-val').forEach(el => el.innerText = Number(data.newCoins).toLocaleString());
+                                const box = document.getElementById('dailyActionBox');
+                                if (box) {
+                                    box.innerHTML = '<button disabled class="w-full py-3.5 bg-purple-950/40 border border-purple-900/30 text-gray-400 font-bold text-xs rounded-xl cursor-not-allowed">⏳ تم استلام المكافأة بنجاح! عد غداً للحصول على مكافأة جديدة.</button>';
+                                }
+                            } else {
+                                showToast(data.error || 'حدث خطأ أثناء الاستلام', true);
+                                if (btn) {
+                                    btn.disabled = false;
+                                    btn.innerText = '🎁 استلام المكافأة اليومية الآن (+500 ¢)';
+                                }
+                            }
+                        } catch (err) {
+                            showToast('فشل الاتصال بالخادم', true);
+                            if (btn) {
+                                btn.disabled = false;
+                                btn.innerText = '🎁 استلام المكافأة اليومية الآن (+500 ¢)';
+                            }
+                        }
+                    }
+
+                    async function buyItem(type, name, price, btn) {
+                        if (!confirm('هل أنت متأكد من شراء وتجهيز: ' + name + ' مقابل ' + price.toLocaleString() + ' ¢؟')) return;
+                        
+                        const originalText = btn ? btn.innerText : '';
+                        if (btn) {
+                            btn.disabled = true;
+                            btn.innerText = '⏳ جاري الشراء...';
+                        }
+
+                        try {
+                            const res = await fetch('/api/user/buy-item', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ type, name, price })
+                            });
+                            const data = await res.json();
+                            if (data.success) {
+                                showToast('✅ ' + data.message);
+                                const d = document.getElementById('userCoinsDisplay');
+                                if (d) d.innerText = Number(data.newCoins).toLocaleString();
+                                document.querySelectorAll('.user-coins-val').forEach(el => el.innerText = Number(data.newCoins).toLocaleString());
+                                if (btn) btn.innerText = '✅ مجهّز ومفعّل';
+                            } else {
+                                showToast(data.error || 'فشلت عملية الشراء', true);
+                                if (btn) {
+                                    btn.disabled = false;
+                                    btn.innerText = originalText;
+                                }
+                            }
+                        } catch (err) {
+                            showToast('فشل الاتصال بالخادم', true);
+                            if (btn) {
+                                btn.disabled = false;
+                                btn.innerText = originalText;
+                            }
+                        }
+                    }
+                </script>
             </body>
             </html>
             `);
@@ -1663,6 +1985,134 @@ module.exports = function (app, client) {
                         </div>
                     </div>
                 `;
+            } else if (section === 'moderation') {
+                formFieldsHtml = `
+                    <div class="space-y-6">
+
+                        <!-- إعدادات القناة والبرفكس -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-gray-300 mb-2 text-right">برفكس الأوامر (Prefix)</label>
+                                <input type="text" name="prefix" value="${settings.prefix || '#'}" class="w-full bg-[#12131c] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right font-mono">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-300 mb-2 text-right">قناة سجلات الإشراف (Log Channel ID)</label>
+                                <input type="text" name="log_channel" value="${settings.log_channel || ''}" placeholder="ضع ID القناة هنا..." class="w-full bg-[#12131c] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right font-mono">
+                            </div>
+                        </div>
+
+                        <!-- أوامر الإشراف الكاملة -->
+                        <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl">
+                            <h4 class="font-bold text-white text-sm mb-4 text-right">أوامر الإشراف المتاحة 🔨</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+
+                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                    <div class="text-right">
+                                        <p class="font-bold text-white text-xs">/ban & #ban</p>
+                                        <p class="text-gray-400 text-[10px]">حظر الأعضاء المؤقت والنهائي مع إرسال رسالة خاصة قبل الحظر</p>
+                                    </div>
+                                </div>
+
+                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                    <div class="text-right">
+                                        <p class="font-bold text-white text-xs">/unban</p>
+                                        <p class="text-gray-400 text-[10px]">رفع الحظر عن عضو محظور مع البحث باليوزرنيم</p>
+                                    </div>
+                                </div>
+
+                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                    <div class="text-right">
+                                        <p class="font-bold text-white text-xs">/kick & #kick</p>
+                                        <p class="text-gray-400 text-[10px]">طرد الأعضاء المخالفين مع إرسال رسالة خاصة قبل الطرد</p>
+                                    </div>
+                                </div>
+
+                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                    <div class="text-right">
+                                        <p class="font-bold text-white text-xs">/warn & /warnings & #warn</p>
+                                        <p class="text-gray-400 text-[10px]">نظام تحذيرات متقدم مع عقوبات تلقائية تراكمية</p>
+                                    </div>
+                                </div>
+
+                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                    <div class="text-right">
+                                        <p class="font-bold text-white text-xs">/timeout & /mute & /untimeout</p>
+                                        <p class="text-gray-400 text-[10px]">تايم اوت مؤقت وكتم صوتي وكتابي برسالة خاصة</p>
+                                    </div>
+                                </div>
+
+                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                    <div class="text-right">
+                                        <p class="font-bold text-white text-xs">/clear & #clear</p>
+                                        <p class="text-gray-400 text-[10px]">مسح الرسائل مع فلاتر (بوتات، صور، روابط)</p>
+                                    </div>
+                                </div>
+
+                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                    <div class="text-right">
+                                        <p class="font-bold text-white text-xs">/lock & /unlock</p>
+                                        <p class="text-gray-400 text-[10px]">قفل وفتح القنوات للسيرفر بالكامل أو قناة معينة</p>
+                                    </div>
+                                </div>
+
+                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                    <div class="text-right">
+                                        <p class="font-bold text-white text-xs">/role & /temprole</p>
+                                        <p class="text-gray-400 text-[10px]">إعطاء وسحب الرتب المؤقتة والدائمة حتى 5 أعضاء</p>
+                                    </div>
+                                </div>
+
+                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                    <div class="text-right">
+                                        <p class="font-bold text-white text-xs">/slowmode & #slowmode</p>
+                                        <p class="text-gray-400 text-[10px]">تفعيل وإيقاف الوضع البطيء لقناة أو كل القنوات</p>
+                                    </div>
+                                </div>
+
+                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                    <div class="text-right">
+                                        <p class="font-bold text-white text-xs">/unban & /bans</p>
+                                        <p class="text-gray-400 text-[10px]">عرض قائمة المحظورين ورفع الحظر بالاسم أو الـ ID</p>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <!-- نظام العقوبات التلقائي -->
+                        <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl text-right">
+                            <h4 class="font-bold text-white text-sm mb-3">نظام العقوبات التلقائي للتحذيرات ⚠️</h4>
+                            <p class="text-gray-400 text-xs mb-4">عند تراكم التحذيرات يتم تطبيق العقوبات تلقائياً على العضو</p>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+                                <div class="bg-[#0b0c10] p-4 rounded-xl border border-yellow-900/40 text-center">
+                                    <span class="text-2xl mb-2 block">⏳</span>
+                                    <p class="font-bold text-yellow-300 text-sm">3 تحذيرات</p>
+                                    <p class="text-gray-400 text-[11px] mt-1">تايم اوت تلقائي لمدة 1 ساعة</p>
+                                </div>
+                                <div class="bg-[#0b0c10] p-4 rounded-xl border border-orange-900/40 text-center">
+                                    <span class="text-2xl mb-2 block">👢</span>
+                                    <p class="font-bold text-orange-400 text-sm">5 تحذيرات</p>
+                                    <p class="text-gray-400 text-[11px] mt-1">طرد تلقائي من السيرفر (Kick)</p>
+                                </div>
+                                <div class="bg-[#0b0c10] p-4 rounded-xl border border-red-900/40 text-center">
+                                    <span class="text-2xl mb-2 block">🔨</span>
+                                    <p class="font-bold text-red-400 text-sm">7 تحذيرات</p>
+                                    <p class="text-gray-400 text-[11px] mt-1">حظر نهائي من السيرفر (Ban)</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
             } else if (section === 'general' || section === 'settings') {
                 formFieldsHtml = `
                     <div class="space-y-6">
@@ -2470,6 +2920,84 @@ module.exports = function (app, client) {
         } catch (e) {
             console.error("Dashboard render error:", e);
             res.status(500).send("Error rendering section: " + e.message);
+        }
+    });
+
+    // ========================================================
+    // User APIs (Daily Reward, Store Purchases & Equips)
+    // ========================================================
+    app.post('/api/user/claim-daily', express.json(), (req, res) => {
+        try {
+            if (!req.session?.user) return res.status(401).json({ success: false, error: 'يجب تسجيل الدخول أولاً' });
+            const userId = req.session.user.id;
+            
+            const userRow = rawDb.prepare('SELECT coins, last_daily FROM users WHERE user_id = ? LIMIT 1').get(userId);
+            const now = Date.now();
+            const dailyCooldown = 24 * 60 * 60 * 1000;
+            const lastDaily = userRow?.last_daily || 0;
+
+            if (now - lastDaily < dailyCooldown) {
+                const timeLeft = dailyCooldown - (now - lastDaily);
+                const h = Math.floor(timeLeft / (1000 * 60 * 60));
+                const m = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+                return res.status(400).json({ 
+                    success: false, 
+                    error: `لقد استلمت مكافأتك اليومية مسبقاً! يتبقى ${h} ساعة و ${m} دقيقة` 
+                });
+            }
+
+            const reward = 500;
+            if (!userRow) {
+                rawDb.prepare('INSERT INTO users (user_id, guild_id, coins, last_daily) VALUES (?, ?, ?, ?)').run(userId, 'global', reward, now);
+            } else {
+                rawDb.prepare('UPDATE users SET coins = coins + ?, last_daily = ? WHERE user_id = ?').run(reward, now, userId);
+            }
+
+            const updated = rawDb.prepare('SELECT SUM(coins) as coins FROM users WHERE user_id = ?').get(userId);
+            return res.json({
+                success: true,
+                message: `تم استلام مكافأتك اليومية بنجاح (+${reward} ¢)!`,
+                newCoins: updated?.coins || reward
+            });
+        } catch (err) {
+            console.error('Error claiming daily:', err);
+            return res.status(500).json({ success: false, error: 'حدث خطأ في السيرفر أثناء الاستلام' });
+        }
+    });
+
+    app.post('/api/user/buy-item', express.json(), (req, res) => {
+        try {
+            if (!req.session?.user) return res.status(401).json({ success: false, error: 'يجب تسجيل الدخول أولاً' });
+            const userId = req.session.user.id;
+            const { type, name, price } = req.body;
+            const cost = parseInt(price) || 0;
+
+            const userRow = rawDb.prepare('SELECT SUM(coins) as coins FROM users WHERE user_id = ?').get(userId);
+            const userCoins = userRow?.coins || 0;
+
+            if (userCoins < cost) {
+                return res.status(400).json({
+                    success: false,
+                    error: `عذراً، رصيدك غير كافٍ! تحتاج إلى ${cost.toLocaleString()} ¢ بينما رصيدك الحالي ${userCoins.toLocaleString()} ¢`
+                });
+            }
+
+            // Deduct coins & equip item
+            if (type === 'wallpaper') {
+                rawDb.prepare('UPDATE users SET coins = MAX(0, coins - ?), wallpaper = ? WHERE user_id = ?').run(cost, name, userId);
+            } else {
+                rawDb.prepare('UPDATE users SET coins = MAX(0, coins - ?) WHERE user_id = ?').run(cost, userId);
+            }
+
+            const updated = rawDb.prepare('SELECT SUM(coins) as coins FROM users WHERE user_id = ?').get(userId);
+            return res.json({
+                success: true,
+                message: `تم شراء وتجهيز "${name}" بنجاح!`,
+                newCoins: updated?.coins || 0
+            });
+        } catch (err) {
+            console.error('Error buying item:', err);
+            return res.status(500).json({ success: false, error: 'حدث خطأ أثناء تنفيذ الشراء' });
         }
     });
 
