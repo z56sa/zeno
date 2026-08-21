@@ -1286,7 +1286,8 @@ module.exports = function (app, client) {
                 `;
             } else if (section === 'moderation') {
                 formFieldsHtml = `
-                    <div class="space-y-5">
+                    <div class="space-y-6">
+                        <!-- Quick Stats & Settings -->
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-xs font-bold text-gray-300 mb-2 text-right">برفكس الأوامر (Prefix)</label>
@@ -1298,20 +1299,96 @@ module.exports = function (app, client) {
                             </div>
                         </div>
 
+                        <!-- Moderation Commands List (ProBot Style Toggles) -->
+                        <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl">
+                            <h4 class="font-bold text-white text-sm mb-4 text-right">أوامر الإشراف المتاحة</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                
+                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                    <div class="text-right">
+                                        <p class="font-bold text-white text-xs">/ban & #ban</p>
+                                        <p class="text-gray-400 text-[10px]">حظر الأعضاء المؤقت والنهائي مع إرسال رسالة خاصة</p>
+                                    </div>
+                                </div>
+
+                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                    <div class="text-right">
+                                        <p class="font-bold text-white text-xs">/kick & #kick</p>
+                                        <p class="text-gray-400 text-[10px]">طرد الأعضاء المخالفين من السيرفر فوراً</p>
+                                    </div>
+                                </div>
+
+                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                    <div class="text-right">
+                                        <p class="font-bold text-white text-xs">/timeout & /mute</p>
+                                        <p class="text-gray-400 text-[10px]">إعطاء تايم اوت وكتم صوتي وكتابي بمدة محددة</p>
+                                    </div>
+                                </div>
+
+                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                    <div class="text-right">
+                                        <p class="font-bold text-white text-xs">/warn & /warnings</p>
+                                        <p class="text-gray-400 text-[10px]">نظام تحذيرات متقدم مع عقوبات تلقائية تراكمية</p>
+                                    </div>
+                                </div>
+
+                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                    <div class="text-right">
+                                        <p class="font-bold text-white text-xs">/clear & #clear</p>
+                                        <p class="text-gray-400 text-[10px]">مسح الرسائل مع فلاتر (بوتات، صور، روابط)</p>
+                                    </div>
+                                </div>
+
+                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                    <div class="text-right">
+                                        <p class="font-bold text-white text-xs">/lock & /unlock</p>
+                                        <p class="text-gray-400 text-[10px]">قفل وفتح القنوات النصية للسيرفر بالكامل أو لقناة معينة</p>
+                                    </div>
+                                </div>
+
+                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                    <div class="text-right">
+                                        <p class="font-bold text-white text-xs">/role & /temprole</p>
+                                        <p class="text-gray-400 text-[10px]">إعطاء وسحب الرتب المؤقتة والدائمة لعدة أعضاء</p>
+                                    </div>
+                                </div>
+
+                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                    <div class="text-right">
+                                        <p class="font-bold text-white text-xs">/slowmode & #slowmode</p>
+                                        <p class="text-gray-400 text-[10px]">تفعيل وإيقاف الوضع البطيء للرومات</p>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <!-- Punishment System -->
                         <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl text-right">
                             <h4 class="font-bold text-white text-sm mb-3">نظام العقوبات التلقائي للتحذيرات (Auto Warn Punishments)</h4>
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
-                                <div class="bg-[#0b0c10] p-3 rounded-xl border border-purple-950/30">
+                                <div class="bg-[#0b0c10] p-4 rounded-xl border border-purple-950/30 text-center">
+                                    <span class="text-xl mb-1 block">⏳</span>
                                     <p class="font-bold text-purple-300">3 تحذيرات</p>
-                                    <p class="text-gray-400 mt-1">تايم اوت لمدة ساعة ⏳</p>
+                                    <p class="text-gray-400 text-[11px] mt-1">تايم اوت تلقائي لمدة 1 ساعة</p>
                                 </div>
-                                <div class="bg-[#0b0c10] p-3 rounded-xl border border-purple-950/30">
+                                <div class="bg-[#0b0c10] p-4 rounded-xl border border-purple-950/30 text-center">
+                                    <span class="text-xl mb-1 block">👢</span>
                                     <p class="font-bold text-amber-400">5 تحذيرات</p>
-                                    <p class="text-gray-400 mt-1">طرد من السيرفر (Kick) 👢</p>
+                                    <p class="text-gray-400 text-[11px] mt-1">طرد تلقائي من السيرفر (Kick)</p>
                                 </div>
-                                <div class="bg-[#0b0c10] p-3 rounded-xl border border-purple-950/30">
+                                <div class="bg-[#0b0c10] p-4 rounded-xl border border-purple-950/30 text-center">
+                                    <span class="text-xl mb-1 block">🔨</span>
                                     <p class="font-bold text-red-400">7 تحذيرات</p>
-                                    <p class="text-gray-400 mt-1">حظر نهائي (Ban) 🔨</p>
+                                    <p class="text-gray-400 text-[11px] mt-1">حظر نهائي من السيرفر (Ban)</p>
                                 </div>
                             </div>
                         </div>
