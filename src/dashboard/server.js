@@ -1047,8 +1047,17 @@ module.exports = function (app, client) {
                 'autoresponder': 'الرد التلقائي على الكلمات 💬',
                 'tickets': 'نظام التذاكر والدعم الفني 🎫',
                 'protection': 'جدار الحماية الشامل ومكافحة التخريب 🛡️',
+                'antinuke': 'الحماية الخاصة (Anti-Nuke) 🔒',
+                'antiraid': 'مكافحة الغزو والهجمات (Anti-Raid) 🚨',
                 'levels': 'نظام الرتب واللفلات التفاعلي 📈',
-                'tempvoice': 'الرومات الصوتية المؤقتة 🔊'
+                'tempvoice': 'الرومات الصوتية المؤقتة 🔊',
+                'autoroles': 'الرتب التلقائية ورتب الدخول 🎖️',
+                'starboard': 'قناة المشاهير (Starboard) ⭐',
+                'embed': 'صانع رسائل الإيمبد المتقدم 📄',
+                'colors': 'نظام اختيار ألوان الرتب 🎨',
+                'logs': 'قنوات السجلات واللوق الشامل 📋',
+                'general': 'الأوامر العامة والإعدادات الأساسية ⚙️',
+                'settings': 'إعدادات السيرفر العامة ⚙️'
             };
 
             // ==========================================
@@ -1064,7 +1073,7 @@ module.exports = function (app, client) {
                                 <label class="toggle"><input type="checkbox" name="anti_link" value="1" ${settings.anti_link ? 'checked' : ''}><span class="slider"></span></label>
                                 <div class="text-right">
                                     <h4 class="font-bold text-white text-sm">منع الروابط (Anti-Link)</h4>
-                                    <p class="text-gray-400 text-[11px]">حذف روابط الديسكورد والمواقع غير المصرح بها</p>
+                                    <p class="text-gray-400 text-[11px]">حذف روابط الديسكورد والمواقع غير المصرح بها فوراً</p>
                                 </div>
                             </div>
                         </div>
@@ -1074,7 +1083,7 @@ module.exports = function (app, client) {
                                 <label class="toggle"><input type="checkbox" name="anti_spam" value="1" ${settings.anti_spam ? 'checked' : ''}><span class="slider"></span></label>
                                 <div class="text-right">
                                     <h4 class="font-bold text-white text-sm">مكافحة السبام (Anti-Spam)</h4>
-                                    <p class="text-gray-400 text-[11px]">منع التكرار والرسائل السريعة تلقائياً</p>
+                                    <p class="text-gray-400 text-[11px]">منع التكرار والرسائل السريعة تلقائياً لحماية الشات</p>
                                 </div>
                             </div>
                         </div>
@@ -1107,15 +1116,15 @@ module.exports = function (app, client) {
 
                         <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl">
                             <div class="text-right">
-                                <h4 class="font-bold text-white text-sm mb-1">أقصى عدد منشن مسموح به</h4>
+                                <h4 class="font-bold text-white text-sm mb-1">أقصى عدد منشن مسموح به في الرسالة</h4>
                                 <input type="number" name="max_mentions" value="${settings.max_mentions || 4}" min="1" max="50" class="w-full bg-[#0b0c10] border border-purple-950/40 rounded-xl px-4 py-2.5 text-xs text-white outline-none font-mono text-right">
                             </div>
                         </div>
 
                         <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl">
                             <div class="text-right">
-                                <h4 class="font-bold text-white text-sm mb-1">قناة سجلات الحماية (Protection Log)</h4>
-                                <input type="text" name="log_channel" value="${settings.log_channel || ''}" placeholder="Channel ID..." class="w-full bg-[#0b0c10] border border-purple-950/40 rounded-xl px-4 py-2.5 text-xs text-white outline-none font-mono text-right">
+                                <h4 class="font-bold text-white text-sm mb-1">قناة سجلات الحماية (Protection Log Channel ID)</h4>
+                                <input type="text" name="log_channel" value="${settings.log_channel || ''}" placeholder="ضع ID القناة..." class="w-full bg-[#0b0c10] border border-purple-950/40 rounded-xl px-4 py-2.5 text-xs text-white outline-none font-mono text-right">
                             </div>
                         </div>
                     </div>
@@ -1127,8 +1136,8 @@ module.exports = function (app, client) {
                             <div class="flex items-center justify-between mb-4">
                                 <label class="toggle"><input type="checkbox" name="welcome_image" value="1" ${settings.welcome_image ? 'checked' : ''}><span class="slider"></span></label>
                                 <div class="text-right">
-                                    <h4 class="font-bold text-white text-sm">توليد بطاقة ترحيب مصممة (Canvas Card)</h4>
-                                    <p class="text-gray-400 text-[11px]">إرسال صورة ترحيبية باسم وافتار العضو الجديد</p>
+                                    <h4 class="font-bold text-white text-sm">توليد بطاقة ترحيب مصممة (Canvas Card Image)</h4>
+                                    <p class="text-gray-400 text-[11px]">إرسال صورة ترحيبية احترافية باسم وافتار العضو الجديد</p>
                                 </div>
                             </div>
                         </div>
@@ -1165,7 +1174,7 @@ module.exports = function (app, client) {
                         </div>
 
                         <div>
-                            <label class="block text-xs font-bold text-gray-300 mb-2 text-right">قناة سجلات التذاكر والترانسكريبت (Ticket Logs Channel ID)</label>
+                            <label class="block text-xs font-bold text-gray-300 mb-2 text-right">قناة حفظ السجلات والترانسكريبت (Ticket Log Channel ID)</label>
                             <input type="text" name="ticket_log_channel" value="${settings.ticket_log_channel || ''}" placeholder="ضع ID روم حفظ السجلات..." class="w-full bg-[#12131c] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right font-mono">
                         </div>
                     </div>
@@ -1178,7 +1187,7 @@ module.exports = function (app, client) {
                                 <label class="toggle"><input type="checkbox" name="leveling_enabled" value="1" ${settings.leveling_enabled ? 'checked' : ''}><span class="slider"></span></label>
                                 <div class="text-right">
                                     <h4 class="font-bold text-white text-sm">تفعيل نظام اللفلات واكتساب XP</h4>
-                                    <p class="text-gray-400 text-[11px]">يحصل الأعضاء على خبرة عند التفاعل والشات</p>
+                                    <p class="text-gray-400 text-[11px]">يحصل الأعضاء على نقاط خبرة وتصنيف عند التفاعل</p>
                                 </div>
                             </div>
                         </div>
@@ -1228,8 +1237,112 @@ module.exports = function (app, client) {
                         </div>
                     </div>
                 `;
+            } else if (section === 'tempvoice') {
+                formFieldsHtml = `
+                    <div class="space-y-5">
+                        <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl">
+                            <div class="flex items-center justify-between mb-4">
+                                <label class="toggle"><input type="checkbox" name="temp_voice_enabled" value="1" ${settings.temp_voice_enabled ? 'checked' : ''}><span class="slider"></span></label>
+                                <div class="text-right">
+                                    <h4 class="font-bold text-white text-sm">تفعيل الرومات الصوتية المؤقتة</h4>
+                                    <p class="text-gray-400 text-[11px]">إنشاء روم صوتي خاص تلقائياً عند دخول القناة الرئيسية</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-gray-300 mb-2 text-right">قناة الإنشاء الرئيسية (Join to Create Channel ID)</label>
+                                <input type="text" name="temp_voice_channel" value="${settings.temp_voice_channel || ''}" placeholder="ضع ID القناة الصوتية..." class="w-full bg-[#12131c] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right font-mono">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-300 mb-2 text-right">كاتيجوري الرومات المؤقتة (Category ID)</label>
+                                <input type="text" name="temp_voice_category" value="${settings.temp_voice_category || ''}" placeholder="ضع ID الكاتيجوري..." class="w-full bg-[#12131c] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right font-mono">
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else if (section === 'autoresponder') {
+                formFieldsHtml = `
+                    <div class="space-y-5">
+                        <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl text-right">
+                            <h4 class="font-bold text-white text-sm mb-1">الردود التلقائية المخصصة (Auto Responder)</h4>
+                            <p class="text-gray-400 text-xs mb-4">يقوم البوت بالرد التلقائي فور كتابة الأعضاء للكلمات المحددة.</p>
+                            
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-300 mb-1 text-right">الكلمة المفتاحية (Trigger Word)</label>
+                                    <input type="text" placeholder="مثال: السلام عليكم أو رابط السيرفر" class="w-full bg-[#0b0c10] border border-purple-950/40 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-300 mb-1 text-right">الرد التلقائي للبوت (Response Message)</label>
+                                    <textarea rows="3" placeholder="مثال: وعليكم السلام ورحمة الله وبركاته، أهلاً بك!" class="w-full bg-[#0b0c10] border border-purple-950/40 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else if (section === 'moderation') {
+                formFieldsHtml = `
+                    <div class="space-y-5">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-gray-300 mb-2 text-right">برفكس الأوامر (Prefix)</label>
+                                <input type="text" name="prefix" value="${settings.prefix || '#'}" class="w-full bg-[#12131c] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right font-mono">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-300 mb-2 text-right">قناة سجلات الإشراف (Mod Logs Channel ID)</label>
+                                <input type="text" name="log_channel" value="${settings.log_channel || ''}" placeholder="ضع ID القناة..." class="w-full bg-[#12131c] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right font-mono">
+                            </div>
+                        </div>
+
+                        <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl text-right">
+                            <h4 class="font-bold text-white text-sm mb-3">نظام العقوبات التلقائي للتحذيرات (Auto Warn Punishments)</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+                                <div class="bg-[#0b0c10] p-3 rounded-xl border border-purple-950/30">
+                                    <p class="font-bold text-purple-300">3 تحذيرات</p>
+                                    <p class="text-gray-400 mt-1">تايم اوت لمدة ساعة ⏳</p>
+                                </div>
+                                <div class="bg-[#0b0c10] p-3 rounded-xl border border-purple-950/30">
+                                    <p class="font-bold text-amber-400">5 تحذيرات</p>
+                                    <p class="text-gray-400 mt-1">طرد من السيرفر (Kick) 👢</p>
+                                </div>
+                                <div class="bg-[#0b0c10] p-3 rounded-xl border border-purple-950/30">
+                                    <p class="font-bold text-red-400">7 تحذيرات</p>
+                                    <p class="text-gray-400 mt-1">حظر نهائي (Ban) 🔨</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else if (section === 'embed') {
+                formFieldsHtml = `
+                    <div class="space-y-5">
+                        <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl space-y-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-300 mb-2 text-right">القناة المستهدفة (Channel ID)</label>
+                                    <input type="text" placeholder="ضع ID القناة..." class="w-full bg-[#0b0c10] border border-purple-950/40 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right font-mono">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-300 mb-2 text-right">لون الإيمبد (Hex Color)</label>
+                                    <input type="text" placeholder="#9333ea" value="#9333ea" class="w-full bg-[#0b0c10] border border-purple-950/40 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right font-mono">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold text-gray-300 mb-2 text-right">عنوان الرسالة (Embed Title)</label>
+                                <input type="text" placeholder="اكتب العنوان الرئيسي..." class="w-full bg-[#0b0c10] border border-purple-950/40 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right">
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold text-gray-300 mb-2 text-right">محتوى الإيمبد (Description)</label>
+                                <textarea rows="4" placeholder="اكتب تفاصيل الرسالة هنا..." class="w-full bg-[#0b0c10] border border-purple-950/40 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                `;
             } else {
-                // النموذج العام للإشراف والأوامر العامة وباقي الأقسام
                 formFieldsHtml = `
                     <div class="space-y-5">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
