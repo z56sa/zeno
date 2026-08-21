@@ -108,9 +108,10 @@ module.exports = {
     }
 
     // 1. نظام الرتب التلقائية (Auto-Role)
-    if (settings.autorole_id) {
+    const autoRoleId = settings.auto_role || settings.autorole_id;
+    if (autoRoleId) {
       try {
-        const role = guild.roles.cache.get(settings.autorole_id);
+        const role = guild.roles.cache.get(autoRoleId);
         if (role) {
           await member.roles.add(role);
         }
@@ -123,12 +124,16 @@ module.exports = {
     if (settings.welcome_channel) {
       const welcomeChannel = guild.channels.cache.get(settings.welcome_channel);
       if (welcomeChannel) {
-        let msg = settings.welcome_message || 'أهلاً بك يا {user} في سيرفر **{server}**! 🎉';
+        let msg = settings.welcome_message || 'أهلاً بك يا [user] في سيرفر **[server]**! 🎉 أنت العضو رقم [memberCount]';
         msg = msg
-          .replace(/{user}/g, `<@${member.id}>`)
-          .replace(/{userName}/g, member.user.username)
-          .replace(/{server}/g, guild.name)
-          .replace(/{memberCount}/g, guild.memberCount.toString());
+          .replace(/\[user\]/gi, `<@${member.id}>`)
+          .replace(/\{user\}/gi, `<@${member.id}>`)
+          .replace(/\[userName\]/gi, member.user.username)
+          .replace(/\{userName\}/gi, member.user.username)
+          .replace(/\[server\]/gi, guild.name)
+          .replace(/\{server\}/gi, guild.name)
+          .replace(/\[memberCount\]/gi, guild.memberCount.toString())
+          .replace(/\{memberCount\}/gi, guild.memberCount.toString());
 
         const sendPayload = { content: msg };
 
