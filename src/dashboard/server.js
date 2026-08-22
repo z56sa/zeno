@@ -1048,8 +1048,13 @@ module.exports = function (app, client) {
             if (!req.session?.user) return res.redirect('/auth/discord');
             const guildId = req.params.guildId;
             const guilds = req.session.guilds || [];
-            const guild = guilds.find(g => g.id === guildId);
+            let guild = guilds.find(g => g.id === guildId);
             const user = req.session.user;
+
+            const botGuild = client?.guilds?.cache?.get(guildId);
+            if (!guild && botGuild) {
+                guild = { id: botGuild.id, name: botGuild.name, icon: botGuild.icon, memberCount: botGuild.memberCount };
+            }
 
             if (!guild) return res.redirect('/dashboard');
 
@@ -1777,7 +1782,8 @@ module.exports = function (app, client) {
             </html>
             `);
         } catch (error) {
-            res.status(500).send("Error");
+            console.error("Dashboard /dashboard/:guildId error:", error);
+            res.status(500).send(`<pre style="color:red;background:#111;padding:20px;font-family:monospace">${error.stack || error.message || error}</pre>`);
         }
     });
 
