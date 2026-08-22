@@ -1245,6 +1245,17 @@ module.exports = {
   addStaffGoal,
   deleteStaffGoal,
   resetStaffStats,
+  // 🎁 Giveaway Exports
+  createGiveaway,
+  getGiveaway,
+  getActiveGiveaways,
+  getGiveawayEntries,
+  updateGiveawayEntries,
+  addGiveawayEntry,
+  removeGiveawayEntry,
+  toggleGiveawayEntry,
+  endGiveaway,
+  getGuildGiveaways: (guildId) => db.prepare('SELECT * FROM giveaways WHERE guild_id = ? ORDER BY end_time DESC LIMIT 50').all(guildId),
   // Compatibility aliases
   getTopXp: getLeaderboard,
   getTopCredits: getCoinsLeaderboard,

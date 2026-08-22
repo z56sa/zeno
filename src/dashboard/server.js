@@ -1060,7 +1060,7 @@ module.exports = function (app, client) {
             const serverRailHtml = guilds.map(g => `
                 <a href="/dashboard/${g.id}" title="${g.name}" class="group relative flex items-center justify-center">
                     <img src="${g.icon ? `https://cdn.discordapp.com/icons/${g.id}/${g.icon}.png` : 'https://cdn.discordapp.com/embed/avatars/0.png'}" 
-                         class="w-11 h-11 rounded-2xl ${g.id === guildId ? 'border-2 border-[#5865F2]' : 'border border-transparent'} hover:rounded-xl object-cover transition-all">
+                         class="w-12 h-12 rounded-2xl ${g.id === guildId ? 'border-2 border-purple-500 shadow-lg shadow-purple-900/50 p-0.5 ring-2 ring-purple-600/30' : 'border border-transparent hover:border-purple-500/40'} hover:rounded-xl object-cover transition-all">
                 </a>
             `).join('');
 
@@ -1449,6 +1449,45 @@ module.exports = function (app, client) {
                                     <a href="/dashboard/${guildId}/appearance" class="w-full py-2 bg-amber-950/30 hover:bg-gradient-to-r hover:from-amber-600 hover:to-yellow-600 hover:text-white text-amber-300 border border-amber-900/30 rounded-xl text-xs font-bold text-center transition">&gt; Visit</a>
                                 </div>
 
+                                <!-- Invite Tracker -->
+                                <div class="probot-card border border-purple-950/40 hover:border-purple-600/40 rounded-2xl p-5 flex flex-col justify-between transition shadow-lg">
+                                    <div class="flex items-center justify-between mb-3">
+                                        <label class="toggle"><input type="checkbox" onchange="toggleModule('${guildId}', 'invite_tracker_enabled', this.checked)" checked><span class="slider"></span></label>
+                                        <div class="flex items-center gap-2">
+                                            <h4 class="font-bold text-white text-sm">Invite Tracker</h4>
+                                            <span class="text-lg">🔗</span>
+                                        </div>
+                                    </div>
+                                    <p class="text-gray-400 text-[11px] mb-4 text-right">تتبع دعوات الأعضاء، من جاب مين، الليدربورد، ومكافأة الداعي</p>
+                                    <a href="/dashboard/${guildId}/invites" class="w-full py-2 bg-purple-950/30 hover:bg-gradient-to-r hover:from-purple-600 hover:to-[#5865f2] hover:text-white text-purple-300 border border-purple-900/30 rounded-xl text-xs font-bold text-center transition">&gt; Visit</a>
+                                </div>
+
+                                <!-- Giveaways -->
+                                <div class="probot-card border border-yellow-950/40 hover:border-yellow-600/40 rounded-2xl p-5 flex flex-col justify-between transition shadow-lg">
+                                    <div class="flex items-center justify-between mb-3">
+                                        <label class="toggle"><input type="checkbox" onchange="toggleModule('${guildId}', 'giveaway_enabled', this.checked)" checked><span class="slider"></span></label>
+                                        <div class="flex items-center gap-2">
+                                            <h4 class="font-bold text-white text-sm">Giveaways 🎁</h4>
+                                            <span class="text-lg">🎉</span>
+                                        </div>
+                                    </div>
+                                    <p class="text-gray-400 text-[11px] mb-4 text-right">سحوبات متقدمة: شروط رول/مستوى، فرصة مضاعفة، Reroll، إشعار DM</p>
+                                    <a href="/dashboard/${guildId}/giveaways" class="w-full py-2 bg-yellow-950/30 hover:bg-gradient-to-r hover:from-yellow-500 hover:to-amber-600 hover:text-white text-yellow-300 border border-yellow-900/30 rounded-xl text-xs font-bold text-center transition">&gt; Visit</a>
+                                </div>
+
+                                <!-- Broadcast / Announcements -->
+                                <div class="probot-card border border-cyan-950/40 hover:border-cyan-600/40 rounded-2xl p-5 flex flex-col justify-between transition shadow-lg">
+                                    <div class="flex items-center justify-between mb-3">
+                                        <label class="toggle"><input type="checkbox" onchange="toggleModule('${guildId}', 'broadcast_enabled', this.checked)" checked><span class="slider"></span></label>
+                                        <div class="flex items-center gap-2">
+                                            <h4 class="font-bold text-white text-sm">الإعلانات 📢</h4>
+                                            <span class="text-lg">📡</span>
+                                        </div>
+                                    </div>
+                                    <p class="text-gray-400 text-[11px] mb-4 text-right">جدولة إعلانات، تكرار تلقائي، عدة قنوات، Embed Designer</p>
+                                    <a href="/dashboard/${guildId}/broadcast" class="w-full py-2 bg-cyan-950/30 hover:bg-gradient-to-r hover:from-cyan-600 hover:to-blue-600 hover:text-white text-cyan-300 border border-cyan-900/30 rounded-xl text-xs font-bold text-center transition">&gt; Visit</a>
+                                </div>
+
                             </div>
                         </div>
 
@@ -1463,131 +1502,277 @@ module.exports = function (app, client) {
                         </script>
                     </main>
 
-                    <!-- Server Settings Navigation Sidebar (ProBot Server Menu) -->
-                    <aside class="w-64 bg-[#0f1016] border-l border-white/5 p-5 flex flex-col shrink-0 overflow-y-auto">
+                    <!-- Server Settings Navigation Sidebar (Novax Style Categorized & Collapsible) -->
+                    <aside class="w-72 bg-[#090a10] border-l border-white/5 flex flex-col shrink-0 h-full select-none">
                         
-                        <!-- Server Icon & Title Header -->
-                        <div class="flex flex-col items-center text-center pb-5 mb-4 border-b border-white/5">
-                            <img src="${guildIcon}" class="w-16 h-16 rounded-2xl bg-[#1c1f2e] mb-2 object-cover shadow-lg border border-white/5">
-                            <h3 class="font-bold text-white text-sm truncate max-w-[200px]">${guild.name}</h3>
+                        <!-- Server Card Top (Novax Style) -->
+                        <div class="p-3">
+                            <div class="bg-[#12141f] border border-white/5 rounded-2xl p-3 flex items-center justify-between shadow-lg">
+                                <div class="text-gray-400 text-xs">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"/></svg>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <div class="text-right">
+                                        <h3 class="font-bold text-white text-xs truncate max-w-[130px]">${guild.name}</h3>
+                                        <span class="text-[10px] text-gray-400">الأعضاء: ${guild.memberCount || botGuild?.memberCount || 0}</span>
+                                    </div>
+                                    <div class="relative">
+                                        <img src="${guildIcon}" class="w-10 h-10 rounded-xl bg-[#1c1f2e] object-cover ring-2 ring-purple-600/50 shadow-md">
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
-                        <!-- Menu Items -->
-                        <div class="flex flex-col gap-1 text-xs text-right overflow-y-auto pr-1">
-                            <span class="text-[10px] font-bold text-[#5865f2]/60 px-3 py-1">عام</span>
-                            <a href="/dashboard/${guildId}" class="px-3 py-2 rounded-xl bg-gradient-to-r from-purple-700 to-indigo-700 text-white font-bold flex items-center justify-between shadow-lg shadow-purple-950/50">
-                                <span class="w-1.5 h-1.5 rounded-full bg-white"></span>
-                                <span>نظرة عامة</span>
-                            </a>
-                            <a href="/dashboard/${guildId}/analytics" class="px-3 py-1.5 rounded-xl text-gray-400 hover:text-gray-200 hover:bg-[#151722] font-medium flex items-center justify-end gap-2 transition">
-                                <span>الإحصائيات</span>
-                                <span>📊</span>
-                            </a>
-                            <a href="/dashboard/${guildId}/general" class="px-3 py-1.5 rounded-xl text-gray-400 hover:text-gray-200 hover:bg-[#151722] font-medium flex items-center justify-end gap-2 transition">
-                                <span>إعدادات السيرفر</span>
-                                <span>⚙️</span>
-                            </a>
-                            <a href="/dashboard/${guildId}/embed" class="px-3 py-1.5 rounded-xl text-gray-400 hover:text-gray-200 hover:bg-[#151722] font-medium flex items-center justify-end gap-2 transition">
-                                <span>رسائل الإيمبد</span>
-                                <span>📄</span>
-                            </a>
+                        <!-- Categorized Scrollable Nav Menu -->
+                        <div class="flex-1 overflow-y-auto px-3 py-2 space-y-4 text-xs text-right custom-scrollbar">
 
-                            <span class="text-[10px] font-bold text-[#5865f2]/60 px-3 pt-3 pb-1">قائمة الخصائص</span>
-                            <a href="/dashboard/${guildId}/fun" class="px-3 py-1.5 rounded-xl text-gray-300 hover:text-gray-200 hover:bg-[#151722] font-medium flex items-center justify-between transition">
-                                <span class="w-2 h-2 rounded-full bg-purple-400"></span>
-                                <span class="flex items-center gap-1.5"><span>التسلية والألعاب</span><span>🎮</span></span>
-                            </a>
-                            <a href="/dashboard/${guildId}/general" class="px-3 py-1.5 rounded-xl text-gray-300 hover:text-gray-200 hover:bg-[#151722] font-medium flex items-center justify-between transition">
-                                <span class="w-2 h-2 rounded-full bg-purple-400"></span>
-                                <span class="flex items-center gap-1.5"><span>الأوامر العامة</span><span>⚙️</span></span>
-                            </a>
-                            <a href="/dashboard/${guildId}/welcome" class="px-3 py-1.5 rounded-xl text-gray-300 hover:text-gray-200 hover:bg-[#151722] font-medium flex items-center justify-between transition">
-                                <span class="w-2 h-2 rounded-full bg-purple-400"></span>
-                                <span class="flex items-center gap-1.5"><span>الترحيب & المغادرة</span><span>👋</span></span>
-                            </a>
-                            <a href="/dashboard/${guildId}/boost" class="px-3 py-1.5 rounded-xl text-gray-300 hover:text-gray-200 hover:bg-[#151722] font-medium flex items-center justify-between transition">
-                                <span class="w-2 h-2 rounded-full bg-pink-400"></span>
-                                <span class="flex items-center gap-1.5"><span>البوستات</span><span>🚀</span></span>
-                            </a>
-                            <a href="/dashboard/${guildId}/autoresponder" class="px-3 py-1.5 rounded-xl text-gray-300 hover:text-gray-200 hover:bg-[#151722] font-medium flex items-center justify-between transition">
-                                <span class="w-2 h-2 rounded-full bg-purple-400"></span>
-                                <span class="flex items-center gap-1.5"><span>الرد التلقائي</span><span>💬</span></span>
-                            </a>
-                            <a href="/dashboard/${guildId}/levels" class="px-3 py-1.5 rounded-xl text-gray-300 hover:text-gray-200 hover:bg-[#151722] font-medium flex items-center justify-between transition">
-                                <span class="w-2 h-2 rounded-full bg-purple-400"></span>
-                                <span class="flex items-center gap-1.5"><span>نظام اللفلات</span><span>📈</span></span>
-                            </a>
-                            <a href="/dashboard/${guildId}/autoroles" class="px-3 py-1.5 rounded-xl text-gray-300 hover:text-gray-200 hover:bg-[#151722] font-medium flex items-center justify-between transition">
-                                <span class="w-2 h-2 rounded-full bg-purple-400"></span>
-                                <span class="flex items-center gap-1.5"><span>الرتب التلقائية</span><span>🎖️</span></span>
-                            </a>
-                            <a href="/dashboard/${guildId}/colors" class="px-3 py-1.5 rounded-xl text-gray-300 hover:text-gray-200 hover:bg-[#151722] font-medium flex items-center justify-between transition">
-                                <span class="w-2 h-2 rounded-full bg-purple-400"></span>
-                                <span class="flex items-center gap-1.5"><span>الألوان</span><span>🎨</span></span>
-                            </a>
-                            <a href="/dashboard/${guildId}/tempvoice" class="px-3 py-1.5 rounded-xl text-gray-300 hover:text-gray-200 hover:bg-[#151722] font-medium flex items-center justify-between transition">
-                                <span class="w-2 h-2 rounded-full bg-purple-400"></span>
-                                <span class="flex items-center gap-1.5"><span>الرومات المؤقتة</span><span>🔊</span></span>
-                            </a>
-                            <a href="/dashboard/${guildId}/starboard" class="px-3 py-1.5 rounded-xl text-gray-300 hover:text-gray-200 hover:bg-[#151722] font-medium flex items-center justify-between transition">
-                                <span class="w-2 h-2 rounded-full bg-purple-400"></span>
-                                <span class="flex items-center gap-1.5"><span>ستاربورد</span><span>⭐</span></span>
-                            </a>
-                            <a href="/dashboard/${guildId}/tickets" class="px-3 py-1.5 rounded-xl text-gray-300 hover:text-gray-200 hover:bg-[#151722] font-medium flex items-center justify-between transition">
-                                <span class="w-2 h-2 rounded-full bg-purple-400"></span>
-                                <span class="flex items-center gap-1.5"><span>التذاكر</span><span>🎫</span></span>
-                            </a>
-                            <a href="/dashboard/${guildId}/quran" class="px-3 py-1.5 rounded-xl text-emerald-300 hover:text-emerald-200 hover:bg-emerald-950/30 font-medium flex items-center justify-between transition">
-                                <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
-                                <span class="flex items-center gap-1.5"><span>القرآن & الراديو</span><span>📻</span></span>
-                            </a>
-                            <a href="/dashboard/${guildId}/applications" class="px-3 py-1.5 rounded-xl text-indigo-300 hover:text-indigo-200 hover:bg-indigo-950/30 font-medium flex items-center justify-between transition">
-                                <span class="w-2 h-2 rounded-full bg-indigo-400"></span>
-                                <span class="flex items-center gap-1.5"><span>التقديمات</span><span>📝</span></span>
-                            </a>
-                            <a href="/dashboard/${guildId}/social" class="px-3 py-1.5 rounded-xl text-red-300 hover:text-red-200 hover:bg-red-950/30 font-medium flex items-center justify-between transition">
-                                <span class="w-2 h-2 rounded-full bg-red-400"></span>
-                                <span class="flex items-center gap-1.5"><span>تنبيهات السوشيال</span><span>📺</span></span>
-                            </a>
-                            <a href="/dashboard/${guildId}/appearance" class="px-3 py-1.5 rounded-xl text-amber-300 hover:text-amber-200 hover:bg-amber-950/30 font-medium flex items-center justify-between transition">
-                                <span class="w-2 h-2 rounded-full bg-amber-400"></span>
-                                <span class="flex items-center gap-1.5"><span>مظهر البوت</span><span>🎨</span></span>
-                            </a>
+                            <!-- الأخيرة (Recent / Fast Access) -->
+                            <div class="space-y-1">
+                                <button type="button" onclick="toggleNavGroup('grp_recent')" class="w-full flex items-center justify-between text-gray-400 hover:text-white px-2 py-1 font-bold text-[11px] transition">
+                                    <svg id="arrow_grp_recent" class="w-3.5 h-3.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                    <span class="flex items-center gap-1.5"><span>الأخيرة</span><span>🕒</span></span>
+                                </button>
+                                <div id="grp_recent" class="space-y-1">
+                                    <a href="/dashboard/${guildId}/welcome" class="flex items-center justify-between px-3 py-2 rounded-xl text-gray-300 hover:text-white hover:bg-[#151724] transition group">
+                                        <span class="w-4 h-4 rounded-full border border-emerald-500/60 bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-[9px] font-black">✓</span>
+                                        <span class="flex items-center gap-2"><span>الترحيب & المغادرة</span><span class="text-gray-400 group-hover:text-purple-400">👋</span></span>
+                                    </a>
+                                    <a href="/dashboard/${guildId}/autoresponder" class="flex items-center justify-between px-3 py-2 rounded-xl text-gray-300 hover:text-white hover:bg-[#151724] transition group">
+                                        <span class="w-4 h-4 rounded-full border border-emerald-500/60 bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-[9px] font-black">✓</span>
+                                        <span class="flex items-center gap-2"><span>الرد التلقائي</span><span class="text-gray-400 group-hover:text-purple-400">💬</span></span>
+                                    </a>
+                                    <a href="/dashboard/${guildId}/tickets" class="flex items-center justify-between px-3 py-2 rounded-xl text-gray-300 hover:text-white hover:bg-[#151724] transition group">
+                                        <span class="w-4 h-4 rounded-full border border-emerald-500/60 bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-[9px] font-black">✓</span>
+                                        <span class="flex items-center gap-2"><span>نظام التذاكر</span><span class="text-gray-400 group-hover:text-purple-400">🎫</span></span>
+                                    </a>
+                                </div>
+                            </div>
 
-                            <span class="text-[10px] font-bold text-[#5865f2]/60 px-3 pt-3 pb-1">الإشراف</span>
-                            <a href="/dashboard/${guildId}/moderation" class="px-3 py-1.5 rounded-xl text-gray-300 hover:text-gray-200 hover:bg-[#151722] font-medium flex items-center justify-between transition">
-                                <span class="w-2 h-2 rounded-full bg-purple-400"></span>
-                                <span class="flex items-center gap-1.5"><span>الإشراف</span><span>🔨</span></span>
-                            </a>
-                            <a href="/dashboard/${guildId}/logs" class="px-3 py-1.5 rounded-xl text-gray-300 hover:text-gray-200 hover:bg-[#151722] font-medium flex items-center justify-between transition">
-                                <span class="w-2 h-2 rounded-full bg-purple-400"></span>
-                                <span class="flex items-center gap-1.5"><span>اللوق (Logs)</span><span>📋</span></span>
-                            </a>
-                            <a href="/dashboard/${guildId}/automod" class="px-3 py-1.5 rounded-xl text-gray-300 hover:text-gray-200 hover:bg-[#151722] font-medium flex items-center justify-between transition">
-                                <span class="w-2 h-2 rounded-full bg-purple-400"></span>
-                                <span class="flex items-center gap-1.5"><span>الرقابة التلقائية</span><span>🤖</span></span>
-                            </a>
-                            <a href="/dashboard/${guildId}/antiraid" class="px-3 py-1.5 rounded-xl text-gray-300 hover:text-gray-200 hover:bg-[#151722] font-medium flex items-center justify-between transition">
-                                <span class="w-2 h-2 rounded-full bg-purple-400"></span>
-                                <span class="flex items-center gap-1.5"><span>مكافحة الغزو (Anti-Raid)</span><span>🛡️</span></span>
-                            </a>
-                            <a href="/dashboard/${guildId}/protection" class="px-3 py-1.5 rounded-xl text-gray-300 hover:text-gray-200 hover:bg-[#151722] font-medium flex items-center justify-between transition">
-                                <span class="w-2 h-2 rounded-full bg-purple-400"></span>
-                                <span class="flex items-center gap-1.5"><span>الحماية الخاصة (Anti-Nuke)</span><span>🔒</span></span>
-                            </a>
+                            <!-- عام (General) -->
+                            <div class="space-y-1">
+                                <button type="button" onclick="toggleNavGroup('grp_general')" class="w-full flex items-center justify-between text-gray-400 hover:text-white px-2 py-1 font-bold text-[11px] transition">
+                                    <svg id="arrow_grp_general" class="w-3.5 h-3.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                    <span class="flex items-center gap-1.5"><span>عام</span></span>
+                                </button>
+                                <div id="grp_general" class="space-y-1">
+                                    <a href="/dashboard/${guildId}" class="flex items-center justify-between px-3 py-2 rounded-xl bg-purple-600/20 text-purple-300 font-bold border border-purple-500/30 transition">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-purple-400 shadow-sm shadow-purple-400"></span>
+                                        <span class="flex items-center gap-2"><span>نظرة عامة</span><span class="text-purple-400">🎛️</span></span>
+                                    </a>
+                                    <a href="/dashboard/${guildId}/appearance" class="flex items-center justify-between px-3 py-2 rounded-xl text-gray-300 hover:text-white hover:bg-[#151724] transition group">
+                                        <span></span>
+                                        <span class="flex items-center gap-2"><span>مظهر البوت</span><span class="text-gray-400 group-hover:text-purple-400">🎨</span></span>
+                                    </a>
+                                    <a href="/dashboard/${guildId}/settings" class="flex items-center justify-between px-3 py-2 rounded-xl text-gray-300 hover:text-white hover:bg-[#151724] transition group">
+                                        <span></span>
+                                        <span class="flex items-center gap-2"><span>الإعدادات</span><span class="text-gray-400 group-hover:text-purple-400">⚙️</span></span>
+                                    </a>
+                                    <a href="/dashboard/${guildId}/analytics" class="flex items-center justify-between px-3 py-2 rounded-xl text-gray-300 hover:text-white hover:bg-[#151724] transition group">
+                                        <span></span>
+                                        <span class="flex items-center gap-2"><span>الإحصائيات</span><span class="text-gray-400 group-hover:text-purple-400">📊</span></span>
+                                    </a>
+                                    <a href="/dashboard/${guildId}/general" class="flex items-center justify-between px-3 py-2 rounded-xl text-gray-300 hover:text-white hover:bg-[#151724] transition group">
+                                        <span class="text-[9px] font-bold text-rose-400 bg-rose-950/60 px-1.5 py-0.2 rounded">جديد</span>
+                                        <span class="flex items-center gap-2"><span>الأوامر</span><span class="text-gray-400 group-hover:text-purple-400">⌨️</span></span>
+                                    </a>
+                                </div>
+                            </div>
+
+                            <!-- الرسائل والإمبد (Messages & Embeds) -->
+                            <div class="space-y-1">
+                                <button type="button" onclick="toggleNavGroup('grp_messages')" class="w-full flex items-center justify-between text-gray-400 hover:text-white px-2 py-1 font-bold text-[11px] transition">
+                                    <svg id="arrow_grp_messages" class="w-3.5 h-3.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                    <span class="flex items-center gap-1.5"><span>الرسائل والأمبد</span></span>
+                                </button>
+                                <div id="grp_messages" class="space-y-1">
+                                    <a href="/dashboard/${guildId}/embed" class="flex items-center justify-between px-3 py-2 rounded-xl text-gray-300 hover:text-white hover:bg-[#151724] transition group">
+                                        <span></span>
+                                        <span class="flex items-center gap-2"><span>رسائل الأمبد</span><span class="text-gray-400 group-hover:text-purple-400">📄</span></span>
+                                    </a>
+                                    <a href="/dashboard/${guildId}/broadcast" class="flex items-center justify-between px-3 py-2 rounded-xl text-gray-300 hover:text-white hover:bg-[#151724] transition group">
+                                        <span class="text-[9px] font-bold text-cyan-400 bg-cyan-950/60 px-1.5 py-0.2 rounded">جديد</span>
+                                        <span class="flex items-center gap-2"><span>نظام الإعلانات</span><span class="text-gray-400 group-hover:text-purple-400">📢</span></span>
+                                    </a>
+                                </div>
+                            </div>
+
+                            <!-- الميزات الأساسية (Core Features) -->
+                            <div class="space-y-1">
+                                <button type="button" onclick="toggleNavGroup('grp_core')" class="w-full flex items-center justify-between text-gray-400 hover:text-white px-2 py-1 font-bold text-[11px] transition">
+                                    <svg id="arrow_grp_core" class="w-3.5 h-3.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                    <span class="flex items-center gap-1.5"><span>الميزات الأساسية</span></span>
+                                </button>
+                                <div id="grp_core" class="space-y-1">
+                                    <a href="/dashboard/${guildId}/moderation" class="flex items-center justify-between px-3 py-2 rounded-xl text-gray-300 hover:text-white hover:bg-[#151724] transition group">
+                                        <span class="text-[9px] font-bold text-amber-400 bg-amber-950/60 px-1.5 py-0.2 rounded">تحديث</span>
+                                        <span class="flex items-center gap-2"><span>الإشراف</span><span class="text-gray-400 group-hover:text-purple-400">🔨</span></span>
+                                    </a>
+                                    <a href="/dashboard/${guildId}/levels" class="flex items-center justify-between px-3 py-2 rounded-xl text-gray-300 hover:text-white hover:bg-[#151724] transition group">
+                                        <span class="w-4 h-4 rounded-full border border-emerald-500/60 bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-[9px] font-black">✓</span>
+                                        <span class="flex items-center gap-2"><span>المستويات & XP</span><span class="text-gray-400 group-hover:text-purple-400">🏆</span></span>
+                                    </a>
+                                    <a href="/dashboard/${guildId}/welcome" class="flex items-center justify-between px-3 py-2 rounded-xl text-gray-300 hover:text-white hover:bg-[#151724] transition group">
+                                        <span class="w-4 h-4 rounded-full border border-emerald-500/60 bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-[9px] font-black">✓</span>
+                                        <span class="flex items-center gap-2"><span>الترحيب & المغادرة</span><span class="text-gray-400 group-hover:text-purple-400">👋</span></span>
+                                    </a>
+                                    <a href="/dashboard/${guildId}/autoroles" class="flex items-center justify-between px-3 py-2 rounded-xl text-gray-300 hover:text-white hover:bg-[#151724] transition group">
+                                        <span class="w-4 h-4 rounded-full border border-emerald-500/60 bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-[9px] font-black">✓</span>
+                                        <span class="flex items-center gap-2"><span>الرتب التلقائية</span><span class="text-gray-400 group-hover:text-purple-400">🎖️</span></span>
+                                    </a>
+                                    <a href="/dashboard/${guildId}/giveaways" class="flex items-center justify-between px-3 py-2 rounded-xl text-gray-300 hover:text-white hover:bg-[#151724] transition group">
+                                        <span class="w-4 h-4 rounded-full border border-emerald-500/60 bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-[9px] font-black">✓</span>
+                                        <span class="flex items-center gap-2"><span>قيف اواي</span><span class="text-gray-400 group-hover:text-purple-400">🎁</span></span>
+                                    </a>
+                                    <a href="/dashboard/${guildId}/invites" class="flex items-center justify-between px-3 py-2 rounded-xl text-gray-300 hover:text-white hover:bg-[#151724] transition group">
+                                        <span class="w-4 h-4 rounded-full border border-emerald-500/60 bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-[9px] font-black">✓</span>
+                                        <span class="flex items-center gap-2"><span>Invite Tracker</span><span class="text-gray-400 group-hover:text-purple-400">🔗</span></span>
+                                    </a>
+                                </div>
+                            </div>
+
+                            <!-- الإجراءات الآلية والعامة (Automations) -->
+                            <div class="space-y-1">
+                                <button type="button" onclick="toggleNavGroup('grp_automations')" class="w-full flex items-center justify-between text-gray-400 hover:text-white px-2 py-1 font-bold text-[11px] transition">
+                                    <svg id="arrow_grp_automations" class="w-3.5 h-3.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                    <span class="flex items-center gap-1.5"><span>الإجراءات الآلية والعامة</span></span>
+                                </button>
+                                <div id="grp_automations" class="space-y-1">
+                                    <a href="/dashboard/${guildId}/autoresponder" class="flex items-center justify-between px-3 py-2 rounded-xl text-gray-300 hover:text-white hover:bg-[#151724] transition group">
+                                        <span class="w-4 h-4 rounded-full border border-emerald-500/60 bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-[9px] font-black">✓</span>
+                                        <span class="flex items-center gap-2"><span>الرد التلقائي</span><span class="text-gray-400 group-hover:text-purple-400">💬</span></span>
+                                    </a>
+                                    <a href="/dashboard/${guildId}/applications" class="flex items-center justify-between px-3 py-2 rounded-xl text-gray-300 hover:text-white hover:bg-[#151724] transition group">
+                                        <span class="text-[9px] font-bold text-rose-400 bg-rose-950/60 px-1.5 py-0.2 rounded">جديد</span>
+                                        <span class="flex items-center gap-2"><span>التقديمات</span><span class="text-gray-400 group-hover:text-purple-400">📝</span></span>
+                                    </a>
+                                </div>
+                            </div>
+
+                            <!-- الإشراف والأمان (Security & Moderation) -->
+                            <div class="space-y-1">
+                                <button type="button" onclick="toggleNavGroup('grp_security')" class="w-full flex items-center justify-between text-gray-400 hover:text-white px-2 py-1 font-bold text-[11px] transition">
+                                    <svg id="arrow_grp_security" class="w-3.5 h-3.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                    <span class="flex items-center gap-1.5"><span>الإشراف والأمان</span></span>
+                                </button>
+                                <div id="grp_security" class="space-y-1">
+                                    <a href="/dashboard/${guildId}/automod" class="flex items-center justify-between px-3 py-2 rounded-xl text-gray-300 hover:text-white hover:bg-[#151724] transition group">
+                                        <span class="w-4 h-4 rounded-full border border-emerald-500/60 bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-[9px] font-black">✓</span>
+                                        <span class="flex items-center gap-2"><span>الرقابة التلقائية</span><span class="text-gray-400 group-hover:text-purple-400">🤖</span></span>
+                                    </a>
+                                    <a href="/dashboard/${guildId}/protection" class="flex items-center justify-between px-3 py-2 rounded-xl text-gray-300 hover:text-white hover:bg-[#151724] transition group">
+                                        <span class="flex items-center gap-1">
+                                            <span class="w-4 h-4 rounded-full border border-emerald-500/60 bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-[9px] font-black">✓</span>
+                                            <span class="text-amber-400 text-xs">👑</span>
+                                        </span>
+                                        <span class="flex items-center gap-2"><span>الحماية</span><span class="text-gray-400 group-hover:text-purple-400">🛡️</span></span>
+                                    </a>
+                                    <a href="/dashboard/${guildId}/antiraid" class="flex items-center justify-between px-3 py-2 rounded-xl text-gray-300 hover:text-white hover:bg-[#151724] transition group">
+                                        <span class="w-4 h-4 rounded-full border border-emerald-500/60 bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-[9px] font-black">✓</span>
+                                        <span class="flex items-center gap-2"><span>مكافحة الغزو</span><span class="text-gray-400 group-hover:text-purple-400">🚨</span></span>
+                                    </a>
+                                    <a href="/dashboard/${guildId}/staff-activity" class="flex items-center justify-between px-3 py-2 rounded-xl text-gray-300 hover:text-white hover:bg-[#151724] transition group">
+                                        <span class="w-4 h-4 rounded-full border border-emerald-500/60 bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-[9px] font-black">✓</span>
+                                        <span class="flex items-center gap-2"><span>نشاط الإدارة</span><span class="text-gray-400 group-hover:text-purple-400">👮</span></span>
+                                    </a>
+                                </div>
+                            </div>
+
+                            <!-- إدارة السيرفر (Server Management) -->
+                            <div class="space-y-1">
+                                <button type="button" onclick="toggleNavGroup('grp_management')" class="w-full flex items-center justify-between text-gray-400 hover:text-white px-2 py-1 font-bold text-[11px] transition">
+                                    <svg id="arrow_grp_management" class="w-3.5 h-3.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                    <span class="flex items-center gap-1.5"><span>إدارة السيرفر</span></span>
+                                </button>
+                                <div id="grp_management" class="space-y-1">
+                                    <a href="/dashboard/${guildId}/tempvoice" class="flex items-center justify-between px-3 py-2 rounded-xl text-gray-300 hover:text-white hover:bg-[#151724] transition group">
+                                        <span class="w-4 h-4 rounded-full border border-emerald-500/60 bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-[9px] font-black">✓</span>
+                                        <span class="flex items-center gap-2"><span>الرومات المؤقتة</span><span class="text-gray-400 group-hover:text-purple-400">🕒</span></span>
+                                    </a>
+                                    <a href="/dashboard/${guildId}/boost" class="flex items-center justify-between px-3 py-2 rounded-xl text-gray-300 hover:text-white hover:bg-[#151724] transition group">
+                                        <span class="w-4 h-4 rounded-full border border-emerald-500/60 bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-[9px] font-black">✓</span>
+                                        <span class="flex items-center gap-2"><span>البوستات</span><span class="text-gray-400 group-hover:text-purple-400">💎</span></span>
+                                    </a>
+                                    <a href="/dashboard/${guildId}/colors" class="flex items-center justify-between px-3 py-2 rounded-xl text-gray-300 hover:text-white hover:bg-[#151724] transition group">
+                                        <span class="w-4 h-4 rounded-full border border-emerald-500/60 bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-[9px] font-black">✓</span>
+                                        <span class="flex items-center gap-2"><span>الألوان</span><span class="text-gray-400 group-hover:text-purple-400">🎨</span></span>
+                                    </a>
+                                    <a href="/dashboard/${guildId}/logs" class="flex items-center justify-between px-3 py-2 rounded-xl text-gray-300 hover:text-white hover:bg-[#151724] transition group">
+                                        <span class="text-[9px] font-bold text-amber-400 bg-amber-950/60 px-1.5 py-0.2 rounded">تحديث</span>
+                                        <span class="flex items-center gap-2"><span>السجلات</span><span class="text-gray-400 group-hover:text-purple-400">📜</span></span>
+                                    </a>
+                                    <a href="/dashboard/${guildId}/tickets" class="flex items-center justify-between px-3 py-2 rounded-xl text-gray-300 hover:text-white hover:bg-[#151724] transition group">
+                                        <span class="flex items-center gap-1">
+                                            <span class="w-4 h-4 rounded-full border border-emerald-500/60 bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-[9px] font-black">✓</span>
+                                            <span class="text-amber-400 text-xs">👑</span>
+                                        </span>
+                                        <span class="flex items-center gap-2"><span>التذاكر</span><span class="text-gray-400 group-hover:text-purple-400">🎫</span></span>
+                                    </a>
+                                </div>
+                            </div>
+
+                            <!-- الترفيه والتفاعل (Entertainment) -->
+                            <div class="space-y-1">
+                                <button type="button" onclick="toggleNavGroup('grp_fun')" class="w-full flex items-center justify-between text-gray-400 hover:text-white px-2 py-1 font-bold text-[11px] transition">
+                                    <svg id="arrow_grp_fun" class="w-3.5 h-3.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                    <span class="flex items-center gap-1.5"><span>الترفيه والتفاعل</span></span>
+                                </button>
+                                <div id="grp_fun" class="space-y-1">
+                                    <a href="/dashboard/${guildId}/fun" class="flex items-center justify-between px-3 py-2 rounded-xl text-gray-300 hover:text-white hover:bg-[#151724] transition group">
+                                        <span class="w-4 h-4 rounded-full border border-emerald-500/60 bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-[9px] font-black">✓</span>
+                                        <span class="flex items-center gap-2"><span>تسلية</span><span class="text-gray-400 group-hover:text-purple-400">🎮</span></span>
+                                    </a>
+                                    <a href="/dashboard/${guildId}/quran" class="flex items-center justify-between px-3 py-2 rounded-xl text-gray-300 hover:text-white hover:bg-[#151724] transition group">
+                                        <span class="w-4 h-4 rounded-full border border-emerald-500/60 bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-[9px] font-black">✓</span>
+                                        <span class="flex items-center gap-2"><span>القرآن & الراديو</span><span class="text-gray-400 group-hover:text-purple-400">📻</span></span>
+                                    </a>
+                                    <a href="/dashboard/${guildId}/social" class="flex items-center justify-between px-3 py-2 rounded-xl text-gray-300 hover:text-white hover:bg-[#151724] transition group">
+                                        <span class="text-[9px] font-bold text-red-400 bg-red-950/60 px-1.5 py-0.2 rounded">بث</span>
+                                        <span class="flex items-center gap-2"><span>تنبيهات السوشيال</span><span class="text-gray-400 group-hover:text-purple-400">📺</span></span>
+                                    </a>
+                                </div>
+                            </div>
+
                         </div>
+
+                        <!-- User Profile Bottom Bar (Novax Style) -->
+                        <div class="p-3 border-t border-white/5">
+                            <div class="bg-gradient-to-r from-purple-700 to-indigo-700 rounded-2xl p-2.5 flex items-center justify-between shadow-lg shadow-purple-950/40">
+                                <div class="text-white/80 hover:text-white cursor-pointer px-1">
+                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M6 10a2 2 0 11-4 0 2 2 0 014 0zM12 10a2 2 0 11-4 0 2 2 0 014 0zM16 12a2 2 0 100-4 2 2 0 000 4z"/></svg>
+                                </div>
+                                <div class="flex items-center gap-2.5">
+                                    <div class="text-right">
+                                        <span class="text-xs font-black text-white block leading-tight truncate max-w-[110px]">${user.username}</span>
+                                    </div>
+                                    <img src="${userAvatar}" class="w-8 h-8 rounded-xl object-cover ring-2 ring-white/20 shadow-md">
+                                </div>
+                            </div>
+                        </div>
+
                     </aside>
 
-                    <!-- Server Rail Column (Far Right) -->
-                    <div class="w-16 bg-[#08080c] border-l border-white/5 py-4 flex flex-col items-center gap-3 shrink-0 overflow-y-auto">
-                        <a href="/dashboard" title="${user.username}" class="group relative flex items-center justify-center">
-                            <img src="${userAvatar}" class="w-11 h-11 rounded-2xl border-2 border-purple-500 shadow-lg shadow-black/40 hover:rounded-xl object-cover transition-all" alt="${user.username}">
+                    <!-- Server Rail Column (Far Right - Novax Style) -->
+                    <div class="w-18 bg-[#05060a] border-l border-white/5 py-4 px-2 flex flex-col items-center gap-3 shrink-0 overflow-y-auto select-none">
+                        <!-- Home Icon Button -->
+                        <a href="/dashboard" title="الصفحة الرئيسية" class="w-12 h-12 rounded-2xl bg-[#12141f] hover:bg-purple-600/30 border border-white/5 hover:border-purple-500/50 flex items-center justify-center text-gray-300 hover:text-white transition shadow-lg mb-1 group">
+                            <svg class="w-6 h-6 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
                         </a>
-                        <div class="w-8 h-[1px] bg-[#151722]"></div>
+                        <div class="w-8 h-[1px] bg-white/5"></div>
+                        <!-- Active Server List Icons -->
                         ${serverRailHtml}
                     </div>
 
                 </div>
+
+                <script>
+                function toggleNavGroup(groupId) {
+                    const el = document.getElementById(groupId);
+                    const arrow = document.getElementById('arrow_' + groupId);
+                    if (!el) return;
+                    el.classList.toggle('hidden');
+                    if (arrow) arrow.classList.toggle('rotate-180');
+                }
+                </script>
             </body>
             </html>
             `);
@@ -3089,7 +3274,7 @@ document.getElementById('addModal').addEventListener('click', function(e) {
             const serverRailHtml = Array.isArray(guilds) && guilds.length > 0 ? guilds.map(g => `
                 <a href="/dashboard/${g.id}" title="${g.name}" class="group relative flex items-center justify-center">
                     <img src="${g.icon ? `https://cdn.discordapp.com/icons/${g.id}/${g.icon}.png` : 'https://cdn.discordapp.com/embed/avatars/0.png'}" 
-                         class="w-11 h-11 rounded-2xl ${g.id === guildId ? 'border-2 border-purple-500 shadow-lg shadow-black/40' : 'border border-transparent'} hover:rounded-xl object-cover transition-all">
+                         class="w-12 h-12 rounded-2xl ${g.id === guildId ? 'border-2 border-purple-500 shadow-lg shadow-purple-900/50 p-0.5 ring-2 ring-purple-600/30' : 'border border-transparent hover:border-purple-500/40'} hover:rounded-xl object-cover transition-all">
                 </a>
             `).join('') : '';
 
@@ -3704,31 +3889,280 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                 `;
             } else if (section === 'automod') {
                 formFieldsHtml = `
-                    <div class="space-y-5">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div class="bg-[#1c1f2e] border border-white/5 p-4 rounded-2xl flex items-center justify-between">
-                                <label class="toggle"><input type="checkbox" name="anti_caps" value="1" ${settings.anti_caps ? 'checked' : ''}><span class="slider"></span></label>
-                                <span class="font-bold text-white text-xs">منع الحروف الكبيرة (Anti-Caps)</span>
-                            </div>
-                            <div class="bg-[#1c1f2e] border border-white/5 p-4 rounded-2xl flex items-center justify-between">
-                                <label class="toggle"><input type="checkbox" name="anti_emoji_spam" value="1" ${settings.anti_emoji_spam ? 'checked' : ''}><span class="slider"></span></label>
-                                <span class="font-bold text-white text-xs">منع سبام الإيموجي (Anti-Emoji)</span>
-                            </div>
-                            <div class="bg-[#1c1f2e] border border-white/5 p-4 rounded-2xl flex items-center justify-between">
-                                <label class="toggle"><input type="checkbox" name="bad_words_enabled" value="1" ${settings.bad_words_enabled ? 'checked' : ''}><span class="slider"></span></label>
-                                <span class="font-bold text-white text-xs">فلتر الكلمات المسيئة (Bad Words)</span>
-                            </div>
-                            <div class="bg-[#1c1f2e] border border-white/5 p-4 rounded-2xl flex items-center justify-between">
-                                <label class="toggle"><input type="checkbox" name="anti_line_spam" value="1" ${settings.anti_line_spam ? 'checked' : ''}><span class="slider"></span></label>
-                                <span class="font-bold text-white text-xs">منع تكرار الأسطر الطويلة</span>
+                    <div class="space-y-6 text-right" dir="rtl">
+
+                        <!-- Master Toggle -->
+                        <div class="flex items-center justify-between bg-[#1c1f2e] border border-white/5 p-5 rounded-2xl">
+                            <label class="toggle">
+                                <input type="checkbox" name="automod_enabled" value="1" ${settings.automod_enabled !== 0 ? 'checked' : ''} onchange="saveAutomodSetting('automod_enabled', this.checked)">
+                                <span class="slider"></span>
+                            </label>
+                            <div>
+                                <h4 class="font-black text-white text-lg">الرقابة التلقائية 🤖</h4>
+                                <p class="text-gray-400 text-[11px] mt-0.5">قم بتفعيل كل الفلترات وضبطها مناسبةً لسيرفرك، وضعها أمامك في لوحة الاعدادات لخفية الأذى</p>
                             </div>
                         </div>
 
-                        <div>
-                            <label class="block text-xs font-bold text-gray-300 mb-2 text-right">قائمة الكلمات المحظورة (افصل بينها بفاصلة)</label>
-                            <textarea name="bad_words_list" rows="3" placeholder="كلمة1, كلمة2, كلمة3..." class="w-full bg-[#1c1f2e] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right">${settings.bad_words_list || ''}</textarea>
+                        <!-- Cards Grid 3 columns -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+                            <!-- إزعاج بالرسائل / Spam -->
+                            <div class="bg-[#1c1f2e] border border-white/5 rounded-2xl p-5 flex flex-col gap-3 hover:border-purple-800/40 transition">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-gray-400 text-xs">≡</span>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="font-bold text-white text-sm">إزعاج بالرسائل (5 رسائل \\ 5 ثواني)</span>
+                                        <label class="toggle">
+                                            <input type="checkbox" name="anti_spam" value="1" ${settings.anti_spam ? 'checked' : ''} onchange="saveAutomodSetting('anti_spam', this.checked)">
+                                            <span class="slider"></span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <button type="button" onclick="openAutomodModal('spam')" class="w-full py-2 bg-[#0b0d14] hover:bg-[#0d0f18] border border-white/5 rounded-xl text-gray-400 hover:text-white text-xs font-bold transition">بحاجة إلى الإعداد</button>
+                            </div>
+
+                            <!-- الكلمات المسيئة / Bad Words -->
+                            <div class="bg-[#1c1f2e] border border-white/5 rounded-2xl p-5 flex flex-col gap-3 hover:border-purple-800/40 transition">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-gray-400 text-xs">🔇</span>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="font-bold text-white text-sm">الكلمات المسيئة</span>
+                                        <label class="toggle">
+                                            <input type="checkbox" name="bad_words_enabled" value="1" ${settings.bad_words_enabled ? 'checked' : ''} onchange="saveAutomodSetting('bad_words_enabled', this.checked)">
+                                            <span class="slider"></span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <button type="button" onclick="openAutomodModal('badwords')" class="w-full py-2 bg-[#0b0d14] hover:bg-[#0d0f18] border border-white/5 rounded-xl text-gray-400 hover:text-white text-xs font-bold transition">بحاجة إلى الإعداد</button>
+                            </div>
+
+                            <!-- تكرار النص / Repeated Text -->
+                            <div class="bg-[#1c1f2e] border border-white/5 rounded-2xl p-5 flex flex-col gap-3 hover:border-purple-800/40 transition">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-gray-400 text-xs">🔁</span>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="font-bold text-white text-sm">تكرار النص</span>
+                                        <label class="toggle">
+                                            <input type="checkbox" name="anti_line_spam" value="1" ${settings.anti_line_spam ? 'checked' : ''} onchange="saveAutomodSetting('anti_line_spam', this.checked)">
+                                            <span class="slider"></span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <button type="button" class="w-full py-2 bg-[#0b0d14] hover:bg-[#0d0f18] border border-white/5 rounded-xl text-gray-400 hover:text-white text-xs font-bold transition">بحاجة إلى الإعداد</button>
+                            </div>
+
+                            <!-- الروابط / Links -->
+                            <div class="bg-[#1c1f2e] border border-white/5 rounded-2xl p-5 flex flex-col gap-3 hover:border-purple-800/40 transition">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-gray-400 text-xs">🔗</span>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="font-bold text-white text-sm">الروابط</span>
+                                        <label class="toggle">
+                                            <input type="checkbox" name="anti_links" value="1" ${settings.anti_links ? 'checked' : ''} onchange="saveAutomodSetting('anti_links', this.checked)">
+                                            <span class="slider"></span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <button type="button" onclick="openAutomodModal('links')" class="w-full py-2 bg-[#0b0d14] hover:bg-[#0d0f18] border border-white/5 rounded-xl text-gray-400 hover:text-white text-xs font-bold transition">بحاجة إلى الإعداد</button>
+                            </div>
+
+                            <!-- روابط السيرفرات / Invite Links -->
+                            <div class="bg-[#1c1f2e] border border-white/5 rounded-2xl p-5 flex flex-col gap-3 hover:border-purple-800/40 transition">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-gray-400 text-xs">🔀</span>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="font-bold text-white text-sm">روابط السيرفرات</span>
+                                        <label class="toggle">
+                                            <input type="checkbox" name="anti_invites" value="1" ${settings.anti_invites ? 'checked' : ''} onchange="saveAutomodSetting('anti_invites', this.checked)">
+                                            <span class="slider"></span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <button type="button" class="w-full py-2 bg-[#0b0d14] hover:bg-[#0d0f18] border border-white/5 rounded-xl text-gray-400 hover:text-white text-xs font-bold transition">بحاجة إلى الإعداد</button>
+                            </div>
+
+                            <!-- الرسائل المكررة / Duplicate Messages -->
+                            <div class="bg-[#1c1f2e] border border-white/5 rounded-2xl p-5 flex flex-col gap-3 hover:border-purple-800/40 transition">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-gray-400 text-xs">📋</span>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="font-bold text-white text-sm">الرسائل المكررة</span>
+                                        <label class="toggle">
+                                            <input type="checkbox" name="anti_duplicate" value="1" ${settings.anti_duplicate ? 'checked' : ''} onchange="saveAutomodSetting('anti_duplicate', this.checked)">
+                                            <span class="slider"></span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <button type="button" class="w-full py-2 bg-[#0b0d14] hover:bg-[#0d0f18] border border-white/5 rounded-xl text-gray-400 hover:text-white text-xs font-bold transition">بحاجة إلى الإعداد</button>
+                            </div>
+
+                            <!-- إزعاج منشن / Mention Spam -->
+                            <div class="bg-[#1c1f2e] border border-white/5 rounded-2xl p-5 flex flex-col gap-3 hover:border-purple-800/40 transition">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-gray-400 text-xs">📢</span>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="font-bold text-white text-sm">إزعاج منشن</span>
+                                        <label class="toggle">
+                                            <input type="checkbox" name="anti_mention_spam" value="1" ${settings.anti_mention_spam ? 'checked' : ''} onchange="saveAutomodSetting('anti_mention_spam', this.checked)">
+                                            <span class="slider"></span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <button type="button" onclick="openAutomodModal('mention')" class="w-full py-2 bg-[#0b0d14] hover:bg-[#0d0f18] border border-white/5 rounded-xl text-gray-400 hover:text-white text-xs font-bold transition">بحاجة إلى الإعداد</button>
+                            </div>
+
+                            <!-- إزعاج EMOJI / Emoji Spam -->
+                            <div class="bg-[#1c1f2e] border border-white/5 rounded-2xl p-5 flex flex-col gap-3 hover:border-purple-800/40 transition">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-gray-400 text-xs">😂</span>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="font-bold text-white text-sm">إزعاج EMOJI</span>
+                                        <label class="toggle">
+                                            <input type="checkbox" name="anti_emoji_spam" value="1" ${settings.anti_emoji_spam ? 'checked' : ''} onchange="saveAutomodSetting('anti_emoji_spam', this.checked)">
+                                            <span class="slider"></span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <button type="button" onclick="openAutomodModal('emoji')" class="w-full py-2 bg-[#0b0d14] hover:bg-[#0d0f18] border border-white/5 rounded-xl text-gray-400 hover:text-white text-xs font-bold transition">بحاجة إلى الإعداد</button>
+                            </div>
+
+                            <!-- سبام الأحرف الكبيرة / Anti Caps -->
+                            <div class="bg-[#1c1f2e] border border-white/5 rounded-2xl p-5 flex flex-col gap-3 hover:border-purple-800/40 transition">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-gray-400 text-xs font-black">B</span>
+                                    </div>
+                                    <div class="flex items-center gap-2 text-right">
+                                        <div>
+                                            <span class="font-bold text-white text-sm block">سبام الأحرف الكبيرة</span>
+                                            <span class="text-[10px] text-gray-400">(70% < احرف مكبرة)</span>
+                                        </div>
+                                        <label class="toggle">
+                                            <input type="checkbox" name="anti_caps" value="1" ${settings.anti_caps ? 'checked' : ''} onchange="saveAutomodSetting('anti_caps', this.checked)">
+                                            <span class="slider"></span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <button type="button" onclick="openAutomodModal('caps')" class="w-full py-2 bg-[#0b0d14] hover:bg-[#0d0f18] border border-white/5 rounded-xl text-gray-400 hover:text-white text-xs font-bold transition">بحاجة إلى الإعداد</button>
+                            </div>
+
                         </div>
+
+                        <!-- Exemptions / Bypass -->
+                        <div class="bg-[#1c1f2e] border border-white/5 rounded-2xl p-5 space-y-4 text-right">
+                            <h4 class="font-bold text-white text-sm">⚙️ الاستثناءات (Exemptions)</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <!-- تخطي الرومات -->
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-400 mb-2">تخطي الرومات (Ignored Channels)</label>
+                                    ${renderChannelSelect('automod_ignore_channels', settings.automod_ignore_channels || '', 'اختر روم للاستثناء...')}
+                                </div>
+                                <!-- تخطي الرولات -->
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-400 mb-2">تخطي الرولات (Ignored Roles)</label>
+                                    ${renderRoleSelect('automod_ignore_roles', settings.automod_ignore_roles || '')}
+                                </div>
+                                <!-- رومات صور فقط -->
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-400 mb-2">رومات صور فقط (Images Only Channels)</label>
+                                    ${renderChannelSelect('automod_images_only', settings.automod_images_only || '', 'اختر روم...')}
+                                </div>
+                                <!-- رومات يوتيوب فقط -->
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-400 mb-2">رومات يوتيوب فقط (YouTube Only)</label>
+                                    ${renderChannelSelect('automod_youtube_only', settings.automod_youtube_only || '', 'اختر روم...')}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Bad Words List -->
+                        <div id="badwordsSection" class="bg-[#1c1f2e] border border-white/5 rounded-2xl p-5 space-y-3 text-right ${settings.bad_words_enabled ? '' : 'hidden'}">
+                            <h4 class="font-bold text-white text-sm">📝 قائمة الكلمات المحظورة</h4>
+                            <p class="text-gray-400 text-[11px]">أضف الكلمات المحظورة مفصولة بفواصل. البوت سيقوم بحذف الرسائل التي تحتوي عليها تلقائياً.</p>
+                            <textarea name="bad_words_list" rows="4" placeholder="كلمة1, كلمة2, كلمة3..." class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right font-mono leading-relaxed">${settings.bad_words_list || ''}</textarea>
+                        </div>
+
+                        <!-- Action on Violation -->
+                        <div class="bg-[#1c1f2e] border border-white/5 rounded-2xl p-5 space-y-4 text-right">
+                            <h4 class="font-bold text-white text-sm">⚡ الإجراء عند المخالفة (Action on Violation)</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-300 mb-2">الإجراء الافتراضي</label>
+                                    <select name="automod_action" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right cursor-pointer">
+                                        <option value="delete" ${(settings.automod_action || 'delete') === 'delete' ? 'selected' : ''}>🗑️ حذف الرسالة فقط</option>
+                                        <option value="warn" ${settings.automod_action === 'warn' ? 'selected' : ''}>⚠️ حذف + إنذار</option>
+                                        <option value="mute" ${settings.automod_action === 'mute' ? 'selected' : ''}>🔇 حذف + كتم مؤقت</option>
+                                        <option value="kick" ${settings.automod_action === 'kick' ? 'selected' : ''}>👢 حذف + طرد</option>
+                                        <option value="ban" ${settings.automod_action === 'ban' ? 'selected' : ''}>🔨 حذف + حظر</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-300 mb-2">مدة الكتم (إذا كان الإجراء كتم)</label>
+                                    <select name="automod_mute_duration" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right cursor-pointer">
+                                        <option value="1" ${settings.automod_mute_duration == 1 ? 'selected' : ''}>1 دقيقة</option>
+                                        <option value="5" ${(settings.automod_mute_duration || 5) == 5 ? 'selected' : ''}>5 دقائق</option>
+                                        <option value="10" ${settings.automod_mute_duration == 10 ? 'selected' : ''}>10 دقائق</option>
+                                        <option value="30" ${settings.automod_mute_duration == 30 ? 'selected' : ''}>30 دقيقة</option>
+                                        <option value="60" ${settings.automod_mute_duration == 60 ? 'selected' : ''}>ساعة</option>
+                                        <option value="1440" ${settings.automod_mute_duration == 1440 ? 'selected' : ''}>يوم</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-300 mb-2">قناة سجل الرقابة (Automod Log)</label>
+                                    ${renderChannelSelect('automod_log_channel', settings.automod_log_channel)}
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
+
+                    <script>
+                    // Toggle bad words section visibility
+                    document.addEventListener('change', function(e) {
+                        if (e.target && e.target.name === 'bad_words_enabled') {
+                            const section = document.getElementById('badwordsSection');
+                            if (section) section.classList.toggle('hidden', !e.target.checked);
+                        }
+                    });
+
+                    async function saveAutomodSetting(key, value) {
+                        try {
+                            await fetch('/api/guild/${guildId}/settings', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ key, value: value ? 1 : 0 })
+                            });
+                        } catch(e) {}
+                    }
+
+                    function openAutomodModal(type) {
+                        const labels = {
+                            spam: 'إعداد فلتر الإزعاج بالرسائل',
+                            badwords: 'إعداد فلتر الكلمات المسيئة',
+                            links: 'إعداد فلتر الروابط',
+                            mention: 'إعداد فلتر إزعاج المنشن',
+                            emoji: 'إعداد فلتر إزعاج الإيموجي',
+                            caps: 'إعداد فلتر الأحرف الكبيرة'
+                        };
+                        alert('⚙️ ' + (labels[type] || 'الإعداد') + '\\nاستخدم قسم "حفظ الإعدادات" في الأسفل لتطبيق التغييرات.');
+                    }
+                    </script>
                 `;
             } else if (section === 'tempvoice') {
                 formFieldsHtml = `
@@ -6331,6 +6765,261 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                     }
                     </script>
                 `;
+            } else if (section === 'giveaways') {
+                const guildGiveaways = database.getGuildGiveaways ? database.getGuildGiveaways(guildId) : [];
+                const activeGiveaways = guildGiveaways.filter(g => g.status === 'active');
+                const endedGiveaways = guildGiveaways.filter(g => g.status !== 'active').slice(0, 10);
+
+                function renderGiveawayCard(g, botGuild) {
+                    const ch = botGuild?.channels?.cache?.get(g.channel_id);
+                    const channelName = ch ? `#${ch.name}` : g.channel_id;
+                    const endsAt = new Date(g.end_time);
+                    const endsStr = endsAt.toLocaleString('ar-SA');
+                    const entries = (() => { try { return JSON.parse(g.entries || '[]').length; } catch { return 0; } })();
+                    const isActive = g.status === 'active';
+                    const statusBadge = isActive
+                        ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-950 text-emerald-300 border border-emerald-800">🟢 نشط</span>`
+                        : `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-gray-800 text-gray-400">⚪ منتهي</span>`;
+
+                    const reqList = [];
+                    if (g.required_role) reqList.push(`<span class="text-[10px] bg-indigo-950/60 text-indigo-300 px-1.5 py-0.5 rounded">🛡️ رتبة مطلوبة</span>`);
+                    if (g.min_level > 0) reqList.push(`<span class="text-[10px] bg-purple-950/60 text-purple-300 px-1.5 py-0.5 rounded">⭐ مستوى ${g.min_level}+</span>`);
+                    if (g.min_account_age > 0) reqList.push(`<span class="text-[10px] bg-orange-950/60 text-orange-300 px-1.5 py-0.5 rounded">📅 ${g.min_account_age} يوم</span>`);
+                    if (g.extra_role) reqList.push(`<span class="text-[10px] bg-yellow-950/60 text-yellow-300 px-1.5 py-0.5 rounded">🔥 فرصة x2</span>`);
+
+                    return `
+                        <div class="bg-[#0b0d14] border border-white/5 rounded-xl p-4 text-right hover:border-yellow-900/40 transition">
+                            <div class="flex items-start justify-between gap-3">
+                                <div class="flex flex-col gap-1.5 items-start">
+                                    ${isActive ? `
+                                    <button onclick="endGiveawayNow('${g.message_id}', '${g.channel_id}')"
+                                        class="px-3 py-1.5 bg-red-950/40 hover:bg-red-900/60 text-red-300 border border-red-800/40 rounded-lg text-[10px] font-bold transition">
+                                        ⏹️ إنهاء
+                                    </button>
+                                    <button onclick="rerollGiveaway('${g.message_id}', '${g.channel_id}')"
+                                        class="px-3 py-1.5 bg-purple-950/40 hover:bg-purple-900/60 text-purple-300 border border-purple-800/40 rounded-lg text-[10px] font-bold transition">
+                                        🎲 Reroll
+                                    </button>` : `
+                                    <button onclick="rerollGiveaway('${g.message_id}', '${g.channel_id}')"
+                                        class="px-3 py-1.5 bg-purple-950/40 hover:bg-purple-900/60 text-purple-300 border border-purple-800/40 rounded-lg text-[10px] font-bold transition">
+                                        🎲 Reroll
+                                    </button>`}
+                                </div>
+                                <div class="flex-1">
+                                    <div class="flex items-center gap-2 justify-end flex-wrap mb-1">
+                                        ${statusBadge}
+                                        <span class="text-[10px] bg-[#1c1f2e] text-gray-300 px-2 py-0.5 rounded">👥 ${entries} مشترك</span>
+                                        <span class="text-[10px] bg-[#1c1f2e] text-gray-300 px-2 py-0.5 rounded">🏆 ${g.winners_count || 1} فائز</span>
+                                    </div>
+                                    <h5 class="font-black text-white text-sm">🎁 ${g.prize || 'جائزة'}</h5>
+                                    <div class="flex items-center gap-1 flex-wrap mt-1">
+                                        ${reqList.join('')}
+                                    </div>
+                                    <div class="flex items-center justify-end gap-3 mt-2">
+                                        <span class="text-[10px] text-gray-500">📍 ${channelName}</span>
+                                        <span class="text-[10px] text-gray-500">⏰ ${endsStr}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                const activeHtml = activeGiveaways.length > 0
+                    ? activeGiveaways.map(g => renderGiveawayCard(g, botGuild)).join('')
+                    : `<div class="text-center py-8 text-gray-500 text-xs">لا توجد سحوبات نشطة حالياً</div>`;
+
+                const endedHtml = endedGiveaways.length > 0
+                    ? endedGiveaways.map(g => renderGiveawayCard(g, botGuild)).join('')
+                    : `<div class="text-center py-8 text-gray-500 text-xs">لا توجد سحوبات منتهية</div>`;
+
+                const channelOptions = guildTextChannels.map(c =>
+                    `<option value="${c.id}">#${c.name}</option>`
+                ).join('');
+
+                const roleOptions = (botGuild?.roles?.cache ? Array.from(botGuild.roles.cache.values()).filter(r => r.name !== '@everyone') : [])
+                    .map(r => `<option value="${r.id}">@${r.name}</option>`).join('');
+
+                formFieldsHtml = `
+                    <div class="space-y-6 text-right" dir="rtl">
+
+                        <!-- إنشاء سحب جديد -->
+                        <div class="bg-[#1c1f2e] border border-white/5 rounded-2xl p-5 space-y-4">
+                            <h4 class="font-black text-white text-base">🎁 إنشاء سحب قيف أواي جديد</h4>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-400 mb-2">القناة</label>
+                                    <div class="relative">
+                                        <select id="gw_channel" class="w-full bg-[#0b0d14] border border-white/5 focus:border-yellow-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right cursor-pointer appearance-none">
+                                            ${channelOptions}
+                                        </select>
+                                        <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center px-3 text-gray-400">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"/></svg>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-400 mb-2">الجائزة 🎁</label>
+                                    <input id="gw_prize" type="text" placeholder="مثال: نيترو / رتبة VIP..." class="w-full bg-[#0b0d14] border border-white/5 focus:border-yellow-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-400 mb-2">المدة</label>
+                                    <input id="gw_duration" type="text" placeholder="مثال: 10m / 2h / 1d" value="1h" class="w-full bg-[#0b0d14] border border-white/5 focus:border-yellow-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right font-mono">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-400 mb-2">عدد الفائزين 🏆</label>
+                                    <input id="gw_winners" type="number" min="1" max="20" value="1" class="w-full bg-[#0b0d14] border border-white/5 focus:border-yellow-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right">
+                                </div>
+                            </div>
+
+                            <!-- الشروط المتقدمة -->
+                            <div class="border-t border-white/5 pt-4">
+                                <h5 class="font-bold text-gray-300 text-xs mb-3">⚙️ شروط ومميزات متقدمة (اختياري)</h5>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-xs font-bold text-gray-400 mb-2">🛡️ رتبة إجبارية للاشتراك</label>
+                                        <div class="relative">
+                                            <select id="gw_required_role" class="w-full bg-[#0b0d14] border border-white/5 focus:border-yellow-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right cursor-pointer appearance-none">
+                                                <option value="">لا يوجد شرط رتبة</option>
+                                                ${roleOptions}
+                                            </select>
+                                            <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center px-3 text-gray-400">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"/></svg>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold text-gray-400 mb-2">🔥 رتبة الفرصة المضاعفة (x2)</label>
+                                        <div class="relative">
+                                            <select id="gw_extra_role" class="w-full bg-[#0b0d14] border border-white/5 focus:border-yellow-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right cursor-pointer appearance-none">
+                                                <option value="">لا يوجد</option>
+                                                ${roleOptions}
+                                            </select>
+                                            <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center px-3 text-gray-400">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"/></svg>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold text-gray-400 mb-2">⭐ أدنى مستوى مطلوب (Levels)</label>
+                                        <input id="gw_min_level" type="number" min="0" value="0" placeholder="0 = لا يوجد شرط" class="w-full bg-[#0b0d14] border border-white/5 focus:border-yellow-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold text-gray-400 mb-2">📅 الحد الأدنى لعمر الحساب (بالأيام)</label>
+                                        <input id="gw_min_age" type="number" min="0" value="0" placeholder="0 = لا يوجد شرط" class="w-full bg-[#0b0d14] border border-white/5 focus:border-yellow-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center gap-3 pt-2 flex-row-reverse">
+                                <button type="button" onclick="createGiveawayFromDashboard()"
+                                    class="px-8 py-3 bg-gradient-to-r from-yellow-500 to-amber-600 hover:from-yellow-400 hover:to-amber-500 text-black text-xs font-black rounded-xl transition shadow-lg">
+                                    🚀 إطلاق السحب الآن
+                                </button>
+                                <span id="gwStatus" class="text-xs font-bold hidden"></span>
+                            </div>
+                        </div>
+
+                        <!-- السحوبات النشطة -->
+                        <div class="bg-[#1c1f2e] border border-white/5 rounded-2xl p-5 space-y-3">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs text-emerald-400 font-bold bg-emerald-950/40 px-2 py-0.5 rounded">${activeGiveaways.length} نشط</span>
+                                <h4 class="font-black text-white text-base">🟢 السحوبات النشطة</h4>
+                            </div>
+                            <div class="space-y-3">
+                                ${activeHtml}
+                            </div>
+                        </div>
+
+                        <!-- السحوبات المنتهية -->
+                        <div class="bg-[#1c1f2e] border border-white/5 rounded-2xl p-5 space-y-3">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs text-gray-400 font-bold bg-gray-800/40 px-2 py-0.5 rounded">${endedGiveaways.length} منتهية</span>
+                                <h4 class="font-black text-white text-base">📋 السحوبات الأخيرة</h4>
+                            </div>
+                            <div class="space-y-3">
+                                ${endedHtml}
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <script>
+                    async function createGiveawayFromDashboard() {
+                        const channelId = document.getElementById('gw_channel')?.value;
+                        const prize = document.getElementById('gw_prize')?.value?.trim();
+                        const duration = document.getElementById('gw_duration')?.value?.trim();
+                        const winners = parseInt(document.getElementById('gw_winners')?.value) || 1;
+                        const requiredRole = document.getElementById('gw_required_role')?.value;
+                        const extraRole = document.getElementById('gw_extra_role')?.value;
+                        const minLevel = parseInt(document.getElementById('gw_min_level')?.value) || 0;
+                        const minAge = parseInt(document.getElementById('gw_min_age')?.value) || 0;
+
+                        const statusEl = document.getElementById('gwStatus');
+
+                        if (!channelId || !prize || !duration) {
+                            statusEl.className = 'text-xs font-bold text-rose-400';
+                            statusEl.innerText = '❌ يرجى تعبئة القناة، الجائزة، والمدة';
+                            statusEl.classList.remove('hidden');
+                            return;
+                        }
+
+                        statusEl.className = 'text-xs font-bold text-yellow-400';
+                        statusEl.innerText = '⏳ جارٍ إطلاق السحب...';
+                        statusEl.classList.remove('hidden');
+
+                        try {
+                            const res = await fetch('/api/guild/${guildId}/giveaway/create', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ channelId, prize, duration, winners, requiredRole: requiredRole || null, extraRole: extraRole || null, minLevel, minAccountAge: minAge })
+                            });
+                            const data = await res.json();
+                            if (data.success) {
+                                statusEl.className = 'text-xs font-bold text-emerald-400';
+                                statusEl.innerText = '✅ تم إطلاق السحب بنجاح!';
+                                setTimeout(() => location.reload(), 1500);
+                            } else {
+                                statusEl.className = 'text-xs font-bold text-rose-400';
+                                statusEl.innerText = '❌ ' + (data.error || 'حدث خطأ');
+                            }
+                        } catch (e) {
+                            statusEl.className = 'text-xs font-bold text-rose-400';
+                            statusEl.innerText = '❌ خطأ في الاتصال: ' + e.message;
+                        }
+                    }
+
+                    async function endGiveawayNow(messageId, channelId) {
+                        if (!confirm('هل أنت متأكد من إنهاء هذا السحب الآن؟')) return;
+                        try {
+                            const res = await fetch('/api/guild/${guildId}/giveaway/end', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ messageId, channelId })
+                            });
+                            const data = await res.json();
+                            if (data.success) { alert('✅ تم إنهاء السحب واختيار الفائزين!'); location.reload(); }
+                            else alert('❌ ' + (data.error || 'حدث خطأ'));
+                        } catch(e) { alert('❌ خطأ: ' + e.message); }
+                    }
+
+                    async function rerollGiveaway(messageId, channelId) {
+                        const count = prompt('كم فائز تريد في إعادة السحب؟', '1');
+                        if (!count) return;
+                        try {
+                            const res = await fetch('/api/guild/${guildId}/giveaway/reroll', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ messageId, channelId, winners: parseInt(count) || 1 })
+                            });
+                            const data = await res.json();
+                            if (data.success) { alert('✅ تم إعادة السحب! الفائزون: ' + (data.winners || []).join(', ')); }
+                            else alert('❌ ' + (data.error || 'حدث خطأ'));
+                        } catch(e) { alert('❌ خطأ: ' + e.message); }
+                    }
+                    </script>
+                `;
             } else {
                 formFieldsHtml = `
                     <div class="space-y-5">
@@ -6429,6 +7118,8 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                 </header>
 
                 <div class="flex-1 flex overflow-hidden">
+                    
+                    <!-- Main Content Form Area -->
                     <main class="flex-1 p-8 overflow-y-auto max-w-4xl mx-auto">
                         <div class="probot-card border border-white/5 rounded-3xl p-8 shadow-2xl mb-8">
                             <div class="flex items-center justify-between pb-6 mb-6 border-b border-white/5">
@@ -6443,7 +7134,7 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                                 ${formFieldsHtml}
 
                                 <div class="pt-6 border-t border-white/5 flex items-center justify-between flex-row-reverse">
-                                    <button type="submit" class="px-8 py-3 bg-gradient-to-r from-[#5865f2] to-indigo-600 hover:from-[#4752c4] hover:to-indigo-500 text-white text-xs font-bold rounded-xl transition shadow-lg shadow-black/20 flex items-center gap-2">
+                                    <button type="submit" class="px-8 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-bold rounded-xl transition shadow-lg shadow-black/20 flex items-center gap-2">
                                         <span>💾</span>
                                         <span>حفظ التغييرات</span>
                                     </button>
@@ -6456,15 +7147,277 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                         </div>
                     </main>
 
-                    <!-- Server Rail -->
-                    <div class="w-16 bg-[#08080c] border-l border-white/5 py-4 flex flex-col items-center gap-3 shrink-0 overflow-y-auto">
-                        <a href="/dashboard" title="${user.username}" class="group relative flex items-center justify-center">
-                            <img src="${userAvatar}" class="w-11 h-11 rounded-2xl border-2 border-purple-500 shadow-lg shadow-black/40 hover:rounded-xl object-cover transition-all" alt="${user.username}">
+                    <!-- Server Settings Navigation Sidebar (Novax Style) -->
+                    <aside class="w-72 bg-[#090a10] border-l border-white/5 flex flex-col shrink-0 h-full select-none">
+                        
+                        <!-- Server Card Top -->
+                        <div class="p-3">
+                            <div class="bg-[#12141f] border border-white/5 rounded-2xl p-3 flex items-center justify-between shadow-lg">
+                                <div class="text-gray-400 text-xs">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"/></svg>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <div class="text-right">
+                                        <h3 class="font-bold text-white text-xs truncate max-w-[130px]">${guild.name}</h3>
+                                        <span class="text-[10px] text-gray-400">الأعضاء: ${guild.memberCount || botGuild?.memberCount || 0}</span>
+                                    </div>
+                                    <div class="relative">
+                                        <img src="${guildIcon}" class="w-10 h-10 rounded-xl bg-[#1c1f2e] object-cover ring-2 ring-purple-600/50 shadow-md">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Categorized Scrollable Nav Menu -->
+                        <div class="flex-1 overflow-y-auto px-3 py-2 space-y-4 text-xs text-right custom-scrollbar">
+
+                            <!-- الأخيرة -->
+                            <div class="space-y-1">
+                                <button type="button" onclick="toggleNavGroup('grp_sub_recent')" class="w-full flex items-center justify-between text-gray-400 hover:text-white px-2 py-1 font-bold text-[11px] transition">
+                                    <svg id="arrow_grp_sub_recent" class="w-3.5 h-3.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                    <span class="flex items-center gap-1.5"><span>الأخيرة</span><span>🕒</span></span>
+                                </button>
+                                <div id="grp_sub_recent" class="space-y-1">
+                                    <a href="/dashboard/${guildId}/welcome" class="flex items-center justify-between px-3 py-2 rounded-xl ${section === 'welcome' ? 'bg-purple-600 text-white font-bold shadow-md' : 'text-gray-300 hover:text-white hover:bg-[#151724]'} transition group">
+                                        <span class="w-4 h-4 rounded-full border border-emerald-500/60 bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-[9px] font-black">✓</span>
+                                        <span class="flex items-center gap-2"><span>الترحيب & المغادرة</span><span class="text-gray-400 group-hover:text-purple-400">👋</span></span>
+                                    </a>
+                                    <a href="/dashboard/${guildId}/autoresponder" class="flex items-center justify-between px-3 py-2 rounded-xl ${section === 'autoresponder' ? 'bg-purple-600 text-white font-bold shadow-md' : 'text-gray-300 hover:text-white hover:bg-[#151724]'} transition group">
+                                        <span class="w-4 h-4 rounded-full border border-emerald-500/60 bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-[9px] font-black">✓</span>
+                                        <span class="flex items-center gap-2"><span>الرد التلقائي</span><span class="text-gray-400 group-hover:text-purple-400">💬</span></span>
+                                    </a>
+                                    <a href="/dashboard/${guildId}/tickets" class="flex items-center justify-between px-3 py-2 rounded-xl ${section === 'tickets' ? 'bg-purple-600 text-white font-bold shadow-md' : 'text-gray-300 hover:text-white hover:bg-[#151724]'} transition group">
+                                        <span class="w-4 h-4 rounded-full border border-emerald-500/60 bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-[9px] font-black">✓</span>
+                                        <span class="flex items-center gap-2"><span>نظام التذاكر</span><span class="text-gray-400 group-hover:text-purple-400">🎫</span></span>
+                                    </a>
+                                </div>
+                            </div>
+
+                            <!-- عام -->
+                            <div class="space-y-1">
+                                <button type="button" onclick="toggleNavGroup('grp_sub_general')" class="w-full flex items-center justify-between text-gray-400 hover:text-white px-2 py-1 font-bold text-[11px] transition">
+                                    <svg id="arrow_grp_sub_general" class="w-3.5 h-3.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                    <span class="flex items-center gap-1.5"><span>عام</span></span>
+                                </button>
+                                <div id="grp_sub_general" class="space-y-1">
+                                    <a href="/dashboard/${guildId}" class="flex items-center justify-between px-3 py-2 rounded-xl ${section === 'overview' ? 'bg-purple-600 text-white font-bold shadow-md' : 'text-gray-300 hover:text-white hover:bg-[#151724]'} transition group">
+                                        <span></span>
+                                        <span class="flex items-center gap-2"><span>نظرة عامة</span><span class="text-gray-400 group-hover:text-purple-400">🎛️</span></span>
+                                    </a>
+                                    <a href="/dashboard/${guildId}/appearance" class="flex items-center justify-between px-3 py-2 rounded-xl ${section === 'appearance' ? 'bg-purple-600 text-white font-bold shadow-md' : 'text-gray-300 hover:text-white hover:bg-[#151724]'} transition group">
+                                        <span></span>
+                                        <span class="flex items-center gap-2"><span>مظهر البوت</span><span class="text-gray-400 group-hover:text-purple-400">🎨</span></span>
+                                    </a>
+                                    <a href="/dashboard/${guildId}/settings" class="flex items-center justify-between px-3 py-2 rounded-xl ${section === 'settings' ? 'bg-purple-600 text-white font-bold shadow-md' : 'text-gray-300 hover:text-white hover:bg-[#151724]'} transition group">
+                                        <span></span>
+                                        <span class="flex items-center gap-2"><span>الإعدادات</span><span class="text-gray-400 group-hover:text-purple-400">⚙️</span></span>
+                                    </a>
+                                    <a href="/dashboard/${guildId}/analytics" class="flex items-center justify-between px-3 py-2 rounded-xl ${section === 'analytics' || section === 'stats' ? 'bg-purple-600 text-white font-bold shadow-md' : 'text-gray-300 hover:text-white hover:bg-[#151724]'} transition group">
+                                        <span></span>
+                                        <span class="flex items-center gap-2"><span>الإحصائيات</span><span class="text-gray-400 group-hover:text-purple-400">📊</span></span>
+                                    </a>
+                                    <a href="/dashboard/${guildId}/general" class="flex items-center justify-between px-3 py-2 rounded-xl ${section === 'general' ? 'bg-purple-600 text-white font-bold shadow-md' : 'text-gray-300 hover:text-white hover:bg-[#151724]'} transition group">
+                                        <span class="text-[9px] font-bold text-rose-400 bg-rose-950/60 px-1.5 py-0.2 rounded">جديد</span>
+                                        <span class="flex items-center gap-2"><span>الأوامر</span><span class="text-gray-400 group-hover:text-purple-400">⌨️</span></span>
+                                    </a>
+                                </div>
+                            </div>
+
+                            <!-- الرسائل والإمبد -->
+                            <div class="space-y-1">
+                                <button type="button" onclick="toggleNavGroup('grp_sub_messages')" class="w-full flex items-center justify-between text-gray-400 hover:text-white px-2 py-1 font-bold text-[11px] transition">
+                                    <svg id="arrow_grp_sub_messages" class="w-3.5 h-3.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                    <span class="flex items-center gap-1.5"><span>الرسائل والأمبد</span></span>
+                                </button>
+                                <div id="grp_sub_messages" class="space-y-1">
+                                    <a href="/dashboard/${guildId}/embed" class="flex items-center justify-between px-3 py-2 rounded-xl ${section === 'embed' ? 'bg-purple-600 text-white font-bold shadow-md' : 'text-gray-300 hover:text-white hover:bg-[#151724]'} transition group">
+                                        <span></span>
+                                        <span class="flex items-center gap-2"><span>رسائل الأمبد</span><span class="text-gray-400 group-hover:text-purple-400">📄</span></span>
+                                    </a>
+                                    <a href="/dashboard/${guildId}/broadcast" class="flex items-center justify-between px-3 py-2 rounded-xl ${section === 'broadcast' ? 'bg-purple-600 text-white font-bold shadow-md' : 'text-gray-300 hover:text-white hover:bg-[#151724]'} transition group">
+                                        <span class="text-[9px] font-bold text-cyan-400 bg-cyan-950/60 px-1.5 py-0.2 rounded">جديد</span>
+                                        <span class="flex items-center gap-2"><span>نظام الإعلانات</span><span class="text-gray-400 group-hover:text-purple-400">📢</span></span>
+                                    </a>
+                                </div>
+                            </div>
+
+                            <!-- الميزات الأساسية -->
+                            <div class="space-y-1">
+                                <button type="button" onclick="toggleNavGroup('grp_sub_core')" class="w-full flex items-center justify-between text-gray-400 hover:text-white px-2 py-1 font-bold text-[11px] transition">
+                                    <svg id="arrow_grp_sub_core" class="w-3.5 h-3.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                    <span class="flex items-center gap-1.5"><span>الميزات الأساسية</span></span>
+                                </button>
+                                <div id="grp_sub_core" class="space-y-1">
+                                    <a href="/dashboard/${guildId}/moderation" class="flex items-center justify-between px-3 py-2 rounded-xl ${section === 'moderation' ? 'bg-purple-600 text-white font-bold shadow-md' : 'text-gray-300 hover:text-white hover:bg-[#151724]'} transition group">
+                                        <span class="text-[9px] font-bold text-amber-400 bg-amber-950/60 px-1.5 py-0.2 rounded">تحديث</span>
+                                        <span class="flex items-center gap-2"><span>الإشراف</span><span class="text-gray-400 group-hover:text-purple-400">🔨</span></span>
+                                    </a>
+                                    <a href="/dashboard/${guildId}/levels" class="flex items-center justify-between px-3 py-2 rounded-xl ${section === 'levels' ? 'bg-purple-600 text-white font-bold shadow-md' : 'text-gray-300 hover:text-white hover:bg-[#151724]'} transition group">
+                                        <span class="w-4 h-4 rounded-full border border-emerald-500/60 bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-[9px] font-black">✓</span>
+                                        <span class="flex items-center gap-2"><span>المستويات & XP</span><span class="text-gray-400 group-hover:text-purple-400">🏆</span></span>
+                                    </a>
+                                    <a href="/dashboard/${guildId}/welcome" class="flex items-center justify-between px-3 py-2 rounded-xl ${section === 'welcome' ? 'bg-purple-600 text-white font-bold shadow-md' : 'text-gray-300 hover:text-white hover:bg-[#151724]'} transition group">
+                                        <span class="w-4 h-4 rounded-full border border-emerald-500/60 bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-[9px] font-black">✓</span>
+                                        <span class="flex items-center gap-2"><span>الترحيب & المغادرة</span><span class="text-gray-400 group-hover:text-purple-400">👋</span></span>
+                                    </a>
+                                    <a href="/dashboard/${guildId}/autoroles" class="flex items-center justify-between px-3 py-2 rounded-xl ${section === 'autoroles' ? 'bg-purple-600 text-white font-bold shadow-md' : 'text-gray-300 hover:text-white hover:bg-[#151724]'} transition group">
+                                        <span class="w-4 h-4 rounded-full border border-emerald-500/60 bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-[9px] font-black">✓</span>
+                                        <span class="flex items-center gap-2"><span>الرتب التلقائية</span><span class="text-gray-400 group-hover:text-purple-400">🎖️</span></span>
+                                    </a>
+                                    <a href="/dashboard/${guildId}/giveaways" class="flex items-center justify-between px-3 py-2 rounded-xl ${section === 'giveaways' ? 'bg-purple-600 text-white font-bold shadow-md' : 'text-gray-300 hover:text-white hover:bg-[#151724]'} transition group">
+                                        <span class="w-4 h-4 rounded-full border border-emerald-500/60 bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-[9px] font-black">✓</span>
+                                        <span class="flex items-center gap-2"><span>قيف اواي</span><span class="text-gray-400 group-hover:text-purple-400">🎁</span></span>
+                                    </a>
+                                    <a href="/dashboard/${guildId}/invites" class="flex items-center justify-between px-3 py-2 rounded-xl ${section === 'invites' ? 'bg-purple-600 text-white font-bold shadow-md' : 'text-gray-300 hover:text-white hover:bg-[#151724]'} transition group">
+                                        <span class="w-4 h-4 rounded-full border border-emerald-500/60 bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-[9px] font-black">✓</span>
+                                        <span class="flex items-center gap-2"><span>Invite Tracker</span><span class="text-gray-400 group-hover:text-purple-400">🔗</span></span>
+                                    </a>
+                                </div>
+                            </div>
+
+                            <!-- الإجراءات الآلية -->
+                            <div class="space-y-1">
+                                <button type="button" onclick="toggleNavGroup('grp_sub_automations')" class="w-full flex items-center justify-between text-gray-400 hover:text-white px-2 py-1 font-bold text-[11px] transition">
+                                    <svg id="arrow_grp_sub_automations" class="w-3.5 h-3.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                    <span class="flex items-center gap-1.5"><span>الإجراءات الآلية</span></span>
+                                </button>
+                                <div id="grp_sub_automations" class="space-y-1">
+                                    <a href="/dashboard/${guildId}/autoresponder" class="flex items-center justify-between px-3 py-2 rounded-xl ${section === 'autoresponder' ? 'bg-purple-600 text-white font-bold shadow-md' : 'text-gray-300 hover:text-white hover:bg-[#151724]'} transition group">
+                                        <span class="w-4 h-4 rounded-full border border-emerald-500/60 bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-[9px] font-black">✓</span>
+                                        <span class="flex items-center gap-2"><span>الرد التلقائي</span><span class="text-gray-400 group-hover:text-purple-400">💬</span></span>
+                                    </a>
+                                    <a href="/dashboard/${guildId}/applications" class="flex items-center justify-between px-3 py-2 rounded-xl ${section === 'applications' ? 'bg-purple-600 text-white font-bold shadow-md' : 'text-gray-300 hover:text-white hover:bg-[#151724]'} transition group">
+                                        <span class="text-[9px] font-bold text-rose-400 bg-rose-950/60 px-1.5 py-0.2 rounded">جديد</span>
+                                        <span class="flex items-center gap-2"><span>التقديمات</span><span class="text-gray-400 group-hover:text-purple-400">📝</span></span>
+                                    </a>
+                                </div>
+                            </div>
+
+                            <!-- الإشراف والأمان -->
+                            <div class="space-y-1">
+                                <button type="button" onclick="toggleNavGroup('grp_sub_security')" class="w-full flex items-center justify-between text-gray-400 hover:text-white px-2 py-1 font-bold text-[11px] transition">
+                                    <svg id="arrow_grp_sub_security" class="w-3.5 h-3.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                    <span class="flex items-center gap-1.5"><span>الإشراف والأمان</span></span>
+                                </button>
+                                <div id="grp_sub_security" class="space-y-1">
+                                    <a href="/dashboard/${guildId}/automod" class="flex items-center justify-between px-3 py-2 rounded-xl ${section === 'automod' ? 'bg-purple-600 text-white font-bold shadow-md' : 'text-gray-300 hover:text-white hover:bg-[#151724]'} transition group">
+                                        <span class="w-4 h-4 rounded-full border border-emerald-500/60 bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-[9px] font-black">✓</span>
+                                        <span class="flex items-center gap-2"><span>الرقابة التلقائية</span><span class="text-gray-400 group-hover:text-purple-400">🤖</span></span>
+                                    </a>
+                                    <a href="/dashboard/${guildId}/protection" class="flex items-center justify-between px-3 py-2 rounded-xl ${section === 'protection' ? 'bg-purple-600 text-white font-bold shadow-md' : 'text-gray-300 hover:text-white hover:bg-[#151724]'} transition group">
+                                        <span class="flex items-center gap-1">
+                                            <span class="w-4 h-4 rounded-full border border-emerald-500/60 bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-[9px] font-black">✓</span>
+                                            <span class="text-amber-400 text-xs">👑</span>
+                                        </span>
+                                        <span class="flex items-center gap-2"><span>الحماية</span><span class="text-gray-400 group-hover:text-purple-400">🛡️</span></span>
+                                    </a>
+                                    <a href="/dashboard/${guildId}/antiraid" class="flex items-center justify-between px-3 py-2 rounded-xl ${section === 'antiraid' ? 'bg-purple-600 text-white font-bold shadow-md' : 'text-gray-300 hover:text-white hover:bg-[#151724]'} transition group">
+                                        <span class="w-4 h-4 rounded-full border border-emerald-500/60 bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-[9px] font-black">✓</span>
+                                        <span class="flex items-center gap-2"><span>مكافحة الغزو</span><span class="text-gray-400 group-hover:text-purple-400">🚨</span></span>
+                                    </a>
+                                    <a href="/dashboard/${guildId}/staff-activity" class="flex items-center justify-between px-3 py-2 rounded-xl ${section === 'staff-activity' ? 'bg-purple-600 text-white font-bold shadow-md' : 'text-gray-300 hover:text-white hover:bg-[#151724]'} transition group">
+                                        <span class="w-4 h-4 rounded-full border border-emerald-500/60 bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-[9px] font-black">✓</span>
+                                        <span class="flex items-center gap-2"><span>نشاط الإدارة</span><span class="text-gray-400 group-hover:text-purple-400">👮</span></span>
+                                    </a>
+                                </div>
+                            </div>
+
+                            <!-- إدارة السيرفر -->
+                            <div class="space-y-1">
+                                <button type="button" onclick="toggleNavGroup('grp_sub_management')" class="w-full flex items-center justify-between text-gray-400 hover:text-white px-2 py-1 font-bold text-[11px] transition">
+                                    <svg id="arrow_grp_sub_management" class="w-3.5 h-3.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                    <span class="flex items-center gap-1.5"><span>إدارة السيرفر</span></span>
+                                </button>
+                                <div id="grp_sub_management" class="space-y-1">
+                                    <a href="/dashboard/${guildId}/tempvoice" class="flex items-center justify-between px-3 py-2 rounded-xl ${section === 'tempvoice' ? 'bg-purple-600 text-white font-bold shadow-md' : 'text-gray-300 hover:text-white hover:bg-[#151724]'} transition group">
+                                        <span class="w-4 h-4 rounded-full border border-emerald-500/60 bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-[9px] font-black">✓</span>
+                                        <span class="flex items-center gap-2"><span>الرومات المؤقتة</span><span class="text-gray-400 group-hover:text-purple-400">🕒</span></span>
+                                    </a>
+                                    <a href="/dashboard/${guildId}/boost" class="flex items-center justify-between px-3 py-2 rounded-xl ${section === 'boost' ? 'bg-purple-600 text-white font-bold shadow-md' : 'text-gray-300 hover:text-white hover:bg-[#151724]'} transition group">
+                                        <span class="w-4 h-4 rounded-full border border-emerald-500/60 bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-[9px] font-black">✓</span>
+                                        <span class="flex items-center gap-2"><span>البوستات</span><span class="text-gray-400 group-hover:text-purple-400">💎</span></span>
+                                    </a>
+                                    <a href="/dashboard/${guildId}/colors" class="flex items-center justify-between px-3 py-2 rounded-xl ${section === 'colors' ? 'bg-purple-600 text-white font-bold shadow-md' : 'text-gray-300 hover:text-white hover:bg-[#151724]'} transition group">
+                                        <span class="w-4 h-4 rounded-full border border-emerald-500/60 bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-[9px] font-black">✓</span>
+                                        <span class="flex items-center gap-2"><span>الألوان</span><span class="text-gray-400 group-hover:text-purple-400">🎨</span></span>
+                                    </a>
+                                    <a href="/dashboard/${guildId}/logs" class="flex items-center justify-between px-3 py-2 rounded-xl ${section === 'logs' ? 'bg-purple-600 text-white font-bold shadow-md' : 'text-gray-300 hover:text-white hover:bg-[#151724]'} transition group">
+                                        <span class="text-[9px] font-bold text-amber-400 bg-amber-950/60 px-1.5 py-0.2 rounded">تحديث</span>
+                                        <span class="flex items-center gap-2"><span>السجلات</span><span class="text-gray-400 group-hover:text-purple-400">📜</span></span>
+                                    </a>
+                                    <a href="/dashboard/${guildId}/tickets" class="flex items-center justify-between px-3 py-2 rounded-xl ${section === 'tickets' ? 'bg-purple-600 text-white font-bold shadow-md' : 'text-gray-300 hover:text-white hover:bg-[#151724]'} transition group">
+                                        <span class="flex items-center gap-1">
+                                            <span class="w-4 h-4 rounded-full border border-emerald-500/60 bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-[9px] font-black">✓</span>
+                                            <span class="text-amber-400 text-xs">👑</span>
+                                        </span>
+                                        <span class="flex items-center gap-2"><span>التذاكر</span><span class="text-gray-400 group-hover:text-purple-400">🎫</span></span>
+                                    </a>
+                                </div>
+                            </div>
+
+                            <!-- الترفيه والتفاعل -->
+                            <div class="space-y-1">
+                                <button type="button" onclick="toggleNavGroup('grp_sub_fun')" class="w-full flex items-center justify-between text-gray-400 hover:text-white px-2 py-1 font-bold text-[11px] transition">
+                                    <svg id="arrow_grp_sub_fun" class="w-3.5 h-3.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                    <span class="flex items-center gap-1.5"><span>الترفيه والتفاعل</span></span>
+                                </button>
+                                <div id="grp_sub_fun" class="space-y-1">
+                                    <a href="/dashboard/${guildId}/fun" class="flex items-center justify-between px-3 py-2 rounded-xl ${section === 'fun' ? 'bg-purple-600 text-white font-bold shadow-md' : 'text-gray-300 hover:text-white hover:bg-[#151724]'} transition group">
+                                        <span class="w-4 h-4 rounded-full border border-emerald-500/60 bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-[9px] font-black">✓</span>
+                                        <span class="flex items-center gap-2"><span>تسلية</span><span class="text-gray-400 group-hover:text-purple-400">🎮</span></span>
+                                    </a>
+                                    <a href="/dashboard/${guildId}/quran" class="flex items-center justify-between px-3 py-2 rounded-xl ${section === 'quran' ? 'bg-purple-600 text-white font-bold shadow-md' : 'text-gray-300 hover:text-white hover:bg-[#151724]'} transition group">
+                                        <span class="w-4 h-4 rounded-full border border-emerald-500/60 bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-[9px] font-black">✓</span>
+                                        <span class="flex items-center gap-2"><span>القرآن & الراديو</span><span class="text-gray-400 group-hover:text-purple-400">📻</span></span>
+                                    </a>
+                                    <a href="/dashboard/${guildId}/social" class="flex items-center justify-between px-3 py-2 rounded-xl ${section === 'social' ? 'bg-purple-600 text-white font-bold shadow-md' : 'text-gray-300 hover:text-white hover:bg-[#151724]'} transition group">
+                                        <span class="text-[9px] font-bold text-red-400 bg-red-950/60 px-1.5 py-0.2 rounded">بث</span>
+                                        <span class="flex items-center gap-2"><span>تنبيهات السوشيال</span><span class="text-gray-400 group-hover:text-purple-400">📺</span></span>
+                                    </a>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- User Profile Bottom Bar -->
+                        <div class="p-3 border-t border-white/5">
+                            <div class="bg-gradient-to-r from-purple-700 to-indigo-700 rounded-2xl p-2.5 flex items-center justify-between shadow-lg shadow-purple-950/40">
+                                <div class="text-white/80 hover:text-white cursor-pointer px-1">
+                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M6 10a2 2 0 11-4 0 2 2 0 014 0zM12 10a2 2 0 11-4 0 2 2 0 014 0zM16 12a2 2 0 100-4 2 2 0 000 4z"/></svg>
+                                </div>
+                                <div class="flex items-center gap-2.5">
+                                    <div class="text-right">
+                                        <span class="text-xs font-black text-white block leading-tight truncate max-w-[110px]">${user.username}</span>
+                                    </div>
+                                    <img src="${userAvatar}" class="w-8 h-8 rounded-xl object-cover ring-2 ring-white/20 shadow-md">
+                                </div>
+                            </div>
+                        </div>
+
+                    </aside>
+
+                    <!-- Server Rail (Far Right - Novax Style) -->
+                    <div class="w-18 bg-[#05060a] border-l border-white/5 py-4 px-2 flex flex-col items-center gap-3 shrink-0 overflow-y-auto select-none">
+                        <!-- Home Icon Button -->
+                        <a href="/dashboard" title="الصفحة الرئيسية" class="w-12 h-12 rounded-2xl bg-[#12141f] hover:bg-purple-600/30 border border-white/5 hover:border-purple-500/50 flex items-center justify-center text-gray-300 hover:text-white transition shadow-lg mb-1 group">
+                            <svg class="w-6 h-6 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
                         </a>
-                        <div class="w-8 h-[1px] bg-[#151722]"></div>
+                        <div class="w-8 h-[1px] bg-white/5"></div>
+                        <!-- Active Server List Icons -->
                         ${serverRailHtml}
                     </div>
+
                 </div>
+
+                <script>
+                function toggleNavGroup(groupId) {
+                    const el = document.getElementById(groupId);
+                    const arrow = document.getElementById('arrow_' + groupId);
+                    if (!el) return;
+                    el.classList.toggle('hidden');
+                    if (arrow) arrow.classList.toggle('rotate-180');
+                }
+                </script>
 
                 <script>
                     async function addAutoResponder(guildId) {
