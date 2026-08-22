@@ -492,14 +492,14 @@ module.exports = function (app, client) {
                                 <span class="text-purple-400">🎛️</span>
                             </div>
 
-                            <!-- Top Stats 4-Grid (Novax Exact Order & Icons: الذهب / السمعة / التصنيف / المستوى) -->
+                            <!-- Top Stats 4-Grid (Novax Exact Order & Icons: Star / السمعة / التصنيف / المستوى) -->
                             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                                 
-                                <!-- 1. الذهب (Golds / Stars) -->
+                                <!-- 1. Star -->
                                 <div class="bg-[#10121b] border border-white/5 hover:border-purple-500/30 rounded-2xl p-4 flex items-center justify-between shadow-lg transition">
-                                    <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center text-xl font-bold shadow-inner">🪙</div>
+                                    <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center text-xl font-bold shadow-inner">⭐</div>
                                     <div class="text-right">
-                                        <span class="text-xs font-bold text-gray-400">الذهب</span>
+                                        <span class="text-xs font-bold text-gray-400">Star</span>
                                         <h3 id="userCoinsDisplay" class="text-xl font-black text-white mt-0.5">${userCoins.toLocaleString()}</h3>
                                     </div>
                                 </div>
@@ -557,11 +557,11 @@ module.exports = function (app, client) {
                                 </div>
                             </div>
 
-                            <!-- آخر معاملات الذهب (Recent Gold Transactions - Novax Exact Style) -->
+                            <!-- آخر معاملات Star (Recent Star Transactions) -->
                             <div class="bg-[#10121b] border border-white/5 rounded-3xl p-6 shadow-xl space-y-4 text-right">
                                 <div class="flex items-center justify-between border-b border-white/5 pb-3">
                                     <span class="text-xs text-gray-400">سجل التحويلات والمكافآت</span>
-                                    <h3 class="text-sm font-black text-white flex items-center gap-2"><span>آخر 5 معاملات الذهب</span><span>🪙</span></h3>
+                                    <h3 class="text-sm font-black text-white flex items-center gap-2"><span>آخر 5 معاملات Star</span><span class="text-amber-400">⭐</span></h3>
                                 </div>
 
                                 <div class="overflow-x-auto">
@@ -589,7 +589,7 @@ module.exports = function (app, client) {
                                 </div>
                             </div>
 
-                            <!-- قسم الملف الشخصي وبطاقة الهوية (Profile Card & Identity Card - Novax Exact Style) -->
+                            <!-- قسم الملف الشخصي وبطاقة الهوية (Profile Card & Identity Card) -->
                             <div class="space-y-4 text-right">
                                 <h3 class="text-sm font-black text-white flex items-center justify-end gap-2"><span>الملف الشخصي</span><span>👤</span></h3>
                                 
@@ -606,50 +606,51 @@ module.exports = function (app, client) {
                                         </div>
 
                                         <!-- The Graphic Discord Card (Purple Nebula Design) -->
-                                        <div class="relative rounded-2xl overflow-hidden bg-gradient-to-br from-purple-950 via-[#18112e] to-[#0d071a] border border-purple-500/30 p-5 shadow-2xl space-y-4">
+                                        <div dir="ltr" class="relative rounded-2xl overflow-hidden bg-gradient-to-br from-purple-950 via-[#18112e] to-[#0d071a] border border-purple-500/30 p-5 shadow-2xl space-y-4 text-left font-sans">
                                             <!-- Top Header in Card -->
                                             <div class="flex items-center justify-between">
-                                                <span class="px-2.5 py-1 bg-purple-900/60 border border-purple-500/40 text-purple-200 text-[10px] font-bold rounded-lg">+0 REP</span>
                                                 <div class="flex items-center gap-3">
-                                                    <div class="text-right">
-                                                        <h4 class="text-sm font-black text-white leading-tight">@${user.username}</h4>
-                                                    </div>
                                                     <img src="${userAvatar}" class="w-12 h-12 rounded-2xl object-cover ring-2 ring-purple-500/60 shadow-lg shadow-black/40">
+                                                    <div>
+                                                        <h4 class="text-sm font-black text-white leading-tight">@${user.username}</h4>
+                                                        <span class="text-[10px] text-gray-400">ZENO MEMBER</span>
+                                                    </div>
                                                 </div>
+                                                <span class="px-2.5 py-1 bg-purple-900/60 border border-purple-500/40 text-purple-200 text-[10px] font-bold rounded-lg">+${userStars} REP</span>
                                             </div>
 
                                             <!-- About Me Box -->
-                                            <div class="bg-black/30 border border-white/5 rounded-xl p-3 text-right">
-                                                <span class="text-[9px] font-bold text-gray-400 block mb-0.5">ABOUT ME</span>
+                                            <div class="bg-black/30 border border-white/5 rounded-xl p-3">
+                                                <span class="text-[9px] font-bold text-gray-400 block mb-0.5 tracking-wider">ABOUT ME</span>
                                                 <p class="text-xs text-gray-200">مرحباً بك في لوحة تحكم ZENO Bot!</p>
                                             </div>
 
                                             <!-- Stats & Gold in Card -->
-                                            <div class="grid grid-cols-2 gap-3 text-right">
-                                                <div class="bg-black/30 border border-white/5 rounded-xl p-3 space-y-1 text-xs">
-                                                    <span class="text-[9px] font-bold text-gray-400 block">STATISTICS</span>
+                                            <div class="grid grid-cols-2 gap-3">
+                                                <div class="bg-black/30 border border-white/5 rounded-xl p-3 space-y-1.5 text-xs">
+                                                    <span class="text-[9px] font-bold text-gray-400 block tracking-wider">STATISTICS</span>
                                                     <div class="text-[11px] text-gray-300 flex items-center justify-between">
+                                                        <span class="text-gray-400">⚡ LEVEL:</span>
                                                         <span class="font-bold text-purple-300">${userLevel}</span>
-                                                        <span>⚡ LEVEL:</span>
                                                     </div>
                                                     <div class="text-[11px] text-gray-300 flex items-center justify-between">
+                                                        <span class="text-gray-400">🏆 RANK:</span>
                                                         <span class="font-bold text-emerald-400">#${userRankXp}</span>
-                                                        <span>🏆 RANK:</span>
                                                     </div>
                                                     <div class="text-[11px] text-gray-300 flex items-center justify-between">
-                                                        <span class="font-bold text-gray-200 font-mono">${userXp} XP</span>
-                                                        <span>✨ XP:</span>
+                                                        <span class="text-gray-400">✨ XP:</span>
+                                                        <span class="font-bold text-gray-200 font-mono">${userXp}</span>
                                                     </div>
                                                 </div>
 
-                                                <div class="bg-black/30 border border-white/5 rounded-xl p-3 space-y-2 text-right">
-                                                    <span class="text-[9px] font-bold text-gray-400 block">GOLDS</span>
-                                                    <div class="flex items-center justify-end gap-1.5 text-amber-400 font-black text-sm">
+                                                <div class="bg-black/30 border border-white/5 rounded-xl p-3 space-y-2">
+                                                    <span class="text-[9px] font-bold text-gray-400 block tracking-wider">STAR COINS</span>
+                                                    <div class="flex items-center gap-1.5 text-amber-400 font-black text-sm">
+                                                        <span class="text-base">⭐</span>
                                                         <span>${userCoins.toLocaleString()}</span>
-                                                        <span class="text-base">🪙</span>
                                                     </div>
-                                                    <span class="text-[9px] font-bold text-gray-400 block pt-1">BADGES</span>
-                                                    <div class="flex items-center justify-end gap-1 text-base">
+                                                    <span class="text-[9px] font-bold text-gray-400 block pt-1 tracking-wider">BADGES</span>
+                                                    <div class="flex items-center gap-1.5 text-base">
                                                         <span>👑</span><span>💎</span><span>🔥</span><span>⚡</span>
                                                     </div>
                                                 </div>
@@ -668,25 +669,25 @@ module.exports = function (app, client) {
                                         </div>
 
                                         <!-- The Graphic Identity Card -->
-                                        <div class="relative rounded-2xl overflow-hidden bg-gradient-to-br from-indigo-950 via-[#101426] to-[#090b14] border border-indigo-500/30 p-5 shadow-2xl space-y-4">
+                                        <div dir="ltr" class="relative rounded-2xl overflow-hidden bg-gradient-to-br from-indigo-950 via-[#101426] to-[#090b14] border border-indigo-500/30 p-5 shadow-2xl space-y-4 text-left font-sans">
                                             <div class="flex items-center justify-between">
-                                                <div class="text-left text-xs font-bold text-indigo-300 bg-indigo-950/60 border border-indigo-800/40 px-3 py-1 rounded-xl">
-                                                    <span>INVITES: 0</span>
-                                                </div>
                                                 <div class="flex items-center gap-3">
-                                                    <div class="text-right">
+                                                    <img src="${userAvatar}" class="w-12 h-12 rounded-2xl object-cover ring-2 ring-indigo-500/60 shadow-lg shadow-black/40">
+                                                    <div>
                                                         <h4 class="text-sm font-black text-white leading-tight">@${user.username}</h4>
                                                         <span class="text-[10px] text-gray-400">ID CARD</span>
                                                     </div>
-                                                    <img src="${userAvatar}" class="w-12 h-12 rounded-2xl object-cover ring-2 ring-indigo-500/60 shadow-lg shadow-black/40">
+                                                </div>
+                                                <div class="text-xs font-bold text-indigo-300 bg-indigo-950/60 border border-indigo-800/40 px-3 py-1 rounded-xl">
+                                                    <span>INVITES: 0</span>
                                                 </div>
                                             </div>
 
-                                            <div class="grid grid-cols-2 gap-3 text-right">
+                                            <div class="grid grid-cols-2 gap-3">
                                                 <div class="bg-black/30 border border-white/5 rounded-xl p-3 space-y-1">
                                                     <div class="flex items-center justify-between text-xs text-indigo-400 font-bold mb-1">
-                                                        <span>TOP #1</span>
                                                         <span>💬 TEXT</span>
+                                                        <span>TOP #1</span>
                                                     </div>
                                                     <div class="text-[10px] text-gray-300">TOTAL XP: <span class="font-mono text-white">${userXp}</span></div>
                                                     <div class="text-[10px] text-gray-300">STREAK: <span class="font-mono text-emerald-400">Active</span></div>
@@ -694,8 +695,8 @@ module.exports = function (app, client) {
 
                                                 <div class="bg-black/30 border border-white/5 rounded-xl p-3 space-y-1">
                                                     <div class="flex items-center justify-between text-xs text-purple-400 font-bold mb-1">
-                                                        <span>TOP #1</span>
                                                         <span>🎙️ VOICE</span>
+                                                        <span>TOP #1</span>
                                                     </div>
                                                     <div class="text-[10px] text-gray-300">VOICE TIME: <span class="font-mono text-white">Online</span></div>
                                                     <div class="text-[10px] text-gray-300">STREAK: <span class="font-mono text-emerald-400">Level ${userLevel}</span></div>
@@ -713,7 +714,7 @@ module.exports = function (app, client) {
                         <div id="tabWallpapers" class="tab-content hidden space-y-6">
                             <div class="probot-card border border-white/5 rounded-3xl p-6 shadow-xl">
                                 <div class="flex items-center justify-between pb-4 mb-4 border-b border-white/5">
-                                    <span class="text-xs text-amber-400 font-bold">رصيدك: <span class="user-coins-val">${userCoins.toLocaleString()}</span> 🪙 الذهب</span>
+                                    <span class="text-xs text-amber-400 font-bold">رصيدك: <span class="user-coins-val">${userCoins.toLocaleString()}</span> ⭐ Star Coin</span>
                                     <h3 class="text-sm font-black text-white text-right">متجر خلفيات الملف الشخصي 🖼️</h3>
                                 </div>
                                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -725,7 +726,7 @@ module.exports = function (app, client) {
                                             <p class="text-[10px] text-gray-400 mt-0.5">خلفية النجوم والنيون الأرجواني</p>
                                             <div class="mt-3 flex items-center justify-between">
                                                 <button onclick="buyItem('wallpaper', 'Galaxy Neon', 5000, this)" class="px-4 py-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-xs font-bold shadow-md hover:from-purple-500 hover:to-indigo-500 transition">شراء وتجهيز</button>
-                                                <span class="text-xs font-mono text-amber-300 font-bold">5,000 🪙</span>
+                                                <span class="text-xs font-mono text-amber-300 font-bold">5,000 ⭐</span>
                                             </div>
                                         </div>
                                     </div>
@@ -737,7 +738,7 @@ module.exports = function (app, client) {
                                             <p class="text-[10px] text-gray-400 mt-0.5">خلفية الطبيعة والزمرد الفخم</p>
                                             <div class="mt-3 flex items-center justify-between">
                                                 <button onclick="buyItem('wallpaper', 'Emerald Forest', 7500, this)" class="px-4 py-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-xs font-bold shadow-md hover:from-purple-500 hover:to-indigo-500 transition">شراء وتجهيز</button>
-                                                <span class="text-xs font-mono text-amber-300 font-bold">7,500 🪙</span>
+                                                <span class="text-xs font-mono text-amber-300 font-bold">7,500 ⭐</span>
                                             </div>
                                         </div>
                                     </div>
@@ -746,10 +747,10 @@ module.exports = function (app, client) {
                                         <div class="h-28 bg-gradient-to-r from-rose-950 via-zinc-900 to-amber-950 flex items-center justify-center text-3xl">🔥</div>
                                         <div class="p-4 text-right">
                                             <h4 class="text-xs font-bold text-white">Cyberpunk Gold</h4>
-                                            <p class="text-[10px] text-gray-400 mt-0.5">خلفية اللهب والذهب الخالص</p>
+                                            <p class="text-[10px] text-gray-400 mt-0.5">خلفية اللهب وتوهج النجوم</p>
                                             <div class="mt-3 flex items-center justify-between">
                                                 <button onclick="buyItem('wallpaper', 'Cyberpunk Gold', 12000, this)" class="px-4 py-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-xs font-bold shadow-md hover:from-purple-500 hover:to-indigo-500 transition">شراء وتجهيز</button>
-                                                <span class="text-xs font-mono text-amber-300 font-bold">12,000 🪙</span>
+                                                <span class="text-xs font-mono text-amber-300 font-bold">12,000 ⭐</span>
                                             </div>
                                         </div>
                                     </div>
@@ -762,7 +763,7 @@ module.exports = function (app, client) {
                         <div id="tabBadges" class="tab-content hidden space-y-6">
                             <div class="probot-card border border-white/5 rounded-3xl p-6 shadow-xl">
                                 <div class="flex items-center justify-between pb-4 mb-4 border-b border-white/5">
-                                    <span class="text-xs text-amber-400 font-bold">رصيدك: <span class="user-coins-val">${userCoins.toLocaleString()}</span> 🪙 الذهب</span>
+                                    <span class="text-xs text-amber-400 font-bold">رصيدك: <span class="user-coins-val">${userCoins.toLocaleString()}</span> ⭐ Star Coin</span>
                                     <h3 class="text-sm font-black text-white text-right">متجر شارات وأوسمة الملف الشخصي 🎖️</h3>
                                 </div>
                                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -770,25 +771,25 @@ module.exports = function (app, client) {
                                         <span class="text-3xl block">👑</span>
                                         <h4 class="text-xs font-bold text-white">تاج الأساطير</h4>
                                         <p class="text-[10px] text-gray-400">شارة ملكية ذهبية</p>
-                                        <button onclick="buyItem('badge', 'Crown Badge', 10000, this)" class="w-full py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-xs font-bold transition shadow-md">شراء (10,000 🪙)</button>
+                                        <button onclick="buyItem('badge', 'Crown Badge', 10000, this)" class="w-full py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-xs font-bold transition shadow-md">شراء (10,000 ⭐)</button>
                                     </div>
                                     <div class="bg-[#1c1f2e] border border-white/5 p-4 rounded-2xl text-center space-y-2">
                                         <span class="text-3xl block">💎</span>
                                         <h4 class="text-xs font-bold text-white">الماسة اللامعة</h4>
                                         <p class="text-[10px] text-gray-400">شارة النقاء والتميز</p>
-                                        <button onclick="buyItem('badge', 'Diamond Badge', 15000, this)" class="w-full py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-xs font-bold transition shadow-md">شراء (15,000 🪙)</button>
+                                        <button onclick="buyItem('badge', 'Diamond Badge', 15000, this)" class="w-full py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-xs font-bold transition shadow-md">شراء (15,000 ⭐)</button>
                                     </div>
                                     <div class="bg-[#1c1f2e] border border-white/5 p-4 rounded-2xl text-center space-y-2">
                                         <span class="text-3xl block">⚡</span>
                                         <h4 class="text-xs font-bold text-white">صاعقة النيون</h4>
                                         <p class="text-[10px] text-gray-400">شارة السرعة والقوة</p>
-                                        <button onclick="buyItem('badge', 'Lightning Badge', 8000, this)" class="w-full py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-xs font-bold transition shadow-md">شراء (8,000 🪙)</button>
+                                        <button onclick="buyItem('badge', 'Lightning Badge', 8000, this)" class="w-full py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-xs font-bold transition shadow-md">شراء (8,000 ⭐)</button>
                                     </div>
                                     <div class="bg-[#1c1f2e] border border-white/5 p-4 rounded-2xl text-center space-y-2">
                                         <span class="text-3xl block">🔥</span>
                                         <h4 class="text-xs font-bold text-white">لهب العزيمة</h4>
                                         <p class="text-[10px] text-gray-400">شارة النشاط والحماس</p>
-                                        <button onclick="buyItem('badge', 'Fire Badge', 7000, this)" class="w-full py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-xs font-bold transition shadow-md">شراء (7,000 🪙)</button>
+                                        <button onclick="buyItem('badge', 'Fire Badge', 7000, this)" class="w-full py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-xs font-bold transition shadow-md">شراء (7,000 ⭐)</button>
                                     </div>
                                 </div>
                             </div>
@@ -802,14 +803,14 @@ module.exports = function (app, client) {
                                 
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div class="bg-[#1c1f2e] border border-white/5 p-4 rounded-2xl flex items-center justify-between">
-                                        <button onclick="buyItem('identity', 'Dark Minimalist', 3000, this)" class="px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-xs font-bold">تفعيل (3,000 🪙)</button>
+                                        <button onclick="buyItem('identity', 'Dark Minimalist', 3000, this)" class="px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-xs font-bold">تفعيل (3,000 ⭐)</button>
                                         <div>
                                             <h4 class="text-xs font-bold text-white">Dark Minimalist</h4>
                                             <p class="text-[10px] text-gray-400">تصميم أسود داكن كلاسيكي فخم</p>
                                         </div>
                                     </div>
                                     <div class="bg-[#1c1f2e] border border-white/5 p-4 rounded-2xl flex items-center justify-between">
-                                        <button onclick="buyItem('identity', 'Purple Glow Pro', 4500, this)" class="px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-xs font-bold">تفعيل (4,500 🪙)</button>
+                                        <button onclick="buyItem('identity', 'Purple Glow Pro', 4500, this)" class="px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-xs font-bold">تفعيل (4,500 ⭐)</button>
                                         <div>
                                             <h4 class="text-xs font-bold text-white">Purple Glow Pro</h4>
                                             <p class="text-[10px] text-gray-400">توهج بنفسجي متدرج ملكي</p>
@@ -837,7 +838,7 @@ module.exports = function (app, client) {
                             <div class="probot-card border border-white/5 rounded-3xl p-6 shadow-xl">
                                 <div class="flex items-center justify-between mb-4 border-b border-white/5 pb-3">
                                     <span class="text-xs text-amber-400 font-mono font-bold">ترتيبك المالي: #${userRankCoins}</span>
-                                    <h3 class="text-sm font-black text-white text-right">أغنى الأثرياء برصيد الذهب 🪙</h3>
+                                    <h3 class="text-sm font-black text-white text-right">أغنى الأثرياء برصيد Star Coin ⭐</h3>
                                 </div>
                                 <div class="space-y-2.5 max-h-[600px] overflow-y-auto pr-1">
                                     ${coinsLeaderboardHtml}
@@ -845,23 +846,23 @@ module.exports = function (app, client) {
                             </div>
                         </div>
 
-                        <!-- Tab 6: الراتب اليومي (Daily Reward) -->
+                        <!-- Tab 6: الراتب والمكافأة اليومية (Daily Reward) -->
                         <div id="tabDaily" class="tab-content hidden space-y-6">
                             <div class="probot-card border border-white/5 rounded-3xl p-8 shadow-xl text-center space-y-5 max-w-xl mx-auto">
                                 <div class="w-20 h-20 rounded-3xl bg-gradient-to-tr from-purple-600/30 to-indigo-600/30 border border-purple-500/40 flex items-center justify-center text-4xl mx-auto shadow-xl shadow-black/20">
                                     🎁
                                 </div>
                                 <div>
-                                    <h3 class="text-xl font-black text-white">الراتب اليومي (Daily Reward)</h3>
+                                    <h3 class="text-xl font-black text-white">المكافأة اليومية (Daily Star Coin)</h3>
                                     <p class="text-gray-400 text-xs mt-2 leading-relaxed">
-                                        احصل على <span class="text-amber-300 font-bold">500 إلى 1,000 من الذهب</span> مجاناً كل 24 ساعة!
+                                        احصل على <span class="text-amber-300 font-bold">500 إلى 1,000 من عملات Star Coin</span> مجاناً كل 24 ساعة!
                                     </p>
                                 </div>
 
                                 <div class="bg-[#1c1f2e] border border-white/5 rounded-2xl p-4 flex items-center justify-around text-xs">
                                     <div>
                                         <span class="text-gray-400 block text-[11px]">مكافأة اليوم</span>
-                                        <span class="text-amber-400 font-black font-mono text-sm">+500 🪙</span>
+                                        <span class="text-amber-400 font-black font-mono text-sm">+500 ⭐</span>
                                     </div>
                                     <div class="w-px h-8 bg-purple-950/50"></div>
                                     <div>
@@ -874,12 +875,12 @@ module.exports = function (app, client) {
                                     ${canClaimDaily ? `
                                         <button id="claimDailyBtn" onclick="claimDaily()" class="w-full py-4 bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 hover:from-purple-500 hover:to-indigo-500 text-white font-black text-sm rounded-2xl shadow-xl shadow-purple-900/40 transition transform active:scale-95 flex items-center justify-center gap-2">
                                             <span>🎁</span>
-                                            <span>استلام الراتب اليومي الآن (+500 🪙)</span>
+                                            <span>استلام المكافأة اليومية الآن (+500 ⭐)</span>
                                         </button>
                                     ` : `
                                         <div class="bg-[#0b0d14] border border-purple-950/60 rounded-2xl p-5 space-y-4">
                                             <div class="flex items-center justify-between text-xs font-bold text-gray-300">
-                                                <span class="flex items-center gap-1 text-purple-400"><span>⏰</span><span>الراتب القادم</span></span>
+                                                <span class="flex items-center gap-1 text-purple-400"><span>⏰</span><span>المكافأة القادمة</span></span>
                                                 <span class="text-gray-400">الوقت المتبقي بالضبط</span>
                                             </div>
 
@@ -900,7 +901,7 @@ module.exports = function (app, client) {
 
                                             <button disabled class="w-full py-3 bg-[#151722] border border-white/5 text-gray-400 font-bold text-xs rounded-xl cursor-not-allowed flex items-center justify-center gap-2">
                                                 <span>⌛</span>
-                                                <span>تم استلام راتب اليوم! عد بعد انتهاء الوقت أعلاه</span>
+                                                <span>تم استلام مكافأة اليوم! عد بعد انتهاء الوقت أعلاه</span>
                                             </button>
                                         </div>
                                     `}
@@ -945,11 +946,11 @@ module.exports = function (app, client) {
                                 </div>
                             </div>
 
-                            <!-- متجر القولد (Shop) -->
+                            <!-- متجر Star (Shop) -->
                             <div class="space-y-1">
                                 <button type="button" onclick="toggleNavGroup('user_grp_shop')" class="w-full flex items-center justify-between text-gray-400 hover:text-white px-2 py-1 font-bold text-[11px] transition">
                                     <svg id="arrow_user_grp_shop" class="w-3.5 h-3.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                                    <span class="flex items-center gap-1.5"><span>متجر القولد</span></span>
+                                    <span class="flex items-center gap-1.5"><span>متجر Star</span></span>
                                 </button>
                                 <div id="user_grp_shop" class="space-y-1">
                                     <button onclick="switchTab('tabWallpapers', this)" class="nav-btn px-3 py-2 rounded-xl text-gray-300 hover:text-white hover:bg-[#151724] font-medium flex items-center justify-between transition w-full">
@@ -976,7 +977,7 @@ module.exports = function (app, client) {
                                 <div id="user_grp_leaderboard" class="space-y-1">
                                     <button onclick="switchTab('tabCoinsLeaderboard', this)" class="nav-btn px-3 py-2 rounded-xl text-gray-300 hover:text-white hover:bg-[#151724] font-medium flex items-center justify-between transition w-full">
                                         <span></span>
-                                        <span class="flex items-center gap-2"><span>أغنى الأثرياء</span><span class="text-gray-400">🪙</span></span>
+                                        <span class="flex items-center gap-2"><span>أغنى الأثرياء (Star)</span><span class="text-amber-400">⭐</span></span>
                                     </button>
                                     <button onclick="switchTab('tabLeaderboard', this)" class="nav-btn px-3 py-2 rounded-xl text-gray-300 hover:text-white hover:bg-[#151724] font-medium flex items-center justify-between transition w-full">
                                         <span></span>
@@ -4718,32 +4719,32 @@ document.getElementById('addModal').addEventListener('click', function(e) {
             } else if (section === 'general') {
                 formFieldsHtml = `
                     <div class="space-y-6">
-                        <!-- General Commands Overview matching Image 3 -->
+                        <!-- General Commands Overview -->
                         <div class="bg-[#1c1f2e] border border-white/5 p-5 rounded-2xl flex items-center justify-between">
-                            <span class="px-3 py-1 bg-purple-950/60 text-gray-200 border border-purple-800/40 rounded-xl text-xs font-bold">12 أمراً متاحاً</span>
+                            <span class="px-3 py-1 bg-purple-950/60 text-purple-300 border border-purple-800/40 rounded-xl text-xs font-bold font-mono">36+ أمراً متاحاً</span>
                             <div class="text-right">
-                                <h4 class="font-bold text-white text-sm">الأوامر العامة والخدمية للأعضاء ⚙️</h4>
-                                <p class="text-gray-400 text-xs mt-0.5">أوامر التفاعل والمعلومات والخدمات المتاحة لجميع أعضاء السيرفر</p>
+                                <h4 class="font-bold text-white text-sm">جميع الأوامر العامة والخدمية للأعضاء ⚙️</h4>
+                                <p class="text-gray-400 text-xs mt-0.5">أوامر التفاعل والمعلومات والاقتصاد والألعاب والخدمات المتاحة لجميع أعضاء السيرفر</p>
                             </div>
                         </div>
 
-                        <!-- 12 General Member Commands Only matching Image 3 -->
-                        <div class="bg-[#1c1f2e] border border-white/5 p-5 rounded-2xl">
-                            <h4 class="font-bold text-white text-sm mb-4 text-right">قائمة الأوامر الخدمية والعامة</h4>
+                        <!-- 1. أوامر المعلومات والبروفايل (General & Identity) -->
+                        <div class="bg-[#1c1f2e] border border-white/5 p-5 rounded-2xl space-y-3">
+                            <h4 class="font-bold text-white text-xs mb-3 text-right flex items-center justify-end gap-2"><span>أوامر المعلومات والهوية والبروفايل</span><span class="text-purple-400">👤</span></h4>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                                 
                                 <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
                                     <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
                                     <div class="text-right">
                                         <p class="font-bold text-white text-xs">help & #help</p>
-                                        <p class="text-gray-400 text-[10px]">قائمة المساعدة التفاعلية المنسدلة لجميع الأوامر</p>
+                                        <p class="text-gray-400 text-[10px]">قائمة المساعدة التفاعلية المنسدلة لجميع أوامر البوت</p>
                                     </div>
                                 </div>
 
                                 <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
                                     <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
                                     <div class="text-right">
-                                        <p class="font-bold text-white text-xs">profile & /id</p>
+                                        <p class="font-bold text-white text-xs">profile & /profile & /id</p>
                                         <p class="text-gray-400 text-[10px]">بطاقة البروفايل التفاعلية مع الرصيد والمستوى والسمعة</p>
                                     </div>
                                 </div>
@@ -4752,7 +4753,7 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                                     <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
                                     <div class="text-right">
                                         <p class="font-bold text-white text-xs">avatar & #avatar</p>
-                                        <p class="text-gray-400 text-[10px]">عرض وتحميل الصورة الرمزية للعضو أو السيرفر</p>
+                                        <p class="text-gray-400 text-[10px]">عرض وتحميل الصورة الرمزية للعضو أو أيقونة السيرفر</p>
                                     </div>
                                 </div>
 
@@ -4767,16 +4768,24 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                                 <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
                                     <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
                                     <div class="text-right">
-                                        <p class="font-bold text-white text-xs">server & #server</p>
-                                        <p class="text-gray-400 text-[10px]">عرض معلومات السيرفر والأونر وتاريخ الإنشاء والإحصائيات</p>
+                                        <p class="font-bold text-white text-xs">user & #user</p>
+                                        <p class="text-gray-400 text-[10px]">عرض بطاقة معلومات العضو، ورتبه، وتاريخ انضمامه وديسكورد</p>
                                     </div>
                                 </div>
 
                                 <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
                                     <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
                                     <div class="text-right">
-                                        <p class="font-bold text-white text-xs">user & #user</p>
-                                        <p class="text-gray-400 text-[10px]">عرض بطاقة معلومات العضو ورتبه وتاريخ الانضمام</p>
+                                        <p class="font-bold text-white text-xs">server & #server</p>
+                                        <p class="text-gray-400 text-[10px]">عرض معلومات وإحصائيات السيرفر، الأونر وتاريخ الإنشاء</p>
+                                    </div>
+                                </div>
+
+                                <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                    <div class="text-right">
+                                        <p class="font-bold text-white text-xs">invites & #invites</p>
+                                        <p class="text-gray-400 text-[10px]">معرفة عدد دعواتك الحقيقية، الوهمية، ومن قام بدعوتك</p>
                                     </div>
                                 </div>
 
@@ -4784,23 +4793,7 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                                     <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
                                     <div class="text-right">
                                         <p class="font-bold text-white text-xs">ping & #ping</p>
-                                        <p class="text-gray-400 text-[10px]">فحص سرعة استجابة البوت وسيرفرات ديسكورد</p>
-                                    </div>
-                                </div>
-
-                                <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
-                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
-                                    <div class="text-right">
-                                        <p class="font-bold text-white text-xs">tax & #tax</p>
-                                        <p class="text-gray-400 text-[10px]">حاسبة ضريبة بروبوت والتحويلات الذكية</p>
-                                    </div>
-                                </div>
-
-                                <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
-                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
-                                    <div class="text-right">
-                                        <p class="font-bold text-white text-xs">stars & #stars</p>
-                                        <p class="text-gray-400 text-[10px]">استعراض رصيد النجوم والسمعة وإعطاء النجوم للأعضاء</p>
+                                        <p class="text-gray-400 text-[10px]">فحص سرعة استجابة البوت وبنج سيرفرات ديسكورد</p>
                                     </div>
                                 </div>
 
@@ -4808,7 +4801,7 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                                     <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
                                     <div class="text-right">
                                         <p class="font-bold text-white text-xs">roles & #roles</p>
-                                        <p class="text-gray-400 text-[10px]">عرض قائمة جميع رتب السيرفر وأعداد أعضائها</p>
+                                        <p class="text-gray-400 text-[10px]">عرض قائمة جميع رتب السيرفر وأعداد أعضاء كل رتبة</p>
                                     </div>
                                 </div>
 
@@ -4831,37 +4824,222 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                                 <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
                                     <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
                                     <div class="text-right">
-                                        <p class="font-bold text-white text-xs">giveaway & #giveaway</p>
-                                        <p class="text-gray-400 text-[10px]">إنشاء وإدارة مسابقات الجيف أواي وتحديد الفائزين</p>
-                                    </div>
-                                </div>
-
-                                <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
-                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
-                                    <div class="text-right">
-                                        <p class="font-bold text-white text-xs">poll & #poll</p>
-                                        <p class="text-gray-400 text-[10px]">إنشاء استطلاعات وتصويت تفاعلي للأعضاء</p>
-                                    </div>
-                                </div>
-
-                                <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
-                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
-                                    <div class="text-right">
-                                        <p class="font-bold text-white text-xs">quran & #quran</p>
-                                        <p class="text-gray-400 text-[10px]">الاستماع لآيات وسور القرآن الكريم والتفاسير</p>
-                                    </div>
-                                </div>
-
-                                <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
-                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
-                                    <div class="text-right">
-                                        <p class="font-bold text-white text-xs">radio & #radio</p>
-                                        <p class="text-gray-400 text-[10px]">تشغيل إذاعة القرآن الكريم على مدار الساعة</p>
+                                        <p class="font-bold text-white text-xs">apply & /apply</p>
+                                        <p class="text-gray-400 text-[10px]">التقديم على رتب الإدارة والوظائف المتاحة في السيرفر</p>
                                     </div>
                                 </div>
 
                             </div>
                         </div>
+
+                        <!-- 2. أوامر الاقتصاد والعملات (Economy & Stars) -->
+                        <div class="bg-[#1c1f2e] border border-white/5 p-5 rounded-2xl space-y-3">
+                            <h4 class="font-bold text-white text-xs mb-3 text-right flex items-center justify-end gap-2"><span>أوامر الاقتصاد ورصيد الذهب & Star Coins</span><span class="text-amber-400">🪙</span></h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+
+                                <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                    <div class="text-right">
+                                        <p class="font-bold text-white text-xs">star & #star & #stars & /stars</p>
+                                        <p class="text-gray-400 text-[10px]">عرض رصيد Star Coin وإعطاء النجوم والسمعة للأعضاء</p>
+                                    </div>
+                                </div>
+
+                                <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                    <div class="text-right">
+                                        <p class="font-bold text-white text-xs">daily & #daily & /daily</p>
+                                        <p class="text-gray-400 text-[10px]">استلام المكافأة اليومية المجانية كل 24 ساعة (+500 إلى 1,000 ⭐)</p>
+                                    </div>
+                                </div>
+
+                                <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                    <div class="text-right">
+                                        <p class="font-bold text-white text-xs">pay & #pay & #star &lt;user&gt; &lt;amount&gt;</p>
+                                        <p class="text-gray-400 text-[10px]">تحويل العملات والنجوم لعضو آخر مع حساب الضريبة</p>
+                                    </div>
+                                </div>
+
+                                <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                    <div class="text-right">
+                                        <p class="font-bold text-white text-xs">work & #work & /work</p>
+                                        <p class="text-gray-400 text-[10px]">العمل في وظائف عشوائية لكسب الذهب والعملات (كل 4 ساعات)</p>
+                                    </div>
+                                </div>
+
+                                <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                    <div class="text-right">
+                                        <p class="font-bold text-white text-xs">bank & #bank & /bank</p>
+                                        <p class="text-gray-400 text-[10px]">إيداع وسحب الأموال والتحكم بحساب البنك لحماية الرصيد</p>
+                                    </div>
+                                </div>
+
+                                <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                    <div class="text-right">
+                                        <p class="font-bold text-white text-xs">rank & #rank & /rank & /level</p>
+                                        <p class="text-gray-400 text-[10px]">بطاقة مستوى العضو ونقاط الخبرة والترتيب في السيرفر</p>
+                                    </div>
+                                </div>
+
+                                <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                    <div class="text-right">
+                                        <p class="font-bold text-white text-xs">leaderboard & #top & /top</p>
+                                        <p class="text-gray-400 text-[10px]">قائمة المتصدرين في السيرفر (XP المستويات أو أغنى الأعضاء)</p>
+                                    </div>
+                                </div>
+
+                                <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                    <div class="text-right">
+                                        <p class="font-bold text-white text-xs">tax & #tax & /tax</p>
+                                        <p class="text-gray-400 text-[10px]">حاسبة ضريبة بروبوت والتحويلات الذكية والمبالغ الصافية</p>
+                                    </div>
+                                </div>
+
+                                <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                    <div class="text-right">
+                                        <p class="font-bold text-white text-xs">setwallpaper & /setwallpaper</p>
+                                        <p class="text-gray-400 text-[10px]">تغيير خلفية بروفايل العضو وتعيين رابط صورة مخصصة</p>
+                                    </div>
+                                </div>
+
+                                <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                    <div class="text-right">
+                                        <p class="font-bold text-white text-xs">gamble & #gamble & /gamble</p>
+                                        <p class="text-gray-400 text-[10px]">المراهنة بالعملات في لعبة الكازينو لمضاعفة الأرباح</p>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <!-- 3. أوامر الألعاب والتسلية والمسابقات (Fun & Games) -->
+                        <div class="bg-[#1c1f2e] border border-white/5 p-5 rounded-2xl space-y-3">
+                            <h4 class="font-bold text-white text-xs mb-3 text-right flex items-center justify-end gap-2"><span>أوامر الألعاب والتسلية والمسابقات</span><span class="text-pink-400">🎮</span></h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+
+                                <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                    <div class="text-right">
+                                        <p class="font-bold text-white text-xs">trivia & #trivia & /trivia</p>
+                                        <p class="text-gray-400 text-[10px]">مسابقة الأسئلة الثقافية التفاعلية مع جوائز Star Coins</p>
+                                    </div>
+                                </div>
+
+                                <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                    <div class="text-right">
+                                        <p class="font-bold text-white text-xs">fight & #fight & /fight</p>
+                                        <p class="text-gray-400 text-[10px]">قتال ومبارزة تفاعلية بالدور بين عضوين بأزرار وأسلحة متنوعة</p>
+                                    </div>
+                                </div>
+
+                                <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                    <div class="text-right">
+                                        <p class="font-bold text-white text-xs">chairs & #chairs & /chairs</p>
+                                        <p class="text-gray-400 text-[10px]">لعبة الكراسي الموسيقية الشهيرة للأعضاء داخل الروم</p>
+                                    </div>
+                                </div>
+
+                                <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                    <div class="text-right">
+                                        <p class="font-bold text-white text-xs">mafia & #mafia & /mafia</p>
+                                        <p class="text-gray-400 text-[10px]">لعبة المافيا والغموض والتحقيق الجماعية</p>
+                                    </div>
+                                </div>
+
+                                <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                    <div class="text-right">
+                                        <p class="font-bold text-white text-xs">hideseek & #hideseek & /hideseek</p>
+                                        <p class="text-gray-400 text-[10px]">لعبة الغميمة والاختباء التفاعلية</p>
+                                    </div>
+                                </div>
+
+                                <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                    <div class="text-right">
+                                        <p class="font-bold text-white text-xs">coinflip & #coinflip & /coinflip</p>
+                                        <p class="text-gray-400 text-[10px]">رمي العملة (ملك/كتابة) والمراهنة بالنجوم</p>
+                                    </div>
+                                </div>
+
+                                <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                    <div class="text-right">
+                                        <p class="font-bold text-white text-xs">roulette & #roulette & /roulette</p>
+                                        <p class="text-gray-400 text-[10px]">لعبة الروليت الكلاسيكية مع عجلة الحظ والأرقام</p>
+                                    </div>
+                                </div>
+
+                                <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                    <div class="text-right">
+                                        <p class="font-bold text-white text-xs">poll & #poll & /poll</p>
+                                        <p class="text-gray-400 text-[10px]">إنشاء استطلاعات وتصويت تفاعلي للأعضاء مع خيارات متعددة</p>
+                                    </div>
+                                </div>
+
+                                <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                    <div class="text-right">
+                                        <p class="font-bold text-white text-xs">giveaway & #giveaway & /giveaway</p>
+                                        <p class="text-gray-400 text-[10px]">إنشاء وإدارة مسابقات الجيف أواي وتحديد الفائزين تلقائياً</p>
+                                    </div>
+                                </div>
+
+                                <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                    <div class="text-right">
+                                        <p class="font-bold text-white text-xs">embed & /embed</p>
+                                        <p class="text-gray-400 text-[10px]">إنشاء رسائل أمبد احترافية وتنسيق الألوان والحقول</p>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <!-- 4. أوامر القرآن الكريم والراديو الإسلامي (Islamic & Audio) -->
+                        <div class="bg-[#1c1f2e] border border-white/5 p-5 rounded-2xl space-y-3">
+                            <h4 class="font-bold text-white text-xs mb-3 text-right flex items-center justify-end gap-2"><span>القرآن الكريم والإذاعة الإسلامية 24/7</span><span class="text-emerald-400">📻</span></h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+
+                                <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                    <div class="text-right">
+                                        <p class="font-bold text-white text-xs">quran & #quran & /quran</p>
+                                        <p class="text-gray-400 text-[10px]">الاستماع لآيات وسور القرآن الكريم بصوت أشهر القراء</p>
+                                    </div>
+                                </div>
+
+                                <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                    <div class="text-right">
+                                        <p class="font-bold text-white text-xs">radio & #radio & /radio</p>
+                                        <p class="text-gray-400 text-[10px]">تشغيل إذاعة القرآن الكريم والتلاوات المباشرة على مدار 24 ساعة</p>
+                                    </div>
+                                </div>
+
+                                <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                                    <div class="text-right">
+                                        <p class="font-bold text-white text-xs">stop & #stop & /stop</p>
+                                        <p class="text-gray-400 text-[10px]">إيقاف تشغيل الراديو أو الصوت وخروج البوت من الروم الصوتي</p>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
                     </div>
                 `;
             } else if (section === 'moderation') {

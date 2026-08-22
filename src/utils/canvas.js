@@ -1,4 +1,20 @@
-const { createCanvas, loadImage } = require('@napi-rs/canvas');
+const { createCanvas, loadImage, GlobalFonts } = require('@napi-rs/canvas');
+const fs = require('fs');
+const path = require('path');
+
+// تسجيل الخطوط لضمان وضوح النصوص في ديسكورد وCanvas
+try {
+  const fontsDir = process.env.WINDIR ? path.join(process.env.WINDIR, 'Fonts') : 'C:\\Windows\\Fonts';
+  if (fs.existsSync(path.join(fontsDir, 'arial.ttf'))) {
+    GlobalFonts.registerFromPath(path.join(fontsDir, 'arial.ttf'), 'MainFont');
+  }
+  if (fs.existsSync(path.join(fontsDir, 'arialbd.ttf'))) {
+    GlobalFonts.registerFromPath(path.join(fontsDir, 'arialbd.ttf'), 'MainFontBold');
+  }
+  if (fs.existsSync(path.join(fontsDir, 'segoeuib.ttf'))) {
+    GlobalFonts.registerFromPath(path.join(fontsDir, 'segoeuib.ttf'), 'SegoeUIBold');
+  }
+} catch (e) {}
 
 const numFmt = new Intl.NumberFormat('en-US');
 
