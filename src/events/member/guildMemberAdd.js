@@ -107,7 +107,20 @@ module.exports = {
       }
     }
 
-    // 1. نظام الرتب التلقائية (Auto-Role)
+    // 1. نظام متتبع الدعوات (Invite Tracker)
+    let inviterData = { inviter: null, code: null, isFake: false };
+    try {
+      const inviteTracker = require('../../utils/inviteTracker');
+      inviterData = await inviteTracker.findInviter(member);
+    } catch (e) {}
+
+    const inviterObj = inviterData.inviter;
+    const inviterMention = inviterObj ? `<@${inviterObj.id}>` : (inviterData.code ? `رابط خاص (\`${inviterData.code}\`)` : 'غير معروف (Direct / Discovery)');
+    const inviterName = inviterObj ? inviterObj.username : 'غير معروف';
+    const inviterStats = inviterObj ? db.getInvites(guild.id, inviterObj.id) : null;
+    const inviterCount = inviterStats ? inviterStats.total : 0;
+
+    // 1.5 نظام الرتب التلقائية (Auto-Role)
     const autoRoleId = settings.auto_role || settings.autorole_id;
     if (autoRoleId) {
       try {
@@ -133,7 +146,7 @@ module.exports = {
       }
 
       if (welcomeChannel && welcomeChannel.isTextBased()) {
-        let msg = settings.welcome_message || 'أهلاً بك يا [user] في سيرفر **[server]**! 🎉 أنت العضو رقم [memberCount]';
+        let msg = settings.welcome_message || 'أهلاً بك يا [user] في سيرفر **[server]**! 🎉 أنت العضو رقم [memberCount] (تمت دعوتك بواسطة [inviter])';
         msg = msg
           .replace(/\[user\]/gi, `<@${member.id}>`)
           .replace(/\{user\}/gi, `<@${member.id}>`)
@@ -150,7 +163,15 @@ module.exports = {
           .replace(/\[memberCount\]/gi, guild.memberCount.toString())
           .replace(/\{memberCount\}/gi, guild.memberCount.toString())
           .replace(/\[members\]/gi, guild.memberCount.toString())
-          .replace(/\{members\}/gi, guild.memberCount.toString());
+          .replace(/\{members\}/gi, guild.memberCount.toString())
+          .replace(/\[inviter\]/gi, inviterMention)
+          .replace(/\{inviter\}/gi, inviterMention)
+          .replace(/\[inviterName\]/gi, inviterName)
+          .replace(/\{inviterName\}/gi, inviterName)
+          .replace(/\[invitesCount\]/gi, inviterCount.toString())
+          .replace(/\{invitesCount\}/gi, inviterCount.toString())
+          .replace(/\[inviteCode\]/gi, inviterData.code || 'N/A')
+          .replace(/\{inviteCode\}/gi, inviterData.code || 'N/A');
 
         const sendPayload = {};
 
@@ -160,7 +181,7 @@ module.exports = {
             .setTitle(`🎉 مرحباً بك في ${guild.name}!`)
             .setDescription(msg)
             .setThumbnail(member.user.displayAvatarURL({ dynamic: true, size: 256 }))
-            .setFooter({ text: `العضو رقم #${guild.memberCount}`, iconURL: guild.iconURL() || undefined })
+            .setFooter({ text: `العضو رقم #${guild.memberCount} • دعوة بواسطة: ${inviterName}`, iconURL: guild.iconURL() || undefined })
             .setTimestamp();
           sendPayload.embeds = [welcomeEmbed];
         } else {
@@ -196,7 +217,9 @@ module.exports = {
           .replace(/\[server\]/gi, guild.name)
           .replace(/\{server\}/gi, guild.name)
           .replace(/\[memberCount\]/gi, guild.memberCount.toString())
-          .replace(/\{memberCount\}/gi, guild.memberCount.toString());
+          .replace(/\{memberCount\}/gi, guild.memberCount.toString())
+          .replace(/\[inviter\]/gi, inviterMention)
+          .replace(/\{inviter\}/gi, inviterMention);
 
         await member.send({ content: dmMsg }).catch(() => {});
       } catch (err) {}
@@ -214,10 +237,15 @@ module.exports = {
             .addFields(
               { name: '👤 العضو', value: `<@${member.id}> (${member.user.tag})`, inline: true },
               { name: '🆔 الأيدي', value: `${member.id}`, inline: true },
+              { name: '🔗 الداعي (Inviter)', value: `${inviterMention} (${inviterCount} دعوة)`, inline: true },
               { name: '📅 تاريخ إنشاء الحساب', value: `<t:${Math.floor(member.user.createdTimestamp / 1000)}:R>`, inline: false },
               { name: '👥 إجمالي الأعضاء', value: `${guild.memberCount}`, inline: true }
             )
             .setTimestamp();
+
+          if (inviterData.isFake) {
+            joinEmbed.addFields({ name: '⚠️ تنبيه', value: 'حساب جديد عمره أقل من 3 أيام (Fake Invite)', inline: true });
+          }
 
           await logChannel.send({ embeds: [joinEmbed] }).catch(() => {});
         }

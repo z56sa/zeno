@@ -15,6 +15,13 @@ module.exports = {
       await antiNuke.checkAction(guild, 'memberKick', AuditLogEvent.MemberKick);
     } catch (e) {}
 
+    // 1.5 تحديث متتبع الدعوات وتسجيل المغادرة (Invite Tracker)
+    let inviterId = null;
+    try {
+      const inviteTracker = require('../../utils/inviteTracker');
+      inviterId = inviteTracker.handleMemberLeave(member);
+    } catch (e) {}
+
     // 2. نظام رسائل المغادرة (Leave / Goodbye Message)
     if (settings.leave_enabled && settings.leave_channel) {
       try {
@@ -50,6 +57,7 @@ module.exports = {
       try {
         const logChannel = guild.channels.cache.get(settings.log_channel) || await guild.channels.fetch(settings.log_channel).catch(() => null);
         if (logChannel && logChannel.isTextBased()) {
+          const inviterText = inviterId ? `<@${inviterId}>` : 'غير معروف';
           const leaveLogEmbed = new EmbedBuilder()
             .setColor('#ef4444')
             .setTitle('📤 عضو غادر السيرفر')
@@ -57,6 +65,7 @@ module.exports = {
             .addFields(
               { name: '👤 العضو', value: `${member.user.tag} (${member.id})`, inline: true },
               { name: '🆔 الأيدي', value: `${member.id}`, inline: true },
+              { name: '🔗 الداعي (Inviter)', value: inviterText, inline: true },
               { name: '👥 الأعضاء المتبقين', value: `${guild.memberCount}`, inline: true }
             )
             .setTimestamp();

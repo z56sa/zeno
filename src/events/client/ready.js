@@ -1,5 +1,6 @@
 const { ActivityType, Events } = require('discord.js');
 const logger = require('../../utils/logger');
+const inviteTracker = require('../../utils/inviteTracker');
 
 module.exports = {
   name: Events.ClientReady || 'ready',
@@ -12,6 +13,9 @@ module.exports = {
         await guild.members.fetch().catch(() => null);
       }
     } catch (e) {}
+
+    // تهيئة متتبع الدعوات
+    await inviteTracker.init(client);
 
     const totalMembers = client.guilds.cache.reduce((acc, g) => acc + (g.memberCount || g.members.cache.size || 0), 0);
     logger.info(`البوت متواجد في ${client.guilds.cache.size} سيرفر(ات) ويخدم ${totalMembers} مستخدم.`);

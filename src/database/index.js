@@ -218,6 +218,90 @@ db.exec(`
     reward_points INTEGER DEFAULT 100,
     created_at INTEGER DEFAULT (strftime('%s','now'))
   );
+
+  -- 🎫 Ticket Panels (لوحات التذاكر المخصصة)
+  CREATE TABLE IF NOT EXISTS ticket_panels (
+    panel_id TEXT PRIMARY KEY,
+    guild_id TEXT NOT NULL,
+    channel_id TEXT,
+    message_id TEXT,
+    title TEXT,
+    description TEXT,
+    button_label TEXT,
+    button_emoji TEXT,
+    button_style TEXT,
+    welcome_msg TEXT,
+    support_role TEXT,
+    category_id TEXT,
+    naming_scheme TEXT,
+    logs_channel TEXT,
+    categories_json TEXT,
+    created_at INTEGER DEFAULT (strftime('%s','now'))
+  );
+
+  -- ⭐ Ticket Ratings (تقييمات موظفي الدعم)
+  CREATE TABLE IF NOT EXISTS ticket_ratings (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    guild_id TEXT NOT NULL,
+    ticket_channel_id TEXT,
+    user_id TEXT NOT NULL,
+    staff_id TEXT NOT NULL,
+    stars INTEGER NOT NULL,
+    feedback TEXT,
+    created_at INTEGER DEFAULT (strftime('%s','now'))
+  );
+
+  -- 📜 Ticket Transcripts (سجلات التذاكر)
+  CREATE TABLE IF NOT EXISTS ticket_transcripts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    guild_id TEXT NOT NULL,
+    channel_id TEXT NOT NULL,
+    user_id TEXT NOT NULL,
+    closed_by TEXT,
+    reason TEXT,
+    html_content TEXT,
+    created_at INTEGER DEFAULT (strftime('%s','now'))
+  );
+
+  -- 🔗 Invites System (نظام تتبع الدعوات)
+  CREATE TABLE IF NOT EXISTS invites (
+    guild_id TEXT NOT NULL,
+    user_id TEXT NOT NULL,
+    regular INTEGER DEFAULT 0,
+    leaves INTEGER DEFAULT 0,
+    fake INTEGER DEFAULT 0,
+    bonus INTEGER DEFAULT 0,
+    PRIMARY KEY (guild_id, user_id)
+  );
+
+  CREATE TABLE IF NOT EXISTS invite_members (
+    guild_id TEXT NOT NULL,
+    member_id TEXT NOT NULL,
+    inviter_id TEXT,
+    code TEXT,
+    is_fake INTEGER DEFAULT 0,
+    is_left INTEGER DEFAULT 0,
+    joined_at INTEGER DEFAULT (strftime('%s','now')),
+    PRIMARY KEY (guild_id, member_id)
+  );
+
+  -- 📢 Broadcasts System (نظام الإعلانات والمذيع الآلي المتقدم)
+  CREATE TABLE IF NOT EXISTS broadcasts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    guild_id TEXT NOT NULL,
+    channel_ids TEXT NOT NULL,
+    title TEXT,
+    message TEXT NOT NULL,
+    color TEXT DEFAULT '#9333ea',
+    image_url TEXT,
+    interval_minutes INTEGER DEFAULT 0,
+    scheduled_time INTEGER DEFAULT 0,
+    last_sent INTEGER DEFAULT 0,
+    is_recurring INTEGER DEFAULT 0,
+    status TEXT DEFAULT 'active',
+    created_by TEXT,
+    created_at INTEGER DEFAULT (strftime('%s','now'))
+  );
 `);
 
 // Migrations - إضافة الأعمدة الجديدة بشكل آمن
@@ -255,6 +339,20 @@ try { db.exec("ALTER TABLE guild_settings ADD COLUMN ticket_panel_channel TEXT;"
 try { db.exec("ALTER TABLE guild_settings ADD COLUMN ticket_panel_title TEXT;"); } catch(e) {}
 try { db.exec("ALTER TABLE guild_settings ADD COLUMN ticket_panel_desc TEXT;"); } catch(e) {}
 try { db.exec("ALTER TABLE guild_settings ADD COLUMN ticket_role TEXT;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN ticket_rating_enabled INTEGER DEFAULT 1;"); } catch(e) {}
+
+try { db.exec("ALTER TABLE tickets ADD COLUMN claimed_by TEXT;"); } catch(e) {}
+try { db.exec("ALTER TABLE tickets ADD COLUMN claimed_at INTEGER;"); } catch(e) {}
+try { db.exec("ALTER TABLE tickets ADD COLUMN closed_by TEXT;"); } catch(e) {}
+try { db.exec("ALTER TABLE tickets ADD COLUMN close_reason TEXT;"); } catch(e) {}
+try { db.exec("ALTER TABLE tickets ADD COLUMN transcript_url TEXT;"); } catch(e) {}
+
+try { db.exec("ALTER TABLE giveaways ADD COLUMN required_role TEXT;"); } catch(e) {}
+try { db.exec("ALTER TABLE giveaways ADD COLUMN min_level INTEGER DEFAULT 0;"); } catch(e) {}
+try { db.exec("ALTER TABLE giveaways ADD COLUMN min_account_age INTEGER DEFAULT 0;"); } catch(e) {}
+try { db.exec("ALTER TABLE giveaways ADD COLUMN extra_role TEXT;"); } catch(e) {}
+try { db.exec("ALTER TABLE giveaways ADD COLUMN hosted_by TEXT;"); } catch(e) {}
+try { db.exec("ALTER TABLE giveaways ADD COLUMN guild_id TEXT;"); } catch(e) {}
 
 try { db.exec("ALTER TABLE guild_settings ADD COLUMN economy_enabled INTEGER DEFAULT 1;"); } catch(e) {}
 try { db.exec("ALTER TABLE guild_settings ADD COLUMN daily_amount INTEGER DEFAULT 500;"); } catch(e) {}
@@ -405,15 +503,16 @@ function clearWarnings(guildId, userId) {
 }
 
 // ==========================================
-// Tickets
+// Tickets (نظام التذاكر المتقدم)
 // ==========================================
 function createTicket(guildId, channelId, userId, category = 'General') {
-  db.prepare('INSERT OR IGNORE INTO tickets (guild_id, channel_id, user_id, category) VALUES (?, ?, ?, ?)').run(guildId, channelId, userId, category);
+  db.prepare('INSERT OR IGNORE INTO tickets (guild_id, channel_id, user_id, category, status) VALUES (?, ?, ?, ?, ?)').run(guildId, channelId, userId, category, 'open');
   return db.prepare('SELECT * FROM tickets WHERE channel_id = ?').get(channelId);
 }
 
-function closeTicket(channelId) {
-  db.prepare("UPDATE tickets SET status = 'closed', closed_at = strftime('%s','now') WHERE channel_id = ?").run(channelId);
+function closeTicket(channelId, closedBy = null, reason = null) {
+  db.prepare("UPDATE tickets SET status = 'closed', closed_at = strftime('%s','now'), closed_by = ?, close_reason = ? WHERE channel_id = ?")
+    .run(closedBy, reason, channelId);
   return db.prepare('SELECT * FROM tickets WHERE channel_id = ?').get(channelId);
 }
 
@@ -431,6 +530,220 @@ function getUserActiveTickets(guildId, userId) {
 
 function getGuildTickets(guildId, limit = 50) {
   return db.prepare('SELECT * FROM tickets WHERE guild_id = ? ORDER BY created_at DESC LIMIT ?').all(guildId, limit);
+}
+
+function claimTicket(channelId, staffId) {
+  db.prepare("UPDATE tickets SET claimed_by = ?, claimed_at = strftime('%s','now') WHERE channel_id = ?").run(staffId, channelId);
+  return db.prepare('SELECT * FROM tickets WHERE channel_id = ?').get(channelId);
+}
+
+function unclaimTicket(channelId) {
+  db.prepare("UPDATE tickets SET claimed_by = NULL, claimed_at = NULL WHERE channel_id = ?").run(channelId);
+  return db.prepare('SELECT * FROM tickets WHERE channel_id = ?').get(channelId);
+}
+
+function transferTicket(channelId, targetStaffOrRoleId) {
+  db.prepare("UPDATE tickets SET claimed_by = ? WHERE channel_id = ?").run(targetStaffOrRoleId, channelId);
+  return db.prepare('SELECT * FROM tickets WHERE channel_id = ?').get(channelId);
+}
+
+// 🎫 Ticket Panels (لوحات التذاكر)
+function saveTicketPanel(p) {
+  return db.prepare(`
+    INSERT OR REPLACE INTO ticket_panels 
+    (panel_id, guild_id, channel_id, message_id, title, description, button_label, button_emoji, button_style, welcome_msg, support_role, category_id, naming_scheme, logs_channel, categories_json)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `).run(
+    p.panel_id, p.guild_id, p.channel_id || null, p.message_id || null, 
+    p.title || '🎫 نظام الدعم الفني', p.description || '', p.button_label || 'فتح تذكرة', 
+    p.button_emoji || '📩', p.button_style || 'Primary', p.welcome_msg || '', 
+    p.support_role || null, p.category_id || null, p.naming_scheme || 'ticket-{username}', 
+    p.logs_channel || null, p.categories_json ? (typeof p.categories_json === 'string' ? p.categories_json : JSON.stringify(p.categories_json)) : null
+  );
+}
+
+function getTicketPanel(panelId) {
+  return db.prepare('SELECT * FROM ticket_panels WHERE panel_id = ?').get(panelId);
+}
+
+function getGuildTicketPanels(guildId) {
+  return db.prepare('SELECT * FROM ticket_panels WHERE guild_id = ? ORDER BY created_at DESC').all(guildId);
+}
+
+function deleteTicketPanel(panelId) {
+  return db.prepare('DELETE FROM ticket_panels WHERE panel_id = ?').run(panelId);
+}
+
+// ⭐ Ticket Ratings (تقييمات الموظفين)
+function addTicketRating(guildId, ticketChannelId, userId, staffId, stars, feedback = '') {
+  const res = db.prepare(`
+    INSERT INTO ticket_ratings (guild_id, ticket_channel_id, user_id, staff_id, stars, feedback)
+    VALUES (?, ?, ?, ?, ?, ?)
+  `).run(guildId, ticketChannelId, userId, staffId, stars, feedback);
+
+  // تحديث نقاط الموظف بناء على التقييم
+  try {
+    const pointsBonus = stars >= 4 ? (stars * 5) : 0;
+    if (pointsBonus > 0) {
+      getStaffMember(guildId, staffId);
+      db.prepare('UPDATE staff_activity SET points = points + ? WHERE guild_id = ? AND user_id = ?').run(pointsBonus, guildId, staffId);
+    }
+  } catch (e) {}
+
+  return res.lastInsertRowid;
+}
+
+function getStaffRatings(guildId, staffId) {
+  return db.prepare('SELECT * FROM ticket_ratings WHERE guild_id = ? AND staff_id = ? ORDER BY created_at DESC').all(guildId, staffId);
+}
+
+function getStaffAverageRating(guildId, staffId) {
+  const row = db.prepare('SELECT COUNT(*) as count, AVG(stars) as avg_stars FROM ticket_ratings WHERE guild_id = ? AND staff_id = ?').get(guildId, staffId);
+  return {
+    count: row?.count || 0,
+    average: row?.avg_stars ? parseFloat(row.avg_stars.toFixed(1)) : 5.0
+  };
+}
+
+// 📜 Ticket Transcripts
+function saveTranscript(guildId, channelId, userId, closedBy = null, reason = null, htmlContent = '') {
+  return db.prepare(`
+    INSERT INTO ticket_transcripts (guild_id, channel_id, user_id, closed_by, reason, html_content)
+    VALUES (?, ?, ?, ?, ?, ?)
+  `).run(guildId, channelId, userId, closedBy, reason, htmlContent);
+}
+
+function getTranscript(channelId) {
+  return db.prepare('SELECT * FROM ticket_transcripts WHERE channel_id = ? ORDER BY id DESC LIMIT 1').get(channelId);
+}
+
+// ==========================================
+// 🔗 Invites System (متتبع الدعوات)
+// ==========================================
+function getInvites(guildId, userId) {
+  let row = db.prepare('SELECT * FROM invites WHERE guild_id = ? AND user_id = ?').get(guildId, userId);
+  if (!row) {
+    db.prepare('INSERT OR IGNORE INTO invites (guild_id, user_id, regular, leaves, fake, bonus) VALUES (?, ?, 0, 0, 0, 0)').run(guildId, userId);
+    row = db.prepare('SELECT * FROM invites WHERE guild_id = ? AND user_id = ?').get(guildId, userId);
+  }
+  const regular = row?.regular || 0;
+  const leaves = row?.leaves || 0;
+  const fake = row?.fake || 0;
+  const bonus = row?.bonus || 0;
+  const total = (regular + bonus) - (leaves + fake);
+  return { ...row, regular, leaves, fake, bonus, total: Math.max(0, total) };
+}
+
+function addInviteRecord(guildId, inviterId, memberId, code = null, isFake = 0) {
+  // حفظ سجل العضو المدعو
+  db.prepare(`
+    INSERT OR REPLACE INTO invite_members (guild_id, member_id, inviter_id, code, is_fake, is_left)
+    VALUES (?, ?, ?, ?, ?, 0)
+  `).run(guildId, memberId, inviterId, code, isFake ? 1 : 0);
+
+  if (inviterId) {
+    getInvites(guildId, inviterId);
+    if (isFake) {
+      db.prepare('UPDATE invites SET fake = fake + 1 WHERE guild_id = ? AND user_id = ?').run(guildId, inviterId);
+    } else {
+      db.prepare('UPDATE invites SET regular = regular + 1 WHERE guild_id = ? AND user_id = ?').run(guildId, inviterId);
+    }
+  }
+}
+
+function removeInviteMember(guildId, memberId) {
+  const memberRecord = db.prepare('SELECT * FROM invite_members WHERE guild_id = ? AND member_id = ?').get(guildId, memberId);
+  if (memberRecord && !memberRecord.is_left) {
+    db.prepare('UPDATE invite_members SET is_left = 1 WHERE guild_id = ? AND member_id = ?').run(guildId, memberId);
+    if (memberRecord.inviter_id) {
+      getInvites(guildId, memberRecord.inviter_id);
+      db.prepare('UPDATE invites SET leaves = leaves + 1 WHERE guild_id = ? AND user_id = ?').run(guildId, memberRecord.inviter_id);
+    }
+    return memberRecord.inviter_id;
+  }
+  return null;
+}
+
+function addBonusInvites(guildId, userId, amount) {
+  getInvites(guildId, userId);
+  db.prepare('UPDATE invites SET bonus = bonus + ? WHERE guild_id = ? AND user_id = ?').run(amount, guildId, userId);
+  return getInvites(guildId, userId);
+}
+
+function getInvitesLeaderboard(guildId, limit = 15) {
+  const rows = db.prepare('SELECT * FROM invites WHERE guild_id = ?').all(guildId);
+  return rows
+    .map(r => ({
+      ...r,
+      total: Math.max(0, ((r.regular || 0) + (r.bonus || 0)) - ((r.leaves || 0) + (r.fake || 0)))
+    }))
+    .sort((a, b) => b.total - a.total)
+    .slice(0, limit);
+}
+
+function getMemberInviter(guildId, memberId) {
+  return db.prepare('SELECT * FROM invite_members WHERE guild_id = ? AND member_id = ?').get(guildId, memberId);
+}
+
+function resetInvites(guildId, userId = null) {
+  if (userId) {
+    db.prepare('DELETE FROM invites WHERE guild_id = ? AND user_id = ?').run(guildId, userId);
+    db.prepare('DELETE FROM invite_members WHERE guild_id = ? AND inviter_id = ?').run(guildId, userId);
+  } else {
+    db.prepare('DELETE FROM invites WHERE guild_id = ?').run(guildId);
+    db.prepare('DELETE FROM invite_members WHERE guild_id = ?').run(guildId);
+  }
+}
+
+// ==========================================
+// 📢 Broadcasts (نظام الإعلانات والمذيع الآلي)
+// ==========================================
+function createBroadcast(data) {
+  const channelIdsStr = Array.isArray(data.channel_ids) ? data.channel_ids.join(',') : String(data.channel_ids || '');
+  const res = db.prepare(`
+    INSERT INTO broadcasts (guild_id, channel_ids, title, message, color, image_url, interval_minutes, scheduled_time, is_recurring, created_by, status)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `).run(
+    data.guild_id,
+    channelIdsStr,
+    data.title || null,
+    data.message,
+    data.color || '#9333ea',
+    data.image_url || null,
+    data.interval_minutes || 0,
+    data.scheduled_time || 0,
+    data.is_recurring ? 1 : 0,
+    data.created_by || null,
+    data.status || 'active'
+  );
+  return db.prepare('SELECT * FROM broadcasts WHERE id = ?').get(res.lastInsertRowid);
+}
+
+function getGuildBroadcasts(guildId) {
+  return db.prepare('SELECT * FROM broadcasts WHERE guild_id = ? ORDER BY id DESC').all(guildId);
+}
+
+function getBroadcast(id) {
+  return db.prepare('SELECT * FROM broadcasts WHERE id = ?').get(id);
+}
+
+function deleteBroadcast(id, guildId = null) {
+  if (guildId) {
+    return db.prepare('DELETE FROM broadcasts WHERE id = ? AND guild_id = ?').run(id, guildId);
+  }
+  return db.prepare('DELETE FROM broadcasts WHERE id = ?').run(id);
+}
+
+function getAllActiveBroadcasts() {
+  return db.prepare("SELECT * FROM broadcasts WHERE status = 'active'").all();
+}
+
+function updateBroadcastLastSent(id, timestamp = Date.now()) {
+  return db.prepare('UPDATE broadcasts SET last_sent = ? WHERE id = ?').run(timestamp, id);
+}
+
+function updateBroadcastStatus(id, status) {
+  return db.prepare('UPDATE broadcasts SET status = ? WHERE id = ?').run(status, id);
 }
 
 // ==========================================
@@ -589,11 +902,35 @@ function getStars(guildId, userId) {
 }
 
 // ==========================================
-// Giveaways
+// Giveaways (نظام السحوبات المتقدم)
 // ==========================================
-function createGiveaway(guildId, channelId, messageId, prize, winnersCount, hostId, endTime) {
-  db.prepare('INSERT INTO giveaways (guild_id, channel_id, message_id, prize, winners_count, host_id, end_time) VALUES (?, ?, ?, ?, ?, ?, ?)').run(guildId, channelId, messageId, prize, winnersCount, hostId, endTime);
-  return db.prepare('SELECT * FROM giveaways WHERE message_id = ?').get(messageId);
+function createGiveaway(messageIdOrGuildId, channelId, guildIdOrMessageId, prize, winnersCount, endTime, hostId, requiredRole = null, minLevel = 0, minAccountAge = 0, extraRole = null) {
+  let gId = guildIdOrMessageId;
+  let mId = messageIdOrGuildId;
+  let chId = channelId;
+  let pr = prize;
+  let wc = winnersCount || 1;
+  let et = endTime;
+  let hId = hostId;
+
+  // Flexible argument check: if called as (guildId, channelId, messageId, prize, winnersCount, hostId, endTime)
+  if (typeof endTime === 'string' && isNaN(endTime) && typeof hostId === 'number') {
+    gId = messageIdOrGuildId;
+    chId = channelId;
+    mId = guildIdOrMessageId;
+    pr = prize;
+    wc = winnersCount;
+    hId = endTime;
+    et = hostId;
+  }
+
+  db.prepare(`
+    INSERT OR REPLACE INTO giveaways 
+    (message_id, channel_id, guild_id, prize, winners_count, host_id, end_time, required_role, min_level, min_account_age, extra_role, status, entries)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'active', '[]')
+  `).run(mId, chId, gId, pr, wc, hId, et, requiredRole, minLevel, minAccountAge, extraRole);
+
+  return db.prepare('SELECT * FROM giveaways WHERE message_id = ?').get(mId);
 }
 
 function getGiveaway(messageId) {
@@ -604,8 +941,52 @@ function getActiveGiveaways() {
   return db.prepare("SELECT * FROM giveaways WHERE status = 'active' AND end_time <= ?").all(Date.now());
 }
 
+function getGiveawayEntries(messageId) {
+  const row = db.prepare('SELECT entries FROM giveaways WHERE message_id = ?').get(messageId);
+  if (!row || !row.entries) return [];
+  try {
+    return JSON.parse(row.entries);
+  } catch (e) {
+    return [];
+  }
+}
+
 function updateGiveawayEntries(messageId, entries) {
-  db.prepare('UPDATE giveaways SET entries = ? WHERE message_id = ?').run(JSON.stringify(entries), messageId);
+  const jsonStr = typeof entries === 'string' ? entries : JSON.stringify(entries);
+  db.prepare('UPDATE giveaways SET entries = ? WHERE message_id = ?').run(jsonStr, messageId);
+}
+
+function addGiveawayEntry(messageId, userId) {
+  const entries = getGiveawayEntries(messageId);
+  if (!entries.includes(userId)) {
+    entries.push(userId);
+    updateGiveawayEntries(messageId, entries);
+    return { added: true, count: entries.length };
+  }
+  return { added: false, count: entries.length };
+}
+
+function removeGiveawayEntry(messageId, userId) {
+  let entries = getGiveawayEntries(messageId);
+  if (entries.includes(userId)) {
+    entries = entries.filter(id => id !== userId);
+    updateGiveawayEntries(messageId, entries);
+    return { removed: true, count: entries.length };
+  }
+  return { removed: false, count: entries.length };
+}
+
+function toggleGiveawayEntry(messageId, userId) {
+  const entries = getGiveawayEntries(messageId);
+  if (entries.includes(userId)) {
+    const updated = entries.filter(id => id !== userId);
+    updateGiveawayEntries(messageId, updated);
+    return { joined: false, count: updated.length };
+  } else {
+    entries.push(userId);
+    updateGiveawayEntries(messageId, entries);
+    return { joined: true, count: entries.length };
+  }
 }
 
 function endGiveaway(messageId) {
@@ -778,6 +1159,7 @@ module.exports = {
   addWarning,
   getWarnings,
   clearWarnings,
+  // 🎫 Tickets
   createTicket,
   closeTicket,
   deleteTicket,
@@ -785,6 +1167,45 @@ module.exports = {
   getTicketByChannel,
   getUserActiveTickets,
   getGuildTickets,
+  claimTicket,
+  unclaimTicket,
+  transferTicket,
+  saveTicketPanel,
+  getTicketPanel,
+  getGuildTicketPanels,
+  deleteTicketPanel,
+  addTicketRating,
+  getStaffRatings,
+  getStaffAverageRating,
+  saveTranscript,
+  getTranscript,
+  // 🔗 Invites
+  getInvites,
+  addInviteRecord,
+  removeInviteMember,
+  addBonusInvites,
+  getInvitesLeaderboard,
+  getMemberInviter,
+  resetInvites,
+  // 🎁 Giveaways
+  createGiveaway,
+  getGiveaway,
+  getActiveGiveaways,
+  getGiveawayEntries,
+  updateGiveawayEntries,
+  addGiveawayEntry,
+  removeGiveawayEntry,
+  toggleGiveawayEntry,
+  endGiveaway,
+  // 📢 Broadcasts
+  createBroadcast,
+  getGuildBroadcasts,
+  getBroadcast,
+  deleteBroadcast,
+  getAllActiveBroadcasts,
+  updateBroadcastLastSent,
+  updateBroadcastStatus,
+  // Temp Voice
   createTempVoice,
   isTempVoice,
   getTempVoice,
