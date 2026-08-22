@@ -52,53 +52,104 @@ module.exports = function (app, client) {
                 <title>ZENO - اصنع خادم ديسكورد احترافي!</title>
                 <script src="https://cdn.tailwindcss.com"></script>
                 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+                
                 <style>
-                    body { background-color: #0b0c10; color: #ffffff; font-family: 'Cairo', sans-serif; }
+                    :root {
+                        --bg-main: #0b0d14;
+                        --bg-sidebar: #10121b;
+                        --bg-card: #151722;
+                        --bg-card-hover: #1c1f2e;
+                        --primary: #5865f2;
+                        --primary-hover: #4752c4;
+                        --border: rgba(255, 255, 255, 0.05);
+                        --text-muted: #a3a6aa;
+                    }
+                    body { background-color: var(--bg-main) !important; color: #ffffff !important; font-family: 'Cairo', sans-serif !important; }
+                    /* Scrollbar */
+                    ::-webkit-scrollbar { width: 8px; height: 8px; }
+                    ::-webkit-scrollbar-track { background: var(--bg-main); }
+                    ::-webkit-scrollbar-thumb { background: #2f3146; border-radius: 10px; }
+                    ::-webkit-scrollbar-thumb:hover { background: #40445f; }
+                    
+                    /* Glassmorphism & Cards */
+                    .probot-card {
+                        background: var(--bg-card) !important;
+                        border: 1px solid var(--border) !important;
+                        border-radius: 16px !important;
+                        transition: all 0.3s ease !important;
+                        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2) !important;
+                    }
+                    .probot-card:hover {
+                        background: var(--bg-card-hover) !important;
+                        border-color: rgba(88, 101, 242, 0.4) !important;
+                        transform: translateY(-3px) !important;
+                        box-shadow: 0 6px 25px rgba(0, 0, 0, 0.3) !important;
+                    }
+                    
+                    /* Toggles */
+                    .toggle { position: relative; display: inline-block; width: 44px; height: 24px; }
+                    .toggle input { opacity: 0; width: 0; height: 0; }
+                    .slider { position: absolute; cursor: pointer; inset: 0; background: #2f3146; border-radius: 24px; transition: .3s; }
+                    .slider:before { content: ''; position: absolute; width: 18px; height: 18px; left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: .3s; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+                    input:checked + .slider { background: var(--primary); }
+                    input:checked + .slider:before { transform: translateX(20px); }
+                    
+                    /* Buttons */
+                    .btn-primary {
+                        background-color: var(--primary);
+                        color: white;
+                        transition: all 0.2s;
+                    }
+                    .btn-primary:hover {
+                        background-color: var(--primary-hover);
+                        box-shadow: 0 4px 15px rgba(88, 101, 242, 0.4);
+                    }
                 </style>
+
             </head>
-            <body class="min-h-screen flex flex-col bg-[#0b0c10] text-gray-200 relative overflow-x-hidden selection:bg-purple-600 selection:text-white">
+            <body class="min-h-screen flex flex-col bg-[#0b0d14] text-gray-200 relative overflow-x-hidden selection:bg-purple-600 selection:text-white">
 
                 <!-- Ambient Purple Glows & Black Mesh -->
                 <div class="fixed inset-0 pointer-events-none z-0">
-                    <div class="absolute -top-40 right-1/4 w-[600px] h-[600px] bg-purple-900/20 rounded-full blur-[140px]"></div>
-                    <div class="absolute top-1/3 -left-40 w-[500px] h-[500px] bg-indigo-900/15 rounded-full blur-[130px]"></div>
-                    <div class="absolute -bottom-40 right-1/3 w-[600px] h-[600px] bg-purple-800/10 rounded-full blur-[150px]"></div>
+                    <div class="absolute -top-40 right-1/4 w-[600px] h-[600px] bg-[#5865f2]/10 rounded-full blur-[140px]"></div>
+                    <div class="absolute top-1/3 -left-40 w-[500px] h-[500px] bg-[#4752c4]/10 rounded-full blur-[130px]"></div>
+                    <div class="absolute -bottom-40 right-1/3 w-[600px] h-[600px] bg-[#5865f2]/5 rounded-full blur-[150px]"></div>
                 </div>
 
                 <!-- Header -->
-                <header class="h-20 bg-[#0f1016]/80 backdrop-blur-md border-b border-purple-900/20 px-8 flex items-center justify-between sticky top-0 z-50">
+                <header class="h-20 bg-[#10121b]/90 backdrop-blur-md border-b border-white/5 px-8 flex items-center justify-between sticky top-0 z-50">
                     <!-- Left: Profile or Login -->
                     <div class="flex items-center gap-5">
                         ${user ? `
-                            <a href="/dashboard" class="flex items-center gap-2.5 px-4 py-2 bg-gradient-to-r from-purple-600 to-[#5865F2] hover:from-purple-500 hover:to-[#4752C4] text-white text-xs font-black rounded-xl transition shadow-lg shadow-purple-900/30">
+                            <a href="/dashboard" class="flex items-center gap-2.5 px-4 py-2 bg-gradient-to-r from-[#5865f2] to-[#4752c4] hover:from-[#4752c4] hover:to-[#3b45a6] text-white text-xs font-black rounded-xl transition shadow-lg shadow-black/20">
                                 <img src="${user.avatar ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png` : 'https://cdn.discordapp.com/embed/avatars/0.png'}" class="w-5 h-5 rounded-full">
                                 <span>لوحة التحكم</span>
                             </a>
                         ` : `
-                            <a href="/auth/discord" class="px-5 py-2 bg-gradient-to-r from-purple-600 to-[#5865F2] hover:from-purple-500 hover:to-[#4752C4] text-white text-xs font-black rounded-xl transition shadow-lg shadow-purple-900/30">
+                            <a href="/auth/discord" class="px-5 py-2 bg-gradient-to-r from-[#5865f2] to-[#4752c4] hover:from-[#4752c4] hover:to-[#3b45a6] text-white text-xs font-black rounded-xl transition shadow-lg shadow-black/20">
                                 تسجيل الدخول
                             </a>
                         `}
-                        <a href="https://discord.gg/uxqQDtbVMz" target="_blank" class="text-gray-400 hover:text-purple-300 text-xs font-bold transition">الدعم الفني</a>
-                        <a href="#commands" class="text-gray-400 hover:text-purple-300 text-xs font-bold transition">الأوامر</a>
+                        <a href="https://discord.gg/uxqQDtbVMz" target="_blank" class="text-gray-400 hover:text-gray-200 text-xs font-bold transition">الدعم الفني</a>
+                        <a href="#commands" class="text-gray-400 hover:text-gray-200 text-xs font-bold transition">الأوامر</a>
                     </div>
 
                     <!-- Center: Navigation Links (المميزات / المصادر) -->
                     <nav class="hidden md:flex items-center gap-8 text-xs font-bold text-gray-300">
                         <div class="relative group cursor-pointer">
-                            <span class="hover:text-purple-300 flex items-center gap-1">المميزات <svg class="w-3.5 h-3.5 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></span>
-                            <div class="absolute top-full right-0 mt-2 w-48 bg-[#12131c] border border-purple-900/30 rounded-xl shadow-2xl p-2 hidden group-hover:block text-right backdrop-blur-lg">
-                                <a href="/dashboard" class="block px-3 py-2 text-xs hover:bg-purple-950/40 hover:text-purple-300 rounded-lg transition">🛡️ الحماية و Anti-Nuke</a>
-                                <a href="/dashboard" class="block px-3 py-2 text-xs hover:bg-purple-950/40 hover:text-purple-300 rounded-lg transition">💰 نظام الاقتصاد والبنك</a>
-                                <a href="/dashboard" class="block px-3 py-2 text-xs hover:bg-purple-950/40 hover:text-purple-300 rounded-lg transition">🎮 الألعاب التفاعلية</a>
-                                <a href="/dashboard" class="block px-3 py-2 text-xs hover:bg-purple-950/40 hover:text-purple-300 rounded-lg transition">🎫 نظام التذاكر</a>
+                            <span class="hover:text-gray-200 flex items-center gap-1">المميزات <svg class="w-3.5 h-3.5 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></span>
+                            <div class="absolute top-full right-0 mt-2 w-48 bg-[#1c1f2e] border border-white/5 rounded-xl shadow-2xl p-2 hidden group-hover:block text-right backdrop-blur-lg">
+                                <a href="/dashboard" class="block px-3 py-2 text-xs hover:bg-[#151722] hover:text-gray-200 rounded-lg transition">🛡️ الحماية و Anti-Nuke</a>
+                                <a href="/dashboard" class="block px-3 py-2 text-xs hover:bg-[#151722] hover:text-gray-200 rounded-lg transition">💰 نظام الاقتصاد والبنك</a>
+                                <a href="/dashboard" class="block px-3 py-2 text-xs hover:bg-[#151722] hover:text-gray-200 rounded-lg transition">🎮 الألعاب التفاعلية</a>
+                                <a href="/dashboard" class="block px-3 py-2 text-xs hover:bg-[#151722] hover:text-gray-200 rounded-lg transition">🎫 نظام التذاكر</a>
                             </div>
                         </div>
                         <div class="relative group cursor-pointer">
-                            <span class="hover:text-purple-300 flex items-center gap-1">المصادر <svg class="w-3.5 h-3.5 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></span>
-                            <div class="absolute top-full right-0 mt-2 w-48 bg-[#12131c] border border-purple-900/30 rounded-xl shadow-2xl p-2 hidden group-hover:block text-right backdrop-blur-lg">
-                                <a href="https://discord.gg/uxqQDtbVMz" target="_blank" class="block px-3 py-2 text-xs hover:bg-purple-950/40 hover:text-purple-300 rounded-lg transition">سيرفر الدعم الفني</a>
-                                <a href="/dashboard" class="block px-3 py-2 text-xs hover:bg-purple-950/40 hover:text-purple-300 rounded-lg transition">سجل التحديثات</a>
+                            <span class="hover:text-gray-200 flex items-center gap-1">المصادر <svg class="w-3.5 h-3.5 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></span>
+                            <div class="absolute top-full right-0 mt-2 w-48 bg-[#1c1f2e] border border-white/5 rounded-xl shadow-2xl p-2 hidden group-hover:block text-right backdrop-blur-lg">
+                                <a href="https://discord.gg/uxqQDtbVMz" target="_blank" class="block px-3 py-2 text-xs hover:bg-[#151722] hover:text-gray-200 rounded-lg transition">سيرفر الدعم الفني</a>
+                                <a href="/dashboard" class="block px-3 py-2 text-xs hover:bg-[#151722] hover:text-gray-200 rounded-lg transition">سجل التحديثات</a>
                             </div>
                         </div>
                     </nav>
@@ -106,19 +157,19 @@ module.exports = function (app, client) {
                     <!-- Right: Logo -->
                     <div class="flex items-center gap-3">
                         <span class="font-black text-xl tracking-wider text-white">ZENO</span>
-                        <img src="/logo.png" class="w-9 h-9 rounded-xl object-cover border border-purple-500/40 shadow-lg shadow-purple-900/50" alt="ZENO">
+                        <img src="/logo.png" class="w-9 h-9 rounded-xl object-cover border border-purple-500/40 shadow-lg shadow-black/40" alt="ZENO">
                     </div>
                 </header>
 
                 <!-- Hero Section ProBot Exact with Deep Black & Purple -->
                 <main class="flex-1 flex flex-col items-center justify-center text-center px-4 py-20 max-w-4xl mx-auto z-10">
                     
-                    <span class="px-4 py-1.5 bg-purple-950/60 border border-purple-800/40 text-purple-300 text-xs font-bold rounded-full mb-8 backdrop-blur-sm shadow-inner">
+                    <span class="px-4 py-1.5 bg-purple-950/60 border border-purple-800/40 text-gray-200 text-xs font-bold rounded-full mb-8 backdrop-blur-sm shadow-inner">
                         ✨ جديد: نظام التذاكر والحماية 100% مجاني بدون قيود
                     </span>
 
                     <h1 class="text-5xl md:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-b from-white via-gray-100 to-purple-200 leading-tight mb-6 tracking-tight drop-shadow-sm">
-                        اصنع خادم ديسكورد<br><span class="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-purple-300 to-indigo-300">احترافي!</span>
+                        اصنع خادم ديسكورد<br><span class="text-transparent bg-clip-text bg-gradient-to-r from-[#5865f2] via-[#8b5cf6] to-[#4752c4]">احترافي!</span>
                     </h1>
 
                     <p class="text-gray-400 text-sm md:text-base max-w-2xl mb-10 leading-relaxed font-medium">
@@ -127,31 +178,31 @@ module.exports = function (app, client) {
 
                     <!-- Buttons with smaller size for Add Bot -->
                     <div class="flex flex-wrap gap-4 items-center justify-center">
-                        <a href="/auth/discord" class="py-2.5 px-6 bg-gradient-to-r from-purple-600 to-[#5865F2] hover:from-purple-500 hover:to-[#4752C4] text-white text-xs font-bold rounded-xl transition shadow-lg shadow-purple-900/30 flex items-center gap-2">
+                        <a href="/auth/discord" class="py-2.5 px-6 bg-gradient-to-r from-[#5865f2] to-[#4752c4] hover:from-[#4752c4] hover:to-[#3b45a6] text-white text-xs font-bold rounded-xl transition shadow-lg shadow-black/20 flex items-center gap-2">
                             <span>إضافة البوت في Discord</span>
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                         </a>
-                        <a href="/dashboard" class="py-2.5 px-6 bg-[#13141d]/90 hover:bg-[#1a1c29] text-gray-200 text-xs font-bold rounded-xl border border-purple-900/30 transition shadow-md hover:text-white">
+                        <a href="/dashboard" class="py-2.5 px-6 bg-[#13141d]/90 hover:bg-[#1a1c29] text-gray-200 text-xs font-bold rounded-xl border border-white/5 transition shadow-md hover:text-white">
                             لوحة التحكم
                         </a>
                     </div>
 
                     <!-- Live Stats Cards with Black/Purple borders -->
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 w-full mt-16 text-center">
-                        <div class="bg-[#101118]/80 border border-purple-900/20 hover:border-purple-600/40 p-5 rounded-2xl shadow-xl backdrop-blur-sm transition">
+                        <div class="bg-[#101118]/80 border border-white/5 hover:border-[#5865f2]/40 p-5 rounded-2xl shadow-xl backdrop-blur-sm transition">
                             <p class="text-2xl font-black text-white">${stats.guilds}</p>
                             <p class="text-gray-400 text-[11px] font-bold mt-1.5">سيرفرات نشطة</p>
                         </div>
-                        <div class="bg-[#101118]/80 border border-purple-900/20 hover:border-purple-600/40 p-5 rounded-2xl shadow-xl backdrop-blur-sm transition">
+                        <div class="bg-[#101118]/80 border border-white/5 hover:border-[#5865f2]/40 p-5 rounded-2xl shadow-xl backdrop-blur-sm transition">
                             <p class="text-2xl font-black text-white">${stats.users}</p>
                             <p class="text-gray-400 text-[11px] font-bold mt-1.5">أعضاء يخدمهم</p>
                         </div>
-                        <div class="bg-[#101118]/80 border border-purple-900/20 hover:border-purple-600/40 p-5 rounded-2xl shadow-xl backdrop-blur-sm transition">
+                        <div class="bg-[#101118]/80 border border-white/5 hover:border-[#5865f2]/40 p-5 rounded-2xl shadow-xl backdrop-blur-sm transition">
                             <p class="text-2xl font-black text-emerald-400">${stats.ping}ms</p>
                             <p class="text-gray-400 text-[11px] font-bold mt-1.5">استجابة البث الحية</p>
                         </div>
-                        <div class="bg-[#101118]/80 border border-purple-900/20 hover:border-purple-600/40 p-5 rounded-2xl shadow-xl backdrop-blur-sm transition">
-                            <p class="text-2xl font-black text-purple-400">100%</p>
+                        <div class="bg-[#101118]/80 border border-white/5 hover:border-[#5865f2]/40 p-5 rounded-2xl shadow-xl backdrop-blur-sm transition">
+                            <p class="text-2xl font-black text-[#5865f2]">100%</p>
                             <p class="text-gray-400 text-[11px] font-bold mt-1.5">جاهزية الحماية (نشط)</p>
                         </div>
                     </div>
@@ -292,17 +343,17 @@ module.exports = function (app, client) {
                 const avatarUrl = isMe ? userAvatar : (cachedUser ? cachedUser.displayAvatarURL({ size: 64 }) : 'https://cdn.discordapp.com/embed/avatars/0.png');
 
                 return `
-                    <div class="bg-[#12131c] border ${borderClass} p-4 rounded-2xl flex items-center justify-between transition ${isMe ? 'ring-1 ring-purple-500' : ''}">
+                    <div class="bg-[#1c1f2e] border ${borderClass} p-4 rounded-2xl flex items-center justify-between transition ${isMe ? 'ring-1 ring-purple-500' : ''}">
                         <div class="flex items-center gap-4">
-                            <span class="text-xs font-mono font-bold text-purple-300">Level ${item.max_level || 1} • ${(item.total_xp || 0).toLocaleString()} XP</span>
+                            <span class="text-xs font-mono font-bold text-gray-200">Level ${item.max_level || 1} • ${(item.total_xp || 0).toLocaleString()} XP</span>
                             <span class="text-xs font-mono text-amber-400 font-bold hidden sm:inline">${(item.total_coins || 0).toLocaleString()} ⭐</span>
                         </div>
                         <div class="flex items-center gap-3">
                             <div class="text-right">
                                 <h4 class="text-xs font-bold text-white">${displayName}</h4>
-                                <p class="text-[10px] text-purple-400 font-mono">الترتيب: #${rank}</p>
+                                <p class="text-[10px] text-[#5865f2] font-mono">الترتيب: #${rank}</p>
                             </div>
-                            <img src="${avatarUrl}" class="w-9 h-9 rounded-xl object-cover border border-purple-950/40">
+                            <img src="${avatarUrl}" class="w-9 h-9 rounded-xl object-cover border border-white/5">
                             <span class="text-base font-bold min-w-[28px] text-center">${medal}</span>
                         </div>
                     </div>
@@ -326,7 +377,7 @@ module.exports = function (app, client) {
                 const avatarUrl = isMe ? userAvatar : (cachedUser ? cachedUser.displayAvatarURL({ size: 64 }) : 'https://cdn.discordapp.com/embed/avatars/0.png');
 
                 return `
-                    <div class="bg-[#12131c] border ${borderClass} p-4 rounded-2xl flex items-center justify-between transition ${isMe ? 'ring-1 ring-purple-500' : ''}">
+                    <div class="bg-[#1c1f2e] border ${borderClass} p-4 rounded-2xl flex items-center justify-between transition ${isMe ? 'ring-1 ring-purple-500' : ''}">
                         <div class="flex items-center gap-4">
                             <span class="text-xs font-mono font-bold text-amber-400">${(item.total_coins || 0).toLocaleString()} ⭐ Star</span>
                             <span class="text-xs font-mono text-gray-400 font-bold hidden sm:inline">Level ${item.max_level || 1}</span>
@@ -336,7 +387,7 @@ module.exports = function (app, client) {
                                 <h4 class="text-xs font-bold text-white">${displayName}</h4>
                                 <p class="text-[10px] text-amber-400 font-mono">الترتيب: #${rank}</p>
                             </div>
-                            <img src="${avatarUrl}" class="w-9 h-9 rounded-xl object-cover border border-purple-950/40">
+                            <img src="${avatarUrl}" class="w-9 h-9 rounded-xl object-cover border border-white/5">
                             <span class="text-base font-bold min-w-[28px] text-center">${medal}</span>
                         </div>
                     </div>
@@ -354,27 +405,76 @@ module.exports = function (app, client) {
                 <title>لوحة التحكم | ZENO</title>
                 <script src="https://cdn.tailwindcss.com"></script>
                 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+                
                 <style>
-                    body { background-color: #0b0c10; color: #e2e8f0; font-family: 'Cairo', sans-serif; }
-                    ::-webkit-scrollbar { width: 5px; height: 5px; }
-                    ::-webkit-scrollbar-thumb { background: #2e1065; border-radius: 10px; }
+                    :root {
+                        --bg-main: #0b0d14;
+                        --bg-sidebar: #10121b;
+                        --bg-card: #151722;
+                        --bg-card-hover: #1c1f2e;
+                        --primary: #5865f2;
+                        --primary-hover: #4752c4;
+                        --border: rgba(255, 255, 255, 0.05);
+                        --text-muted: #a3a6aa;
+                    }
+                    body { background-color: var(--bg-main) !important; color: #ffffff !important; font-family: 'Cairo', sans-serif !important; }
+                    /* Scrollbar */
+                    ::-webkit-scrollbar { width: 8px; height: 8px; }
+                    ::-webkit-scrollbar-track { background: var(--bg-main); }
+                    ::-webkit-scrollbar-thumb { background: #2f3146; border-radius: 10px; }
+                    ::-webkit-scrollbar-thumb:hover { background: #40445f; }
+                    
+                    /* Glassmorphism & Cards */
+                    .probot-card {
+                        background: var(--bg-card) !important;
+                        border: 1px solid var(--border) !important;
+                        border-radius: 16px !important;
+                        transition: all 0.3s ease !important;
+                        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2) !important;
+                    }
+                    .probot-card:hover {
+                        background: var(--bg-card-hover) !important;
+                        border-color: rgba(88, 101, 242, 0.4) !important;
+                        transform: translateY(-3px) !important;
+                        box-shadow: 0 6px 25px rgba(0, 0, 0, 0.3) !important;
+                    }
+                    
+                    /* Toggles */
+                    .toggle { position: relative; display: inline-block; width: 44px; height: 24px; }
+                    .toggle input { opacity: 0; width: 0; height: 0; }
+                    .slider { position: absolute; cursor: pointer; inset: 0; background: #2f3146; border-radius: 24px; transition: .3s; }
+                    .slider:before { content: ''; position: absolute; width: 18px; height: 18px; left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: .3s; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+                    input:checked + .slider { background: var(--primary); }
+                    input:checked + .slider:before { transform: translateX(20px); }
+                    
+                    /* Buttons */
+                    .btn-primary {
+                        background-color: var(--primary);
+                        color: white;
+                        transition: all 0.2s;
+                    }
+                    .btn-primary:hover {
+                        background-color: var(--primary-hover);
+                        box-shadow: 0 4px 15px rgba(88, 101, 242, 0.4);
+                    }
                 </style>
+
             </head>
-            <body class="min-h-screen flex flex-col bg-[#0b0c10] text-gray-200">
+            <body class="min-h-screen flex flex-col bg-[#0b0d14] text-gray-200">
 
                 <!-- Toast Notification Container -->
                 <div id="toast" class="fixed top-5 left-1/2 -translate-x-1/2 z-50 transition-all duration-300 transform -translate-y-20 opacity-0 pointer-events-none px-6 py-3 rounded-2xl shadow-2xl text-xs font-bold flex items-center gap-2"></div>
 
                 <!-- Header -->
-                <header class="h-16 bg-[#0f1016]/90 backdrop-blur-md border-b border-purple-950/40 px-6 flex items-center justify-between sticky top-0 z-40">
+                <header class="h-16 bg-[#10121b]/95 backdrop-blur-md border-b border-white/5 px-6 flex items-center justify-between sticky top-0 z-40">
                     <div class="flex items-center gap-4">
-                        <a href="https://discord.gg/uxqQDtbVMz" target="_blank" class="text-xs text-gray-400 hover:text-purple-300 transition">الدعم الفني</a>
+                        <a href="https://discord.gg/uxqQDtbVMz" target="_blank" class="text-xs text-gray-400 hover:text-gray-200 transition">الدعم الفني</a>
                         <span class="text-gray-700">|</span>
-                        <a href="/#commands" class="text-xs text-gray-400 hover:text-purple-300 transition">الأوامر</a>
+                        <a href="/#commands" class="text-xs text-gray-400 hover:text-gray-200 transition">الأوامر</a>
                     </div>
                     <div class="flex items-center gap-2">
                         <span class="font-black text-sm text-white tracking-wide">ZENO</span>
-                        <img src="/logo.png" class="w-8 h-8 rounded-xl object-cover border border-purple-500/40 shadow-lg shadow-purple-900/50" alt="ZENO">
+                        <img src="/logo.png" class="w-8 h-8 rounded-xl object-cover border border-purple-500/40 shadow-lg shadow-black/40" alt="ZENO">
                     </div>
                 </header>
 
@@ -385,7 +485,7 @@ module.exports = function (app, client) {
                         <!-- User Stats Header (ProBot Style Cards) -->
                         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
                             <!-- Star -->
-                            <div class="bg-[#10111a] border border-purple-950/40 rounded-2xl p-5 flex items-center justify-between shadow-lg">
+                            <div class="probot-card border border-white/5 rounded-2xl p-5 flex items-center justify-between shadow-lg">
                                 <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center text-xl font-bold">⭐</div>
                                 <div class="text-right">
                                     <span class="text-xs font-bold text-gray-400">Star</span>
@@ -393,15 +493,15 @@ module.exports = function (app, client) {
                                 </div>
                             </div>
                             <!-- المستوى -->
-                            <div class="bg-[#10111a] border border-purple-950/40 rounded-2xl p-5 flex items-center justify-between shadow-lg">
-                                <div class="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center text-xl">📈</div>
+                            <div class="probot-card border border-white/5 rounded-2xl p-5 flex items-center justify-between shadow-lg">
+                                <div class="w-10 h-10 rounded-xl bg-purple-500/10 text-[#5865f2] flex items-center justify-center text-xl">📈</div>
                                 <div class="text-right">
                                     <span class="text-xs font-bold text-gray-400">المستوى</span>
                                     <h3 class="text-2xl font-black text-white mt-0.5">${userLevel}</h3>
                                 </div>
                             </div>
                             <!-- الترتيب -->
-                            <div class="bg-[#10111a] border border-purple-950/40 rounded-2xl p-5 flex items-center justify-between shadow-lg">
+                            <div class="probot-card border border-white/5 rounded-2xl p-5 flex items-center justify-between shadow-lg">
                                 <div class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-xl">🏆</div>
                                 <div class="text-right">
                                     <span class="text-xs font-bold text-gray-400">الترتيب</span>
@@ -409,8 +509,8 @@ module.exports = function (app, client) {
                                 </div>
                             </div>
                             <!-- السمعة -->
-                            <div class="bg-[#10111a] border border-purple-950/40 rounded-2xl p-5 flex items-center justify-between shadow-lg">
-                                <div class="w-10 h-10 rounded-xl bg-purple-500/20 text-purple-300 flex items-center justify-center text-xl">✨</div>
+                            <div class="probot-card border border-white/5 rounded-2xl p-5 flex items-center justify-between shadow-lg">
+                                <div class="w-10 h-10 rounded-xl bg-purple-500/20 text-gray-200 flex items-center justify-center text-xl">✨</div>
                                 <div class="text-right">
                                     <span class="text-xs font-bold text-gray-400">السمعة</span>
                                     <h3 class="text-2xl font-black text-white mt-0.5">${userStars}</h3>
@@ -420,20 +520,20 @@ module.exports = function (app, client) {
 
                         <!-- Tab 1: نظرة عامة والخوادم (Default Overview) -->
                         <div id="tabOverview" class="tab-content">
-                            <div class="bg-[#10111a] border border-purple-950/40 rounded-3xl p-6 shadow-xl">
+                            <div class="probot-card border border-white/5 rounded-3xl p-6 shadow-xl">
                                 <h3 class="text-sm font-black text-white mb-4 text-right">خوادمك المتاحة للإدارة</h3>
                                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                                     ${guilds.map(g => `
-                                        <a href="/dashboard/${g.id}" class="bg-[#12131c] hover:bg-[#181926] border border-purple-950/40 hover:border-purple-600/50 p-4 rounded-2xl flex items-center justify-between transition-all group shadow-md">
-                                            <div class="w-8 h-8 rounded-xl bg-purple-950/40 flex items-center justify-center text-purple-400 group-hover:text-white transition">
+                                        <a href="/dashboard/${g.id}" class="bg-[#1c1f2e] hover:bg-[#181926] border border-white/5 hover:border-[#5865f2]/40 p-4 rounded-2xl flex items-center justify-between transition-all group shadow-md">
+                                            <div class="w-8 h-8 rounded-xl bg-[#151722] flex items-center justify-center text-[#5865f2] group-hover:text-white transition">
                                                 <svg class="w-4 h-4 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
                                             </div>
                                             <div class="flex items-center gap-3 text-right">
                                                 <div>
-                                                    <h4 class="text-xs font-bold text-white group-hover:text-purple-300 transition truncate max-w-[150px]">${g.name}</h4>
-                                                    <span class="text-[10px] text-purple-400/60 font-bold">صلاحية إدارية</span>
+                                                    <h4 class="text-xs font-bold text-white group-hover:text-gray-200 transition truncate max-w-[150px]">${g.name}</h4>
+                                                    <span class="text-[10px] text-[#5865f2]/60 font-bold">صلاحية إدارية</span>
                                                 </div>
-                                                <img src="${g.icon ? `https://cdn.discordapp.com/icons/${g.id}/${g.icon}.png` : 'https://cdn.discordapp.com/embed/avatars/0.png'}" class="w-10 h-10 rounded-xl object-cover bg-[#0f1016] border border-purple-950/40">
+                                                <img src="${g.icon ? `https://cdn.discordapp.com/icons/${g.id}/${g.icon}.png` : 'https://cdn.discordapp.com/embed/avatars/0.png'}" class="w-10 h-10 rounded-xl object-cover bg-[#0f1016] border border-white/5">
                                             </div>
                                         </a>
                                     `).join('')}
@@ -443,80 +543,80 @@ module.exports = function (app, client) {
 
                         <!-- Tab 2: متجر خلفيات البروفايل (Wallpapers Shop) -->
                         <div id="tabWallpapers" class="tab-content hidden space-y-6">
-                            <div class="bg-[#10111a] border border-purple-950/40 rounded-3xl p-6 shadow-xl">
-                                <div class="flex items-center justify-between pb-4 mb-4 border-b border-purple-950/40">
+                            <div class="probot-card border border-white/5 rounded-3xl p-6 shadow-xl">
+                                <div class="flex items-center justify-between pb-4 mb-4 border-b border-white/5">
                                     <span class="text-xs text-amber-400 font-bold">رصيدك: <span class="user-coins-val">${userCoins.toLocaleString()}</span> ⭐ Star</span>
                                     <h3 class="text-sm font-black text-white text-right">متجر خلفيات البروفايل (Profile Backgrounds) 🖼️</h3>
                                 </div>
                                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                                     
-                                    <div class="bg-[#12131c] border border-purple-950/40 rounded-2xl overflow-hidden shadow-lg group">
+                                    <div class="bg-[#1c1f2e] border border-white/5 rounded-2xl overflow-hidden shadow-lg group">
                                         <div class="h-28 bg-gradient-to-r from-purple-900 via-indigo-950 to-purple-950 flex items-center justify-center text-3xl">🌌</div>
                                         <div class="p-4 text-right">
                                             <h4 class="text-xs font-bold text-white">Galaxy Neon</h4>
                                             <p class="text-[10px] text-gray-400 mt-0.5">خلفية النجوم والنيون الأرجواني</p>
                                             <div class="mt-3 flex items-center justify-between">
-                                                <button onclick="buyItem('wallpaper', 'Galaxy Neon', 5000, this)" class="px-4 py-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-xs font-bold shadow-md hover:from-purple-500 hover:to-indigo-500 transition">شراء وتجهيز (5,000 ⭐)</button>
+                                                <button onclick="buyItem('wallpaper', 'Galaxy Neon', 5000, this)" class="px-4 py-1.5 bg-gradient-to-r from-[#5865f2] to-indigo-600 text-white rounded-xl text-xs font-bold shadow-md hover:from-[#4752c4] hover:to-indigo-500 transition">شراء وتجهيز (5,000 ⭐)</button>
                                                 <span class="text-xs font-mono text-amber-300 font-bold">5,000 ⭐</span>
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div class="bg-[#12131c] border border-purple-950/40 rounded-2xl overflow-hidden shadow-lg group">
+                                    <div class="bg-[#1c1f2e] border border-white/5 rounded-2xl overflow-hidden shadow-lg group">
                                         <div class="h-28 bg-gradient-to-r from-emerald-950 via-slate-900 to-teal-950 flex items-center justify-center text-3xl">🌲</div>
                                         <div class="p-4 text-right">
                                             <h4 class="text-xs font-bold text-white">Emerald Forest</h4>
                                             <p class="text-[10px] text-gray-400 mt-0.5">خلفية الطبيعة والزمرد الفخم</p>
                                             <div class="mt-3 flex items-center justify-between">
-                                                <button onclick="buyItem('wallpaper', 'Emerald Forest', 7500, this)" class="px-4 py-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-xs font-bold shadow-md hover:from-purple-500 hover:to-indigo-500 transition">شراء وتجهيز (7,500 ⭐)</button>
+                                                <button onclick="buyItem('wallpaper', 'Emerald Forest', 7500, this)" class="px-4 py-1.5 bg-gradient-to-r from-[#5865f2] to-indigo-600 text-white rounded-xl text-xs font-bold shadow-md hover:from-[#4752c4] hover:to-indigo-500 transition">شراء وتجهيز (7,500 ⭐)</button>
                                                 <span class="text-xs font-mono text-amber-300 font-bold">7,500 ⭐</span>
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div class="bg-[#12131c] border border-purple-950/40 rounded-2xl overflow-hidden shadow-lg group">
+                                    <div class="bg-[#1c1f2e] border border-white/5 rounded-2xl overflow-hidden shadow-lg group">
                                         <div class="h-28 bg-gradient-to-r from-rose-950 via-zinc-900 to-amber-950 flex items-center justify-center text-3xl">🔥</div>
                                         <div class="p-4 text-right">
                                             <h4 class="text-xs font-bold text-white">Cyberpunk Gold</h4>
                                             <p class="text-[10px] text-gray-400 mt-0.5">خلفية اللهب والذهب الخالص</p>
                                             <div class="mt-3 flex items-center justify-between">
-                                                <button onclick="buyItem('wallpaper', 'Cyberpunk Gold', 12000, this)" class="px-4 py-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-xs font-bold shadow-md hover:from-purple-500 hover:to-indigo-500 transition">شراء وتجهيز (12,000 ⭐)</button>
+                                                <button onclick="buyItem('wallpaper', 'Cyberpunk Gold', 12000, this)" class="px-4 py-1.5 bg-gradient-to-r from-[#5865f2] to-indigo-600 text-white rounded-xl text-xs font-bold shadow-md hover:from-[#4752c4] hover:to-indigo-500 transition">شراء وتجهيز (12,000 ⭐)</button>
                                                 <span class="text-xs font-mono text-amber-300 font-bold">12,000 ⭐</span>
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div class="bg-[#12131c] border border-purple-950/40 rounded-2xl overflow-hidden shadow-lg group">
+                                    <div class="bg-[#1c1f2e] border border-white/5 rounded-2xl overflow-hidden shadow-lg group">
                                         <div class="h-28 bg-gradient-to-r from-cyan-950 via-blue-900 to-indigo-950 flex items-center justify-center text-3xl">❄️</div>
                                         <div class="p-4 text-right">
                                             <h4 class="text-xs font-bold text-white">Arctic Frost</h4>
                                             <p class="text-[10px] text-gray-400 mt-0.5">خلفية الجليد والكريستال السماوي</p>
                                             <div class="mt-3 flex items-center justify-between">
-                                                <button onclick="buyItem('wallpaper', 'Arctic Frost', 6000, this)" class="px-4 py-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-xs font-bold shadow-md hover:from-purple-500 hover:to-indigo-500 transition">شراء وتجهيز (6,000 ⭐)</button>
+                                                <button onclick="buyItem('wallpaper', 'Arctic Frost', 6000, this)" class="px-4 py-1.5 bg-gradient-to-r from-[#5865f2] to-indigo-600 text-white rounded-xl text-xs font-bold shadow-md hover:from-[#4752c4] hover:to-indigo-500 transition">شراء وتجهيز (6,000 ⭐)</button>
                                                 <span class="text-xs font-mono text-amber-300 font-bold">6,000 ⭐</span>
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div class="bg-[#12131c] border border-purple-950/40 rounded-2xl overflow-hidden shadow-lg group">
+                                    <div class="bg-[#1c1f2e] border border-white/5 rounded-2xl overflow-hidden shadow-lg group">
                                         <div class="h-28 bg-gradient-to-r from-red-950 via-purple-950 to-neutral-900 flex items-center justify-center text-3xl">🩸</div>
                                         <div class="p-4 text-right">
                                             <h4 class="text-xs font-bold text-white">Crimson Samurai</h4>
                                             <p class="text-[10px] text-gray-400 mt-0.5">خلفية الساموراي القرمزي الفخم</p>
                                             <div class="mt-3 flex items-center justify-between">
-                                                <button onclick="buyItem('wallpaper', 'Crimson Samurai', 9000, this)" class="px-4 py-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-xs font-bold shadow-md hover:from-purple-500 hover:to-indigo-500 transition">شراء وتجهيز (9,000 ⭐)</button>
+                                                <button onclick="buyItem('wallpaper', 'Crimson Samurai', 9000, this)" class="px-4 py-1.5 bg-gradient-to-r from-[#5865f2] to-indigo-600 text-white rounded-xl text-xs font-bold shadow-md hover:from-[#4752c4] hover:to-indigo-500 transition">شراء وتجهيز (9,000 ⭐)</button>
                                                 <span class="text-xs font-mono text-amber-300 font-bold">9,000 ⭐</span>
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div class="bg-[#12131c] border border-purple-950/40 rounded-2xl overflow-hidden shadow-lg group">
+                                    <div class="bg-[#1c1f2e] border border-white/5 rounded-2xl overflow-hidden shadow-lg group">
                                         <div class="h-28 bg-gradient-to-r from-yellow-950 via-amber-900 to-orange-950 flex items-center justify-center text-3xl">👑</div>
                                         <div class="p-4 text-right">
                                             <h4 class="text-xs font-bold text-white">Royal Empire</h4>
                                             <p class="text-[10px] text-gray-400 mt-0.5">خلفية الإمبراطورية الملكية الذهبية</p>
                                             <div class="mt-3 flex items-center justify-between">
-                                                <button onclick="buyItem('wallpaper', 'Royal Empire', 15000, this)" class="px-4 py-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-xs font-bold shadow-md hover:from-purple-500 hover:to-indigo-500 transition">شراء وتجهيز (15,000 ⭐)</button>
+                                                <button onclick="buyItem('wallpaper', 'Royal Empire', 15000, this)" class="px-4 py-1.5 bg-gradient-to-r from-[#5865f2] to-indigo-600 text-white rounded-xl text-xs font-bold shadow-md hover:from-[#4752c4] hover:to-indigo-500 transition">شراء وتجهيز (15,000 ⭐)</button>
                                                 <span class="text-xs font-mono text-amber-300 font-bold">15,000 ⭐</span>
                                             </div>
                                         </div>
@@ -528,59 +628,59 @@ module.exports = function (app, client) {
 
                         <!-- Tab 3: شارات البروفايل (Badges Shop) -->
                         <div id="tabBadges" class="tab-content hidden space-y-6">
-                            <div class="bg-[#10111a] border border-purple-950/40 rounded-3xl p-6 shadow-xl">
-                                <div class="flex items-center justify-between pb-4 mb-4 border-b border-purple-950/40">
+                            <div class="probot-card border border-white/5 rounded-3xl p-6 shadow-xl">
+                                <div class="flex items-center justify-between pb-4 mb-4 border-b border-white/5">
                                     <span class="text-xs text-amber-400 font-bold">رصيدك: <span class="user-coins-val">${userCoins.toLocaleString()}</span> ⭐ Star</span>
                                     <h3 class="text-sm font-black text-white text-right">متجر شارات وأوسمة البروفايل 🎖️</h3>
                                 </div>
                                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                                    <div class="bg-[#12131c] border border-purple-950/40 p-4 rounded-2xl text-center space-y-2">
+                                    <div class="bg-[#1c1f2e] border border-white/5 p-4 rounded-2xl text-center space-y-2">
                                         <span class="text-3xl block">👑</span>
                                         <h4 class="text-xs font-bold text-white">تاج الأساطير</h4>
                                         <p class="text-[10px] text-gray-400">شارة ملكية ذهبية</p>
-                                        <button onclick="buyItem('badge', 'Crown Badge', 10000, this)" class="w-full py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-xs font-bold transition shadow-md">شراء (10,000 ⭐)</button>
+                                        <button onclick="buyItem('badge', 'Crown Badge', 10000, this)" class="w-full py-2 bg-gradient-to-r from-[#5865f2] to-indigo-600 text-white rounded-xl text-xs font-bold transition shadow-md">شراء (10,000 ⭐)</button>
                                     </div>
-                                    <div class="bg-[#12131c] border border-purple-950/40 p-4 rounded-2xl text-center space-y-2">
+                                    <div class="bg-[#1c1f2e] border border-white/5 p-4 rounded-2xl text-center space-y-2">
                                         <span class="text-3xl block">💎</span>
                                         <h4 class="text-xs font-bold text-white">الماسة اللامعة</h4>
                                         <p class="text-[10px] text-gray-400">شارة النقاء والتميز</p>
-                                        <button onclick="buyItem('badge', 'Diamond Badge', 15000, this)" class="w-full py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-xs font-bold transition shadow-md">شراء (15,000 ⭐)</button>
+                                        <button onclick="buyItem('badge', 'Diamond Badge', 15000, this)" class="w-full py-2 bg-gradient-to-r from-[#5865f2] to-indigo-600 text-white rounded-xl text-xs font-bold transition shadow-md">شراء (15,000 ⭐)</button>
                                     </div>
-                                    <div class="bg-[#12131c] border border-purple-950/40 p-4 rounded-2xl text-center space-y-2">
+                                    <div class="bg-[#1c1f2e] border border-white/5 p-4 rounded-2xl text-center space-y-2">
                                         <span class="text-3xl block">⚡</span>
                                         <h4 class="text-xs font-bold text-white">صاعقة النيون</h4>
                                         <p class="text-[10px] text-gray-400">شارة السرعة والقوة</p>
-                                        <button onclick="buyItem('badge', 'Lightning Badge', 8000, this)" class="w-full py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-xs font-bold transition shadow-md">شراء (8,000 ⭐)</button>
+                                        <button onclick="buyItem('badge', 'Lightning Badge', 8000, this)" class="w-full py-2 bg-gradient-to-r from-[#5865f2] to-indigo-600 text-white rounded-xl text-xs font-bold transition shadow-md">شراء (8,000 ⭐)</button>
                                     </div>
-                                    <div class="bg-[#12131c] border border-purple-950/40 p-4 rounded-2xl text-center space-y-2">
+                                    <div class="bg-[#1c1f2e] border border-white/5 p-4 rounded-2xl text-center space-y-2">
                                         <span class="text-3xl block">🛡️</span>
                                         <h4 class="text-xs font-bold text-white">درع الحارس</h4>
                                         <p class="text-[10px] text-gray-400">شارة الشرف والحماية</p>
-                                        <button onclick="buyItem('badge', 'Guardian Badge', 6000, this)" class="w-full py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-xs font-bold transition shadow-md">شراء (6,000 ⭐)</button>
+                                        <button onclick="buyItem('badge', 'Guardian Badge', 6000, this)" class="w-full py-2 bg-gradient-to-r from-[#5865f2] to-indigo-600 text-white rounded-xl text-xs font-bold transition shadow-md">شراء (6,000 ⭐)</button>
                                     </div>
-                                    <div class="bg-[#12131c] border border-purple-950/40 p-4 rounded-2xl text-center space-y-2">
+                                    <div class="bg-[#1c1f2e] border border-white/5 p-4 rounded-2xl text-center space-y-2">
                                         <span class="text-3xl block">🔥</span>
                                         <h4 class="text-xs font-bold text-white">لهب العزيمة</h4>
                                         <p class="text-[10px] text-gray-400">شارة النشاط والحماس</p>
-                                        <button onclick="buyItem('badge', 'Fire Badge', 7000, this)" class="w-full py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-xs font-bold transition shadow-md">شراء (7,000 ⭐)</button>
+                                        <button onclick="buyItem('badge', 'Fire Badge', 7000, this)" class="w-full py-2 bg-gradient-to-r from-[#5865f2] to-indigo-600 text-white rounded-xl text-xs font-bold transition shadow-md">شراء (7,000 ⭐)</button>
                                     </div>
-                                    <div class="bg-[#12131c] border border-purple-950/40 p-4 rounded-2xl text-center space-y-2">
+                                    <div class="bg-[#1c1f2e] border border-white/5 p-4 rounded-2xl text-center space-y-2">
                                         <span class="text-3xl block">🚀</span>
                                         <h4 class="text-xs font-bold text-white">رائد الفضاء</h4>
                                         <p class="text-[10px] text-gray-400">شارة الوصول للقمة</p>
-                                        <button onclick="buyItem('badge', 'Rocket Badge', 12000, this)" class="w-full py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-xs font-bold transition shadow-md">شراء (12,000 ⭐)</button>
+                                        <button onclick="buyItem('badge', 'Rocket Badge', 12000, this)" class="w-full py-2 bg-gradient-to-r from-[#5865f2] to-indigo-600 text-white rounded-xl text-xs font-bold transition shadow-md">شراء (12,000 ⭐)</button>
                                     </div>
-                                    <div class="bg-[#12131c] border border-purple-950/40 p-4 rounded-2xl text-center space-y-2">
+                                    <div class="bg-[#1c1f2e] border border-white/5 p-4 rounded-2xl text-center space-y-2">
                                         <span class="text-3xl block">🌟</span>
                                         <h4 class="text-xs font-bold text-white">النجم الساطع</h4>
                                         <p class="text-[10px] text-gray-400">شارة التألق المستمر</p>
-                                        <button onclick="buyItem('badge', 'Star Badge', 9000, this)" class="w-full py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-xs font-bold transition shadow-md">شراء (9,000 ⭐)</button>
+                                        <button onclick="buyItem('badge', 'Star Badge', 9000, this)" class="w-full py-2 bg-gradient-to-r from-[#5865f2] to-indigo-600 text-white rounded-xl text-xs font-bold transition shadow-md">شراء (9,000 ⭐)</button>
                                     </div>
-                                    <div class="bg-[#12131c] border border-purple-950/40 p-4 rounded-2xl text-center space-y-2">
+                                    <div class="bg-[#1c1f2e] border border-white/5 p-4 rounded-2xl text-center space-y-2">
                                         <span class="text-3xl block">🎭</span>
                                         <h4 class="text-xs font-bold text-white">قناع الغموض</h4>
                                         <p class="text-[10px] text-gray-400">شارة الأسلوب الفريد</p>
-                                        <button onclick="buyItem('badge', 'Mask Badge', 5000, this)" class="w-full py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-xs font-bold transition shadow-md">شراء (5,000 ⭐)</button>
+                                        <button onclick="buyItem('badge', 'Mask Badge', 5000, this)" class="w-full py-2 bg-gradient-to-r from-[#5865f2] to-indigo-600 text-white rounded-xl text-xs font-bold transition shadow-md">شراء (5,000 ⭐)</button>
                                     </div>
                                 </div>
                             </div>
@@ -588,34 +688,34 @@ module.exports = function (app, client) {
 
                         <!-- Tab 4: خلفيات الهوية (Identity Shop) -->
                         <div id="tabIdentity" class="tab-content hidden space-y-6">
-                            <div class="bg-[#10111a] border border-purple-950/40 rounded-3xl p-6 shadow-xl text-right">
+                            <div class="probot-card border border-white/5 rounded-3xl p-6 shadow-xl text-right">
                                 <h3 class="text-sm font-black text-white mb-2">خلفيات وبطاقات الهوية الشخصية 🪪</h3>
-                                <p class="text-gray-400 text-xs mb-6">خصص تصميم بطاقة الهوية التي تظهر في الديسكورد عند كتابة أمر <span class="text-purple-400 font-mono">/id</span> أو <span class="text-purple-400 font-mono">/profile</span>.</p>
+                                <p class="text-gray-400 text-xs mb-6">خصص تصميم بطاقة الهوية التي تظهر في الديسكورد عند كتابة أمر <span class="text-[#5865f2] font-mono">/id</span> أو <span class="text-[#5865f2] font-mono">/profile</span>.</p>
                                 
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div class="bg-[#12131c] border border-purple-950/40 p-4 rounded-2xl flex items-center justify-between">
-                                        <button onclick="buyItem('identity', 'Dark Minimalist', 3000, this)" class="px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-xs font-bold">تفعيل (3,000 ⭐)</button>
+                                    <div class="bg-[#1c1f2e] border border-white/5 p-4 rounded-2xl flex items-center justify-between">
+                                        <button onclick="buyItem('identity', 'Dark Minimalist', 3000, this)" class="px-4 py-2 bg-gradient-to-r from-[#5865f2] to-indigo-600 text-white rounded-xl text-xs font-bold">تفعيل (3,000 ⭐)</button>
                                         <div>
                                             <h4 class="text-xs font-bold text-white">Dark Minimalist</h4>
                                             <p class="text-[10px] text-gray-400">تصميم أسود داكن كلاسيكي فخم</p>
                                         </div>
                                     </div>
-                                    <div class="bg-[#12131c] border border-purple-950/40 p-4 rounded-2xl flex items-center justify-between">
-                                        <button onclick="buyItem('identity', 'Purple Glow Pro', 4500, this)" class="px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-xs font-bold">تفعيل (4,500 ⭐)</button>
+                                    <div class="bg-[#1c1f2e] border border-white/5 p-4 rounded-2xl flex items-center justify-between">
+                                        <button onclick="buyItem('identity', 'Purple Glow Pro', 4500, this)" class="px-4 py-2 bg-gradient-to-r from-[#5865f2] to-indigo-600 text-white rounded-xl text-xs font-bold">تفعيل (4,500 ⭐)</button>
                                         <div>
                                             <h4 class="text-xs font-bold text-white">Purple Glow Pro</h4>
                                             <p class="text-[10px] text-gray-400">توهج بنفسجي متدرج ملكي</p>
                                         </div>
                                     </div>
-                                    <div class="bg-[#12131c] border border-purple-950/40 p-4 rounded-2xl flex items-center justify-between">
-                                        <button onclick="buyItem('identity', 'Golden Executive', 8000, this)" class="px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-xs font-bold">تفعيل (8,000 ⭐)</button>
+                                    <div class="bg-[#1c1f2e] border border-white/5 p-4 rounded-2xl flex items-center justify-between">
+                                        <button onclick="buyItem('identity', 'Golden Executive', 8000, this)" class="px-4 py-2 bg-gradient-to-r from-[#5865f2] to-indigo-600 text-white rounded-xl text-xs font-bold">تفعيل (8,000 ⭐)</button>
                                         <div>
                                             <h4 class="text-xs font-bold text-white">Golden Executive</h4>
                                             <p class="text-[10px] text-gray-400">بطاقة كبار الشخصيات بالذهب اللامع</p>
                                         </div>
                                     </div>
-                                    <div class="bg-[#12131c] border border-purple-950/40 p-4 rounded-2xl flex items-center justify-between">
-                                        <button onclick="buyItem('identity', 'Cyber Matrix', 6000, this)" class="px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-xs font-bold">تفعيل (6,000 ⭐)</button>
+                                    <div class="bg-[#1c1f2e] border border-white/5 p-4 rounded-2xl flex items-center justify-between">
+                                        <button onclick="buyItem('identity', 'Cyber Matrix', 6000, this)" class="px-4 py-2 bg-gradient-to-r from-[#5865f2] to-indigo-600 text-white rounded-xl text-xs font-bold">تفعيل (6,000 ⭐)</button>
                                         <div>
                                             <h4 class="text-xs font-bold text-white">Cyber Matrix</h4>
                                             <p class="text-[10px] text-gray-400">بطاقة نيون إلكترونية مستقبلية</p>
@@ -627,9 +727,9 @@ module.exports = function (app, client) {
 
                         <!-- Tab 5: قائمة المتصدرين بالـ XP (Leaderboards XP) -->
                         <div id="tabLeaderboard" class="tab-content hidden space-y-6">
-                            <div class="bg-[#10111a] border border-purple-950/40 rounded-3xl p-6 shadow-xl">
-                                <div class="flex items-center justify-between mb-4 border-b border-purple-950/40 pb-3">
-                                    <span class="text-xs text-purple-400 font-mono font-bold">ترتيبك الحالي: #${userRankXp}</span>
+                            <div class="probot-card border border-white/5 rounded-3xl p-6 shadow-xl">
+                                <div class="flex items-center justify-between mb-4 border-b border-white/5 pb-3">
+                                    <span class="text-xs text-[#5865f2] font-mono font-bold">ترتيبك الحالي: #${userRankXp}</span>
                                     <h3 class="text-sm font-black text-white text-right">أعلى 100 عضو بواسطة نقاط الخبرة (XP Leaderboard) 🏆</h3>
                                 </div>
                                 <div class="space-y-2.5 max-h-[600px] overflow-y-auto pr-1">
@@ -640,8 +740,8 @@ module.exports = function (app, client) {
 
                         <!-- Tab 5B: قائمة أغنى 100 ملياردير (Coins Leaderboard) -->
                         <div id="tabCoinsLeaderboard" class="tab-content hidden space-y-6">
-                            <div class="bg-[#10111a] border border-purple-950/40 rounded-3xl p-6 shadow-xl">
-                                <div class="flex items-center justify-between mb-4 border-b border-purple-950/40 pb-3">
+                            <div class="probot-card border border-white/5 rounded-3xl p-6 shadow-xl">
+                                <div class="flex items-center justify-between mb-4 border-b border-white/5 pb-3">
                                     <span class="text-xs text-amber-400 font-mono font-bold">ترتيبك المالي: #${userRankCoins}</span>
                                     <h3 class="text-sm font-black text-white text-right">أغنى 100 عضو برصيد النجوم (Richest 100 Star) ⭐</h3>
                                 </div>
@@ -653,8 +753,8 @@ module.exports = function (app, client) {
 
                         <!-- Tab 6: المكافأة اليومية (Daily Reward) -->
                         <div id="tabDaily" class="tab-content hidden space-y-6">
-                            <div class="bg-[#10111a] border border-purple-950/40 rounded-3xl p-8 shadow-xl text-center space-y-5 max-w-xl mx-auto">
-                                <div class="w-20 h-20 rounded-3xl bg-gradient-to-tr from-purple-600/30 to-indigo-600/30 border border-purple-500/40 flex items-center justify-center text-4xl mx-auto shadow-xl shadow-purple-900/30">
+                            <div class="probot-card border border-white/5 rounded-3xl p-8 shadow-xl text-center space-y-5 max-w-xl mx-auto">
+                                <div class="w-20 h-20 rounded-3xl bg-gradient-to-tr from-[#5865f2]/30 to-indigo-600/30 border border-purple-500/40 flex items-center justify-center text-4xl mx-auto shadow-xl shadow-black/20">
                                     🎁
                                 </div>
                                 <div>
@@ -665,7 +765,7 @@ module.exports = function (app, client) {
                                     </p>
                                 </div>
 
-                                <div class="bg-[#12131c] border border-purple-950/40 rounded-2xl p-4 flex items-center justify-around text-xs">
+                                <div class="bg-[#1c1f2e] border border-white/5 rounded-2xl p-4 flex items-center justify-around text-xs">
                                     <div>
                                         <span class="text-gray-400 block text-[11px]">مكافأة اليوم</span>
                                         <span class="text-amber-400 font-black font-mono text-sm">+500 ⭐</span>
@@ -673,40 +773,40 @@ module.exports = function (app, client) {
                                     <div class="w-px h-8 bg-purple-950/50"></div>
                                     <div>
                                         <span class="text-gray-400 block text-[11px]">التكرار</span>
-                                        <span class="text-purple-300 font-bold">كل 24 ساعة</span>
+                                        <span class="text-gray-200 font-bold">كل 24 ساعة</span>
                                     </div>
                                 </div>
 
                                 <div id="dailyActionBox" class="space-y-4">
                                     ${canClaimDaily ? `
-                                        <button id="claimDailyBtn" onclick="claimDaily()" class="w-full py-4 bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 hover:from-purple-500 hover:to-indigo-500 text-white font-black text-sm rounded-2xl shadow-xl shadow-purple-900/40 transition transform active:scale-95 flex items-center justify-center gap-2">
+                                        <button id="claimDailyBtn" onclick="claimDaily()" class="w-full py-4 bg-gradient-to-r from-[#5865f2] via-indigo-600 to-[#5865f2] hover:from-[#4752c4] hover:to-indigo-500 text-white font-black text-sm rounded-2xl shadow-xl shadow-purple-900/40 transition transform active:scale-95 flex items-center justify-center gap-2">
                                             <span>🎁</span>
                                             <span>استلام المكافأة اليومية الآن (+500 ⭐)</span>
                                         </button>
                                     ` : `
-                                        <div class="bg-[#0b0c10] border border-purple-950/60 rounded-2xl p-5 space-y-4">
+                                        <div class="bg-[#0b0d14] border border-purple-950/60 rounded-2xl p-5 space-y-4">
                                             <div class="flex items-center justify-between text-xs font-bold text-gray-300">
-                                                <span class="flex items-center gap-1 text-purple-400"><span>⏰</span><span>المكافأة القادمة</span></span>
+                                                <span class="flex items-center gap-1 text-[#5865f2]"><span>⏰</span><span>المكافأة القادمة</span></span>
                                                 <span class="text-gray-400">الوقت المتبقي بالضبط</span>
                                             </div>
 
                                             <!-- Digital Countdown Cards -->
                                             <div class="grid grid-cols-3 gap-3">
-                                                <div class="bg-[#12131c] border border-purple-900/40 rounded-xl p-3 text-center shadow-inner">
+                                                <div class="bg-[#1c1f2e] border border-purple-900/40 rounded-xl p-3 text-center shadow-inner">
                                                     <span id="cdHours" class="text-2xl font-black text-white font-mono block">${String(hoursLeft).padStart(2, '0')}</span>
                                                     <span class="text-[10px] text-gray-400 font-bold mt-0.5 block">ساعة</span>
                                                 </div>
-                                                <div class="bg-[#12131c] border border-purple-900/40 rounded-xl p-3 text-center shadow-inner">
+                                                <div class="bg-[#1c1f2e] border border-purple-900/40 rounded-xl p-3 text-center shadow-inner">
                                                     <span id="cdMins" class="text-2xl font-black text-white font-mono block">${String(minsLeft).padStart(2, '0')}</span>
                                                     <span class="text-[10px] text-gray-400 font-bold mt-0.5 block">دقيقة</span>
                                                 </div>
-                                                <div class="bg-[#12131c] border border-purple-900/40 rounded-xl p-3 text-center shadow-inner">
-                                                    <span id="cdSecs" class="text-2xl font-black text-purple-400 font-mono block">00</span>
+                                                <div class="bg-[#1c1f2e] border border-purple-900/40 rounded-xl p-3 text-center shadow-inner">
+                                                    <span id="cdSecs" class="text-2xl font-black text-[#5865f2] font-mono block">00</span>
                                                     <span class="text-[10px] text-gray-400 font-bold mt-0.5 block">ثانية</span>
                                                 </div>
                                             </div>
 
-                                            <button disabled class="w-full py-3 bg-purple-950/30 border border-purple-900/30 text-gray-400 font-bold text-xs rounded-xl cursor-not-allowed flex items-center justify-center gap-2">
+                                            <button disabled class="w-full py-3 bg-[#151722] border border-white/5 text-gray-400 font-bold text-xs rounded-xl cursor-not-allowed flex items-center justify-center gap-2">
                                                 <span>⌛</span>
                                                 <span>تم استلام مكافأة اليوم! عد بعد انتهاء الوقت أعلاه</span>
                                             </button>
@@ -719,10 +819,10 @@ module.exports = function (app, client) {
                     </main>
 
                     <!-- Sidebar Right (ProBot Menu) -->
-                    <aside class="w-64 bg-[#0f1016] border-l border-purple-950/40 p-5 flex flex-col justify-between shrink-0">
+                    <aside class="w-64 bg-[#0f1016] border-l border-white/5 p-5 flex flex-col justify-between shrink-0">
                         <div>
                             <!-- User Profile Box -->
-                            <div class="flex flex-col items-center text-center pb-5 mb-4 border-b border-purple-950/40">
+                            <div class="flex flex-col items-center text-center pb-5 mb-4 border-b border-white/5">
                                 <img src="${userAvatar}" class="w-16 h-16 rounded-full border-2 border-purple-600 shadow-lg shadow-purple-900/40 mb-2 object-cover">
                                 <h3 class="font-bold text-white text-sm">${user.username}</h3>
                                 <span class="text-[10px] text-amber-400 font-mono mt-0.5">${userCoins.toLocaleString()} ⭐</span>
@@ -730,38 +830,38 @@ module.exports = function (app, client) {
 
                             <!-- Nav Links with Active Tab Switchers -->
                             <div class="flex flex-col gap-1 text-xs text-right overflow-y-auto pr-1">
-                                <span class="text-[10px] font-bold text-purple-400/60 px-3 py-1">عام</span>
+                                <span class="text-[10px] font-bold text-[#5865f2]/60 px-3 py-1">عام</span>
                                 <button onclick="switchTab('tabOverview', this)" class="nav-btn px-3 py-2 rounded-xl bg-gradient-to-r from-purple-700 to-indigo-700 text-white font-bold flex items-center justify-between shadow-md w-full transition">
                                     <span class="w-1.5 h-1.5 rounded-full bg-white"></span>
                                     <span>نظرة عامة</span>
                                 </button>
 
-                                <span class="text-[10px] font-bold text-purple-400/60 px-3 pt-3 pb-1">متاجر النجوم</span>
-                                <button onclick="switchTab('tabWallpapers', this)" class="nav-btn px-3 py-2 rounded-xl text-gray-400 hover:text-purple-300 hover:bg-purple-950/30 font-medium flex items-center justify-between transition w-full">
+                                <span class="text-[10px] font-bold text-[#5865f2]/60 px-3 pt-3 pb-1">متاجر النجوم</span>
+                                <button onclick="switchTab('tabWallpapers', this)" class="nav-btn px-3 py-2 rounded-xl text-gray-400 hover:text-gray-200 hover:bg-[#151722] font-medium flex items-center justify-between transition w-full">
                                     <span class="text-base">🖼️</span>
                                     <span>خلفيات البروفايل</span>
                                 </button>
-                                <button onclick="switchTab('tabBadges', this)" class="nav-btn px-3 py-2 rounded-xl text-gray-400 hover:text-purple-300 hover:bg-purple-950/30 font-medium flex items-center justify-between transition w-full">
+                                <button onclick="switchTab('tabBadges', this)" class="nav-btn px-3 py-2 rounded-xl text-gray-400 hover:text-gray-200 hover:bg-[#151722] font-medium flex items-center justify-between transition w-full">
                                     <span class="text-base">🎖️</span>
                                     <span>شارات البروفايل</span>
                                 </button>
-                                <button onclick="switchTab('tabIdentity', this)" class="nav-btn px-3 py-2 rounded-xl text-gray-400 hover:text-purple-300 hover:bg-purple-950/30 font-medium flex items-center justify-between transition w-full">
+                                <button onclick="switchTab('tabIdentity', this)" class="nav-btn px-3 py-2 rounded-xl text-gray-400 hover:text-gray-200 hover:bg-[#151722] font-medium flex items-center justify-between transition w-full">
                                     <span class="text-base">🪪</span>
                                     <span>خلفيات الهوية</span>
                                 </button>
 
-                                <span class="text-[10px] font-bold text-purple-400/60 px-3 pt-3 pb-1">قائمة المتصدرين</span>
-                                <button onclick="switchTab('tabLeaderboard', this)" class="nav-btn px-3 py-2 rounded-xl text-gray-400 hover:text-purple-300 hover:bg-purple-950/30 font-medium flex items-center justify-between transition w-full">
+                                <span class="text-[10px] font-bold text-[#5865f2]/60 px-3 pt-3 pb-1">قائمة المتصدرين</span>
+                                <button onclick="switchTab('tabLeaderboard', this)" class="nav-btn px-3 py-2 rounded-xl text-gray-400 hover:text-gray-200 hover:bg-[#151722] font-medium flex items-center justify-between transition w-full">
                                     <span class="text-base">🏆</span>
                                     <span>أعلى 100 بواسطة XP</span>
                                 </button>
-                                <button onclick="switchTab('tabCoinsLeaderboard', this)" class="nav-btn px-3 py-2 rounded-xl text-gray-400 hover:text-purple-300 hover:bg-purple-950/30 font-medium flex items-center justify-between transition w-full">
+                                <button onclick="switchTab('tabCoinsLeaderboard', this)" class="nav-btn px-3 py-2 rounded-xl text-gray-400 hover:text-gray-200 hover:bg-[#151722] font-medium flex items-center justify-between transition w-full">
                                     <span class="text-base">⭐</span>
                                     <span>أغنى 100 بالنجوم</span>
                                 </button>
 
-                                <span class="text-[10px] font-bold text-purple-400/60 px-3 pt-3 pb-1">أخرى</span>
-                                <button onclick="switchTab('tabDaily', this)" class="nav-btn px-3 py-2 rounded-xl text-gray-400 hover:text-purple-300 hover:bg-purple-950/30 font-medium flex items-center justify-between transition w-full">
+                                <span class="text-[10px] font-bold text-[#5865f2]/60 px-3 pt-3 pb-1">أخرى</span>
+                                <button onclick="switchTab('tabDaily', this)" class="nav-btn px-3 py-2 rounded-xl text-gray-400 hover:text-gray-200 hover:bg-[#151722] font-medium flex items-center justify-between transition w-full">
                                     <span class="text-base">🎁</span>
                                     <span>احصل على مكافأتك اليومية</span>
                                 </button>
@@ -769,18 +869,18 @@ module.exports = function (app, client) {
                         </div>
 
                         <!-- Logout -->
-                        <a href="/logout" class="px-3 py-2.5 rounded-xl text-red-400 hover:bg-red-950/20 text-xs font-bold text-right flex items-center justify-end gap-2 transition mt-2 border-t border-purple-950/40 pt-3">
+                        <a href="/logout" class="px-3 py-2.5 rounded-xl text-red-400 hover:bg-red-950/20 text-xs font-bold text-right flex items-center justify-end gap-2 transition mt-2 border-t border-white/5 pt-3">
                             <span>خروج</span>
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
                         </a>
                     </aside>
 
                     <!-- Server Rail (Far Right Column) -->
-                    <div class="w-16 bg-[#08080c] border-l border-purple-950/40 py-4 flex flex-col items-center gap-3 shrink-0 overflow-y-auto">
+                    <div class="w-16 bg-[#08080c] border-l border-white/5 py-4 flex flex-col items-center gap-3 shrink-0 overflow-y-auto">
                         <a href="/dashboard" title="${user.username}" class="group relative flex items-center justify-center">
-                            <img src="${userAvatar}" class="w-11 h-11 rounded-2xl border-2 border-purple-500 shadow-lg shadow-purple-900/50 hover:rounded-xl object-cover transition-all" alt="${user.username}">
+                            <img src="${userAvatar}" class="w-11 h-11 rounded-2xl border-2 border-purple-500 shadow-lg shadow-black/40 hover:rounded-xl object-cover transition-all" alt="${user.username}">
                         </a>
-                        <div class="w-8 h-[1px] bg-purple-950/40"></div>
+                        <div class="w-8 h-[1px] bg-[#151722]"></div>
                         ${serverRailHtml}
                     </div>
 
@@ -804,7 +904,7 @@ module.exports = function (app, client) {
                         if (target) target.classList.remove('hidden');
 
                         document.querySelectorAll('.nav-btn').forEach(b => {
-                            b.className = 'nav-btn px-3 py-2 rounded-xl text-gray-400 hover:text-purple-300 hover:bg-purple-950/30 font-medium flex items-center justify-between transition w-full';
+                            b.className = 'nav-btn px-3 py-2 rounded-xl text-gray-400 hover:text-gray-200 hover:bg-[#151722] font-medium flex items-center justify-between transition w-full';
                         });
 
                         if (btn) {
@@ -818,16 +918,16 @@ module.exports = function (app, client) {
                         const box = document.getElementById('dailyActionBox');
                         if (!box) return;
                         if (canClaim) {
-                            box.innerHTML = '<button id="claimDailyBtn" onclick="claimDaily()" class="w-full py-4 bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 hover:from-purple-500 hover:to-indigo-500 text-white font-black text-sm rounded-2xl shadow-xl shadow-purple-900/40 transition transform active:scale-95 flex items-center justify-center gap-2"><span>🎁</span><span>استلام المكافأة اليومية الآن (+500 ⭐)</span></button>';
+                            box.innerHTML = '<button id="claimDailyBtn" onclick="claimDaily()" class="w-full py-4 bg-gradient-to-r from-[#5865f2] via-indigo-600 to-[#5865f2] hover:from-[#4752c4] hover:to-indigo-500 text-white font-black text-sm rounded-2xl shadow-xl shadow-purple-900/40 transition transform active:scale-95 flex items-center justify-center gap-2"><span>🎁</span><span>استلام المكافأة اليومية الآن (+500 ⭐)</span></button>';
                         } else {
-                            box.innerHTML = '<div class="bg-[#0b0c10] border border-purple-950/60 rounded-2xl p-5 space-y-4">'
-                                + '<div class="flex items-center justify-between text-xs font-bold text-gray-300"><span class="flex items-center gap-1 text-purple-400"><span>⏰</span><span>المكافأة القادمة</span></span><span class="text-gray-400">الوقت المتبقي بالضبط</span></div>'
+                            box.innerHTML = '<div class="bg-[#0b0d14] border border-purple-950/60 rounded-2xl p-5 space-y-4">'
+                                + '<div class="flex items-center justify-between text-xs font-bold text-gray-300"><span class="flex items-center gap-1 text-[#5865f2]"><span>⏰</span><span>المكافأة القادمة</span></span><span class="text-gray-400">الوقت المتبقي بالضبط</span></div>'
                                 + '<div class="grid grid-cols-3 gap-3">'
-                                + '<div class="bg-[#12131c] border border-purple-900/40 rounded-xl p-3 text-center shadow-inner"><span id="cdHours" class="text-2xl font-black text-white font-mono block">00</span><span class="text-[10px] text-gray-400 font-bold mt-0.5 block">ساعة</span></div>'
-                                + '<div class="bg-[#12131c] border border-purple-900/40 rounded-xl p-3 text-center shadow-inner"><span id="cdMins" class="text-2xl font-black text-white font-mono block">00</span><span class="text-[10px] text-gray-400 font-bold mt-0.5 block">دقيقة</span></div>'
-                                + '<div class="bg-[#12131c] border border-purple-900/40 rounded-xl p-3 text-center shadow-inner"><span id="cdSecs" class="text-2xl font-black text-purple-400 font-mono block">00</span><span class="text-[10px] text-gray-400 font-bold mt-0.5 block">ثانية</span></div>'
+                                + '<div class="bg-[#1c1f2e] border border-purple-900/40 rounded-xl p-3 text-center shadow-inner"><span id="cdHours" class="text-2xl font-black text-white font-mono block">00</span><span class="text-[10px] text-gray-400 font-bold mt-0.5 block">ساعة</span></div>'
+                                + '<div class="bg-[#1c1f2e] border border-purple-900/40 rounded-xl p-3 text-center shadow-inner"><span id="cdMins" class="text-2xl font-black text-white font-mono block">00</span><span class="text-[10px] text-gray-400 font-bold mt-0.5 block">دقيقة</span></div>'
+                                + '<div class="bg-[#1c1f2e] border border-purple-900/40 rounded-xl p-3 text-center shadow-inner"><span id="cdSecs" class="text-2xl font-black text-[#5865f2] font-mono block">00</span><span class="text-[10px] text-gray-400 font-bold mt-0.5 block">ثانية</span></div>'
                                 + '</div>'
-                                + '<button disabled class="w-full py-3 bg-purple-950/30 border border-purple-900/30 text-gray-400 font-bold text-xs rounded-xl cursor-not-allowed flex items-center justify-center gap-2"><span>⌛</span><span>تم استلام مكافأة اليوم! عد بعد انتهاء الوقت أعلاه</span></button>'
+                                + '<button disabled class="w-full py-3 bg-[#151722] border border-white/5 text-gray-400 font-bold text-xs rounded-xl cursor-not-allowed flex items-center justify-center gap-2"><span>⌛</span><span>تم استلام مكافأة اليوم! عد بعد انتهاء الوقت أعلاه</span></button>'
                                 + '</div>';
                         }
                     }
@@ -973,30 +1073,73 @@ module.exports = function (app, client) {
                 <title>${guild.name} | ZENO Dashboard</title>
                 <script src="https://cdn.tailwindcss.com"></script>
                 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+                
                 <style>
-                    body { background-color: #0b0c10; color: #e2e8f0; font-family: 'Cairo', sans-serif; }
-                    .toggle { position: relative; display: inline-block; width: 40px; height: 20px; }
+                    :root {
+                        --bg-main: #0b0d14;
+                        --bg-sidebar: #10121b;
+                        --bg-card: #151722;
+                        --bg-card-hover: #1c1f2e;
+                        --primary: #5865f2;
+                        --primary-hover: #4752c4;
+                        --border: rgba(255, 255, 255, 0.05);
+                        --text-muted: #a3a6aa;
+                    }
+                    body { background-color: var(--bg-main) !important; color: #ffffff !important; font-family: 'Cairo', sans-serif !important; }
+                    /* Scrollbar */
+                    ::-webkit-scrollbar { width: 8px; height: 8px; }
+                    ::-webkit-scrollbar-track { background: var(--bg-main); }
+                    ::-webkit-scrollbar-thumb { background: #2f3146; border-radius: 10px; }
+                    ::-webkit-scrollbar-thumb:hover { background: #40445f; }
+                    
+                    /* Glassmorphism & Cards */
+                    .probot-card {
+                        background: var(--bg-card) !important;
+                        border: 1px solid var(--border) !important;
+                        border-radius: 16px !important;
+                        transition: all 0.3s ease !important;
+                        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2) !important;
+                    }
+                    .probot-card:hover {
+                        background: var(--bg-card-hover) !important;
+                        border-color: rgba(88, 101, 242, 0.4) !important;
+                        transform: translateY(-3px) !important;
+                        box-shadow: 0 6px 25px rgba(0, 0, 0, 0.3) !important;
+                    }
+                    
+                    /* Toggles */
+                    .toggle { position: relative; display: inline-block; width: 44px; height: 24px; }
                     .toggle input { opacity: 0; width: 0; height: 0; }
-                    .slider { position: absolute; cursor: pointer; inset: 0; background: #1f212d; border-radius: 20px; transition: .2s; }
-                    .slider:before { content: ''; position: absolute; width: 14px; height: 14px; left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: .2s; }
-                    input:checked + .slider { background: #9333ea; }
+                    .slider { position: absolute; cursor: pointer; inset: 0; background: #2f3146; border-radius: 24px; transition: .3s; }
+                    .slider:before { content: ''; position: absolute; width: 18px; height: 18px; left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: .3s; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+                    input:checked + .slider { background: var(--primary); }
                     input:checked + .slider:before { transform: translateX(20px); }
-                    ::-webkit-scrollbar { width: 5px; height: 5px; }
-                    ::-webkit-scrollbar-thumb { background: #2e1065; border-radius: 10px; }
+                    
+                    /* Buttons */
+                    .btn-primary {
+                        background-color: var(--primary);
+                        color: white;
+                        transition: all 0.2s;
+                    }
+                    .btn-primary:hover {
+                        background-color: var(--primary-hover);
+                        box-shadow: 0 4px 15px rgba(88, 101, 242, 0.4);
+                    }
                 </style>
+
             </head>
-            <body class="min-h-screen flex flex-col bg-[#0b0c10] text-gray-200">
+            <body class="min-h-screen flex flex-col bg-[#0b0d14] text-gray-200">
 
                 <!-- Header -->
-                <header class="h-16 bg-[#0f1016]/90 backdrop-blur-md border-b border-purple-950/40 px-6 flex items-center justify-between sticky top-0 z-50">
+                <header class="h-16 bg-[#10121b]/95 backdrop-blur-md border-b border-white/5 px-6 flex items-center justify-between sticky top-0 z-50">
                     <div class="flex items-center gap-4">
-                        <a href="https://discord.gg/uxqQDtbVMz" target="_blank" class="text-xs text-gray-400 hover:text-purple-300 transition">الدعم الفني</a>
+                        <a href="https://discord.gg/uxqQDtbVMz" target="_blank" class="text-xs text-gray-400 hover:text-gray-200 transition">الدعم الفني</a>
                         <span class="text-gray-700">|</span>
-                        <a href="/dashboard" class="text-xs text-purple-400 hover:text-purple-300 font-bold transition">الخوادم</a>
+                        <a href="/dashboard" class="text-xs text-[#5865f2] hover:text-gray-200 font-bold transition">الخوادم</a>
                     </div>
                     <div class="flex items-center gap-2">
                         <span class="font-black text-sm text-white tracking-wide">ZENO</span>
-                        <img src="/logo.png" class="w-8 h-8 rounded-xl object-cover border border-purple-500/40 shadow-lg shadow-purple-900/50" alt="ZENO">
+                        <img src="/logo.png" class="w-8 h-8 rounded-xl object-cover border border-purple-500/40 shadow-lg shadow-black/40" alt="ZENO">
                     </div>
                 </header>
 
@@ -1008,7 +1151,7 @@ module.exports = function (app, client) {
                         <!-- Search Box -->
                         <div class="flex items-center justify-between mb-8">
                             <div class="relative w-72">
-                                <input type="text" placeholder="...Search plugins" class="w-full bg-[#12131c] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-2 text-xs text-white outline-none">
+                                <input type="text" placeholder="...Search plugins" class="w-full bg-[#1c1f2e] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2 text-xs text-white outline-none">
                             </div>
                             <h2 class="text-xl font-black text-white">Fast Access</h2>
                         </div>
@@ -1016,49 +1159,49 @@ module.exports = function (app, client) {
                         <!-- General (Plugins 4) -->
                         <div class="mb-10">
                             <div class="flex items-center justify-between mb-4">
-                                <span class="text-xs font-bold text-purple-400/70">plugins 4</span>
+                                <span class="text-xs font-bold text-[#5865f2]/70">plugins 4</span>
                                 <h3 class="text-sm font-bold text-gray-400">General</h3>
                             </div>
                             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                                 
                                 <!-- نظرة عامة -->
-                                <div class="bg-[#10111a] border border-purple-950/40 hover:border-purple-600/30 rounded-2xl p-5 flex flex-col justify-between transition shadow-lg">
+                                <div class="probot-card border border-white/5 hover:border-[#5865f2]/40 rounded-2xl p-5 flex flex-col justify-between transition shadow-lg">
                                     <div class="flex items-center justify-between mb-2">
-                                        <div class="w-8 h-8 rounded-xl bg-purple-950/40 flex items-center justify-center text-purple-300">👁️</div>
+                                        <div class="w-8 h-8 rounded-xl bg-[#151722] flex items-center justify-center text-gray-200">👁️</div>
                                         <h4 class="font-bold text-white text-xs">نظرة عامة</h4>
                                     </div>
                                     <p class="text-gray-400 text-[11px] mb-4 text-right">Get main information about your server settings</p>
-                                    <a href="/dashboard/${guildId}/overview" class="w-full py-2 bg-purple-950/30 hover:bg-purple-600 hover:text-white text-purple-300 border border-purple-900/30 rounded-xl text-xs font-bold text-center transition">&gt; Visit</a>
+                                    <a href="/dashboard/${guildId}/overview" class="w-full py-2 bg-[#151722] hover:bg-[#5865f2] hover:text-white text-gray-200 border border-white/5 rounded-xl text-xs font-bold text-center transition">&gt; Visit</a>
                                 </div>
 
                                 <!-- إعدادات السيرفر -->
-                                <div class="bg-[#10111a] border border-purple-950/40 hover:border-purple-600/30 rounded-2xl p-5 flex flex-col justify-between transition shadow-lg">
+                                <div class="probot-card border border-white/5 hover:border-[#5865f2]/40 rounded-2xl p-5 flex flex-col justify-between transition shadow-lg">
                                     <div class="flex items-center justify-between mb-2">
-                                        <div class="w-8 h-8 rounded-xl bg-purple-950/40 flex items-center justify-center text-purple-300">⚙️</div>
+                                        <div class="w-8 h-8 rounded-xl bg-[#151722] flex items-center justify-center text-gray-200">⚙️</div>
                                         <h4 class="font-bold text-white text-xs">إعدادات السيرفر</h4>
                                     </div>
                                     <p class="text-gray-400 text-[11px] mb-4 text-right">Manage your server settings</p>
-                                    <a href="/dashboard/${guildId}/settings" class="w-full py-2 bg-purple-950/30 hover:bg-purple-600 hover:text-white text-purple-300 border border-purple-900/30 rounded-xl text-xs font-bold text-center transition">&gt; Visit</a>
+                                    <a href="/dashboard/${guildId}/settings" class="w-full py-2 bg-[#151722] hover:bg-[#5865f2] hover:text-white text-gray-200 border border-white/5 rounded-xl text-xs font-bold text-center transition">&gt; Visit</a>
                                 </div>
 
                                 <!-- رسائل الإيمبد -->
-                                <div class="bg-[#10111a] border border-purple-950/40 hover:border-purple-600/30 rounded-2xl p-5 flex flex-col justify-between transition shadow-lg">
+                                <div class="probot-card border border-white/5 hover:border-[#5865f2]/40 rounded-2xl p-5 flex flex-col justify-between transition shadow-lg">
                                     <div class="flex items-center justify-between mb-2">
-                                        <div class="w-8 h-8 rounded-xl bg-purple-950/40 flex items-center justify-center text-purple-300">📄</div>
+                                        <div class="w-8 h-8 rounded-xl bg-[#151722] flex items-center justify-center text-gray-200">📄</div>
                                         <h4 class="font-bold text-white text-xs">رسائل الإيمبد</h4>
                                     </div>
                                     <p class="text-gray-400 text-[11px] mb-4 text-right">Create and manage embed messages</p>
-                                    <a href="/dashboard/${guildId}/embed" class="w-full py-2 bg-purple-950/30 hover:bg-purple-600 hover:text-white text-purple-300 border border-purple-900/30 rounded-xl text-xs font-bold text-center transition">&gt; Visit</a>
+                                    <a href="/dashboard/${guildId}/embed" class="w-full py-2 bg-[#151722] hover:bg-[#5865f2] hover:text-white text-gray-200 border border-white/5 rounded-xl text-xs font-bold text-center transition">&gt; Visit</a>
                                 </div>
 
                                 <!-- حماية السيرفر -->
-                                <div class="bg-[#10111a] border border-purple-950/40 hover:border-purple-600/30 rounded-2xl p-5 flex flex-col justify-between transition shadow-lg">
+                                <div class="probot-card border border-white/5 hover:border-[#5865f2]/40 rounded-2xl p-5 flex flex-col justify-between transition shadow-lg">
                                     <div class="flex items-center justify-between mb-2">
-                                        <div class="w-8 h-8 rounded-xl bg-purple-950/40 flex items-center justify-center text-purple-300">🛡️</div>
+                                        <div class="w-8 h-8 rounded-xl bg-[#151722] flex items-center justify-center text-gray-200">🛡️</div>
                                         <h4 class="font-bold text-white text-xs">حماية السيرفر</h4>
                                     </div>
                                     <p class="text-gray-400 text-[11px] mb-4 text-right">Anti-Nuke, Anti-Spam & Protection</p>
-                                    <a href="/dashboard/${guildId}/protection" class="w-full py-2 bg-purple-950/30 hover:bg-purple-600 hover:text-white text-purple-300 border border-purple-900/30 rounded-xl text-xs font-bold text-center transition">&gt; Visit</a>
+                                    <a href="/dashboard/${guildId}/protection" class="w-full py-2 bg-[#151722] hover:bg-[#5865f2] hover:text-white text-gray-200 border border-white/5 rounded-xl text-xs font-bold text-center transition">&gt; Visit</a>
                                 </div>
 
                             </div>
@@ -1067,12 +1210,12 @@ module.exports = function (app, client) {
                         <!-- Modules (Plugins 12) -->
                         <div>
                             <div class="flex items-center justify-between mb-4">
-                                <span class="text-xs font-bold text-purple-400/70">plugins 14</span>
+                                <span class="text-xs font-bold text-[#5865f2]/70">plugins 14</span>
                                 <h3 class="text-sm font-bold text-gray-400">Modules</h3>
                             </div>
                             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                 <!-- 👮 نشاط طاقم الإدارة (Staff Activity) -->
-                                <div class="bg-[#10111a] border border-amber-950/40 hover:border-amber-600/40 rounded-2xl p-5 flex flex-col justify-between transition shadow-lg">
+                                <div class="probot-card border border-amber-950/40 hover:border-amber-600/40 rounded-2xl p-5 flex flex-col justify-between transition shadow-lg">
                                     <div class="flex items-center justify-between mb-3">
                                         <label class="toggle"><input type="checkbox" onchange="toggleModule('${guildId}', 'staff_activity_enabled', this.checked)" checked><span class="slider"></span></label>
                                         <div class="flex items-center gap-2">
@@ -1085,7 +1228,7 @@ module.exports = function (app, client) {
                                 </div>
 
                                 <!-- سجل النشاطات والأحداث (Logs) -->
-                                <div class="bg-[#10111a] border border-blue-950/40 hover:border-blue-600/40 rounded-2xl p-5 flex flex-col justify-between transition shadow-lg">
+                                <div class="probot-card border border-blue-950/40 hover:border-blue-600/40 rounded-2xl p-5 flex flex-col justify-between transition shadow-lg">
                                     <div class="flex items-center justify-between mb-3">
                                         <label class="toggle"><input type="checkbox" onchange="toggleModule('${guildId}', 'logs_enabled', this.checked)" checked><span class="slider"></span></label>
                                         <div class="flex items-center gap-2">
@@ -1099,7 +1242,7 @@ module.exports = function (app, client) {
 
 
                                 <!-- التسلية والألعاب -->
-                                <div class="bg-[#10111a] border border-purple-950/40 hover:border-purple-600/40 rounded-2xl p-5 flex flex-col justify-between transition shadow-lg">
+                                <div class="probot-card border border-white/5 hover:border-[#5865f2]/40 rounded-2xl p-5 flex flex-col justify-between transition shadow-lg">
                                     <div class="flex items-center justify-between mb-3">
                                         <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
                                         <div class="flex items-center gap-2">
@@ -1108,11 +1251,11 @@ module.exports = function (app, client) {
                                         </div>
                                     </div>
                                     <p class="text-gray-400 text-[11px] mb-4 text-right">روليت، مافيا، كراسي موسيقية، غميضة</p>
-                                    <a href="/dashboard/${guildId}/fun" class="w-full py-2 bg-purple-950/30 hover:bg-gradient-to-r hover:from-purple-600 hover:to-indigo-600 hover:text-white text-purple-300 border border-purple-900/30 rounded-xl text-xs font-bold text-center transition">&gt; Visit</a>
+                                    <a href="/dashboard/${guildId}/fun" class="w-full py-2 bg-[#151722] hover:bg-gradient-to-r hover:from-[#5865f2] hover:to-indigo-600 hover:text-white text-gray-200 border border-white/5 rounded-xl text-xs font-bold text-center transition">&gt; Visit</a>
                                 </div>
 
                                 <!-- الأوامر العامة -->
-                                <div class="bg-[#10111a] border border-purple-950/40 hover:border-purple-600/40 rounded-2xl p-5 flex flex-col justify-between transition shadow-lg">
+                                <div class="probot-card border border-white/5 hover:border-[#5865f2]/40 rounded-2xl p-5 flex flex-col justify-between transition shadow-lg">
                                     <div class="flex items-center justify-between mb-3">
                                         <label class="toggle"><input type="checkbox" onchange="toggleModule('${guildId}', 'general_enabled', this.checked)" checked><span class="slider"></span></label>
                                         <div class="flex items-center gap-2">
@@ -1121,11 +1264,11 @@ module.exports = function (app, client) {
                                         </div>
                                     </div>
                                     <p class="text-gray-400 text-[11px] mb-4 text-right">Utility commands and features</p>
-                                    <a href="/dashboard/${guildId}/general" class="w-full py-2 bg-purple-950/30 hover:bg-gradient-to-r hover:from-purple-600 hover:to-indigo-600 hover:text-white text-purple-300 border border-purple-900/30 rounded-xl text-xs font-bold text-center transition">&gt; Visit</a>
+                                    <a href="/dashboard/${guildId}/general" class="w-full py-2 bg-[#151722] hover:bg-gradient-to-r hover:from-[#5865f2] hover:to-indigo-600 hover:text-white text-gray-200 border border-white/5 rounded-xl text-xs font-bold text-center transition">&gt; Visit</a>
                                 </div>
 
                                 <!-- الإشراف -->
-                                <div class="bg-[#10111a] border border-purple-950/40 hover:border-purple-600/40 rounded-2xl p-5 flex flex-col justify-between transition shadow-lg">
+                                <div class="probot-card border border-white/5 hover:border-[#5865f2]/40 rounded-2xl p-5 flex flex-col justify-between transition shadow-lg">
                                     <div class="flex items-center justify-between mb-3">
                                         <label class="toggle"><input type="checkbox" onchange="toggleModule('${guildId}', 'moderation_enabled', this.checked)" checked><span class="slider"></span></label>
                                         <div class="flex items-center gap-2">
@@ -1134,11 +1277,11 @@ module.exports = function (app, client) {
                                         </div>
                                     </div>
                                     <p class="text-gray-400 text-[11px] mb-4 text-right">Moderation tools and commands</p>
-                                    <a href="/dashboard/${guildId}/moderation" class="w-full py-2 bg-purple-950/30 hover:bg-gradient-to-r hover:from-purple-600 hover:to-indigo-600 hover:text-white text-purple-300 border border-purple-900/30 rounded-xl text-xs font-bold text-center transition">&gt; Visit</a>
+                                    <a href="/dashboard/${guildId}/moderation" class="w-full py-2 bg-[#151722] hover:bg-gradient-to-r hover:from-[#5865f2] hover:to-indigo-600 hover:text-white text-gray-200 border border-white/5 rounded-xl text-xs font-bold text-center transition">&gt; Visit</a>
                                 </div>
 
                                 <!-- الرقابة التلقائية -->
-                                <div class="bg-[#10111a] border border-purple-950/40 hover:border-purple-600/40 rounded-2xl p-5 flex flex-col justify-between transition shadow-lg">
+                                <div class="probot-card border border-white/5 hover:border-[#5865f2]/40 rounded-2xl p-5 flex flex-col justify-between transition shadow-lg">
                                     <div class="flex items-center justify-between mb-3">
                                         <label class="toggle"><input type="checkbox" onchange="toggleModule('${guildId}', 'automod_enabled', this.checked)" checked><span class="slider"></span></label>
                                         <div class="flex items-center gap-2">
@@ -1147,11 +1290,11 @@ module.exports = function (app, client) {
                                         </div>
                                     </div>
                                     <p class="text-gray-400 text-[11px] mb-4 text-right">Automatic moderation features</p>
-                                    <a href="/dashboard/${guildId}/automod" class="w-full py-2 bg-purple-950/30 hover:bg-gradient-to-r hover:from-purple-600 hover:to-indigo-600 hover:text-white text-purple-300 border border-purple-900/30 rounded-xl text-xs font-bold text-center transition">&gt; Visit</a>
+                                    <a href="/dashboard/${guildId}/automod" class="w-full py-2 bg-[#151722] hover:bg-gradient-to-r hover:from-[#5865f2] hover:to-indigo-600 hover:text-white text-gray-200 border border-white/5 rounded-xl text-xs font-bold text-center transition">&gt; Visit</a>
                                 </div>
 
                                 <!-- الترحيب والمغادرة -->
-                                <div class="bg-[#10111a] border border-purple-950/40 hover:border-purple-600/40 rounded-2xl p-5 flex flex-col justify-between transition shadow-lg">
+                                <div class="probot-card border border-white/5 hover:border-[#5865f2]/40 rounded-2xl p-5 flex flex-col justify-between transition shadow-lg">
                                     <div class="flex items-center justify-between mb-3">
                                         <label class="toggle"><input type="checkbox" onchange="toggleModule('${guildId}', 'welcome_enabled', this.checked)" checked><span class="slider"></span></label>
                                         <div class="flex items-center gap-2">
@@ -1160,11 +1303,11 @@ module.exports = function (app, client) {
                                         </div>
                                     </div>
                                     <p class="text-gray-400 text-[11px] mb-4 text-right">Welcome card canvas and messages</p>
-                                    <a href="/dashboard/${guildId}/welcome" class="w-full py-2 bg-purple-950/30 hover:bg-gradient-to-r hover:from-purple-600 hover:to-indigo-600 hover:text-white text-purple-300 border border-purple-900/30 rounded-xl text-xs font-bold text-center transition">&gt; Visit</a>
+                                    <a href="/dashboard/${guildId}/welcome" class="w-full py-2 bg-[#151722] hover:bg-gradient-to-r hover:from-[#5865f2] hover:to-indigo-600 hover:text-white text-gray-200 border border-white/5 rounded-xl text-xs font-bold text-center transition">&gt; Visit</a>
                                 </div>
 
                                 <!-- الرد التلقائي -->
-                                <div class="bg-[#10111a] border border-purple-950/40 hover:border-purple-600/40 rounded-2xl p-5 flex flex-col justify-between transition shadow-lg">
+                                <div class="probot-card border border-white/5 hover:border-[#5865f2]/40 rounded-2xl p-5 flex flex-col justify-between transition shadow-lg">
                                     <div class="flex items-center justify-between mb-3">
                                         <label class="toggle"><input type="checkbox" onchange="toggleModule('${guildId}', 'autoresponder_enabled', this.checked)" checked><span class="slider"></span></label>
                                         <div class="flex items-center gap-2">
@@ -1173,11 +1316,11 @@ module.exports = function (app, client) {
                                         </div>
                                     </div>
                                     <p class="text-gray-400 text-[11px] mb-4 text-right">Custom automatic responders</p>
-                                    <a href="/dashboard/${guildId}/autoresponder" class="w-full py-2 bg-purple-950/30 hover:bg-gradient-to-r hover:from-purple-600 hover:to-indigo-600 hover:text-white text-purple-300 border border-purple-900/30 rounded-xl text-xs font-bold text-center transition">&gt; Visit</a>
+                                    <a href="/dashboard/${guildId}/autoresponder" class="w-full py-2 bg-[#151722] hover:bg-gradient-to-r hover:from-[#5865f2] hover:to-indigo-600 hover:text-white text-gray-200 border border-white/5 rounded-xl text-xs font-bold text-center transition">&gt; Visit</a>
                                 </div>
 
                                 <!-- البوستات -->
-                                <div class="bg-[#10111a] border border-pink-950/40 hover:border-pink-600/40 rounded-2xl p-5 flex flex-col justify-between transition shadow-lg">
+                                <div class="probot-card border border-pink-950/40 hover:border-pink-600/40 rounded-2xl p-5 flex flex-col justify-between transition shadow-lg">
                                     <div class="flex items-center justify-between mb-3">
                                         <label class="toggle"><input type="checkbox" onchange="toggleModule('${guildId}', 'boost_enabled', this.checked)" ${true ? 'checked' : ''}><span class="slider"></span></label>
                                         <div class="flex items-center gap-2">
@@ -1186,11 +1329,11 @@ module.exports = function (app, client) {
                                         </div>
                                     </div>
                                     <p class="text-gray-400 text-[11px] mb-4 text-right">رسائل شكر تلقائية للداعمين بالبوست</p>
-                                    <a href="/dashboard/${guildId}/boost" class="w-full py-2 bg-pink-950/30 hover:bg-gradient-to-r hover:from-pink-600 hover:to-purple-600 hover:text-white text-pink-300 border border-pink-900/30 rounded-xl text-xs font-bold text-center transition">&gt; Visit</a>
+                                    <a href="/dashboard/${guildId}/boost" class="w-full py-2 bg-pink-950/30 hover:bg-gradient-to-r hover:from-pink-600 hover:to-[#5865f2] hover:text-white text-pink-300 border border-pink-900/30 rounded-xl text-xs font-bold text-center transition">&gt; Visit</a>
                                 </div>
 
                                 <!-- التذاكر والدعم الفني -->
-                                <div class="bg-[#10111a] border border-purple-950/40 hover:border-purple-600/40 rounded-2xl p-5 flex flex-col justify-between transition shadow-lg">
+                                <div class="probot-card border border-white/5 hover:border-[#5865f2]/40 rounded-2xl p-5 flex flex-col justify-between transition shadow-lg">
                                     <div class="flex items-center justify-between mb-3">
                                         <label class="toggle"><input type="checkbox" onchange="toggleModule('${guildId}', 'ticket_enabled', this.checked)" checked><span class="slider"></span></label>
                                         <div class="flex items-center gap-2">
@@ -1199,11 +1342,11 @@ module.exports = function (app, client) {
                                         </div>
                                     </div>
                                     <p class="text-gray-400 text-[11px] mb-4 text-right">لوحات دعم فني مخصصة وترانسكريبت</p>
-                                    <a href="/dashboard/${guildId}/tickets" class="w-full py-2 bg-purple-950/30 hover:bg-gradient-to-r hover:from-purple-600 hover:to-indigo-600 hover:text-white text-purple-300 border border-purple-900/30 rounded-xl text-xs font-bold text-center transition">&gt; Visit</a>
+                                    <a href="/dashboard/${guildId}/tickets" class="w-full py-2 bg-[#151722] hover:bg-gradient-to-r hover:from-[#5865f2] hover:to-indigo-600 hover:text-white text-gray-200 border border-white/5 rounded-xl text-xs font-bold text-center transition">&gt; Visit</a>
                                 </div>
 
                                 <!-- المستويات واللفلات -->
-                                <div class="bg-[#10111a] border border-purple-950/40 hover:border-purple-600/40 rounded-2xl p-5 flex flex-col justify-between transition shadow-lg">
+                                <div class="probot-card border border-white/5 hover:border-[#5865f2]/40 rounded-2xl p-5 flex flex-col justify-between transition shadow-lg">
                                     <div class="flex items-center justify-between mb-3">
                                         <label class="toggle"><input type="checkbox" onchange="toggleModule('${guildId}', 'leveling_enabled', this.checked)" checked><span class="slider"></span></label>
                                         <div class="flex items-center gap-2">
@@ -1212,11 +1355,11 @@ module.exports = function (app, client) {
                                         </div>
                                     </div>
                                     <p class="text-gray-400 text-[11px] mb-4 text-right">نظام الرتب ونقاط الخبرة وبطاقات الرانك</p>
-                                    <a href="/dashboard/${guildId}/levels" class="w-full py-2 bg-purple-950/30 hover:bg-gradient-to-r hover:from-purple-600 hover:to-indigo-600 hover:text-white text-purple-300 border border-purple-900/30 rounded-xl text-xs font-bold text-center transition">&gt; Visit</a>
+                                    <a href="/dashboard/${guildId}/levels" class="w-full py-2 bg-[#151722] hover:bg-gradient-to-r hover:from-[#5865f2] hover:to-indigo-600 hover:text-white text-gray-200 border border-white/5 rounded-xl text-xs font-bold text-center transition">&gt; Visit</a>
                                 </div>
 
                                 <!-- الرومات المؤقتة -->
-                                <div class="bg-[#10111a] border border-purple-950/40 hover:border-purple-600/40 rounded-2xl p-5 flex flex-col justify-between transition shadow-lg">
+                                <div class="probot-card border border-white/5 hover:border-[#5865f2]/40 rounded-2xl p-5 flex flex-col justify-between transition shadow-lg">
                                     <div class="flex items-center justify-between mb-3">
                                         <label class="toggle"><input type="checkbox" onchange="toggleModule('${guildId}', 'temp_voice_enabled', this.checked)" checked><span class="slider"></span></label>
                                         <div class="flex items-center gap-2">
@@ -1225,11 +1368,11 @@ module.exports = function (app, client) {
                                         </div>
                                     </div>
                                     <p class="text-gray-400 text-[11px] mb-4 text-right">إنشاء قنوات صوتية خاصة تلقائياً</p>
-                                    <a href="/dashboard/${guildId}/tempvoice" class="w-full py-2 bg-purple-950/30 hover:bg-gradient-to-r hover:from-purple-600 hover:to-indigo-600 hover:text-white text-purple-300 border border-purple-900/30 rounded-xl text-xs font-bold text-center transition">&gt; Visit</a>
+                                    <a href="/dashboard/${guildId}/tempvoice" class="w-full py-2 bg-[#151722] hover:bg-gradient-to-r hover:from-[#5865f2] hover:to-indigo-600 hover:text-white text-gray-200 border border-white/5 rounded-xl text-xs font-bold text-center transition">&gt; Visit</a>
                                 </div>
 
                                 <!-- التحقق والتفعيل -->
-                                <div class="bg-[#10111a] border border-purple-950/40 hover:border-purple-600/40 rounded-2xl p-5 flex flex-col justify-between transition shadow-lg">
+                                <div class="probot-card border border-white/5 hover:border-[#5865f2]/40 rounded-2xl p-5 flex flex-col justify-between transition shadow-lg">
                                     <div class="flex items-center justify-between mb-3">
                                         <label class="toggle"><input type="checkbox" onchange="toggleModule('${guildId}', 'verify_enabled', this.checked)" checked><span class="slider"></span></label>
                                         <div class="flex items-center gap-2">
@@ -1238,11 +1381,11 @@ module.exports = function (app, client) {
                                         </div>
                                     </div>
                                     <p class="text-gray-400 text-[11px] mb-4 text-right">لوحة تفعيل الأعضاء بالأزرار التفاعلية</p>
-                                    <a href="/dashboard/${guildId}/verification" class="w-full py-2 bg-purple-950/30 hover:bg-gradient-to-r hover:from-purple-600 hover:to-indigo-600 hover:text-white text-purple-300 border border-purple-900/30 rounded-xl text-xs font-bold text-center transition">&gt; Visit</a>
+                                    <a href="/dashboard/${guildId}/verification" class="w-full py-2 bg-[#151722] hover:bg-gradient-to-r hover:from-[#5865f2] hover:to-indigo-600 hover:text-white text-gray-200 border border-white/5 rounded-xl text-xs font-bold text-center transition">&gt; Visit</a>
                                 </div>
 
                                 <!-- الاقتصاد والنجوم -->
-                                <div class="bg-[#10111a] border border-amber-950/40 hover:border-amber-600/40 rounded-2xl p-5 flex flex-col justify-between transition shadow-lg">
+                                <div class="probot-card border border-amber-950/40 hover:border-amber-600/40 rounded-2xl p-5 flex flex-col justify-between transition shadow-lg">
                                     <div class="flex items-center justify-between mb-3">
                                         <label class="toggle"><input type="checkbox" onchange="toggleModule('${guildId}', 'economy_enabled', this.checked)" checked><span class="slider"></span></label>
                                         <div class="flex items-center gap-2">
@@ -1255,7 +1398,7 @@ module.exports = function (app, client) {
                                 </div>
 
                                 <!-- القرآن الكريم والراديو 24/7 -->
-                                <div class="bg-[#10111a] border border-emerald-950/40 hover:border-emerald-600/40 rounded-2xl p-5 flex flex-col justify-between transition shadow-lg">
+                                <div class="probot-card border border-emerald-950/40 hover:border-emerald-600/40 rounded-2xl p-5 flex flex-col justify-between transition shadow-lg">
                                     <div class="flex items-center justify-between mb-3">
                                         <label class="toggle"><input type="checkbox" onchange="toggleModule('${guildId}', 'quran_enabled', this.checked)" checked><span class="slider"></span></label>
                                         <div class="flex items-center gap-2">
@@ -1268,7 +1411,7 @@ module.exports = function (app, client) {
                                 </div>
 
                                 <!-- نظام التقديمات (Applications) -->
-                                <div class="bg-[#10111a] border border-indigo-950/40 hover:border-indigo-600/40 rounded-2xl p-5 flex flex-col justify-between transition shadow-lg">
+                                <div class="probot-card border border-indigo-950/40 hover:border-indigo-600/40 rounded-2xl p-5 flex flex-col justify-between transition shadow-lg">
                                     <div class="flex items-center justify-between mb-3">
                                         <label class="toggle"><input type="checkbox" onchange="toggleModule('${guildId}', 'applications_enabled', this.checked)" checked><span class="slider"></span></label>
                                         <div class="flex items-center gap-2">
@@ -1277,24 +1420,24 @@ module.exports = function (app, client) {
                                         </div>
                                     </div>
                                     <p class="text-gray-400 text-[11px] mb-4 text-right">إنشاء وتخصيص استمارات التقديم مع لوحة أزرار تفاعلية ومراجعة الطلبات</p>
-                                    <a href="/dashboard/${guildId}/applications" class="w-full py-2 bg-indigo-950/30 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 hover:text-white text-indigo-300 border border-indigo-900/30 rounded-xl text-xs font-bold text-center transition">&gt; Visit</a>
+                                    <a href="/dashboard/${guildId}/applications" class="w-full py-2 bg-indigo-950/30 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-[#5865f2] hover:text-white text-indigo-300 border border-indigo-900/30 rounded-xl text-xs font-bold text-center transition">&gt; Visit</a>
                                 </div>
 
                                 <!-- الإحصائيات والتحليلات (Analytics) -->
-                                <div class="bg-[#10111a] border border-purple-950/40 hover:border-purple-600/40 rounded-2xl p-5 flex flex-col justify-between transition shadow-lg">
+                                <div class="probot-card border border-white/5 hover:border-[#5865f2]/40 rounded-2xl p-5 flex flex-col justify-between transition shadow-lg">
                                     <div class="flex items-center justify-between mb-3">
-                                        <span class="px-2 py-0.5 bg-purple-950/60 text-purple-300 rounded-lg text-[10px] font-bold">مباشر 📊</span>
+                                        <span class="px-2 py-0.5 bg-purple-950/60 text-gray-200 rounded-lg text-[10px] font-bold">مباشر 📊</span>
                                         <div class="flex items-center gap-2">
                                             <h4 class="font-bold text-white text-sm">الإحصائيات & التحليلات</h4>
                                             <span class="text-lg">📊</span>
                                         </div>
                                     </div>
                                     <p class="text-gray-400 text-[11px] mb-4 text-right">تحليلات بيانية دقيقة لتفاعل الرسائل، دخول وخروج الأعضاء، والرومات الصوتية</p>
-                                    <a href="/dashboard/${guildId}/analytics" class="w-full py-2 bg-purple-950/30 hover:bg-gradient-to-r hover:from-purple-600 hover:to-indigo-600 hover:text-white text-purple-300 border border-purple-900/30 rounded-xl text-xs font-bold text-center transition">&gt; Visit</a>
+                                    <a href="/dashboard/${guildId}/analytics" class="w-full py-2 bg-[#151722] hover:bg-gradient-to-r hover:from-[#5865f2] hover:to-indigo-600 hover:text-white text-gray-200 border border-white/5 rounded-xl text-xs font-bold text-center transition">&gt; Visit</a>
                                 </div>
 
                                 <!-- مظهر البوت (Bot Appearance) -->
-                                <div class="bg-[#10111a] border border-amber-950/40 hover:border-amber-600/40 rounded-2xl p-5 flex flex-col justify-between transition shadow-lg">
+                                <div class="probot-card border border-amber-950/40 hover:border-amber-600/40 rounded-2xl p-5 flex flex-col justify-between transition shadow-lg">
                                     <div class="flex items-center justify-between mb-3">
                                         <span class="px-2 py-0.5 bg-amber-950/60 text-amber-300 rounded-lg text-[10px] font-bold">مجاني 👑</span>
                                         <div class="flex items-center gap-2">
@@ -1321,76 +1464,76 @@ module.exports = function (app, client) {
                     </main>
 
                     <!-- Server Settings Navigation Sidebar (ProBot Server Menu) -->
-                    <aside class="w-64 bg-[#0f1016] border-l border-purple-950/40 p-5 flex flex-col shrink-0 overflow-y-auto">
+                    <aside class="w-64 bg-[#0f1016] border-l border-white/5 p-5 flex flex-col shrink-0 overflow-y-auto">
                         
                         <!-- Server Icon & Title Header -->
-                        <div class="flex flex-col items-center text-center pb-5 mb-4 border-b border-purple-950/40">
-                            <img src="${guildIcon}" class="w-16 h-16 rounded-2xl bg-[#12131c] mb-2 object-cover shadow-lg border border-purple-900/30">
+                        <div class="flex flex-col items-center text-center pb-5 mb-4 border-b border-white/5">
+                            <img src="${guildIcon}" class="w-16 h-16 rounded-2xl bg-[#1c1f2e] mb-2 object-cover shadow-lg border border-white/5">
                             <h3 class="font-bold text-white text-sm truncate max-w-[200px]">${guild.name}</h3>
                         </div>
 
                         <!-- Menu Items -->
                         <div class="flex flex-col gap-1 text-xs text-right overflow-y-auto pr-1">
-                            <span class="text-[10px] font-bold text-purple-400/60 px-3 py-1">عام</span>
+                            <span class="text-[10px] font-bold text-[#5865f2]/60 px-3 py-1">عام</span>
                             <a href="/dashboard/${guildId}" class="px-3 py-2 rounded-xl bg-gradient-to-r from-purple-700 to-indigo-700 text-white font-bold flex items-center justify-between shadow-lg shadow-purple-950/50">
                                 <span class="w-1.5 h-1.5 rounded-full bg-white"></span>
                                 <span>نظرة عامة</span>
                             </a>
-                            <a href="/dashboard/${guildId}/analytics" class="px-3 py-1.5 rounded-xl text-gray-400 hover:text-purple-300 hover:bg-purple-950/30 font-medium flex items-center justify-end gap-2 transition">
+                            <a href="/dashboard/${guildId}/analytics" class="px-3 py-1.5 rounded-xl text-gray-400 hover:text-gray-200 hover:bg-[#151722] font-medium flex items-center justify-end gap-2 transition">
                                 <span>الإحصائيات</span>
                                 <span>📊</span>
                             </a>
-                            <a href="/dashboard/${guildId}/general" class="px-3 py-1.5 rounded-xl text-gray-400 hover:text-purple-300 hover:bg-purple-950/30 font-medium flex items-center justify-end gap-2 transition">
+                            <a href="/dashboard/${guildId}/general" class="px-3 py-1.5 rounded-xl text-gray-400 hover:text-gray-200 hover:bg-[#151722] font-medium flex items-center justify-end gap-2 transition">
                                 <span>إعدادات السيرفر</span>
                                 <span>⚙️</span>
                             </a>
-                            <a href="/dashboard/${guildId}/embed" class="px-3 py-1.5 rounded-xl text-gray-400 hover:text-purple-300 hover:bg-purple-950/30 font-medium flex items-center justify-end gap-2 transition">
+                            <a href="/dashboard/${guildId}/embed" class="px-3 py-1.5 rounded-xl text-gray-400 hover:text-gray-200 hover:bg-[#151722] font-medium flex items-center justify-end gap-2 transition">
                                 <span>رسائل الإيمبد</span>
                                 <span>📄</span>
                             </a>
 
-                            <span class="text-[10px] font-bold text-purple-400/60 px-3 pt-3 pb-1">قائمة الخصائص</span>
-                            <a href="/dashboard/${guildId}/fun" class="px-3 py-1.5 rounded-xl text-gray-300 hover:text-purple-300 hover:bg-purple-950/30 font-medium flex items-center justify-between transition">
+                            <span class="text-[10px] font-bold text-[#5865f2]/60 px-3 pt-3 pb-1">قائمة الخصائص</span>
+                            <a href="/dashboard/${guildId}/fun" class="px-3 py-1.5 rounded-xl text-gray-300 hover:text-gray-200 hover:bg-[#151722] font-medium flex items-center justify-between transition">
                                 <span class="w-2 h-2 rounded-full bg-purple-400"></span>
                                 <span class="flex items-center gap-1.5"><span>التسلية والألعاب</span><span>🎮</span></span>
                             </a>
-                            <a href="/dashboard/${guildId}/general" class="px-3 py-1.5 rounded-xl text-gray-300 hover:text-purple-300 hover:bg-purple-950/30 font-medium flex items-center justify-between transition">
+                            <a href="/dashboard/${guildId}/general" class="px-3 py-1.5 rounded-xl text-gray-300 hover:text-gray-200 hover:bg-[#151722] font-medium flex items-center justify-between transition">
                                 <span class="w-2 h-2 rounded-full bg-purple-400"></span>
                                 <span class="flex items-center gap-1.5"><span>الأوامر العامة</span><span>⚙️</span></span>
                             </a>
-                            <a href="/dashboard/${guildId}/welcome" class="px-3 py-1.5 rounded-xl text-gray-300 hover:text-purple-300 hover:bg-purple-950/30 font-medium flex items-center justify-between transition">
+                            <a href="/dashboard/${guildId}/welcome" class="px-3 py-1.5 rounded-xl text-gray-300 hover:text-gray-200 hover:bg-[#151722] font-medium flex items-center justify-between transition">
                                 <span class="w-2 h-2 rounded-full bg-purple-400"></span>
                                 <span class="flex items-center gap-1.5"><span>الترحيب & المغادرة</span><span>👋</span></span>
                             </a>
-                            <a href="/dashboard/${guildId}/boost" class="px-3 py-1.5 rounded-xl text-gray-300 hover:text-purple-300 hover:bg-purple-950/30 font-medium flex items-center justify-between transition">
+                            <a href="/dashboard/${guildId}/boost" class="px-3 py-1.5 rounded-xl text-gray-300 hover:text-gray-200 hover:bg-[#151722] font-medium flex items-center justify-between transition">
                                 <span class="w-2 h-2 rounded-full bg-pink-400"></span>
                                 <span class="flex items-center gap-1.5"><span>البوستات</span><span>🚀</span></span>
                             </a>
-                            <a href="/dashboard/${guildId}/autoresponder" class="px-3 py-1.5 rounded-xl text-gray-300 hover:text-purple-300 hover:bg-purple-950/30 font-medium flex items-center justify-between transition">
+                            <a href="/dashboard/${guildId}/autoresponder" class="px-3 py-1.5 rounded-xl text-gray-300 hover:text-gray-200 hover:bg-[#151722] font-medium flex items-center justify-between transition">
                                 <span class="w-2 h-2 rounded-full bg-purple-400"></span>
                                 <span class="flex items-center gap-1.5"><span>الرد التلقائي</span><span>💬</span></span>
                             </a>
-                            <a href="/dashboard/${guildId}/levels" class="px-3 py-1.5 rounded-xl text-gray-300 hover:text-purple-300 hover:bg-purple-950/30 font-medium flex items-center justify-between transition">
+                            <a href="/dashboard/${guildId}/levels" class="px-3 py-1.5 rounded-xl text-gray-300 hover:text-gray-200 hover:bg-[#151722] font-medium flex items-center justify-between transition">
                                 <span class="w-2 h-2 rounded-full bg-purple-400"></span>
                                 <span class="flex items-center gap-1.5"><span>نظام اللفلات</span><span>📈</span></span>
                             </a>
-                            <a href="/dashboard/${guildId}/autoroles" class="px-3 py-1.5 rounded-xl text-gray-300 hover:text-purple-300 hover:bg-purple-950/30 font-medium flex items-center justify-between transition">
+                            <a href="/dashboard/${guildId}/autoroles" class="px-3 py-1.5 rounded-xl text-gray-300 hover:text-gray-200 hover:bg-[#151722] font-medium flex items-center justify-between transition">
                                 <span class="w-2 h-2 rounded-full bg-purple-400"></span>
                                 <span class="flex items-center gap-1.5"><span>الرتب التلقائية</span><span>🎖️</span></span>
                             </a>
-                            <a href="/dashboard/${guildId}/colors" class="px-3 py-1.5 rounded-xl text-gray-300 hover:text-purple-300 hover:bg-purple-950/30 font-medium flex items-center justify-between transition">
+                            <a href="/dashboard/${guildId}/colors" class="px-3 py-1.5 rounded-xl text-gray-300 hover:text-gray-200 hover:bg-[#151722] font-medium flex items-center justify-between transition">
                                 <span class="w-2 h-2 rounded-full bg-purple-400"></span>
                                 <span class="flex items-center gap-1.5"><span>الألوان</span><span>🎨</span></span>
                             </a>
-                            <a href="/dashboard/${guildId}/tempvoice" class="px-3 py-1.5 rounded-xl text-gray-300 hover:text-purple-300 hover:bg-purple-950/30 font-medium flex items-center justify-between transition">
+                            <a href="/dashboard/${guildId}/tempvoice" class="px-3 py-1.5 rounded-xl text-gray-300 hover:text-gray-200 hover:bg-[#151722] font-medium flex items-center justify-between transition">
                                 <span class="w-2 h-2 rounded-full bg-purple-400"></span>
                                 <span class="flex items-center gap-1.5"><span>الرومات المؤقتة</span><span>🔊</span></span>
                             </a>
-                            <a href="/dashboard/${guildId}/starboard" class="px-3 py-1.5 rounded-xl text-gray-300 hover:text-purple-300 hover:bg-purple-950/30 font-medium flex items-center justify-between transition">
+                            <a href="/dashboard/${guildId}/starboard" class="px-3 py-1.5 rounded-xl text-gray-300 hover:text-gray-200 hover:bg-[#151722] font-medium flex items-center justify-between transition">
                                 <span class="w-2 h-2 rounded-full bg-purple-400"></span>
                                 <span class="flex items-center gap-1.5"><span>ستاربورد</span><span>⭐</span></span>
                             </a>
-                            <a href="/dashboard/${guildId}/tickets" class="px-3 py-1.5 rounded-xl text-gray-300 hover:text-purple-300 hover:bg-purple-950/30 font-medium flex items-center justify-between transition">
+                            <a href="/dashboard/${guildId}/tickets" class="px-3 py-1.5 rounded-xl text-gray-300 hover:text-gray-200 hover:bg-[#151722] font-medium flex items-center justify-between transition">
                                 <span class="w-2 h-2 rounded-full bg-purple-400"></span>
                                 <span class="flex items-center gap-1.5"><span>التذاكر</span><span>🎫</span></span>
                             </a>
@@ -1411,24 +1554,24 @@ module.exports = function (app, client) {
                                 <span class="flex items-center gap-1.5"><span>مظهر البوت</span><span>🎨</span></span>
                             </a>
 
-                            <span class="text-[10px] font-bold text-purple-400/60 px-3 pt-3 pb-1">الإشراف</span>
-                            <a href="/dashboard/${guildId}/moderation" class="px-3 py-1.5 rounded-xl text-gray-300 hover:text-purple-300 hover:bg-purple-950/30 font-medium flex items-center justify-between transition">
+                            <span class="text-[10px] font-bold text-[#5865f2]/60 px-3 pt-3 pb-1">الإشراف</span>
+                            <a href="/dashboard/${guildId}/moderation" class="px-3 py-1.5 rounded-xl text-gray-300 hover:text-gray-200 hover:bg-[#151722] font-medium flex items-center justify-between transition">
                                 <span class="w-2 h-2 rounded-full bg-purple-400"></span>
                                 <span class="flex items-center gap-1.5"><span>الإشراف</span><span>🔨</span></span>
                             </a>
-                            <a href="/dashboard/${guildId}/logs" class="px-3 py-1.5 rounded-xl text-gray-300 hover:text-purple-300 hover:bg-purple-950/30 font-medium flex items-center justify-between transition">
+                            <a href="/dashboard/${guildId}/logs" class="px-3 py-1.5 rounded-xl text-gray-300 hover:text-gray-200 hover:bg-[#151722] font-medium flex items-center justify-between transition">
                                 <span class="w-2 h-2 rounded-full bg-purple-400"></span>
                                 <span class="flex items-center gap-1.5"><span>اللوق (Logs)</span><span>📋</span></span>
                             </a>
-                            <a href="/dashboard/${guildId}/automod" class="px-3 py-1.5 rounded-xl text-gray-300 hover:text-purple-300 hover:bg-purple-950/30 font-medium flex items-center justify-between transition">
+                            <a href="/dashboard/${guildId}/automod" class="px-3 py-1.5 rounded-xl text-gray-300 hover:text-gray-200 hover:bg-[#151722] font-medium flex items-center justify-between transition">
                                 <span class="w-2 h-2 rounded-full bg-purple-400"></span>
                                 <span class="flex items-center gap-1.5"><span>الرقابة التلقائية</span><span>🤖</span></span>
                             </a>
-                            <a href="/dashboard/${guildId}/antiraid" class="px-3 py-1.5 rounded-xl text-gray-300 hover:text-purple-300 hover:bg-purple-950/30 font-medium flex items-center justify-between transition">
+                            <a href="/dashboard/${guildId}/antiraid" class="px-3 py-1.5 rounded-xl text-gray-300 hover:text-gray-200 hover:bg-[#151722] font-medium flex items-center justify-between transition">
                                 <span class="w-2 h-2 rounded-full bg-purple-400"></span>
                                 <span class="flex items-center gap-1.5"><span>مكافحة الغزو (Anti-Raid)</span><span>🛡️</span></span>
                             </a>
-                            <a href="/dashboard/${guildId}/protection" class="px-3 py-1.5 rounded-xl text-gray-300 hover:text-purple-300 hover:bg-purple-950/30 font-medium flex items-center justify-between transition">
+                            <a href="/dashboard/${guildId}/protection" class="px-3 py-1.5 rounded-xl text-gray-300 hover:text-gray-200 hover:bg-[#151722] font-medium flex items-center justify-between transition">
                                 <span class="w-2 h-2 rounded-full bg-purple-400"></span>
                                 <span class="flex items-center gap-1.5"><span>الحماية الخاصة (Anti-Nuke)</span><span>🔒</span></span>
                             </a>
@@ -1436,11 +1579,11 @@ module.exports = function (app, client) {
                     </aside>
 
                     <!-- Server Rail Column (Far Right) -->
-                    <div class="w-16 bg-[#08080c] border-l border-purple-950/40 py-4 flex flex-col items-center gap-3 shrink-0 overflow-y-auto">
+                    <div class="w-16 bg-[#08080c] border-l border-white/5 py-4 flex flex-col items-center gap-3 shrink-0 overflow-y-auto">
                         <a href="/dashboard" title="${user.username}" class="group relative flex items-center justify-center">
-                            <img src="${userAvatar}" class="w-11 h-11 rounded-2xl border-2 border-purple-500 shadow-lg shadow-purple-900/50 hover:rounded-xl object-cover transition-all" alt="${user.username}">
+                            <img src="${userAvatar}" class="w-11 h-11 rounded-2xl border-2 border-purple-500 shadow-lg shadow-black/40 hover:rounded-xl object-cover transition-all" alt="${user.username}">
                         </a>
-                        <div class="w-8 h-[1px] bg-purple-950/40"></div>
+                        <div class="w-8 h-[1px] bg-[#151722]"></div>
                         ${serverRailHtml}
                     </div>
 
@@ -1914,13 +2057,13 @@ module.exports = function (app, client) {
                         if (parseFloat(voiceH) >= 10) ach.push('🎙️');
                         return '<tr class="border-b border-purple-900/10 hover:bg-[#111322] transition">' +
                             '<td class="px-4 py-4 text-center text-xl">' + medal + '</td>' +
-                            '<td class="px-4 py-4"><div class="flex items-center gap-3"><div class="w-9 h-9 rounded-full bg-purple-900/40 flex items-center justify-center text-purple-300 font-bold text-sm">' + (i + 1) + '</div><div><div class="font-bold text-white text-sm" id="name-' + s.user_id + '"><@' + s.user_id + '></div><div class="text-xs text-gray-500">' + ach.join(' ') + (ach.length ? ' ' : '') + s.user_id + '</div></div></div></td>' +
+                            '<td class="px-4 py-4"><div class="flex items-center gap-3"><div class="w-9 h-9 rounded-full bg-purple-900/40 flex items-center justify-center text-gray-200 font-bold text-sm">' + (i + 1) + '</div><div><div class="font-bold text-white text-sm" id="name-' + s.user_id + '"><@' + s.user_id + '></div><div class="text-xs text-gray-500">' + ach.join(' ') + (ach.length ? ' ' : '') + s.user_id + '</div></div></div></td>' +
                             '<td class="px-4 py-4 text-center"><span class="font-bold text-amber-400">' + s.tickets_closed + '</span></td>' +
                             '<td class="px-4 py-4 text-center"><span class="font-bold text-rose-400">' + s.mod_actions + '</span></td>' +
                             '<td class="px-4 py-4 text-center text-gray-300">' + s.messages_count.toLocaleString() + '</td>' +
                             '<td class="px-4 py-4 text-center text-cyan-400">' + voiceH + 'h</td>' +
                             '<td class="px-4 py-4 text-center"><span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold ' + (s.streak_days >= 7 ? 'bg-orange-500/20 text-orange-400' : 'bg-gray-700 text-gray-400') + '">🔥 ' + s.streak_days + 'd</span></td>' +
-                            '<td class="px-4 py-4 text-center"><span class="font-black text-purple-300 text-sm">' + score + ' pts</span></td>' +
+                            '<td class="px-4 py-4 text-center"><span class="font-black text-gray-200 text-sm">' + score + ' pts</span></td>' +
                             '</tr>';
                     }).join('');
 
@@ -1931,7 +2074,7 @@ module.exports = function (app, client) {
                         const aName   = actionNames[l.action_type]  || l.action_type;
                         const timeStr = new Date(l.created_at * 1000).toLocaleString('ar-SA');
                         const colMap  = { ticket_close: 'text-amber-400 bg-amber-500/10 border-amber-500/25', ban: 'text-rose-400 bg-rose-500/10 border-rose-500/25', kick: 'text-orange-400 bg-orange-500/10 border-orange-500/25', mute: 'text-yellow-400 bg-yellow-500/10 border-yellow-500/25', warn: 'text-blue-400 bg-blue-500/10 border-blue-500/25' };
-                        const cls = colMap[l.action_type] || 'text-purple-400 bg-purple-500/10 border-purple-500/25';
+                        const cls = colMap[l.action_type] || 'text-[#5865f2] bg-purple-500/10 border-purple-500/25';
                         return '<div class="flex items-start gap-4 p-4 border-b border-purple-900/10 hover:bg-[#11121c] transition">' +
                             '<div class="w-9 h-9 rounded-xl flex items-center justify-center text-lg border ' + cls + ' flex-shrink-0">' + icon + '</div>' +
                             '<div class="flex-1 min-w-0">' +
@@ -1939,7 +2082,7 @@ module.exports = function (app, client) {
                                     '<span class="font-bold text-white text-sm">' + aName + '</span>' +
                                     '<span class="text-xs px-2 py-0.5 rounded-full border ' + cls + '">' + icon + ' ' + aName + '</span>' +
                                 '</div>' +
-                                '<div class="text-xs text-gray-400 mt-1">الستاف: <span class="text-purple-300"><@' + l.staff_id + '></span>' + (l.target_id ? ' • ضد: <span class="text-gray-300"><@' + l.target_id + '></span>' : '') + '</div>' +
+                                '<div class="text-xs text-gray-400 mt-1">الستاف: <span class="text-gray-200"><@' + l.staff_id + '></span>' + (l.target_id ? ' • ضد: <span class="text-gray-300"><@' + l.target_id + '></span>' : '') + '</div>' +
                                 '<div class="text-xs text-gray-500 mt-0.5">السبب: ' + (l.reason || 'لم يُذكر') + (l.details ? ' • ' + l.details : '') + '</div>' +
                             '</div>' +
                             '<div class="text-xs text-gray-500 flex-shrink-0">' + timeStr + '</div>' +
@@ -1968,11 +2111,11 @@ module.exports = function (app, client) {
                     const pct = Math.min(100, Math.floor((current / g.target) * 100));
                     const colorMap = { amber: '#f59e0b', rose: '#f43f5e', cyan: '#06b6d4', orange: '#f97316', yellow: '#eab308', blue: '#3b82f6' };
                     const col = colorMap[g.color] || '#7c3aed';
-                    return '<div class="bg-[#0e0f1b] border border-purple-900/20 rounded-2xl p-5">' +
+                    return '<div class="bg-[#0e0f1b] border border-white/5 rounded-2xl p-5">' +
                         '<div class="flex items-center justify-between mb-3">' +
                             '<div class="flex items-center gap-3">' +
                                 '<div class="w-10 h-10 rounded-xl flex items-center justify-center text-xl" style="background:' + col + '22;border:1px solid ' + col + '44">' + g.icon + '</div>' +
-                                '<div><div class="font-bold text-white text-sm">' + g.title + '</div><div class="text-xs text-gray-500 mt-0.5">🏅 المكافأة: <span class="text-purple-300">' + g.reward + ' نقطة</span></div></div>' +
+                                '<div><div class="font-bold text-white text-sm">' + g.title + '</div><div class="text-xs text-gray-500 mt-0.5">🏅 المكافأة: <span class="text-gray-200">' + g.reward + ' نقطة</span></div></div>' +
                             '</div>' +
                             '<span class="text-lg font-black" style="color:' + col + '">' + pct + '%</span>' +
                         '</div>' +
@@ -1992,20 +2135,60 @@ module.exports = function (app, client) {
 <title>Staff Activity - ZENO Dashboard</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
-<style>
-* { box-sizing: border-box; }
-body { background: #0a0a0f; color: #e2e8f0; font-family: 'Cairo', sans-serif; margin: 0; min-height: 100vh; }
-::-webkit-scrollbar { width: 4px; } ::-webkit-scrollbar-thumb { background: #4a1d96; border-radius: 4px; }
-.tab-btn { padding: 0.55rem 1.25rem; border-radius: 10px; cursor: pointer; font-weight: 700; font-size: 0.82rem; font-family: 'Cairo', sans-serif; border: 1px solid transparent; transition: all 0.2s; color: #64748b; background: transparent; }
-.tab-btn.active { background: rgba(139,92,246,0.2); color: #a78bfa; border-color: rgba(139,92,246,0.3); }
-.tab-btn:hover:not(.active) { background: rgba(139,92,246,0.08); color: #94a3b8; }
-.stat-card { background: linear-gradient(135deg, #11121d 0%, #0e0f1c 100%); border: 1px solid rgba(139,92,246,0.18); border-radius: 18px; padding: 1.5rem; }
-.stat-card:hover { border-color: rgba(139,92,246,0.35); transform: translateY(-1px); transition: all 0.2s; }
-.inactive-alert { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 14px; padding: 1rem 1.25rem; }
-select, input { background: #0d0e17; border: 1px solid rgba(139,92,246,0.3); border-radius: 10px; padding: 0.6rem 0.9rem; color: #e2e8f0; font-family: 'Cairo', sans-serif; font-size: 0.85rem; outline: none; width: 100%; }
-select:focus, input:focus { border-color: #8b5cf6; }
-label { font-size: 0.78rem; color: #94a3b8; font-weight: 700; display: block; margin-bottom: 5px; }
-</style>
+
+                <style>
+                    :root {
+                        --bg-main: #0b0d14;
+                        --bg-sidebar: #10121b;
+                        --bg-card: #151722;
+                        --bg-card-hover: #1c1f2e;
+                        --primary: #5865f2;
+                        --primary-hover: #4752c4;
+                        --border: rgba(255, 255, 255, 0.05);
+                        --text-muted: #a3a6aa;
+                    }
+                    body { background-color: var(--bg-main) !important; color: #ffffff !important; font-family: 'Cairo', sans-serif !important; }
+                    /* Scrollbar */
+                    ::-webkit-scrollbar { width: 8px; height: 8px; }
+                    ::-webkit-scrollbar-track { background: var(--bg-main); }
+                    ::-webkit-scrollbar-thumb { background: #2f3146; border-radius: 10px; }
+                    ::-webkit-scrollbar-thumb:hover { background: #40445f; }
+                    
+                    /* Glassmorphism & Cards */
+                    .probot-card {
+                        background: var(--bg-card) !important;
+                        border: 1px solid var(--border) !important;
+                        border-radius: 16px !important;
+                        transition: all 0.3s ease !important;
+                        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2) !important;
+                    }
+                    .probot-card:hover {
+                        background: var(--bg-card-hover) !important;
+                        border-color: rgba(88, 101, 242, 0.4) !important;
+                        transform: translateY(-3px) !important;
+                        box-shadow: 0 6px 25px rgba(0, 0, 0, 0.3) !important;
+                    }
+                    
+                    /* Toggles */
+                    .toggle { position: relative; display: inline-block; width: 44px; height: 24px; }
+                    .toggle input { opacity: 0; width: 0; height: 0; }
+                    .slider { position: absolute; cursor: pointer; inset: 0; background: #2f3146; border-radius: 24px; transition: .3s; }
+                    .slider:before { content: ''; position: absolute; width: 18px; height: 18px; left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: .3s; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+                    input:checked + .slider { background: var(--primary); }
+                    input:checked + .slider:before { transform: translateX(20px); }
+                    
+                    /* Buttons */
+                    .btn-primary {
+                        background-color: var(--primary);
+                        color: white;
+                        transition: all 0.2s;
+                    }
+                    .btn-primary:hover {
+                        background-color: var(--primary-hover);
+                        box-shadow: 0 4px 15px rgba(88, 101, 242, 0.4);
+                    }
+                </style>
+
 </head>
 <body class="min-h-screen">
 
@@ -2165,12 +2348,60 @@ label { font-size: 0.78rem; color: #94a3b8; font-weight: 700; display: block; ma
 
 </div>
 
-<style>
-.toggle input { opacity: 0; width: 0; height: 0; }
-.slider:before { content: ""; position: absolute; height: 18px; width: 18px; right: 3px; bottom: 3px; background: white; border-radius: 50%; transition: .3s; }
-input:checked + .slider { background: #7c3aed !important; }
-input:checked + .slider:before { transform: translateX(-20px); }
-</style>
+
+                <style>
+                    :root {
+                        --bg-main: #0b0d14;
+                        --bg-sidebar: #10121b;
+                        --bg-card: #151722;
+                        --bg-card-hover: #1c1f2e;
+                        --primary: #5865f2;
+                        --primary-hover: #4752c4;
+                        --border: rgba(255, 255, 255, 0.05);
+                        --text-muted: #a3a6aa;
+                    }
+                    body { background-color: var(--bg-main) !important; color: #ffffff !important; font-family: 'Cairo', sans-serif !important; }
+                    /* Scrollbar */
+                    ::-webkit-scrollbar { width: 8px; height: 8px; }
+                    ::-webkit-scrollbar-track { background: var(--bg-main); }
+                    ::-webkit-scrollbar-thumb { background: #2f3146; border-radius: 10px; }
+                    ::-webkit-scrollbar-thumb:hover { background: #40445f; }
+                    
+                    /* Glassmorphism & Cards */
+                    .probot-card {
+                        background: var(--bg-card) !important;
+                        border: 1px solid var(--border) !important;
+                        border-radius: 16px !important;
+                        transition: all 0.3s ease !important;
+                        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2) !important;
+                    }
+                    .probot-card:hover {
+                        background: var(--bg-card-hover) !important;
+                        border-color: rgba(88, 101, 242, 0.4) !important;
+                        transform: translateY(-3px) !important;
+                        box-shadow: 0 6px 25px rgba(0, 0, 0, 0.3) !important;
+                    }
+                    
+                    /* Toggles */
+                    .toggle { position: relative; display: inline-block; width: 44px; height: 24px; }
+                    .toggle input { opacity: 0; width: 0; height: 0; }
+                    .slider { position: absolute; cursor: pointer; inset: 0; background: #2f3146; border-radius: 24px; transition: .3s; }
+                    .slider:before { content: ''; position: absolute; width: 18px; height: 18px; left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: .3s; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+                    input:checked + .slider { background: var(--primary); }
+                    input:checked + .slider:before { transform: translateX(20px); }
+                    
+                    /* Buttons */
+                    .btn-primary {
+                        background-color: var(--primary);
+                        color: white;
+                        transition: all 0.2s;
+                    }
+                    .btn-primary:hover {
+                        background-color: var(--primary-hover);
+                        box-shadow: 0 4px 15px rgba(88, 101, 242, 0.4);
+                    }
+                </style>
+
 
 <script>
 function switchTab(tabName, btn) {
@@ -2268,55 +2499,60 @@ function showToast(msg, isErr = false) {
 <title>Social Notifier - ZENO Dashboard</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
-<style>
-* { box-sizing: border-box; }
-body { background: #0a0a0f; color: #e2e8f0; font-family: 'Cairo', sans-serif; margin: 0; min-height: 100vh; }
-::-webkit-scrollbar { width: 4px; } ::-webkit-scrollbar-track { background: #111; } ::-webkit-scrollbar-thumb { background: #4a1d96; border-radius: 4px; }
-.sidebar { width: 250px; min-height: 100vh; background: #0c0d14; border-left: 1px solid rgba(139,92,246,0.15); padding: 1.2rem 0; flex-shrink: 0; }
-.platform-btn { display: flex; align-items: center; gap: 12px; width: calc(100% - 24px); margin: 3px 12px; padding: 10px 14px; border-radius: 12px; cursor: pointer; transition: all 0.2s; border: none; background: transparent; color: #94a3b8; font-family: 'Cairo', sans-serif; font-size: 0.85rem; font-weight: 700; text-align: right; }
-.platform-btn:hover { background: rgba(139,92,246,0.12); color: #c4b5fd; }
-.platform-btn.active { background: rgba(139,92,246,0.22); color: #a78bfa; border: 1px solid rgba(139,92,246,0.3); }
-.platform-icon { width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; flex-shrink: 0; }
-.sub-btn { display: flex; align-items: center; width: calc(100% - 36px); margin: 2px 12px 2px 24px; padding: 8px 12px; border-radius: 10px; cursor: pointer; transition: all 0.2s; border: none; background: transparent; color: #64748b; font-family: 'Cairo', sans-serif; font-size: 0.8rem; font-weight: 600; text-align: right; }
-.sub-btn:hover { background: rgba(139,92,246,0.08); color: #94a3b8; }
-.sub-btn.active { background: rgba(139,92,246,0.18); color: #c4b5fd; font-weight: 700; }
-.divider { height: 1px; background: rgba(139,92,246,0.1); margin: 14px 16px; }
-.content { flex: 1; padding: 2rem 2.5rem; overflow-y: auto; }
-.card { background: #11121c; border: 1px solid rgba(139,92,246,0.18); border-radius: 16px; }
-.banner-promo { background: linear-gradient(90deg, #16122b 0%, #1e133d 100%); border: 1px solid rgba(139,92,246,0.3); border-radius: 16px; padding: 1.25rem 1.5rem; margin-bottom: 2rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
-.banner-badge { display: flex; align-items: center; gap: 8px; font-size: 0.78rem; color: #cbd5e1; font-weight: 600; }
-.banner-badge svg { color: #3b82f6; flex-shrink: 0; }
-.modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 50; align-items: center; justify-content: center; backdrop-filter: blur(6px); }
-.modal-bg.show { display: flex; }
-.modal { background: #12131e; border: 1px solid rgba(139,92,246,0.35); border-radius: 20px; width: 90%; max-width: 620px; max-height: 90vh; overflow-y: auto; padding: 2rem; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7); }
-input, select, textarea { background: #0a0a0f; border: 1px solid rgba(139,92,246,0.3); border-radius: 12px; padding: 0.75rem 1rem; color: #e2e8f0; width: 100%; font-family: 'Cairo', sans-serif; font-size: 0.85rem; outline: none; transition: border-color 0.2s; }
-input:focus, select:focus, textarea:focus { border-color: #8b5cf6; }
-label { display: block; font-size: 0.8rem; font-weight: 700; color: #94a3b8; margin-bottom: 6px; }
-.btn-primary { background: #3b82f6; color: white; border: none; border-radius: 12px; padding: 0.65rem 1.4rem; font-weight: 700; font-family: 'Cairo', sans-serif; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; }
-.btn-primary:hover { background: #2563eb; }
-.btn-secondary { background: #1e1f2e; color: #cbd5e1; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 0.65rem 1.4rem; font-weight: 700; font-family: 'Cairo', sans-serif; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; }
-.btn-secondary:hover { background: #2d2e3f; }
-.btn-danger { background: rgba(239,68,68,0.12); color: #f87171; border: 1px solid rgba(239,68,68,0.25); border-radius: 10px; padding: 0.45rem 0.9rem; font-weight: 700; font-family: 'Cairo', sans-serif; font-size: 0.78rem; cursor: pointer; transition: all 0.2s; }
-.btn-danger:hover { background: rgba(239,68,68,0.25); }
-.btn-test { background: rgba(59,130,246,0.12); color: #60a5fa; border: 1px solid rgba(59,130,246,0.25); border-radius: 10px; padding: 0.45rem 0.9rem; font-weight: 700; font-family: 'Cairo', sans-serif; font-size: 0.78rem; cursor: pointer; transition: all 0.2s; }
-.btn-test:hover { background: rgba(59,130,246,0.25); }
-.toggle { position: relative; width: 44px; height: 24px; flex-shrink: 0; }
-.toggle input { opacity: 0; width: 0; height: 0; }
-.slider { position: absolute; cursor: pointer; inset: 0; background: #232433; border-radius: 24px; transition: .3s; }
-.slider:before { content: ""; position: absolute; height: 18px; width: 18px; right: 3px; bottom: 3px; background: white; border-radius: 50%; transition: .3s; }
-input:checked + .slider { background: #3b82f6; }
-input:checked + .slider:before { transform: translateX(-20px); }
-.account-row { display: flex; align-items: center; justify-content: space-between; padding: 18px 24px; border-bottom: 1px solid rgba(139,92,246,0.08); gap: 16px; flex-wrap: wrap; }
-.account-row:last-child { border-bottom: none; }
-.status-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
-.status-dot.active { background: #22c55e; box-shadow: 0 0 8px #22c55e; }
-.status-dot.paused { background: #64748b; }
-.search-box { background: #11121c; border: 1px solid rgba(139,92,246,0.2); border-radius: 12px; padding: 0.65rem 1rem 0.65rem 2.6rem; color: #e2e8f0; width: 100%; font-family: 'Cairo', sans-serif; font-size: 0.85rem; outline: none; }
-.badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 700; }
-.badge-yt  { background: rgba(255,0,0,0.15);   color: #f87171; }
-.badge-tw  { background: rgba(145,70,255,0.15); color: #a78bfa; }
-.badge-tt  { background: rgba(0,242,254,0.15);  color: #67e8f9; }
-</style>
+
+                <style>
+                    :root {
+                        --bg-main: #0b0d14;
+                        --bg-sidebar: #10121b;
+                        --bg-card: #151722;
+                        --bg-card-hover: #1c1f2e;
+                        --primary: #5865f2;
+                        --primary-hover: #4752c4;
+                        --border: rgba(255, 255, 255, 0.05);
+                        --text-muted: #a3a6aa;
+                    }
+                    body { background-color: var(--bg-main) !important; color: #ffffff !important; font-family: 'Cairo', sans-serif !important; }
+                    /* Scrollbar */
+                    ::-webkit-scrollbar { width: 8px; height: 8px; }
+                    ::-webkit-scrollbar-track { background: var(--bg-main); }
+                    ::-webkit-scrollbar-thumb { background: #2f3146; border-radius: 10px; }
+                    ::-webkit-scrollbar-thumb:hover { background: #40445f; }
+                    
+                    /* Glassmorphism & Cards */
+                    .probot-card {
+                        background: var(--bg-card) !important;
+                        border: 1px solid var(--border) !important;
+                        border-radius: 16px !important;
+                        transition: all 0.3s ease !important;
+                        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2) !important;
+                    }
+                    .probot-card:hover {
+                        background: var(--bg-card-hover) !important;
+                        border-color: rgba(88, 101, 242, 0.4) !important;
+                        transform: translateY(-3px) !important;
+                        box-shadow: 0 6px 25px rgba(0, 0, 0, 0.3) !important;
+                    }
+                    
+                    /* Toggles */
+                    .toggle { position: relative; display: inline-block; width: 44px; height: 24px; }
+                    .toggle input { opacity: 0; width: 0; height: 0; }
+                    .slider { position: absolute; cursor: pointer; inset: 0; background: #2f3146; border-radius: 24px; transition: .3s; }
+                    .slider:before { content: ''; position: absolute; width: 18px; height: 18px; left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: .3s; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+                    input:checked + .slider { background: var(--primary); }
+                    input:checked + .slider:before { transform: translateX(20px); }
+                    
+                    /* Buttons */
+                    .btn-primary {
+                        background-color: var(--primary);
+                        color: white;
+                        transition: all 0.2s;
+                    }
+                    .btn-primary:hover {
+                        background-color: var(--primary-hover);
+                        box-shadow: 0 4px 15px rgba(88, 101, 242, 0.4);
+                    }
+                </style>
+
 </head>
 <body>
 <div style="display:flex; min-height:100vh;">
@@ -2771,7 +3007,7 @@ document.getElementById('addModal').addEventListener('click', function(e) {
             const serverRailHtml = Array.isArray(guilds) && guilds.length > 0 ? guilds.map(g => `
                 <a href="/dashboard/${g.id}" title="${g.name}" class="group relative flex items-center justify-center">
                     <img src="${g.icon ? `https://cdn.discordapp.com/icons/${g.id}/${g.icon}.png` : 'https://cdn.discordapp.com/embed/avatars/0.png'}" 
-                         class="w-11 h-11 rounded-2xl ${g.id === guildId ? 'border-2 border-purple-500 shadow-lg shadow-purple-900/50' : 'border border-transparent'} hover:rounded-xl object-cover transition-all">
+                         class="w-11 h-11 rounded-2xl ${g.id === guildId ? 'border-2 border-purple-500 shadow-lg shadow-black/40' : 'border border-transparent'} hover:rounded-xl object-cover transition-all">
                 </a>
             `).join('') : '';
 
@@ -2834,7 +3070,7 @@ document.getElementById('addModal').addEventListener('click', function(e) {
             function renderRoleSelect(inputName, selectedId, placeholder = '...اختر') {
                 return `
                     <div class="relative">
-                        <select name="${inputName}" id="${inputName}" class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right cursor-pointer appearance-none">
+                        <select name="${inputName}" id="${inputName}" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right cursor-pointer appearance-none">
                             <option value="">${placeholder}</option>
                             ${guildRoles.map(r => `<option value="${r.id}" ${String(selectedId) === String(r.id) ? 'selected' : ''}>${r.name} ⚪</option>`).join('')}
                         </select>
@@ -2848,7 +3084,7 @@ document.getElementById('addModal').addEventListener('click', function(e) {
             function renderChannelSelect(inputName, selectedId, placeholder = '...اختر') {
                 return `
                     <div class="relative">
-                        <select name="${inputName}" id="${inputName}" class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right cursor-pointer appearance-none">
+                        <select name="${inputName}" id="${inputName}" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right cursor-pointer appearance-none">
                             <option value="">${placeholder}</option>
                             ${guildTextChannels.map(c => `<option value="${c.id}" ${String(selectedId) === String(c.id) ? 'selected' : ''}># ${c.name}</option>`).join('')}
                         </select>
@@ -2862,7 +3098,7 @@ document.getElementById('addModal').addEventListener('click', function(e) {
             function renderVoiceSelect(inputName, selectedId, placeholder = '...اختر') {
                 return `
                     <div class="relative">
-                        <select name="${inputName}" id="${inputName}" class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right cursor-pointer appearance-none">
+                        <select name="${inputName}" id="${inputName}" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right cursor-pointer appearance-none">
                             <option value="">${placeholder}</option>
                             ${guildVoiceChannels.map(c => `<option value="${c.id}" ${String(selectedId) === String(c.id) ? 'selected' : ''}>🔊 ${c.name}</option>`).join('')}
                         </select>
@@ -2876,7 +3112,7 @@ document.getElementById('addModal').addEventListener('click', function(e) {
             function renderCategorySelect(inputName, selectedId, placeholder = '...اختر') {
                 return `
                     <div class="relative">
-                        <select name="${inputName}" id="${inputName}" class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right cursor-pointer appearance-none">
+                        <select name="${inputName}" id="${inputName}" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right cursor-pointer appearance-none">
                             <option value="">${placeholder}</option>
                             ${guildCategories.map(c => `<option value="${c.id}" ${String(selectedId) === String(c.id) ? 'selected' : ''}>📁 ${c.name}</option>`).join('')}
                         </select>
@@ -2897,7 +3133,7 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                     <div class="space-y-6">
 
                         <!-- إعدادات البوستات الرئيسية -->
-                        <div class="bg-[#12131c] border border-purple-950/40 p-6 rounded-2xl space-y-5 text-right">
+                        <div class="bg-[#1c1f2e] border border-white/5 p-6 rounded-2xl space-y-5 text-right">
                             <div class="flex items-center justify-between">
                                 <label class="toggle"><input type="checkbox" name="boost_enabled" ${settings.boost_enabled !== 0 ? 'checked' : ''} onchange="saveSetting('boost_enabled', this.checked ? 1 : 0)"><span class="slider"></span></label>
                                 <div>
@@ -2908,7 +3144,7 @@ document.getElementById('addModal').addEventListener('click', function(e) {
 
                             <!-- قناة البوست -->
                             <div>
-                                <label class="block text-xs font-bold text-gray-300 mb-2">قناة إعلانات البوست (Boost Channel) <span class="text-purple-400">*</span></label>
+                                <label class="block text-xs font-bold text-gray-300 mb-2">قناة إعلانات البوست (Boost Channel) <span class="text-[#5865f2]">*</span></label>
                                 ${renderChannelSelect('boost_channel', settings.boost_channel)}
                             </div>
 
@@ -2916,14 +3152,14 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                             <div>
                                 <div class="flex items-center justify-between mb-2">
                                     <div class="flex items-center gap-1.5 flex-wrap">
-                                        <button type="button" onclick="insertBoostTag('[user]')" class="px-2 py-1 bg-purple-950/50 hover:bg-purple-800/60 text-purple-300 border border-purple-900/40 rounded-lg text-[10px] font-mono transition">+ [user]</button>
-                                        <button type="button" onclick="insertBoostTag('[globalName]')" class="px-2 py-1 bg-purple-950/50 hover:bg-purple-800/60 text-purple-300 border border-purple-900/40 rounded-lg text-[10px] font-mono transition">+ [globalName]</button>
-                                        <button type="button" onclick="insertBoostTag('[totalBoosts]')" class="px-2 py-1 bg-purple-950/50 hover:bg-purple-800/60 text-purple-300 border border-purple-900/40 rounded-lg text-[10px] font-mono transition">+ [totalBoosts]</button>
-                                        <button type="button" onclick="insertBoostTag('[serverName]')" class="px-2 py-1 bg-purple-950/50 hover:bg-purple-800/60 text-purple-300 border border-purple-900/40 rounded-lg text-[10px] font-mono transition">+ [serverName]</button>
+                                        <button type="button" onclick="insertBoostTag('[user]')" class="px-2 py-1 bg-purple-950/50 hover:bg-purple-800/60 text-gray-200 border border-purple-900/40 rounded-lg text-[10px] font-mono transition">+ [user]</button>
+                                        <button type="button" onclick="insertBoostTag('[globalName]')" class="px-2 py-1 bg-purple-950/50 hover:bg-purple-800/60 text-gray-200 border border-purple-900/40 rounded-lg text-[10px] font-mono transition">+ [globalName]</button>
+                                        <button type="button" onclick="insertBoostTag('[totalBoosts]')" class="px-2 py-1 bg-purple-950/50 hover:bg-purple-800/60 text-gray-200 border border-purple-900/40 rounded-lg text-[10px] font-mono transition">+ [totalBoosts]</button>
+                                        <button type="button" onclick="insertBoostTag('[serverName]')" class="px-2 py-1 bg-purple-950/50 hover:bg-purple-800/60 text-gray-200 border border-purple-900/40 rounded-lg text-[10px] font-mono transition">+ [serverName]</button>
                                     </div>
                                     <label class="text-xs font-bold text-gray-300">رسالة البوست في القناة</label>
                                 </div>
-                                <textarea id="boostTextarea" name="boost_message" rows="4" placeholder="🎉 شكراً [user] لدعمك السيرفر بالبوست! أصبح عدد البوستات الآن [totalBoosts] بوست!" class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right leading-relaxed">${settings.boost_message || ''}</textarea>
+                                <textarea id="boostTextarea" name="boost_message" rows="4" placeholder="🎉 شكراً [user] لدعمك السيرفر بالبوست! أصبح عدد البوستات الآن [totalBoosts] بوست!" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right leading-relaxed">${settings.boost_message || ''}</textarea>
                             </div>
 
                             <!-- معاينة حية -->
@@ -2937,7 +3173,7 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                         </div>
 
                         <!-- إرسال إلى الخاص (DM) -->
-                        <div class="bg-[#12131c] border border-purple-950/40 p-6 rounded-2xl space-y-4 text-right">
+                        <div class="bg-[#1c1f2e] border border-white/5 p-6 rounded-2xl space-y-4 text-right">
                             <div class="flex items-center justify-between">
                                 <label class="toggle"><input type="checkbox" name="boost_dm_enabled" ${settings.boost_dm_enabled ? 'checked' : ''} onchange="saveSetting('boost_dm_enabled', this.checked ? 1 : 0)"><span class="slider"></span></label>
                                 <div>
@@ -2947,12 +3183,12 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                             </div>
                             <div>
                                 <label class="block text-xs font-bold text-gray-300 mb-2">رسالة الخاص (DM Message)</label>
-                                <textarea name="boost_dm_message" rows="3" placeholder="شكراً جزيلاً لدعمك سيرفر [serverName] بالبوست! 🚀" class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right leading-relaxed">${settings.boost_dm_message || ''}</textarea>
+                                <textarea name="boost_dm_message" rows="3" placeholder="شكراً جزيلاً لدعمك سيرفر [serverName] بالبوست! 🚀" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right leading-relaxed">${settings.boost_dm_message || ''}</textarea>
                             </div>
                         </div>
 
                         <!-- إرسال كـ Embed -->
-                        <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl text-right">
+                        <div class="bg-[#1c1f2e] border border-white/5 p-5 rounded-2xl text-right">
                             <div class="flex items-center justify-between">
                                 <label class="toggle"><input type="checkbox" name="boost_embed_enabled" ${settings.boost_embed_enabled ? 'checked' : ''} onchange="saveSetting('boost_embed_enabled', this.checked ? 1 : 0)"><span class="slider"></span></label>
                                 <div>
@@ -2963,28 +3199,28 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                         </div>
 
                         <!-- متغيرات البوست -->
-                        <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl text-right">
+                        <div class="bg-[#1c1f2e] border border-white/5 p-5 rounded-2xl text-right">
                             <h4 class="font-bold text-white text-sm mb-3">المتغيرات المدعومة 🏷️</h4>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
                                 <div class="flex justify-between items-center py-2 border-b border-purple-950/30">
                                     <span class="text-gray-400">منشن العضو الداعم</span>
-                                    <code class="text-purple-400 bg-purple-950/30 px-2 py-0.5 rounded">[user]</code>
+                                    <code class="text-[#5865f2] bg-[#151722] px-2 py-0.5 rounded">[user]</code>
                                 </div>
                                 <div class="flex justify-between items-center py-2 border-b border-purple-950/30">
                                     <span class="text-gray-400">الاسم العام للعضو</span>
-                                    <code class="text-purple-400 bg-purple-950/30 px-2 py-0.5 rounded">[globalName]</code>
+                                    <code class="text-[#5865f2] bg-[#151722] px-2 py-0.5 rounded">[globalName]</code>
                                 </div>
                                 <div class="flex justify-between items-center py-2 border-b border-purple-950/30">
                                     <span class="text-gray-400">اسم المستخدم</span>
-                                    <code class="text-purple-400 bg-purple-950/30 px-2 py-0.5 rounded">[userName]</code>
+                                    <code class="text-[#5865f2] bg-[#151722] px-2 py-0.5 rounded">[userName]</code>
                                 </div>
                                 <div class="flex justify-between items-center py-2 border-b border-purple-950/30">
                                     <span class="text-gray-400">إجمالي البوستات في السيرفر</span>
-                                    <code class="text-purple-400 bg-purple-950/30 px-2 py-0.5 rounded">[totalBoosts]</code>
+                                    <code class="text-[#5865f2] bg-[#151722] px-2 py-0.5 rounded">[totalBoosts]</code>
                                 </div>
                                 <div class="flex justify-between items-center py-2">
                                     <span class="text-gray-400">اسم السيرفر</span>
-                                    <code class="text-purple-400 bg-purple-950/30 px-2 py-0.5 rounded">[serverName]</code>
+                                    <code class="text-[#5865f2] bg-[#151722] px-2 py-0.5 rounded">[serverName]</code>
                                 </div>
                             </div>
                         </div>
@@ -3011,7 +3247,7 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                 formFieldsHtml = `
                     <div class="space-y-6">
                         <!-- Main Protection Master Toggle Card -->
-                        <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl flex items-center justify-between">
+                        <div class="bg-[#1c1f2e] border border-white/5 p-5 rounded-2xl flex items-center justify-between">
                             <label class="toggle"><input type="checkbox" name="anti_nuke_enabled" value="1" ${settings.anti_nuke_enabled ? 'checked' : ''}><span class="slider"></span></label>
                             <div class="text-right">
                                 <h4 class="font-bold text-white text-sm">جدار الحماية الشامل ومكافحة التخريب 🛡️</h4>
@@ -3022,7 +3258,7 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                         <!-- 6 Cards Grid matching Image 5 -->
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <!-- 1. منع الروابط -->
-                            <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl flex items-center justify-between">
+                            <div class="bg-[#1c1f2e] border border-white/5 p-5 rounded-2xl flex items-center justify-between">
                                 <label class="toggle"><input type="checkbox" name="anti_link" value="1" ${settings.anti_link ? 'checked' : ''}><span class="slider"></span></label>
                                 <div class="text-right">
                                     <h4 class="font-bold text-white text-xs">منع الروابط (Anti-Link)</h4>
@@ -3031,7 +3267,7 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                             </div>
 
                             <!-- 2. مكافحة السبام -->
-                            <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl flex items-center justify-between">
+                            <div class="bg-[#1c1f2e] border border-white/5 p-5 rounded-2xl flex items-center justify-between">
                                 <label class="toggle"><input type="checkbox" name="anti_spam" value="1" ${settings.anti_spam ? 'checked' : ''}><span class="slider"></span></label>
                                 <div class="text-right">
                                     <h4 class="font-bold text-white text-xs">مكافحة السبام (Anti-Spam)</h4>
@@ -3040,7 +3276,7 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                             </div>
 
                             <!-- 3. مكافحة التخريب والنظام -->
-                            <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl space-y-3">
+                            <div class="bg-[#1c1f2e] border border-white/5 p-5 rounded-2xl space-y-3">
                                 <div class="flex items-center justify-between">
                                     <label class="toggle"><input type="checkbox" name="anti_nuke_enabled" value="1" ${settings.anti_nuke_enabled ? 'checked' : ''}><span class="slider"></span></label>
                                     <div class="text-right">
@@ -3050,7 +3286,7 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                                 </div>
                                 <div>
                                     <label class="block text-[11px] font-bold text-gray-400 mb-1 text-right">إجراء العقوبة عند التخريب</label>
-                                    <select name="anti_nuke_action" class="w-full bg-[#0b0c10] border border-purple-950/40 rounded-xl px-3 py-2 text-xs text-white outline-none">
+                                    <select name="anti_nuke_action" class="w-full bg-[#0b0d14] border border-white/5 rounded-xl px-3 py-2 text-xs text-white outline-none">
                                         <option value="ban" ${settings.anti_nuke_action === 'ban' ? 'selected' : ''}>حظر فوري (Ban)</option>
                                         <option value="kick" ${settings.anti_nuke_action === 'kick' ? 'selected' : ''}>طرد من السيرفر (Kick)</option>
                                         <option value="strip_roles" ${settings.anti_nuke_action === 'strip_roles' ? 'selected' : ''}>سحب جميع الرتب (Strip Roles)</option>
@@ -3059,39 +3295,39 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                             </div>
 
                             <!-- 4. الحد الأدنى لعمر الحساب -->
-                            <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl text-right space-y-2">
+                            <div class="bg-[#1c1f2e] border border-white/5 p-5 rounded-2xl text-right space-y-2">
                                 <h4 class="font-bold text-white text-xs">الحد الأدنى لعمر الحساب (Anti-Alt)</h4>
                                 <p class="text-gray-400 text-[11px]">طرد الحسابات الوهمية والجديدة التي عمرها أقل من عدد الأيام المحدد</p>
-                                <input type="number" name="anti_alt_days" value="${settings.anti_alt_days || 0}" min="0" max="365" class="w-full bg-[#0b0c10] border border-purple-950/40 rounded-xl px-4 py-2.5 text-xs text-white outline-none font-mono text-right" placeholder="0 لتعطيل الفحص">
+                                <input type="number" name="anti_alt_days" value="${settings.anti_alt_days || 0}" min="0" max="365" class="w-full bg-[#0b0d14] border border-white/5 rounded-xl px-4 py-2.5 text-xs text-white outline-none font-mono text-right" placeholder="0 لتعطيل الفحص">
                             </div>
 
                             <!-- 5. أقصى عدد منشن -->
-                            <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl text-right space-y-2">
+                            <div class="bg-[#1c1f2e] border border-white/5 p-5 rounded-2xl text-right space-y-2">
                                 <h4 class="font-bold text-white text-xs">أقصى عدد منشن مسموح به في الرسالة (Max Mentions)</h4>
                                 <p class="text-gray-400 text-[11px]">معاقبة الأعضاء الذين يرسلون رسائل بمنشن جماعي مفرط</p>
-                                <input type="number" name="max_mentions" value="${settings.max_mentions || 4}" min="1" max="50" class="w-full bg-[#0b0c10] border border-purple-950/40 rounded-xl px-4 py-2.5 text-xs text-white outline-none font-mono text-right">
+                                <input type="number" name="max_mentions" value="${settings.max_mentions || 4}" min="1" max="50" class="w-full bg-[#0b0d14] border border-white/5 rounded-xl px-4 py-2.5 text-xs text-white outline-none font-mono text-right">
                             </div>
 
                             <!-- 6. قناة سجلات الحماية -->
-                            <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl text-right space-y-2">
+                            <div class="bg-[#1c1f2e] border border-white/5 p-5 rounded-2xl text-right space-y-2">
                                 <h4 class="font-bold text-white text-xs">قناة سجلات الحماية (Protection Log Channel ID)</h4>
                                 <p class="text-gray-400 text-[11px]">إرسال تقارير محاولات التخريب والسبام والروابط المحذوفة</p>
-                                <input type="text" name="log_channel" value="${settings.log_channel || ''}" placeholder="ضع ID القناة..." class="w-full bg-[#0b0c10] border border-purple-950/40 rounded-xl px-4 py-2.5 text-xs text-white outline-none font-mono text-right">
+                                <input type="text" name="log_channel" value="${settings.log_channel || ''}" placeholder="ضع ID القناة..." class="w-full bg-[#0b0d14] border border-white/5 rounded-xl px-4 py-2.5 text-xs text-white outline-none font-mono text-right">
                             </div>
                         </div>
 
                         <!-- Advanced Automod & Badwords Filter -->
-                        <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl space-y-4">
+                        <div class="bg-[#1c1f2e] border border-white/5 p-5 rounded-2xl space-y-4">
                             <h4 class="font-bold text-white text-sm text-right">فلاتر الرقابة التلقائية الإضافية (Automod Filters) 🛡️</h4>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
                                     <label class="toggle"><input type="checkbox" name="anti_caps" value="1" ${settings.anti_caps ? 'checked' : ''}><span class="slider"></span></label>
                                     <div class="text-right">
                                         <p class="font-bold text-white text-xs">منع الحروف الكبيرة (Anti-Caps)</p>
                                         <p class="text-gray-400 text-[10px]">حذف الرسائل المكتوبة بحروف كبيرة مفرطة (CAPS)</p>
                                     </div>
                                 </div>
-                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
                                     <label class="toggle"><input type="checkbox" name="anti_emoji_spam" value="1" ${settings.anti_emoji_spam ? 'checked' : ''}><span class="slider"></span></label>
                                     <div class="text-right">
                                         <p class="font-bold text-white text-xs">منع سبام الإيموجي (Anti-Emoji Spam)</p>
@@ -3108,7 +3344,7 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                                         <p class="text-gray-400 text-[11px]">حذف الرسائل التي تحتوي على كلمات محظورة تلقائياً وتنبيه العضو</p>
                                     </div>
                                 </div>
-                                <textarea name="bad_words_list" rows="3" placeholder="اكتب الكلمات المحظورة مفصولة بفواصل (مثال: كلمة1, كلمة2, كلمة3)..." class="w-full bg-[#0b0c10] border border-purple-950/40 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right font-mono">${settings.bad_words_list || ''}</textarea>
+                                <textarea name="bad_words_list" rows="3" placeholder="اكتب الكلمات المحظورة مفصولة بفواصل (مثال: كلمة1, كلمة2, كلمة3)..." class="w-full bg-[#0b0d14] border border-white/5 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right font-mono">${settings.bad_words_list || ''}</textarea>
                             </div>
                         </div>
                     </div>
@@ -3117,7 +3353,7 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                 formFieldsHtml = `
                     <div class="space-y-6">
                         <!-- Welcome Header & Live Card -->
-                        <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl">
+                        <div class="bg-[#1c1f2e] border border-white/5 p-5 rounded-2xl">
                             <div class="flex items-center justify-between mb-4">
                                 <label class="toggle"><input type="checkbox" name="welcome_image" value="1" ${settings.welcome_image ? 'checked' : ''}><span class="slider"></span></label>
                                 <div class="text-right">
@@ -3126,12 +3362,12 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                                 </div>
                             </div>
                             <!-- Live Preview Visual -->
-                            <div class="mt-4 p-4 rounded-xl bg-gradient-to-r from-purple-950/40 via-[#0d0e15] to-indigo-950/40 border border-purple-900/30 flex items-center justify-between">
+                            <div class="mt-4 p-4 rounded-xl bg-gradient-to-r from-purple-950/40 via-[#0d0e15] to-indigo-950/40 border border-white/5 flex items-center justify-between">
                                 <div class="flex items-center gap-3">
                                     <div class="w-12 h-12 rounded-full border-2 border-purple-500 bg-[#1f212d] flex items-center justify-center text-lg">👤</div>
                                     <div class="text-right">
                                         <p class="text-xs font-bold text-white">WELCOME TO THE SERVER</p>
-                                        <p class="text-[11px] text-purple-300 font-mono">Member #124</p>
+                                        <p class="text-[11px] text-gray-200 font-mono">Member #124</p>
                                     </div>
                                 </div>
                                 <span class="text-[10px] bg-purple-900/50 text-purple-200 px-2.5 py-1 rounded-lg border border-purple-700/40">معاينة مباشرة</span>
@@ -3139,11 +3375,11 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                         </div>
 
                         <!-- Welcome Channel & Message -->
-                        <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl space-y-4 text-right">
+                        <div class="bg-[#1c1f2e] border border-white/5 p-5 rounded-2xl space-y-4 text-right">
                             <h4 class="font-bold text-white text-sm">إعدادات رسالة الترحيب في القناة 📢</h4>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <label class="block text-xs font-bold text-gray-300 mb-2">قناة الترحيب (Welcome Channel) <span class="text-purple-400">*</span></label>
+                                    <label class="block text-xs font-bold text-gray-300 mb-2">قناة الترحيب (Welcome Channel) <span class="text-[#5865f2]">*</span></label>
                                     ${renderChannelSelect('welcome_channel', settings.welcome_channel)}
                                 </div>
                                 <div>
@@ -3154,7 +3390,7 @@ document.getElementById('addModal').addEventListener('click', function(e) {
 
                             <div>
                                 <label class="block text-xs font-bold text-gray-300 mb-2">نص رسالة الترحيب</label>
-                                <textarea id="welcomeMsgInput" name="welcome_message" rows="3" placeholder="مرحباً بك [user] في سيرفر [server]! أنت العضو رقم [memberCount] 🎉" class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none leading-relaxed text-right">${settings.welcome_message || ''}</textarea>
+                                <textarea id="welcomeMsgInput" name="welcome_message" rows="3" placeholder="مرحباً بك [user] في سيرفر [server]! أنت العضو رقم [memberCount] 🎉" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none leading-relaxed text-right">${settings.welcome_message || ''}</textarea>
                                 
                                 <!-- Quick Tag Badges -->
                                 <div class="flex flex-wrap gap-2 mt-2 items-center justify-end">
@@ -3176,7 +3412,7 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                         </div>
 
                         <!-- DM Welcome Message -->
-                        <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl space-y-4 text-right">
+                        <div class="bg-[#1c1f2e] border border-white/5 p-5 rounded-2xl space-y-4 text-right">
                             <div class="flex items-center justify-between">
                                 <label class="toggle"><input type="checkbox" name="welcome_dm_enabled" value="1" ${settings.welcome_dm_enabled ? 'checked' : ''}><span class="slider"></span></label>
                                 <div>
@@ -3184,11 +3420,11 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                                     <p class="text-gray-400 text-xs mt-0.5">إرسال رسالة ترحيب خاصة للعضو الجديد فور انضمامه</p>
                                 </div>
                             </div>
-                            <textarea name="welcome_dm_message" rows="3" placeholder="أهلاً بك يا [user] في سيرفرنا [server]! نتمنى لك وقتاً ممتعاً 🌟" class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none leading-relaxed text-right">${settings.welcome_dm_message || ''}</textarea>
+                            <textarea name="welcome_dm_message" rows="3" placeholder="أهلاً بك يا [user] في سيرفرنا [server]! نتمنى لك وقتاً ممتعاً 🌟" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none leading-relaxed text-right">${settings.welcome_dm_message || ''}</textarea>
                         </div>
 
                         <!-- Leave / Goodbye System -->
-                        <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl space-y-4 text-right">
+                        <div class="bg-[#1c1f2e] border border-white/5 p-5 rounded-2xl space-y-4 text-right">
                             <div class="flex items-center justify-between">
                                 <label class="toggle"><input type="checkbox" name="leave_enabled" value="1" ${settings.leave_enabled ? 'checked' : ''}><span class="slider"></span></label>
                                 <div>
@@ -3203,7 +3439,7 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-gray-300 mb-2">نص رسالة المغادرة</label>
-                                    <input type="text" name="leave_message" value="${settings.leave_message || 'وداعاً [userName]، نتمنى رؤيتك قريباً 👋'}" class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right">
+                                    <input type="text" name="leave_message" value="${settings.leave_message || 'وداعاً [userName]، نتمنى رؤيتك قريباً 👋'}" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right">
                                 </div>
                             </div>
                         </div>
@@ -3213,7 +3449,7 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                 formFieldsHtml = `
                     <div class="space-y-6">
                         <!-- Master Toggle Card -->
-                        <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl flex items-center justify-between">
+                        <div class="bg-[#1c1f2e] border border-white/5 p-5 rounded-2xl flex items-center justify-between">
                             <label class="toggle"><input type="checkbox" name="ticket_enabled" value="1" ${settings.ticket_enabled !== 0 ? 'checked' : ''}><span class="slider"></span></label>
                             <div class="text-right">
                                 <h4 class="font-bold text-white text-sm">نظام التذاكر والدعم الفني المتقدم (Pro Tickets) 🎫</h4>
@@ -3222,7 +3458,7 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                         </div>
 
                         <!-- Core Setup Grid -->
-                        <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl space-y-4">
+                        <div class="bg-[#1c1f2e] border border-white/5 p-5 rounded-2xl space-y-4">
                             <h4 class="font-bold text-white text-sm text-right">الإعدادات الأساسية للرومات والرتب ⚙️</h4>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-right">
                                 <div>
@@ -3239,46 +3475,46 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-gray-300 mb-2">الحد الأقصى للتذاكر المفتوحة للعضو الواحد</label>
-                                    <input type="number" name="ticket_max_open" value="${settings.ticket_max_open || 1}" min="1" max="5" class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none font-mono text-right">
+                                    <input type="number" name="ticket_max_open" value="${settings.ticket_max_open || 1}" min="1" max="5" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none font-mono text-right">
                                 </div>
                             </div>
                         </div>
 
                         <!-- Ticket Message & Greeting -->
-                        <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl space-y-3 text-right">
+                        <div class="bg-[#1c1f2e] border border-white/5 p-5 rounded-2xl space-y-3 text-right">
                             <div class="flex items-center justify-between">
                                 <span class="text-[11px] text-gray-400 font-mono">[user] [userName] [server]</span>
                                 <h4 class="font-bold text-white text-sm">رسالة الترحيب داخل التذكرة الجديدة 📩</h4>
                             </div>
-                            <textarea name="ticket_welcome_msg" rows="3" placeholder="مرحباً بك [user] في تذكرتك الخاصة! يرجى توضيح استفسارك أو مشكلتك بالتفصيل وسيقوم فريق الدعم بالرد عليك قريباً." class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right leading-relaxed">${settings.ticket_welcome_msg || ''}</textarea>
+                            <textarea name="ticket_welcome_msg" rows="3" placeholder="مرحباً بك [user] في تذكرتك الخاصة! يرجى توضيح استفسارك أو مشكلتك بالتفصيل وسيقوم فريق الدعم بالرد عليك قريباً." class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right leading-relaxed">${settings.ticket_welcome_msg || ''}</textarea>
                         </div>
 
                         <!-- Interactive Ticket Panel Deployer -->
-                        <div class="bg-[#12131c] border border-purple-950/40 p-6 rounded-2xl space-y-4 text-right">
+                        <div class="bg-[#1c1f2e] border border-white/5 p-6 rounded-2xl space-y-4 text-right">
                             <div class="flex items-center justify-between">
-                                <span class="px-2.5 py-1 bg-purple-950/60 text-purple-300 border border-purple-800/40 rounded-lg text-xs font-bold">🚀 إرسال فوري</span>
+                                <span class="px-2.5 py-1 bg-purple-950/60 text-gray-200 border border-purple-800/40 rounded-lg text-xs font-bold">🚀 إرسال فوري</span>
                                 <h4 class="font-bold text-white text-sm">إنشاء وإرسال لوحة التذاكر التفاعلية إلى الديسكورد 🔘</h4>
                             </div>
                             <p class="text-gray-400 text-xs">قم بتحديد روم الدعم الفني بالأسفل واضغط زر الإرسال لينشر البوت لوحة التذاكر التفاعلية بالأزرار فوراً في السيرفر:</p>
                             
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <label class="block text-xs font-bold text-gray-300 mb-2">روم إرسال اللوحة (Channel) <span class="text-purple-400">*</span></label>
+                                    <label class="block text-xs font-bold text-gray-300 mb-2">روم إرسال اللوحة (Channel) <span class="text-[#5865f2]">*</span></label>
                                     ${renderChannelSelect('ticket_panel_channel', settings.ticket_panel_channel)}
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-gray-300 mb-2">عنوان لوحة التذاكر</label>
-                                    <input type="text" id="panelTitleInput" value="${settings.ticket_panel_title || '🎫 نظام الدعم الفني والمساعدة'}" class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right">
+                                    <input type="text" id="panelTitleInput" value="${settings.ticket_panel_title || '🎫 نظام الدعم الفني والمساعدة'}" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right">
                                 </div>
                             </div>
 
                             <div class="mt-2">
                                 <label class="block text-xs font-bold text-gray-300 mb-2">وصف لوحة التذاكر</label>
-                                <textarea id="panelDescInput" rows="2" class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right">${settings.ticket_panel_desc || 'لفتح تذكرة جديدة والتواصل مع فريق الإدارة والدعم الفني، يرجى الضغط على الزر بالأسفل.'}</textarea>
+                                <textarea id="panelDescInput" rows="2" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right">${settings.ticket_panel_desc || 'لفتح تذكرة جديدة والتواصل مع فريق الإدارة والدعم الفني، يرجى الضغط على الزر بالأسفل.'}</textarea>
                             </div>
 
                             <div class="pt-2 flex justify-end">
-                                <button type="button" onclick="sendTicketPanelDirect()" id="sendPanelBtn" class="px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold transition shadow-lg flex items-center gap-2">
+                                <button type="button" onclick="sendTicketPanelDirect()" id="sendPanelBtn" class="px-6 py-3 bg-gradient-to-r from-[#5865f2] to-indigo-600 hover:from-[#4752c4] hover:to-indigo-500 text-white rounded-xl text-xs font-bold transition shadow-lg flex items-center gap-2">
                                     <span>🚀 إرسال لوحة التذاكر إلى الروم المحدد</span>
                                 </button>
                             </div>
@@ -3288,20 +3524,21 @@ document.getElementById('addModal').addEventListener('click', function(e) {
 
                     <script>
                     async function sendTicketPanelDirect() {
-                        const channelId = document.getElementById('panelChannelInput').value.trim();
-                        const title = document.getElementById('panelTitleInput').value.trim();
-                        const desc = document.getElementById('panelDescInput').value.trim();
+                        const channelSel = document.getElementById('ticket_panel_channel') || document.querySelector('select[name="ticket_panel_channel"]');
+                        const channelId = channelSel ? channelSel.value.trim() : '';
+                        const title = (document.getElementById('panelTitleInput')?.value || '').trim();
+                        const desc = (document.getElementById('panelDescInput')?.value || '').trim();
                         const statusEl = document.getElementById('panelSendStatus');
                         const btn = document.getElementById('sendPanelBtn');
 
                         if (!channelId) {
-                            alert('يرجى كتابة ID القناة أولاً!');
+                            alert('يرجى اختيار روم إرسال لوحة التذاكر من القائمة أولاً!');
                             return;
                         }
 
                         btn.disabled = true;
                         btn.innerHTML = '⏳ جارٍ الإرسال...';
-                        statusEl.className = 'text-xs font-bold text-center text-purple-400 mt-2 block';
+                        statusEl.className = 'text-xs font-bold text-center text-[#5865f2] mt-2 block';
                         statusEl.innerText = 'جارٍ إرسال لوحة التذاكر إلى ديسكورد...';
 
                         try {
@@ -3320,7 +3557,7 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                             }
                         } catch (err) {
                             statusEl.className = 'text-xs font-bold text-center text-rose-400 mt-2 block';
-                            statusEl.innerText = '❌ حدث خطأ أثناء الاتصال بالخادم';
+                            statusEl.innerText = '❌ حدث خطأ أثناء الاتصال بالخادم: ' + err.message;
                         } finally {
                             btn.disabled = false;
                             btn.innerHTML = '<span>🚀 إرسال لوحة التذاكر إلى الروم المحدد</span>';
@@ -3332,7 +3569,7 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                 formFieldsHtml = `
                     <div class="space-y-6">
                         <!-- Master Leveling Toggle Card -->
-                        <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl flex items-center justify-between">
+                        <div class="bg-[#1c1f2e] border border-white/5 p-5 rounded-2xl flex items-center justify-between">
                             <label class="toggle"><input type="checkbox" name="leveling_enabled" value="1" ${settings.leveling_enabled !== 0 ? 'checked' : ''}><span class="slider"></span></label>
                             <div class="text-right">
                                 <h4 class="font-bold text-white text-sm">نظام المستويات واللفلات التفاعلي (Leveling & XP) 📈</h4>
@@ -3341,34 +3578,34 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                         </div>
 
                         <!-- Core Leveling Configuration -->
-                        <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl space-y-4 text-right">
+                        <div class="bg-[#1c1f2e] border border-white/5 p-5 rounded-2xl space-y-4 text-right">
                             <h4 class="font-bold text-white text-sm">إعدادات الخبرة XP والإعلانات ⚙️</h4>
                             
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <label class="block text-xs font-bold text-gray-300 mb-2">مضاعف نقاط الـ XP (XP Multiplier)</label>
-                                    <input type="number" step="0.1" name="level_multiplier" value="${settings.level_multiplier || 1.0}" min="0.1" max="10.0" class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none font-mono text-right">
+                                    <input type="number" step="0.1" name="level_multiplier" value="${settings.level_multiplier || 1.0}" min="0.1" max="10.0" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none font-mono text-right">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-gray-300 mb-2">قناة إرسال رسائل الترقية (Level Up Channel)</label>
-                                    <input type="text" name="level_channel" value="${settings.level_channel || 'current'}" placeholder="current (نفس الروم) أو ضع ID الروم..." class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none font-mono text-right">
-                                    <p class="text-[10px] text-gray-400 mt-1">اكتب <code class="text-purple-400">current</code> للإرسال بنفس الروم، أو <code class="text-purple-400">dm</code> للخاص، أو <code class="text-purple-400">disabled</code> لتعطيل الرسائل، أو ID روم مخصص.</p>
+                                    <input type="text" name="level_channel" value="${settings.level_channel || 'current'}" placeholder="current (نفس الروم) أو ضع ID الروم..." class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none font-mono text-right">
+                                    <p class="text-[10px] text-gray-400 mt-1">اكتب <code class="text-[#5865f2]">current</code> للإرسال بنفس الروم، أو <code class="text-[#5865f2]">dm</code> للخاص، أو <code class="text-[#5865f2]">disabled</code> لتعطيل الرسائل، أو ID روم مخصص.</p>
                                 </div>
                             </div>
                         </div>
 
                         <!-- Level Up Message Customizer -->
-                        <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl space-y-3 text-right">
+                        <div class="bg-[#1c1f2e] border border-white/5 p-5 rounded-2xl space-y-3 text-right">
                             <div class="flex items-center justify-between">
                                 <div class="flex items-center gap-1.5 flex-wrap">
-                                    <button type="button" onclick="insertLevelTag('[user]')" class="px-2 py-1 bg-purple-950/50 hover:bg-purple-800/60 text-purple-300 border border-purple-900/40 rounded-lg text-[10px] font-mono transition">+ [user]</button>
-                                    <button type="button" onclick="insertLevelTag('[level]')" class="px-2 py-1 bg-purple-950/50 hover:bg-purple-800/60 text-purple-300 border border-purple-900/40 rounded-lg text-[10px] font-mono transition">+ [level]</button>
-                                    <button type="button" onclick="insertLevelTag('[userName]')" class="px-2 py-1 bg-purple-950/50 hover:bg-purple-800/60 text-purple-300 border border-purple-900/40 rounded-lg text-[10px] font-mono transition">+ [userName]</button>
-                                    <button type="button" onclick="insertLevelTag('[server]')" class="px-2 py-1 bg-purple-950/50 hover:bg-purple-800/60 text-purple-300 border border-purple-900/40 rounded-lg text-[10px] font-mono transition">+ [server]</button>
+                                    <button type="button" onclick="insertLevelTag('[user]')" class="px-2 py-1 bg-purple-950/50 hover:bg-purple-800/60 text-gray-200 border border-purple-900/40 rounded-lg text-[10px] font-mono transition">+ [user]</button>
+                                    <button type="button" onclick="insertLevelTag('[level]')" class="px-2 py-1 bg-purple-950/50 hover:bg-purple-800/60 text-gray-200 border border-purple-900/40 rounded-lg text-[10px] font-mono transition">+ [level]</button>
+                                    <button type="button" onclick="insertLevelTag('[userName]')" class="px-2 py-1 bg-purple-950/50 hover:bg-purple-800/60 text-gray-200 border border-purple-900/40 rounded-lg text-[10px] font-mono transition">+ [userName]</button>
+                                    <button type="button" onclick="insertLevelTag('[server]')" class="px-2 py-1 bg-purple-950/50 hover:bg-purple-800/60 text-gray-200 border border-purple-900/40 rounded-lg text-[10px] font-mono transition">+ [server]</button>
                                 </div>
                                 <h4 class="font-bold text-white text-sm">نص رسالة الترقية (Level Up Message) 🎉</h4>
                             </div>
-                            <textarea id="levelMsgTextarea" name="level_message" rows="3" placeholder="🎉 مبروك يا [user]! لقد وصلت إلى المستوى [level]! 🚀" class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none leading-relaxed text-right">${settings.level_message || '🎉 مبروك يا [user]! لقد وصلت إلى المستوى [level]! 🚀'}</textarea>
+                            <textarea id="levelMsgTextarea" name="level_message" rows="3" placeholder="🎉 مبروك يا [user]! لقد وصلت إلى المستوى [level]! 🚀" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none leading-relaxed text-right">${settings.level_message || '🎉 مبروك يا [user]! لقد وصلت إلى المستوى [level]! 🚀'}</textarea>
                         </div>
                     </div>
 
@@ -3387,19 +3624,19 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                 formFieldsHtml = `
                     <div class="space-y-5">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div class="bg-[#12131c] border border-purple-950/40 p-4 rounded-2xl flex items-center justify-between">
+                            <div class="bg-[#1c1f2e] border border-white/5 p-4 rounded-2xl flex items-center justify-between">
                                 <label class="toggle"><input type="checkbox" name="anti_caps" value="1" ${settings.anti_caps ? 'checked' : ''}><span class="slider"></span></label>
                                 <span class="font-bold text-white text-xs">منع الحروف الكبيرة (Anti-Caps)</span>
                             </div>
-                            <div class="bg-[#12131c] border border-purple-950/40 p-4 rounded-2xl flex items-center justify-between">
+                            <div class="bg-[#1c1f2e] border border-white/5 p-4 rounded-2xl flex items-center justify-between">
                                 <label class="toggle"><input type="checkbox" name="anti_emoji_spam" value="1" ${settings.anti_emoji_spam ? 'checked' : ''}><span class="slider"></span></label>
                                 <span class="font-bold text-white text-xs">منع سبام الإيموجي (Anti-Emoji)</span>
                             </div>
-                            <div class="bg-[#12131c] border border-purple-950/40 p-4 rounded-2xl flex items-center justify-between">
+                            <div class="bg-[#1c1f2e] border border-white/5 p-4 rounded-2xl flex items-center justify-between">
                                 <label class="toggle"><input type="checkbox" name="bad_words_enabled" value="1" ${settings.bad_words_enabled ? 'checked' : ''}><span class="slider"></span></label>
                                 <span class="font-bold text-white text-xs">فلتر الكلمات المسيئة (Bad Words)</span>
                             </div>
-                            <div class="bg-[#12131c] border border-purple-950/40 p-4 rounded-2xl flex items-center justify-between">
+                            <div class="bg-[#1c1f2e] border border-white/5 p-4 rounded-2xl flex items-center justify-between">
                                 <label class="toggle"><input type="checkbox" name="anti_line_spam" value="1" ${settings.anti_line_spam ? 'checked' : ''}><span class="slider"></span></label>
                                 <span class="font-bold text-white text-xs">منع تكرار الأسطر الطويلة</span>
                             </div>
@@ -3407,14 +3644,14 @@ document.getElementById('addModal').addEventListener('click', function(e) {
 
                         <div>
                             <label class="block text-xs font-bold text-gray-300 mb-2 text-right">قائمة الكلمات المحظورة (افصل بينها بفاصلة)</label>
-                            <textarea name="bad_words_list" rows="3" placeholder="كلمة1, كلمة2, كلمة3..." class="w-full bg-[#12131c] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right">${settings.bad_words_list || ''}</textarea>
+                            <textarea name="bad_words_list" rows="3" placeholder="كلمة1, كلمة2, كلمة3..." class="w-full bg-[#1c1f2e] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right">${settings.bad_words_list || ''}</textarea>
                         </div>
                     </div>
                 `;
             } else if (section === 'tempvoice') {
                 formFieldsHtml = `
                     <div class="space-y-5">
-                        <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl">
+                        <div class="bg-[#1c1f2e] border border-white/5 p-5 rounded-2xl">
                             <div class="flex items-center justify-between mb-4">
                                 <label class="toggle"><input type="checkbox" name="temp_voice_enabled" value="1" ${settings.temp_voice_enabled ? 'checked' : ''}><span class="slider"></span></label>
                                 <div class="text-right">
@@ -3448,10 +3685,10 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                 formFieldsHtml = `
                     <div class="space-y-6">
                         <!-- Header & Duration Selector -->
-                        <div class="bg-[#12131c] border border-purple-950/40 p-6 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-4">
+                        <div class="bg-[#1c1f2e] border border-white/5 p-6 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-4">
                             <div class="flex items-center gap-3 justify-end w-full md:w-auto">
                                 <label class="text-xs font-bold text-gray-400">المدة</label>
-                                <select id="statsDurationSelect" onchange="changeStatsDuration(this.value)" class="bg-[#0b0c10] border border-purple-950/40 text-white rounded-xl px-4 py-2.5 text-xs font-bold outline-none focus:border-purple-600 cursor-pointer">
+                                <select id="statsDurationSelect" onchange="changeStatsDuration(this.value)" class="bg-[#0b0d14] border border-white/5 text-white rounded-xl px-4 py-2.5 text-xs font-bold outline-none focus:border-purple-600 cursor-pointer">
                                     <option value="7d" selected>7 أيام</option>
                                     <option value="24h">24 ساعة</option>
                                     <option value="14d">14 يوم</option>
@@ -3466,22 +3703,22 @@ document.getElementById('addModal').addEventListener('click', function(e) {
 
                         <!-- 4 Stat Cards Row -->
                         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            <div class="bg-[#12131c] border border-purple-950/40 p-4 rounded-2xl text-right">
+                            <div class="bg-[#1c1f2e] border border-white/5 p-4 rounded-2xl text-right">
                                 <span class="text-gray-400 text-[11px] block">إجمالي الأعضاء</span>
                                 <h4 class="text-xl font-black text-white mt-1">${totalMembers.toLocaleString()}</h4>
-                                <span class="text-[10px] text-purple-400">👤 أعضاء السيرفر</span>
+                                <span class="text-[10px] text-[#5865f2]">👤 أعضاء السيرفر</span>
                             </div>
-                            <div class="bg-[#12131c] border border-purple-950/40 p-4 rounded-2xl text-right">
+                            <div class="bg-[#1c1f2e] border border-white/5 p-4 rounded-2xl text-right">
                                 <span class="text-gray-400 text-[11px] block">البوتات المساعدة</span>
                                 <h4 class="text-xl font-black text-indigo-300 mt-1">${totalBots}</h4>
                                 <span class="text-[10px] text-indigo-400">🤖 حسابات بوتات</span>
                             </div>
-                            <div class="bg-[#12131c] border border-purple-950/40 p-4 rounded-2xl text-right">
+                            <div class="bg-[#1c1f2e] border border-white/5 p-4 rounded-2xl text-right">
                                 <span class="text-gray-400 text-[11px] block">القنوات والرومات</span>
-                                <h4 class="text-xl font-black text-purple-300 mt-1">${totalChannels}</h4>
-                                <span class="text-[10px] text-purple-400">💬 صوتية وكتابية</span>
+                                <h4 class="text-xl font-black text-gray-200 mt-1">${totalChannels}</h4>
+                                <span class="text-[10px] text-[#5865f2]">💬 صوتية وكتابية</span>
                             </div>
-                            <div class="bg-[#12131c] border border-purple-950/40 p-4 rounded-2xl text-right">
+                            <div class="bg-[#1c1f2e] border border-white/5 p-4 rounded-2xl text-right">
                                 <span class="text-gray-400 text-[11px] block">مستوى البوست</span>
                                 <h4 class="text-xl font-black text-pink-400 mt-1">Level ${boostTier}</h4>
                                 <span class="text-[10px] text-pink-400">🚀 ${boostCount} Boosts</span>
@@ -3489,27 +3726,27 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                         </div>
 
                         <!-- Chart 1: الرسائل (Messages Chart) -->
-                        <div class="bg-[#12131c] border border-purple-950/40 rounded-2xl p-6 shadow-xl space-y-4 text-right">
+                        <div class="bg-[#1c1f2e] border border-white/5 rounded-2xl p-6 shadow-xl space-y-4 text-right">
                             <div class="flex items-center justify-between">
-                                <button type="button" class="text-gray-500 hover:text-purple-400 text-sm">☰</button>
+                                <button type="button" class="text-gray-500 hover:text-[#5865f2] text-sm">☰</button>
                                 <h4 class="font-bold text-white text-sm">الرسائل</h4>
                             </div>
                             <div id="messagesChartContainer" class="w-full h-72"></div>
                         </div>
 
                         <!-- Chart 2: دخول/خروج (Joins & Leaves Chart) -->
-                        <div class="bg-[#12131c] border border-purple-950/40 rounded-2xl p-6 shadow-xl space-y-4 text-right">
+                        <div class="bg-[#1c1f2e] border border-white/5 rounded-2xl p-6 shadow-xl space-y-4 text-right">
                             <div class="flex items-center justify-between">
-                                <button type="button" class="text-gray-500 hover:text-purple-400 text-sm">☰</button>
+                                <button type="button" class="text-gray-500 hover:text-[#5865f2] text-sm">☰</button>
                                 <h4 class="font-bold text-white text-sm">دخول/خروج</h4>
                             </div>
                             <div id="joinsLeavesChartContainer" class="w-full h-80"></div>
                         </div>
 
                         <!-- Chart 3: المتصلين بالرومات الصوتية (Voice Active Members Chart) -->
-                        <div class="bg-[#12131c] border border-purple-950/40 rounded-2xl p-6 shadow-xl space-y-4 text-right">
+                        <div class="bg-[#1c1f2e] border border-white/5 rounded-2xl p-6 shadow-xl space-y-4 text-right">
                             <div class="flex items-center justify-between">
-                                <button type="button" class="text-gray-500 hover:text-purple-400 text-sm">☰</button>
+                                <button type="button" class="text-gray-500 hover:text-[#5865f2] text-sm">☰</button>
                                 <h4 class="font-bold text-white text-sm">المتصلين بالرومات الصوتية</h4>
                             </div>
                             <div id="voiceChartContainer" class="w-full h-80"></div>
@@ -3710,10 +3947,10 @@ document.getElementById('addModal').addEventListener('click', function(e) {
             } else if (section === 'autoresponder') {
                 const autoRespondersList = database.getAutoResponders ? database.getAutoResponders(guildId) : [];
                 const respondersHtml = autoRespondersList && autoRespondersList.length > 0 ? autoRespondersList.map(r => `
-                    <div class="bg-[#0b0c10] border border-purple-950/40 p-4 rounded-xl flex items-center justify-between">
+                    <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between">
                         <button type="button" onclick="deleteResponder('${guildId}', '${r.id || r.trigger_word}')" class="px-3 py-1.5 bg-red-950/40 hover:bg-red-900/60 text-red-300 border border-red-900/30 rounded-lg text-xs font-bold transition">حذف 🗑️</button>
                         <div class="text-right">
-                            <p class="font-bold text-white text-xs">إذا كتب العضو: <span class="text-purple-300 font-mono bg-purple-950/40 px-2 py-0.5 rounded">"${r.trigger_word}"</span></p>
+                            <p class="font-bold text-white text-xs">إذا كتب العضو: <span class="text-gray-200 font-mono bg-[#151722] px-2 py-0.5 rounded">"${r.trigger_word}"</span></p>
                             <p class="text-gray-300 text-xs mt-1">يرد البوت: <span class="text-gray-200">"${r.reply_text}"</span></p>
                         </div>
                     </div>
@@ -3722,7 +3959,7 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                 formFieldsHtml = `
                     <div class="space-y-6">
                         <!-- Current Responders List -->
-                        <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl">
+                        <div class="bg-[#1c1f2e] border border-white/5 p-5 rounded-2xl">
                             <h4 class="font-bold text-white text-sm mb-3 text-right">قائمة الردود التلقائية النشطة (${autoRespondersList.length})</h4>
                             <div class="space-y-2.5 max-h-60 overflow-y-auto pr-1">
                                 ${respondersHtml}
@@ -3730,21 +3967,21 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                         </div>
 
                         <!-- Add New Responder Form -->
-                        <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl text-right">
+                        <div class="bg-[#1c1f2e] border border-white/5 p-5 rounded-2xl text-right">
                             <h4 class="font-bold text-white text-sm mb-1">إضافة رد تلقائي جديد 💬</h4>
                             <p class="text-gray-400 text-xs mb-4">يقوم البوت بالرد التلقائي فوراً في الشات بمجرد كتابة الكلمة المحددة (يمكنك إضافة أكثر من رد لنفس الكلمة أو لكلمات متعددة).</p>
                             
                             <div class="space-y-4">
                                 <div>
                                     <label class="block text-xs font-bold text-gray-300 mb-1 text-right">الكلمة المفتاحية (Trigger Word)</label>
-                                    <input type="text" id="triggerWordInput" placeholder="مثال: السلام عليكم أو رابط السيرفر" class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right">
+                                    <input type="text" id="triggerWordInput" placeholder="مثال: السلام عليكم أو رابط السيرفر" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-gray-300 mb-1 text-right">الرد التلقائي للبوت (Response Message)</label>
-                                    <textarea id="replyTextInput" rows="3" placeholder="مثال: وعليكم السلام ورحمة الله وبركاته، أهلاً وسهلاً بك في سيرفرنا!" class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right"></textarea>
+                                    <textarea id="replyTextInput" rows="3" placeholder="مثال: وعليكم السلام ورحمة الله وبركاته، أهلاً وسهلاً بك في سيرفرنا!" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right"></textarea>
                                 </div>
                                 <div class="pt-2">
-                                    <button type="button" onclick="addAutoResponder('${guildId}')" class="w-full py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-bold rounded-xl transition shadow-lg shadow-purple-900/30">
+                                    <button type="button" onclick="addAutoResponder('${guildId}')" class="w-full py-2.5 bg-gradient-to-r from-[#5865f2] to-indigo-600 hover:from-[#4752c4] hover:to-indigo-500 text-white text-xs font-bold rounded-xl transition shadow-lg shadow-black/20">
                                         + إضافة وحفظ الرد التلقائي
                                     </button>
                                 </div>
@@ -3756,7 +3993,7 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                 formFieldsHtml = `
                     <div class="space-y-6">
                         <!-- Server Overview Card -->
-                        <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl flex items-center justify-between">
+                        <div class="bg-[#1c1f2e] border border-white/5 p-5 rounded-2xl flex items-center justify-between">
                             <div class="flex items-center gap-3">
                                 <div class="text-right">
                                     <h4 class="font-bold text-white text-sm">${guild.name}</h4>
@@ -3764,20 +4001,20 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                                 </div>
                                 <img src="${guildIcon}" class="w-12 h-12 rounded-2xl border border-purple-900/40 object-cover">
                             </div>
-                            <span class="px-3 py-1 bg-purple-950/60 text-purple-300 border border-purple-800/40 rounded-xl text-xs font-bold">إعدادات السيرفر ⚙️</span>
+                            <span class="px-3 py-1 bg-purple-950/60 text-gray-200 border border-purple-800/40 rounded-xl text-xs font-bold">إعدادات السيرفر ⚙️</span>
                         </div>
 
                         <!-- Core Server Settings Form -->
-                        <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl space-y-4">
+                        <div class="bg-[#1c1f2e] border border-white/5 p-5 rounded-2xl space-y-4">
                             <h4 class="font-bold text-white text-sm text-right">الإعدادات الأساسية للنظام ⚙️</h4>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <label class="block text-xs font-bold text-gray-300 mb-2 text-right">برفكس البوت الافتراضي (Default Prefix)</label>
-                                    <input type="text" name="prefix" value="${settings.prefix || '#'}" class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right font-mono">
+                                    <input type="text" name="prefix" value="${settings.prefix || '#'}" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right font-mono">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-gray-300 mb-2 text-right">لغة البوت في السيرفر (Bot Language)</label>
-                                    <select name="bot_language" class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right">
+                                    <select name="bot_language" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right">
                                         <option value="ar" ${settings.bot_language !== 'en' ? 'selected' : ''}>العربية (Arabic) 🇸🇦</option>
                                         <option value="en" ${settings.bot_language === 'en' ? 'selected' : ''}>English (الإنجليزية) 🇺🇸</option>
                                     </select>
@@ -3806,8 +4043,8 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                 formFieldsHtml = `
                     <div class="space-y-6">
                         <!-- General Commands Overview matching Image 3 -->
-                        <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl flex items-center justify-between">
-                            <span class="px-3 py-1 bg-purple-950/60 text-purple-300 border border-purple-800/40 rounded-xl text-xs font-bold">12 أمراً متاحاً</span>
+                        <div class="bg-[#1c1f2e] border border-white/5 p-5 rounded-2xl flex items-center justify-between">
+                            <span class="px-3 py-1 bg-purple-950/60 text-gray-200 border border-purple-800/40 rounded-xl text-xs font-bold">12 أمراً متاحاً</span>
                             <div class="text-right">
                                 <h4 class="font-bold text-white text-sm">الأوامر العامة والخدمية للأعضاء ⚙️</h4>
                                 <p class="text-gray-400 text-xs mt-0.5">أوامر التفاعل والمعلومات والخدمات المتاحة لجميع أعضاء السيرفر</p>
@@ -3815,11 +4052,11 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                         </div>
 
                         <!-- 12 General Member Commands Only matching Image 3 -->
-                        <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl">
+                        <div class="bg-[#1c1f2e] border border-white/5 p-5 rounded-2xl">
                             <h4 class="font-bold text-white text-sm mb-4 text-right">قائمة الأوامر الخدمية والعامة</h4>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                                 
-                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
                                     <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
                                     <div class="text-right">
                                         <p class="font-bold text-white text-xs">help & #help</p>
@@ -3827,7 +4064,7 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                                     </div>
                                 </div>
 
-                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
                                     <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
                                     <div class="text-right">
                                         <p class="font-bold text-white text-xs">profile & /id</p>
@@ -3835,7 +4072,7 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                                     </div>
                                 </div>
 
-                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
                                     <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
                                     <div class="text-right">
                                         <p class="font-bold text-white text-xs">avatar & #avatar</p>
@@ -3843,7 +4080,7 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                                     </div>
                                 </div>
 
-                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
                                     <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
                                     <div class="text-right">
                                         <p class="font-bold text-white text-xs">banner & #banner</p>
@@ -3851,7 +4088,7 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                                     </div>
                                 </div>
 
-                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
                                     <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
                                     <div class="text-right">
                                         <p class="font-bold text-white text-xs">server & #server</p>
@@ -3859,7 +4096,7 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                                     </div>
                                 </div>
 
-                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
                                     <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
                                     <div class="text-right">
                                         <p class="font-bold text-white text-xs">user & #user</p>
@@ -3867,7 +4104,7 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                                     </div>
                                 </div>
 
-                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
                                     <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
                                     <div class="text-right">
                                         <p class="font-bold text-white text-xs">ping & #ping</p>
@@ -3875,7 +4112,7 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                                     </div>
                                 </div>
 
-                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
                                     <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
                                     <div class="text-right">
                                         <p class="font-bold text-white text-xs">tax & #tax</p>
@@ -3883,7 +4120,7 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                                     </div>
                                 </div>
 
-                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
                                     <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
                                     <div class="text-right">
                                         <p class="font-bold text-white text-xs">stars & #stars</p>
@@ -3891,7 +4128,7 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                                     </div>
                                 </div>
 
-                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
                                     <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
                                     <div class="text-right">
                                         <p class="font-bold text-white text-xs">roles & #roles</p>
@@ -3899,7 +4136,7 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                                     </div>
                                 </div>
 
-                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
                                     <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
                                     <div class="text-right">
                                         <p class="font-bold text-white text-xs">channels & #channels</p>
@@ -3907,7 +4144,7 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                                     </div>
                                 </div>
 
-                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
                                     <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
                                     <div class="text-right">
                                         <p class="font-bold text-white text-xs">emojis & #emojis</p>
@@ -3915,7 +4152,7 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                                     </div>
                                 </div>
 
-                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
                                     <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
                                     <div class="text-right">
                                         <p class="font-bold text-white text-xs">giveaway & #giveaway</p>
@@ -3923,7 +4160,7 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                                     </div>
                                 </div>
 
-                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
                                     <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
                                     <div class="text-right">
                                         <p class="font-bold text-white text-xs">poll & #poll</p>
@@ -3931,7 +4168,7 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                                     </div>
                                 </div>
 
-                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
                                     <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
                                     <div class="text-right">
                                         <p class="font-bold text-white text-xs">quran & #quran</p>
@@ -3939,7 +4176,7 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                                     </div>
                                 </div>
 
-                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
                                     <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
                                     <div class="text-right">
                                         <p class="font-bold text-white text-xs">radio & #radio</p>
@@ -3958,7 +4195,7 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-xs font-bold text-gray-300 mb-2 text-right">برفكس الأوامر (Prefix)</label>
-                                <input type="text" name="prefix" value="${settings.prefix || '#'}" class="w-full bg-[#12131c] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right font-mono">
+                                <input type="text" name="prefix" value="${settings.prefix || '#'}" class="w-full bg-[#1c1f2e] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right font-mono">
                             </div>
                             <div>
                                 <label class="block text-xs font-bold text-gray-300 mb-2 text-right">قناة سجلات الإشراف (Moderation Logs)</label>
@@ -3967,11 +4204,11 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                         </div>
 
                         <!-- أوامر الإشراف الكاملة -->
-                        <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl">
+                        <div class="bg-[#1c1f2e] border border-white/5 p-5 rounded-2xl">
                             <h4 class="font-bold text-white text-sm mb-4 text-right">أوامر الإشراف المتاحة 🔨</h4>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
 
-                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
                                     <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
                                     <div class="text-right">
                                         <p class="font-bold text-white text-xs">/ban & #ban</p>
@@ -3979,7 +4216,7 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                                     </div>
                                 </div>
 
-                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
                                     <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
                                     <div class="text-right">
                                         <p class="font-bold text-white text-xs">/unban</p>
@@ -3987,7 +4224,7 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                                     </div>
                                 </div>
 
-                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
                                     <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
                                     <div class="text-right">
                                         <p class="font-bold text-white text-xs">/kick & #kick</p>
@@ -3995,7 +4232,7 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                                     </div>
                                 </div>
 
-                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
                                     <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
                                     <div class="text-right">
                                         <p class="font-bold text-white text-xs">/warn & /warnings & #warn</p>
@@ -4003,7 +4240,7 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                                     </div>
                                 </div>
 
-                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
                                     <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
                                     <div class="text-right">
                                         <p class="font-bold text-white text-xs">/timeout & /mute & /untimeout</p>
@@ -4011,7 +4248,7 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                                     </div>
                                 </div>
 
-                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
                                     <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
                                     <div class="text-right">
                                         <p class="font-bold text-white text-xs">/clear & #clear</p>
@@ -4019,7 +4256,7 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                                     </div>
                                 </div>
 
-                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
                                     <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
                                     <div class="text-right">
                                         <p class="font-bold text-white text-xs">/lock & /unlock</p>
@@ -4027,7 +4264,7 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                                     </div>
                                 </div>
 
-                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
                                     <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
                                     <div class="text-right">
                                         <p class="font-bold text-white text-xs">/role & /temprole</p>
@@ -4035,7 +4272,7 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                                     </div>
                                 </div>
 
-                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
                                     <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
                                     <div class="text-right">
                                         <p class="font-bold text-white text-xs">/slowmode & #slowmode</p>
@@ -4043,7 +4280,7 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                                     </div>
                                 </div>
 
-                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
+                                <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
                                     <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
                                     <div class="text-right">
                                         <p class="font-bold text-white text-xs">/unban & /bans</p>
@@ -4055,21 +4292,21 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                         </div>
 
                         <!-- نظام العقوبات التلقائي -->
-                        <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl text-right">
+                        <div class="bg-[#1c1f2e] border border-white/5 p-5 rounded-2xl text-right">
                             <h4 class="font-bold text-white text-sm mb-3">نظام العقوبات التلقائي للتحذيرات ⚠️</h4>
                             <p class="text-gray-400 text-xs mb-4">عند تراكم التحذيرات يتم تطبيق العقوبات تلقائياً على العضو</p>
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
-                                <div class="bg-[#0b0c10] p-4 rounded-xl border border-yellow-900/40 text-center">
+                                <div class="bg-[#0b0d14] p-4 rounded-xl border border-yellow-900/40 text-center">
                                     <span class="text-2xl mb-2 block">⏳</span>
                                     <p class="font-bold text-yellow-300 text-sm">3 تحذيرات</p>
                                     <p class="text-gray-400 text-[11px] mt-1">تايم اوت تلقائي لمدة 1 ساعة</p>
                                 </div>
-                                <div class="bg-[#0b0c10] p-4 rounded-xl border border-orange-900/40 text-center">
+                                <div class="bg-[#0b0d14] p-4 rounded-xl border border-orange-900/40 text-center">
                                     <span class="text-2xl mb-2 block">👢</span>
                                     <p class="font-bold text-orange-400 text-sm">5 تحذيرات</p>
                                     <p class="text-gray-400 text-[11px] mt-1">طرد تلقائي من السيرفر (Kick)</p>
                                 </div>
-                                <div class="bg-[#0b0c10] p-4 rounded-xl border border-red-900/40 text-center">
+                                <div class="bg-[#0b0d14] p-4 rounded-xl border border-red-900/40 text-center">
                                     <span class="text-2xl mb-2 block">🔨</span>
                                     <p class="font-bold text-red-400 text-sm">7 تحذيرات</p>
                                     <p class="text-gray-400 text-[11px] mt-1">حظر نهائي من السيرفر (Ban)</p>
@@ -4082,9 +4319,9 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                 formFieldsHtml = `
                     <div class="space-y-6">
                         <!-- Header Section matching Image 4 -->
-                        <div class="bg-[#12131c] border border-purple-950/40 p-6 rounded-2xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                        <div class="bg-[#1c1f2e] border border-white/5 p-6 rounded-2xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                             <div class="flex items-center gap-3">
-                                <span class="px-3.5 py-1.5 bg-purple-950/60 text-purple-300 border border-purple-800/40 rounded-xl text-xs font-mono font-bold">30 / 00</span>
+                                <span class="px-3.5 py-1.5 bg-purple-950/60 text-gray-200 border border-purple-800/40 rounded-xl text-xs font-mono font-bold">30 / 00</span>
                             </div>
                             <div class="text-right">
                                 <h3 class="font-black text-white text-base">رسائل الأمبد</h3>
@@ -4093,28 +4330,28 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                         </div>
 
                         <!-- Dashed Create Button matching Image 4 -->
-                        <div onclick="document.getElementById('embedBuilderBox').classList.toggle('hidden'); document.getElementById('embedBuilderBox').scrollIntoView({behavior: 'smooth'})" class="border-2 border-dashed border-purple-800/40 hover:border-purple-500 bg-[#12131c]/50 hover:bg-[#12131c] p-8 rounded-2xl text-center cursor-pointer transition group">
-                            <div class="w-12 h-12 rounded-2xl bg-purple-950/60 group-hover:bg-purple-600/30 text-purple-400 group-hover:text-purple-200 border border-purple-800/40 flex items-center justify-center text-xl mx-auto mb-3 transition">
+                        <div onclick="document.getElementById('embedBuilderBox').classList.toggle('hidden'); document.getElementById('embedBuilderBox').scrollIntoView({behavior: 'smooth'})" class="border-2 border-dashed border-purple-800/40 hover:border-purple-500 bg-[#1c1f2e]/50 hover:bg-[#1c1f2e] p-8 rounded-2xl text-center cursor-pointer transition group">
+                            <div class="w-12 h-12 rounded-2xl bg-purple-950/60 group-hover:bg-[#5865f2]/30 text-[#5865f2] group-hover:text-purple-200 border border-purple-800/40 flex items-center justify-center text-xl mx-auto mb-3 transition">
                                 +
                             </div>
-                            <h4 class="font-bold text-white text-sm group-hover:text-purple-300 transition">+ إنشاء رسالة أمبد</h4>
+                            <h4 class="font-bold text-white text-sm group-hover:text-gray-200 transition">+ إنشاء رسالة أمبد</h4>
                             <p class="text-gray-500 text-xs mt-1">اضغط هنا لفتح المحرر التفاعلي وتصميم وإرسال رسالة إيمبد جديدة</p>
                         </div>
 
                         <!-- Interactive Embed Builder -->
-                        <div id="embedBuilderBox" class="bg-[#12131c] border border-purple-950/40 p-6 rounded-2xl space-y-5">
+                        <div id="embedBuilderBox" class="bg-[#1c1f2e] border border-white/5 p-6 rounded-2xl space-y-5">
                             <h4 class="font-bold text-white text-sm text-right">محرر رسائل الإيمبد التفاعلي (Interactive Embed Builder) 📄</h4>
                             
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <label class="block text-xs font-bold text-gray-300 mb-2 text-right">القناة المستهدفة (Channel ID) <span class="text-purple-400">*</span></label>
-                                    <input type="text" id="embedChannelInput" placeholder="ضع ID الروم هنا..." class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right font-mono">
+                                    <label class="block text-xs font-bold text-gray-300 mb-2 text-right">القناة المستهدفة (Channel ID) <span class="text-[#5865f2]">*</span></label>
+                                    <input type="text" id="embedChannelInput" placeholder="ضع ID الروم هنا..." class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right font-mono">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-gray-300 mb-2 text-right">لون الإيمبد (Hex Color)</label>
                                     <div class="flex items-center gap-2">
                                         <input type="color" id="embedColorPicker" value="#9333ea" onchange="document.getElementById('embedColorInput').value = this.value; updateEmbedPreview()" class="w-10 h-9 rounded-xl bg-transparent border-0 cursor-pointer">
-                                        <input type="text" id="embedColorInput" value="#9333ea" oninput="updateEmbedPreview()" placeholder="#9333ea" class="flex-1 bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-2 text-xs text-white outline-none text-right font-mono">
+                                        <input type="text" id="embedColorInput" value="#9333ea" oninput="updateEmbedPreview()" placeholder="#9333ea" class="flex-1 bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2 text-xs text-white outline-none text-right font-mono">
                                     </div>
                                 </div>
                             </div>
@@ -4122,32 +4359,32 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <label class="block text-xs font-bold text-gray-300 mb-2 text-right">اسم الكاتب (Author Name)</label>
-                                    <input type="text" id="embedAuthorInput" oninput="updateEmbedPreview()" placeholder="اسم الكاتب أو الإدارة..." class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right">
+                                    <input type="text" id="embedAuthorInput" oninput="updateEmbedPreview()" placeholder="اسم الكاتب أو الإدارة..." class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-gray-300 mb-2 text-right">عنوان الرسالة (Embed Title)</label>
-                                    <input type="text" id="embedTitleInput" oninput="updateEmbedPreview()" placeholder="اكتب العنوان الرئيسي هنا..." class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right">
+                                    <input type="text" id="embedTitleInput" oninput="updateEmbedPreview()" placeholder="اكتب العنوان الرئيسي هنا..." class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right">
                                 </div>
                             </div>
 
                             <div>
-                                <label class="block text-xs font-bold text-gray-300 mb-2 text-right">محتوى الرسالة (Description) <span class="text-purple-400">*</span></label>
-                                <textarea id="embedDescInput" oninput="updateEmbedPreview()" rows="4" placeholder="اكتب تفاصيل الرسالة والإعلان والتنسيق هنا..." class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right leading-relaxed"></textarea>
+                                <label class="block text-xs font-bold text-gray-300 mb-2 text-right">محتوى الرسالة (Description) <span class="text-[#5865f2]">*</span></label>
+                                <textarea id="embedDescInput" oninput="updateEmbedPreview()" rows="4" placeholder="اكتب تفاصيل الرسالة والإعلان والتنسيق هنا..." class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right leading-relaxed"></textarea>
                             </div>
 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <label class="block text-xs font-bold text-gray-300 mb-2 text-right">رابط صورة البنر الكبيرة (Banner Image URL)</label>
-                                    <input type="text" id="embedImageInput" oninput="updateEmbedPreview()" placeholder="https://..." class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-left font-mono">
+                                    <input type="text" id="embedImageInput" oninput="updateEmbedPreview()" placeholder="https://..." class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-left font-mono">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-gray-300 mb-2 text-right">النص السفلي (Footer Text)</label>
-                                    <input type="text" id="embedFooterInput" oninput="updateEmbedPreview()" placeholder="حقوق السيرفر أو نص التذييل..." class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right">
+                                    <input type="text" id="embedFooterInput" oninput="updateEmbedPreview()" placeholder="حقوق السيرفر أو نص التذييل..." class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right">
                                 </div>
                             </div>
 
                             <!-- Live Interactive Preview Box -->
-                            <div class="pt-4 border-t border-purple-950/40">
+                            <div class="pt-4 border-t border-white/5">
                                 <h5 class="text-xs font-bold text-gray-400 mb-3 text-right">المعاينة الحية لرسالة الإيمبد (Discord Live Preview)</h5>
                                 <div id="previewCard" class="bg-[#2b2d31] p-4 rounded-xl border-r-4 border-[#9333ea] text-right space-y-2 max-w-lg mx-auto shadow-xl">
                                     <p id="previewAuthor" class="text-[11px] font-bold text-gray-300 hidden"></p>
@@ -4159,7 +4396,7 @@ document.getElementById('addModal').addEventListener('click', function(e) {
 
                             <div class="pt-3 flex flex-col sm:flex-row items-center justify-between gap-3">
                                 <span id="embedSendStatus" class="text-xs font-bold text-emerald-400 hidden">✅ تم إرسال رسالة الإيمبد إلى الروم في الديسكورد بنجاح!</span>
-                                <button type="button" onclick="sendEmbedToDiscord('${guildId}')" class="w-full sm:w-auto px-8 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-bold rounded-xl transition shadow-lg shadow-purple-900/40 flex items-center justify-center gap-2">
+                                <button type="button" onclick="sendEmbedToDiscord('${guildId}')" class="w-full sm:w-auto px-8 py-3 bg-gradient-to-r from-[#5865f2] to-indigo-600 hover:from-[#4752c4] hover:to-indigo-500 text-white text-xs font-bold rounded-xl transition shadow-lg shadow-purple-900/40 flex items-center justify-center gap-2">
                                     <span>🚀</span>
                                     <span>إرسال الإيمبد إلى ديسكورد الآن</span>
                                 </button>
@@ -4171,7 +4408,7 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                 formFieldsHtml = `
                     <div class="space-y-6">
                         <!-- Fun Games Header Master Toggle matching Image 4 -->
-                        <div class="bg-[#12131c] border border-purple-950/40 p-6 rounded-2xl flex items-center justify-between">
+                        <div class="bg-[#1c1f2e] border border-white/5 p-6 rounded-2xl flex items-center justify-between">
                             <label class="toggle"><input type="checkbox" name="fun_enabled" value="1" ${settings.fun_enabled !== 0 ? 'checked' : ''}><span class="slider"></span></label>
                             <div class="text-right">
                                 <h3 class="font-black text-white text-base">التسلية 🎮</h3>
@@ -4180,12 +4417,12 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                         </div>
 
                         <!-- Games Grid matching Image 4 -->
-                        <div class="bg-[#12131c] border border-purple-950/40 p-6 rounded-2xl">
+                        <div class="bg-[#1c1f2e] border border-white/5 p-6 rounded-2xl">
                             <h4 class="font-bold text-white text-sm mb-4 text-right">الألعاب</h4>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
                                 
                                 <!-- روليت -->
-                                <div class="bg-[#0b0c10] border border-purple-950/40 p-4 rounded-xl flex items-center justify-between">
+                                <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between">
                                     <div class="flex items-center gap-3">
                                         <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
                                     </div>
@@ -4194,12 +4431,12 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                                             <p class="font-bold text-white text-sm">روليت</p>
                                             <p class="text-gray-400 text-[10px]">روليت الكازينو الأوروبي ومضاعفة أرباح النجوم</p>
                                         </div>
-                                        <div class="w-10 h-10 bg-purple-950/30 rounded-xl flex items-center justify-center text-xl">🎲</div>
+                                        <div class="w-10 h-10 bg-[#151722] rounded-xl flex items-center justify-center text-xl">🎲</div>
                                     </div>
                                 </div>
 
                                 <!-- الكراسي -->
-                                <div class="bg-[#0b0c10] border border-purple-950/40 p-4 rounded-xl flex items-center justify-between">
+                                <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between">
                                     <div class="flex items-center gap-3">
                                         <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
                                     </div>
@@ -4208,12 +4445,12 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                                             <p class="font-bold text-white text-sm">الكراسي</p>
                                             <p class="text-gray-400 text-[10px]">لعبة الكراسي الموسيقية التفاعلية في الشات</p>
                                         </div>
-                                        <div class="w-10 h-10 bg-purple-950/30 rounded-xl flex items-center justify-center text-xl">🪑</div>
+                                        <div class="w-10 h-10 bg-[#151722] rounded-xl flex items-center justify-center text-xl">🪑</div>
                                     </div>
                                 </div>
 
                                 <!-- مافيا -->
-                                <div class="bg-[#0b0c10] border border-purple-950/40 p-4 rounded-xl flex items-center justify-between">
+                                <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between">
                                     <div class="flex items-center gap-3">
                                         <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
                                     </div>
@@ -4222,12 +4459,12 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                                             <p class="font-bold text-white text-sm">مافيا</p>
                                             <p class="text-gray-400 text-[10px]">لعبة المافيا والغموض بين الأعضاء</p>
                                         </div>
-                                        <div class="w-10 h-10 bg-purple-950/30 rounded-xl flex items-center justify-center text-xl">🎭</div>
+                                        <div class="w-10 h-10 bg-[#151722] rounded-xl flex items-center justify-center text-xl">🎭</div>
                                     </div>
                                 </div>
 
                                 <!-- الغميضة -->
-                                <div class="bg-[#0b0c10] border border-purple-950/40 p-4 rounded-xl flex items-center justify-between">
+                                <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between">
                                     <div class="flex items-center gap-3">
                                         <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
                                     </div>
@@ -4236,12 +4473,12 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                                             <p class="font-bold text-white text-sm">الغميضة</p>
                                             <p class="text-gray-400 text-[10px]">لعبة الغميضة والبحث عن المختبئين</p>
                                         </div>
-                                        <div class="w-10 h-10 bg-purple-950/30 rounded-xl flex items-center justify-center text-xl">🙈</div>
+                                        <div class="w-10 h-10 bg-[#151722] rounded-xl flex items-center justify-center text-xl">🙈</div>
                                     </div>
                                 </div>
 
                                 <!-- رمي العملة -->
-                                <div class="bg-[#0b0c10] border border-purple-950/40 p-4 rounded-xl flex items-center justify-between">
+                                <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between">
                                     <div class="flex items-center gap-3">
                                         <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
                                     </div>
@@ -4250,12 +4487,12 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                                             <p class="font-bold text-white text-sm">رمي العملة (Coinflip)</p>
                                             <p class="text-gray-400 text-[10px]">ملك أو كتابة مع رهانات حماسية</p>
                                         </div>
-                                        <div class="w-10 h-10 bg-purple-950/30 rounded-xl flex items-center justify-center text-xl">🪙</div>
+                                        <div class="w-10 h-10 bg-[#151722] rounded-xl flex items-center justify-center text-xl">🪙</div>
                                     </div>
                                 </div>
 
                                 <!-- قتال ومبارزات -->
-                                <div class="bg-[#0b0c10] border border-purple-950/40 p-4 rounded-xl flex items-center justify-between">
+                                <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between">
                                     <div class="flex items-center gap-3">
                                         <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
                                     </div>
@@ -4264,12 +4501,12 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                                             <p class="font-bold text-white text-sm">قتال ومبارزة (Fight)</p>
                                             <p class="text-gray-400 text-[10px]">تحديات PvP حماسية بين الأعضاء بنظام النقاط</p>
                                         </div>
-                                        <div class="w-10 h-10 bg-purple-950/30 rounded-xl flex items-center justify-center text-xl">⚔️</div>
+                                        <div class="w-10 h-10 bg-[#151722] rounded-xl flex items-center justify-center text-xl">⚔️</div>
                                     </div>
                                 </div>
 
                                 <!-- مسابقات وسين جيم -->
-                                <div class="bg-[#0b0c10] border border-purple-950/40 p-4 rounded-xl flex items-center justify-between">
+                                <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between">
                                     <div class="flex items-center gap-3">
                                         <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
                                     </div>
@@ -4278,12 +4515,12 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                                             <p class="font-bold text-white text-sm">مسابقات وأسئلة (Trivia)</p>
                                             <p class="text-gray-400 text-[10px]">أسئلة إسلامية وثقافية وجوائز نجوم</p>
                                         </div>
-                                        <div class="w-10 h-10 bg-purple-950/30 rounded-xl flex items-center justify-center text-xl">❓</div>
+                                        <div class="w-10 h-10 bg-[#151722] rounded-xl flex items-center justify-center text-xl">❓</div>
                                     </div>
                                 </div>
 
                                 <!-- بلاك جاك -->
-                                <div class="bg-[#0b0c10] border border-purple-950/40 p-4 rounded-xl flex items-center justify-between">
+                                <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between">
                                     <div class="flex items-center gap-3">
                                         <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
                                     </div>
@@ -4292,12 +4529,12 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                                             <p class="font-bold text-white text-sm">بلاك جاك (Blackjack)</p>
                                             <p class="text-gray-400 text-[10px]">لعبة 21 والورق والتحديات المالية السريعة</p>
                                         </div>
-                                        <div class="w-10 h-10 bg-purple-950/30 rounded-xl flex items-center justify-center text-xl">🃏</div>
+                                        <div class="w-10 h-10 bg-[#151722] rounded-xl flex items-center justify-center text-xl">🃏</div>
                                     </div>
                                 </div>
 
                                 <!-- ميمز -->
-                                <div class="bg-[#0b0c10] border border-purple-950/40 p-4 rounded-xl flex items-center justify-between">
+                                <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between">
                                     <div class="flex items-center gap-3">
                                         <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
                                     </div>
@@ -4306,12 +4543,12 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                                             <p class="font-bold text-white text-sm">ميمز (Meme)</p>
                                             <p class="text-gray-400 text-[10px]">جلب صور ونكت مضحكة عشوائية من ريديت</p>
                                         </div>
-                                        <div class="w-10 h-10 bg-purple-950/30 rounded-xl flex items-center justify-center text-xl">🐸</div>
+                                        <div class="w-10 h-10 bg-[#151722] rounded-xl flex items-center justify-center text-xl">🐸</div>
                                     </div>
                                 </div>
 
                                 <!-- الكرة السحرية -->
-                                <div class="bg-[#0b0c10] border border-purple-950/40 p-4 rounded-xl flex items-center justify-between">
+                                <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between">
                                     <div class="flex items-center gap-3">
                                         <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
                                     </div>
@@ -4320,12 +4557,12 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                                             <p class="font-bold text-white text-sm">الكرة السحرية (8Ball)</p>
                                             <p class="text-gray-400 text-[10px]">الإجابة على التساؤلات والتوقعات الغامضة</p>
                                         </div>
-                                        <div class="w-10 h-10 bg-purple-950/30 rounded-xl flex items-center justify-center text-xl">🎱</div>
+                                        <div class="w-10 h-10 bg-[#151722] rounded-xl flex items-center justify-center text-xl">🎱</div>
                                     </div>
                                 </div>
 
                                 <!-- حجر ورقة مقص -->
-                                <div class="bg-[#0b0c10] border border-purple-950/40 p-4 rounded-xl flex items-center justify-between">
+                                <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between">
                                     <div class="flex items-center gap-3">
                                         <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
                                     </div>
@@ -4334,12 +4571,12 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                                             <p class="font-bold text-white text-sm">حجر ورقة مقص (RPS)</p>
                                             <p class="text-gray-400 text-[10px]">لعبة حجر ورقة مقص ضد البوت أو الأعضاء</p>
                                         </div>
-                                        <div class="w-10 h-10 bg-purple-950/30 rounded-xl flex items-center justify-center text-xl">✂️</div>
+                                        <div class="w-10 h-10 bg-[#151722] rounded-xl flex items-center justify-center text-xl">✂️</div>
                                     </div>
                                 </div>
 
                                 <!-- رمي النرد -->
-                                <div class="bg-[#0b0c10] border border-purple-950/40 p-4 rounded-xl flex items-center justify-between">
+                                <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between">
                                     <div class="flex items-center gap-3">
                                         <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
                                     </div>
@@ -4348,7 +4585,7 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                                             <p class="font-bold text-white text-sm">رمي النرد (Dice)</p>
                                             <p class="text-gray-400 text-[10px]">لعبة رمي النرد والمراهنة على الأرقام</p>
                                         </div>
-                                        <div class="w-10 h-10 bg-purple-950/30 rounded-xl flex items-center justify-center text-xl">🎲</div>
+                                        <div class="w-10 h-10 bg-[#151722] rounded-xl flex items-center justify-center text-xl">🎲</div>
                                     </div>
                                 </div>
 
@@ -4356,203 +4593,203 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                         </div>
 
                         <!-- Commands Section matching Image 4 -->
-                        <div class="bg-[#12131c] border border-purple-950/40 p-6 rounded-2xl space-y-4">
+                        <div class="bg-[#1c1f2e] border border-white/5 p-6 rounded-2xl space-y-4">
                             <h4 class="font-bold text-white text-sm text-right">الأوامر</h4>
                             <div class="space-y-3">
                                 
-                                <div class="bg-[#0b0c10] border border-purple-950/40 p-4 rounded-xl flex items-center justify-between">
+                                <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between">
                                     <div class="flex items-center gap-3">
                                         <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
-                                        <button type="button" class="text-gray-500 hover:text-purple-400">✏️</button>
+                                        <button type="button" class="text-gray-500 hover:text-[#5865f2]">✏️</button>
                                     </div>
                                     <div class="flex items-center gap-3 text-right">
                                         <div>
                                             <p class="font-bold text-white text-sm">points</p>
                                             <p class="text-gray-400 text-xs">نظام نقاط وتصنيف اللاعبين على مستوى السيرفر</p>
                                         </div>
-                                        <div class="w-8 h-8 bg-purple-950/40 rounded-lg flex items-center justify-center text-purple-400 font-mono text-xs">&gt;_</div>
+                                        <div class="w-8 h-8 bg-[#151722] rounded-lg flex items-center justify-center text-[#5865f2] font-mono text-xs">&gt;_</div>
                                     </div>
                                 </div>
 
-                                <div class="bg-[#0b0c10] border border-purple-950/40 p-4 rounded-xl flex items-center justify-between">
+                                <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between">
                                     <div class="flex items-center gap-3">
                                         <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
-                                        <button type="button" class="text-gray-500 hover:text-purple-400">✏️</button>
+                                        <button type="button" class="text-gray-500 hover:text-[#5865f2]">✏️</button>
                                     </div>
                                     <div class="flex items-center gap-3 text-right">
                                         <div>
                                             <p class="font-bold text-white text-sm">game stop</p>
                                             <p class="text-gray-400 text-xs">إيقاف وإنهاء أي لعبة جارية في القناة الحالية فوراً</p>
                                         </div>
-                                        <div class="w-8 h-8 bg-purple-950/40 rounded-lg flex items-center justify-center text-purple-400 font-mono text-xs">&gt;_</div>
+                                        <div class="w-8 h-8 bg-[#151722] rounded-lg flex items-center justify-center text-[#5865f2] font-mono text-xs">&gt;_</div>
                                     </div>
                                 </div>
 
-                                <div class="bg-[#0b0c10] border border-purple-950/40 p-4 rounded-xl flex items-center justify-between">
+                                <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between">
                                     <div class="flex items-center gap-3">
                                         <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
-                                        <button type="button" class="text-gray-500 hover:text-purple-400">✏️</button>
+                                        <button type="button" class="text-gray-500 hover:text-[#5865f2]">✏️</button>
                                     </div>
                                     <div class="flex items-center gap-3 text-right">
                                         <div>
                                             <p class="font-bold text-white text-sm">dice</p>
                                             <p class="text-gray-400 text-xs">رمي النرد والمراهنة على الأرقام والنتائج</p>
                                         </div>
-                                        <div class="w-8 h-8 bg-purple-950/40 rounded-lg flex items-center justify-center text-purple-400 font-mono text-xs">&gt;_</div>
+                                        <div class="w-8 h-8 bg-[#151722] rounded-lg flex items-center justify-center text-[#5865f2] font-mono text-xs">&gt;_</div>
                                     </div>
                                 </div>
 
-                                <div class="bg-[#0b0c10] border border-purple-950/40 p-4 rounded-xl flex items-center justify-between">
+                                <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between">
                                     <div class="flex items-center gap-3">
                                         <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
-                                        <button type="button" class="text-gray-500 hover:text-purple-400">✏️</button>
+                                        <button type="button" class="text-gray-500 hover:text-[#5865f2]">✏️</button>
                                     </div>
                                     <div class="flex items-center gap-3 text-right">
                                         <div>
                                             <p class="font-bold text-white text-sm">coinflip</p>
                                             <p class="text-gray-400 text-xs">رمي العملة ملك أو كتابة مع رهانات حماسية</p>
                                         </div>
-                                        <div class="w-8 h-8 bg-purple-950/40 rounded-lg flex items-center justify-center text-purple-400 font-mono text-xs">&gt;_</div>
+                                        <div class="w-8 h-8 bg-[#151722] rounded-lg flex items-center justify-center text-[#5865f2] font-mono text-xs">&gt;_</div>
                                     </div>
                                 </div>
 
-                                <div class="bg-[#0b0c10] border border-purple-950/40 p-4 rounded-xl flex items-center justify-between">
+                                <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between">
                                     <div class="flex items-center gap-3">
                                         <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
-                                        <button type="button" class="text-gray-500 hover:text-purple-400">✏️</button>
+                                        <button type="button" class="text-gray-500 hover:text-[#5865f2]">✏️</button>
                                     </div>
                                     <div class="flex items-center gap-3 text-right">
                                         <div>
                                             <p class="font-bold text-white text-sm">fight</p>
                                             <p class="text-gray-400 text-xs">تحديات وقتال PvP حماسي بين الأعضاء بنقاط صحة HP</p>
                                         </div>
-                                        <div class="w-8 h-8 bg-purple-950/40 rounded-lg flex items-center justify-center text-purple-400 font-mono text-xs">&gt;_</div>
+                                        <div class="w-8 h-8 bg-[#151722] rounded-lg flex items-center justify-center text-[#5865f2] font-mono text-xs">&gt;_</div>
                                     </div>
                                 </div>
 
-                                <div class="bg-[#0b0c10] border border-purple-950/40 p-4 rounded-xl flex items-center justify-between">
+                                <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between">
                                     <div class="flex items-center gap-3">
                                         <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
-                                        <button type="button" class="text-gray-500 hover:text-purple-400">✏️</button>
+                                        <button type="button" class="text-gray-500 hover:text-[#5865f2]">✏️</button>
                                     </div>
                                     <div class="flex items-center gap-3 text-right">
                                         <div>
                                             <p class="font-bold text-white text-sm">trivia</p>
                                             <p class="text-gray-400 text-xs">مسابقات وسين جيم إسلامية وثقافية مع جوائز نجوم</p>
                                         </div>
-                                        <div class="w-8 h-8 bg-purple-950/40 rounded-lg flex items-center justify-center text-purple-400 font-mono text-xs">&gt;_</div>
+                                        <div class="w-8 h-8 bg-[#151722] rounded-lg flex items-center justify-center text-[#5865f2] font-mono text-xs">&gt;_</div>
                                     </div>
                                 </div>
 
-                                <div class="bg-[#0b0c10] border border-purple-950/40 p-4 rounded-xl flex items-center justify-between">
+                                <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between">
                                     <div class="flex items-center gap-3">
                                         <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
-                                        <button type="button" class="text-gray-500 hover:text-purple-400">✏️</button>
+                                        <button type="button" class="text-gray-500 hover:text-[#5865f2]">✏️</button>
                                     </div>
                                     <div class="flex items-center gap-3 text-right">
                                         <div>
                                             <p class="font-bold text-white text-sm">roulette</p>
                                             <p class="text-gray-400 text-xs">روليت الكازينو الأوروبي ومضاعفة أرباح النجوم</p>
                                         </div>
-                                        <div class="w-8 h-8 bg-purple-950/40 rounded-lg flex items-center justify-center text-purple-400 font-mono text-xs">&gt;_</div>
+                                        <div class="w-8 h-8 bg-[#151722] rounded-lg flex items-center justify-center text-[#5865f2] font-mono text-xs">&gt;_</div>
                                     </div>
                                 </div>
 
-                                <div class="bg-[#0b0c10] border border-purple-950/40 p-4 rounded-xl flex items-center justify-between">
+                                <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between">
                                     <div class="flex items-center gap-3">
                                         <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
-                                        <button type="button" class="text-gray-500 hover:text-purple-400">✏️</button>
+                                        <button type="button" class="text-gray-500 hover:text-[#5865f2]">✏️</button>
                                     </div>
                                     <div class="flex items-center gap-3 text-right">
                                         <div>
                                             <p class="font-bold text-white text-sm">blackjack</p>
                                             <p class="text-gray-400 text-xs">لعبة 21 والورق والتحديات المالية السريعة</p>
                                         </div>
-                                        <div class="w-8 h-8 bg-purple-950/40 rounded-lg flex items-center justify-center text-purple-400 font-mono text-xs">&gt;_</div>
+                                        <div class="w-8 h-8 bg-[#151722] rounded-lg flex items-center justify-center text-[#5865f2] font-mono text-xs">&gt;_</div>
                                     </div>
                                 </div>
 
-                                <div class="bg-[#0b0c10] border border-purple-950/40 p-4 rounded-xl flex items-center justify-between">
+                                <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between">
                                     <div class="flex items-center gap-3">
                                         <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
-                                        <button type="button" class="text-gray-500 hover:text-purple-400">✏️</button>
+                                        <button type="button" class="text-gray-500 hover:text-[#5865f2]">✏️</button>
                                     </div>
                                     <div class="flex items-center gap-3 text-right">
                                         <div>
                                             <p class="font-bold text-white text-sm">meme</p>
                                             <p class="text-gray-400 text-xs">جلب صور ونكت وميمز مضحكة عشوائية من ريديت</p>
                                         </div>
-                                        <div class="w-8 h-8 bg-purple-950/40 rounded-lg flex items-center justify-center text-purple-400 font-mono text-xs">&gt;_</div>
+                                        <div class="w-8 h-8 bg-[#151722] rounded-lg flex items-center justify-center text-[#5865f2] font-mono text-xs">&gt;_</div>
                                     </div>
                                 </div>
 
-                                <div class="bg-[#0b0c10] border border-purple-950/40 p-4 rounded-xl flex items-center justify-between">
+                                <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between">
                                     <div class="flex items-center gap-3">
                                         <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
-                                        <button type="button" class="text-gray-500 hover:text-purple-400">✏️</button>
+                                        <button type="button" class="text-gray-500 hover:text-[#5865f2]">✏️</button>
                                     </div>
                                     <div class="flex items-center gap-3 text-right">
                                         <div>
                                             <p class="font-bold text-white text-sm">8ball</p>
                                             <p class="text-gray-400 text-xs">الكرة السحرية للإجابة على جميع الأسئلة والتوقعات</p>
                                         </div>
-                                        <div class="w-8 h-8 bg-purple-950/40 rounded-lg flex items-center justify-center text-purple-400 font-mono text-xs">&gt;_</div>
+                                        <div class="w-8 h-8 bg-[#151722] rounded-lg flex items-center justify-center text-[#5865f2] font-mono text-xs">&gt;_</div>
                                     </div>
                                 </div>
 
-                                <div class="bg-[#0b0c10] border border-purple-950/40 p-4 rounded-xl flex items-center justify-between">
+                                <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between">
                                     <div class="flex items-center gap-3">
                                         <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
-                                        <button type="button" class="text-gray-500 hover:text-purple-400">✏️</button>
+                                        <button type="button" class="text-gray-500 hover:text-[#5865f2]">✏️</button>
                                     </div>
                                     <div class="flex items-center gap-3 text-right">
                                         <div>
                                             <p class="font-bold text-white text-sm">rps</p>
                                             <p class="text-gray-400 text-xs">لعبة حجر ورقة مقص ضد البوت أو الأعضاء</p>
                                         </div>
-                                        <div class="w-8 h-8 bg-purple-950/40 rounded-lg flex items-center justify-center text-purple-400 font-mono text-xs">&gt;_</div>
+                                        <div class="w-8 h-8 bg-[#151722] rounded-lg flex items-center justify-center text-[#5865f2] font-mono text-xs">&gt;_</div>
                                     </div>
                                 </div>
 
-                                <div class="bg-[#0b0c10] border border-purple-950/40 p-4 rounded-xl flex items-center justify-between">
+                                <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between">
                                     <div class="flex items-center gap-3">
                                         <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
-                                        <button type="button" class="text-gray-500 hover:text-purple-400">✏️</button>
+                                        <button type="button" class="text-gray-500 hover:text-[#5865f2]">✏️</button>
                                     </div>
                                     <div class="flex items-center gap-3 text-right">
                                         <div>
                                             <p class="font-bold text-white text-sm">chairs</p>
                                             <p class="text-gray-400 text-xs">لعبة الكراسي الموسيقية التفاعلية في الشات</p>
                                         </div>
-                                        <div class="w-8 h-8 bg-purple-950/40 rounded-lg flex items-center justify-center text-purple-400 font-mono text-xs">&gt;_</div>
+                                        <div class="w-8 h-8 bg-[#151722] rounded-lg flex items-center justify-center text-[#5865f2] font-mono text-xs">&gt;_</div>
                                     </div>
                                 </div>
 
-                                <div class="bg-[#0b0c10] border border-purple-950/40 p-4 rounded-xl flex items-center justify-between">
+                                <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between">
                                     <div class="flex items-center gap-3">
                                         <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
-                                        <button type="button" class="text-gray-500 hover:text-purple-400">✏️</button>
+                                        <button type="button" class="text-gray-500 hover:text-[#5865f2]">✏️</button>
                                     </div>
                                     <div class="flex items-center gap-3 text-right">
                                         <div>
                                             <p class="font-bold text-white text-sm">mafia</p>
                                             <p class="text-gray-400 text-xs">لعبة المافيا والغموض بين الأعضاء في الشات</p>
                                         </div>
-                                        <div class="w-8 h-8 bg-purple-950/40 rounded-lg flex items-center justify-center text-purple-400 font-mono text-xs">&gt;_</div>
+                                        <div class="w-8 h-8 bg-[#151722] rounded-lg flex items-center justify-center text-[#5865f2] font-mono text-xs">&gt;_</div>
                                     </div>
                                 </div>
 
-                                <div class="bg-[#0b0c10] border border-purple-950/40 p-4 rounded-xl flex items-center justify-between">
+                                <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between">
                                     <div class="flex items-center gap-3">
                                         <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
-                                        <button type="button" class="text-gray-500 hover:text-purple-400">✏️</button>
+                                        <button type="button" class="text-gray-500 hover:text-[#5865f2]">✏️</button>
                                     </div>
                                     <div class="flex items-center gap-3 text-right">
                                         <div>
                                             <p class="font-bold text-white text-sm">hideseek</p>
                                             <p class="text-gray-400 text-xs">لعبة الغميضة والبحث عن الأعضاء المختبئين</p>
                                         </div>
-                                        <div class="w-8 h-8 bg-purple-950/40 rounded-lg flex items-center justify-center text-purple-400 font-mono text-xs">&gt;_</div>
+                                        <div class="w-8 h-8 bg-[#151722] rounded-lg flex items-center justify-center text-[#5865f2] font-mono text-xs">&gt;_</div>
                                     </div>
                                 </div>
 
@@ -4560,20 +4797,20 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                         </div>
 
                         <!-- Economy Betting Settings -->
-                        <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl space-y-4 text-right">
+                        <div class="bg-[#1c1f2e] border border-white/5 p-5 rounded-2xl space-y-4 text-right">
                             <h4 class="font-bold text-white text-sm">إعدادات الرهانات ومضاعف الجوائز 💰</h4>
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <div>
                                     <label class="block text-xs font-bold text-gray-300 mb-2">الحد الأدنى للرهان (Min Bet)</label>
-                                    <input type="number" name="min_bet" value="${settings.min_bet || 10}" min="1" class="w-full bg-[#0b0c10] border border-purple-950/40 rounded-xl px-4 py-2.5 text-xs text-white outline-none font-mono text-right">
+                                    <input type="number" name="min_bet" value="${settings.min_bet || 10}" min="1" class="w-full bg-[#0b0d14] border border-white/5 rounded-xl px-4 py-2.5 text-xs text-white outline-none font-mono text-right">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-gray-300 mb-2">الحد الأقصى للرهان (Max Bet)</label>
-                                    <input type="number" name="max_bet" value="${settings.max_bet || 50000}" min="100" class="w-full bg-[#0b0c10] border border-purple-950/40 rounded-xl px-4 py-2.5 text-xs text-white outline-none font-mono text-right">
+                                    <input type="number" name="max_bet" value="${settings.max_bet || 50000}" min="100" class="w-full bg-[#0b0d14] border border-white/5 rounded-xl px-4 py-2.5 text-xs text-white outline-none font-mono text-right">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-gray-300 mb-2">مضاعف المكافآت (Multiplier)</label>
-                                    <input type="number" step="0.1" name="game_rewards_multiplier" value="${settings.game_rewards_multiplier || 1.0}" min="0.5" max="5.0" class="w-full bg-[#0b0c10] border border-purple-950/40 rounded-xl px-4 py-2.5 text-xs text-white outline-none font-mono text-right">
+                                    <input type="number" step="0.1" name="game_rewards_multiplier" value="${settings.game_rewards_multiplier || 1.0}" min="0.5" max="5.0" class="w-full bg-[#0b0d14] border border-white/5 rounded-xl px-4 py-2.5 text-xs text-white outline-none font-mono text-right">
                                 </div>
                             </div>
                         </div>
@@ -4582,7 +4819,7 @@ document.getElementById('addModal').addEventListener('click', function(e) {
             } else if (section === 'autoroles') {
                 formFieldsHtml = `
                     <div class="space-y-6">
-                        <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl">
+                        <div class="bg-[#1c1f2e] border border-white/5 p-5 rounded-2xl">
                             <h4 class="font-bold text-white text-sm mb-2 text-right">إعدادات الرتب التلقائية (Auto Roles)</h4>
                             <p class="text-gray-400 text-xs mb-4 text-right">يتم إعطاء هذه الرتب تلقائياً للأعضاء الجدد فور انضمامهم للسيرفر.</p>
 
@@ -4602,7 +4839,7 @@ document.getElementById('addModal').addEventListener('click', function(e) {
             } else if (section === 'starboard') {
                 formFieldsHtml = `
                     <div class="space-y-6">
-                        <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl">
+                        <div class="bg-[#1c1f2e] border border-white/5 p-5 rounded-2xl">
                             <h4 class="font-bold text-white text-sm mb-2 text-right">نظام ستاربورد (Starboard) ⭐</h4>
                             <p class="text-gray-400 text-xs mb-4 text-right">نشر الرسائل المميزة تلقائياً في روم المشاهير عند تفاعل الأعضاء عليها بإيموجي النجمة ⭐.</p>
 
@@ -4613,7 +4850,7 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-gray-300 mb-2 text-right">الحد الأدنى للنجوم (Star Threshold)</label>
-                                    <input type="number" name="starboard_count" value="${settings.starboard_count || 3}" min="1" max="50" class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right font-mono">
+                                    <input type="number" name="starboard_count" value="${settings.starboard_count || 3}" min="1" max="50" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right font-mono">
                                 </div>
                             </div>
                         </div>
@@ -4622,24 +4859,24 @@ document.getElementById('addModal').addEventListener('click', function(e) {
             } else if (section === 'colors') {
                 formFieldsHtml = `
                     <div class="space-y-6">
-                        <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl text-right">
+                        <div class="bg-[#1c1f2e] border border-white/5 p-5 rounded-2xl text-right">
                             <h4 class="font-bold text-white text-sm mb-2">نظام ألوان الرتب التفاعلي (Color Roles) 🎨</h4>
                             <p class="text-gray-400 text-xs mb-4">يتيح للأعضاء اختيار لون اسمهم في السيرفر عبر القائمة أو الأزرار التفاعلية.</p>
                             
                             <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                                <div class="p-3 bg-[#0b0c10] border border-purple-950/40 rounded-xl text-center">
+                                <div class="p-3 bg-[#0b0d14] border border-white/5 rounded-xl text-center">
                                     <span class="w-6 h-6 rounded-full bg-purple-500 inline-block mb-1 shadow-lg shadow-purple-500/50"></span>
                                     <p class="text-xs font-bold text-white">أرجواني الملكي</p>
                                 </div>
-                                <div class="p-3 bg-[#0b0c10] border border-purple-950/40 rounded-xl text-center">
+                                <div class="p-3 bg-[#0b0d14] border border-white/5 rounded-xl text-center">
                                     <span class="w-6 h-6 rounded-full bg-blue-500 inline-block mb-1 shadow-lg shadow-blue-500/50"></span>
                                     <p class="text-xs font-bold text-white">أزرق سماوي</p>
                                 </div>
-                                <div class="p-3 bg-[#0b0c10] border border-purple-950/40 rounded-xl text-center">
+                                <div class="p-3 bg-[#0b0d14] border border-white/5 rounded-xl text-center">
                                     <span class="w-6 h-6 rounded-full bg-emerald-500 inline-block mb-1 shadow-lg shadow-emerald-500/50"></span>
                                     <p class="text-xs font-bold text-white">أخضر زمردي</p>
                                 </div>
-                                <div class="p-3 bg-[#0b0c10] border border-purple-950/40 rounded-xl text-center">
+                                <div class="p-3 bg-[#0b0d14] border border-white/5 rounded-xl text-center">
                                     <span class="w-6 h-6 rounded-full bg-amber-500 inline-block mb-1 shadow-lg shadow-amber-500/50"></span>
                                     <p class="text-xs font-bold text-white">ذهبي متألق</p>
                                 </div>
@@ -4650,7 +4887,7 @@ document.getElementById('addModal').addEventListener('click', function(e) {
             } else if (section === 'logs') {
                 formFieldsHtml = `
                     <div class="space-y-6">
-                        <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl">
+                        <div class="bg-[#1c1f2e] border border-white/5 p-5 rounded-2xl">
                             <h4 class="font-bold text-white text-sm mb-4 text-right">قنوات السجلات واللوق الشامل (Full Audit Logging) 📋</h4>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
@@ -4676,16 +4913,16 @@ document.getElementById('addModal').addEventListener('click', function(e) {
             } else if (section === 'antiraid') {
                 formFieldsHtml = `
                     <div class="space-y-6">
-                        <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl">
+                        <div class="bg-[#1c1f2e] border border-white/5 p-5 rounded-2xl">
                             <h4 class="font-bold text-white text-sm mb-4 text-right">مكافحة الغزو والهجمات (Anti-Raid Protection) 🚨</h4>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <label class="block text-xs font-bold text-gray-300 mb-2 text-right">الحد الأقصى لدخول الأعضاء في 10 ثوانٍ</label>
-                                    <input type="number" value="5" min="2" max="50" class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right font-mono">
+                                    <input type="number" value="5" min="2" max="50" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right font-mono">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-gray-300 mb-2 text-right">الإجراء الفوري عند كشف هجوم</label>
-                                    <select class="w-full bg-[#0b0c10] border border-purple-950/40 rounded-xl px-4 py-3 text-xs text-white outline-none">
+                                    <select class="w-full bg-[#0b0d14] border border-white/5 rounded-xl px-4 py-3 text-xs text-white outline-none">
                                         <option value="lockdown">إغلاق السيرفر مؤقتاً (Lockdown)</option>
                                         <option value="kick">طرد الأعضاء الجدد فوراً (Kick New Joins)</option>
                                         <option value="ban">حظر المهاجمين (Mass Ban)</option>
@@ -4699,7 +4936,7 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                 formFieldsHtml = `
                     <div class="space-y-6">
                         <!-- Master Verification Toggle -->
-                        <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl flex items-center justify-between">
+                        <div class="bg-[#1c1f2e] border border-white/5 p-5 rounded-2xl flex items-center justify-between">
                             <label class="toggle"><input type="checkbox" name="verify_enabled" value="1" ${settings.verify_enabled ? 'checked' : ''}><span class="slider"></span></label>
                             <div class="text-right">
                                 <h4 class="font-bold text-white text-sm">نظام التحقق والتفعيل التفاعلي (Verification System) 🛡️</h4>
@@ -4708,30 +4945,30 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                         </div>
 
                         <!-- Core Verification Settings -->
-                        <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl space-y-4 text-right">
+                        <div class="bg-[#1c1f2e] border border-white/5 p-5 rounded-2xl space-y-4 text-right">
                             <h4 class="font-bold text-white text-sm">إعدادات الرتبة والروم ⚙️</h4>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <label class="block text-xs font-bold text-gray-300 mb-2">روم التحقق (Verification Channel) <span class="text-purple-400">*</span></label>
+                                    <label class="block text-xs font-bold text-gray-300 mb-2">روم التحقق (Verification Channel) <span class="text-[#5865f2]">*</span></label>
                                     ${renderChannelSelect('verify_channel', settings.verify_channel)}
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-bold text-gray-300 mb-2">الرتبة الممنوحة عند التفعيل (Verified Role) <span class="text-purple-400">*</span></label>
+                                    <label class="block text-xs font-bold text-gray-300 mb-2">الرتبة الممنوحة عند التفعيل (Verified Role) <span class="text-[#5865f2]">*</span></label>
                                     ${renderRoleSelect('verify_role', settings.verify_role)}
                                 </div>
                             </div>
                         </div>
 
                         <!-- Verification Message Customizer -->
-                        <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl space-y-3 text-right">
+                        <div class="bg-[#1c1f2e] border border-white/5 p-5 rounded-2xl space-y-3 text-right">
                             <h4 class="font-bold text-white text-sm">رسالة لوحة التحقق (Verification Message) 📌</h4>
-                            <textarea id="verifyMsgInput" name="verify_message" rows="3" placeholder="📌 إثبات نفسك&#10;&#10;عشان تثبت نفسك، اضغط على الزر الموجود تحت الرسالة، وبكذا يتم تفعيلك وسترى جميع الرومات." class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right leading-relaxed">${settings.verify_message || '📌 إثبات نفسك\n\nعشان تثبت نفسك، اضغط على الزر الموجود تحت الرسالة، وبكذا يتم تفعيلك وسترى جميع الرومات.'}</textarea>
+                            <textarea id="verifyMsgInput" name="verify_message" rows="3" placeholder="📌 إثبات نفسك&#10;&#10;عشان تثبت نفسك، اضغط على الزر الموجود تحت الرسالة، وبكذا يتم تفعيلك وسترى جميع الرومات." class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right leading-relaxed">${settings.verify_message || '📌 إثبات نفسك\n\nعشان تثبت نفسك، اضغط على الزر الموجود تحت الرسالة، وبكذا يتم تفعيلك وسترى جميع الرومات.'}</textarea>
                         </div>
 
                         <!-- Interactive Verification Panel Deployer -->
-                        <div class="bg-[#12131c] border border-purple-950/40 p-6 rounded-2xl space-y-4 text-right">
+                        <div class="bg-[#1c1f2e] border border-white/5 p-6 rounded-2xl space-y-4 text-right">
                             <div class="flex items-center justify-between">
-                                <span class="px-2.5 py-1 bg-purple-950/60 text-purple-300 border border-purple-800/40 rounded-lg text-xs font-bold">🚀 نشر مباشر</span>
+                                <span class="px-2.5 py-1 bg-purple-950/60 text-gray-200 border border-purple-800/40 rounded-lg text-xs font-bold">🚀 نشر مباشر</span>
                                 <h4 class="font-bold text-white text-sm">إرسال لوحة التحقق التفاعلية إلى الديسكورد 🔘</h4>
                             </div>
                             <p class="text-gray-400 text-xs">اضغط الزر بالأسفل ليقوم البوت بنشر رسالة التحقق مع الزر التفاعلي فوراً في الروم المحدد أعلاه، وعندما يضغط العضو على الزر سيحصل على الرتبة مباشرة:</p>
@@ -4769,7 +5006,7 @@ document.getElementById('addModal').addEventListener('click', function(e) {
 
                         btn.disabled = true;
                         btn.innerHTML = '⏳ جارٍ النشر...';
-                        statusEl.className = 'text-xs font-bold text-center text-purple-400 mt-2 block';
+                        statusEl.className = 'text-xs font-bold text-center text-[#5865f2] mt-2 block';
                         statusEl.innerText = 'جارٍ إرسال لوحة التفعيل إلى ديسكورد...';
 
                         try {
@@ -4799,35 +5036,35 @@ document.getElementById('addModal').addEventListener('click', function(e) {
             } else if (section === 'reactionroles') {
                 formFieldsHtml = `
                     <div class="space-y-6">
-                        <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl text-right">
+                        <div class="bg-[#1c1f2e] border border-white/5 p-5 rounded-2xl text-right">
                             <h4 class="font-bold text-white text-sm mb-1">الرتب التفاعلية بالأزرار (Reaction & Button Roles) 🔘</h4>
                             <p class="text-gray-400 text-xs mb-4">إنشاء رسالة بأزرار تفاعلية تمكن الأعضاء من إعطاء أو إزالة الرتب عن أنفسهم بنقرة واحدة.</p>
 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-right">
                                 <div>
-                                    <label class="block text-xs font-bold text-gray-300 mb-2">روم إرسال الرسالة (Channel ID) <span class="text-purple-400">*</span></label>
-                                    <input type="text" id="rrChannel" placeholder="ضع ID القناة..." class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none font-mono text-right">
+                                    <label class="block text-xs font-bold text-gray-300 mb-2">روم إرسال الرسالة (Channel ID) <span class="text-[#5865f2]">*</span></label>
+                                    <input type="text" id="rrChannel" placeholder="ضع ID القناة..." class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none font-mono text-right">
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-bold text-gray-300 mb-2">الرتبة المراد إعطاؤها (Role ID) <span class="text-purple-400">*</span></label>
-                                    <input type="text" id="rrRole" placeholder="ضع ID الرتبة..." class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none font-mono text-right">
+                                    <label class="block text-xs font-bold text-gray-300 mb-2">الرتبة المراد إعطاؤها (Role ID) <span class="text-[#5865f2]">*</span></label>
+                                    <input type="text" id="rrRole" placeholder="ضع ID الرتبة..." class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none font-mono text-right">
                                 </div>
                             </div>
 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 text-right">
                                 <div>
                                     <label class="block text-xs font-bold text-gray-300 mb-2">نص الزر (Button Label)</label>
-                                    <input type="text" id="rrLabel" placeholder="مثال: الإشعارات 🔔 أو الأخبار" class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right">
+                                    <input type="text" id="rrLabel" placeholder="مثال: الإشعارات 🔔 أو الأخبار" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-gray-300 mb-2">عنوان رسالة الإيمبد (Embed Title)</label>
-                                    <input type="text" id="rrTitle" placeholder="مثال: اختر رتبتك من هنا" class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right">
+                                    <input type="text" id="rrTitle" placeholder="مثال: اختر رتبتك من هنا" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right">
                                 </div>
                             </div>
 
                             <div class="mt-4">
                                 <label class="block text-xs font-bold text-gray-300 mb-2 text-right">وصف الرسالة (Description)</label>
-                                <textarea id="rrDesc" rows="3" placeholder="اضغط على الزر بالأسفل للحصول على الرتبة أو إزالتها..." class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right"></textarea>
+                                <textarea id="rrDesc" rows="3" placeholder="اضغط على الزر بالأسفل للحصول على الرتبة أو إزالتها..." class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right"></textarea>
                             </div>
                         </div>
                     </div>
@@ -4835,7 +5072,7 @@ document.getElementById('addModal').addEventListener('click', function(e) {
             } else if (section === 'economy') {
                 formFieldsHtml = `
                     <div class="space-y-6">
-                        <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl flex items-center justify-between">
+                        <div class="bg-[#1c1f2e] border border-white/5 p-5 rounded-2xl flex items-center justify-between">
                             <label class="toggle"><input type="checkbox" name="economy_enabled" value="1" ${settings.economy_enabled !== 0 ? 'checked' : ''}><span class="slider"></span></label>
                             <div class="text-right">
                                 <h4 class="font-bold text-white text-sm">نظام اقتصاد وعملة السيرفر (Economy & Star System) 💰</h4>
@@ -4846,43 +5083,43 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div>
                                 <label class="block text-xs font-bold text-gray-300 mb-2 text-right">المكافأة اليومية الأساسية (/daily)</label>
-                                <input type="number" name="daily_amount" value="${settings.daily_amount || 500}" min="50" class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none font-mono text-right">
+                                <input type="number" name="daily_amount" value="${settings.daily_amount || 500}" min="50" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none font-mono text-right">
                             </div>
                             <div>
                                 <label class="block text-xs font-bold text-gray-300 mb-2 text-right">مدة انتظار أمر العمل (/work بالساعات)</label>
-                                <input type="number" name="work_cooldown" value="${settings.work_cooldown || 4}" min="1" max="24" class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none font-mono text-right">
+                                <input type="number" name="work_cooldown" value="${settings.work_cooldown || 4}" min="1" max="24" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none font-mono text-right">
                             </div>
                             <div>
                                 <label class="block text-xs font-bold text-gray-300 mb-2 text-right">نسبة ضريبة التحويل (/pay %)</label>
-                                <input type="number" step="0.5" name="transfer_tax" value="${settings.transfer_tax || 5}" min="0" max="20" class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none font-mono text-right">
+                                <input type="number" step="0.5" name="transfer_tax" value="${settings.transfer_tax || 5}" min="0" max="20" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none font-mono text-right">
                             </div>
                         </div>
 
-                        <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl text-right">
+                        <div class="bg-[#1c1f2e] border border-white/5 p-5 rounded-2xl text-right">
                             <h4 class="font-bold text-white text-sm mb-3">أوامر الاقتصاد المتوفرة بالأعضاء 💳</h4>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3 rounded-xl flex items-center justify-between">
+                                <div class="bg-[#0b0d14] border border-purple-950/30 p-3 rounded-xl flex items-center justify-between">
                                     <span class="text-xs text-emerald-400 font-bold">نشط ✅</span>
                                     <div>
                                         <p class="font-bold text-white text-xs">/bank (deposit & withdraw)</p>
                                         <p class="text-gray-400 text-[10px]">إيداع وسحب وحماية النجوم في الحساب البنكي</p>
                                     </div>
                                 </div>
-                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3 rounded-xl flex items-center justify-between">
+                                <div class="bg-[#0b0d14] border border-purple-950/30 p-3 rounded-xl flex items-center justify-between">
                                     <span class="text-xs text-emerald-400 font-bold">نشط ✅</span>
                                     <div>
                                         <p class="font-bold text-white text-xs">/work</p>
                                         <p class="text-gray-400 text-[10px]">العمل في وظائف عشوائية وكسب المكافآت</p>
                                     </div>
                                 </div>
-                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3 rounded-xl flex items-center justify-between">
+                                <div class="bg-[#0b0d14] border border-purple-950/30 p-3 rounded-xl flex items-center justify-between">
                                     <span class="text-xs text-emerald-400 font-bold">نشط ✅</span>
                                     <div>
                                         <p class="font-bold text-white text-xs">/gamble & /casino</p>
                                         <p class="text-gray-400 text-[10px]">المراهنة ومضاعفة النجوم في ألعاب الكازينو</p>
                                     </div>
                                 </div>
-                                <div class="bg-[#0b0c10] border border-purple-950/30 p-3 rounded-xl flex items-center justify-between">
+                                <div class="bg-[#0b0d14] border border-purple-950/30 p-3 rounded-xl flex items-center justify-between">
                                     <span class="text-xs text-emerald-400 font-bold">نشط ✅</span>
                                     <div>
                                         <p class="font-bold text-white text-xs">/leaderboard</p>
@@ -4942,14 +5179,14 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                                 </div>
                                 <div class="flex items-center gap-2 justify-end text-gray-400 text-xs mt-1">
                                     <span class="text-emerald-400 font-mono text-[10px] bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-800/40">HQ 320kbps Crystal Sound</span>
-                                    <span class="text-purple-300 font-bold text-[10px] bg-purple-950/60 px-2 py-0.5 rounded border border-purple-800/40">بدون ديفن (Non-Deafened) 🔊</span>
+                                    <span class="text-gray-200 font-bold text-[10px] bg-purple-950/60 px-2 py-0.5 rounded border border-purple-800/40">بدون ديفن (Non-Deafened) 🔊</span>
                                 </div>
                             </div>
                         </div>
 
                         <!-- إعدادات الروم الصوتي والمحطة -->
-                        <div class="bg-[#12131c] border border-purple-950/40 p-6 rounded-2xl space-y-4 text-right">
-                            <div class="flex items-center justify-between border-b border-purple-950/40 pb-3">
+                        <div class="bg-[#1c1f2e] border border-white/5 p-6 rounded-2xl space-y-4 text-right">
+                            <div class="flex items-center justify-between border-b border-white/5 pb-3">
                                 <span class="text-xs text-gray-400 font-bold">اختر الروم الصوتي أو ضع الـ ID يدوياً</span>
                                 <h4 class="font-bold text-white text-sm">إعدادات الروم والمحطة ⚙️</h4>
                             </div>
@@ -4958,17 +5195,17 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                                 <div>
                                     <label class="block text-xs font-bold text-gray-300 mb-2">اختر الروم الصوتي من السيرفر <span class="text-emerald-400">*</span></label>
                                     ${voiceChannels.length > 0 ? `
-                                        <select id="voiceChannelSelect" onchange="document.getElementById('quranChannelInput').value = this.value" class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-emerald-500 rounded-xl px-4 py-3 text-xs text-white outline-none text-right cursor-pointer mb-2">
+                                        <select id="voiceChannelSelect" onchange="document.getElementById('quranChannelInput').value = this.value" class="w-full bg-[#0b0d14] border border-white/5 focus:border-emerald-500 rounded-xl px-4 py-3 text-xs text-white outline-none text-right cursor-pointer mb-2">
                                             <option value="">-- اختر من قائمة الرومات --</option>
                                             ${voiceChannelOptions}
                                         </select>
                                     ` : ''}
-                                    <input type="text" id="quranChannelInput" name="quran_channel" value="${settings.quran_channel || ''}" placeholder="أو اكتب ID الروم الصوتي هنا..." class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-emerald-500 rounded-xl px-4 py-2.5 text-xs text-white outline-none font-mono text-right">
+                                    <input type="text" id="quranChannelInput" name="quran_channel" value="${settings.quran_channel || ''}" placeholder="أو اكتب ID الروم الصوتي هنا..." class="w-full bg-[#0b0d14] border border-white/5 focus:border-emerald-500 rounded-xl px-4 py-2.5 text-xs text-white outline-none font-mono text-right">
                                 </div>
 
                                 <div>
                                     <label class="block text-xs font-bold text-gray-300 mb-2">المحطة أو القارئ المفضل <span class="text-emerald-400">*</span></label>
-                                    <select id="quranStationSelect" name="quran_station" class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-emerald-500 rounded-xl px-4 py-3 text-xs text-white outline-none text-right cursor-pointer">
+                                    <select id="quranStationSelect" name="quran_station" class="w-full bg-[#0b0d14] border border-white/5 focus:border-emerald-500 rounded-xl px-4 py-3 text-xs text-white outline-none text-right cursor-pointer">
                                         ${stationOptions}
                                     </select>
                                 </div>
@@ -4976,7 +5213,7 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                         </div>
 
                         <!-- إعدادات التشغيل المستمر 24/7 والديفن -->
-                        <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl space-y-4 text-right">
+                        <div class="bg-[#1c1f2e] border border-white/5 p-5 rounded-2xl space-y-4 text-right">
                             <div class="flex items-center justify-between">
                                 <label class="toggle"><input type="checkbox" name="quran_enabled" value="1" ${settings.quran_enabled ? 'checked' : ''}><span class="slider"></span></label>
                                 <div>
@@ -5022,7 +5259,7 @@ document.getElementById('addModal').addEventListener('click', function(e) {
 
                         btn.disabled = true;
                         btn.innerHTML = '⏳ جارٍ البدء...';
-                        statusMsg.className = 'text-xs font-bold text-center text-purple-400 mt-2 block bg-purple-950/30 border border-purple-800/40 py-2.5 px-4 rounded-xl';
+                        statusMsg.className = 'text-xs font-bold text-center text-[#5865f2] mt-2 block bg-[#151722] border border-purple-800/40 py-2.5 px-4 rounded-xl';
                         statusMsg.innerText = 'جارٍ تشغيل الراديو في الروم الصوتي...';
 
                         try {
@@ -5081,10 +5318,10 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                     let qList = [];
                     try { qList = typeof a.questions === 'string' ? JSON.parse(a.questions) : a.questions; } catch(e) { qList = []; }
                     return `
-                        <div class="bg-[#0b0c10] border border-purple-950/40 p-4 rounded-xl flex items-center justify-between">
+                        <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between">
                             <div class="flex items-center gap-2">
                                 <button type="button" onclick="deleteAppForm('${a.id}')" class="px-3 py-1.5 bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 border border-rose-900/30 rounded-lg text-xs font-bold transition">حذف 🗑️</button>
-                                <span class="px-2.5 py-1 bg-purple-950/60 text-purple-300 rounded-lg text-[10px] font-bold">${qList.length} أسئلة</span>
+                                <span class="px-2.5 py-1 bg-purple-950/60 text-gray-200 rounded-lg text-[10px] font-bold">${qList.length} أسئلة</span>
                             </div>
                             <div class="text-right">
                                 <h5 class="font-bold text-white text-xs">${a.title}</h5>
@@ -5097,10 +5334,10 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                 formFieldsHtml = `
                     <div class="space-y-6">
                         <!-- Top Card: التقديمات Header & Form Creator -->
-                        <div class="bg-[#12131c] border border-purple-950/40 rounded-2xl p-6 shadow-xl space-y-4 text-right">
+                        <div class="bg-[#1c1f2e] border border-white/5 rounded-2xl p-6 shadow-xl space-y-4 text-right">
                             <div class="flex items-center justify-between">
-                                <div class="flex items-center gap-1 bg-[#0b0c10] border border-purple-950/40 px-3 py-1 rounded-xl text-xs font-mono font-bold text-gray-300">
-                                    <span class="text-purple-400">${appsCountFormatted}</span>
+                                <div class="flex items-center gap-1 bg-[#0b0d14] border border-white/5 px-3 py-1 rounded-xl text-xs font-mono font-bold text-gray-300">
+                                    <span class="text-[#5865f2]">${appsCountFormatted}</span>
                                     <span>/</span>
                                     <span class="text-gray-500">00</span>
                                 </div>
@@ -5108,25 +5345,25 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                             </div>
 
                             <!-- Dashed Create Button -->
-                            <div onclick="toggleCreateAppForm()" class="border-2 border-dashed border-purple-950/70 hover:border-purple-600/70 bg-[#0b0c10]/40 hover:bg-purple-950/20 rounded-2xl p-6 flex items-center justify-center gap-2 cursor-pointer transition text-gray-300 hover:text-white">
+                            <div onclick="toggleCreateAppForm()" class="border-2 border-dashed border-purple-950/70 hover:border-purple-600/70 bg-[#0b0d14]/40 hover:bg-purple-950/20 rounded-2xl p-6 flex items-center justify-center gap-2 cursor-pointer transition text-gray-300 hover:text-white">
                                 <span class="text-xs font-bold">إنشاء تقديم</span>
-                                <span class="w-5 h-5 rounded-full bg-purple-900/60 flex items-center justify-center text-xs font-bold text-purple-300">➕</span>
+                                <span class="w-5 h-5 rounded-full bg-purple-900/60 flex items-center justify-center text-xs font-bold text-gray-200">➕</span>
                             </div>
 
                             <!-- Inline Form for Creating an Application (Hidden by default) -->
-                            <div id="createAppModal" class="hidden bg-[#0b0c10] border border-purple-900/40 rounded-2xl p-5 space-y-4 mt-4">
-                                <div class="flex items-center justify-between border-b border-purple-950/40 pb-3">
+                            <div id="createAppModal" class="hidden bg-[#0b0d14] border border-purple-900/40 rounded-2xl p-5 space-y-4 mt-4">
+                                <div class="flex items-center justify-between border-b border-white/5 pb-3">
                                     <button type="button" onclick="toggleCreateAppForm()" class="text-gray-500 hover:text-white text-xs font-bold">✕ إلغاء</button>
-                                    <h5 class="font-bold text-purple-300 text-xs">✨ إضافة استمارة تقديم جديدة</h5>
+                                    <h5 class="font-bold text-gray-200 text-xs">✨ إضافة استمارة تقديم جديدة</h5>
                                 </div>
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
                                         <label class="block text-xs font-bold text-gray-300 mb-1.5">عنوان التقديم <span class="text-rose-400">*</span></label>
-                                        <input type="text" id="newAppTitle" placeholder="مثال: تقديم إدارة السيرفر / دعم فني" class="w-full bg-[#12131c] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none">
+                                        <input type="text" id="newAppTitle" placeholder="مثال: تقديم إدارة السيرفر / دعم فني" class="w-full bg-[#1c1f2e] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none">
                                     </div>
                                     <div>
                                         <label class="block text-xs font-bold text-gray-300 mb-1.5">وصف التقديم (اختياري)</label>
-                                        <input type="text" id="newAppDesc" placeholder="شروط أو توضيح بسيط للتقديم..." class="w-full bg-[#12131c] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none">
+                                        <input type="text" id="newAppDesc" placeholder="شروط أو توضيح بسيط للتقديم..." class="w-full bg-[#1c1f2e] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none">
                                     </div>
                                     <div>
                                         <label class="block text-xs font-bold text-gray-300 mb-1.5">روم استلام الطلبات (Log Channel)</label>
@@ -5139,10 +5376,10 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-gray-300 mb-1.5">أسئلة الاستمارة (سؤال في كل سطر - حتى 5 أسئلة)</label>
-                                    <textarea id="newAppQuestions" rows="4" placeholder="1. كم عمرك؟&#10;2. ما هي خبراتك السابقة في الإدارة؟&#10;3. كم ساعة تتواجد يومياً في الديسكورد؟" class="w-full bg-[#12131c] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none"></textarea>
+                                    <textarea id="newAppQuestions" rows="4" placeholder="1. كم عمرك؟&#10;2. ما هي خبراتك السابقة في الإدارة؟&#10;3. كم ساعة تتواجد يومياً في الديسكورد؟" class="w-full bg-[#1c1f2e] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none"></textarea>
                                 </div>
                                 <div class="flex justify-end pt-2">
-                                    <button type="button" onclick="submitCreateApp()" class="px-6 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold transition shadow-lg flex items-center gap-1.5">
+                                    <button type="button" onclick="submitCreateApp()" class="px-6 py-2.5 bg-gradient-to-r from-[#5865f2] to-indigo-600 hover:from-[#4752c4] hover:to-indigo-500 text-white rounded-xl text-xs font-bold transition shadow-lg flex items-center gap-1.5">
                                         <span>💾 حفظ الاستمارة</span>
                                     </button>
                                 </div>
@@ -5155,79 +5392,79 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                         </div>
 
                         <!-- Section 2: الأوامر (Commands list) -->
-                        <div class="bg-[#12131c] border border-purple-950/40 rounded-2xl p-6 shadow-xl space-y-3 text-right">
+                        <div class="bg-[#1c1f2e] border border-white/5 rounded-2xl p-6 shadow-xl space-y-3 text-right">
                             <h4 class="font-bold text-white text-base mb-3">الأوامر</h4>
 
                             <!-- Command 1: applications pending -->
-                            <div class="bg-[#0b0c10] border border-purple-950/30 p-4 rounded-xl flex items-center justify-between">
+                            <div class="bg-[#0b0d14] border border-purple-950/30 p-4 rounded-xl flex items-center justify-between">
                                 <div class="flex items-center gap-2">
                                     <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
-                                    <button type="button" class="w-7 h-7 rounded-lg bg-purple-950/40 text-gray-400 hover:text-white flex items-center justify-center text-xs">✏️</button>
+                                    <button type="button" class="w-7 h-7 rounded-lg bg-[#151722] text-gray-400 hover:text-white flex items-center justify-center text-xs">✏️</button>
                                 </div>
                                 <div class="flex items-center gap-3">
                                     <div class="text-right">
                                         <div class="font-mono font-bold text-white text-xs">applications pending</div>
                                         <p class="text-gray-400 text-[11px] mt-0.5">عرض التقديمات قيد الانتظار</p>
                                     </div>
-                                    <div class="w-6 h-6 rounded-md bg-purple-950/60 text-purple-300 flex items-center justify-center text-xs font-mono font-bold">&gt;_</div>
+                                    <div class="w-6 h-6 rounded-md bg-purple-950/60 text-gray-200 flex items-center justify-center text-xs font-mono font-bold">&gt;_</div>
                                 </div>
                             </div>
 
                             <!-- Command 2: applications points list -->
-                            <div class="bg-[#0b0c10] border border-purple-950/30 p-4 rounded-xl flex items-center justify-between">
+                            <div class="bg-[#0b0d14] border border-purple-950/30 p-4 rounded-xl flex items-center justify-between">
                                 <div class="flex items-center gap-2">
                                     <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
-                                    <button type="button" class="w-7 h-7 rounded-lg bg-purple-950/40 text-gray-400 hover:text-white flex items-center justify-center text-xs">✏️</button>
+                                    <button type="button" class="w-7 h-7 rounded-lg bg-[#151722] text-gray-400 hover:text-white flex items-center justify-center text-xs">✏️</button>
                                 </div>
                                 <div class="flex items-center gap-3">
                                     <div class="text-right">
                                         <div class="font-mono font-bold text-white text-xs">applications points list</div>
                                         <p class="text-gray-400 text-[11px] mt-0.5">عرض نقاط التقديمات الخاصة بك أو الخاصة بعضو آخر</p>
                                     </div>
-                                    <div class="w-6 h-6 rounded-md bg-purple-950/60 text-purple-300 flex items-center justify-center text-xs font-mono font-bold">&gt;_</div>
+                                    <div class="w-6 h-6 rounded-md bg-purple-950/60 text-gray-200 flex items-center justify-center text-xs font-mono font-bold">&gt;_</div>
                                 </div>
                             </div>
 
                             <!-- Command 3: applications points reset -->
-                            <div class="bg-[#0b0c10] border border-purple-950/30 p-4 rounded-xl flex items-center justify-between">
+                            <div class="bg-[#0b0d14] border border-purple-950/30 p-4 rounded-xl flex items-center justify-between">
                                 <div class="flex items-center gap-2">
                                     <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
-                                    <button type="button" class="w-7 h-7 rounded-lg bg-purple-950/40 text-gray-400 hover:text-white flex items-center justify-center text-xs">✏️</button>
+                                    <button type="button" class="w-7 h-7 rounded-lg bg-[#151722] text-gray-400 hover:text-white flex items-center justify-center text-xs">✏️</button>
                                 </div>
                                 <div class="flex items-center gap-3">
                                     <div class="text-right">
                                         <div class="font-mono font-bold text-white text-xs">applications points reset_user|reset_server</div>
                                         <p class="text-gray-400 text-[11px] mt-0.5">إعادة تعيين نقاط التقديمات لسيرفر أو لعضو</p>
                                     </div>
-                                    <div class="w-6 h-6 rounded-md bg-purple-950/60 text-purple-300 flex items-center justify-center text-xs font-mono font-bold">&gt;_</div>
+                                    <div class="w-6 h-6 rounded-md bg-purple-950/60 text-gray-200 flex items-center justify-center text-xs font-mono font-bold">&gt;_</div>
                                 </div>
                             </div>
 
                             <!-- Command 4: applications points set -->
-                            <div class="bg-[#0b0c10] border border-purple-950/30 p-4 rounded-xl flex items-center justify-between">
+                            <div class="bg-[#0b0d14] border border-purple-950/30 p-4 rounded-xl flex items-center justify-between">
                                 <div class="flex items-center gap-2">
                                     <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
-                                    <button type="button" class="w-7 h-7 rounded-lg bg-purple-950/40 text-gray-400 hover:text-white flex items-center justify-center text-xs">✏️</button>
+                                    <button type="button" class="w-7 h-7 rounded-lg bg-[#151722] text-gray-400 hover:text-white flex items-center justify-center text-xs">✏️</button>
                                 </div>
                                 <div class="flex items-center gap-3">
                                     <div class="text-right">
                                         <div class="font-mono font-bold text-white text-xs">applications points set</div>
                                         <p class="text-gray-400 text-[11px] mt-0.5">تعيين نقاط التقديمات لعضو</p>
                                     </div>
-                                    <div class="w-6 h-6 rounded-md bg-purple-950/60 text-purple-300 flex items-center justify-center text-xs font-mono font-bold">&gt;_</div>
+                                    <div class="w-6 h-6 rounded-md bg-purple-950/60 text-gray-200 flex items-center justify-center text-xs font-mono font-bold">&gt;_</div>
                                 </div>
                             </div>
                         </div>
 
                         <!-- Section 3: منشئ الرسالة الواحدة (Single Message Panel Deployer) -->
-                        <div class="bg-[#12131c] border border-purple-950/40 rounded-2xl p-6 shadow-xl space-y-5 text-right">
+                        <div class="bg-[#1c1f2e] border border-white/5 rounded-2xl p-6 shadow-xl space-y-5 text-right">
                             <div>
                                 <h4 class="font-bold text-white text-base">منشئ الرسالة الواحدة</h4>
                                 <p class="text-gray-400 text-xs mt-0.5">أنشئ وأرسل رسالة واحدة تتضمن جميع التقديمات لسهولة عرضها.</p>
                             </div>
 
                             <!-- Discord Message Preview Box -->
-                            <div class="bg-[#0b0c10] border border-purple-950/40 rounded-2xl p-4 space-y-3">
+                            <div class="bg-[#0b0d14] border border-white/5 rounded-2xl p-4 space-y-3">
                                 <div class="flex items-center justify-between text-gray-400 text-[11px]">
                                     <div class="flex items-center gap-2">
                                         <img src="/logo.png" class="w-6 h-6 rounded-full object-cover">
@@ -5246,7 +5483,7 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
                                     <div class="flex items-center gap-2 justify-end">
                                         <span class="text-xs text-gray-400 font-bold">نوع العرض:</span>
-                                        <div class="flex items-center bg-[#0b0c10] border border-purple-950/40 p-1 rounded-xl gap-1">
+                                        <div class="flex items-center bg-[#0b0d14] border border-white/5 p-1 rounded-xl gap-1">
                                             <button type="button" onclick="setPanelType('buttons')" id="btnTypeButtons" class="px-3 py-1 rounded-lg text-xs font-bold bg-purple-600 text-white transition">ضغطة زر</button>
                                             <button type="button" onclick="setPanelType('select')" id="btnTypeSelect" class="px-3 py-1 rounded-lg text-xs font-bold text-gray-400 hover:text-white transition">قائمة الاختيار</button>
                                         </div>
@@ -5258,7 +5495,7 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                                 </div>
 
                                 <div class="flex justify-end pt-2">
-                                    <button type="button" onclick="sendApplicationPanelDirect()" id="sendAppPanelBtn" class="px-8 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold transition shadow-lg flex items-center gap-2">
+                                    <button type="button" onclick="sendApplicationPanelDirect()" id="sendAppPanelBtn" class="px-8 py-3 bg-gradient-to-r from-[#5865f2] to-indigo-600 hover:from-[#4752c4] hover:to-indigo-500 text-white rounded-xl text-xs font-bold transition shadow-lg flex items-center gap-2">
                                         <span>إرسال اللوحة ➔</span>
                                     </button>
                                 </div>
@@ -5354,7 +5591,7 @@ document.getElementById('addModal').addEventListener('click', function(e) {
 
                         btn.disabled = true;
                         btn.innerHTML = '⏳ جارٍ الإرسال...';
-                        statusEl.className = 'text-xs font-bold text-center text-purple-400 mt-2 block bg-purple-950/30 border border-purple-800/40 py-2 px-4 rounded-xl';
+                        statusEl.className = 'text-xs font-bold text-center text-[#5865f2] mt-2 block bg-[#151722] border border-purple-800/40 py-2 px-4 rounded-xl';
                         statusEl.innerText = 'جارٍ نشر لوحة التقديمات في ديسكورد...';
 
                         try {
@@ -5406,9 +5643,9 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                         </div>
 
                         <!-- Appearance Card (Free & Unlocked) -->
-                        <div class="bg-[#12131c] border border-purple-950/40 rounded-3xl p-7 shadow-2xl space-y-6 text-right relative overflow-hidden">
+                        <div class="bg-[#1c1f2e] border border-white/5 rounded-3xl p-7 shadow-2xl space-y-6 text-right relative overflow-hidden">
                             <!-- Header with Golden Crown -->
-                            <div class="flex items-center justify-between border-b border-purple-950/40 pb-4">
+                            <div class="flex items-center justify-between border-b border-white/5 pb-4">
                                 <span class="px-3 py-1 bg-gradient-to-r from-amber-500/20 to-yellow-500/20 border border-amber-500/40 text-amber-300 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-md">
                                     <span>✨ ميزة مجانية للجميع</span>
                                 </span>
@@ -5423,23 +5660,23 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                                 <!-- Banner Box -->
                                 <div class="space-y-2">
                                     <label class="block text-xs font-bold text-gray-400">خلفية (Banner)</label>
-                                    <div class="h-32 rounded-2xl bg-[#0b0c10] border-2 border-dashed border-purple-950/60 hover:border-purple-600/50 flex flex-col items-center justify-center relative overflow-hidden transition group">
+                                    <div class="h-32 rounded-2xl bg-[#0b0d14] border-2 border-dashed border-purple-950/60 hover:border-[#5865f2]/40 flex flex-col items-center justify-center relative overflow-hidden transition group">
                                         <div id="bannerPreview" class="absolute inset-0 bg-cover bg-center ${botBannerVal ? '' : 'hidden'}" style="background-image: url('${botBannerVal}');"></div>
-                                        <div class="flex flex-col items-center gap-1 z-10 text-gray-500 group-hover:text-purple-300">
+                                        <div class="flex flex-col items-center gap-1 z-10 text-gray-500 group-hover:text-gray-200">
                                             <span class="text-2xl">🖼️</span>
                                             <span class="text-[10px] font-bold">ضع رابط الخلفية بالأسفل</span>
                                         </div>
                                     </div>
-                                    <input type="text" id="botBannerInput" oninput="updateBannerPreview(this.value)" value="${botBannerVal}" placeholder="رابط صورة الخلفية (URL)..." class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none font-mono text-right">
+                                    <input type="text" id="botBannerInput" oninput="updateBannerPreview(this.value)" value="${botBannerVal}" placeholder="رابط صورة الخلفية (URL)..." class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none font-mono text-right">
                                 </div>
 
                                 <!-- Avatar Box -->
                                 <div class="space-y-2 flex flex-col items-end">
                                     <label class="block text-xs font-bold text-gray-400">الصورة الرمزية (Avatar)</label>
-                                    <div class="w-28 h-28 rounded-full bg-[#0b0c10] border-2 border-purple-600/60 shadow-xl shadow-purple-900/30 overflow-hidden flex items-center justify-center relative group">
+                                    <div class="w-28 h-28 rounded-full bg-[#0b0d14] border-2 border-purple-600/60 shadow-xl shadow-black/20 overflow-hidden flex items-center justify-center relative group">
                                         <img id="avatarPreview" src="${botAvatarVal}" class="w-full h-full object-cover">
                                     </div>
-                                    <input type="text" id="botAvatarInput" oninput="updateAvatarPreview(this.value)" value="${botAvatarVal}" placeholder="رابط الصورة الرمزية (URL)..." class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none font-mono text-right mt-1">
+                                    <input type="text" id="botAvatarInput" oninput="updateAvatarPreview(this.value)" value="${botAvatarVal}" placeholder="رابط الصورة الرمزية (URL)..." class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none font-mono text-right mt-1">
                                 </div>
                             </div>
 
@@ -5449,13 +5686,13 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                                     <span id="botNameCharCount" class="font-mono text-gray-500">${botNameVal.length}/32</span>
                                     <label class="font-bold text-gray-300">أسم البوت في السيرفر (Bot Nickname)</label>
                                 </div>
-                                <input type="text" id="botNameInput" maxlength="32" oninput="updateBotNameCount(this)" value="${botNameVal}" placeholder="Nova Bot / ZENO" class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right font-bold">
+                                <input type="text" id="botNameInput" maxlength="32" oninput="updateBotNameCount(this)" value="${botNameVal}" placeholder="Nova Bot / ZENO" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right font-bold">
                             </div>
 
                             <!-- Bot Status Dropdown -->
                             <div class="space-y-1.5">
                                 <label class="block text-xs font-bold text-gray-300">الحالة (Presence Status)</label>
-                                <select id="botStatusSelect" class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right cursor-pointer">
+                                <select id="botStatusSelect" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right cursor-pointer">
                                     <option value="online" ${botStatusVal === 'online' ? 'selected' : ''}>🟢 متصل (Online)</option>
                                     <option value="idle" ${botStatusVal === 'idle' ? 'selected' : ''}>🟡 خامل (Idle)</option>
                                     <option value="dnd" ${botStatusVal === 'dnd' ? 'selected' : ''}>🔴 عدم الإزعاج (Do Not Disturb)</option>
@@ -5466,7 +5703,7 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                             <!-- Activity Type Dropdown -->
                             <div class="space-y-1.5">
                                 <label class="block text-xs font-bold text-gray-300">نوع النشاط (Activity Type)</label>
-                                <select id="botActTypeSelect" class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right cursor-pointer">
+                                <select id="botActTypeSelect" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right cursor-pointer">
                                     <option value="playing" ${botActTypeVal === 'playing' ? 'selected' : ''}>🎮 يلعب (Playing)</option>
                                     <option value="watching" ${botActTypeVal === 'watching' ? 'selected' : ''}>📺 يشاهد (Watching)</option>
                                     <option value="listening" ${botActTypeVal === 'listening' ? 'selected' : ''}>🎧 يستمع إلى (Listening)</option>
@@ -5478,11 +5715,11 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                             <!-- Activity Status Text -->
                             <div class="space-y-1.5">
                                 <label class="block text-xs font-bold text-gray-300">نص النشاط المخصص (Activity Text)</label>
-                                <input type="text" id="botActTextInput" value="${botActTextVal}" placeholder="ZENO Bot | #help | حماية وسيرفرات" class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right">
+                                <input type="text" id="botActTextInput" value="${botActTextVal}" placeholder="ZENO Bot | #help | حماية وسيرفرات" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right">
                             </div>
 
                             <!-- Save Button (Green Button matching image) -->
-                            <div class="pt-4 border-t border-purple-950/40 flex items-center justify-between">
+                            <div class="pt-4 border-t border-white/5 flex items-center justify-between">
                                 <div id="appearanceSaveStatus" class="text-xs font-bold hidden"></div>
                                 <button type="button" onclick="saveAppearanceDirect()" id="saveAppearanceBtn" class="px-8 py-3 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl transition shadow-lg shadow-emerald-950/50 flex items-center gap-2">
                                     <span>حفظ</span>
@@ -5564,11 +5801,11 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                     const color = f.platform === 'youtube' ? 'border-red-500/30 bg-red-950/20' : f.platform === 'twitch' ? 'border-purple-500/30 bg-purple-950/20' : 'border-cyan-500/30 bg-cyan-950/20';
                     const mention = f.role_id ? (f.role_id === 'everyone' ? '@everyone' : ('<@&' + f.role_id + '>')) : 'بدون منشن';
                     return `
-                    <div class="bg-[#0b0c10] border ` + color + ` p-4 rounded-xl flex items-center justify-between gap-4">
+                    <div class="bg-[#0b0d14] border ` + color + ` p-4 rounded-xl flex items-center justify-between gap-4">
                         <div class="flex items-center gap-2">
                             <button type="button" onclick="deleteSocialFeed('` + f.id + `')" class="px-3 py-1.5 bg-rose-950/60 hover:bg-rose-600 text-rose-300 hover:text-white rounded-lg text-xs font-bold transition">حذف 🗑️</button>
                             <button type="button" onclick="toggleSocialFeedItem('` + f.id + `', ` + (f.enabled ? 'false' : 'true') + `)" class="px-3 py-1.5 ` + (f.enabled ? 'bg-amber-950/60 hover:bg-amber-600 text-amber-300' : 'bg-emerald-950/60 hover:bg-emerald-600 text-emerald-300') + ` hover:text-white rounded-lg text-xs font-bold transition">` + (f.enabled ? 'إيقاف مؤقت ⏸️' : 'تفعيل ▶️') + `</button>
-                            <button type="button" onclick="testSocialFeed('` + f.id + `')" class="px-3 py-1.5 bg-purple-950/60 hover:bg-purple-600 text-purple-300 hover:text-white rounded-lg text-xs font-bold transition">تجربة 🚀</button>
+                            <button type="button" onclick="testSocialFeed('` + f.id + `')" class="px-3 py-1.5 bg-purple-950/60 hover:bg-[#5865f2] text-gray-200 hover:text-white rounded-lg text-xs font-bold transition">تجربة 🚀</button>
                         </div>
                         <div class="text-right">
                             <div class="flex items-center justify-end gap-2">
@@ -5576,16 +5813,16 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                                 <p class="font-bold text-white text-sm">` + f.account_id + `</p>
                                 <span class="text-xs font-bold">` + icon + `</span>
                             </div>
-                            <p class="text-gray-400 text-xs mt-1">الروم: <span class="text-purple-300">#` + (channels.find(c => c.id === f.channel_id)?.name || f.channel_id) + `</span> | المنشن: <span class="text-amber-300">` + mention + `</span></p>
+                            <p class="text-gray-400 text-xs mt-1">الروم: <span class="text-gray-200">#` + (channels.find(c => c.id === f.channel_id)?.name || f.channel_id) + `</span> | المنشن: <span class="text-amber-300">` + mention + `</span></p>
                         </div>
                     </div>
                     `;
-                }).join('') : '<div class="p-8 text-center text-gray-500 text-xs bg-[#0b0c10] border border-purple-950/30 rounded-xl">لا توجد أي قنوات أو حسابات مضافة حالياً. أضف أول حساب من النموذج بالأسفل!</div>';
+                }).join('') : '<div class="p-8 text-center text-gray-500 text-xs bg-[#0b0d14] border border-purple-950/30 rounded-xl">لا توجد أي قنوات أو حسابات مضافة حالياً. أضف أول حساب من النموذج بالأسفل!</div>';
 
                 formFieldsHtml = `
                     <div class="space-y-6">
                         <!-- Master Notifier Toggle -->
-                        <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl flex items-center justify-between">
+                        <div class="bg-[#1c1f2e] border border-white/5 p-5 rounded-2xl flex items-center justify-between">
                             <label class="toggle"><input type="checkbox" name="social_alerts_enabled" value="1" ${settings.social_alerts_enabled !== 0 ? 'checked' : ''}><span class="slider"></span></label>
                             <div class="text-right">
                                 <h4 class="font-bold text-white text-sm">نظام تنبيهات السوشيال ميديا 📺</h4>
@@ -5594,9 +5831,9 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                         </div>
 
                         <!-- Current Feeds List -->
-                        <div class="bg-[#12131c] border border-purple-950/40 p-5 rounded-2xl text-right space-y-3">
+                        <div class="bg-[#1c1f2e] border border-white/5 p-5 rounded-2xl text-right space-y-3">
                             <div class="flex items-center justify-between mb-2">
-                                <span class="px-2.5 py-1 bg-purple-950/60 text-purple-300 border border-purple-800/40 rounded-lg text-xs font-bold">الحسابات المراقبة (${feeds.length})</span>
+                                <span class="px-2.5 py-1 bg-purple-950/60 text-gray-200 border border-purple-800/40 rounded-lg text-xs font-bold">الحسابات المراقبة (${feeds.length})</span>
                                 <h4 class="font-bold text-white text-sm">القنوات والحسابات النشطة 📋</h4>
                             </div>
                             <div class="space-y-2.5">
@@ -5605,36 +5842,36 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                         </div>
 
                         <!-- Add New Feed Form -->
-                        <div class="bg-[#12131c] border border-purple-950/40 p-6 rounded-2xl text-right space-y-4">
+                        <div class="bg-[#1c1f2e] border border-white/5 p-6 rounded-2xl text-right space-y-4">
                             <h4 class="font-bold text-white text-sm">إضافة قناة أو حساب جديد ➕</h4>
                             <p class="text-gray-400 text-xs">حدد المنصة والحساب والروم المخصص وسيتم النشر التلقائي فور نزول المحتوى:</p>
 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <label class="block text-xs font-bold text-gray-300 mb-2">المنصة المستهدفة <span class="text-purple-400">*</span></label>
-                                    <select id="feedPlatform" class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none">
+                                    <label class="block text-xs font-bold text-gray-300 mb-2">المنصة المستهدفة <span class="text-[#5865f2]">*</span></label>
+                                    <select id="feedPlatform" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none">
                                         <option value="youtube">📺 YouTube (قناة يوتيوب)</option>
                                         <option value="twitch">🔴 Twitch (ستريمر تويتش)</option>
                                         <option value="tiktok">🎵 TikTok (حساب تيك توك)</option>
                                     </select>
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-bold text-gray-300 mb-2">اسم الحساب / الرابط / ID القناة <span class="text-purple-400">*</span></label>
-                                    <input type="text" id="feedAccount" placeholder="مثال: @MrBeast أو رابط القناة" class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right font-mono">
+                                    <label class="block text-xs font-bold text-gray-300 mb-2">اسم الحساب / الرابط / ID القناة <span class="text-[#5865f2]">*</span></label>
+                                    <input type="text" id="feedAccount" placeholder="مثال: @MrBeast أو رابط القناة" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right font-mono">
                                 </div>
                             </div>
 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <label class="block text-xs font-bold text-gray-300 mb-2">روم إرسال التنبيهات <span class="text-purple-400">*</span></label>
-                                    <select id="feedChannel" class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none">
+                                    <label class="block text-xs font-bold text-gray-300 mb-2">روم إرسال التنبيهات <span class="text-[#5865f2]">*</span></label>
+                                    <select id="feedChannel" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none">
                                         <option value="">-- اختر الروم --</option>
                                         ${channels.map(c => '<option value="' + c.id + '">#' + c.name + '</option>').join('')}
                                     </select>
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-gray-300 mb-2">الرتبة المراد منشنها (اختياري)</label>
-                                    <select id="feedRole" class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none">
+                                    <select id="feedRole" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none">
                                         <option value="">بدون منشن</option>
                                         <option value="everyone">@everyone</option>
                                         ${roles.map(r => '<option value="' + r.id + '">@' + r.name + '</option>').join('')}
@@ -5644,12 +5881,12 @@ document.getElementById('addModal').addEventListener('click', function(e) {
 
                             <div>
                                 <label class="block text-xs font-bold text-gray-300 mb-2">رسالة التنبيه المخصصة (اختياري)</label>
-                                <input type="text" id="feedMessage" placeholder="مثال: 🔔 نزل فيديو جديد على قناة {channel}! شاهد الآن: {url}" class="w-full bg-[#0b0c10] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right">
+                                <input type="text" id="feedMessage" placeholder="مثال: 🔔 نزل فيديو جديد على قناة {channel}! شاهد الآن: {url}" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right">
                                 <span class="text-[10px] text-gray-500 mt-1 block">المتغيرات المتاحة: {channel} (اسم القناة) ، {title} (عنوان الفيديو/البث) ، {url} (الرابط)</span>
                             </div>
 
                             <div class="pt-2 flex justify-end">
-                                <button type="button" onclick="addNewSocialFeed()" id="addFeedBtn" class="px-6 py-3 bg-gradient-to-r from-red-600 to-purple-600 hover:from-red-500 hover:to-purple-500 text-white rounded-xl text-xs font-bold transition shadow-lg flex items-center gap-2">
+                                <button type="button" onclick="addNewSocialFeed()" id="addFeedBtn" class="px-6 py-3 bg-gradient-to-r from-red-600 to-[#5865f2] hover:from-red-500 hover:to-[#4752c4] text-white rounded-xl text-xs font-bold transition shadow-lg flex items-center gap-2">
                                     <span>➕ إضافة وتفعيل التنبيه الآن</span>
                                 </button>
                             </div>
@@ -5733,11 +5970,11 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-xs font-bold text-gray-300 mb-2 text-right">برفكس الأوامر (Prefix)</label>
-                                <input type="text" name="prefix" value="${settings.prefix || '#'}" class="w-full bg-[#12131c] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right font-mono">
+                                <input type="text" name="prefix" value="${settings.prefix || '#'}" class="w-full bg-[#1c1f2e] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right font-mono">
                             </div>
                             <div>
                                 <label class="block text-xs font-bold text-gray-300 mb-2 text-right">قناة السجلات (Log Channel ID)</label>
-                                <input type="text" name="log_channel" value="${settings.log_channel || ''}" placeholder="ضع ID القناة..." class="w-full bg-[#12131c] border border-purple-950/40 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right font-mono">
+                                <input type="text" name="log_channel" value="${settings.log_channel || ''}" placeholder="ضع ID القناة..." class="w-full bg-[#1c1f2e] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right font-mono">
                             </div>
                         </div>
                     </div>
@@ -5754,39 +5991,80 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                 <script src="https://cdn.tailwindcss.com"></script>
                 <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
                 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+                
                 <style>
-                    body { background-color: #08080d; color: #e2e8f0; font-family: 'Cairo', sans-serif; }
+                    :root {
+                        --bg-main: #0b0d14;
+                        --bg-sidebar: #10121b;
+                        --bg-card: #151722;
+                        --bg-card-hover: #1c1f2e;
+                        --primary: #5865f2;
+                        --primary-hover: #4752c4;
+                        --border: rgba(255, 255, 255, 0.05);
+                        --text-muted: #a3a6aa;
+                    }
+                    body { background-color: var(--bg-main) !important; color: #ffffff !important; font-family: 'Cairo', sans-serif !important; }
+                    /* Scrollbar */
+                    ::-webkit-scrollbar { width: 8px; height: 8px; }
+                    ::-webkit-scrollbar-track { background: var(--bg-main); }
+                    ::-webkit-scrollbar-thumb { background: #2f3146; border-radius: 10px; }
+                    ::-webkit-scrollbar-thumb:hover { background: #40445f; }
+                    
+                    /* Glassmorphism & Cards */
+                    .probot-card {
+                        background: var(--bg-card) !important;
+                        border: 1px solid var(--border) !important;
+                        border-radius: 16px !important;
+                        transition: all 0.3s ease !important;
+                        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2) !important;
+                    }
+                    .probot-card:hover {
+                        background: var(--bg-card-hover) !important;
+                        border-color: rgba(88, 101, 242, 0.4) !important;
+                        transform: translateY(-3px) !important;
+                        box-shadow: 0 6px 25px rgba(0, 0, 0, 0.3) !important;
+                    }
+                    
+                    /* Toggles */
                     .toggle { position: relative; display: inline-block; width: 44px; height: 24px; }
                     .toggle input { opacity: 0; width: 0; height: 0; }
-                    .slider { position: absolute; cursor: pointer; inset: 0; background: #1c1d28; border: 1px solid rgba(139,92,246,0.25); border-radius: 24px; transition: .25s ease-in-out; }
-                    .slider:before { content: ''; position: absolute; width: 16px; height: 16px; left: 3px; bottom: 3px; background: #f8fafc; border-radius: 50%; transition: .25s ease-in-out; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
-                    input:checked + .slider { background: linear-gradient(135deg, #9333ea, #6366f1); border-color: #a855f7; }
-                    input:checked + .slider:before { transform: translateX(20px); background: #ffffff; }
-                    select, input[type="text"], textarea { background-color: #0d0e15 !important; border: 1px solid rgba(139,92,246,0.25) !important; border-radius: 12px !important; color: #f1f5f9 !important; transition: all 0.2s ease; }
-                    select:focus, input[type="text"]:focus, textarea:focus { border-color: #a855f7 !important; outline: none; box-shadow: 0 0 0 3px rgba(168,85,247,0.15); }
-                    .card-box { background: #10111a; border: 1px solid rgba(139,92,246,0.2); border-radius: 20px; transition: all 0.2s; }
-                    .card-box:hover { border-color: rgba(139,92,246,0.35); }
+                    .slider { position: absolute; cursor: pointer; inset: 0; background: #2f3146; border-radius: 24px; transition: .3s; }
+                    .slider:before { content: ''; position: absolute; width: 18px; height: 18px; left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: .3s; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+                    input:checked + .slider { background: var(--primary); }
+                    input:checked + .slider:before { transform: translateX(20px); }
+                    
+                    /* Buttons */
+                    .btn-primary {
+                        background-color: var(--primary);
+                        color: white;
+                        transition: all 0.2s;
+                    }
+                    .btn-primary:hover {
+                        background-color: var(--primary-hover);
+                        box-shadow: 0 4px 15px rgba(88, 101, 242, 0.4);
+                    }
                 </style>
+
             </head>
-            <body class="min-h-screen flex flex-col bg-[#0b0c10] text-gray-200">
+            <body class="min-h-screen flex flex-col bg-[#0b0d14] text-gray-200">
                 
                 <!-- Header -->
-                <header class="h-16 bg-[#0f1016]/90 backdrop-blur-md border-b border-purple-950/40 px-6 flex items-center justify-between sticky top-0 z-50">
+                <header class="h-16 bg-[#10121b]/95 backdrop-blur-md border-b border-white/5 px-6 flex items-center justify-between sticky top-0 z-50">
                     <div class="flex items-center gap-4">
-                        <a href="https://discord.gg/uxqQDtbVMz" target="_blank" class="text-xs text-gray-400 hover:text-purple-300 transition">الدعم الفني</a>
+                        <a href="https://discord.gg/uxqQDtbVMz" target="_blank" class="text-xs text-gray-400 hover:text-gray-200 transition">الدعم الفني</a>
                         <span class="text-gray-700">|</span>
-                        <a href="/dashboard/${guildId}" class="text-xs text-purple-400 hover:text-purple-300 font-bold transition">الرجوع للوحة التحكم</a>
+                        <a href="/dashboard/${guildId}" class="text-xs text-[#5865f2] hover:text-gray-200 font-bold transition">الرجوع للوحة التحكم</a>
                     </div>
                     <div class="flex items-center gap-2">
                         <span class="font-black text-sm text-white tracking-wide">ZENO</span>
-                        <img src="/logo.png" class="w-8 h-8 rounded-xl object-cover border border-purple-500/40 shadow-lg shadow-purple-900/50" alt="ZENO">
+                        <img src="/logo.png" class="w-8 h-8 rounded-xl object-cover border border-purple-500/40 shadow-lg shadow-black/40" alt="ZENO">
                     </div>
                 </header>
 
                 <div class="flex-1 flex overflow-hidden">
                     <main class="flex-1 p-8 overflow-y-auto max-w-4xl mx-auto">
-                        <div class="bg-[#10111a] border border-purple-950/40 rounded-3xl p-8 shadow-2xl mb-8">
-                            <div class="flex items-center justify-between pb-6 mb-6 border-b border-purple-950/40">
+                        <div class="probot-card border border-white/5 rounded-3xl p-8 shadow-2xl mb-8">
+                            <div class="flex items-center justify-between pb-6 mb-6 border-b border-white/5">
                                 <label class="toggle"><input type="checkbox" onchange="toggleModule('${guildId}', '${section}_enabled', this.checked)" checked><span class="slider"></span></label>
                                 <div class="text-right">
                                     <h2 class="text-2xl font-black text-white">${title}</h2>
@@ -5797,8 +6075,8 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                             <form id="settingsForm" class="space-y-6">
                                 ${formFieldsHtml}
 
-                                <div class="pt-6 border-t border-purple-950/40 flex items-center justify-between flex-row-reverse">
-                                    <button type="submit" class="px-8 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-bold rounded-xl transition shadow-lg shadow-purple-900/30 flex items-center gap-2">
+                                <div class="pt-6 border-t border-white/5 flex items-center justify-between flex-row-reverse">
+                                    <button type="submit" class="px-8 py-3 bg-gradient-to-r from-[#5865f2] to-indigo-600 hover:from-[#4752c4] hover:to-indigo-500 text-white text-xs font-bold rounded-xl transition shadow-lg shadow-black/20 flex items-center gap-2">
                                         <span>💾</span>
                                         <span>حفظ التغييرات</span>
                                     </button>
@@ -5812,11 +6090,11 @@ document.getElementById('addModal').addEventListener('click', function(e) {
                     </main>
 
                     <!-- Server Rail -->
-                    <div class="w-16 bg-[#08080c] border-l border-purple-950/40 py-4 flex flex-col items-center gap-3 shrink-0 overflow-y-auto">
+                    <div class="w-16 bg-[#08080c] border-l border-white/5 py-4 flex flex-col items-center gap-3 shrink-0 overflow-y-auto">
                         <a href="/dashboard" title="${user.username}" class="group relative flex items-center justify-center">
-                            <img src="${userAvatar}" class="w-11 h-11 rounded-2xl border-2 border-purple-500 shadow-lg shadow-purple-900/50 hover:rounded-xl object-cover transition-all" alt="${user.username}">
+                            <img src="${userAvatar}" class="w-11 h-11 rounded-2xl border-2 border-purple-500 shadow-lg shadow-black/40 hover:rounded-xl object-cover transition-all" alt="${user.username}">
                         </a>
-                        <div class="w-8 h-[1px] bg-purple-950/40"></div>
+                        <div class="w-8 h-[1px] bg-[#151722]"></div>
                         ${serverRailHtml}
                     </div>
                 </div>
@@ -6129,7 +6407,7 @@ document.getElementById('addModal').addEventListener('click', function(e) {
         const feedsHTML = feeds.length === 0
             ? `<div class="text-center py-16 text-gray-500"><div class="text-5xl mb-3">📭</div><p>لا توجد حسابات مضافة بعد</p></div>`
             : feeds.map(f => `
-                <div class="bg-[#12131c] border border-purple-900/30 rounded-2xl p-5 flex items-center justify-between gap-4">
+                <div class="bg-[#1c1f2e] border border-white/5 rounded-2xl p-5 flex items-center justify-between gap-4">
                     <div class="flex items-center gap-3">
                         <span class="text-2xl">${platformIcon[f.platform] || '🔔'}</span>
                         <div>
@@ -6152,21 +6430,74 @@ document.getElementById('addModal').addEventListener('click', function(e) {
 <title>تنبيهات السوشيال ميديا - ZENO</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
-<style>body{background:#0b0c10;color:#fff;font-family:'Cairo',sans-serif;}</style>
+
+                <style>
+                    :root {
+                        --bg-main: #0b0d14;
+                        --bg-sidebar: #10121b;
+                        --bg-card: #151722;
+                        --bg-card-hover: #1c1f2e;
+                        --primary: #5865f2;
+                        --primary-hover: #4752c4;
+                        --border: rgba(255, 255, 255, 0.05);
+                        --text-muted: #a3a6aa;
+                    }
+                    body { background-color: var(--bg-main) !important; color: #ffffff !important; font-family: 'Cairo', sans-serif !important; }
+                    /* Scrollbar */
+                    ::-webkit-scrollbar { width: 8px; height: 8px; }
+                    ::-webkit-scrollbar-track { background: var(--bg-main); }
+                    ::-webkit-scrollbar-thumb { background: #2f3146; border-radius: 10px; }
+                    ::-webkit-scrollbar-thumb:hover { background: #40445f; }
+                    
+                    /* Glassmorphism & Cards */
+                    .probot-card {
+                        background: var(--bg-card) !important;
+                        border: 1px solid var(--border) !important;
+                        border-radius: 16px !important;
+                        transition: all 0.3s ease !important;
+                        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2) !important;
+                    }
+                    .probot-card:hover {
+                        background: var(--bg-card-hover) !important;
+                        border-color: rgba(88, 101, 242, 0.4) !important;
+                        transform: translateY(-3px) !important;
+                        box-shadow: 0 6px 25px rgba(0, 0, 0, 0.3) !important;
+                    }
+                    
+                    /* Toggles */
+                    .toggle { position: relative; display: inline-block; width: 44px; height: 24px; }
+                    .toggle input { opacity: 0; width: 0; height: 0; }
+                    .slider { position: absolute; cursor: pointer; inset: 0; background: #2f3146; border-radius: 24px; transition: .3s; }
+                    .slider:before { content: ''; position: absolute; width: 18px; height: 18px; left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: .3s; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+                    input:checked + .slider { background: var(--primary); }
+                    input:checked + .slider:before { transform: translateX(20px); }
+                    
+                    /* Buttons */
+                    .btn-primary {
+                        background-color: var(--primary);
+                        color: white;
+                        transition: all 0.2s;
+                    }
+                    .btn-primary:hover {
+                        background-color: var(--primary-hover);
+                        box-shadow: 0 4px 15px rgba(88, 101, 242, 0.4);
+                    }
+                </style>
+
 </head>
-<body class="min-h-screen bg-[#0b0c10]">
+<body class="min-h-screen bg-[#0b0d14]">
 <div class="max-w-4xl mx-auto px-4 py-10">
-    <a href="/dashboard/${guildId}" class="text-purple-400 text-sm mb-6 inline-block">← العودة للداشبورد</a>
+    <a href="/dashboard/${guildId}" class="text-[#5865f2] text-sm mb-6 inline-block">← العودة للداشبورد</a>
     <h1 class="text-3xl font-black mb-2">📡 تنبيهات السوشيال ميديا</h1>
     <p class="text-gray-400 mb-8">أضف حسابات YouTube / Twitch / TikTok وسيرسل البوت تنبيه تلقائي عند نزول محتوى جديد</p>
 
     <!-- Add Form -->
-    <div class="bg-[#12131c] border border-purple-900/30 rounded-2xl p-6 mb-8">
+    <div class="bg-[#1c1f2e] border border-white/5 rounded-2xl p-6 mb-8">
         <h2 class="text-lg font-bold mb-4">➕ إضافة حساب جديد</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
                 <label class="text-xs text-gray-400 mb-1 block">المنصة</label>
-                <select id="platform" class="w-full bg-[#0b0c10] border border-purple-900/40 rounded-xl px-4 py-2.5 text-sm">
+                <select id="platform" class="w-full bg-[#0b0d14] border border-purple-900/40 rounded-xl px-4 py-2.5 text-sm">
                     <option value="youtube">📺 YouTube</option>
                     <option value="twitch">🔴 Twitch</option>
                     <option value="tiktok">🎵 TikTok</option>
@@ -6174,22 +6505,22 @@ document.getElementById('addModal').addEventListener('click', function(e) {
             </div>
             <div>
                 <label class="text-xs text-gray-400 mb-1 block">اسم الحساب أو الـ ID</label>
-                <input id="account" type="text" placeholder="مثال: @MrBeast أو UCX6OQ3DkcsbYNE6H8uQQuVA" class="w-full bg-[#0b0c10] border border-purple-900/40 rounded-xl px-4 py-2.5 text-sm">
+                <input id="account" type="text" placeholder="مثال: @MrBeast أو UCX6OQ3DkcsbYNE6H8uQQuVA" class="w-full bg-[#0b0d14] border border-purple-900/40 rounded-xl px-4 py-2.5 text-sm">
             </div>
             <div>
                 <label class="text-xs text-gray-400 mb-1 block">روم الإشعارات</label>
-                <select id="channelId" class="w-full bg-[#0b0c10] border border-purple-900/40 rounded-xl px-4 py-2.5 text-sm">${channelOptions}</select>
+                <select id="channelId" class="w-full bg-[#0b0d14] border border-purple-900/40 rounded-xl px-4 py-2.5 text-sm">${channelOptions}</select>
             </div>
             <div>
                 <label class="text-xs text-gray-400 mb-1 block">منشن رول (اختياري)</label>
-                <select id="roleId" class="w-full bg-[#0b0c10] border border-purple-900/40 rounded-xl px-4 py-2.5 text-sm">${roleOptions}</select>
+                <select id="roleId" class="w-full bg-[#0b0d14] border border-purple-900/40 rounded-xl px-4 py-2.5 text-sm">${roleOptions}</select>
             </div>
             <div class="md:col-span-2">
                 <label class="text-xs text-gray-400 mb-1 block">رسالة مخصصة (اختياري)</label>
-                <input id="message" type="text" placeholder="مثال: 🔥 محتوى جديد نزل! اذهب شوف!" class="w-full bg-[#0b0c10] border border-purple-900/40 rounded-xl px-4 py-2.5 text-sm">
+                <input id="message" type="text" placeholder="مثال: 🔥 محتوى جديد نزل! اذهب شوف!" class="w-full bg-[#0b0d14] border border-purple-900/40 rounded-xl px-4 py-2.5 text-sm">
             </div>
         </div>
-        <button onclick="addFeed()" class="mt-4 px-6 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold rounded-xl transition text-sm">إضافة ✅</button>
+        <button onclick="addFeed()" class="mt-4 px-6 py-2.5 bg-gradient-to-r from-[#5865f2] to-indigo-600 hover:from-[#4752c4] hover:to-indigo-500 text-white font-bold rounded-xl transition text-sm">إضافة ✅</button>
     </div>
 
     <!-- Feeds List -->

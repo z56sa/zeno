@@ -347,7 +347,7 @@ module.exports = {
           });
         }
 
-        const supportRoleId = catConfig?.role || panel?.support_role || settings.ticket_role;
+        const supportRoleId = catConfig?.role || panel?.support_role || settings.support_role || settings.ticket_role;
         const categoryId = catConfig?.category || panel?.category_id || settings.ticket_category;
         const rawNaming = catConfig?.naming || panel?.naming_scheme || 'ticket-{username}';
         const channelName = rawNaming
@@ -400,8 +400,8 @@ module.exports = {
 
         db.createTicket(ticketChannel.id, interaction.guild.id, interaction.user.id, selectedCategoryType);
 
-        let welcomeDescription = catConfig?.welcome || panel?.welcome_msg || 'مرحباً بك {user}!\nيرجى كتابة استفسارك أو مشكلتك بالتفصيل وسيقوم فريق الدعم بالرد عليك قريباً.';
-        welcomeDescription = welcomeDescription.replace(/{user}/g, `<@${interaction.user.id}>`);
+        let welcomeDescription = catConfig?.welcome || panel?.welcome_msg || settings.ticket_welcome_msg || 'مرحباً بك {user}!\nيرجى كتابة استفسارك أو مشكلتك بالتفصيل وسيقوم فريق الدعم بالرد عليك قريباً.';
+        welcomeDescription = welcomeDescription.replace(/{user}|\[user\]/g, `<@${interaction.user.id}>`).replace(/\[userName\]/g, interaction.user.username).replace(/\[server\]/g, interaction.guild.name);
 
         const ticketEmbed = new EmbedBuilder()
           .setColor(config.colors.ticket)
