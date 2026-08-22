@@ -55,6 +55,10 @@ module.exports = {
       deleteMessageSeconds: deleteDays * 86400
     });
 
+    if (db.recordStaffAction) {
+      db.recordStaffAction(interaction.guild.id, interaction.user.id, 'ban', targetUser.id, reason, durationStr || 'دائم');
+    }
+
     const banEmbed = new EmbedBuilder()
       .setColor(config.colors?.danger || '#e74c3c')
       .setTitle(durationMs ? '🔨 حظر مؤقت تم بنجاح' : '🔨 حظر دائم تم بنجاح')

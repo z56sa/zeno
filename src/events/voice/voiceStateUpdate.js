@@ -2,6 +2,9 @@ const { EmbedBuilder, ChannelType, PermissionFlagsBits } = require('discord.js')
 const db = require('../../database');
 const config = require('../../config.json');
 
+// مخزن مؤقت لحساب وقت الستاف في الرومات الصوتية (Staff Voice Tracker)
+const staffVoiceMap = new Map();
+
 module.exports = {
   name: 'voiceStateUpdate',
   async execute(oldState, newState) {
@@ -10,6 +13,31 @@ module.exports = {
 
     const guild = newState.guild || oldState.guild;
     const settings = db.getGuildSettings(guild.id);
+
+    // 👮 Staff Activity: تتبع وقت الرومات الصوتية للستاف
+    const isStaff = member.permissions.has(PermissionFlagsBits.Administrator) ||
+                    member.permissions.has(PermissionFlagsBits.ModerateMembers) ||
+                    (settings.staff_role && member.roles.cache.has(settings.staff_role)) ||
+                    (settings.support_role && member.roles.cache.has(settings.support_role));
+
+    const sessionKey = `${guild.id}_${member.id}`;
+
+    if (isStaff) {
+      if (!oldState.channelId && newState.channelId) {
+        // دخول روم صوتي
+        staffVoiceMap.set(sessionKey, Date.now());
+      } else if (oldState.channelId && !newState.channelId) {
+        // خروج من روم صوتي
+        const joinTime = staffVoiceMap.get(sessionKey);
+        if (joinTime) {
+          const durationSeconds = Math.floor((Date.now() - joinTime) / 1000);
+          if (durationSeconds > 10 && db.addStaffVoiceTime) {
+            db.addStaffVoiceTime(guild.id, member.id, durationSeconds);
+          }
+          staffVoiceMap.delete(sessionKey);
+        }
+      }
+    }
 
     // ==========================================
     // 1. نظام الرومات الصوتية المؤقتة (Temp Voice)

@@ -41,6 +41,10 @@ module.exports = {
     await member.send({ embeds: [dmEmbed] }).catch(() => {});
     await member.kick(`${reason} | بواسطة: ${interaction.user.tag}`);
 
+    if (db.recordStaffAction) {
+      db.recordStaffAction(interaction.guild.id, interaction.user.id, 'kick', targetUser.id, reason);
+    }
+
     const embed = new EmbedBuilder()
       .setColor(config.colors?.warning || '#f39c12')
       .setTitle('👢 تم الطرد بنجاح')

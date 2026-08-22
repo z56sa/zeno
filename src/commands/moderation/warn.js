@@ -34,6 +34,10 @@ module.exports = {
       const reason = interaction.options.getString('reason');
       const count = db.addWarning(interaction.guild.id, targetUser.id, interaction.user.id, reason);
 
+      if (db.recordStaffAction) {
+        db.recordStaffAction(interaction.guild.id, interaction.user.id, 'warn', targetUser.id, reason, `تحذير رقم ${count}`);
+      }
+
       // DM للعضو
       const dmEmbed = new EmbedBuilder()
         .setColor('#f39c12')

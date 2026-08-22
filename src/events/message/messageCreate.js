@@ -22,6 +22,16 @@ module.exports = {
       (settings.automod_whitelist_role && message.member?.roles.cache.has(settings.automod_whitelist_role)) ||
       (settings.automod_whitelist_channel && message.channel.id === settings.automod_whitelist_channel);
 
+    // 👮 Staff Activity: تسجيل رسائل الإدارة تلقائياً
+    const isStaff = isAdmin || 
+      (settings.staff_role && message.member?.roles.cache.has(settings.staff_role)) ||
+      (settings.support_role && message.member?.roles.cache.has(settings.support_role)) ||
+      message.member?.permissions.has(PermissionFlagsBits.ModerateMembers);
+
+    if (isStaff && db.addStaffMessages) {
+      db.addStaffMessages(guildId, userId, 1);
+    }
+
     // ==========================================
     // 🛡️ درع الرقابة التلقائية المتقدم (Auto-Mod)
     // ==========================================

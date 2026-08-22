@@ -181,22 +181,49 @@ db.exec(`
     created_at INTEGER DEFAULT (strftime('%s','now'))
   );
 
-  CREATE TABLE IF NOT EXISTS social_feeds (
+  CREATE TABLE IF NOT EXISTS staff_activity (
+    guild_id TEXT NOT NULL,
+    user_id TEXT NOT NULL,
+    tickets_closed INTEGER DEFAULT 0,
+    mod_actions INTEGER DEFAULT 0,
+    bans_count INTEGER DEFAULT 0,
+    kicks_count INTEGER DEFAULT 0,
+    mutes_count INTEGER DEFAULT 0,
+    warns_count INTEGER DEFAULT 0,
+    messages_count INTEGER DEFAULT 0,
+    voice_seconds INTEGER DEFAULT 0,
+    streak_days INTEGER DEFAULT 0,
+    last_active_day TEXT,
+    points INTEGER DEFAULT 0,
+    PRIMARY KEY (guild_id, user_id)
+  );
+
+  CREATE TABLE IF NOT EXISTS staff_actions (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     guild_id TEXT NOT NULL,
-    platform TEXT NOT NULL, -- youtube, twitch, tiktok
-    account_id TEXT NOT NULL, -- channel id, username, handle
-    channel_id TEXT NOT NULL, -- Discord channel ID
-    role_id TEXT, -- role to mention (optional)
-    custom_message TEXT, -- custom notification message
-    last_video_id TEXT, -- prevent duplicate alerts
-    enabled INTEGER DEFAULT 1,
+    staff_id TEXT NOT NULL,
+    action_type TEXT NOT NULL, -- ticket_close, ban, kick, mute, warn, unban, unmute
+    target_id TEXT,
+    reason TEXT,
+    details TEXT,
+    created_at INTEGER DEFAULT (strftime('%s','now'))
+  );
+
+  CREATE TABLE IF NOT EXISTS staff_goals (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    guild_id TEXT NOT NULL,
+    title TEXT NOT NULL,
+    target_type TEXT NOT NULL, -- tickets, mod_actions, messages, voice_hours
+    target_value INTEGER NOT NULL,
+    reward_points INTEGER DEFAULT 100,
     created_at INTEGER DEFAULT (strftime('%s','now'))
   );
 `);
 
 // Migrations - إضافة الأعمدة الجديدة بشكل آمن
-try { db.exec("ALTER TABLE guild_settings ADD COLUMN social_alerts_enabled INTEGER DEFAULT 1;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN staff_activity_enabled INTEGER DEFAULT 1;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN staff_role TEXT;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN staff_log_channel TEXT;"); } catch(e) {}
 try { db.exec("ALTER TABLE guild_settings ADD COLUMN boost_enabled INTEGER DEFAULT 1;"); } catch(e) {}
 try { db.exec("ALTER TABLE guild_settings ADD COLUMN boost_channel TEXT;"); } catch(e) {}
 try { db.exec("ALTER TABLE guild_settings ADD COLUMN boost_message TEXT;"); } catch(e) {}
@@ -586,46 +613,134 @@ function endGiveaway(messageId) {
 }
 
 // ==========================================
-// Social Media Feeds / Notifier
+// 👮 Staff Activity System
 // ==========================================
-function addSocialFeed(guildId, platform, accountId, channelId, roleId = null, customMessage = null) {
-  const stmt = db.prepare(`
-    INSERT INTO social_feeds (guild_id, platform, account_id, channel_id, role_id, custom_message, enabled)
-    VALUES (?, ?, ?, ?, ?, ?, 1)
-  `);
-  const res = stmt.run(guildId, platform.toLowerCase(), accountId, channelId, roleId, customMessage);
-  return db.prepare('SELECT * FROM social_feeds WHERE id = ?').get(res.lastInsertRowid);
-}
-
-function getGuildSocialFeeds(guildId) {
-  return db.prepare('SELECT * FROM social_feeds WHERE guild_id = ? ORDER BY created_at DESC').all(guildId);
-}
-
-function getSocialFeed(id) {
-  return db.prepare('SELECT * FROM social_feeds WHERE id = ?').get(id);
-}
-
-function deleteSocialFeed(id, guildId = null) {
-  if (guildId) {
-    return db.prepare('DELETE FROM social_feeds WHERE id = ? AND guild_id = ?').run(id, guildId);
+function getStaffMember(guildId, userId) {
+  let member = db.prepare('SELECT * FROM staff_activity WHERE guild_id = ? AND user_id = ?').get(guildId, userId);
+  if (!member) {
+    db.prepare(`
+      INSERT INTO staff_activity (guild_id, user_id, tickets_closed, mod_actions, bans_count, kicks_count, mutes_count, warns_count, messages_count, voice_seconds, streak_days, points)
+      VALUES (?, ?, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+    `).run(guildId, userId);
+    member = db.prepare('SELECT * FROM staff_activity WHERE guild_id = ? AND user_id = ?').get(guildId, userId);
   }
-  return db.prepare('DELETE FROM social_feeds WHERE id = ?').run(id);
+  return member;
 }
 
-function toggleSocialFeed(id, enabled) {
-  return db.prepare('UPDATE social_feeds SET enabled = ? WHERE id = ?').run(enabled ? 1 : 0, id);
+function updateStaffActivityStreak(guildId, userId) {
+  const today = new Date().toISOString().slice(0, 10);
+  const staff = getStaffMember(guildId, userId);
+  if (staff.last_active_day === today) return;
+
+  const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+  let newStreak = (staff.last_active_day === yesterday) ? (staff.streak_days + 1) : 1;
+
+  db.prepare('UPDATE staff_activity SET streak_days = ?, last_active_day = ? WHERE guild_id = ? AND user_id = ?')
+    .run(newStreak, today, guildId, userId);
 }
 
-function updateSocialFeedLastId(id, lastVideoId) {
-  return db.prepare('UPDATE social_feeds SET last_video_id = ? WHERE id = ?').run(lastVideoId, id);
+function recordStaffAction(guildId, staffId, actionType, targetId = null, reason = null, details = null) {
+  try {
+    getStaffMember(guildId, staffId);
+    updateStaffActivityStreak(guildId, staffId);
+
+    // تسجيل الحدث في سجل الإجراءات
+    db.prepare(`
+      INSERT INTO staff_actions (guild_id, staff_id, action_type, target_id, reason, details)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `).run(guildId, staffId, actionType, targetId, reason, details);
+
+    // تحديث العدادات والنقاط
+    let pointsToAdd = 10;
+    let colToIncrement = 'mod_actions';
+
+    if (actionType === 'ticket_close') {
+      colToIncrement = 'tickets_closed';
+      pointsToAdd = 25;
+    } else if (actionType === 'ban') {
+      colToIncrement = 'bans_count';
+      pointsToAdd = 20;
+    } else if (actionType === 'kick') {
+      colToIncrement = 'kicks_count';
+      pointsToAdd = 15;
+    } else if (actionType === 'mute') {
+      colToIncrement = 'mutes_count';
+      pointsToAdd = 10;
+    } else if (actionType === 'warn') {
+      colToIncrement = 'warns_count';
+      pointsToAdd = 5;
+    }
+
+    if (colToIncrement === 'tickets_closed') {
+      db.prepare(`
+        UPDATE staff_activity 
+        SET tickets_closed = tickets_closed + 1, points = points + ? 
+        WHERE guild_id = ? AND user_id = ?
+      `).run(pointsToAdd, guildId, staffId);
+    } else {
+      db.prepare(`
+        UPDATE staff_activity 
+        SET mod_actions = mod_actions + 1, ${colToIncrement} = ${colToIncrement} + 1, points = points + ? 
+        WHERE guild_id = ? AND user_id = ?
+      `).run(pointsToAdd, guildId, staffId);
+    }
+  } catch (err) {
+    console.error('[DB] recordStaffAction error:', err);
+  }
 }
 
-function getAllActiveSocialFeeds() {
+function addStaffMessages(guildId, staffId, count = 1) {
+  try {
+    getStaffMember(guildId, staffId);
+    updateStaffActivityStreak(guildId, staffId);
+    db.prepare('UPDATE staff_activity SET messages_count = messages_count + ?, points = points + 1 WHERE guild_id = ? AND user_id = ?')
+      .run(count, guildId, staffId);
+  } catch (e) {}
+}
+
+function addStaffVoiceTime(guildId, staffId, seconds) {
+  try {
+    getStaffMember(guildId, staffId);
+    updateStaffActivityStreak(guildId, staffId);
+    const points = Math.floor(seconds / 300); // 1 point per 5 mins
+    db.prepare('UPDATE staff_activity SET voice_seconds = voice_seconds + ?, points = points + ? WHERE guild_id = ? AND user_id = ?')
+      .run(seconds, points, guildId, staffId);
+  } catch (e) {}
+}
+
+function getStaffLeaderboard(guildId, limit = 25) {
   return db.prepare(`
-    SELECT sf.* FROM social_feeds sf
-    LEFT JOIN guild_settings gs ON sf.guild_id = gs.guild_id
-    WHERE sf.enabled = 1 AND (gs.social_alerts_enabled IS NULL OR gs.social_alerts_enabled = 1)
-  `).all();
+    SELECT *, 
+      (tickets_closed * 25 + mod_actions * 10 + messages_count * 1 + (voice_seconds / 300) * 1) as performance_score
+    FROM staff_activity 
+    WHERE guild_id = ? 
+    ORDER BY performance_score DESC, points DESC
+    LIMIT ?
+  `).all(guildId, limit);
+}
+
+function getStaffActionLogs(guildId, limit = 50) {
+  return db.prepare('SELECT * FROM staff_actions WHERE guild_id = ? ORDER BY created_at DESC LIMIT ?').all(guildId, limit);
+}
+
+function getStaffGoals(guildId) {
+  return db.prepare('SELECT * FROM staff_goals WHERE guild_id = ? ORDER BY created_at DESC').all(guildId);
+}
+
+function addStaffGoal(guildId, title, targetType, targetValue, rewardPoints = 100) {
+  const stmt = db.prepare('INSERT INTO staff_goals (guild_id, title, target_type, target_value, reward_points) VALUES (?, ?, ?, ?, ?)');
+  return stmt.run(guildId, title, targetType, targetValue, rewardPoints);
+}
+
+function deleteStaffGoal(id, guildId) {
+  return db.prepare('DELETE FROM staff_goals WHERE id = ? AND guild_id = ?').run(id, guildId);
+}
+
+function resetStaffStats(guildId, userId = null) {
+  if (userId) {
+    return db.prepare('UPDATE staff_activity SET tickets_closed = 0, mod_actions = 0, bans_count = 0, kicks_count = 0, mutes_count = 0, warns_count = 0, messages_count = 0, voice_seconds = 0, streak_days = 0, points = 0 WHERE guild_id = ? AND user_id = ?').run(guildId, userId);
+  }
+  return db.prepare('UPDATE staff_activity SET tickets_closed = 0, mod_actions = 0, bans_count = 0, kicks_count = 0, mutes_count = 0, warns_count = 0, messages_count = 0, voice_seconds = 0, streak_days = 0, points = 0 WHERE guild_id = ?').run(guildId);
 }
 
 // ==========================================
@@ -698,13 +813,17 @@ module.exports = {
   setUserApplicationPoints,
   addApplicationPoint,
   resetApplicationPoints,
-  addSocialFeed,
-  getGuildSocialFeeds,
-  getSocialFeed,
-  deleteSocialFeed,
-  toggleSocialFeed,
-  updateSocialFeedLastId,
-  getAllActiveSocialFeeds,
+  // 👮 Staff Activity Exports
+  getStaffMember,
+  recordStaffAction,
+  addStaffMessages,
+  addStaffVoiceTime,
+  getStaffLeaderboard,
+  getStaffActionLogs,
+  getStaffGoals,
+  addStaffGoal,
+  deleteStaffGoal,
+  resetStaffStats,
   // Compatibility aliases
   getTopXp: getLeaderboard,
   getTopCredits: getCoinsLeaderboard,

@@ -1071,17 +1071,17 @@ module.exports = function (app, client) {
                                 <h3 class="text-sm font-bold text-gray-400">Modules</h3>
                             </div>
                             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                <!-- تنبيهات السوشيال ميديا (YouTube / Twitch / TikTok) -->
-                                <div class="bg-[#10111a] border border-red-950/40 hover:border-red-600/40 rounded-2xl p-5 flex flex-col justify-between transition shadow-lg">
+                                <!-- 👮 نشاط طاقم الإدارة (Staff Activity) -->
+                                <div class="bg-[#10111a] border border-amber-950/40 hover:border-amber-600/40 rounded-2xl p-5 flex flex-col justify-between transition shadow-lg">
                                     <div class="flex items-center justify-between mb-3">
-                                        <label class="toggle"><input type="checkbox" onchange="toggleModule('${guildId}', 'social_alerts_enabled', this.checked)" checked><span class="slider"></span></label>
+                                        <label class="toggle"><input type="checkbox" onchange="toggleModule('${guildId}', 'staff_activity_enabled', this.checked)" checked><span class="slider"></span></label>
                                         <div class="flex items-center gap-2">
-                                            <h4 class="font-bold text-white text-sm">تنبيهات السوشيال ميديا</h4>
-                                            <span class="text-lg">📺</span>
+                                            <h4 class="font-bold text-white text-sm">نشاط طاقم الإدارة</h4>
+                                            <span class="text-lg">👮</span>
                                         </div>
                                     </div>
-                                    <p class="text-gray-400 text-[11px] mb-4 text-right">إشعارات تلقائية فورية لفيديوهات وبثوث YouTube / Twitch / TikTok</p>
-                                    <a href="/dashboard/${guildId}/social" class="w-full py-2 bg-red-950/30 hover:bg-gradient-to-r hover:from-red-600 hover:to-purple-600 hover:text-white text-red-300 border border-red-900/30 rounded-xl text-xs font-bold text-center transition">&gt; Visit</a>
+                                    <p class="text-gray-400 text-[11px] mb-4 text-right">إحصائيات وترتيب وإنجازات طاقم الإدارة وسجل إجراءاتهم</p>
+                                    <a href="/dashboard/${guildId}/staff-activity" class="w-full py-2 bg-amber-950/30 hover:bg-gradient-to-r hover:from-amber-600 hover:to-orange-600 hover:text-white text-amber-300 border border-amber-900/30 rounded-xl text-xs font-bold text-center transition">&gt; Visit</a>
                                 </div>
 
                                 <!-- سجل النشاطات والأحداث (Logs) -->
@@ -1875,8 +1875,348 @@ module.exports = function (app, client) {
             const { guildId, section } = req.params;
             const guilds = req.session.guilds || [];
 
-            // ─── Social Notifier: صفحة NotifyMe Style ───
+            // ─── Staff Activity Dashboard Page ───
+            if (section === 'staff-activity') {
+                const botGuild = client.guilds.cache.get(guildId);
+                if (!botGuild) return res.redirect('/dashboard');
+
+                const leaderboard = database.getStaffLeaderboard ? database.getStaffLeaderboard(guildId, 25) : [];
+                const actionLogs  = database.getStaffActionLogs  ? database.getStaffActionLogs(guildId, 30) : [];
+                const goals       = database.getStaffGoals        ? database.getStaffGoals(guildId) : [];
+                const settings    = database.getGuildSettings(guildId);
+
+                const guildRolesList = botGuild.roles.cache
+                    .filter(r => r.name !== '@everyone')
+                    .sort((a, b) => b.position - a.position)
+                    .map(r => ({ id: r.id, name: r.name }));
+                const roleOptionsHtml = '<option value="">-- بدون رتبة --</option>' + guildRolesList.map(r => '<option value="' + r.id + '"' + (settings.staff_role === r.id ? ' selected' : '') + '>@' + r.name + '</option>').join('');
+
+                const textChannels = botGuild.channels.cache
+                    .filter(c => c.isTextBased && c.isTextBased() && !c.isThread())
+                    .sort((a, b) => a.rawPosition - b.rawPosition)
+                    .map(c => ({ id: c.id, name: c.name }));
+                const logChannelOptionsHtml = '<option value="">-- بدون روم --</option>' + textChannels.map(c => '<option value="' + c.id + '"' + (settings.staff_log_channel === c.id ? ' selected' : '') + '>#' + c.name + '</option>').join('');
+
+                const medals = ['🥇', '🥈', '🥉', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟'];
+                const actionIcons = { ticket_close: '🎫', ban: '🔨', kick: '👢', mute: '🔇', warn: '⚠️' };
+                const actionNames = { ticket_close: 'إغلاق تذكرة', ban: 'حظر', kick: 'طرد', mute: 'كتم', warn: 'تحذير' };
+
+                const leaderboardRows = leaderboard.length === 0
+                    ? '<tr><td colspan="8" class="px-6 py-16 text-center text-gray-500"><div style="font-size:3rem;margin-bottom:12px">📭</div><div>لا توجد بيانات نشاط مسجلة للستاف بعد</div></td></tr>'
+                    : leaderboard.map((s, i) => {
+                        const score = Math.floor((s.tickets_closed * 25) + (s.mod_actions * 10) + (s.messages_count) + Math.floor(s.voice_seconds / 300));
+                        const voiceH = (s.voice_seconds / 3600).toFixed(1);
+                        const medal  = medals[i] || `#${i + 1}`;
+                        const ach = [];
+                        if (s.tickets_closed >= 100) ach.push('🏆');
+                        else if (s.tickets_closed >= 25) ach.push('🎫');
+                        if (s.streak_days >= 7) ach.push('🔥');
+                        if (parseFloat(voiceH) >= 10) ach.push('🎙️');
+                        return '<tr class="border-b border-purple-900/10 hover:bg-[#111322] transition">' +
+                            '<td class="px-4 py-4 text-center text-xl">' + medal + '</td>' +
+                            '<td class="px-4 py-4"><div class="flex items-center gap-3"><div class="w-9 h-9 rounded-full bg-purple-900/40 flex items-center justify-center text-purple-300 font-bold text-sm">' + (i + 1) + '</div><div><div class="font-bold text-white text-sm" id="name-' + s.user_id + '"><@' + s.user_id + '></div><div class="text-xs text-gray-500">' + ach.join(' ') + (ach.length ? ' ' : '') + s.user_id + '</div></div></div></td>' +
+                            '<td class="px-4 py-4 text-center"><span class="font-bold text-amber-400">' + s.tickets_closed + '</span></td>' +
+                            '<td class="px-4 py-4 text-center"><span class="font-bold text-rose-400">' + s.mod_actions + '</span></td>' +
+                            '<td class="px-4 py-4 text-center text-gray-300">' + s.messages_count.toLocaleString() + '</td>' +
+                            '<td class="px-4 py-4 text-center text-cyan-400">' + voiceH + 'h</td>' +
+                            '<td class="px-4 py-4 text-center"><span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold ' + (s.streak_days >= 7 ? 'bg-orange-500/20 text-orange-400' : 'bg-gray-700 text-gray-400') + '">🔥 ' + s.streak_days + 'd</span></td>' +
+                            '<td class="px-4 py-4 text-center"><span class="font-black text-purple-300 text-sm">' + score + ' pts</span></td>' +
+                            '</tr>';
+                    }).join('');
+
+                const logsHtml = actionLogs.length === 0
+                    ? '<div class="text-center py-10 text-gray-500"><div style="font-size:2.5rem;margin-bottom:10px">📋</div><div>لا توجد سجلات إجراءات بعد</div></div>'
+                    : actionLogs.map(l => {
+                        const icon    = actionIcons[l.action_type]  || '⚡';
+                        const aName   = actionNames[l.action_type]  || l.action_type;
+                        const timeStr = new Date(l.created_at * 1000).toLocaleString('ar-SA');
+                        const colMap  = { ticket_close: 'text-amber-400 bg-amber-500/10 border-amber-500/25', ban: 'text-rose-400 bg-rose-500/10 border-rose-500/25', kick: 'text-orange-400 bg-orange-500/10 border-orange-500/25', mute: 'text-yellow-400 bg-yellow-500/10 border-yellow-500/25', warn: 'text-blue-400 bg-blue-500/10 border-blue-500/25' };
+                        const cls = colMap[l.action_type] || 'text-purple-400 bg-purple-500/10 border-purple-500/25';
+                        return '<div class="flex items-start gap-4 p-4 border-b border-purple-900/10 hover:bg-[#11121c] transition">' +
+                            '<div class="w-9 h-9 rounded-xl flex items-center justify-center text-lg border ' + cls + ' flex-shrink-0">' + icon + '</div>' +
+                            '<div class="flex-1 min-w-0">' +
+                                '<div class="flex items-center gap-2 flex-wrap">' +
+                                    '<span class="font-bold text-white text-sm">' + aName + '</span>' +
+                                    '<span class="text-xs px-2 py-0.5 rounded-full border ' + cls + '">' + icon + ' ' + aName + '</span>' +
+                                '</div>' +
+                                '<div class="text-xs text-gray-400 mt-1">الستاف: <span class="text-purple-300"><@' + l.staff_id + '></span>' + (l.target_id ? ' • ضد: <span class="text-gray-300"><@' + l.target_id + '></span>' : '') + '</div>' +
+                                '<div class="text-xs text-gray-500 mt-0.5">السبب: ' + (l.reason || 'لم يُذكر') + (l.details ? ' • ' + l.details : '') + '</div>' +
+                            '</div>' +
+                            '<div class="text-xs text-gray-500 flex-shrink-0">' + timeStr + '</div>' +
+                            '</div>';
+                    }).join('');
+
+                const defaultGoals = [
+                    { title: 'إغلاق 20 تذكرة أسبوعياً', icon: '🎫', color: 'amber', target: 20, type: 'tickets_closed', reward: 150 },
+                    { title: 'اتخاذ 15 إجراء إداري', icon: '🔨', color: 'rose', target: 15, type: 'mod_actions', reward: 100 },
+                    { title: 'التواجد 10 ساعات صوتياً', icon: '🔊', color: 'cyan', target: 10, type: 'voice_hours', reward: 200 },
+                    { title: 'نشاط متتالي لـ 7 أيام', icon: '🔥', color: 'orange', target: 7, type: 'streak_days', reward: 250 },
+                    { title: 'إغلاق 100 تذكرة إجمالاً', icon: '🏆', color: 'yellow', target: 100, type: 'tickets_closed_total', reward: 500 },
+                    { title: 'إرسال 500 رسالة في السيرفر', icon: '💬', color: 'blue', target: 500, type: 'messages_count', reward: 80 }
+                ];
+
+                const goalsHtml = defaultGoals.map(g => {
+                    const topStaff = leaderboard[0];
+                    let current = 0;
+                    if (topStaff) {
+                        if (g.type === 'tickets_closed' || g.type === 'tickets_closed_total') current = topStaff.tickets_closed;
+                        else if (g.type === 'mod_actions') current = topStaff.mod_actions;
+                        else if (g.type === 'voice_hours') current = parseFloat((topStaff.voice_seconds / 3600).toFixed(1));
+                        else if (g.type === 'streak_days') current = topStaff.streak_days;
+                        else if (g.type === 'messages_count') current = topStaff.messages_count;
+                    }
+                    const pct = Math.min(100, Math.floor((current / g.target) * 100));
+                    const colorMap = { amber: '#f59e0b', rose: '#f43f5e', cyan: '#06b6d4', orange: '#f97316', yellow: '#eab308', blue: '#3b82f6' };
+                    const col = colorMap[g.color] || '#7c3aed';
+                    return '<div class="bg-[#0e0f1b] border border-purple-900/20 rounded-2xl p-5">' +
+                        '<div class="flex items-center justify-between mb-3">' +
+                            '<div class="flex items-center gap-3">' +
+                                '<div class="w-10 h-10 rounded-xl flex items-center justify-center text-xl" style="background:' + col + '22;border:1px solid ' + col + '44">' + g.icon + '</div>' +
+                                '<div><div class="font-bold text-white text-sm">' + g.title + '</div><div class="text-xs text-gray-500 mt-0.5">🏅 المكافأة: <span class="text-purple-300">' + g.reward + ' نقطة</span></div></div>' +
+                            '</div>' +
+                            '<span class="text-lg font-black" style="color:' + col + '">' + pct + '%</span>' +
+                        '</div>' +
+                        '<div class="w-full bg-[#1a1b2e] rounded-full h-2">' +
+                            '<div class="h-2 rounded-full transition-all" style="width:' + pct + '%;background:' + col + '"></div>' +
+                        '</div>' +
+                        '<div class="flex justify-between text-xs text-gray-500 mt-1.5">' +
+                            '<span>المتصدر: ' + current + '</span><span>الهدف: ' + g.target + '</span>' +
+                        '</div>' +
+                    '</div>';
+                }).join('');
+
+                return res.send(`<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Staff Activity - ZENO Dashboard</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; }
+body { background: #0a0a0f; color: #e2e8f0; font-family: 'Cairo', sans-serif; margin: 0; min-height: 100vh; }
+::-webkit-scrollbar { width: 4px; } ::-webkit-scrollbar-thumb { background: #4a1d96; border-radius: 4px; }
+.tab-btn { padding: 0.55rem 1.25rem; border-radius: 10px; cursor: pointer; font-weight: 700; font-size: 0.82rem; font-family: 'Cairo', sans-serif; border: 1px solid transparent; transition: all 0.2s; color: #64748b; background: transparent; }
+.tab-btn.active { background: rgba(139,92,246,0.2); color: #a78bfa; border-color: rgba(139,92,246,0.3); }
+.tab-btn:hover:not(.active) { background: rgba(139,92,246,0.08); color: #94a3b8; }
+.stat-card { background: linear-gradient(135deg, #11121d 0%, #0e0f1c 100%); border: 1px solid rgba(139,92,246,0.18); border-radius: 18px; padding: 1.5rem; }
+.stat-card:hover { border-color: rgba(139,92,246,0.35); transform: translateY(-1px); transition: all 0.2s; }
+.inactive-alert { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 14px; padding: 1rem 1.25rem; }
+select, input { background: #0d0e17; border: 1px solid rgba(139,92,246,0.3); border-radius: 10px; padding: 0.6rem 0.9rem; color: #e2e8f0; font-family: 'Cairo', sans-serif; font-size: 0.85rem; outline: none; width: 100%; }
+select:focus, input:focus { border-color: #8b5cf6; }
+label { font-size: 0.78rem; color: #94a3b8; font-weight: 700; display: block; margin-bottom: 5px; }
+</style>
+</head>
+<body class="min-h-screen">
+
+<!-- Header -->
+<header style="height:60px;background:#0c0d14;border-bottom:1px solid rgba(139,92,246,0.15);padding:0 2rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50">
+  <div style="display:flex;align-items:center;gap:16px">
+    <a href="/dashboard/${guildId}" style="color:#94a3b8;font-size:0.82rem;text-decoration:none;display:flex;align-items:center;gap:6px">
+      <span style="font-size:1.1rem">←</span> العودة للداشبورد
+    </a>
+    <span style="color:#2d2e40">|</span>
+    <span style="font-size:0.75rem;color:#64748b">نشاط طاقم الإدارة</span>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px">
+    <span style="font-weight:900;color:white;font-size:0.9rem">ZENO</span>
+  </div>
+</header>
+
+<div style="max-width:1200px;margin:0 auto;padding:2rem 1.5rem">
+
+  <!-- Page Title -->
+  <div style="margin-bottom:2rem">
+    <h1 style="font-size:1.6rem;font-weight:900;color:white;margin:0 0 6px">👮 نشاط طاقم الإدارة</h1>
+    <p style="font-size:0.85rem;color:#64748b;margin:0">إحصائيات شاملة، لوحة الشرف، سجل الإجراءات، الأهداف والإنجازات</p>
+  </div>
+
+  <!-- Quick Stats Row -->
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:2rem">
+    <div class="stat-card" style="text-align:center">
+      <div style="font-size:1.8rem;font-weight:900;color:#f59e0b">${leaderboard.reduce((s, m) => s + m.tickets_closed, 0)}</div>
+      <div style="font-size:0.78rem;color:#94a3b8;margin-top:4px">🎫 إجمالي التذاكر المغلقة</div>
+    </div>
+    <div class="stat-card" style="text-align:center">
+      <div style="font-size:1.8rem;font-weight:900;color:#f43f5e">${leaderboard.reduce((s, m) => s + m.mod_actions, 0)}</div>
+      <div style="font-size:0.78rem;color:#94a3b8;margin-top:4px">🔨 إجمالي الإجراءات الإدارية</div>
+    </div>
+    <div class="stat-card" style="text-align:center">
+      <div style="font-size:1.8rem;font-weight:900;color:#8b5cf6">${leaderboard.length}</div>
+      <div style="font-size:0.78rem;color:#94a3b8;margin-top:4px">👮 أعضاء ستاف نشطون</div>
+    </div>
+    <div class="stat-card" style="text-align:center">
+      <div style="font-size:1.8rem;font-weight:900;color:#06b6d4">${(leaderboard.reduce((s, m) => s + m.voice_seconds, 0) / 3600).toFixed(0)}</div>
+      <div style="font-size:0.78rem;color:#94a3b8;margin-top:4px">🔊 ساعات التواجد الصوتي</div>
+    </div>
+  </div>
+
+  <!-- Tab Navigation -->
+  <div style="display:flex;gap:6px;margin-bottom:1.5rem;background:#0c0d14;border:1px solid rgba(139,92,246,0.12);border-radius:14px;padding:6px;width:fit-content">
+    <button class="tab-btn active" onclick="switchTab('leaderboard', this)">🏆 لوحة الشرف</button>
+    <button class="tab-btn" onclick="switchTab('logs', this)">📝 سجل الإجراءات</button>
+    <button class="tab-btn" onclick="switchTab('goals', this)">🎯 الأهداف والإنجازات</button>
+    <button class="tab-btn" onclick="switchTab('settings', this)">⚙️ الإعدادات</button>
+  </div>
+
+  <!-- Leaderboard Tab -->
+  <div id="tab-leaderboard">
+    <div style="background:#0e0f1b;border:1px solid rgba(139,92,246,0.15);border-radius:18px;overflow:hidden">
+      <div style="padding:1.25rem 1.5rem;border-bottom:1px solid rgba(139,92,246,0.1);display:flex;align-items:center;justify-content:space-between">
+        <div>
+          <h2 style="font-size:1rem;font-weight:800;color:white;margin:0">🏆 ترتيب طاقم الإدارة حسب النشاط</h2>
+          <p style="font-size:0.75rem;color:#64748b;margin:4px 0 0">يُحتسب الترتيب بناءً على التذاكر (×25) + الإجراءات (×10) + الرسائل (×1) + الصوت (×1/5دق)</p>
+        </div>
+        <button onclick="location.reload()" style="background:rgba(139,92,246,0.15);border:1px solid rgba(139,92,246,0.25);border-radius:10px;padding:0.5rem 1rem;color:#a78bfa;font-family:'Cairo',sans-serif;font-size:0.8rem;font-weight:700;cursor:pointer">🔄 تحديث</button>
+      </div>
+      <div style="overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse;font-size:0.85rem">
+          <thead>
+            <tr style="background:#0c0d16;color:#64748b;font-size:0.75rem">
+              <th style="padding:12px 16px;text-align:center">#</th>
+              <th style="padding:12px 16px;text-align:right">عضو الستاف</th>
+              <th style="padding:12px 16px;text-align:center">🎫 تذاكر</th>
+              <th style="padding:12px 16px;text-align:center">🔨 إجراءات</th>
+              <th style="padding:12px 16px;text-align:center">💬 رسائل</th>
+              <th style="padding:12px 16px;text-align:center">🔊 صوت</th>
+              <th style="padding:12px 16px;text-align:center">🔥 Streak</th>
+              <th style="padding:12px 16px;text-align:center">📈 تقييم</th>
+            </tr>
+          </thead>
+          <tbody id="lb-body">${leaderboardRows}</tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Logs Tab -->
+  <div id="tab-logs" style="display:none">
+    <div style="background:#0e0f1b;border:1px solid rgba(139,92,246,0.15);border-radius:18px;overflow:hidden">
+      <div style="padding:1.25rem 1.5rem;border-bottom:1px solid rgba(139,92,246,0.1)">
+        <h2 style="font-size:1rem;font-weight:800;color:white;margin:0">📝 سجل الإجراءات الإدارية (آخر 30 إجراء)</h2>
+        <p style="font-size:0.75rem;color:#64748b;margin:4px 0 0">يتم التسجيل تلقائياً عند كل باند، طرد، كتم، تحذير، أو إغلاق تذكرة</p>
+      </div>
+      <div id="logs-container">${logsHtml}</div>
+    </div>
+  </div>
+
+  <!-- Goals Tab -->
+  <div id="tab-goals" style="display:none">
+    <div style="margin-bottom:1.25rem;display:flex;align-items:center;justify-content:space-between">
+      <div>
+        <h2 style="font-size:1rem;font-weight:800;color:white;margin:0">🎯 أهداف الستاف وإنجازاتهم</h2>
+        <p style="font-size:0.78rem;color:#64748b;margin:4px 0 0">البار يعكس أفضل نشاط لعضو واحد مقارنةً بالهدف المطلوب</p>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:1rem">${goalsHtml}</div>
+    
+    <!-- Achievements Legend -->
+    <div style="margin-top:2rem;background:#0e0f1b;border:1px solid rgba(139,92,246,0.15);border-radius:18px;padding:1.5rem">
+      <h3 style="font-size:0.95rem;font-weight:800;color:white;margin:0 0 1rem">🏅 الإنجازات والألقاب</h3>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:0.75rem">
+        ${[
+          { icon: '🏆', title: 'بطل التذاكر', desc: 'أغلق 100+ تذكرة', color: '#f59e0b' },
+          { icon: '🎫', title: 'خبير الدعم', desc: 'أغلق 25+ تذكرة', color: '#f97316' },
+          { icon: '🛡️', title: 'حارس السيرفر', desc: '50+ إجراء إداري', color: '#ef4444' },
+          { icon: '🔥', title: 'وحش الاستمرارية', desc: '7+ أيام Streak', color: '#f97316' },
+          { icon: '🎙️', title: 'عملاق الرومات', desc: '10+ ساعات صوتية', color: '#06b6d4' },
+          { icon: '⭐', title: 'ستاف مميز', desc: '500+ نقطة مكافأة', color: '#8b5cf6' }
+        ].map(a => '<div style="background:#11121e;border:1px solid rgba(139,92,246,0.12);border-radius:12px;padding:0.9rem;display:flex;align-items:center;gap:10px"><div style="font-size:1.5rem;width:36px;text-align:center">' + a.icon + '</div><div><div style="font-weight:800;color:white;font-size:0.82rem">' + a.title + '</div><div style="font-size:0.73rem;color:#64748b;margin-top:2px">' + a.desc + '</div></div></div>').join('')}
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings Tab -->
+  <div id="tab-settings" style="display:none">
+    <div style="background:#0e0f1b;border:1px solid rgba(139,92,246,0.15);border-radius:18px;padding:1.75rem">
+      <h2 style="font-size:1rem;font-weight:800;color:white;margin:0 0 1.5rem">⚙️ إعدادات نظام متابعة الستاف</h2>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem">
+        <div>
+          <label>👮 رتبة الستاف (لتتبع نشاطهم تلقائياً)</label>
+          <select id="staff-role" onchange="saveSetting('staff_role', this.value)">${roleOptionsHtml}</select>
+          <p style="font-size:0.73rem;color:#64748b;margin-top:6px">سيتم تتبع رسائل وصوت أصحاب هذه الرتبة تلقائياً</p>
+        </div>
+        <div>
+          <label>📢 روم سجل إجراءات الستاف</label>
+          <select id="staff-log-ch" onchange="saveSetting('staff_log_channel', this.value)">${logChannelOptionsHtml}</select>
+          <p style="font-size:0.73rem;color:#64748b;margin-top:6px">سيُرسل إشعار في هذا الروم عند اتخاذ أي إجراء إداري</p>
+        </div>
+        <div>
+          <label>🚨 تنبيه عدم النشاط (بعد كم يوم؟)</label>
+          <input type="number" id="inactive-days" placeholder="مثال: 7 (0 = مطفئ)" min="0" max="30" value="${settings.staff_inactive_days || 7}" onchange="saveSetting('staff_inactive_days', this.value)">
+        </div>
+        <div>
+          <label>💰 تفعيل نظام نقاط المكافآت للستاف</label>
+          <div style="display:flex;align-items:center;gap:12px;margin-top:10px">
+            <label class="toggle" style="position:relative;width:44px;height:24px;display:inline-block"><input type="checkbox" ${settings.staff_rewards_enabled != 0 ? 'checked' : ''} onchange="saveSetting('staff_rewards_enabled', this.checked ? 1 : 0)"><span class="slider" style="position:absolute;cursor:pointer;inset:0;background:#232433;border-radius:24px;transition:.3s"></span></label>
+            <span style="font-size:0.82rem;color:#94a3b8">تفعيل نقاط المكافآت</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:1.5rem;padding:1rem;background:rgba(239,68,68,0.07);border:1px solid rgba(239,68,68,0.2);border-radius:14px">
+        <div style="font-weight:800;color:#f87171;font-size:0.85rem;margin-bottom:8px">🗑️ منطقة الخطر (Danger Zone)</div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button onclick="if(confirm('سيتم تصفير إحصائيات جميع الستاف. هل أنت متأكد؟')) resetAll()" style="background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.25);border-radius:10px;padding:0.5rem 1.1rem;color:#f87171;font-family:'Cairo',sans-serif;font-size:0.8rem;font-weight:700;cursor:pointer">🔄 تصفير إحصائيات الكل</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<style>
+.toggle input { opacity: 0; width: 0; height: 0; }
+.slider:before { content: ""; position: absolute; height: 18px; width: 18px; right: 3px; bottom: 3px; background: white; border-radius: 50%; transition: .3s; }
+input:checked + .slider { background: #7c3aed !important; }
+input:checked + .slider:before { transform: translateX(-20px); }
+</style>
+
+<script>
+function switchTab(tabName, btn) {
+  document.querySelectorAll('[id^="tab-"]').forEach(t => t.style.display = 'none');
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + tabName).style.display = 'block';
+  btn.classList.add('active');
+}
+
+async function saveSetting(key, value) {
+  try {
+    const res = await fetch('/api/guild/${guildId}/settings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key, value }) });
+    const data = await res.json();
+    if (data.success) showToast('✅ تم حفظ الإعداد بنجاح');
+    else showToast('❌ فشل في الحفظ: ' + data.error, true);
+  } catch (e) { showToast('❌ خطأ في الاتصال', true); }
+}
+
+async function resetAll() {
+  try {
+    const res = await fetch('/api/guild/${guildId}/staff/reset', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+    const data = await res.json();
+    if (data.success) { showToast('✅ تم تصفير جميع الإحصائيات'); setTimeout(() => location.reload(), 1500); }
+    else showToast('❌ فشل: ' + data.error, true);
+  } catch (e) { showToast('❌ خطأ في الاتصال', true); }
+}
+
+function showToast(msg, isErr = false) {
+  const t = document.createElement('div');
+  t.textContent = msg;
+  t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:' + (isErr ? '#7f1d1d' : '#14532d') + ';color:' + (isErr ? '#fca5a5' : '#86efac') + ';padding:10px 20px;border-radius:12px;font-weight:700;font-family:Cairo,sans-serif;font-size:0.85rem;z-index:9999;border:1px solid ' + (isErr ? '#ef4444' : '#22c55e') + '40;box-shadow:0 4px 20px rgba(0,0,0,0.4)';
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 3000);
+}
+</script>
+</body>
+</html>`);
+            }
+
+            // ─── Social Notifier (removed) ─── keep fallthrough for section handler
             if (section === 'social' || section === 'notifier') {
+                return res.redirect('/dashboard/' + guildId);
+            }
+
+            // ─── Social Notifier: صفحة NotifyMe Style ───
+            if (section === '__old_social__') {
                 const botGuild = client.guilds.cache.get(guildId);
                 if (!botGuild) return res.redirect('/dashboard');
                 const allFeeds = database.getGuildSocialFeeds ? (database.getGuildSocialFeeds(guildId) || []) : [];
@@ -5902,6 +6242,21 @@ async function testFeed(id) {
 </script>
 </body>
 </html>`);
+    });
+
+    // ─── 👮 Staff Activity Reset API ───
+    app.post('/api/guild/:guildId/staff/reset', express.json(), (req, res) => {
+        try {
+            if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
+            const { guildId } = req.params;
+            const { userId } = req.body;
+            if (database.resetStaffStats) {
+                database.resetStaffStats(guildId, userId || null);
+            }
+            res.json({ success: true });
+        } catch (e) {
+            res.status(500).json({ success: false, error: e.message });
+        }
     });
 
 };

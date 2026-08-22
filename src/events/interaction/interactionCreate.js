@@ -461,6 +461,12 @@ module.exports = {
         const settings = db.getGuildSettings(interaction.guild.id);
 
         db.closeTicket(interaction.channel.id);
+
+        // 👮 Staff Activity: تسجيل إغلاق التذكرة للستاف
+        if (db.recordStaffAction) {
+          db.recordStaffAction(interaction.guild.id, interaction.user.id, 'ticket_close', ticketData ? ticketData.user_id : null, 'إغلاق تذكرة');
+        }
+
         await interaction.editReply({ content: '🔒 جاري حفظ المحادثة وسيتم حذف التذكرة خلال 5 ثوانٍ...' });
 
         try {

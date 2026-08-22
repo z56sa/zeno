@@ -48,6 +48,10 @@ module.exports = {
       await member.send({ embeds: [dmEmbed] }).catch(() => {});
       await member.timeout(durationMs, `${reason} | بواسطة: ${interaction.user.tag}`);
 
+      if (db.recordStaffAction) {
+        db.recordStaffAction(interaction.guild.id, interaction.user.id, 'mute', targetUser.id, reason, durationStr);
+      }
+
       const embed = new EmbedBuilder()
         .setColor('#f39c12')
         .setTitle('🔇 تم الإسكات بنجاح')
