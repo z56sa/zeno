@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  redis:
+    container_name: zeno_redis
+    image: redis:6-alpine # Using a standard, stable Redis image
+    restart: always
+    ports:
+      - "6379:6379" # Exposing the port for local development/testing
+    volumes:
+      - ./data/redis:/data
+
+  zeno_bot:
+    container_name: zeno_bot_service
+    build: . # Instructing compose to use the Dockerfile in the current directory
+    restart: unless-stopped
+    environment:
+      # --- Critical Environment Variables (MUST BE FILLED BY USER) ---
+      DISCORD_TOKEN: ${DISCORD_TOKEN}
+      MONGO_URI: ${MONGO_URI}
+      SESSION_SECRET: ${SESSION_SECRET} # Used by express-session and potentially Redis connection string prefix
+      REDIS_HOST: redis # CRITICAL: Use the service name 'redis' as the hostname for connectivity within Docker network.
+      REDIS_PORT: 6379
+      DISCORD_CLIENT_ID: ${DISCORD_CLIENT_ID}
+    depends_on:
+      - redis # Ensures that Redis starts up and is ready BEFORE zeno_bot attempts to connect.
+
+volumes:
+  data: # Persistence for Redis data

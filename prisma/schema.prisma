@@ -1,0 +1,55 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        String   @id
+  username  String
+  avatar    String?
+  createdAt DateTime @default(now())
+}
+
+model Guild {
+  id               String      @id
+  name             String?
+  antiNukeEnabled  Boolean     @default(true)
+  antiSpamEnabled  Boolean     @default(true)
+  autoModEnabled   Boolean     @default(true)
+  logChannelId     String?
+  whitelistedUsers WhitelistUser[]
+  auditLogs        AuditAction[]
+  punishments      Punishment[]
+  createdAt        DateTime    @default(now())
+}
+
+model WhitelistUser {
+  id        String   @id @default(uuid())
+  userId    String
+  guildId   String
+  createdAt DateTime @default(now())
+
+  @@unique([userId, guildId])
+}
+
+model AuditAction {
+  id          String   @id @default(uuid())
+  guildId     String
+  type        String
+  count       Int
+  timestamp   DateTime @default(now())
+  executorId  String
+  isHandled   Boolean  @default(false)
+}
+
+model Punishment {
+  id          String   @id @default(uuid())
+  guildId     String
+  actionType  String
+  threshold   Int
+  durationSec Int?
+  createdAt   DateTime @default(now())
+}

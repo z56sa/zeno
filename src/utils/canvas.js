@@ -1,0 +1,550 @@
+const { createCanvas, loadImage, GlobalFonts } = require('@napi-rs/canvas');
+const fs = require('fs');
+const path = require('path');
+
+// تسجيل الخطوط لضمان وضوح النصوص في ديسكورد وCanvas
+try {
+  const fontsDir = process.env.WINDIR ? path.join(process.env.WINDIR, 'Fonts') : 'C:\\Windows\\Fonts';
+  if (fs.existsSync(path.join(fontsDir, 'arial.ttf'))) {
+    GlobalFonts.registerFromPath(path.join(fontsDir, 'arial.ttf'), 'MainFont');
+  }
+  if (fs.existsSync(path.join(fontsDir, 'arialbd.ttf'))) {
+    GlobalFonts.registerFromPath(path.join(fontsDir, 'arialbd.ttf'), 'MainFontBold');
+  }
+  if (fs.existsSync(path.join(fontsDir, 'segoeuib.ttf'))) {
+    GlobalFonts.registerFromPath(path.join(fontsDir, 'segoeuib.ttf'), 'SegoeUIBold');
+  }
+} catch (e) {}
+
+const numFmt = new Intl.NumberFormat('en-US');
+
+// رسم شارة فيكتور دائرية احترافية ذات إطار نيون
+function drawEmblemBadge(ctx, x, y, size, type) {
+  ctx.save();
+  ctx.translate(x, y);
+
+  // إطار الكبسولة الزجاجية للشارة
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.07)';
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.18)';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.arc(0, 0, size, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.stroke();
+
+  if (type === 'diamond') {
+    const grad = ctx.createLinearGradient(-size/2, -size/2, size/2, size/2);
+    grad.addColorStop(0, '#00f2fe');
+    grad.addColorStop(1, '#4facfe');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.moveTo(0, -size * 0.55);
+    ctx.lineTo(size * 0.55, 0);
+    ctx.lineTo(0, size * 0.55);
+    ctx.lineTo(-size * 0.55, 0);
+    ctx.closePath();
+    ctx.fill();
+  } else if (type === 'crown') {
+    const grad = ctx.createLinearGradient(0, -size/2, 0, size/2);
+    grad.addColorStop(0, '#FFE600');
+    grad.addColorStop(1, '#FF8A00');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.moveTo(-size * 0.5, size * 0.3);
+    ctx.lineTo(-size * 0.5, -size * 0.2);
+    ctx.lineTo(-size * 0.2, 0);
+    ctx.lineTo(0, -size * 0.4);
+    ctx.lineTo(size * 0.2, 0);
+    ctx.lineTo(size * 0.5, -size * 0.2);
+    ctx.lineTo(size * 0.5, size * 0.3);
+    ctx.closePath();
+    ctx.fill();
+  } else if (type === 'bolt') {
+    const grad = ctx.createLinearGradient(0, -size/2, 0, size/2);
+    grad.addColorStop(0, '#ff007f');
+    grad.addColorStop(1, '#7928ca');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.moveTo(size * 0.1, -size * 0.5);
+    ctx.lineTo(-size * 0.35, 0.05);
+    ctx.lineTo(-size * 0.05, 0.05);
+    ctx.lineTo(-size * 0.15, size * 0.5);
+    ctx.lineTo(size * 0.4, -0.05);
+    ctx.lineTo(size * 0.1, -0.05);
+    ctx.closePath();
+    ctx.fill();
+  } else if (type === 'shield') {
+    const grad = ctx.createLinearGradient(0, -size/2, 0, size/2);
+    grad.addColorStop(0, '#2ed573');
+    grad.addColorStop(1, '#10ac84');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.moveTo(0, -size * 0.45);
+    ctx.lineTo(size * 0.4, -size * 0.25);
+    ctx.lineTo(size * 0.4, size * 0.1);
+    ctx.quadraticCurveTo(size * 0.35, size * 0.4, 0, size * 0.5);
+    ctx.quadraticCurveTo(-size * 0.35, size * 0.4, -size * 0.4, size * 0.1);
+    ctx.lineTo(-size * 0.4, -size * 0.25);
+    ctx.closePath();
+    ctx.fill();
+  } else if (type === 'star') {
+    const grad = ctx.createLinearGradient(0, -size/2, 0, size/2);
+    grad.addColorStop(0, '#a55eea');
+    grad.addColorStop(1, '#8854d0');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    for (let i = 0; i < 5; i++) {
+      const angle = (i * 4 * Math.PI) / 5 - Math.PI / 2;
+      const r = (size * 0.5);
+      const px = Math.cos(angle) * r;
+      const py = Math.sin(angle) * r;
+      if (i === 0) ctx.moveTo(px, py);
+      else ctx.lineTo(px, py);
+    }
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  ctx.restore();
+}
+
+const canvasUtil = {
+  /**
+   * إنشاء بطاقة ترحيب عصرية
+   */
+  async createWelcomeCard(member) {
+    const width = 800;
+    const height = 350;
+    const canvas = createCanvas(width, height);
+    const ctx = canvas.getContext('2d');
+
+    const bgGradient = ctx.createLinearGradient(0, 0, width, height);
+    bgGradient.addColorStop(0, '#0f172a');
+    bgGradient.addColorStop(0.5, '#1e1b4b');
+    bgGradient.addColorStop(1, '#0f172a');
+    ctx.fillStyle = bgGradient;
+    ctx.fillRect(0, 0, width, height);
+
+    ctx.strokeStyle = '#6366f1';
+    ctx.lineWidth = 4;
+    ctx.strokeRect(10, 10, width - 20, height - 20);
+
+    const centerX = width / 2;
+    const avatarY = 110;
+    const avatarRadius = 60;
+
+    try {
+      const avatarURL = member.user.displayAvatarURL({ extension: 'png', size: 256 });
+      const avatar = await loadImage(avatarURL);
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(centerX, avatarY, avatarRadius, 0, Math.PI * 2, true);
+      ctx.closePath();
+      ctx.clip();
+      ctx.drawImage(avatar, centerX - avatarRadius, avatarY - avatarRadius, avatarRadius * 2, avatarRadius * 2);
+      ctx.restore();
+
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.arc(centerX, avatarY, avatarRadius, 0, Math.PI * 2);
+      ctx.stroke();
+    } catch {}
+
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#94a3b8';
+    ctx.font = 'bold 22px sans-serif';
+    ctx.fillText('WELCOME TO THE SERVER', centerX, 210);
+
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 30px sans-serif';
+    const tag = member.user.username;
+    ctx.fillText(tag.length > 20 ? tag.substring(0, 18) + '...' : tag, centerX, 255);
+
+    ctx.fillStyle = '#818cf8';
+    ctx.font = '18px sans-serif';
+    ctx.fillText(`Member #${member.guild.memberCount}`, centerX, 295);
+
+    return canvas.toBuffer('image/png');
+  },
+
+  /**
+   * إنشاء بطاقة المستوى (Rank Card)
+   */
+  async createRankCard(member, xpData) {
+    const width = 800;
+    const height = 240;
+    const canvas = createCanvas(width, height);
+    const ctx = canvas.getContext('2d');
+
+    ctx.fillStyle = '#0b0f19';
+    ctx.fillRect(0, 0, width, height);
+
+    ctx.fillStyle = '#111827';
+    ctx.roundRect(20, 20, width - 40, height - 40, 20);
+    ctx.fill();
+
+    const avatarX = 60;
+    const avatarY = 60;
+    const avatarRadius = 60;
+
+    try {
+      const avatarURL = member.user.displayAvatarURL({ extension: 'png', size: 256 });
+      const avatar = await loadImage(avatarURL);
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(avatarX + avatarRadius, avatarY + avatarRadius, avatarRadius, 0, Math.PI * 2, true);
+      ctx.closePath();
+      ctx.clip();
+      ctx.drawImage(avatar, avatarX, avatarY, avatarRadius * 2, avatarRadius * 2);
+      ctx.restore();
+
+      ctx.strokeStyle = '#6366f1';
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.arc(avatarX + avatarRadius, avatarY + avatarRadius, avatarRadius, 0, Math.PI * 2);
+      ctx.stroke();
+    } catch {}
+
+    const textStartX = 210;
+
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 28px sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText(member.user.username, textStartX, 80);
+
+    ctx.font = 'bold 20px sans-serif';
+    ctx.fillStyle = '#6366f1';
+    ctx.textAlign = 'right';
+    ctx.fillText(`RANK #${numFmt.format(xpData.rank || 1)}`, width - 60, 80);
+    ctx.fillText(`LEVEL ${numFmt.format(xpData.level || 0)}`, width - 200, 80);
+
+    const currentLevel = xpData.level || 0;
+    const currentLevelXp = Math.pow(currentLevel * 10, 2);
+    const nextLevelXp = Math.pow((currentLevel + 1) * 10, 2);
+    const neededXp = nextLevelXp - currentLevelXp;
+    const progressXp = Math.max(0, (xpData.xp || 0) - currentLevelXp);
+    const progressPercent = Math.min(1, Math.max(0.05, progressXp / (neededXp || 1)));
+
+    const barX = textStartX;
+    const barY = 135;
+    const barWidth = width - textStartX - 60;
+    const barHeight = 24;
+
+    ctx.fillStyle = '#1f2937';
+    ctx.beginPath();
+    ctx.roundRect(barX, barY, barWidth, barHeight, 12);
+    ctx.fill();
+
+    const fillGradient = ctx.createLinearGradient(barX, barY, barX + barWidth, barY);
+    fillGradient.addColorStop(0, '#4f46e5');
+    fillGradient.addColorStop(1, '#06b6d4');
+    ctx.fillStyle = fillGradient;
+    ctx.beginPath();
+    ctx.roundRect(barX, barY, barWidth * progressPercent, barHeight, 12);
+    ctx.fill();
+
+    ctx.fillStyle = '#9ca3af';
+    ctx.font = '16px sans-serif';
+    ctx.textAlign = 'right';
+    ctx.fillText(`${numFmt.format(xpData.xp || 0)} / ${numFmt.format(nextLevelXp)} XP`, width - 60, 125);
+
+    return canvas.toBuffer('image/png');
+  },
+
+  /**
+   * إنشاء بطاقة بروفايل وهوية أسطورية بستايل البانر الواقعي الاحترافي (ProBot Banner Style)
+   */
+  async createProfileCard(member, userData = {}, rankData = {}) {
+    const width = 920;
+    const height = 430;
+    const bannerHeight = 175;
+    const canvas = createCanvas(width, height);
+    const ctx = canvas.getContext('2d');
+
+    const wallpaperUrl = userData.wallpaper_url || 'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=960&q=80';
+
+    // 1. قص الكرت بزوايا دائرية فاخرة (Card Outer Clip)
+    const cardRadius = 26;
+    ctx.save();
+    ctx.beginPath();
+    ctx.roundRect(0, 0, width, height, cardRadius);
+    ctx.clip();
+
+    // 2. خلفية جسم الكرت السفلي الداكن الفخم
+    ctx.fillStyle = '#0d111d';
+    ctx.fillRect(0, 0, width, height);
+
+    // 3. رسم بانر الخلفية العلوي الكامل (Top Banner) بدون أي تشويش
+    try {
+      const bgImg = await loadImage(wallpaperUrl);
+      ctx.drawImage(bgImg, 0, 0, width, bannerHeight);
+    } catch {
+      const grad = ctx.createLinearGradient(0, 0, width, bannerHeight);
+      grad.addColorStop(0, '#1e1b4b');
+      grad.addColorStop(0.5, '#312e81');
+      grad.addColorStop(1, '#0f172a');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, width, bannerHeight);
+    }
+
+    // تدرج ظل سفلي خفيف جداً على حافة البانر ليدمج بسلاسة مع الجسم
+    const bannerFade = ctx.createLinearGradient(0, bannerHeight - 45, 0, bannerHeight);
+    bannerFade.addColorStop(0, 'rgba(13, 17, 29, 0)');
+    bannerFade.addColorStop(1, 'rgba(13, 17, 29, 0.95)');
+    ctx.fillStyle = bannerFade;
+    ctx.fillRect(0, bannerHeight - 45, width, 45);
+
+    // 4. خط فاصل نيون متدرج خفيف أسفل البانر
+    const sepGrad = ctx.createLinearGradient(0, bannerHeight, width, bannerHeight);
+    sepGrad.addColorStop(0, 'rgba(88, 101, 242, 0.6)');
+    sepGrad.addColorStop(0.5, 'rgba(0, 242, 254, 0.8)');
+    sepGrad.addColorStop(1, 'rgba(255, 215, 0, 0.6)');
+    ctx.fillStyle = sepGrad;
+    ctx.fillRect(0, bannerHeight - 1, width, 2);
+
+    // 5. الأفاتار المتداخل الأيقوني (Overlapping Avatar)
+    const avatarRadius = 58;
+    const avatarX = 55;
+    const avatarY = bannerHeight - 60;
+
+    // هالة نيون مشعة خلف الأفاتار
+    const glowGrad = ctx.createRadialGradient(avatarX + avatarRadius, avatarY + avatarRadius, 30, avatarX + avatarRadius, avatarY + avatarRadius, 90);
+    glowGrad.addColorStop(0, 'rgba(88, 101, 242, 0.55)');
+    glowGrad.addColorStop(0.6, 'rgba(0, 242, 254, 0.25)');
+    glowGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+    ctx.fillStyle = glowGrad;
+    ctx.beginPath();
+    ctx.arc(avatarX + avatarRadius, avatarY + avatarRadius, 90, 0, Math.PI * 2);
+    ctx.fill();
+
+    // إطار قص الأفاتار مع حافة سميكة
+    ctx.save();
+    // دائرة خارجية سميكة بلون الخلفية
+    ctx.fillStyle = '#0d111d';
+    ctx.beginPath();
+    ctx.arc(avatarX + avatarRadius, avatarY + avatarRadius, avatarRadius + 6, 0, Math.PI * 2);
+    ctx.fill();
+
+    try {
+      const avatarURL = member.user.displayAvatarURL({ extension: 'png', size: 256 });
+      const avatar = await loadImage(avatarURL);
+
+      ctx.beginPath();
+      ctx.arc(avatarX + avatarRadius, avatarY + avatarRadius, avatarRadius, 0, Math.PI * 2);
+      ctx.closePath();
+      ctx.clip();
+      ctx.drawImage(avatar, avatarX, avatarY, avatarRadius * 2, avatarRadius * 2);
+    } catch {}
+    ctx.restore();
+
+    // إطار الأفاتار النيون المضيء
+    const avatarRing = ctx.createLinearGradient(avatarX, avatarY, avatarX + avatarRadius * 2, avatarY + avatarRadius * 2);
+    avatarRing.addColorStop(0, '#00f2fe');
+    avatarRing.addColorStop(0.5, '#5865F2');
+    avatarRing.addColorStop(1, '#ff007f');
+    ctx.strokeStyle = avatarRing;
+    ctx.lineWidth = 3.5;
+    ctx.beginPath();
+    ctx.arc(avatarX + avatarRadius, avatarY + avatarRadius, avatarRadius, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // نقطة الحالة الخضراء المضيئة (Online Dot)
+    const dotX = avatarX + avatarRadius * 1.65;
+    const dotY = avatarY + avatarRadius * 1.65;
+    ctx.fillStyle = '#2ed573';
+    ctx.beginPath();
+    ctx.arc(dotX, dotY, 9, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#0d111d';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.arc(dotX, dotY, 9, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // 6. كبسولة المستوى (LVL Badge)
+    const levelPillX = avatarX + avatarRadius;
+    const levelPillY = avatarY + avatarRadius * 2 + 18;
+    const lvlGrad = ctx.createLinearGradient(levelPillX - 42, levelPillY, levelPillX + 42, levelPillY);
+    lvlGrad.addColorStop(0, '#5865F2');
+    lvlGrad.addColorStop(1, '#4752c4');
+    ctx.fillStyle = lvlGrad;
+    ctx.beginPath();
+    ctx.roundRect(levelPillX - 42, levelPillY - 13, 84, 26, 13);
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+    ctx.lineWidth = 1.2;
+    ctx.stroke();
+
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 12px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(`LVL ${numFmt.format(rankData.level || 1)}`, levelPillX, levelPillY + 4);
+
+    // 7. بيانات المستخدم (الاسم، المعرف، والشارات)
+    const infoStartX = 195;
+
+    // اسم المستخدم
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 30px sans-serif';
+    ctx.textAlign = 'left';
+    const username = member.user.username;
+    ctx.fillText(username.length > 16 ? username.substring(0, 14) + '..' : username, infoStartX, 215);
+
+    // وسم المستخدم أو الحالة
+    ctx.fillStyle = '#8c96ab';
+    ctx.font = 'bold 14px sans-serif';
+    ctx.fillText(`@${username} • ZENO MEMBER`, infoStartX, 238);
+
+    // كبسولة الشارات المعتمدة
+    const badgesStartX = width - 235;
+    const badgesY = 205;
+    
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.04)';
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.roundRect(badgesStartX - 10, badgesY - 16, 190, 34, 17);
+    ctx.fill();
+    ctx.stroke();
+
+    drawEmblemBadge(ctx, badgesStartX + 10, badgesY, 13, 'diamond');
+    drawEmblemBadge(ctx, badgesStartX + 46, badgesY, 13, 'crown');
+    drawEmblemBadge(ctx, badgesStartX + 82, badgesY, 13, 'bolt');
+    drawEmblemBadge(ctx, badgesStartX + 118, badgesY, 13, 'shield');
+    drawEmblemBadge(ctx, badgesStartX + 154, badgesY, 13, 'star');
+
+    // 8. صناديق الإحصائيات الأنيقة (Stat Cards)
+    const statsY = 262;
+    const statBoxWidth = 210;
+    const statBoxHeight = 62;
+    const statGap = 16;
+    const statsStartX = infoStartX;
+
+    const coinsAmount = Number(userData.coins ?? userData.credits ?? 0);
+    const starText = coinsAmount >= 999999999999999 ? 'UNLIMITED' : numFmt.format(coinsAmount);
+
+    const repAmount = Number(userData.reputation ?? userData.rep ?? 0);
+
+    const stats = [
+      { label: 'STAR COIN', val: starText, color: '#FFD700', isCoin: true },
+      { label: 'RANK', val: `#${numFmt.format(rankData.rank || 1)}`, color: '#2ed573' },
+      { label: 'REPUTATION', val: `+${numFmt.format(repAmount)} REP`, color: '#a55eea' }
+    ];
+
+    function drawVectorStar(targetCtx, cx, cy, r, color) {
+      targetCtx.save();
+      targetCtx.fillStyle = color;
+      targetCtx.beginPath();
+      for (let i = 0; i < 5; i++) {
+        const aOuter = (i * 4 * Math.PI) / 5 - Math.PI / 2;
+        const xO = cx + Math.cos(aOuter) * r;
+        const yO = cy + Math.sin(aOuter) * r;
+        if (i === 0) targetCtx.moveTo(xO, yO);
+        else targetCtx.lineTo(xO, yO);
+      }
+      targetCtx.closePath();
+      targetCtx.fill();
+      targetCtx.restore();
+    }
+
+    stats.forEach((s, idx) => {
+      const bx = statsStartX + (idx * (statBoxWidth + statGap));
+      
+      // خلفية الصندوق الزجاجي
+      ctx.fillStyle = 'rgba(20, 26, 44, 0.65)';
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.roundRect(bx, statsY, statBoxWidth, statBoxHeight, 14);
+      ctx.fill();
+      ctx.stroke();
+
+      // شريط أيسر ملون
+      ctx.fillStyle = s.color;
+      ctx.beginPath();
+      ctx.roundRect(bx + 2, statsY + 10, 3.5, statBoxHeight - 20, 2);
+      ctx.fill();
+
+      // العنوان
+      ctx.fillStyle = '#8c96ab';
+      ctx.font = 'bold 11px sans-serif';
+      ctx.textAlign = 'left';
+      ctx.fillText(s.label, bx + 16, statsY + 24);
+
+      // القيمة
+      ctx.fillStyle = s.color;
+      ctx.font = 'bold 17px sans-serif';
+      ctx.fillText(s.val, bx + 16, statsY + 48);
+
+      // رسم النجمة الفيكتور لخانة STAR COIN
+      if (s.isCoin) {
+        const textWidth = ctx.measureText(s.val).width;
+        drawVectorStar(ctx, bx + 16 + textWidth + 12, statsY + 42, 7, '#FFD700');
+      }
+    });
+
+    // 9. شريط تقدم الخبرة الفاخر (XP Bar)
+    const barX = 55;
+    const barY = 352;
+    const barWidth = width - 110;
+    const barHeight = 24;
+
+    const currentLevel = rankData.level || 0;
+    const currentLevelXp = Math.pow(currentLevel * 10, 2);
+    const nextLevelXp = Math.max(100, Math.pow((currentLevel + 1) * 10, 2));
+    const neededXp = nextLevelXp - currentLevelXp;
+    const progressXp = Math.max(0, (rankData.xp || 0) - currentLevelXp);
+    const progressPercent = Math.min(1, Math.max(0.06, progressXp / (neededXp || 1)));
+
+    // خلفية الشريط
+    ctx.fillStyle = 'rgba(20, 26, 44, 0.85)';
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.roundRect(barX, barY, barWidth, barHeight, 12);
+    ctx.fill();
+    ctx.stroke();
+
+    // تعبئة الشريط بتدرج نيون متناسق
+    const fillGrad = ctx.createLinearGradient(barX, barY, barX + barWidth, barY);
+    fillGrad.addColorStop(0, '#5865F2');
+    fillGrad.addColorStop(0.5, '#00f2fe');
+    fillGrad.addColorStop(1, '#2ed573');
+    
+    ctx.fillStyle = fillGrad;
+    ctx.beginPath();
+    ctx.roundRect(barX, barY, barWidth * progressPercent, barHeight, 12);
+    ctx.fill();
+
+    // لمسة إضاءة علوية
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+    ctx.beginPath();
+    ctx.roundRect(barX + 2, barY + 2, (barWidth * progressPercent) - 4, (barHeight / 2) - 2, 8);
+    ctx.fill();
+
+    // نصوص الـ XP والنسبة
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 12px sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText(`XP: ${numFmt.format(rankData.xp || 0)} / ${numFmt.format(nextLevelXp)}`, barX + 14, barY + 16);
+
+    ctx.textAlign = 'right';
+    const percentText = `${Math.round(progressPercent * 100)}%`;
+    ctx.fillText(percentText, barX + barWidth - 14, barY + 16);
+
+    // 10. إطار الكرت الخارجي الفاخر
+    ctx.restore(); // استعادة بعد القص الدائري
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.roundRect(0, 0, width, height, cardRadius);
+    ctx.stroke();
+
+    return canvas.toBuffer('image/png');
+  }
+};
+
+module.exports = canvasUtil;

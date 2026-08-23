@@ -1,0 +1,72 @@
+const { SlashCommandBuilder, PermissionFlagsBits, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType } = require('discord.js');
+const db = require('../../database');
+const config = require('../../config.json');
+
+module.exports = {
+  name: 'reaction-role',
+  description: 'إنشاء رسالة لاختيار الرتب بالضغط على الزر (Button Role)',
+  aliases: ['زر_رتبة'],
+  data: new SlashCommandBuilder()
+    .setName('reaction-role')
+    .setDescription('إنشاء رسالة إعطاء رتبة بزر تفاعلي')
+    .addChannelOption(opt =>
+      opt.setName('channel')
+        .setDescription('الروم المراد إرسال الرسالة فيه')
+        .addChannelTypes(ChannelType.GuildText)
+        .setRequired(true)
+    )
+    .addRoleOption(opt =>
+      opt.setName('role')
+        .setDescription('الرتبة التي سيحصل عليها العضو')
+        .setRequired(true)
+    )
+    .addStringOption(opt =>
+      opt.setName('title')
+        .setDescription('عنوان الرسالة (Embed Title)')
+        .setRequired(true)
+    )
+    .addStringOption(opt =>
+      opt.setName('description')
+        .setDescription('شرح أو تفاصيل الرسالة')
+        .setRequired(true)
+    )
+    .addStringOption(opt =>
+      opt.setName('button_label')
+        .setDescription('النص الظاهر على الزر')
+        .setRequired(true)
+    )
+    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
+
+  async execute(interaction) {
+    if (!interaction.member.permissions.has(PermissionFlagsBits.Administrator)) {
+      return interaction.reply({ content: '❌ لا تملك صلاحية الأدمن.', ephemeral: true });
+    }
+
+    const channel = interaction.options.getChannel('channel');
+    const role = interaction.options.getRole('role');
+    const title = interaction.options.getString('title');
+    const description = interaction.options.getString('description');
+    const buttonLabel = interaction.options.getString('button_label');
+
+    const customId = `rr_${role.id}_${Date.now()}`;
+
+    const embed = new EmbedBuilder()
+      .setColor(config.colors.primary)
+      .setTitle(title)
+      .setDescription(description)
+      .setFooter({ text: 'اضغط على الزر للحصول على الرتبة أو إزالتها' });
+
+    const row = new ActionRowBuilder().addComponents(
+      new ButtonBuilder()
+        .setCustomId(customId)
+        .setLabel(buttonLabel)
+        .setEmoji('🎭')
+        .setStyle(ButtonStyle.Secondary)
+    );
+
+    const sentMessage = await channel.send({ embeds: [embed], components: [row] });
+    db.addReactionRole(interaction.guild.id, sentMessage.id, role.id, customId, buttonLabel, '🎭');
+
+    await interaction.reply({ content: `✅ تم إنشاء رسالة الرتب التفاعلية بنجاح في <#${channel.id}>!`, ephemeral: true });
+  }
+};

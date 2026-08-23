@@ -1,0 +1,1274 @@
+// ========================================================
+// FILE: src/database/index.js
+// قاعدة بيانات SQLite متزامنة (Synchronous) باستخدام better-sqlite3
+// ========================================================
+const Database = require('better-sqlite3');
+const path = require('path');
+const fs = require('fs');
+
+// مجلد البيانات
+const dataDir = path.join(__dirname, '../../data');
+if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
+
+const db = new Database(path.join(dataDir, 'zeno.db'));
+
+// تحسين الأداء
+db.pragma('journal_mode = WAL');
+db.pragma('foreign_keys = ON');
+
+// ==========================================
+// إنشاء الجداول
+// ==========================================
+db.exec(`
+  CREATE TABLE IF NOT EXISTS guild_settings (
+    guild_id TEXT PRIMARY KEY,
+    prefix TEXT DEFAULT '#',
+    welcome_channel TEXT,
+    welcome_message TEXT,
+    welcome_image INTEGER DEFAULT 1,
+    log_channel TEXT,
+    ticket_category TEXT,
+    ticket_log_channel TEXT,
+    support_role TEXT,
+    auto_role TEXT,
+    leveling_enabled INTEGER DEFAULT 1,
+    level_message TEXT,
+    level_channel TEXT DEFAULT 'current',
+    level_multiplier REAL DEFAULT 1.0,
+    anti_link INTEGER DEFAULT 0,
+    anti_spam INTEGER DEFAULT 0,
+    anti_caps INTEGER DEFAULT 0,
+    anti_emoji_spam INTEGER DEFAULT 0,
+    anti_line_spam INTEGER DEFAULT 0,
+    anti_mass_mention INTEGER DEFAULT 0,
+    max_mentions INTEGER DEFAULT 4,
+    max_emojis INTEGER DEFAULT 5,
+    max_lines INTEGER DEFAULT 8,
+    bad_words_enabled INTEGER DEFAULT 0,
+    bad_words_list TEXT DEFAULT '',
+    automod_action TEXT DEFAULT 'warn',
+    automod_whitelist_role TEXT,
+    automod_whitelist_channel TEXT,
+    anti_alt_days INTEGER DEFAULT 0,
+    verification_enabled INTEGER DEFAULT 0,
+    verification_type TEXT DEFAULT 'button',
+    verification_role TEXT,
+    anti_nuke_enabled INTEGER DEFAULT 0,
+    anti_nuke_action TEXT DEFAULT 'kick',
+    temp_voice_enabled INTEGER DEFAULT 0,
+    temp_voice_category TEXT,
+    temp_voice_channel TEXT,
+    boost_enabled INTEGER DEFAULT 1,
+    boost_channel TEXT,
+    boost_message TEXT DEFAULT '🎉 شكراً [user] لدعمك السيرفر بالبوست! أصبح عدد البوستات الآن [totalBoosts] بوست!',
+    boost_dm_enabled INTEGER DEFAULT 0,
+    boost_dm_message TEXT DEFAULT 'شكراً جزيلاً لدعمك سيرفر [serverName] بالبوست! 🚀',
+    boost_embed_enabled INTEGER DEFAULT 0
+  );
+
+  CREATE TABLE IF NOT EXISTS users (
+    user_id TEXT NOT NULL,
+    guild_id TEXT NOT NULL,
+    xp INTEGER DEFAULT 0,
+    level INTEGER DEFAULT 1,
+    coins INTEGER DEFAULT 0,
+    reputation INTEGER DEFAULT 0,
+    last_daily INTEGER DEFAULT 0,
+    last_message_xp INTEGER DEFAULT 0,
+    wallpaper TEXT DEFAULT 'default',
+    warnings INTEGER DEFAULT 0,
+    PRIMARY KEY (user_id, guild_id)
+  );
+
+  CREATE TABLE IF NOT EXISTS tickets (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    guild_id TEXT NOT NULL,
+    channel_id TEXT NOT NULL UNIQUE,
+    user_id TEXT NOT NULL,
+    category TEXT DEFAULT 'General',
+    status TEXT DEFAULT 'open',
+    created_at INTEGER DEFAULT (strftime('%s','now')),
+    closed_at INTEGER
+  );
+
+  CREATE TABLE IF NOT EXISTS warnings (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    guild_id TEXT NOT NULL,
+    user_id TEXT NOT NULL,
+    moderator_id TEXT NOT NULL,
+    reason TEXT,
+    created_at INTEGER DEFAULT (strftime('%s','now'))
+  );
+
+  CREATE TABLE IF NOT EXISTS reaction_roles (
+    custom_id TEXT PRIMARY KEY,
+    guild_id TEXT NOT NULL,
+    role_id TEXT NOT NULL,
+    message_id TEXT,
+    channel_id TEXT
+  );
+
+  CREATE TABLE IF NOT EXISTS auto_responders (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    guild_id TEXT NOT NULL,
+    trigger_word TEXT NOT NULL,
+    reply_text TEXT NOT NULL
+  );
+
+  CREATE TABLE IF NOT EXISTS level_rewards (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    guild_id TEXT NOT NULL,
+    level INTEGER NOT NULL,
+    role_id TEXT NOT NULL
+  );
+
+  CREATE TABLE IF NOT EXISTS giveaways (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    guild_id TEXT NOT NULL,
+    channel_id TEXT NOT NULL,
+    message_id TEXT UNIQUE,
+    prize TEXT NOT NULL,
+    winners_count INTEGER DEFAULT 1,
+    host_id TEXT NOT NULL,
+    end_time INTEGER NOT NULL,
+    status TEXT DEFAULT 'active',
+    entries TEXT DEFAULT '[]'
+  );
+
+  CREATE TABLE IF NOT EXISTS temp_voices (
+    channel_id TEXT PRIMARY KEY,
+    guild_id TEXT NOT NULL,
+    user_id TEXT NOT NULL,
+    created_at INTEGER DEFAULT (strftime('%s','now'))
+  );
+
+  CREATE TABLE IF NOT EXISTS applications (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    guild_id TEXT NOT NULL,
+    title TEXT NOT NULL,
+    description TEXT,
+    questions TEXT NOT NULL,
+    log_channel TEXT,
+    accepted_role TEXT,
+    status TEXT DEFAULT 'open',
+    created_at INTEGER DEFAULT (strftime('%s','now'))
+  );
+
+  CREATE TABLE IF NOT EXISTS application_submissions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    guild_id TEXT NOT NULL,
+    app_id INTEGER NOT NULL,
+    user_id TEXT NOT NULL,
+    answers TEXT NOT NULL,
+    status TEXT DEFAULT 'pending',
+    reviewed_by TEXT,
+    submitted_at INTEGER DEFAULT (strftime('%s','now'))
+  );
+
+  CREATE TABLE IF NOT EXISTS application_points (
+    guild_id TEXT NOT NULL,
+    user_id TEXT NOT NULL,
+    points INTEGER DEFAULT 0,
+    PRIMARY KEY (guild_id, user_id)
+  );
+
+  CREATE TABLE IF NOT EXISTS stars (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    guild_id TEXT NOT NULL,
+    giver_id TEXT NOT NULL,
+    receiver_id TEXT NOT NULL,
+    message_id TEXT,
+    created_at INTEGER DEFAULT (strftime('%s','now'))
+  );
+
+  CREATE TABLE IF NOT EXISTS staff_activity (
+    guild_id TEXT NOT NULL,
+    user_id TEXT NOT NULL,
+    tickets_closed INTEGER DEFAULT 0,
+    mod_actions INTEGER DEFAULT 0,
+    bans_count INTEGER DEFAULT 0,
+    kicks_count INTEGER DEFAULT 0,
+    mutes_count INTEGER DEFAULT 0,
+    warns_count INTEGER DEFAULT 0,
+    messages_count INTEGER DEFAULT 0,
+    voice_seconds INTEGER DEFAULT 0,
+    streak_days INTEGER DEFAULT 0,
+    last_active_day TEXT,
+    points INTEGER DEFAULT 0,
+    PRIMARY KEY (guild_id, user_id)
+  );
+
+  CREATE TABLE IF NOT EXISTS staff_actions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    guild_id TEXT NOT NULL,
+    staff_id TEXT NOT NULL,
+    action_type TEXT NOT NULL, -- ticket_close, ban, kick, mute, warn, unban, unmute
+    target_id TEXT,
+    reason TEXT,
+    details TEXT,
+    created_at INTEGER DEFAULT (strftime('%s','now'))
+  );
+
+  CREATE TABLE IF NOT EXISTS staff_goals (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    guild_id TEXT NOT NULL,
+    title TEXT NOT NULL,
+    target_type TEXT NOT NULL, -- tickets, mod_actions, messages, voice_hours
+    target_value INTEGER NOT NULL,
+    reward_points INTEGER DEFAULT 100,
+    created_at INTEGER DEFAULT (strftime('%s','now'))
+  );
+
+  -- 🎫 Ticket Panels (لوحات التذاكر المخصصة)
+  CREATE TABLE IF NOT EXISTS ticket_panels (
+    panel_id TEXT PRIMARY KEY,
+    guild_id TEXT NOT NULL,
+    channel_id TEXT,
+    message_id TEXT,
+    title TEXT,
+    description TEXT,
+    button_label TEXT,
+    button_emoji TEXT,
+    button_style TEXT,
+    welcome_msg TEXT,
+    support_role TEXT,
+    category_id TEXT,
+    naming_scheme TEXT,
+    logs_channel TEXT,
+    categories_json TEXT,
+    created_at INTEGER DEFAULT (strftime('%s','now'))
+  );
+
+  -- ⭐ Ticket Ratings (تقييمات موظفي الدعم)
+  CREATE TABLE IF NOT EXISTS ticket_ratings (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    guild_id TEXT NOT NULL,
+    ticket_channel_id TEXT,
+    user_id TEXT NOT NULL,
+    staff_id TEXT NOT NULL,
+    stars INTEGER NOT NULL,
+    feedback TEXT,
+    created_at INTEGER DEFAULT (strftime('%s','now'))
+  );
+
+  -- 📜 Ticket Transcripts (سجلات التذاكر)
+  CREATE TABLE IF NOT EXISTS ticket_transcripts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    guild_id TEXT NOT NULL,
+    channel_id TEXT NOT NULL,
+    user_id TEXT NOT NULL,
+    closed_by TEXT,
+    reason TEXT,
+    html_content TEXT,
+    created_at INTEGER DEFAULT (strftime('%s','now'))
+  );
+
+  -- 🔗 Invites System (نظام تتبع الدعوات)
+  CREATE TABLE IF NOT EXISTS invites (
+    guild_id TEXT NOT NULL,
+    user_id TEXT NOT NULL,
+    regular INTEGER DEFAULT 0,
+    leaves INTEGER DEFAULT 0,
+    fake INTEGER DEFAULT 0,
+    bonus INTEGER DEFAULT 0,
+    PRIMARY KEY (guild_id, user_id)
+  );
+
+  CREATE TABLE IF NOT EXISTS invite_members (
+    guild_id TEXT NOT NULL,
+    member_id TEXT NOT NULL,
+    inviter_id TEXT,
+    code TEXT,
+    is_fake INTEGER DEFAULT 0,
+    is_left INTEGER DEFAULT 0,
+    joined_at INTEGER DEFAULT (strftime('%s','now')),
+    PRIMARY KEY (guild_id, member_id)
+  );
+
+  -- 📢 Broadcasts System (نظام الإعلانات والمذيع الآلي المتقدم)
+  CREATE TABLE IF NOT EXISTS broadcasts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    guild_id TEXT NOT NULL,
+    channel_ids TEXT NOT NULL,
+    title TEXT,
+    message TEXT NOT NULL,
+    color TEXT DEFAULT '#9333ea',
+    image_url TEXT,
+    interval_minutes INTEGER DEFAULT 0,
+    scheduled_time INTEGER DEFAULT 0,
+    last_sent INTEGER DEFAULT 0,
+    is_recurring INTEGER DEFAULT 0,
+    status TEXT DEFAULT 'active',
+    created_by TEXT,
+    created_at INTEGER DEFAULT (strftime('%s','now'))
+  );
+`);
+
+// Migrations - إضافة الأعمدة الجديدة بشكل آمن
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN staff_activity_enabled INTEGER DEFAULT 1;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN staff_role TEXT;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN staff_log_channel TEXT;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN boost_enabled INTEGER DEFAULT 1;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN boost_channel TEXT;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN boost_message TEXT;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN boost_dm_enabled INTEGER DEFAULT 0;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN boost_dm_message TEXT;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN boost_embed_enabled INTEGER DEFAULT 0;"); } catch(e) {}
+
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN leave_enabled INTEGER DEFAULT 0;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN leave_channel TEXT;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN leave_message TEXT;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN welcome_dm_enabled INTEGER DEFAULT 0;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN welcome_dm_message TEXT;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN welcome_embed_enabled INTEGER DEFAULT 0;"); } catch(e) {}
+
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN verify_enabled INTEGER DEFAULT 0;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN verify_channel TEXT;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN verify_role TEXT;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN verify_message TEXT;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN verification_enabled INTEGER DEFAULT 0;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN verification_channel TEXT;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN verification_role TEXT;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN verification_type TEXT DEFAULT 'button';"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN unverified_role TEXT;"); } catch(e) {}
+
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN ticket_enabled INTEGER DEFAULT 1;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN ticket_max_open INTEGER DEFAULT 1;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN ticket_welcome_msg TEXT;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN ticket_panel_channel TEXT;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN ticket_panel_title TEXT;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN ticket_panel_desc TEXT;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN ticket_role TEXT;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN ticket_rating_enabled INTEGER DEFAULT 1;"); } catch(e) {}
+
+try { db.exec("ALTER TABLE tickets ADD COLUMN claimed_by TEXT;"); } catch(e) {}
+try { db.exec("ALTER TABLE tickets ADD COLUMN claimed_at INTEGER;"); } catch(e) {}
+try { db.exec("ALTER TABLE tickets ADD COLUMN closed_by TEXT;"); } catch(e) {}
+try { db.exec("ALTER TABLE tickets ADD COLUMN close_reason TEXT;"); } catch(e) {}
+try { db.exec("ALTER TABLE tickets ADD COLUMN transcript_url TEXT;"); } catch(e) {}
+
+try { db.exec("ALTER TABLE giveaways ADD COLUMN required_role TEXT;"); } catch(e) {}
+try { db.exec("ALTER TABLE giveaways ADD COLUMN min_level INTEGER DEFAULT 0;"); } catch(e) {}
+try { db.exec("ALTER TABLE giveaways ADD COLUMN min_account_age INTEGER DEFAULT 0;"); } catch(e) {}
+try { db.exec("ALTER TABLE giveaways ADD COLUMN extra_role TEXT;"); } catch(e) {}
+try { db.exec("ALTER TABLE giveaways ADD COLUMN hosted_by TEXT;"); } catch(e) {}
+try { db.exec("ALTER TABLE giveaways ADD COLUMN guild_id TEXT;"); } catch(e) {}
+
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN economy_enabled INTEGER DEFAULT 1;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN daily_amount INTEGER DEFAULT 500;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN work_cooldown INTEGER DEFAULT 4;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN transfer_tax REAL DEFAULT 5.0;"); } catch(e) {}
+
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN bot_language TEXT DEFAULT 'ar';"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN admin_role TEXT;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN announcements_channel TEXT;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN bot_enabled INTEGER DEFAULT 1;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN fun_enabled INTEGER DEFAULT 1;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN autoresponder_enabled INTEGER DEFAULT 1;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN min_bet INTEGER DEFAULT 10;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN max_bet INTEGER DEFAULT 50000;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN game_rewards_multiplier REAL DEFAULT 1.0;"); } catch(e) {}
+
+console.log('[DB] ✅ SQLite database initialized successfully');
+
+// ==========================================
+// Guild Settings
+// ==========================================
+function getGuildSettings(guildId) {
+  let row = db.prepare('SELECT * FROM guild_settings WHERE guild_id = ?').get(guildId);
+  if (!row) {
+    db.prepare('INSERT OR IGNORE INTO guild_settings (guild_id) VALUES (?)').run(guildId);
+    row = db.prepare('SELECT * FROM guild_settings WHERE guild_id = ?').get(guildId);
+  }
+  return row || { guild_id: guildId, prefix: '#' };
+}
+
+function setGuildSetting(guildId, key, value) {
+  // تأكد السجل موجود
+  db.prepare('INSERT OR IGNORE INTO guild_settings (guild_id) VALUES (?)').run(guildId);
+  
+  // تأكد أن العمود موجود في الجدول، وإذا لم يكن موجوداً يتم إنشاؤه تلقائياً
+  try {
+    db.prepare(`UPDATE guild_settings SET ${key} = ? WHERE guild_id = ?`).run(value, guildId);
+  } catch (err) {
+    if (err.message && err.message.includes('no such column')) {
+      try {
+        const colType = typeof value === 'number' ? 'INTEGER' : 'TEXT';
+        db.exec(`ALTER TABLE guild_settings ADD COLUMN ${key} ${colType};`);
+        db.prepare(`UPDATE guild_settings SET ${key} = ? WHERE guild_id = ?`).run(value, guildId);
+      } catch (addErr) {
+        console.error(`Failed to add column ${key}:`, addErr);
+      }
+    } else {
+      console.error(`Failed to update setting ${key}:`, err);
+    }
+  }
+}
+
+// alias
+function updateGuildSetting(guildId, key, value) {
+  return setGuildSetting(guildId, key, value);
+}
+
+// ==========================================
+// Users / XP / Economy
+// ==========================================
+function getUser(userId, guildId) {
+  let row = db.prepare('SELECT * FROM users WHERE user_id = ? AND guild_id = ?').get(userId, guildId);
+  if (!row) {
+    db.prepare('INSERT OR IGNORE INTO users (user_id, guild_id) VALUES (?, ?)').run(userId, guildId);
+    row = db.prepare('SELECT * FROM users WHERE user_id = ? AND guild_id = ?').get(userId, guildId);
+  }
+  return row || { user_id: userId, guild_id: guildId, xp: 0, level: 1, coins: 0, reputation: 0, last_daily: 0, last_message_xp: 0, wallpaper: 'default', warnings: 0 };
+}
+
+function addXp(userId, guildId, amount) {
+  const user = getUser(userId, guildId);
+  let xp = (user.xp || 0) + amount;
+  let level = user.level || 1;
+  let leveledUp = false;
+
+  // معادلة احترافية لحساب الخبرة المطلوبة لكل لفل
+  const getRequiredXp = (lvl) => Math.floor(lvl * 150 + 100);
+
+  while (xp >= getRequiredXp(level)) {
+    xp -= getRequiredXp(level);
+    level += 1;
+    leveledUp = true;
+  }
+
+  db.prepare(`
+    UPDATE users SET xp = ?, level = ?, last_message_xp = ?
+    WHERE user_id = ? AND guild_id = ?
+  `).run(xp, level, Date.now(), userId, guildId);
+
+  return { level, leveledUp, xp };
+}
+
+function addCoins(userId, guildId, amount) {
+  getUser(userId, guildId);
+  db.prepare('UPDATE users SET coins = coins + ? WHERE user_id = ? AND guild_id = ?').run(amount, userId, guildId);
+}
+
+function removeCoins(userId, guildId, amount) {
+  getUser(userId, guildId);
+  db.prepare('UPDATE users SET coins = MAX(0, coins - ?) WHERE user_id = ? AND guild_id = ?').run(amount, userId, guildId);
+}
+
+function setCoins(userId, guildId, amount) {
+  getUser(userId, guildId);
+  db.prepare('UPDATE users SET coins = ? WHERE user_id = ? AND guild_id = ?').run(amount, userId, guildId);
+}
+
+function getLastDaily(userId) {
+  const row = db.prepare('SELECT MAX(last_daily) as last_daily FROM users WHERE user_id = ?').get(userId);
+  return row?.last_daily || 0;
+}
+
+function setLastDaily(userId, guildId, timestamp) {
+  getUser(userId, guildId);
+  db.prepare('UPDATE users SET last_daily = ? WHERE user_id = ?').run(timestamp, userId);
+}
+
+function setWallpaper(userId, guildId, wallpaper) {
+  getUser(userId, guildId);
+  db.prepare('UPDATE users SET wallpaper = ? WHERE user_id = ? AND guild_id = ?').run(wallpaper, userId, guildId);
+}
+
+function getLeaderboard(guildId, limit = 10) {
+  return db.prepare('SELECT * FROM users WHERE guild_id = ? ORDER BY xp DESC, level DESC LIMIT ?').all(guildId, limit);
+}
+
+function getCoinsLeaderboard(guildId, limit = 10) {
+  return db.prepare('SELECT * FROM users WHERE guild_id = ? ORDER BY coins DESC LIMIT ?').all(guildId, limit);
+}
+
+// ==========================================
+// Warnings
+// ==========================================
+function addWarning(guildId, userId, moderatorId, reason = 'لا يوجد سبب') {
+  db.prepare('INSERT INTO warnings (guild_id, user_id, moderator_id, reason) VALUES (?, ?, ?, ?)').run(guildId, userId, moderatorId, reason);
+  const count = db.prepare('SELECT COUNT(*) as count FROM warnings WHERE guild_id = ? AND user_id = ?').get(guildId, userId);
+  db.prepare('UPDATE users SET warnings = ? WHERE user_id = ? AND guild_id = ?').run(count.count, userId, guildId);
+  return count.count;
+}
+
+function getWarnings(guildId, userId) {
+  return db.prepare('SELECT * FROM warnings WHERE guild_id = ? AND user_id = ? ORDER BY created_at DESC').all(guildId, userId);
+}
+
+function clearWarnings(guildId, userId) {
+  db.prepare('DELETE FROM warnings WHERE guild_id = ? AND user_id = ?').run(guildId, userId);
+  db.prepare('UPDATE users SET warnings = 0 WHERE user_id = ? AND guild_id = ?').run(userId, guildId);
+}
+
+// ==========================================
+// Tickets (نظام التذاكر المتقدم)
+// ==========================================
+function createTicket(guildId, channelId, userId, category = 'General') {
+  db.prepare('INSERT OR IGNORE INTO tickets (guild_id, channel_id, user_id, category, status) VALUES (?, ?, ?, ?, ?)').run(guildId, channelId, userId, category, 'open');
+  return db.prepare('SELECT * FROM tickets WHERE channel_id = ?').get(channelId);
+}
+
+function closeTicket(channelId, closedBy = null, reason = null) {
+  db.prepare("UPDATE tickets SET status = 'closed', closed_at = strftime('%s','now'), closed_by = ?, close_reason = ? WHERE channel_id = ?")
+    .run(closedBy, reason, channelId);
+  return db.prepare('SELECT * FROM tickets WHERE channel_id = ?').get(channelId);
+}
+
+function deleteTicket(channelId) {
+  return db.prepare('DELETE FROM tickets WHERE channel_id = ?').run(channelId);
+}
+
+function getTicketByChannel(channelId) {
+  return db.prepare('SELECT * FROM tickets WHERE channel_id = ?').get(channelId);
+}
+
+function getUserActiveTickets(guildId, userId) {
+  return db.prepare("SELECT * FROM tickets WHERE guild_id = ? AND user_id = ? AND status = 'open'").all(guildId, userId);
+}
+
+function getGuildTickets(guildId, limit = 50) {
+  return db.prepare('SELECT * FROM tickets WHERE guild_id = ? ORDER BY created_at DESC LIMIT ?').all(guildId, limit);
+}
+
+function claimTicket(channelId, staffId) {
+  db.prepare("UPDATE tickets SET claimed_by = ?, claimed_at = strftime('%s','now') WHERE channel_id = ?").run(staffId, channelId);
+  return db.prepare('SELECT * FROM tickets WHERE channel_id = ?').get(channelId);
+}
+
+function unclaimTicket(channelId) {
+  db.prepare("UPDATE tickets SET claimed_by = NULL, claimed_at = NULL WHERE channel_id = ?").run(channelId);
+  return db.prepare('SELECT * FROM tickets WHERE channel_id = ?').get(channelId);
+}
+
+function transferTicket(channelId, targetStaffOrRoleId) {
+  db.prepare("UPDATE tickets SET claimed_by = ? WHERE channel_id = ?").run(targetStaffOrRoleId, channelId);
+  return db.prepare('SELECT * FROM tickets WHERE channel_id = ?').get(channelId);
+}
+
+// 🎫 Ticket Panels (لوحات التذاكر)
+function saveTicketPanel(p) {
+  return db.prepare(`
+    INSERT OR REPLACE INTO ticket_panels 
+    (panel_id, guild_id, channel_id, message_id, title, description, button_label, button_emoji, button_style, welcome_msg, support_role, category_id, naming_scheme, logs_channel, categories_json)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `).run(
+    p.panel_id, p.guild_id, p.channel_id || null, p.message_id || null, 
+    p.title || '🎫 نظام الدعم الفني', p.description || '', p.button_label || 'فتح تذكرة', 
+    p.button_emoji || '📩', p.button_style || 'Primary', p.welcome_msg || '', 
+    p.support_role || null, p.category_id || null, p.naming_scheme || 'ticket-{username}', 
+    p.logs_channel || null, p.categories_json ? (typeof p.categories_json === 'string' ? p.categories_json : JSON.stringify(p.categories_json)) : null
+  );
+}
+
+function getTicketPanel(panelId) {
+  return db.prepare('SELECT * FROM ticket_panels WHERE panel_id = ?').get(panelId);
+}
+
+function getGuildTicketPanels(guildId) {
+  return db.prepare('SELECT * FROM ticket_panels WHERE guild_id = ? ORDER BY created_at DESC').all(guildId);
+}
+
+function deleteTicketPanel(panelId) {
+  return db.prepare('DELETE FROM ticket_panels WHERE panel_id = ?').run(panelId);
+}
+
+// ⭐ Ticket Ratings (تقييمات الموظفين)
+function addTicketRating(guildId, ticketChannelId, userId, staffId, stars, feedback = '') {
+  const res = db.prepare(`
+    INSERT INTO ticket_ratings (guild_id, ticket_channel_id, user_id, staff_id, stars, feedback)
+    VALUES (?, ?, ?, ?, ?, ?)
+  `).run(guildId, ticketChannelId, userId, staffId, stars, feedback);
+
+  // تحديث نقاط الموظف بناء على التقييم
+  try {
+    const pointsBonus = stars >= 4 ? (stars * 5) : 0;
+    if (pointsBonus > 0) {
+      getStaffMember(guildId, staffId);
+      db.prepare('UPDATE staff_activity SET points = points + ? WHERE guild_id = ? AND user_id = ?').run(pointsBonus, guildId, staffId);
+    }
+  } catch (e) {}
+
+  return res.lastInsertRowid;
+}
+
+function getStaffRatings(guildId, staffId) {
+  return db.prepare('SELECT * FROM ticket_ratings WHERE guild_id = ? AND staff_id = ? ORDER BY created_at DESC').all(guildId, staffId);
+}
+
+function getStaffAverageRating(guildId, staffId) {
+  const row = db.prepare('SELECT COUNT(*) as count, AVG(stars) as avg_stars FROM ticket_ratings WHERE guild_id = ? AND staff_id = ?').get(guildId, staffId);
+  return {
+    count: row?.count || 0,
+    average: row?.avg_stars ? parseFloat(row.avg_stars.toFixed(1)) : 5.0
+  };
+}
+
+// 📜 Ticket Transcripts
+function saveTranscript(guildId, channelId, userId, closedBy = null, reason = null, htmlContent = '') {
+  return db.prepare(`
+    INSERT INTO ticket_transcripts (guild_id, channel_id, user_id, closed_by, reason, html_content)
+    VALUES (?, ?, ?, ?, ?, ?)
+  `).run(guildId, channelId, userId, closedBy, reason, htmlContent);
+}
+
+function getTranscript(channelId) {
+  return db.prepare('SELECT * FROM ticket_transcripts WHERE channel_id = ? ORDER BY id DESC LIMIT 1').get(channelId);
+}
+
+// ==========================================
+// 🔗 Invites System (متتبع الدعوات)
+// ==========================================
+function getInvites(guildId, userId) {
+  let row = db.prepare('SELECT * FROM invites WHERE guild_id = ? AND user_id = ?').get(guildId, userId);
+  if (!row) {
+    db.prepare('INSERT OR IGNORE INTO invites (guild_id, user_id, regular, leaves, fake, bonus) VALUES (?, ?, 0, 0, 0, 0)').run(guildId, userId);
+    row = db.prepare('SELECT * FROM invites WHERE guild_id = ? AND user_id = ?').get(guildId, userId);
+  }
+  const regular = row?.regular || 0;
+  const leaves = row?.leaves || 0;
+  const fake = row?.fake || 0;
+  const bonus = row?.bonus || 0;
+  const total = (regular + bonus) - (leaves + fake);
+  return { ...row, regular, leaves, fake, bonus, total: Math.max(0, total) };
+}
+
+function addInviteRecord(guildId, inviterId, memberId, code = null, isFake = 0) {
+  // حفظ سجل العضو المدعو
+  db.prepare(`
+    INSERT OR REPLACE INTO invite_members (guild_id, member_id, inviter_id, code, is_fake, is_left)
+    VALUES (?, ?, ?, ?, ?, 0)
+  `).run(guildId, memberId, inviterId, code, isFake ? 1 : 0);
+
+  if (inviterId) {
+    getInvites(guildId, inviterId);
+    if (isFake) {
+      db.prepare('UPDATE invites SET fake = fake + 1 WHERE guild_id = ? AND user_id = ?').run(guildId, inviterId);
+    } else {
+      db.prepare('UPDATE invites SET regular = regular + 1 WHERE guild_id = ? AND user_id = ?').run(guildId, inviterId);
+    }
+  }
+}
+
+function removeInviteMember(guildId, memberId) {
+  const memberRecord = db.prepare('SELECT * FROM invite_members WHERE guild_id = ? AND member_id = ?').get(guildId, memberId);
+  if (memberRecord && !memberRecord.is_left) {
+    db.prepare('UPDATE invite_members SET is_left = 1 WHERE guild_id = ? AND member_id = ?').run(guildId, memberId);
+    if (memberRecord.inviter_id) {
+      getInvites(guildId, memberRecord.inviter_id);
+      db.prepare('UPDATE invites SET leaves = leaves + 1 WHERE guild_id = ? AND user_id = ?').run(guildId, memberRecord.inviter_id);
+    }
+    return memberRecord.inviter_id;
+  }
+  return null;
+}
+
+function addBonusInvites(guildId, userId, amount) {
+  getInvites(guildId, userId);
+  db.prepare('UPDATE invites SET bonus = bonus + ? WHERE guild_id = ? AND user_id = ?').run(amount, guildId, userId);
+  return getInvites(guildId, userId);
+}
+
+function getInvitesLeaderboard(guildId, limit = 15) {
+  const rows = db.prepare('SELECT * FROM invites WHERE guild_id = ?').all(guildId);
+  return rows
+    .map(r => ({
+      ...r,
+      total: Math.max(0, ((r.regular || 0) + (r.bonus || 0)) - ((r.leaves || 0) + (r.fake || 0)))
+    }))
+    .sort((a, b) => b.total - a.total)
+    .slice(0, limit);
+}
+
+function getMemberInviter(guildId, memberId) {
+  return db.prepare('SELECT * FROM invite_members WHERE guild_id = ? AND member_id = ?').get(guildId, memberId);
+}
+
+function resetInvites(guildId, userId = null) {
+  if (userId) {
+    db.prepare('DELETE FROM invites WHERE guild_id = ? AND user_id = ?').run(guildId, userId);
+    db.prepare('DELETE FROM invite_members WHERE guild_id = ? AND inviter_id = ?').run(guildId, userId);
+  } else {
+    db.prepare('DELETE FROM invites WHERE guild_id = ?').run(guildId);
+    db.prepare('DELETE FROM invite_members WHERE guild_id = ?').run(guildId);
+  }
+}
+
+// ==========================================
+// 📢 Broadcasts (نظام الإعلانات والمذيع الآلي)
+// ==========================================
+function createBroadcast(data) {
+  const channelIdsStr = Array.isArray(data.channel_ids) ? data.channel_ids.join(',') : String(data.channel_ids || '');
+  const res = db.prepare(`
+    INSERT INTO broadcasts (guild_id, channel_ids, title, message, color, image_url, interval_minutes, scheduled_time, is_recurring, created_by, status)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `).run(
+    data.guild_id,
+    channelIdsStr,
+    data.title || null,
+    data.message,
+    data.color || '#9333ea',
+    data.image_url || null,
+    data.interval_minutes || 0,
+    data.scheduled_time || 0,
+    data.is_recurring ? 1 : 0,
+    data.created_by || null,
+    data.status || 'active'
+  );
+  return db.prepare('SELECT * FROM broadcasts WHERE id = ?').get(res.lastInsertRowid);
+}
+
+function getGuildBroadcasts(guildId) {
+  return db.prepare('SELECT * FROM broadcasts WHERE guild_id = ? ORDER BY id DESC').all(guildId);
+}
+
+function getBroadcast(id) {
+  return db.prepare('SELECT * FROM broadcasts WHERE id = ?').get(id);
+}
+
+function deleteBroadcast(id, guildId = null) {
+  if (guildId) {
+    return db.prepare('DELETE FROM broadcasts WHERE id = ? AND guild_id = ?').run(id, guildId);
+  }
+  return db.prepare('DELETE FROM broadcasts WHERE id = ?').run(id);
+}
+
+function getAllActiveBroadcasts() {
+  return db.prepare("SELECT * FROM broadcasts WHERE status = 'active'").all();
+}
+
+function updateBroadcastLastSent(id, timestamp = Date.now()) {
+  return db.prepare('UPDATE broadcasts SET last_sent = ? WHERE id = ?').run(timestamp, id);
+}
+
+function updateBroadcastStatus(id, status) {
+  return db.prepare('UPDATE broadcasts SET status = ? WHERE id = ?').run(status, id);
+}
+
+// ==========================================
+// Temp Voice Channels
+// ==========================================
+function createTempVoice(channelId, guildId, userId) {
+  return db.prepare('INSERT OR REPLACE INTO temp_voices (channel_id, guild_id, user_id) VALUES (?, ?, ?)').run(channelId, guildId, userId);
+}
+
+function isTempVoice(channelId) {
+  const row = db.prepare('SELECT 1 FROM temp_voices WHERE channel_id = ?').get(channelId);
+  return !!row;
+}
+
+function getTempVoice(channelId) {
+  return db.prepare('SELECT * FROM temp_voices WHERE channel_id = ?').get(channelId);
+}
+
+function deleteTempVoice(channelId) {
+  return db.prepare('DELETE FROM temp_voices WHERE channel_id = ?').run(channelId);
+}
+
+// ==========================================
+// Applications (نظام التقديمات)
+// ==========================================
+function createApplication(guildId, title, description, questions, logChannel, acceptedRole) {
+  const qStr = typeof questions === 'string' ? questions : JSON.stringify(questions);
+  const result = db.prepare(`
+    INSERT INTO applications (guild_id, title, description, questions, log_channel, accepted_role)
+    VALUES (?, ?, ?, ?, ?, ?)
+  `).run(guildId, title, description, qStr, logChannel, acceptedRole);
+  return db.prepare('SELECT * FROM applications WHERE id = ?').get(result.lastInsertRowid);
+}
+
+function getApplications(guildId) {
+  return db.prepare('SELECT * FROM applications WHERE guild_id = ? ORDER BY id DESC').all(guildId);
+}
+
+function getApplication(id) {
+  return db.prepare('SELECT * FROM applications WHERE id = ?').get(id);
+}
+
+function deleteApplication(id) {
+  return db.prepare('DELETE FROM applications WHERE id = ?').run(id);
+}
+
+function createSubmission(guildId, appId, userId, answers) {
+  const aStr = typeof answers === 'string' ? answers : JSON.stringify(answers);
+  const result = db.prepare(`
+    INSERT INTO application_submissions (guild_id, app_id, user_id, answers)
+    VALUES (?, ?, ?, ?)
+  `).run(guildId, appId, userId, aStr);
+  return db.prepare('SELECT * FROM application_submissions WHERE id = ?').get(result.lastInsertRowid);
+}
+
+function getSubmission(id) {
+  return db.prepare('SELECT * FROM application_submissions WHERE id = ?').get(id);
+}
+
+function getPendingSubmissions(guildId) {
+  return db.prepare("SELECT * FROM application_submissions WHERE guild_id = ? AND status = 'pending' ORDER BY id DESC").all(guildId);
+}
+
+function updateSubmissionStatus(id, status, reviewedBy) {
+  return db.prepare('UPDATE application_submissions SET status = ?, reviewed_by = ? WHERE id = ?').run(status, reviewedBy, id);
+}
+
+function getUserApplicationPoints(guildId, userId) {
+  const row = db.prepare('SELECT points FROM application_points WHERE guild_id = ? AND user_id = ?').get(guildId, userId);
+  return row ? row.points : 0;
+}
+
+function setUserApplicationPoints(guildId, userId, points) {
+  return db.prepare('INSERT OR REPLACE INTO application_points (guild_id, user_id, points) VALUES (?, ?, ?)').run(guildId, userId, points);
+}
+
+function addApplicationPoint(guildId, userId, amount = 1) {
+  const current = getUserApplicationPoints(guildId, userId);
+  return setUserApplicationPoints(guildId, userId, current + amount);
+}
+
+function resetApplicationPoints(guildId, userId = null) {
+  if (userId) {
+    return db.prepare('DELETE FROM application_points WHERE guild_id = ? AND user_id = ?').run(guildId, userId);
+  }
+  return db.prepare('DELETE FROM application_points WHERE guild_id = ?').run(guildId);
+}
+
+// ==========================================
+// Reaction Roles
+// ==========================================
+function setReactionRole(customId, guildId, roleId, messageId, channelId) {
+  db.prepare('INSERT OR REPLACE INTO reaction_roles (custom_id, guild_id, role_id, message_id, channel_id) VALUES (?, ?, ?, ?, ?)').run(customId, guildId, roleId, messageId, channelId);
+}
+
+function getReactionRole(customId) {
+  return db.prepare('SELECT * FROM reaction_roles WHERE custom_id = ?').get(customId);
+}
+
+function getGuildReactionRoles(guildId) {
+  return db.prepare('SELECT * FROM reaction_roles WHERE guild_id = ?').all(guildId);
+}
+
+function deleteReactionRole(customId) {
+  db.prepare('DELETE FROM reaction_roles WHERE custom_id = ?').run(customId);
+}
+
+// ==========================================
+// Auto Responders
+// ==========================================
+function addAutoResponder(guildId, triggerWord, replyText) {
+  db.prepare('INSERT INTO auto_responders (guild_id, trigger_word, reply_text) VALUES (?, ?, ?)').run(guildId, triggerWord.toLowerCase().trim(), replyText);
+}
+
+function getAutoResponders(guildId) {
+  return db.prepare('SELECT * FROM auto_responders WHERE guild_id = ? ORDER BY id DESC').all(guildId);
+}
+
+function deleteAutoResponder(guildId, idOrTrigger) {
+  if (typeof idOrTrigger === 'number' || !isNaN(idOrTrigger)) {
+    db.prepare('DELETE FROM auto_responders WHERE guild_id = ? AND id = ?').run(guildId, Number(idOrTrigger));
+  } else {
+    db.prepare('DELETE FROM auto_responders WHERE guild_id = ? AND trigger_word = ?').run(guildId, String(idOrTrigger).toLowerCase().trim());
+  }
+}
+
+// ==========================================
+// Level Rewards
+// ==========================================
+function addLevelReward(guildId, level, roleId) {
+  db.prepare('INSERT OR REPLACE INTO level_rewards (guild_id, level, role_id) VALUES (?, ?, ?)').run(guildId, level, roleId);
+}
+
+function getLevelRewards(guildId) {
+  return db.prepare('SELECT * FROM level_rewards WHERE guild_id = ? ORDER BY level ASC').all(guildId);
+}
+
+function removeLevelReward(guildId, level) {
+  db.prepare('DELETE FROM level_rewards WHERE guild_id = ? AND level = ?').run(guildId, level);
+}
+
+// ==========================================
+// Stars
+// ==========================================
+function addStar(guildId, giverId, receiverId, messageId) {
+  // منع التقييم المزدوج
+  const exists = db.prepare('SELECT id FROM stars WHERE guild_id = ? AND giver_id = ? AND message_id = ?').get(guildId, giverId, messageId);
+  if (exists) return false;
+  db.prepare('INSERT INTO stars (guild_id, giver_id, receiver_id, message_id) VALUES (?, ?, ?, ?)').run(guildId, giverId, receiverId, messageId);
+  return true;
+}
+
+function getStars(guildId, userId) {
+  const row = db.prepare('SELECT COUNT(*) as count FROM stars WHERE guild_id = ? AND receiver_id = ?').get(guildId, userId);
+  return row ? row.count : 0;
+}
+
+// ==========================================
+// Giveaways (نظام السحوبات المتقدم)
+// ==========================================
+function createGiveaway(messageIdOrGuildId, channelId, guildIdOrMessageId, prize, winnersCount, endTime, hostId, requiredRole = null, minLevel = 0, minAccountAge = 0, extraRole = null) {
+  let gId = guildIdOrMessageId;
+  let mId = messageIdOrGuildId;
+  let chId = channelId;
+  let pr = prize;
+  let wc = winnersCount || 1;
+  let et = endTime;
+  let hId = hostId;
+
+  // Flexible argument check: if called as (guildId, channelId, messageId, prize, winnersCount, hostId, endTime)
+  if (typeof endTime === 'string' && isNaN(endTime) && typeof hostId === 'number') {
+    gId = messageIdOrGuildId;
+    chId = channelId;
+    mId = guildIdOrMessageId;
+    pr = prize;
+    wc = winnersCount;
+    hId = endTime;
+    et = hostId;
+  }
+
+  db.prepare(`
+    INSERT OR REPLACE INTO giveaways 
+    (message_id, channel_id, guild_id, prize, winners_count, host_id, end_time, required_role, min_level, min_account_age, extra_role, status, entries)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'active', '[]')
+  `).run(mId, chId, gId, pr, wc, hId, et, requiredRole, minLevel, minAccountAge, extraRole);
+
+  return db.prepare('SELECT * FROM giveaways WHERE message_id = ?').get(mId);
+}
+
+function getGiveaway(messageId) {
+  return db.prepare('SELECT * FROM giveaways WHERE message_id = ?').get(messageId);
+}
+
+function getActiveGiveaways() {
+  return db.prepare("SELECT * FROM giveaways WHERE status = 'active' AND end_time <= ?").all(Date.now());
+}
+
+function getGiveawayEntries(messageId) {
+  const row = db.prepare('SELECT entries FROM giveaways WHERE message_id = ?').get(messageId);
+  if (!row || !row.entries) return [];
+  try {
+    return JSON.parse(row.entries);
+  } catch (e) {
+    return [];
+  }
+}
+
+function updateGiveawayEntries(messageId, entries) {
+  const jsonStr = typeof entries === 'string' ? entries : JSON.stringify(entries);
+  db.prepare('UPDATE giveaways SET entries = ? WHERE message_id = ?').run(jsonStr, messageId);
+}
+
+function addGiveawayEntry(messageId, userId) {
+  const entries = getGiveawayEntries(messageId);
+  if (!entries.includes(userId)) {
+    entries.push(userId);
+    updateGiveawayEntries(messageId, entries);
+    return { added: true, count: entries.length };
+  }
+  return { added: false, count: entries.length };
+}
+
+function removeGiveawayEntry(messageId, userId) {
+  let entries = getGiveawayEntries(messageId);
+  if (entries.includes(userId)) {
+    entries = entries.filter(id => id !== userId);
+    updateGiveawayEntries(messageId, entries);
+    return { removed: true, count: entries.length };
+  }
+  return { removed: false, count: entries.length };
+}
+
+function toggleGiveawayEntry(messageId, userId) {
+  const entries = getGiveawayEntries(messageId);
+  if (entries.includes(userId)) {
+    const updated = entries.filter(id => id !== userId);
+    updateGiveawayEntries(messageId, updated);
+    return { joined: false, count: updated.length };
+  } else {
+    entries.push(userId);
+    updateGiveawayEntries(messageId, entries);
+    return { joined: true, count: entries.length };
+  }
+}
+
+function endGiveaway(messageId) {
+  db.prepare("UPDATE giveaways SET status = 'ended' WHERE message_id = ?").run(messageId);
+}
+
+// ==========================================
+// 👮 Staff Activity System
+// ==========================================
+function getStaffMember(guildId, userId) {
+  let member = db.prepare('SELECT * FROM staff_activity WHERE guild_id = ? AND user_id = ?').get(guildId, userId);
+  if (!member) {
+    db.prepare(`
+      INSERT INTO staff_activity (guild_id, user_id, tickets_closed, mod_actions, bans_count, kicks_count, mutes_count, warns_count, messages_count, voice_seconds, streak_days, points)
+      VALUES (?, ?, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+    `).run(guildId, userId);
+    member = db.prepare('SELECT * FROM staff_activity WHERE guild_id = ? AND user_id = ?').get(guildId, userId);
+  }
+  return member;
+}
+
+function updateStaffActivityStreak(guildId, userId) {
+  const today = new Date().toISOString().slice(0, 10);
+  const staff = getStaffMember(guildId, userId);
+  if (staff.last_active_day === today) return;
+
+  const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+  let newStreak = (staff.last_active_day === yesterday) ? (staff.streak_days + 1) : 1;
+
+  db.prepare('UPDATE staff_activity SET streak_days = ?, last_active_day = ? WHERE guild_id = ? AND user_id = ?')
+    .run(newStreak, today, guildId, userId);
+}
+
+function recordStaffAction(guildId, staffId, actionType, targetId = null, reason = null, details = null) {
+  try {
+    getStaffMember(guildId, staffId);
+    updateStaffActivityStreak(guildId, staffId);
+
+    // تسجيل الحدث في سجل الإجراءات
+    db.prepare(`
+      INSERT INTO staff_actions (guild_id, staff_id, action_type, target_id, reason, details)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `).run(guildId, staffId, actionType, targetId, reason, details);
+
+    // تحديث العدادات والنقاط
+    let pointsToAdd = 10;
+    let colToIncrement = 'mod_actions';
+
+    if (actionType === 'ticket_close') {
+      colToIncrement = 'tickets_closed';
+      pointsToAdd = 25;
+    } else if (actionType === 'ban') {
+      colToIncrement = 'bans_count';
+      pointsToAdd = 20;
+    } else if (actionType === 'kick') {
+      colToIncrement = 'kicks_count';
+      pointsToAdd = 15;
+    } else if (actionType === 'mute') {
+      colToIncrement = 'mutes_count';
+      pointsToAdd = 10;
+    } else if (actionType === 'warn') {
+      colToIncrement = 'warns_count';
+      pointsToAdd = 5;
+    }
+
+    if (colToIncrement === 'tickets_closed') {
+      db.prepare(`
+        UPDATE staff_activity 
+        SET tickets_closed = tickets_closed + 1, points = points + ? 
+        WHERE guild_id = ? AND user_id = ?
+      `).run(pointsToAdd, guildId, staffId);
+    } else {
+      db.prepare(`
+        UPDATE staff_activity 
+        SET mod_actions = mod_actions + 1, ${colToIncrement} = ${colToIncrement} + 1, points = points + ? 
+        WHERE guild_id = ? AND user_id = ?
+      `).run(pointsToAdd, guildId, staffId);
+    }
+  } catch (err) {
+    console.error('[DB] recordStaffAction error:', err);
+  }
+}
+
+function addStaffMessages(guildId, staffId, count = 1) {
+  try {
+    getStaffMember(guildId, staffId);
+    updateStaffActivityStreak(guildId, staffId);
+    db.prepare('UPDATE staff_activity SET messages_count = messages_count + ?, points = points + 1 WHERE guild_id = ? AND user_id = ?')
+      .run(count, guildId, staffId);
+  } catch (e) {}
+}
+
+function addStaffVoiceTime(guildId, staffId, seconds) {
+  try {
+    getStaffMember(guildId, staffId);
+    updateStaffActivityStreak(guildId, staffId);
+    const points = Math.floor(seconds / 300); // 1 point per 5 mins
+    db.prepare('UPDATE staff_activity SET voice_seconds = voice_seconds + ?, points = points + ? WHERE guild_id = ? AND user_id = ?')
+      .run(seconds, points, guildId, staffId);
+  } catch (e) {}
+}
+
+function getStaffLeaderboard(guildId, limit = 25) {
+  return db.prepare(`
+    SELECT *, 
+      (tickets_closed * 25 + mod_actions * 10 + messages_count * 1 + (voice_seconds / 300) * 1) as performance_score
+    FROM staff_activity 
+    WHERE guild_id = ? 
+    ORDER BY performance_score DESC, points DESC
+    LIMIT ?
+  `).all(guildId, limit);
+}
+
+function getStaffActionLogs(guildId, limit = 50) {
+  return db.prepare('SELECT * FROM staff_actions WHERE guild_id = ? ORDER BY created_at DESC LIMIT ?').all(guildId, limit);
+}
+
+function getStaffGoals(guildId) {
+  return db.prepare('SELECT * FROM staff_goals WHERE guild_id = ? ORDER BY created_at DESC').all(guildId);
+}
+
+function addStaffGoal(guildId, title, targetType, targetValue, rewardPoints = 100) {
+  const stmt = db.prepare('INSERT INTO staff_goals (guild_id, title, target_type, target_value, reward_points) VALUES (?, ?, ?, ?, ?)');
+  return stmt.run(guildId, title, targetType, targetValue, rewardPoints);
+}
+
+function deleteStaffGoal(id, guildId) {
+  return db.prepare('DELETE FROM staff_goals WHERE id = ? AND guild_id = ?').run(id, guildId);
+}
+
+function resetStaffStats(guildId, userId = null) {
+  if (userId) {
+    return db.prepare('UPDATE staff_activity SET tickets_closed = 0, mod_actions = 0, bans_count = 0, kicks_count = 0, mutes_count = 0, warns_count = 0, messages_count = 0, voice_seconds = 0, streak_days = 0, points = 0 WHERE guild_id = ? AND user_id = ?').run(guildId, userId);
+  }
+  return db.prepare('UPDATE staff_activity SET tickets_closed = 0, mod_actions = 0, bans_count = 0, kicks_count = 0, mutes_count = 0, warns_count = 0, messages_count = 0, voice_seconds = 0, streak_days = 0, points = 0 WHERE guild_id = ?').run(guildId);
+}
+
+// ==========================================
+// Stats
+// ==========================================
+function getSystemStats() {
+  const users = db.prepare('SELECT COUNT(DISTINCT user_id) as count FROM users').get();
+  const guilds = db.prepare('SELECT COUNT(*) as count FROM guild_settings').get();
+  const tickets = db.prepare("SELECT COUNT(*) as count FROM tickets WHERE status = 'open'").get();
+  return {
+    totalUsers: users?.count || 0,
+    totalGuilds: guilds?.count || 0,
+    openTickets: tickets?.count || 0
+  };
+}
+
+// ==========================================
+// Export
+// ==========================================
+module.exports = {
+  db,
+  getGuildSettings,
+  setGuildSetting,
+  updateGuildSetting,
+  getUser,
+  addXp,
+  addCoins,
+  removeCoins,
+  setCoins,
+  getLastDaily,
+  setLastDaily,
+  setWallpaper,
+  getLeaderboard,
+  getCoinsLeaderboard,
+  addWarning,
+  getWarnings,
+  clearWarnings,
+  // 🎫 Tickets
+  createTicket,
+  closeTicket,
+  deleteTicket,
+  getTicket: getTicketByChannel,
+  getTicketByChannel,
+  getUserActiveTickets,
+  getGuildTickets,
+  claimTicket,
+  unclaimTicket,
+  transferTicket,
+  saveTicketPanel,
+  getTicketPanel,
+  getGuildTicketPanels,
+  deleteTicketPanel,
+  addTicketRating,
+  getStaffRatings,
+  getStaffAverageRating,
+  saveTranscript,
+  getTranscript,
+  // 🔗 Invites
+  getInvites,
+  addInviteRecord,
+  removeInviteMember,
+  addBonusInvites,
+  getInvitesLeaderboard,
+  getMemberInviter,
+  resetInvites,
+  // 🎁 Giveaways
+  createGiveaway,
+  getGiveaway,
+  getActiveGiveaways,
+  getGiveawayEntries,
+  updateGiveawayEntries,
+  addGiveawayEntry,
+  removeGiveawayEntry,
+  toggleGiveawayEntry,
+  endGiveaway,
+  // 📢 Broadcasts
+  createBroadcast,
+  getGuildBroadcasts,
+  getBroadcast,
+  deleteBroadcast,
+  getAllActiveBroadcasts,
+  updateBroadcastLastSent,
+  updateBroadcastStatus,
+  // Temp Voice
+  createTempVoice,
+  isTempVoice,
+  getTempVoice,
+  deleteTempVoice,
+  setReactionRole,
+  getReactionRole,
+  getGuildReactionRoles,
+  deleteReactionRole,
+  addAutoResponder,
+  getAutoResponders,
+  deleteAutoResponder,
+  addLevelReward,
+  getLevelRewards,
+  removeLevelReward,
+  addStar,
+  getStars,
+  createApplication,
+  getApplications,
+  getApplication,
+  deleteApplication,
+  createSubmission,
+  getSubmission,
+  getPendingSubmissions,
+  updateSubmissionStatus,
+  getUserApplicationPoints,
+  setUserApplicationPoints,
+  addApplicationPoint,
+  resetApplicationPoints,
+  // 👮 Staff Activity Exports
+  getStaffMember,
+  recordStaffAction,
+  addStaffMessages,
+  addStaffVoiceTime,
+  getStaffLeaderboard,
+  getStaffActionLogs,
+  getStaffGoals,
+  addStaffGoal,
+  deleteStaffGoal,
+  resetStaffStats,
+  // 🎁 Giveaway Exports
+  createGiveaway,
+  getGiveaway,
+  getActiveGiveaways,
+  getGiveawayEntries,
+  updateGiveawayEntries,
+  addGiveawayEntry,
+  removeGiveawayEntry,
+  toggleGiveawayEntry,
+  endGiveaway,
+  getGuildGiveaways: (guildId) => db.prepare('SELECT * FROM giveaways WHERE guild_id = ? ORDER BY end_time DESC LIMIT 50').all(guildId),
+  // Compatibility aliases
+  getTopXp: getLeaderboard,
+  getTopCredits: getCoinsLeaderboard,
+  addCredits: addCoins,
+  getUserRank: (userId, guildId) => {
+    const user = getUser(userId, guildId);
+    return { xp: user.xp || 0, level: user.level || 1, rank: 1 };
+  },
+  getWallpaper: (userId) => 'default',
+  setDaily: (userId, guildId, now, amount) => {
+    addCoins(userId, guildId, amount);
+    setLastDaily(userId, guildId, now);
+    const u = getUser(userId, guildId);
+    return u.coins || 0;
+  }
+};
