@@ -1688,7 +1688,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                         profile_cat: 'btnCatProfile'
                     };
 
-                    function switchCmdCategory(catKey) {
+                    window.switchCmdCategory = function(catKey) {
                         currentCat = catKey;
                         const btns = document.querySelectorAll('[id^="btnCat"]');
                         btns.forEach(b => {
@@ -1700,21 +1700,24 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                             activeBtn.className = "w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold bg-purple-600 text-white shadow-lg transition cursor-pointer";
                         }
                         renderCommands();
-                    }
+                    };
 
-                    function searchCommands() {
+                    window.searchCommands = function() {
                         renderCommands();
-                    }
+                    };
 
-                    function filterCmdStatus(status) {
+                    window.filterCmdStatus = function(status) {
                         currentFilter = status;
-                        document.getElementById('btnFilterAll').className = status === 'all' ? "px-3 py-1 rounded-lg text-xs font-bold bg-purple-600 text-white transition shadow cursor-pointer" : "px-3 py-1 rounded-lg text-xs font-bold text-gray-400 hover:text-white transition cursor-pointer";
-                        document.getElementById('btnFilterEnabled').className = status === 'enabled' ? "px-3 py-1 rounded-lg text-xs font-bold bg-purple-600 text-white transition shadow cursor-pointer" : "px-3 py-1 rounded-lg text-xs font-bold text-gray-400 hover:text-white transition cursor-pointer";
-                        document.getElementById('btnFilterDisabled').className = status === 'disabled' ? "px-3 py-1 rounded-lg text-xs font-bold bg-purple-600 text-white transition shadow cursor-pointer" : "px-3 py-1 rounded-lg text-xs font-bold text-gray-400 hover:text-white transition cursor-pointer";
+                        const btnAll = document.getElementById('btnFilterAll');
+                        const btnEn = document.getElementById('btnFilterEnabled');
+                        const btnDis = document.getElementById('btnFilterDisabled');
+                        if (btnAll) btnAll.className = status === 'all' ? "px-3 py-1 rounded-lg text-xs font-bold bg-purple-600 text-white transition shadow cursor-pointer" : "px-3 py-1 rounded-lg text-xs font-bold text-gray-400 hover:text-white transition cursor-pointer";
+                        if (btnEn) btnEn.className = status === 'enabled' ? "px-3 py-1 rounded-lg text-xs font-bold bg-purple-600 text-white transition shadow cursor-pointer" : "px-3 py-1 rounded-lg text-xs font-bold text-gray-400 hover:text-white transition cursor-pointer";
+                        if (btnDis) btnDis.className = status === 'disabled' ? "px-3 py-1 rounded-lg text-xs font-bold bg-purple-600 text-white transition shadow cursor-pointer" : "px-3 py-1 rounded-lg text-xs font-bold text-gray-400 hover:text-white transition cursor-pointer";
                         renderCommands();
-                    }
+                    };
 
-                    function toggleAllCategoryCmds(enable) {
+                    window.toggleAllCategoryCmds = function(enable) {
                         const data = commandsDatabase[currentCat] || commandsDatabase.punishments;
                         data.items.forEach(it => {
                             if (enable) {
@@ -1725,9 +1728,9 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                         });
                         saveCommandStates();
                         renderCommands();
-                    }
+                    };
 
-                    async function toggleSingleCmd(cmdName, isEnabled) {
+                    window.toggleSingleCmd = async function(cmdName, isEnabled) {
                         if (isEnabled) {
                             disabledCommands.delete(cmdName);
                         } else {
@@ -1735,7 +1738,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                         }
                         await saveCommandStates();
                         updateStatCounters();
-                    }
+                    };
 
                     async function saveCommandStates() {
                         try {
