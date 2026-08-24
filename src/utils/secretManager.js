@@ -65,7 +65,7 @@ class SecretManager {
      * This method will replace the direct process.env calls in future versions.
      */
     async fetchFromVault(secretName, vaultClient) {
-        console.warn(\`[SECURITY WARNING]: Falling back to deprecated process.env for \${secretName}. Please upgrade this module to use a dedicated Vault client.\`);
+        console.warn(`[SECURITY WARNING]: Falling back to deprecated process.env for ${secretName}. Please upgrade this module to use a dedicated Vault client.`);
         return process.env[`VULKAN_${secretName}`] || null; // Example fallback mechanism
     }
 }
