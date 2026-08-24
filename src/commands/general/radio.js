@@ -1,59 +1,52 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
-const audioManager = require('../../utils/audioPlayer');
-const config = require('../../config.json');
+// ============================================================
+// FILE: src/commands/general/radio.js
+// ============================================================
+const { SlashCommandBuilder, PermissionFlagsBits } = require("discord.js");
+const radioService = require("../../services/radioService");
 
 module.exports = {
-  name: 'radio',
-  description: 'تشغيل إذاعة القرآن الكريم مباشرة 24/7 في الروم الصوتي',
-  aliases: ['راديو', 'اذاعة'],
-  data: new SlashCommandBuilder()
-    .setName('radio')
-    .setDescription('تشغيل إذاعة القرآن الكريم 24/7')
-    .addStringOption(opt =>
-      opt.setName('station')
-        .setDescription('اختر الإذاعة')
-        .setRequired(false)
-        .addChoices(
-          { name: '📻 إذاعة القرآن الكريم من القاهرة', value: 'cairo_radio' },
-          { name: '📻 إذاعة القرآن الكريم من مكة المكرمة', value: 'makkah_radio' }
-        )
-    ),
+    data: new SlashCommandBuilder()
+        .setName("radio")
+        .setDescription("تشغيل راديو إسلامي أو قرآن كريم في القناة الصوتية")
+        .addStringOption(opt => opt.setName("station").setDescription("المحطة الإذاعية").setRequired(false)
+            .addChoices(
+                { name: "🕌 قرآن كريم - مكة", value: "quran_makkah" },
+                { name: "📖 إذاعة القرآن - مصر", value: "quran_egypt" },
+                { name: "☀️ راديو السنة النبوية", value: "sunnah" },
+                { name: "🌙 إذاعة المدينة المنورة", value: "madinah" },
+                { name: "📚 قرآن التفسير والعلوم", value: "quran_tafseer" }
+            ))
+        .addSubcommand(sub => sub.setName("stop").setDescription("إيقاف البث الحالي"))
+        .addSubcommand(sub => sub.setName("list").setDescription("عرض قائمة المحطات")),
 
-  async execute(interaction) {
-    const memberVoice = interaction.member.voice.channel;
-    if (!memberVoice) {
-      return interaction.reply({ content: '❌ يجب أن تكون متواجداً في روم صوتي لتشغيل الإذاعة.', ephemeral: true });
+    async execute(interaction) {
+        const sub = interaction.options.getSubcommand(false);
+
+        if (sub === "stop") {
+            const stopped = await radioService.stop(interaction.guild.id);
+            return interaction.reply({ content: stopped ? "⏹️ تم إيقاف البث." : "❌ لا يوجد بث نشط حالياً.", ephemeral: true });
+        }
+
+        if (sub === "list") {
+            const stations = radioService.getStations();
+            const list = Object.entries(stations).map(([k, s]) => `${s.emoji} **${s.name}**`).join("\n");
+            return interaction.reply({ content: `📻 **المحطات المتاحة:**\n${list}`, ephemeral: true });
+        }
+
+        const member = interaction.member;
+        const voiceChannel = member.voice.channel;
+        if (!voiceChannel) return interaction.reply({ content: "❌ يجب أن تكون في قناة صوتية أولاً!", ephemeral: true });
+
+        await interaction.deferReply();
+        const stationKey = interaction.options.getString("station") || "quran_makkah";
+
+        try {
+            const station = await radioService.play(voiceChannel, stationKey);
+            const embed = radioService.buildNowPlayingEmbed(station, voiceChannel, interaction.user.username);
+            const buttons = radioService.buildControlButtons();
+            await interaction.editReply({ embeds: [embed], components: [buttons] });
+        } catch(e) {
+            await interaction.editReply({ content: `❌ خطأ: ${e.message}` });
+        }
     }
-
-    await interaction.deferReply();
-    const stationKey = interaction.options.getString('station') || 'cairo_radio';
-    const station = audioManager.quranStations[stationKey] || audioManager.quranStations.cairo_radio;
-
-    await audioManager.playStream(memberVoice, station.url, station.name);
-
-    const embed = new EmbedBuilder()
-      .setColor(config.colors.success)
-      .setTitle('📻 جاري تشغيل البث المباشر للإذاعة')
-      .setDescription(`🎙️ **المحطة:** ${station.name}\n📍 **الروم الصوتي:** <#${memberVoice.id}>\n⚡ البث متواصل 24/7`)
-      .setFooter({ text: 'لإيقاف البث استخدم /stop' })
-      .setTimestamp();
-
-    await interaction.editReply({ embeds: [embed] });
-  },
-
-  async executePrefix(message) {
-    const memberVoice = message.member?.voice.channel;
-    if (!memberVoice) return message.reply('❌ يجب أن تكون في روم صوتي.');
-
-    const station = audioManager.quranStations.cairo_radio;
-    await audioManager.playStream(memberVoice, station.url, station.name);
-
-    const embed = new EmbedBuilder()
-      .setColor(config.colors.success)
-      .setTitle('📻 جاري تشغيل إذاعة القرآن الكريم')
-      .setDescription(`🎙️ **المحطة:** ${station.name}\n📍 **الروم:** <#${memberVoice.id}>`)
-      .setTimestamp();
-
-    message.reply({ embeds: [embed] });
-  }
 };
