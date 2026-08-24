@@ -27,7 +27,10 @@ const antiNuke = {
       const executor = logEntry.executor;
       if (!executor || executor.id === guild.client.user.id || executor.id === guild.ownerId) return;
 
-      // فحص القائمة البيضاء (Whitelist)
+      // فحص القائمة البيضاء (Whitelist & Anti Mod)
+      if (db.isUserWhitelisted && db.isUserWhitelisted(guild.id, executor.id, 'whitelist')) {
+        return; // مستثنى من الحماية
+      }
       if (settings.antinuke_whitelist_role) {
         const member = await guild.members.fetch(executor.id).catch(() => null);
         if (member && member.roles.cache.has(settings.antinuke_whitelist_role)) {
@@ -116,6 +119,11 @@ const antiNuke = {
         }
 
         logger.warn(`[ANTI-NUKE] تم تطبيق عقوبة (${punishmentLabel}) على المشرف ${executor.tag} في سيرفر ${guild.name} بسبب ${actionLabel}!`);
+
+        // تسجيل في سجلات الأمان (Security Logs)
+        if (db.logSecurityEvent) {
+          db.logSecurityEvent(guild.id, 'security', 'auto_punish', executor.id, null, actionLabel, punishmentLabel);
+        }
 
         // 3. إرسال تنبيه في قناة الطوارئ أو اللوق
         const alertChannelId = settings.antinuke_alert_channel || settings.log_channel;

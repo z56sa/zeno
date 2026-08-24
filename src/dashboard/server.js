@@ -905,6 +905,25 @@ module.exports = function (app, client) {
             } catch (err) {}
             if (!settings) settings = {};
 
+            let whitelistUsers = [];
+            let antimodUsers = [];
+            let securityLogsList = [];
+            let warnPunishmentsList = [];
+            try {
+                if (database.getWarnPunishments) {
+                    warnPunishmentsList = database.getWarnPunishments(guildId) || [];
+                }
+            } catch (err) {}
+            try {
+                if (database.getProtectionWhitelist) {
+                    whitelistUsers = database.getProtectionWhitelist(guildId, 'whitelist') || [];
+                    antimodUsers = database.getProtectionWhitelist(guildId, 'antimod') || [];
+                }
+                if (database.getSecurityLogs) {
+                    securityLogsList = database.getSecurityLogs(guildId, null, 50) || [];
+                }
+            } catch (err) {}
+
             const botGuild = client?.guilds?.cache?.get(guildId);
             const userAvatar = user.avatar ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png` : 'https://cdn.discordapp.com/embed/avatars/0.png';
             const guildIcon = guild.icon ? `https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.png` : 'https://cdn.discordapp.com/embed/avatars/0.png';
@@ -929,6 +948,8 @@ module.exports = function (app, client) {
                 'autoresponder': 'الرد التلقائي على الكلمات 💬',
                 'tickets': 'نظام التذاكر والدعم الفني 🎫',
                 'protection': 'جدار الحماية الشامل ومكافحة التخريب 🛡️',
+                'whitelist': 'الحماية / القائمة البيضاء ⚪',
+                'protection-logs': 'الحماية / السجلات 📋',
                 'antiraid': 'نظام مكافحة الغزو والأعضاء الوهميين 🚨',
                 'staff-activity': 'تتبع نشاط الإدارة والمشرفين 👮',
                 'tempvoice': 'نظام الرومات الصوتية المؤقتة 🕒',
@@ -1306,283 +1327,581 @@ formFieldsHtml = `
                     </div>
                 `;
             } else if (section === 'automod') {
+formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl">
 
-                formFieldsHtml = `
-                    <div class="space-y-6 text-right" dir="rtl">
-
-                        <!-- Master Toggle -->
-                        <div class="flex items-center justify-between bg-[#1c1f2e] border border-white/5 p-5 rounded-2xl">
+                        <!-- 1. Master Toggle & Banner -->
+                        <div class="bg-[#12141f] border border-white/5 p-5 rounded-2xl flex items-center justify-between shadow-xl">
                             <label class="toggle">
                                 <input type="checkbox" name="automod_enabled" value="1" ${settings.automod_enabled !== 0 ? 'checked' : ''} onchange="saveAutomodSetting('automod_enabled', this.checked)">
                                 <span class="slider"></span>
                             </label>
-                            <div>
-                                <h4 class="font-black text-white text-lg">الرقابة التلقائية 🤖</h4>
-                                <p class="text-gray-400 text-[11px] mt-0.5">قم بتفعيل كل الفلترات وضبطها مناسبةً لسيرفرك، وضعها أمامك في لوحة الاعدادات لخفية الأذى</p>
+                            <div class="flex items-center gap-3">
+                                <div class="text-right">
+                                    <h4 class="font-black text-white text-base">الرقابة التلقائية</h4>
+                                    <p class="text-gray-400 text-xs mt-0.5">حماية سيرفرك من المحتوى غير المرغوب</p>
+                                </div>
+                                <div class="w-10 h-10 rounded-xl bg-purple-600/20 text-purple-400 flex items-center justify-center text-lg border border-purple-500/30">
+                                    🛡️
+                                </div>
                             </div>
                         </div>
 
-                        <!-- Cards Grid 3 columns -->
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-
-                            <!-- إزعاج بالرسائل / Spam -->
-                            <div class="bg-[#1c1f2e] border border-white/5 rounded-2xl p-5 flex flex-col gap-3 hover:border-purple-800/40 transition">
-                                <div class="flex items-center justify-between">
-                                    <div class="flex items-center gap-2">
-                                        <span class="text-gray-400 text-xs">≡</span>
-                                    </div>
-                                    <div class="flex items-center gap-2">
-                                        <span class="font-bold text-white text-sm">إزعاج بالرسائل (5 رسائل \\ 5 ثواني)</span>
-                                        <label class="toggle">
-                                            <input type="checkbox" name="anti_spam" value="1" ${settings.anti_spam ? 'checked' : ''} onchange="saveAutomodSetting('anti_spam', this.checked)">
-                                            <span class="slider"></span>
-                                        </label>
-                                    </div>
+                        <!-- 2. Discord AutoMod Header -->
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between">
+                                <span class="text-[11px] text-gray-400 font-bold">فلاتر الكلمات</span>
+                                <div class="flex items-center gap-2 text-indigo-400 font-bold text-xs">
+                                    <span>Discord AutoMod — حماية مدعومة من Discord مباشرة - سريعة وموثوقة</span>
+                                    <span>🤖</span>
                                 </div>
-                                <button type="button" onclick="openAutomodModal('spam')" class="w-full py-2 bg-[#0b0d14] hover:bg-[#0d0f18] border border-white/5 rounded-xl text-gray-400 hover:text-white text-xs font-bold transition">بحاجة إلى الإعداد</button>
                             </div>
 
-                            <!-- الكلمات المسيئة / Bad Words -->
-                            <div class="bg-[#1c1f2e] border border-white/5 rounded-2xl p-5 flex flex-col gap-3 hover:border-purple-800/40 transition">
-                                <div class="flex items-center justify-between">
-                                    <div class="flex items-center gap-2">
-                                        <span class="text-gray-400 text-xs">🔇</span>
-                                    </div>
-                                    <div class="flex items-center gap-2">
-                                        <span class="font-bold text-white text-sm">الكلمات المسيئة</span>
-                                        <label class="toggle">
-                                            <input type="checkbox" name="bad_words_enabled" value="1" ${settings.bad_words_enabled ? 'checked' : ''} onchange="saveAutomodSetting('bad_words_enabled', this.checked)">
-                                            <span class="slider"></span>
-                                        </label>
-                                    </div>
+                            <!-- فلترة الكلمات المحظورة -->
+                            <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between hover:border-purple-500/30 transition">
+                                <div class="flex items-center gap-2">
+                                    <label class="toggle"><input type="checkbox" name="bad_words_enabled" value="1" ${settings.bad_words_enabled ? 'checked' : ''} onchange="saveAutomodSetting('bad_words_enabled', this.checked)"><span class="slider"></span></label>
+                                    <button type="button" onclick="document.getElementById('sec_strict_words').scrollIntoView({behavior:'smooth'})" class="text-gray-400 hover:text-white p-1 text-xs">⚙️</button>
                                 </div>
-                                <button type="button" onclick="openAutomodModal('badwords')" class="w-full py-2 bg-[#0b0d14] hover:bg-[#0d0f18] border border-white/5 rounded-xl text-gray-400 hover:text-white text-xs font-bold transition">بحاجة إلى الإعداد</button>
-                            </div>
-
-                            <!-- تكرار النص / Repeated Text -->
-                            <div class="bg-[#1c1f2e] border border-white/5 rounded-2xl p-5 flex flex-col gap-3 hover:border-purple-800/40 transition">
-                                <div class="flex items-center justify-between">
-                                    <div class="flex items-center gap-2">
-                                        <span class="text-gray-400 text-xs">🔁</span>
-                                    </div>
-                                    <div class="flex items-center gap-2">
-                                        <span class="font-bold text-white text-sm">تكرار النص</span>
-                                        <label class="toggle">
-                                            <input type="checkbox" name="anti_line_spam" value="1" ${settings.anti_line_spam ? 'checked' : ''} onchange="saveAutomodSetting('anti_line_spam', this.checked)">
-                                            <span class="slider"></span>
-                                        </label>
-                                    </div>
-                                </div>
-                                <button type="button" class="w-full py-2 bg-[#0b0d14] hover:bg-[#0d0f18] border border-white/5 rounded-xl text-gray-400 hover:text-white text-xs font-bold transition">بحاجة إلى الإعداد</button>
-                            </div>
-
-                            <!-- الروابط / Links -->
-                            <div class="bg-[#1c1f2e] border border-white/5 rounded-2xl p-5 flex flex-col gap-3 hover:border-purple-800/40 transition">
-                                <div class="flex items-center justify-between">
-                                    <div class="flex items-center gap-2">
-                                        <span class="text-gray-400 text-xs">🔗</span>
-                                    </div>
-                                    <div class="flex items-center gap-2">
-                                        <span class="font-bold text-white text-sm">الروابط</span>
-                                        <label class="toggle">
-                                            <input type="checkbox" name="anti_links" value="1" ${settings.anti_links ? 'checked' : ''} onchange="saveAutomodSetting('anti_links', this.checked)">
-                                            <span class="slider"></span>
-                                        </label>
-                                    </div>
-                                </div>
-                                <button type="button" onclick="openAutomodModal('links')" class="w-full py-2 bg-[#0b0d14] hover:bg-[#0d0f18] border border-white/5 rounded-xl text-gray-400 hover:text-white text-xs font-bold transition">بحاجة إلى الإعداد</button>
-                            </div>
-
-                            <!-- روابط السيرفرات / Invite Links -->
-                            <div class="bg-[#1c1f2e] border border-white/5 rounded-2xl p-5 flex flex-col gap-3 hover:border-purple-800/40 transition">
-                                <div class="flex items-center justify-between">
-                                    <div class="flex items-center gap-2">
-                                        <span class="text-gray-400 text-xs">🔀</span>
-                                    </div>
-                                    <div class="flex items-center gap-2">
-                                        <span class="font-bold text-white text-sm">روابط السيرفرات</span>
-                                        <label class="toggle">
-                                            <input type="checkbox" name="anti_invites" value="1" ${settings.anti_invites ? 'checked' : ''} onchange="saveAutomodSetting('anti_invites', this.checked)">
-                                            <span class="slider"></span>
-                                        </label>
-                                    </div>
-                                </div>
-                                <button type="button" class="w-full py-2 bg-[#0b0d14] hover:bg-[#0d0f18] border border-white/5 rounded-xl text-gray-400 hover:text-white text-xs font-bold transition">بحاجة إلى الإعداد</button>
-                            </div>
-
-                            <!-- الرسائل المكررة / Duplicate Messages -->
-                            <div class="bg-[#1c1f2e] border border-white/5 rounded-2xl p-5 flex flex-col gap-3 hover:border-purple-800/40 transition">
-                                <div class="flex items-center justify-between">
-                                    <div class="flex items-center gap-2">
-                                        <span class="text-gray-400 text-xs">📋</span>
-                                    </div>
-                                    <div class="flex items-center gap-2">
-                                        <span class="font-bold text-white text-sm">الرسائل المكررة</span>
-                                        <label class="toggle">
-                                            <input type="checkbox" name="anti_duplicate" value="1" ${settings.anti_duplicate ? 'checked' : ''} onchange="saveAutomodSetting('anti_duplicate', this.checked)">
-                                            <span class="slider"></span>
-                                        </label>
-                                    </div>
-                                </div>
-                                <button type="button" class="w-full py-2 bg-[#0b0d14] hover:bg-[#0d0f18] border border-white/5 rounded-xl text-gray-400 hover:text-white text-xs font-bold transition">بحاجة إلى الإعداد</button>
-                            </div>
-
-                            <!-- إزعاج منشن / Mention Spam -->
-                            <div class="bg-[#1c1f2e] border border-white/5 rounded-2xl p-5 flex flex-col gap-3 hover:border-purple-800/40 transition">
-                                <div class="flex items-center justify-between">
-                                    <div class="flex items-center gap-2">
-                                        <span class="text-gray-400 text-xs">📢</span>
-                                    </div>
-                                    <div class="flex items-center gap-2">
-                                        <span class="font-bold text-white text-sm">إزعاج منشن</span>
-                                        <label class="toggle">
-                                            <input type="checkbox" name="anti_mention_spam" value="1" ${settings.anti_mention_spam ? 'checked' : ''} onchange="saveAutomodSetting('anti_mention_spam', this.checked)">
-                                            <span class="slider"></span>
-                                        </label>
-                                    </div>
-                                </div>
-                                <button type="button" onclick="openAutomodModal('mention')" class="w-full py-2 bg-[#0b0d14] hover:bg-[#0d0f18] border border-white/5 rounded-xl text-gray-400 hover:text-white text-xs font-bold transition">بحاجة إلى الإعداد</button>
-                            </div>
-
-                            <!-- إزعاج EMOJI / Emoji Spam -->
-                            <div class="bg-[#1c1f2e] border border-white/5 rounded-2xl p-5 flex flex-col gap-3 hover:border-purple-800/40 transition">
-                                <div class="flex items-center justify-between">
-                                    <div class="flex items-center gap-2">
-                                        <span class="text-gray-400 text-xs">😂</span>
-                                    </div>
-                                    <div class="flex items-center gap-2">
-                                        <span class="font-bold text-white text-sm">إزعاج EMOJI</span>
-                                        <label class="toggle">
-                                            <input type="checkbox" name="anti_emoji_spam" value="1" ${settings.anti_emoji_spam ? 'checked' : ''} onchange="saveAutomodSetting('anti_emoji_spam', this.checked)">
-                                            <span class="slider"></span>
-                                        </label>
-                                    </div>
-                                </div>
-                                <button type="button" onclick="openAutomodModal('emoji')" class="w-full py-2 bg-[#0b0d14] hover:bg-[#0d0f18] border border-white/5 rounded-xl text-gray-400 hover:text-white text-xs font-bold transition">بحاجة إلى الإعداد</button>
-                            </div>
-
-                            <!-- سبام الأحرف الكبيرة / Anti Caps -->
-                            <div class="bg-[#1c1f2e] border border-white/5 rounded-2xl p-5 flex flex-col gap-3 hover:border-purple-800/40 transition">
-                                <div class="flex items-center justify-between">
-                                    <div class="flex items-center gap-2">
-                                        <span class="text-gray-400 text-xs font-black">B</span>
-                                    </div>
-                                    <div class="flex items-center gap-2 text-right">
-                                        <div>
-                                            <span class="font-bold text-white text-sm block">سبام الأحرف الكبيرة</span>
-                                            <span class="text-[10px] text-gray-400">(70% < احرف مكبرة)</span>
+                                <div class="flex items-center gap-3 text-right">
+                                    <div>
+                                        <div class="flex items-center justify-end gap-2">
+                                            <h5 class="text-xs font-bold text-white">فلترة الكلمات المحظورة</h5>
+                                            <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-950/60 text-amber-400 border border-amber-800/40">مفعل</span>
                                         </div>
-                                        <label class="toggle">
-                                            <input type="checkbox" name="anti_caps" value="1" ${settings.anti_caps ? 'checked' : ''} onchange="saveAutomodSetting('anti_caps', this.checked)">
-                                            <span class="slider"></span>
-                                        </label>
+                                        <p class="text-[10px] text-gray-400 mt-0.5">فلترة الكلمات المسيئة والشتائم والمحتوى غير اللائق</p>
+                                    </div>
+                                    <span class="text-base">🛡️</span>
+                                </div>
+                            </div>
+
+                            <!-- حظر دعوات السيرفرات -->
+                            <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between hover:border-purple-500/30 transition">
+                                <div class="flex items-center gap-2">
+                                    <label class="toggle"><input type="checkbox" name="anti_invites" value="1" ${settings.anti_invites ? 'checked' : ''} onchange="saveAutomodSetting('anti_invites', this.checked)"><span class="slider"></span></label>
+                                    <button type="button" class="text-gray-400 hover:text-white p-1 text-xs">⚙️</button>
+                                </div>
+                                <div class="flex items-center gap-3 text-right">
+                                    <div>
+                                        <div class="flex items-center justify-end gap-2">
+                                            <h5 class="text-xs font-bold text-white">حظر دعوات السيرفرات</h5>
+                                            <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-950/60 text-amber-400 border border-amber-800/40">مفعل</span>
+                                        </div>
+                                        <p class="text-[10px] text-gray-400 mt-0.5">منع مشاركة روابط دعوات السيرفرات الأخرى</p>
+                                    </div>
+                                    <span class="text-base">🚨</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 3. فلاتر السبام (Spam Filters) -->
+                        <div class="space-y-3 pt-2">
+                            <span class="text-[11px] text-gray-400 font-bold block">فلاتر السبام</span>
+
+                            <!-- مكافحة السبام -->
+                            <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between hover:border-purple-500/30 transition">
+                                <div class="flex items-center gap-2">
+                                    <label class="toggle"><input type="checkbox" name="anti_spam" value="1" ${settings.anti_spam ? 'checked' : ''} onchange="saveAutomodSetting('anti_spam', this.checked)"><span class="slider"></span></label>
+                                    <button type="button" class="text-gray-400 hover:text-white p-1 text-xs">⚙️</button>
+                                </div>
+                                <div class="flex items-center gap-3 text-right">
+                                    <div>
+                                        <div class="flex items-center justify-end gap-2">
+                                            <h5 class="text-xs font-bold text-white">مكافحة السبام</h5>
+                                            <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-950/60 text-amber-400 border border-amber-800/40">مفعل</span>
+                                        </div>
+                                        <p class="text-[10px] text-gray-400 mt-0.5">كشف وحظر الرسائل المزعجة والمتكررة</p>
+                                    </div>
+                                    <span class="text-base">🛡️</span>
+                                </div>
+                            </div>
+
+                            <!-- حظر الروابط -->
+                            <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between hover:border-purple-500/30 transition">
+                                <div class="flex items-center gap-2">
+                                    <label class="toggle"><input type="checkbox" name="anti_link" value="1" ${settings.anti_link ? 'checked' : ''} onchange="saveAutomodSetting('anti_link', this.checked)"><span class="slider"></span></label>
+                                    <button type="button" class="text-gray-400 hover:text-white p-1 text-xs">⚙️</button>
+                                </div>
+                                <div class="flex items-center gap-3 text-right">
+                                    <div>
+                                        <div class="flex items-center justify-end gap-2">
+                                            <h5 class="text-xs font-bold text-white">حظر الروابط</h5>
+                                            <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-950/60 text-amber-400 border border-amber-800/40">مفعل</span>
+                                        </div>
+                                        <p class="text-[10px] text-gray-400 mt-0.5">حظر الروابط الغير مسموح بها</p>
+                                    </div>
+                                    <span class="text-base">🗑️</span>
+                                </div>
+                            </div>
+
+                            <!-- حظر سبام المنشن -->
+                            <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between hover:border-purple-500/30 transition">
+                                <div class="flex items-center gap-2">
+                                    <label class="toggle"><input type="checkbox" name="anti_mass_mention" value="1" ${settings.anti_mass_mention ? 'checked' : ''} onchange="saveAutomodSetting('anti_mass_mention', this.checked)"><span class="slider"></span></label>
+                                    <button type="button" class="text-gray-400 hover:text-white p-1 text-xs">⚙️</button>
+                                </div>
+                                <div class="flex items-center gap-3 text-right">
+                                    <div>
+                                        <div class="flex items-center justify-end gap-2">
+                                            <h5 class="text-xs font-bold text-white">حظر سبام المنشن</h5>
+                                            <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-950/60 text-amber-400 border border-amber-800/40">مفعل</span>
+                                        </div>
+                                        <p class="text-[10px] text-gray-400 mt-0.5">حدد عدد المنشنات المسموح بها في الرسالة الواحدة</p>
+                                    </div>
+                                    <span class="text-base">🔔</span>
+                                </div>
+                            </div>
+
+                            <!-- حظر الحروف الكبيرة -->
+                            <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between hover:border-purple-500/30 transition">
+                                <div class="flex items-center gap-2">
+                                    <label class="toggle"><input type="checkbox" name="anti_caps" value="1" ${settings.anti_caps ? 'checked' : ''} onchange="saveAutomodSetting('anti_caps', this.checked)"><span class="slider"></span></label>
+                                    <button type="button" class="text-gray-400 hover:text-white p-1 text-xs">⚙️</button>
+                                </div>
+                                <div class="flex items-center gap-3 text-right">
+                                    <div>
+                                        <div class="flex items-center justify-end gap-2">
+                                            <h5 class="text-xs font-bold text-white">حظر الحروف الكبيرة</h5>
+                                            <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-950/60 text-amber-400 border border-amber-800/40">مفعل</span>
+                                        </div>
+                                        <p class="text-[10px] text-gray-400 mt-0.5">منع الرسائل التي تحتوي على أحرف كبيرة بشكل مفرط (70% أو أكثر)</p>
+                                    </div>
+                                    <span class="text-base">✏️</span>
+                                </div>
+                            </div>
+
+                            <!-- إزعاج Spoilers -->
+                            <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between hover:border-purple-500/30 transition">
+                                <div class="flex items-center gap-2">
+                                    <label class="toggle"><input type="checkbox" name="anti_spoilers" value="1" ${settings.anti_spoilers ? 'checked' : ''} onchange="saveAutomodSetting('anti_spoilers', this.checked)"><span class="slider"></span></label>
+                                    <button type="button" class="text-gray-400 hover:text-white p-1 text-xs">⚙️</button>
+                                </div>
+                                <div class="flex items-center gap-3 text-right">
+                                    <div>
+                                        <div class="flex items-center justify-end gap-2">
+                                            <h5 class="text-xs font-bold text-white">إزعاج Spoilers</h5>
+                                            <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-950/60 text-amber-400 border border-amber-800/40">مفعل</span>
+                                        </div>
+                                        <p class="text-[10px] text-gray-400 mt-0.5">منع الاستخدام المفرط لعلامات السبويلر</p>
+                                    </div>
+                                    <span class="text-base">🧕</span>
+                                </div>
+                            </div>
+
+                            <!-- نص Zalgo -->
+                            <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between hover:border-purple-500/30 transition">
+                                <div class="flex items-center gap-2">
+                                    <label class="toggle"><input type="checkbox" name="anti_zalgo" value="1" ${settings.anti_zalgo ? 'checked' : ''} onchange="saveAutomodSetting('anti_zalgo', this.checked)"><span class="slider"></span></label>
+                                    <button type="button" class="text-gray-400 hover:text-white p-1 text-xs">⚙️</button>
+                                </div>
+                                <div class="flex items-center gap-3 text-right">
+                                    <div>
+                                        <div class="flex items-center justify-end gap-2">
+                                            <h5 class="text-xs font-bold text-white">نص Zalgo</h5>
+                                            <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-950/60 text-amber-400 border border-amber-800/40">مفعل</span>
+                                        </div>
+                                        <p class="text-[10px] text-gray-400 mt-0.5">منع النصوص المشوهة والرموز الغريبة (Zalgo text)</p>
+                                    </div>
+                                    <span class="text-base">🔎</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 4. حماية متقدمة - حماية البوت (Bot Shield Automod) -->
+                        <div class="space-y-3 pt-4 border-t border-white/5">
+                            <div class="flex items-center justify-between">
+                                <span class="text-[11px] text-gray-400">مرونة أكثر في التخصيص</span>
+                                <div class="flex items-center gap-2 text-amber-400 font-bold text-xs">
+                                    <span>حماية البوت — حماية متقدمة يديرها البوت مباشرة</span>
+                                    <span>🛡️</span>
+                                </div>
+                            </div>
+
+                            <!-- مكافحة السبام المتقدم -->
+                            <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between hover:border-purple-500/30 transition">
+                                <div class="flex items-center gap-2">
+                                    <label class="toggle"><input type="checkbox" name="anti_spam_adv" value="1" checked onchange="saveAutomodSetting('anti_spam_adv', this.checked)"><span class="slider"></span></label>
+                                    <button type="button" class="text-gray-400 hover:text-white p-1 text-xs">⚙️</button>
+                                </div>
+                                <div class="flex items-center gap-3 text-right">
+                                    <div>
+                                        <div class="flex items-center justify-end gap-2">
+                                            <h5 class="text-xs font-bold text-white">مكافحة السبام</h5>
+                                            <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-950/60 text-amber-400 border border-amber-800/40">مفعل</span>
+                                        </div>
+                                        <p class="text-[10px] text-gray-400 mt-0.5">كشف الرسائل المتكررة والفيضان السريع وحظرها تلقائياً</p>
+                                    </div>
+                                    <span class="text-base">🛡️</span>
+                                </div>
+                            </div>
+
+                            <!-- إزعاج الإيموجي -->
+                            <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between hover:border-purple-500/30 transition">
+                                <div class="flex items-center gap-2">
+                                    <label class="toggle"><input type="checkbox" name="anti_emoji" value="1" ${settings.anti_emoji ? 'checked' : ''} onchange="saveAutomodSetting('anti_emoji', this.checked)"><span class="slider"></span></label>
+                                    <button type="button" class="text-gray-400 hover:text-white p-1 text-xs">⚙️</button>
+                                </div>
+                                <div class="flex items-center gap-3 text-right">
+                                    <div>
+                                        <div class="flex items-center justify-end gap-2">
+                                            <h5 class="text-xs font-bold text-white">إزعاج الإيموجي</h5>
+                                            <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-950/60 text-amber-400 border border-amber-800/40">مفعل</span>
+                                        </div>
+                                        <p class="text-[10px] text-gray-400 mt-0.5">منع الاستخدام المفرط للرموز التعبيرية</p>
+                                    </div>
+                                    <span class="text-base">✨</span>
+                                </div>
+                            </div>
+
+                            <!-- تكرار النص -->
+                            <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between hover:border-purple-500/30 transition">
+                                <div class="flex items-center gap-2">
+                                    <label class="toggle"><input type="checkbox" name="anti_text_repeat" value="1" ${settings.anti_text_repeat ? 'checked' : ''} onchange="saveAutomodSetting('anti_text_repeat', this.checked)"><span class="slider"></span></label>
+                                    <button type="button" class="text-gray-400 hover:text-white p-1 text-xs">⚙️</button>
+                                </div>
+                                <div class="flex items-center gap-3 text-right">
+                                    <div>
+                                        <div class="flex items-center justify-end gap-2">
+                                            <h5 class="text-xs font-bold text-white">تكرار النص</h5>
+                                            <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-950/60 text-amber-400 border border-amber-800/40">مفعل</span>
+                                        </div>
+                                        <p class="text-[10px] text-gray-400 mt-0.5">منع تكرار نفس الحروف أو الكلمات بشكل مفرط</p>
+                                    </div>
+                                    <span class="text-base">⏳</span>
+                                </div>
+                            </div>
+
+                            <!-- رسائل مكررة -->
+                            <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between hover:border-purple-500/30 transition">
+                                <div class="flex items-center gap-2">
+                                    <label class="toggle"><input type="checkbox" name="anti_repeat_messages" value="1" ${settings.anti_repeat_messages ? 'checked' : ''} onchange="saveAutomodSetting('anti_repeat_messages', this.checked)"><span class="slider"></span></label>
+                                    <button type="button" class="text-gray-400 hover:text-white p-1 text-xs">⚙️</button>
+                                </div>
+                                <div class="flex items-center gap-3 text-right">
+                                    <div>
+                                        <div class="flex items-center justify-end gap-2">
+                                            <h5 class="text-xs font-bold text-white">رسائل مكررة</h5>
+                                            <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-950/60 text-amber-400 border border-amber-800/40">مفعل</span>
+                                        </div>
+                                        <p class="text-[10px] text-gray-400 mt-0.5">منع إرسال نفس الرسالة عدة مرات متتالية</p>
+                                    </div>
+                                    <span class="text-base">📜</span>
+                                </div>
+                            </div>
+
+                            <!-- سبام الملصقات -->
+                            <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between hover:border-purple-500/30 transition">
+                                <div class="flex items-center gap-2">
+                                    <label class="toggle"><input type="checkbox" name="anti_stickers" value="1" ${settings.anti_stickers ? 'checked' : ''} onchange="saveAutomodSetting('anti_stickers', this.checked)"><span class="slider"></span></label>
+                                    <button type="button" class="text-gray-400 hover:text-white p-1 text-xs">⚙️</button>
+                                </div>
+                                <div class="flex items-center gap-3 text-right">
+                                    <div>
+                                        <div class="flex items-center justify-end gap-2">
+                                            <h5 class="text-xs font-bold text-white">سبام الملصقات</h5>
+                                            <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-950/60 text-amber-400 border border-amber-800/40">مفعل</span>
+                                        </div>
+                                        <p class="text-[10px] text-gray-400 mt-0.5">منع إرسال الملصقات بشكل متكرر وسريع</p>
+                                    </div>
+                                    <span class="text-base">✨</span>
+                                </div>
+                            </div>
+
+                            <!-- سبام الأسطر -->
+                            <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between hover:border-purple-500/30 transition">
+                                <div class="flex items-center gap-2">
+                                    <label class="toggle"><input type="checkbox" name="anti_line_spam" value="1" ${settings.anti_line_spam ? 'checked' : ''} onchange="saveAutomodSetting('anti_line_spam', this.checked)"><span class="slider"></span></label>
+                                    <button type="button" class="text-gray-400 hover:text-white p-1 text-xs">⚙️</button>
+                                </div>
+                                <div class="flex items-center gap-3 text-right">
+                                    <div>
+                                        <div class="flex items-center justify-end gap-2">
+                                            <h5 class="text-xs font-bold text-white">سبام الأسطر</h5>
+                                            <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-950/60 text-amber-400 border border-amber-800/40">مفعل</span>
+                                        </div>
+                                        <p class="text-[10px] text-gray-400 mt-0.5">منع الرسائل التي تحتوي على أسطر فارغة كثيرة</p>
+                                    </div>
+                                    <span class="text-base">⏳</span>
+                                </div>
+                            </div>
+
+                            <!-- الرسائل الطويلة -->
+                            <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between hover:border-purple-500/30 transition">
+                                <div class="flex items-center gap-2">
+                                    <label class="toggle"><input type="checkbox" name="anti_long_messages" value="1" ${settings.anti_long_messages ? 'checked' : ''} onchange="saveAutomodSetting('anti_long_messages', this.checked)"><span class="slider"></span></label>
+                                    <button type="button" class="text-gray-400 hover:text-white p-1 text-xs">⚙️</button>
+                                </div>
+                                <div class="flex items-center gap-3 text-right">
+                                    <div>
+                                        <div class="flex items-center justify-end gap-2">
+                                            <h5 class="text-xs font-bold text-white">الرسائل الطويلة</h5>
+                                            <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-950/60 text-amber-400 border border-amber-800/40">مفعل</span>
+                                        </div>
+                                        <p class="text-[10px] text-gray-400 mt-0.5">منع الرسائل التي تتجاوز الحد الأقصى لعدد الأحرف</p>
+                                    </div>
+                                    <span class="text-base">💬</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 5. نظام العقوبات التلقائية للتحذيرات -->
+                        <div class="bg-[#12141f] border border-white/5 p-6 rounded-2xl space-y-4 shadow-xl">
+                            <div class="flex items-center justify-between border-b border-white/5 pb-3">
+                                <span class="px-2.5 py-1 bg-amber-950/60 text-amber-300 border border-amber-800/40 rounded-xl text-xs font-mono font-bold" id="warnRulesCount">${(warnPunishmentsList || []).length} قاعدة</span>
+                                <div class="text-right">
+                                    <div class="flex items-center justify-end gap-2 text-white font-black text-sm">
+                                        <span>نظام العقوبات التلقائية للتحذيرات</span>
+                                        <span class="text-amber-400">⚠️</span>
+                                    </div>
+                                    <p class="text-gray-400 text-[10px] mt-0.5">تطبيق عقوبات تلقائية عند تجاوز عدد التحذيرات من أمر warn!</p>
+                                </div>
+                            </div>
+
+                            <div id="warnPunishmentsList" class="space-y-2">
+                                ${(warnPunishmentsList && warnPunishmentsList.length > 0) ? warnPunishmentsList.map(rule => `
+                                    <div class="bg-[#0b0d14] border border-white/5 p-3.5 rounded-xl flex items-center justify-between hover:border-amber-500/30 transition text-xs">
+                                        <button type="button" onclick="deleteWarnRule(${rule.id})" class="px-3 py-1 bg-rose-600/20 hover:bg-rose-600/40 text-rose-300 border border-rose-500/30 rounded-lg text-xs font-bold transition">حذف 🗑️</button>
+                                        <div class="flex items-center gap-3">
+                                            <div class="text-right">
+                                                <span class="font-bold text-white block">عند بلوغ ${rule.warn_count} تحذيرات</span>
+                                                <span class="text-[10px] text-amber-400 font-mono">العقوبة: ${rule.action_type}</span>
+                                            </div>
+                                            <span class="w-8 h-8 rounded-lg bg-amber-600/20 text-amber-400 flex items-center justify-center font-bold">⚠️</span>
+                                        </div>
+                                    </div>
+                                `).join('') : `
+                                    <div class="py-8 text-center space-y-2">
+                                        <div class="w-12 h-12 rounded-full bg-white/5 text-gray-400 flex items-center justify-center text-xl mx-auto">📋</div>
+                                        <h5 class="text-xs font-bold text-gray-300">لا توجد قواعد بعد</h5>
+                                        <p class="text-[10px] text-gray-500">أضف قاعدة عقوبة لتفعيل النظام</p>
+                                    </div>
+                                `}
+                            </div>
+
+                            <!-- زر إضافة قاعدة جديدة -->
+                            <button type="button" onclick="openAddWarnModal()" class="w-full py-3 bg-[#171926] hover:bg-[#1f2233] border border-dashed border-amber-500/40 hover:border-amber-500/80 rounded-xl text-amber-300 font-bold text-xs transition flex items-center justify-center gap-2">
+                                <span>➕</span>
+                                <span>إضافة قاعدة جديدة</span>
+                            </button>
+                        </div>
+
+                        <!-- 6. فلتر الكلمات المحظورة المشدد (Strict Bad Words Filter) -->
+                        <div id="sec_strict_words" class="bg-[#12141f] border border-white/5 p-6 rounded-2xl space-y-5 shadow-xl">
+                            <div class="flex items-center justify-between border-b border-white/5 pb-3">
+                                <label class="toggle">
+                                    <input type="checkbox" name="strict_bad_words_enabled" value="1" ${settings.strict_bad_words_enabled ? 'checked' : ''} onchange="saveAutomodSetting('strict_bad_words_enabled', this.checked)">
+                                    <span class="slider"></span>
+                                </label>
+                                <div class="text-right">
+                                    <div class="flex items-center justify-end gap-2 text-rose-400 font-black text-sm">
+                                        <span>فلتر الكلمات المحظورة المشدد</span>
+                                        <span>🚫</span>
+                                    </div>
+                                    <p class="text-gray-400 text-[10px] mt-0.5">يعمل على جميع الأعضاء — يتخطى Discord AutoMod</p>
+                                </div>
+                            </div>
+
+                            <!-- مربع الكلمات المحظورة -->
+                            <div class="space-y-2">
+                                <div class="flex items-center justify-between text-xs text-gray-300 font-bold">
+                                    <div class="flex items-center gap-2 text-[10px] text-gray-400">
+                                        <span>جزئي — يحتوي على الكلمة في أي مكان</span>
+                                        <span>•</span>
+                                        <span>كلمة كاملة — الكلمة وحدها فقط</span>
+                                    </div>
+                                    <div class="flex items-center gap-1 text-white">
+                                        <span>الكلمات المحظورة</span>
+                                        <span>💬</span>
                                     </div>
                                 </div>
-                                <button type="button" onclick="openAutomodModal('caps')" class="w-full py-2 bg-[#0b0d14] hover:bg-[#0d0f18] border border-white/5 rounded-xl text-gray-400 hover:text-white text-xs font-bold transition">بحاجة إلى الإعداد</button>
+
+                                <div class="flex items-center gap-2">
+                                    <button type="button" onclick="addStrictBadWord()" class="px-5 py-2.5 bg-rose-600 hover:bg-rose-500 text-white rounded-xl text-xs font-bold transition shadow-lg shadow-rose-950/40">إضافة</button>
+                                    <select id="strictWordMatchMode" class="bg-[#0b0d14] border border-white/5 rounded-xl px-3 py-2.5 text-xs text-gray-300 outline-none">
+                                        <option value="partial">جزئي</option>
+                                        <option value="exact">كلمة كاملة</option>
+                                    </select>
+                                    <input type="text" id="strictWordInput" placeholder="اكتب كلمة محظورة..." class="flex-1 bg-[#0b0d14] border border-white/5 focus:border-rose-500 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right" onkeydown="if(event.key==='Enter') addStrictBadWord()">
+                                </div>
+
+                                <div id="strictWordsContainer" class="flex flex-wrap gap-2 pt-2">
+                                    ${(settings.bad_words_list ? settings.bad_words_list.split(/[\n,]+/).map(w => w.trim()).filter(Boolean) : []).map(w => `
+                                        <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-rose-950/60 text-rose-300 border border-rose-800/40 rounded-xl text-xs font-mono">
+                                            <span>${w}</span>
+                                            <button type="button" onclick="removeStrictBadWord('${w}')" class="text-rose-400 hover:text-white font-bold text-xs">×</button>
+                                        </span>
+                                    `).join('')}
+                                </div>
                             </div>
 
-                        </div>
+                            <!-- كلمات مسموح بها (Whitelist) -->
+                            <div class="space-y-2 pt-3 border-t border-white/5">
+                                <div class="flex items-center justify-end gap-1 text-xs font-bold text-emerald-400">
+                                    <span>كلمات مسموح بها (Whitelist)</span>
+                                    <span>🛡️</span>
+                                </div>
+                                <p class="text-[10px] text-gray-400 text-right">أضف كلمات تحتوي على كلمة محظورة لكنها مقبولة</p>
 
-                        <!-- Exemptions / Bypass -->
-                        <div class="bg-[#1c1f2e] border border-white/5 rounded-2xl p-5 space-y-4 text-right">
-                            <h4 class="font-bold text-white text-sm">⚙️ الاستثناءات (Exemptions)</h4>
-                            <div class="space-y-4">
-                                <!-- تخطي الرومات -->
-                                <div>
-                                    <label class="block text-xs font-bold text-gray-400 mb-2">تخطي الرومات (Ignored Channels)</label>
-                                    ${renderChannelSelect('automod_ignore_channels', settings.automod_ignore_channels || '', true)}
+                                <div class="flex items-center gap-2">
+                                    <button type="button" onclick="addWhitelistedWord()" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition shadow-lg shadow-emerald-950/40">إضافة</button>
+                                    <input type="text" id="whitelistWordInput" placeholder="اكتب كلمة مسموح بها..." class="flex-1 bg-[#0b0d14] border border-white/5 focus:border-emerald-500 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right" onkeydown="if(event.key==='Enter') addWhitelistedWord()">
                                 </div>
-                                <!-- تخطي الرولات -->
-                                <div>
-                                    <label class="block text-xs font-bold text-gray-400 mb-2">تخطي الرولات (Ignored Roles)</label>
-                                    ${renderRoleSelect('automod_ignore_roles', settings.automod_ignore_roles || '')}
-                                </div>
-                                <!-- رومات صور فقط -->
-                                <div>
-                                    <label class="block text-xs font-bold text-gray-400 mb-2">رومات صور فقط (Images Only Channels)</label>
-                                    ${renderChannelSelect('automod_images_only', settings.automod_images_only || '', true)}
-                                </div>
-                                <!-- رومات يوتيوب فقط -->
-                                <div>
-                                    <label class="block text-xs font-bold text-gray-400 mb-2">رومات يوتيوب فقط (YouTube Only)</label>
-                                    ${renderChannelSelect('automod_youtube_only', settings.automod_youtube_only || '', true)}
+
+                                <div id="whitelistWordsContainer" class="flex flex-wrap gap-2 pt-2">
+                                    ${(settings.whitelist_words_list ? settings.whitelist_words_list.split(/[\n,]+/).map(w => w.trim()).filter(Boolean) : []).map(w => `
+                                        <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-950/60 text-emerald-300 border border-emerald-800/40 rounded-xl text-xs font-mono">
+                                            <span>${w}</span>
+                                            <button type="button" onclick="removeWhitelistedWord('${w}')" class="text-emerald-400 hover:text-white font-bold text-xs">×</button>
+                                        </span>
+                                    `).join('')}
                                 </div>
                             </div>
-                        </div>
 
-                        <!-- Bad Words List -->
-                        <div id="badwordsSection" class="bg-[#1c1f2e] border border-white/5 rounded-2xl p-5 space-y-3 text-right ${settings.bad_words_enabled ? '' : 'hidden'}">
-                            <h4 class="font-bold text-white text-sm">📝 قائمة الكلمات المحظورة</h4>
-                            <p class="text-gray-400 text-[11px]">أضف الكلمات المحظورة مفصولة بفواصل. البوت سيقوم بحذف الرسائل التي تحتوي عليها تلقائياً.</p>
-                            <textarea name="bad_words_list" rows="4" placeholder="كلمة1, كلمة2, كلمة3..." class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right font-mono leading-relaxed">${settings.bad_words_list || ''}</textarea>
-                        </div>
+                            <!-- أعضاء معفيون من الفلتر -->
+                            <div class="space-y-2 pt-3 border-t border-white/5">
+                                <div class="flex items-center justify-end gap-1 text-xs font-bold text-white">
+                                    <span>أعضاء معفيون من الفلتر</span>
+                                    <span class="text-emerald-400">🛡️</span>
+                                </div>
+                                <input type="text" name="automod_exempt_users" value="${settings.automod_exempt_users || ''}" placeholder="ابحث عن عضو أو أدخل الـ ID..." class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right font-mono">
+                                <p class="text-[10px] text-gray-500 text-right">الأدمنية غير معفيين تلقائياً — أضفهم هنا إذا أردت</p>
+                            </div>
 
-                        <!-- Action on Violation -->
-                        <div class="bg-[#1c1f2e] border border-white/5 rounded-2xl p-5 space-y-4 text-right">
-                            <h4 class="font-bold text-white text-sm">⚡ الإجراء عند المخالفة (Action on Violation)</h4>
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <div>
-                                    <label class="block text-xs font-bold text-gray-300 mb-2">الإجراء الافتراضي</label>
-                                    <select name="automod_action" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right cursor-pointer">
-                                        <option value="delete" ${(settings.automod_action || 'delete') === 'delete' ? 'selected' : ''}>🗑️ حذف الرسالة فقط</option>
-                                        <option value="warn" ${settings.automod_action === 'warn' ? 'selected' : ''}>⚠️ حذف + إنذار</option>
-                                        <option value="mute" ${settings.automod_action === 'mute' ? 'selected' : ''}>🔇 حذف + كتم مؤقت</option>
-                                        <option value="kick" ${settings.automod_action === 'kick' ? 'selected' : ''}>👢 حذف + طرد</option>
-                                        <option value="ban" ${settings.automod_action === 'ban' ? 'selected' : ''}>🔨 حذف + حظر</option>
-                                    </select>
+                            <!-- قناة السجل (اختياري) -->
+                            <div class="space-y-2 pt-3 border-t border-white/5">
+                                <div class="flex items-center justify-end gap-1 text-xs font-bold text-white">
+                                    <span>قناة السجل ((اختياري))</span>
+                                    <span>📜</span>
                                 </div>
-                                <div>
-                                    <label class="block text-xs font-bold text-gray-300 mb-2">مدة الكتم (إذا كان الإجراء كتم)</label>
-                                    <select name="automod_mute_duration" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right cursor-pointer">
-                                        <option value="1" ${settings.automod_mute_duration == 1 ? 'selected' : ''}>1 دقيقة</option>
-                                        <option value="5" ${(settings.automod_mute_duration || 5) == 5 ? 'selected' : ''}>5 دقائق</option>
-                                        <option value="10" ${settings.automod_mute_duration == 10 ? 'selected' : ''}>10 دقائق</option>
-                                        <option value="30" ${settings.automod_mute_duration == 30 ? 'selected' : ''}>30 دقيقة</option>
-                                        <option value="60" ${settings.automod_mute_duration == 60 ? 'selected' : ''}>ساعة</option>
-                                        <option value="1440" ${settings.automod_mute_duration == 1440 ? 'selected' : ''}>يوم</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-bold text-gray-300 mb-2">قناة سجل الرقابة (Automod Log)</label>
-                                    ${renderChannelSelect('automod_log_channel', settings.automod_log_channel)}
-                                </div>
+                                ${renderChannelSelect('automod_log_channel', settings.automod_log_channel || settings.log_channel || '')}
                             </div>
                         </div>
 
                     </div>
 
                     <script>
-                    // Toggle bad words section visibility
-                    document.addEventListener('change', function(e) {
-                        if (e.target && e.target.name === 'bad_words_enabled') {
-                            const section = document.getElementById('badwordsSection');
-                            if (section) section.classList.toggle('hidden', !e.target.checked);
-                        }
-                    });
-
                     async function saveAutomodSetting(key, value) {
                         try {
+                            const res = await fetch('/api/guild/${guildId}/settings', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ [key]: value ? 1 : 0 })
+                            });
+                            const data = await res.json();
+                            const status = document.getElementById('saveStatus');
+                            if (status) {
+                                status.classList.remove('hidden');
+                                setTimeout(() => status.classList.add('hidden'), 3000);
+                            }
+                        } catch(e) {
+                            console.error('Failed to save automod setting', e);
+                        }
+                    }
+
+                    async function addStrictBadWord() {
+                        const input = document.getElementById('strictWordInput');
+                        const word = input.value.trim();
+                        if (!word) return;
+                        
+                        let current = "${(settings.bad_words_list || '').replace(/"/g, '\\"')}";
+                        let words = current ? current.split(/[\n,]+/).map(w => w.trim()).filter(Boolean) : [];
+                        if (!words.includes(word)) {
+                            words.push(word);
                             await fetch('/api/guild/${guildId}/settings', {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ key, value: value ? 1 : 0 })
+                                body: JSON.stringify({ bad_words_list: words.join(',') })
                             });
-                        } catch(e) {}
+                            location.reload();
+                        }
                     }
 
-                    function openAutomodModal(type) {
-                        const labels = {
-                            spam: 'إعداد فلتر الإزعاج بالرسائل',
-                            badwords: 'إعداد فلتر الكلمات المسيئة',
-                            links: 'إعداد فلتر الروابط',
-                            mention: 'إعداد فلتر إزعاج المنشن',
-                            emoji: 'إعداد فلتر إزعاج الإيموجي',
-                            caps: 'إعداد فلتر الأحرف الكبيرة'
-                        };
-                        alert('⚙️ ' + (labels[type] || 'الإعداد') + '\\nاستخدم قسم "حفظ الإعدادات" في الأسفل لتطبيق التغييرات.');
+                    async function removeStrictBadWord(word) {
+                        let current = "${(settings.bad_words_list || '').replace(/"/g, '\\"')}";
+                        let words = current ? current.split(/[\n,]+/).map(w => w.trim()).filter(Boolean) : [];
+                        words = words.filter(w => w !== word);
+                        await fetch('/api/guild/${guildId}/settings', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ bad_words_list: words.join(',') })
+                        });
+                        location.reload();
+                    }
+
+                    async function addWhitelistedWord() {
+                        const input = document.getElementById('whitelistWordInput');
+                        const word = input.value.trim();
+                        if (!word) return;
+
+                        let current = "${(settings.whitelist_words_list || '').replace(/"/g, '\\"')}";
+                        let words = current ? current.split(/[\n,]+/).map(w => w.trim()).filter(Boolean) : [];
+                        if (!words.includes(word)) {
+                            words.push(word);
+                            await fetch('/api/guild/${guildId}/settings', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ whitelist_words_list: words.join(',') })
+                            });
+                            location.reload();
+                        }
+                    }
+
+                    async function removeWhitelistedWord(word) {
+                        let current = "${(settings.whitelist_words_list || '').replace(/"/g, '\\"')}";
+                        let words = current ? current.split(/[\n,]+/).map(w => w.trim()).filter(Boolean) : [];
+                        words = words.filter(w => w !== word);
+                        await fetch('/api/guild/${guildId}/settings', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ whitelist_words_list: words.join(',') })
+                        });
+                        location.reload();
+                    }
+
+                    async function openAddWarnModal() {
+                        const count = prompt('أدخل عدد التحذيرات المطلوب لتنفيذ العقوبة (مثلاً: 3):');
+                        if (!count || isNaN(count)) return;
+                        const action = prompt('اختر نوع العقوبة:\\n1 = timeout_5m (عزل 5 دقائق)\\n2 = timeout_1h (عزل ساعة)\\n3 = timeout_24h (عزل 24 ساعة)\\n4 = kick (طرد)\\n5 = ban (حظر نهائي)', '1');
+                        
+                        const actionMap = { '1': 'timeout_5m', '2': 'timeout_1h', '3': 'timeout_24h', '4': 'kick', '5': 'ban' };
+                        const finalAction = actionMap[action] || 'timeout_5m';
+
+                        try {
+                            const res = await fetch('/api/guild/${guildId}/warn-punishments', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ warnCount: parseInt(count), actionType: finalAction })
+                            });
+                            const data = await res.json();
+                            if (data.success) {
+                                alert('✅ تمت إضافة قاعدة العقوبة التلقائية بنجاح!');
+                                location.reload();
+                            } else {
+                                alert('❌ خطأ: ' + (data.error || 'فشل الإضافة'));
+                            }
+                        } catch(e) {
+                            alert('حدث خطأ في الاتصال');
+                        }
+                    }
+
+                    async function deleteWarnRule(ruleId) {
+                        if (!confirm('هل أنت متأكد من رغبتك في حذف قاعدة العقوبة هذه؟')) return;
+                        try {
+                            const res = await fetch('/api/guild/${guildId}/warn-punishments/' + ruleId, {
+                                method: 'DELETE'
+                            });
+                            const data = await res.json();
+                            if (data.success) {
+                                alert('✅ تم الحذف بنجاح!');
+                                location.reload();
+                            } else {
+                                alert('❌ خطأ في الحذف');
+                            }
+                        } catch(e) {
+                            alert('حدث خطأ في الاتصال');
+                        }
                     }
                     </script>
-                `;
+`;
             } else if (section === 'invites') {
 const leaderboard = database.getInvitesLeaderboard ? database.getInvitesLeaderboard(guildId, 20) : [];
                 const totalInvitesCount = leaderboard.reduce((acc, r) => acc + (r.total || 0), 0);
@@ -1869,68 +2188,848 @@ const broadcasts = database.getGuildBroadcasts ? database.getGuildBroadcasts(gui
                     </script>
                 `;
             } else if (section === 'protection') {
-                formFieldsHtml = `
-                    <div class="space-y-6 text-right" dir="rtl">
-                        <div class="bg-[#1c1f2e] border border-white/5 p-5 rounded-2xl flex items-center justify-between">
-                            <label class="toggle"><input type="checkbox" name="anti_nuke_enabled" value="1" ${settings.anti_nuke_enabled !== 0 ? 'checked' : ''}><span class="slider"></span></label>
-                            <div>
-                                <h4 class="font-bold text-white text-base">جدار الحماية الشامل ومكافحة التخريب 🛡️</h4>
-                                <p class="text-gray-400 text-xs mt-0.5">تفعيل وتأمين السيرفر ضد الهجمات والتخريب وحظر الأعضاء والقنوات وحماية الرتب فوراً</p>
+formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl">
+
+                        <!-- 1. Banner Alert: البوت لا يملك صلاحيات حرجة الآن -->
+                        <div class="bg-[#1e0e11] border border-rose-900/50 p-4 rounded-2xl flex items-center justify-between shadow-lg">
+                            <div class="flex items-center gap-3">
+                                <label class="toggle">
+                                    <input type="checkbox" name="lock_dashboard" value="1" ${settings.lock_dashboard ? 'checked' : ''} onchange="saveProtectionSetting('lock_dashboard', this.checked)">
+                                    <span class="slider"></span>
+                                </label>
+                                <span class="text-xs font-bold text-rose-300">قفل لوحة التحكم</span>
+                            </div>
+                            <div class="flex items-center gap-2 text-rose-400 font-bold text-xs">
+                                <span>البوت لا يملك صلاحيات حرجة الآن</span>
+                                <span class="text-base">⚠️</span>
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div class="bg-[#1c1f2e] border border-white/5 p-4 rounded-2xl flex items-center justify-between">
-                                <label class="toggle"><input type="checkbox" name="anti_link" value="1" ${settings.anti_link ? 'checked' : ''}><span class="slider"></span></label>
+                        <!-- 2. Master Toggle: تفعيل نظام الحماية -->
+                        <div class="bg-[#12141f] border border-white/5 p-5 rounded-2xl flex items-center justify-between shadow-lg">
+                            <label class="toggle">
+                                <input type="checkbox" name="anti_nuke_enabled" value="1" ${settings.anti_nuke_enabled !== 0 ? 'checked' : ''} onchange="saveProtectionSetting('anti_nuke_enabled', this.checked)">
+                                <span class="slider"></span>
+                            </label>
+                            <div class="flex items-center gap-3">
                                 <div class="text-right">
-                                    <span class="font-bold text-white text-xs block">منع الروابط (Anti-Link)</span>
-                                    <span class="text-[10px] text-gray-400">حذف روابط الديسكورد والمواقع غير المصرح بها فوراً</span>
+                                    <h4 class="font-black text-white text-sm">تفعيل نظام الحماية</h4>
+                                    <p class="text-gray-400 text-xs mt-0.5">تفعيل أو تعطيل نظام الحماية الشامل</p>
                                 </div>
-                            </div>
-                            <div class="bg-[#1c1f2e] border border-white/5 p-4 rounded-2xl flex items-center justify-between">
-                                <label class="toggle"><input type="checkbox" name="anti_spam" value="1" ${settings.anti_spam ? 'checked' : ''}><span class="slider"></span></label>
-                                <div class="text-right">
-                                    <span class="font-bold text-white text-xs block">مكافحة السبام (Anti-Spam)</span>
-                                    <span class="text-[10px] text-gray-400">منع تكرار الرسائل السريعة تلقائياً لحماية الشات</span>
-                                </div>
-                            </div>
-                            <div class="bg-[#1c1f2e] border border-white/5 p-4 rounded-2xl flex items-center justify-between">
-                                <label class="toggle"><input type="checkbox" name="anti_nuke" value="1" ${settings.anti_nuke ? 'checked' : ''}><span class="slider"></span></label>
-                                <div class="text-right">
-                                    <span class="font-bold text-white text-xs block">مكافحة التخريب (Anti-Nuke)</span>
-                                    <span class="text-[10px] text-gray-400">حماية السيرفر من طرد أو حظر الرتب وتدمير القنوات</span>
-                                </div>
-                            </div>
-                            <div class="bg-[#1c1f2e] border border-white/5 p-4 rounded-2xl flex items-center justify-between">
-                                <label class="toggle"><input type="checkbox" name="anti_alt" value="1" ${settings.anti_alt ? 'checked' : ''}><span class="slider"></span></label>
-                                <div class="text-right">
-                                    <span class="font-bold text-white text-xs block">الحد الأدنى لعمر الحساب (Anti-Alt)</span>
-                                    <span class="text-[10px] text-gray-400">طرد الحسابات الوهمية والحديثة التي عمرها أقل من المحدد</span>
+                                <div class="w-10 h-10 rounded-xl bg-purple-600/20 text-purple-400 flex items-center justify-center text-lg border border-purple-500/30">
+                                    🛡️
                                 </div>
                             </div>
                         </div>
 
-                        <div class="bg-[#1c1f2e] border border-white/5 p-5 rounded-2xl space-y-4">
-                            <h4 class="font-bold text-white text-xs flex items-center gap-2"><span>فلاتر الرقابة التلقائية الإضافية (Automod Filters)</span><span>🛡️</span></h4>
+                        <!-- 3. حماية المتصفح (Browser Protection) -->
+                        <div class="bg-[#12141f] border border-white/5 p-5 rounded-2xl space-y-3 shadow-lg">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs text-gray-500 font-mono">PRO ONLY</span>
+                                <div class="flex items-center gap-3">
+                                    <div class="text-right">
+                                        <h4 class="font-black text-white text-sm">حماية المتصفح</h4>
+                                        <p class="text-gray-400 text-xs mt-0.5">يزيل رتب الأعضاء المحمية مؤقتاً عند الدخول من متصفح — بوتات خاصة فقط</p>
+                                    </div>
+                                    <div class="w-10 h-10 rounded-xl bg-indigo-600/20 text-indigo-400 flex items-center justify-center text-lg border border-indigo-500/30">
+                                        🌐
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-[#0b0d14] border border-white/5 p-3 rounded-xl flex items-center justify-end gap-2 text-gray-400 text-xs">
+                                <span>هذه الميزة تعمل فقط مع البوتات الخاصة — يتطلب اشتراك بوت خاص نشط لهذا السيرفر.</span>
+                                <span>🔒</span>
+                            </div>
+                        </div>
+
+                        <!-- 4. تحديد وعقوبة (0/12 مفعل) -->
+                        <div class="bg-[#12141f] border border-white/5 p-5 rounded-2xl space-y-6 shadow-xl">
+                            <div class="flex items-center justify-between border-b border-white/5 pb-3">
+                                <span class="px-3 py-1 bg-amber-950/60 text-amber-300 border border-amber-800/40 rounded-xl text-xs font-bold font-mono">0/12 مفعل</span>
+                                <div class="flex items-center gap-2">
+                                    <div class="text-right">
+                                        <h4 class="font-black text-white text-sm">تحديد وعقوبة</h4>
+                                        <p class="text-gray-400 text-[11px]">تعيين حد وعقوبة لكل إجراء</p>
+                                    </div>
+                                    <span class="text-base">🛡️</span>
+                                </div>
+                            </div>
+
+                            <!-- مجموعة 1: حماية الرومات / الشاتات -->
+                            <div class="space-y-3">
+                                <div class="flex items-center justify-between text-xs text-gray-400 font-bold">
+                                    <span>0/4 مفعل</span>
+                                    <span class="text-white">حماية الرومات / الشاتات</span>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                    <!-- مكافحة حذف القنوات -->
+                                    <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between hover:border-purple-500/30 transition">
+                                        <label class="toggle"><input type="checkbox" name="anti_channel_delete" value="1" ${settings.anti_channel_delete ? 'checked' : ''} onchange="saveProtectionSetting('anti_channel_delete', this.checked)"><span class="slider"></span></label>
+                                        <div class="flex items-center gap-2 text-right">
+                                            <div>
+                                                <h5 class="text-xs font-bold text-white">مكافحة حذف القنوات</h5>
+                                                <p class="text-[10px] text-gray-400">منع حذف قنوات جماعي</p>
+                                            </div>
+                                            <span class="text-sm">🗑️</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- مكافحة إنشاء القنوات -->
+                                    <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between hover:border-purple-500/30 transition">
+                                        <label class="toggle"><input type="checkbox" name="anti_channel_create" value="1" ${settings.anti_channel_create ? 'checked' : ''} onchange="saveProtectionSetting('anti_channel_create', this.checked)"><span class="slider"></span></label>
+                                        <div class="flex items-center gap-2 text-right">
+                                            <div>
+                                                <h5 class="text-xs font-bold text-white">مكافحة إنشاء القنوات</h5>
+                                                <p class="text-[10px] text-gray-400">منع إنشاء قنوات جماعي</p>
+                                            </div>
+                                            <span class="text-sm">📢</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- مكافحة تعديل القنوات -->
+                                    <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between hover:border-purple-500/30 transition">
+                                        <label class="toggle"><input type="checkbox" name="anti_channel_update" value="1" ${settings.anti_channel_update ? 'checked' : ''} onchange="saveProtectionSetting('anti_channel_update', this.checked)"><span class="slider"></span></label>
+                                        <div class="flex items-center gap-2 text-right">
+                                            <div>
+                                                <h5 class="text-xs font-bold text-white">مكافحة تعديل القنوات</h5>
+                                                <p class="text-[10px] text-gray-400">منع تعديل قنوات جماعي</p>
+                                            </div>
+                                            <span class="text-sm">#️⃣</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- حماية صلاحيات القنوات -->
+                                    <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between hover:border-purple-500/30 transition">
+                                        <label class="toggle"><input type="checkbox" name="anti_channel_permissions" value="1" ${settings.anti_channel_permissions ? 'checked' : ''} onchange="saveProtectionSetting('anti_channel_permissions', this.checked)"><span class="slider"></span></label>
+                                        <div class="flex items-center gap-2 text-right">
+                                            <div>
+                                                <h5 class="text-xs font-bold text-white">حماية صلاحيات القنوات</h5>
+                                                <p class="text-[10px] text-gray-400">منع أي تعديل على صلاحيات القنوات بأي شكل (Allow/Deny/Overwrites)</p>
+                                            </div>
+                                            <span class="text-sm">⚙️</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- مجموعة 2: حماية الرتب -->
+                            <div class="space-y-3 pt-4 border-t border-white/5">
+                                <div class="flex items-center justify-between text-xs text-gray-400 font-bold">
+                                    <span>0/3 مفعل</span>
+                                    <span class="text-white">حماية الرتب</span>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                    <!-- مكافحة حذف الرتب -->
+                                    <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between hover:border-purple-500/30 transition">
+                                        <label class="toggle"><input type="checkbox" name="anti_role_delete" value="1" ${settings.anti_role_delete ? 'checked' : ''} onchange="saveProtectionSetting('anti_role_delete', this.checked)"><span class="slider"></span></label>
+                                        <div class="flex items-center gap-2 text-right">
+                                            <div>
+                                                <h5 class="text-xs font-bold text-white">مكافحة حذف الرتب</h5>
+                                                <p class="text-[10px] text-gray-400">منع حذف رتب جماعي</p>
+                                            </div>
+                                            <span class="text-sm">🗑️</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- مكافحة إنشاء الرتب -->
+                                    <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between hover:border-purple-500/30 transition">
+                                        <label class="toggle"><input type="checkbox" name="anti_role_create" value="1" ${settings.anti_role_create ? 'checked' : ''} onchange="saveProtectionSetting('anti_role_create', this.checked)"><span class="slider"></span></label>
+                                        <div class="flex items-center gap-2 text-right">
+                                            <div>
+                                                <h5 class="text-xs font-bold text-white">مكافحة إنشاء الرتب</h5>
+                                                <p class="text-[10px] text-gray-400">منع إنشاء رتب جماعي</p>
+                                            </div>
+                                            <span class="text-sm">🎖️</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- مكافحة تعديل الرتب -->
+                                    <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between hover:border-purple-500/30 transition">
+                                        <label class="toggle"><input type="checkbox" name="anti_role_update" value="1" ${settings.anti_role_update ? 'checked' : ''} onchange="saveProtectionSetting('anti_role_update', this.checked)"><span class="slider"></span></label>
+                                        <div class="flex items-center gap-2 text-right">
+                                            <div>
+                                                <h5 class="text-xs font-bold text-white">مكافحة تعديل الرتب</h5>
+                                                <p class="text-[10px] text-gray-400">منع تعديل رتب جماعي</p>
+                                            </div>
+                                            <span class="text-sm">🏅</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- مجموعة 3: حماية الويب هوك -->
+                            <div class="space-y-3 pt-4 border-t border-white/5">
+                                <div class="flex items-center justify-between text-xs text-gray-400 font-bold">
+                                    <span>0/2 مفعل</span>
+                                    <span class="text-white">حماية الويب هوك</span>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                    <!-- مكافحة إنشاء الويب هوك -->
+                                    <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between hover:border-purple-500/30 transition">
+                                        <label class="toggle"><input type="checkbox" name="anti_webhook_create" value="1" ${settings.anti_webhook_create ? 'checked' : ''} onchange="saveProtectionSetting('anti_webhook_create', this.checked)"><span class="slider"></span></label>
+                                        <div class="flex items-center gap-2 text-right">
+                                            <div>
+                                                <h5 class="text-xs font-bold text-white">مكافحة إنشاء الويب هوك</h5>
+                                                <p class="text-[10px] text-gray-400">منع إنشاء الويب هوك وحذفه فوراً مع معاقبة المسؤول</p>
+                                            </div>
+                                            <span class="text-sm">⚙️</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- مكافحة تعديل الويب هوك -->
+                                    <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between hover:border-purple-500/30 transition">
+                                        <label class="toggle"><input type="checkbox" name="anti_webhook_update" value="1" ${settings.anti_webhook_update ? 'checked' : ''} onchange="saveProtectionSetting('anti_webhook_update', this.checked)"><span class="slider"></span></label>
+                                        <div class="flex items-center gap-2 text-right">
+                                            <div>
+                                                <h5 class="text-xs font-bold text-white">مكافحة تعديل الويب هوك</h5>
+                                                <p class="text-[10px] text-gray-400">منع التعديل الجماعي على الويب هوكات الحالية مع معاقبة المسؤول</p>
+                                            </div>
+                                            <span class="text-sm">⚙️</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- مجموعة 4: حماية الأعضاء -->
+                            <div class="space-y-3 pt-4 border-t border-white/5">
+                                <div class="flex items-center justify-between text-xs text-gray-400 font-bold">
+                                    <span>0/2 مفعل</span>
+                                    <span class="text-white">حماية الأعضاء</span>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                    <!-- مكافحة الحظر -->
+                                    <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between hover:border-purple-500/30 transition">
+                                        <label class="toggle"><input type="checkbox" name="anti_mass_ban" value="1" ${settings.anti_mass_ban ? 'checked' : ''} onchange="saveProtectionSetting('anti_mass_ban', this.checked)"><span class="slider"></span></label>
+                                        <div class="flex items-center gap-2 text-right">
+                                            <div>
+                                                <h5 class="text-xs font-bold text-white">مكافحة الحظر</h5>
+                                                <p class="text-[10px] text-gray-400">منع الحظر الجماعي</p>
+                                            </div>
+                                            <span class="text-sm">🔨</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- مكافحة الطرد -->
+                                    <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between hover:border-purple-500/30 transition">
+                                        <label class="toggle"><input type="checkbox" name="anti_mass_kick" value="1" ${settings.anti_mass_kick ? 'checked' : ''} onchange="saveProtectionSetting('anti_mass_kick', this.checked)"><span class="slider"></span></label>
+                                        <div class="flex items-center gap-2 text-right">
+                                            <div>
+                                                <h5 class="text-xs font-bold text-white">مكافحة الطرد</h5>
+                                                <p class="text-[10px] text-gray-400">منع الطرد الجماعي</p>
+                                            </div>
+                                            <span class="text-sm">👢</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- مجموعة 5: حماية المحتوى -->
+                            <div class="space-y-3 pt-4 border-t border-white/5">
+                                <div class="flex items-center justify-between text-xs text-gray-400 font-bold">
+                                    <span>0/1 مفعل</span>
+                                    <span class="text-white">حماية المحتوى</span>
+                                </div>
+                                <div class="grid grid-cols-1 gap-3">
+                                    <!-- مكافحة المنشنات -->
+                                    <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between hover:border-purple-500/30 transition">
+                                        <label class="toggle"><input type="checkbox" name="anti_mass_mention" value="1" ${settings.anti_mass_mention ? 'checked' : ''} onchange="saveProtectionSetting('anti_mass_mention', this.checked)"><span class="slider"></span></label>
+                                        <div class="flex items-center gap-2 text-right">
+                                            <div>
+                                                <h5 class="text-xs font-bold text-white">مكافحة المنشنات</h5>
+                                                <p class="text-[10px] text-gray-400">منع المنشنات المفرطة</p>
+                                            </div>
+                                            <span class="text-sm">📢</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- 5. عقوبة فورية (0/9 مفعل) -->
+                        <div class="bg-[#12141f] border border-white/5 p-5 rounded-2xl space-y-4 shadow-xl">
+                            <div class="flex items-center justify-between border-b border-white/5 pb-3">
+                                <span class="px-3 py-1 bg-rose-950/60 text-rose-300 border border-rose-800/40 rounded-xl text-xs font-bold font-mono">0/9 مفعل</span>
+                                <div class="flex items-center gap-2">
+                                    <div class="text-right">
+                                        <h4 class="font-black text-white text-sm">عقوبة فورية</h4>
+                                        <p class="text-gray-400 text-[11px]">تطبيق العقوبة فوراً</p>
+                                    </div>
+                                    <span class="text-base">🏏</span>
+                                </div>
+                            </div>
+
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                <div class="bg-[#0b0d14] border border-white/5 p-3 rounded-xl flex items-center justify-between">
-                                    <label class="toggle"><input type="checkbox" name="anti_caps" value="1" ${settings.anti_caps ? 'checked' : ''}><span class="slider"></span></label>
-                                    <div class="text-right">
-                                        <span class="text-xs font-bold text-white block">منع الحروف الكبيرة (Anti-Caps)</span>
-                                        <span class="text-[10px] text-gray-400">حذف الرسائل المكتوبة بحروف كبيرة مفرطة</span>
+                                <!-- رتب Onboarding الخطيرة -->
+                                <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between hover:border-purple-500/30 transition">
+                                    <label class="toggle"><input type="checkbox" name="anti_onboarding_danger" value="1" ${settings.anti_onboarding_danger ? 'checked' : ''} onchange="saveProtectionSetting('anti_onboarding_danger', this.checked)"><span class="slider"></span></label>
+                                    <div class="flex items-center gap-2 text-right">
+                                        <div>
+                                            <h5 class="text-xs font-bold text-white">رتب Onboarding الخطيرة</h5>
+                                            <p class="text-[10px] text-gray-400">يمنع منح رتبة بصلاحيات خطيرة تلقائياً لأي عضو جديد عبر أسئلة الانضمام (Onboarding)</p>
+                                        </div>
+                                        <span class="text-sm">🚨</span>
                                     </div>
                                 </div>
-                                <div class="bg-[#0b0d14] border border-white/5 p-3 rounded-xl flex items-center justify-between">
-                                    <label class="toggle"><input type="checkbox" name="anti_emoji_spam" value="1" ${settings.anti_emoji_spam ? 'checked' : ''}><span class="slider"></span></label>
-                                    <div class="text-right">
-                                        <span class="text-xs font-bold text-white block">منع سبام الإيموجي (Anti-Emoji)</span>
-                                        <span class="text-[10px] text-gray-400">منع إرسال الرسائل التي تحتوي على عدد كبير من الإيموجيات</span>
+
+                                <!-- رتب خطيرة عند الانضمام (حماية الانفايت) -->
+                                <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between hover:border-purple-500/30 transition">
+                                    <label class="toggle"><input type="checkbox" name="anti_join_danger_roles" value="1" ${settings.anti_join_danger_roles ? 'checked' : ''} onchange="saveProtectionSetting('anti_join_danger_roles', this.checked)"><span class="slider"></span></label>
+                                    <div class="flex items-center gap-2 text-right">
+                                        <div>
+                                            <h5 class="text-xs font-bold text-white">رتب خطيرة عند الانضمام (حماية الانفايت)</h5>
+                                            <p class="text-[10px] text-gray-400">يزيل تلقائياً أي رتبة استقرت على عضو جديد عبر رابط دعوة أو Onboarding ولم تكن الرتبة التلقائية الرسمية</p>
+                                        </div>
+                                        <span class="text-sm">🚨</span>
+                                    </div>
+                                </div>
+
+                                <!-- مكافحة الريد -->
+                                <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between hover:border-purple-500/30 transition">
+                                    <label class="toggle"><input type="checkbox" name="anti_raid_fast" value="1" ${settings.anti_raid_fast ? 'checked' : ''} onchange="saveProtectionSetting('anti_raid_fast', this.checked)"><span class="slider"></span></label>
+                                    <div class="flex items-center gap-2 text-right">
+                                        <div>
+                                            <h5 class="text-xs font-bold text-white">مكافحة الريد</h5>
+                                            <p class="text-[10px] text-gray-400">حماية ضد الانضمام الجماعي</p>
+                                        </div>
+                                        <span class="text-sm">🛡️</span>
+                                    </div>
+                                </div>
+
+                                <!-- مكافحة الصلاحيات الخطيرة -->
+                                <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between hover:border-purple-500/30 transition">
+                                    <label class="toggle"><input type="checkbox" name="anti_dangerous_perms" value="1" ${settings.anti_dangerous_perms ? 'checked' : ''} onchange="saveProtectionSetting('anti_dangerous_perms', this.checked)"><span class="slider"></span></label>
+                                    <div class="flex items-center gap-2 text-right">
+                                        <div>
+                                            <h5 class="text-xs font-bold text-white">مكافحة الصلاحيات الخطيرة</h5>
+                                            <p class="text-[10px] text-gray-400">منع منح صلاحيات خطيرة</p>
+                                        </div>
+                                        <span class="text-sm">🚨</span>
+                                    </div>
+                                </div>
+
+                                <!-- مكافحة الرتب الخطيرة القابلة للربط -->
+                                <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between hover:border-purple-500/30 transition">
+                                    <label class="toggle"><input type="checkbox" name="anti_linked_roles" value="1" ${settings.anti_linked_roles ? 'checked' : ''} onchange="saveProtectionSetting('anti_linked_roles', this.checked)"><span class="slider"></span></label>
+                                    <div class="flex items-center gap-2 text-right">
+                                        <div>
+                                            <h5 class="text-xs font-bold text-white">مكافحة الرتب الخطيرة القابلة للربط</h5>
+                                            <p class="text-[10px] text-gray-400">يمنع أي رتبة تحمل صلاحية خطيرة من أن تصبح قابلة للحصول عليها ذاتياً عبر ربط حساب خارجي (Linked Roles)</p>
+                                        </div>
+                                        <span class="text-sm">🚨</span>
+                                    </div>
+                                </div>
+
+                                <!-- مكافحة إضافة البوتات -->
+                                <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between hover:border-purple-500/30 transition">
+                                    <label class="toggle"><input type="checkbox" name="anti_bot_add" value="1" ${settings.anti_bot_add ? 'checked' : ''} onchange="saveProtectionSetting('anti_bot_add', this.checked)"><span class="slider"></span></label>
+                                    <div class="flex items-center gap-2 text-right">
+                                        <div>
+                                            <h5 class="text-xs font-bold text-white">مكافحة إضافة البوتات</h5>
+                                            <p class="text-[10px] text-gray-400">منع إضافة بوتات بدون إذن</p>
+                                        </div>
+                                        <span class="text-sm">🤖</span>
+                                    </div>
+                                </div>
+
+                                <!-- مكافحة التطهير -->
+                                <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between hover:border-purple-500/30 transition">
+                                    <label class="toggle"><input type="checkbox" name="anti_prune" value="1" ${settings.anti_prune ? 'checked' : ''} onchange="saveProtectionSetting('anti_prune', this.checked)"><span class="slider"></span></label>
+                                    <div class="flex items-center gap-2 text-right">
+                                        <div>
+                                            <h5 class="text-xs font-bold text-white">مكافحة التطهير</h5>
+                                            <p class="text-[10px] text-gray-400">منع تطهير الأعضاء</p>
+                                        </div>
+                                        <span class="text-sm">🧹</span>
+                                    </div>
+                                </div>
+
+                                <!-- مكافحة تغيير اسم السيرفر -->
+                                <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between hover:border-purple-500/30 transition">
+                                    <label class="toggle"><input type="checkbox" name="anti_server_name_change" value="1" ${settings.anti_server_name_change ? 'checked' : ''} onchange="saveProtectionSetting('anti_server_name_change', this.checked)"><span class="slider"></span></label>
+                                    <div class="flex items-center gap-2 text-right">
+                                        <div>
+                                            <h5 class="text-xs font-bold text-white">مكافحة تغيير اسم السيرفر</h5>
+                                            <p class="text-[10px] text-gray-400">منع تغيير اسم السيرفر</p>
+                                        </div>
+                                        <span class="text-sm">✏️</span>
+                                    </div>
+                                </div>
+
+                                <!-- مكافحة تغيير أيقونة السيرفر -->
+                                <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between hover:border-purple-500/30 transition">
+                                    <label class="toggle"><input type="checkbox" name="anti_server_icon_change" value="1" ${settings.anti_server_icon_change ? 'checked' : ''} onchange="saveProtectionSetting('anti_server_icon_change', this.checked)"><span class="slider"></span></label>
+                                    <div class="flex items-center gap-2 text-right">
+                                        <div>
+                                            <h5 class="text-xs font-bold text-white">مكافحة تغيير أيقونة السيرفر</h5>
+                                            <p class="text-[10px] text-gray-400">منع تغيير أيقونة السيرفر</p>
+                                        </div>
+                                        <span class="text-sm">🖼️</span>
                                     </div>
                                 </div>
                             </div>
                         </div>
+
+                        <!-- 6. كشف فقط (1/6 مفعل) -->
+                        <div class="bg-[#12141f] border border-white/5 p-5 rounded-2xl space-y-4 shadow-xl">
+                            <div class="flex items-center justify-between border-b border-white/5 pb-3">
+                                <span class="px-3 py-1 bg-cyan-950/60 text-cyan-300 border border-cyan-800/40 rounded-xl text-xs font-bold font-mono">1/6 مفعل</span>
+                                <div class="flex items-center gap-2">
+                                    <div class="text-right">
+                                        <h4 class="font-black text-white text-sm">كشف فقط</h4>
+                                        <p class="text-gray-400 text-[11px]">تسجيل فقط بدون عقوبة</p>
+                                    </div>
+                                    <span class="text-base">🔭</span>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                <!-- مكافحة الاحتيال -->
+                                <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between hover:border-purple-500/30 transition">
+                                    <label class="toggle"><input type="checkbox" name="anti_scam" value="1" ${settings.anti_scam ? 'checked' : ''} onchange="saveProtectionSetting('anti_scam', this.checked)"><span class="slider"></span></label>
+                                    <div class="flex items-center gap-2 text-right">
+                                        <div>
+                                            <h5 class="text-xs font-bold text-white">مكافحة الاحتيال</h5>
+                                            <p class="text-[10px] text-gray-400">كشف وحذف روابط الاحتيال</p>
+                                        </div>
+                                        <span class="text-sm">🦅</span>
+                                    </div>
+                                </div>
+
+                                <!-- مكافحة روابط الدعوة -->
+                                <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between hover:border-purple-500/30 transition">
+                                    <label class="toggle"><input type="checkbox" name="anti_invite_links" value="1" ${settings.anti_invite_links ? 'checked' : ''} onchange="saveProtectionSetting('anti_invite_links', this.checked)"><span class="slider"></span></label>
+                                    <div class="flex items-center gap-2 text-right">
+                                        <div>
+                                            <h5 class="text-xs font-bold text-white">مكافحة روابط الدعوة</h5>
+                                            <p class="text-[10px] text-gray-400">حذف روابط الدعوة</p>
+                                        </div>
+                                        <span class="text-sm">🪵</span>
+                                    </div>
+                                </div>
+
+                                <!-- مكافحة المحتوى الغير لائق -->
+                                <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between hover:border-purple-500/30 transition">
+                                    <label class="toggle"><input type="checkbox" name="anti_nsfw_content" value="1" ${settings.anti_nsfw_content ? 'checked' : ''} onchange="saveProtectionSetting('anti_nsfw_content', this.checked)"><span class="slider"></span></label>
+                                    <div class="flex items-center gap-2 text-right">
+                                        <div>
+                                            <h5 class="text-xs font-bold text-white">مكافحة المحتوى الغير لائق</h5>
+                                            <p class="text-[10px] text-gray-400">حذف المحتوى الغير لائق</p>
+                                        </div>
+                                        <span class="text-sm">🛡️</span>
+                                    </div>
+                                </div>
+
+                                <!-- مكافحة الغوست بينغ -->
+                                <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between hover:border-purple-500/30 transition">
+                                    <label class="toggle"><input type="checkbox" name="anti_ghost_ping" value="1" ${settings.anti_ghost_ping ? 'checked' : ''} onchange="saveProtectionSetting('anti_ghost_ping', this.checked)"><span class="slider"></span></label>
+                                    <div class="flex items-center gap-2 text-right">
+                                        <div>
+                                            <h5 class="text-xs font-bold text-white">مكافحة الغوست بينغ</h5>
+                                            <p class="text-[10px] text-gray-400">كشف حذف المنشنات</p>
+                                        </div>
+                                        <span class="text-sm">👻</span>
+                                    </div>
+                                </div>
+
+                                <!-- كشف نقل القنوات -->
+                                <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between hover:border-purple-500/30 transition">
+                                    <label class="toggle"><input type="checkbox" name="anti_channel_move" value="1" ${settings.anti_channel_move ? 'checked' : ''} onchange="saveProtectionSetting('anti_channel_move', this.checked)"><span class="slider"></span></label>
+                                    <div class="flex items-center gap-2 text-right">
+                                        <div>
+                                            <h5 class="text-xs font-bold text-white">كشف نقل القنوات</h5>
+                                            <p class="text-[10px] text-gray-400">كشف نقل القنوات إلى تصنيفات أخرى (تنبيه فقط)</p>
+                                        </div>
+                                        <span class="text-sm">📍</span>
+                                    </div>
+                                </div>
+
+                                <!-- مكافحة سبام الويب هوك -->
+                                <div class="bg-[#0b0d14] border border-purple-500/40 p-4 rounded-xl flex items-center justify-between hover:border-purple-500/60 transition shadow-inner">
+                                    <label class="toggle"><input type="checkbox" name="anti_webhook_spam" value="1" checked onchange="saveProtectionSetting('anti_webhook_spam', this.checked)"><span class="slider"></span></label>
+                                    <div class="flex items-center gap-2 text-right">
+                                        <div>
+                                            <h5 class="text-xs font-bold text-white">مكافحة سبام الويب هوك</h5>
+                                            <p class="text-[10px] text-gray-400">يحذف تلقائياً رسائل السبام المرسلة عبر أي ويبهوك ويزيل الويب هوك نفسه — يعمل باستمرار بالخلفية</p>
+                                        </div>
+                                        <span class="text-sm">⚙️</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 7. الدفاع الذاتي للبوت (Self Defense - مقفلة دائماً) -->
+                        <div class="bg-[#12141f] border border-white/5 p-5 rounded-2xl space-y-4 shadow-xl">
+                            <div class="flex items-center justify-between border-b border-white/5 pb-3">
+                                <span class="text-[11px] text-gray-400">مقفلة دائماً — تحمي البوت نفسه، لا يمكن إيقافها</span>
+                                <div class="flex items-center gap-2">
+                                    <div class="text-right">
+                                        <h4 class="font-black text-white text-sm">الدفاع الذاتي للبوت</h4>
+                                    </div>
+                                    <span class="text-base">🛡️</span>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between">
+                                    <span class="px-2.5 py-1 bg-emerald-950/60 text-emerald-400 border border-emerald-800/40 text-[10px] font-bold rounded-lg">مقفلة دائماً</span>
+                                    <div class="text-right">
+                                        <h5 class="text-xs font-bold text-white">مكافحة نزع صلاحيات البوت</h5>
+                                        <p class="text-[10px] text-gray-400">ينبهك (عبر رسالة خاصة) لو فقدت رتبة البوت نفسها صلاحيات حرجة — مثلاً عند إعادة استخدام رابط دعوته وإلغاء تحديد الصلاحيات</p>
+                                    </div>
+                                </div>
+
+                                <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between">
+                                    <span class="px-2.5 py-1 bg-emerald-950/60 text-emerald-400 border border-emerald-800/40 text-[10px] font-bold rounded-lg">مقفلة دائماً</span>
+                                    <div class="text-right">
+                                        <h5 class="text-xs font-bold text-white">مكافحة إزالة رتبة البوت</h5>
+                                        <p class="text-[10px] text-gray-400">ينبهك (عبر رسالة خاصة) لو أزيلت من البوت مباشرة رتبة تمنحه صلاحيات حرجة</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
-                `;
+
+                    <script>
+                    async function saveProtectionSetting(key, value) {
+                        try {
+                            const res = await fetch('/api/guild/${guildId}/settings', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ [key]: value ? 1 : 0 })
+                            });
+                            const data = await res.json();
+                            const status = document.getElementById('saveStatus');
+                            if (status) {
+                                status.classList.remove('hidden');
+                                setTimeout(() => status.classList.add('hidden'), 3000);
+                            }
+                        } catch(e) {
+                            console.error('Failed to save protection setting', e);
+                        }
+                    }
+                    </script>
+`;
+            } else if (section === 'whitelist') {
+formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl">
+
+                        <!-- 1. Banner Alert: البوت لا يملك صلاحيات حرجة الآن -->
+                        <div class="bg-[#1e0e11] border border-rose-900/50 p-4 rounded-2xl flex items-center justify-between shadow-lg">
+                            <div class="flex items-center gap-3">
+                                <label class="toggle">
+                                    <input type="checkbox" name="lock_dashboard" value="1" ${settings.lock_dashboard ? 'checked' : ''} onchange="saveProtectionSetting('lock_dashboard', this.checked)">
+                                    <span class="slider"></span>
+                                </label>
+                                <span class="text-xs font-bold text-rose-300">قفل لوحة التحكم</span>
+                            </div>
+                            <div class="flex items-center gap-2 text-rose-400 font-bold text-xs">
+                                <span>البوت لا يملك صلاحيات حرجة الآن</span>
+                                <span class="text-base">⚠️</span>
+                            </div>
+                        </div>
+
+                        <!-- 2. بطاقة إضافة عضو موثوق -->
+                        <div class="bg-[#12141f] border border-white/5 p-6 rounded-2xl space-y-4 shadow-xl">
+                            <div class="flex items-center justify-end gap-2 text-emerald-400 font-black text-sm">
+                                <span>إضافة عضو موثوق</span>
+                                <span class="text-base">➕</span>
+                            </div>
+
+                            <div class="space-y-3">
+                                <div>
+                                    <input type="text" id="wlSearchUser" placeholder="ابحث عن عضو لإضافته..." class="w-full bg-[#0b0d14] border border-white/5 focus:border-emerald-500 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right placeholder-gray-500">
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <button type="button" onclick="addWhitelistUser('whitelist')" class="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-black transition flex items-center gap-1.5 shadow-lg shadow-emerald-950/40">
+                                        <span>➕</span>
+                                        <span>إضافة</span>
+                                    </button>
+                                    <input type="text" id="wlUserId" placeholder="أدخل معرف المستخدم (User ID) ثم اضغط إضافة أو Enter" class="flex-1 bg-[#0b0d14] border border-white/5 focus:border-emerald-500 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right font-mono placeholder-gray-500" onkeydown="if(event.key==='Enter') addWhitelistUser('whitelist')">
+                                </div>
+                                <div class="text-[10px] text-gray-500 flex items-center justify-end gap-1">
+                                    <span>اضغط Enter للإضافة السريعة</span>
+                                    <span>ℹ️</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 3. قائمة الأعضاء الموثوقين -->
+                        <div class="bg-[#12141f] border border-white/5 p-6 rounded-2xl space-y-4 shadow-xl">
+                            <div class="flex items-center justify-between border-b border-white/5 pb-3">
+                                <span class="px-2.5 py-1 bg-emerald-950/60 text-emerald-300 border border-emerald-800/40 rounded-xl text-xs font-mono font-bold" id="wlCountBadge">${(whitelistUsers || []).length} عضو</span>
+                                <div class="flex items-center gap-2 text-white font-black text-sm">
+                                    <span>الأعضاء الموثوقين</span>
+                                    <span class="text-emerald-400">🛡️</span>
+                                </div>
+                            </div>
+
+                            <div id="wlUsersList" class="space-y-2">
+                                ${(whitelistUsers && whitelistUsers.length > 0) ? whitelistUsers.map(u => `
+                                    <div class="bg-[#0b0d14] border border-white/5 p-3.5 rounded-xl flex items-center justify-between hover:border-emerald-500/30 transition">
+                                        <button type="button" onclick="removeWhitelistUser('${u.user_id}', 'whitelist')" class="px-3 py-1 bg-rose-600/20 hover:bg-rose-600/40 text-rose-300 border border-rose-500/30 rounded-lg text-xs font-bold transition">حذف 🗑️</button>
+                                        <div class="flex items-center gap-3">
+                                            <div class="text-right">
+                                                <span class="text-xs font-bold text-white block font-mono">${u.user_id}</span>
+                                                <span class="text-[10px] text-gray-400">مستثنى من جميع فلاتر الحماية</span>
+                                            </div>
+                                            <div class="w-8 h-8 rounded-lg bg-emerald-600/20 text-emerald-400 flex items-center justify-center font-bold text-xs">👤</div>
+                                        </div>
+                                    </div>
+                                `).join('') : `
+                                    <div class="py-10 text-center space-y-2">
+                                        <div class="w-12 h-12 rounded-full bg-white/5 text-gray-400 flex items-center justify-center text-xl mx-auto">👥</div>
+                                        <h5 class="text-xs font-bold text-gray-300">لا يوجد أعضاء موثوقين</h5>
+                                        <p class="text-[10px] text-gray-500">أضف أعضاء موثوقين أعلاه لاستثنائهم من قيود الحماية</p>
+                                    </div>
+                                `}
+                            </div>
+                        </div>
+
+                        <!-- 4. نظام Anti Mod (محمي من العقوبات) -->
+                        <div class="bg-[#12141f] border border-white/5 p-6 rounded-2xl space-y-4 shadow-xl">
+                            <div class="flex items-center justify-between border-b border-white/5 pb-3">
+                                <span class="px-2.5 py-1 bg-amber-950/60 text-amber-300 border border-amber-800/40 rounded-xl text-xs font-mono font-bold" id="antiModCountBadge">${(antimodUsers || []).length} عضو</span>
+                                <div class="flex items-center gap-2 text-white font-black text-sm">
+                                    <span>نظام Anti Mod (محمي من العقوبات)</span>
+                                    <span class="text-amber-400">🛡️</span>
+                                </div>
+                            </div>
+
+                            <div class="space-y-3">
+                                <div>
+                                    <input type="text" id="antiModSearchUser" placeholder="ابحث عن عضو لإضافته..." class="w-full bg-[#0b0d14] border border-white/5 focus:border-amber-500 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right placeholder-gray-500">
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <button type="button" onclick="addWhitelistUser('antimod')" class="px-6 py-2.5 bg-amber-600 hover:bg-amber-500 text-white rounded-xl text-xs font-black transition flex items-center gap-1.5 shadow-lg shadow-amber-950/40">
+                                        <span>إضافة</span>
+                                    </button>
+                                    <input type="text" id="antiModUserId" placeholder="أدخل User ID لإضافته إلى Anti Mod" class="flex-1 bg-[#0b0d14] border border-white/5 focus:border-amber-500 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right font-mono placeholder-gray-500" onkeydown="if(event.key==='Enter') addWhitelistUser('antimod')">
+                                </div>
+                            </div>
+
+                            <div id="antiModUsersList" class="space-y-2 pt-2">
+                                ${(antimodUsers && antimodUsers.length > 0) ? antimodUsers.map(u => `
+                                    <div class="bg-[#0b0d14] border border-white/5 p-3.5 rounded-xl flex items-center justify-between hover:border-amber-500/30 transition">
+                                        <button type="button" onclick="removeWhitelistUser('${u.user_id}', 'antimod')" class="px-3 py-1 bg-rose-600/20 hover:bg-rose-600/40 text-rose-300 border border-rose-500/30 rounded-lg text-xs font-bold transition">حذف 🗑️</button>
+                                        <div class="flex items-center gap-3">
+                                            <div class="text-right">
+                                                <span class="text-xs font-bold text-white block font-mono">${u.user_id}</span>
+                                                <span class="text-[10px] text-amber-400/80">محمي من الطرد والحظر والعقوبات التلقائية</span>
+                                            </div>
+                                            <div class="w-8 h-8 rounded-lg bg-amber-600/20 text-amber-400 flex items-center justify-center font-bold text-xs">🛡️</div>
+                                        </div>
+                                    </div>
+                                `).join('') : `
+                                    <div class="py-6 text-center text-xs text-gray-500">
+                                        لا يوجد أعضاء في Anti Mod حالياً.
+                                    </div>
+                                `}
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <script>
+                    async function addWhitelistUser(type) {
+                        const inputId = type === 'antimod' ? 'antiModUserId' : 'wlUserId';
+                        const input = document.getElementById(inputId);
+                        const userId = input.value.trim();
+                        if (!userId) return alert('يرجى إدخال معرف المستخدم (User ID)!');
+
+                        try {
+                            const res = await fetch('/api/guild/${guildId}/whitelist', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ userId, type })
+                            });
+                            const data = await res.json();
+                            if (data.success) {
+                                alert('✅ تم إضافة العضو بنجاح!');
+                                location.reload();
+                            } else {
+                                alert('❌ خطأ: ' + (data.error || 'فشل الإضافة'));
+                            }
+                        } catch(e) {
+                            alert('حدث خطأ في الاتصال بالخادم');
+                        }
+                    }
+
+                    async function removeWhitelistUser(userId, type) {
+                        if (!confirm('هل أنت متأكد من حذف هذا العضو؟')) return;
+                        try {
+                            const res = await fetch('/api/guild/${guildId}/whitelist', {
+                                method: 'DELETE',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ userId, type })
+                            });
+                            const data = await res.json();
+                            if (data.success) {
+                                alert('✅ تم الحذف بنجاح!');
+                                location.reload();
+                            } else {
+                                alert('❌ خطأ: ' + (data.error || 'فشل الحذف'));
+                            }
+                        } catch(e) {
+                            alert('حدث خطأ في الاتصال');
+                        }
+                    }
+                    </script>
+`;
+            } else if (section === 'protection-logs' || section === 'security-logs') {
+formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl">
+
+                        <!-- 1. Banner Alert: البوت لا يملك صلاحيات حرجة الآن -->
+                        <div class="bg-[#1e0e11] border border-rose-900/50 p-4 rounded-2xl flex items-center justify-between shadow-lg">
+                            <div class="flex items-center gap-3">
+                                <label class="toggle">
+                                    <input type="checkbox" name="lock_dashboard" value="1" ${settings.lock_dashboard ? 'checked' : ''} onchange="saveProtectionSetting('lock_dashboard', this.checked)">
+                                    <span class="slider"></span>
+                                </label>
+                                <span class="text-xs font-bold text-rose-300">قفل لوحة التحكم</span>
+                            </div>
+                            <div class="flex items-center gap-2 text-rose-400 font-bold text-xs">
+                                <span>البوت لا يملك صلاحيات حرجة الآن</span>
+                                <span class="text-base">⚠️</span>
+                            </div>
+                        </div>
+
+                        <!-- 2. بطاقتي تفعيل سجلات الأمان وسجلات الإشراف جنباً إلى جنب -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <!-- سجلات الأمان -->
+                            <div class="bg-[#12141f] border border-white/5 p-5 rounded-2xl flex items-center justify-between shadow-xl">
+                                <label class="toggle">
+                                    <input type="checkbox" name="security_logs_enabled" value="1" ${settings.security_logs_enabled !== 0 ? 'checked' : ''} onchange="saveProtectionSetting('security_logs_enabled', this.checked)">
+                                    <span class="slider"></span>
+                                </label>
+                                <div class="flex items-center gap-3">
+                                    <div class="text-right">
+                                        <h4 class="font-black text-white text-sm">سجلات الأمان</h4>
+                                        <p class="text-gray-400 text-xs mt-0.5">تسجيل أحداث الأمان</p>
+                                    </div>
+                                    <div class="w-10 h-10 rounded-xl bg-amber-600/20 text-amber-400 flex items-center justify-center text-lg border border-amber-500/30">
+                                        🛡️
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- سجلات الإشراف -->
+                            <div class="bg-[#12141f] border border-white/5 p-5 rounded-2xl flex items-center justify-between shadow-xl">
+                                <label class="toggle">
+                                    <input type="checkbox" name="mod_logs_enabled" value="1" ${settings.mod_logs_enabled !== 0 ? 'checked' : ''} onchange="saveProtectionSetting('mod_logs_enabled', this.checked)">
+                                    <span class="slider"></span>
+                                </label>
+                                <div class="flex items-center gap-3">
+                                    <div class="text-right">
+                                        <h4 class="font-black text-white text-sm">سجلات الإشراف</h4>
+                                        <p class="text-gray-400 text-xs mt-0.5">تسجيل إجراءات الإشراف</p>
+                                    </div>
+                                    <div class="w-10 h-10 rounded-xl bg-purple-600/20 text-purple-400 flex items-center justify-center text-lg border border-purple-500/30">
+                                        👥
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 3. بطاقة ماذا يتم تسجيله؟ -->
+                        <div class="bg-[#12141f] border border-white/5 p-6 rounded-2xl space-y-6 shadow-xl">
+                            <div class="flex items-center justify-end gap-2 text-white font-black text-sm border-b border-white/5 pb-3">
+                                <span>ماذا يتم تسجيله؟</span>
+                                <span class="text-base">⚙️</span>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <!-- عمود سجلات الأمان -->
+                                <div class="space-y-3">
+                                    <div class="flex items-center justify-end gap-2 text-amber-400 font-bold text-xs">
+                                        <span>سجلات الأمان</span>
+                                        <span>🔒</span>
+                                    </div>
+                                    <div class="space-y-2">
+                                        <div class="bg-[#0b0d14] border border-white/5 p-3 rounded-xl flex items-center justify-between text-xs">
+                                            <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+                                            <span class="text-gray-300 font-medium">محاولات التدمير</span>
+                                        </div>
+                                        <div class="bg-[#0b0d14] border border-white/5 p-3 rounded-xl flex items-center justify-between text-xs">
+                                            <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+                                            <span class="text-gray-300 font-medium">العقوبات التلقائية</span>
+                                        </div>
+                                        <div class="bg-[#0b0d14] border border-white/5 p-3 rounded-xl flex items-center justify-between text-xs">
+                                            <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+                                            <span class="text-gray-300 font-medium">تجاوز الحدود</span>
+                                        </div>
+                                        <div class="bg-[#0b0d14] border border-white/5 p-3 rounded-xl flex items-center justify-between text-xs">
+                                            <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+                                            <span class="text-gray-300 font-medium">أنشطة مشبوهة</span>
+                                        </div>
+                                        <div class="bg-[#0b0d14] border border-white/5 p-3 rounded-xl flex items-center justify-between text-xs">
+                                            <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+                                            <span class="text-gray-300 font-medium">روابط الاحتيال</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- عمود سجلات الإشراف -->
+                                <div class="space-y-3">
+                                    <div class="flex items-center justify-end gap-2 text-purple-400 font-bold text-xs">
+                                        <span>سجلات الإشراف</span>
+                                        <span>🛡️</span>
+                                    </div>
+                                    <div class="space-y-2">
+                                        <div class="bg-[#0b0d14] border border-white/5 p-3 rounded-xl flex items-center justify-between text-xs">
+                                            <span class="w-2 h-2 rounded-full bg-purple-400"></span>
+                                            <span class="text-gray-300 font-medium">أوامر الحظر والطرد</span>
+                                        </div>
+                                        <div class="bg-[#0b0d14] border border-white/5 p-3 rounded-xl flex items-center justify-between text-xs">
+                                            <span class="w-2 h-2 rounded-full bg-purple-400"></span>
+                                            <span class="text-gray-300 font-medium">أوامر العزل والكتم</span>
+                                        </div>
+                                        <div class="bg-[#0b0d14] border border-white/5 p-3 rounded-xl flex items-center justify-between text-xs">
+                                            <span class="w-2 h-2 rounded-full bg-purple-400"></span>
+                                            <span class="text-gray-300 font-medium">التحذيرات</span>
+                                        </div>
+                                        <div class="bg-[#0b0d14] border border-white/5 p-3 rounded-xl flex items-center justify-between text-xs">
+                                            <span class="w-2 h-2 rounded-full bg-purple-400"></span>
+                                            <span class="text-gray-300 font-medium">حذف الرسائل</span>
+                                        </div>
+                                        <div class="bg-[#0b0d14] border border-white/5 p-3 rounded-xl flex items-center justify-between text-xs">
+                                            <span class="w-2 h-2 rounded-full bg-purple-400"></span>
+                                            <span class="text-gray-300 font-medium">قفل/فتح القنوات</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 4. جدول الأحداث والسجلات الحية المسجلة -->
+                        <div class="bg-[#12141f] border border-white/5 p-6 rounded-2xl space-y-4 shadow-xl">
+                            <div class="flex items-center justify-between border-b border-white/5 pb-3">
+                                <span class="px-2.5 py-1 bg-purple-950/60 text-purple-300 border border-purple-800/40 rounded-xl text-xs font-mono font-bold">${(securityLogsList || []).length} سجل مسجل</span>
+                                <h4 class="font-black text-white text-sm">أحدث سجلات الأمان والإشراف المسجلة لحظياً</h4>
+                            </div>
+
+                            <div class="space-y-2">
+                                ${(securityLogsList && securityLogsList.length > 0) ? securityLogsList.map(log => `
+                                    <div class="bg-[#0b0d14] border border-white/5 p-3.5 rounded-xl flex items-center justify-between text-xs hover:border-purple-500/30 transition">
+                                        <span class="text-[10px] text-gray-500 font-mono">${new Date(log.created_at * 1000).toLocaleString('ar-SA')}</span>
+                                        <div class="flex items-center gap-3">
+                                            <div class="text-right">
+                                                <span class="font-bold text-white block">${log.reason || log.action_type}</span>
+                                                <span class="text-[10px] text-gray-400">${log.details || ''} ${log.executor_id ? `• المشرف: <span class="font-mono text-purple-300">${log.executor_id}</span>` : ''}</span>
+                                            </div>
+                                            <span class="px-2 py-0.5 rounded-lg text-[10px] font-bold ${log.category === 'security' ? 'bg-amber-950/60 text-amber-400 border border-amber-800/30' : 'bg-purple-950/60 text-purple-400 border border-purple-800/30'}">${log.category === 'security' ? 'أمان' : 'إشراف'}</span>
+                                        </div>
+                                    </div>
+                                `).join('') : `
+                                    <div class="py-8 text-center text-xs text-gray-500">
+                                        لا توجد سجلات أمان مسجلة حتى الآن. السيرفر آمن تماماً! 🛡️
+                                    </div>
+                                `}
+                            </div>
+                        </div>
+
+                    </div>
+`;
             } else if (section === 'embed') {
                 formFieldsHtml = `
                     <div class="space-y-6 text-right" dir="rtl">
@@ -2318,23 +3417,35 @@ const broadcasts = database.getGuildBroadcasts ? database.getGuildBroadcasts(gui
                                 </div>
                             </div>
 
-                            <!-- الإشراف والأمان -->
+                            <!-- الأمان والحماية -->
                             <div class="space-y-1">
                                 <button type="button" onclick="toggleNavGroup('grp_sub_security')" class="w-full flex items-center justify-between text-gray-400 hover:text-white px-2 py-1 font-bold text-[11px] transition">
                                     <svg id="arrow_grp_sub_security" class="w-3.5 h-3.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                                    <span class="flex items-center gap-1.5"><span>الإشراف والأمان</span></span>
+                                    <span class="flex items-center gap-1.5"><span>الحماية والأمان</span><span class="text-purple-400">🛡️</span></span>
                                 </button>
                                 <div id="grp_sub_security" class="space-y-1">
-                                    <a href="/dashboard/${guildId}/automod" class="flex items-center justify-between px-3 py-2 rounded-xl ${section === 'automod' ? 'bg-purple-600 text-white font-bold shadow-md' : 'text-gray-300 hover:text-white hover:bg-[#151724]'} transition group">
-                                        <span class="w-4 h-4 rounded-full border border-emerald-500/60 bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-[9px] font-black">✓</span>
-                                        <span class="flex items-center gap-2"><span>الرقابة التلقائية</span><span class="text-gray-400 group-hover:text-purple-400">🤖</span></span>
-                                    </a>
                                     <a href="/dashboard/${guildId}/protection" class="flex items-center justify-between px-3 py-2 rounded-xl ${section === 'protection' ? 'bg-purple-600 text-white font-bold shadow-md' : 'text-gray-300 hover:text-white hover:bg-[#151724]'} transition group">
                                         <span class="flex items-center gap-1">
                                             <span class="w-4 h-4 rounded-full border border-emerald-500/60 bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-[9px] font-black">✓</span>
                                             <span class="text-amber-400 text-xs">👑</span>
                                         </span>
-                                        <span class="flex items-center gap-2"><span>الحماية</span><span class="text-gray-400 group-hover:text-purple-400">🛡️</span></span>
+                                        <span class="flex items-center gap-2"><span>Anti Nuke (الحماية)</span></span>
+                                    </a>
+                                    <a href="/dashboard/${guildId}/whitelist" class="flex items-center justify-between px-3 py-2 rounded-xl ${section === 'whitelist' ? 'bg-purple-600 text-white font-bold shadow-md' : 'text-gray-300 hover:text-white hover:bg-[#151724]'} transition group">
+                                        <span class="w-4 h-4 rounded-full border border-emerald-500/60 bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-[9px] font-black">✓</span>
+                                        <span class="flex items-center gap-2"><span>القائمة البيضاء</span><span class="text-gray-400 group-hover:text-purple-400">⚪</span></span>
+                                    </a>
+                                    <a href="/dashboard/${guildId}/protection-logs" class="flex items-center justify-between px-3 py-2 rounded-xl ${section === 'protection-logs' ? 'bg-purple-600 text-white font-bold shadow-md' : 'text-gray-300 hover:text-white hover:bg-[#151724]'} transition group">
+                                        <span class="text-[9px] font-bold text-amber-400 bg-amber-950/60 px-1.5 py-0.2 rounded">سجلات</span>
+                                        <span class="flex items-center gap-2"><span>سجلات الأمان والإشراف</span><span class="text-gray-400 group-hover:text-purple-400">📋</span></span>
+                                    </a>
+                                    <a href="/dashboard/${guildId}/backup" class="flex items-center justify-between px-3 py-2 rounded-xl ${section === 'backup' ? 'bg-purple-600 text-white font-bold shadow-md' : 'text-gray-300 hover:text-white hover:bg-[#151724]'} transition group">
+                                        <span class="text-[9px] font-bold text-cyan-400 bg-cyan-950/60 px-1.5 py-0.2 rounded">نسخ</span>
+                                        <span class="flex items-center gap-2"><span>النسخ الاحتياطية</span><span class="text-gray-400 group-hover:text-purple-400">📦</span></span>
+                                    </a>
+                                    <a href="/dashboard/${guildId}/automod" class="flex items-center justify-between px-3 py-2 rounded-xl ${section === 'automod' ? 'bg-purple-600 text-white font-bold shadow-md' : 'text-gray-300 hover:text-white hover:bg-[#151724]'} transition group">
+                                        <span class="w-4 h-4 rounded-full border border-emerald-500/60 bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-[9px] font-black">✓</span>
+                                        <span class="flex items-center gap-2"><span>الرقابة التلقائية</span><span class="text-gray-400 group-hover:text-purple-400">🤖</span></span>
                                     </a>
                                     <a href="/dashboard/${guildId}/antiraid" class="flex items-center justify-between px-3 py-2 rounded-xl ${section === 'antiraid' ? 'bg-purple-600 text-white font-bold shadow-md' : 'text-gray-300 hover:text-white hover:bg-[#151724]'} transition group">
                                         <span class="w-4 h-4 rounded-full border border-emerald-500/60 bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-[9px] font-black">✓</span>
@@ -2497,6 +3608,64 @@ const broadcasts = database.getGuildBroadcasts ? database.getGuildBroadcasts(gui
                 return res.status(400).json({ success: false, error: 'رصيد الذهب (Gold) غير كافٍ!' });
             }
             rawDb.prepare('UPDATE users SET coins = coins - ? WHERE user_id = ?').run(price, userId);
+            res.json({ success: true });
+        } catch (e) {
+            res.status(500).json({ success: false, error: e.message });
+        }
+    });
+
+    app.post('/api/guild/:guildId/whitelist', express.json(), async (req, res) => {
+        try {
+            if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
+            const { guildId } = req.params;
+            const { userId, type } = req.body;
+            if (!userId) return res.status(400).json({ success: false, error: 'User ID is required' });
+            if (database.addProtectionWhitelist) {
+                database.addProtectionWhitelist(guildId, userId, type || 'whitelist', req.session.user.id);
+            }
+            res.json({ success: true });
+        } catch (e) {
+            res.status(500).json({ success: false, error: e.message });
+        }
+    });
+
+    app.delete('/api/guild/:guildId/whitelist', express.json(), async (req, res) => {
+        try {
+            if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
+            const { guildId } = req.params;
+            const { userId, type } = req.body;
+            if (!userId) return res.status(400).json({ success: false, error: 'User ID is required' });
+            if (database.removeProtectionWhitelist) {
+                database.removeProtectionWhitelist(guildId, userId, type || 'whitelist');
+            }
+            res.json({ success: true });
+        } catch (e) {
+            res.status(500).json({ success: false, error: e.message });
+        }
+    });
+
+    app.post('/api/guild/:guildId/warn-punishments', express.json(), async (req, res) => {
+        try {
+            if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
+            const { guildId } = req.params;
+            const { warnCount, actionType } = req.body;
+            if (!warnCount || !actionType) return res.status(400).json({ success: false, error: 'Missing fields' });
+            if (database.addWarnPunishment) {
+                database.addWarnPunishment(guildId, warnCount, actionType);
+            }
+            res.json({ success: true });
+        } catch (e) {
+            res.status(500).json({ success: false, error: e.message });
+        }
+    });
+
+    app.delete('/api/guild/:guildId/warn-punishments/:id', async (req, res) => {
+        try {
+            if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
+            const { guildId, id } = req.params;
+            if (database.deleteWarnPunishment) {
+                database.deleteWarnPunishment(id, guildId);
+            }
             res.json({ success: true });
         } catch (e) {
             res.status(500).json({ success: false, error: e.message });

@@ -302,6 +302,30 @@ db.exec(`
     created_by TEXT,
     created_at INTEGER DEFAULT (strftime('%s','now'))
   );
+
+  -- 🛡️ Whitelist & Anti Mod System (القائمة البيضاء ونظام الحماية من العقوبات)
+  CREATE TABLE IF NOT EXISTS protection_whitelist (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    guild_id TEXT NOT NULL,
+    user_id TEXT NOT NULL,
+    type TEXT DEFAULT 'whitelist', -- 'whitelist' (عضو موثوق) or 'antimod' (محمي من العقوبات)
+    added_by TEXT,
+    created_at INTEGER DEFAULT (strftime('%s','now')),
+    UNIQUE(guild_id, user_id, type)
+  );
+
+  -- 📋 Security & Moderation Logs System (سجلات الأمان والإشراف)
+  CREATE TABLE IF NOT EXISTS security_logs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    guild_id TEXT NOT NULL,
+    category TEXT NOT NULL, -- 'security' or 'moderation'
+    action_type TEXT NOT NULL, -- 'mass_destroy', 'auto_punish', 'limit_exceeded', 'suspicious_activity', 'scam_links', 'ban_kick', 'timeout', 'warn', 'msg_delete', 'channel_lock'
+    executor_id TEXT,
+    target_id TEXT,
+    reason TEXT,
+    details TEXT,
+    created_at INTEGER DEFAULT (strftime('%s','now'))
+  );
 `);
 
 // Migrations - إضافة الأعمدة الجديدة بشكل آمن
@@ -359,15 +383,31 @@ try { db.exec("ALTER TABLE guild_settings ADD COLUMN daily_amount INTEGER DEFAUL
 try { db.exec("ALTER TABLE guild_settings ADD COLUMN work_cooldown INTEGER DEFAULT 4;"); } catch(e) {}
 try { db.exec("ALTER TABLE guild_settings ADD COLUMN transfer_tax REAL DEFAULT 5.0;"); } catch(e) {}
 
-try { db.exec("ALTER TABLE guild_settings ADD COLUMN bot_language TEXT DEFAULT 'ar';"); } catch(e) {}
-try { db.exec("ALTER TABLE guild_settings ADD COLUMN admin_role TEXT;"); } catch(e) {}
-try { db.exec("ALTER TABLE guild_settings ADD COLUMN announcements_channel TEXT;"); } catch(e) {}
-try { db.exec("ALTER TABLE guild_settings ADD COLUMN bot_enabled INTEGER DEFAULT 1;"); } catch(e) {}
-try { db.exec("ALTER TABLE guild_settings ADD COLUMN fun_enabled INTEGER DEFAULT 1;"); } catch(e) {}
-try { db.exec("ALTER TABLE guild_settings ADD COLUMN autoresponder_enabled INTEGER DEFAULT 1;"); } catch(e) {}
-try { db.exec("ALTER TABLE guild_settings ADD COLUMN min_bet INTEGER DEFAULT 10;"); } catch(e) {}
-try { db.exec("ALTER TABLE guild_settings ADD COLUMN max_bet INTEGER DEFAULT 50000;"); } catch(e) {}
-try { db.exec("ALTER TABLE guild_settings ADD COLUMN game_rewards_multiplier REAL DEFAULT 1.0;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN automod_enabled INTEGER DEFAULT 1;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN anti_spoilers INTEGER DEFAULT 0;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN anti_zalgo INTEGER DEFAULT 0;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN anti_emoji INTEGER DEFAULT 0;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN anti_text_repeat INTEGER DEFAULT 0;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN anti_repeat_messages INTEGER DEFAULT 0;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN anti_stickers INTEGER DEFAULT 0;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN anti_long_messages INTEGER DEFAULT 0;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN strict_bad_words_enabled INTEGER DEFAULT 0;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN whitelist_words_list TEXT DEFAULT '';"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN automod_exempt_users TEXT DEFAULT '';"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN automod_log_channel TEXT;"); } catch(e) {}
+
+// إنشاء جدول العقوبات التلقائية للتحذيرات (Warn Punishments)
+try {
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS warn_punishments (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      guild_id TEXT NOT NULL,
+      warn_count INTEGER NOT NULL,
+      action_type TEXT NOT NULL, -- 'timeout_5m', 'timeout_1h', 'timeout_24h', 'kick', 'ban'
+      created_at INTEGER DEFAULT (strftime('%s','now'))
+    );
+  `);
+} catch(e) {}
 
 console.log('[DB] ✅ SQLite database initialized successfully');
 
@@ -402,6 +442,13 @@ function setGuildSetting(guildId, key, value) {
     } else {
       console.error(`Failed to update setting ${key}:`, err);
     }
+  }
+}
+
+function updateGuildSettings(guildId, settingsObj) {
+  if (!settingsObj || typeof settingsObj !== 'object') return;
+  for (const [key, value] of Object.entries(settingsObj)) {
+    setGuildSetting(guildId, key, value);
   }
 }
 
@@ -1125,6 +1172,74 @@ function resetStaffStats(guildId, userId = null) {
 }
 
 // ==========================================
+// 🛡️ Whitelist & Anti Mod Helpers
+// ==========================================
+function getProtectionWhitelist(guildId, type = null) {
+  if (type) {
+    return db.prepare('SELECT * FROM protection_whitelist WHERE guild_id = ? AND type = ? ORDER BY created_at DESC').all(guildId, type);
+  }
+  return db.prepare('SELECT * FROM protection_whitelist WHERE guild_id = ? ORDER BY created_at DESC').all(guildId);
+}
+
+function addProtectionWhitelist(guildId, userId, type = 'whitelist', addedBy = null) {
+  try {
+    const stmt = db.prepare('INSERT OR IGNORE INTO protection_whitelist (guild_id, user_id, type, added_by) VALUES (?, ?, ?, ?)');
+    return stmt.run(guildId, userId, type, addedBy);
+  } catch (err) {
+    console.error('Error adding to protection whitelist:', err);
+    return null;
+  }
+}
+
+function removeProtectionWhitelist(guildId, userId, type = 'whitelist') {
+  return db.prepare('DELETE FROM protection_whitelist WHERE guild_id = ? AND user_id = ? AND type = ?').run(guildId, userId, type);
+}
+
+function isUserWhitelisted(guildId, userId, type = 'whitelist') {
+  const row = db.prepare('SELECT id FROM protection_whitelist WHERE guild_id = ? AND user_id = ? AND (type = ? OR type = "antimod")').get(guildId, userId, type);
+  return !!row;
+}
+
+// ==========================================
+// 📋 Security & Moderation Logs Helpers
+// ==========================================
+function logSecurityEvent(guildId, category, actionType, executorId = null, targetId = null, reason = '', details = '') {
+  try {
+    const stmt = db.prepare(`
+      INSERT INTO security_logs (guild_id, category, action_type, executor_id, target_id, reason, details)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+    `);
+    return stmt.run(guildId, category, actionType, executorId, targetId, reason, details);
+  } catch (err) {
+    console.error('Error logging security event:', err);
+    return null;
+  }
+}
+
+function getSecurityLogs(guildId, category = null, limit = 50) {
+  if (category) {
+    return db.prepare('SELECT * FROM security_logs WHERE guild_id = ? AND category = ? ORDER BY created_at DESC LIMIT ?').all(guildId, category, limit);
+  }
+  return db.prepare('SELECT * FROM security_logs WHERE guild_id = ? ORDER BY created_at DESC LIMIT ?').all(guildId, limit);
+}
+
+// ==========================================
+// ⚠️ Warn Punishments Helpers
+// ==========================================
+function getWarnPunishments(guildId) {
+  return db.prepare('SELECT * FROM warn_punishments WHERE guild_id = ? ORDER BY warn_count ASC').all(guildId);
+}
+
+function addWarnPunishment(guildId, warnCount, actionType) {
+  const stmt = db.prepare('INSERT INTO warn_punishments (guild_id, warn_count, action_type) VALUES (?, ?, ?)');
+  return stmt.run(guildId, warnCount, actionType);
+}
+
+function deleteWarnPunishment(id, guildId) {
+  return db.prepare('DELETE FROM warn_punishments WHERE id = ? AND guild_id = ?').run(id, guildId);
+}
+
+// ==========================================
 // Stats
 // ==========================================
 function getSystemStats() {
@@ -1146,6 +1261,7 @@ module.exports = {
   getGuildSettings,
   setGuildSetting,
   updateGuildSetting,
+  updateGuildSettings,
   getUser,
   addXp,
   addCoins,
@@ -1245,6 +1361,16 @@ module.exports = {
   addStaffGoal,
   deleteStaffGoal,
   resetStaffStats,
+  // 🛡️ Protection Whitelist & Logs Exports
+  getProtectionWhitelist,
+  addProtectionWhitelist,
+  removeProtectionWhitelist,
+  isUserWhitelisted,
+  logSecurityEvent,
+  getSecurityLogs,
+  getWarnPunishments,
+  addWarnPunishment,
+  deleteWarnPunishment,
   // 🎁 Giveaway Exports
   createGiveaway,
   getGiveaway,

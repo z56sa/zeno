@@ -165,6 +165,76 @@ module.exports = {
           } catch (err) {}
         }
       }
+
+      // 6. منع إزعاج السبويلر (Anti-Spoilers)
+      if (settings.anti_spoilers) {
+        const spoilerMatches = (message.content.match(/\|\|.*?\|\|/g) || []).length;
+        if (spoilerMatches >= 3) {
+          try {
+            await message.delete().catch(() => {});
+            const warn = await message.channel.send({
+              content: `⚠️ **Auto-Mod:** يا ${message.author}، يمنع الاستخدام المفرط لعلامات السبويلر (Spoilers)!`
+            });
+            setTimeout(() => warn.delete().catch(() => {}), 4000);
+            return;
+          } catch (err) {}
+        }
+      }
+
+      // 7. منع نصوص زالجو المشوهة (Anti-Zalgo Text)
+      if (settings.anti_zalgo) {
+        const zalgoRegex = /[\u0300-\u036F\u0489\u1DC0-\u1DFF\u20D0-\u20FF\uFE20-\uFE2F]{3,}/g;
+        if (zalgoRegex.test(message.content)) {
+          try {
+            await message.delete().catch(() => {});
+            const warn = await message.channel.send({
+              content: `⚠️ **Auto-Mod:** يا ${message.author}، يمنع إرسال النصوص المشوهة والرموز الغريبة (Zalgo Text)!`
+            });
+            setTimeout(() => warn.delete().catch(() => {}), 4000);
+            return;
+          } catch (err) {}
+        }
+      }
+
+      // 8. منع تكرار نفس الحرف أو الكلمة (Anti-Text-Repeat)
+      if (settings.anti_text_repeat) {
+        const charRepeatRegex = /(.)\1{7,}/i;
+        const wordRepeatRegex = /\b(\w+)\s+\1\s+\1\s+\1\b/i;
+        if (charRepeatRegex.test(message.content) || wordRepeatRegex.test(message.content)) {
+          try {
+            await message.delete().catch(() => {});
+            const warn = await message.channel.send({
+              content: `⚠️ **Auto-Mod:** يا ${message.author}، يمنع تكرار نفس الحروف أو الكلمات بشكل مفرط!`
+            });
+            setTimeout(() => warn.delete().catch(() => {}), 4000);
+            return;
+          } catch (err) {}
+        }
+      }
+
+      // 9. منع سبام الملصقات (Anti-Stickers)
+      if (settings.anti_stickers && message.stickers && message.stickers.size > 0) {
+        try {
+          await message.delete().catch(() => {});
+          const warn = await message.channel.send({
+            content: `⚠️ **Auto-Mod:** يا ${message.author}، إرسال الملصقات غير مسموح به حالياً!`
+          });
+          setTimeout(() => warn.delete().catch(() => {}), 4000);
+          return;
+        } catch (err) {}
+      }
+
+      // 10. منع الرسائل الطويلة المفرطة (Anti-Long-Messages)
+      if (settings.anti_long_messages && message.content.length > 1000) {
+        try {
+          await message.delete().catch(() => {});
+          const warn = await message.channel.send({
+            content: `⚠️ **Auto-Mod:** يا ${message.author}، تم حذف رسالتك لتجاوزها الحد الأقصى للأحرف!`
+          });
+          setTimeout(() => warn.delete().catch(() => {}), 4000);
+          return;
+        } catch (err) {}
+      }
     }
 
     // --- 1. نظام الحماية من الروابط (Anti-Link) ---
