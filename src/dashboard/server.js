@@ -246,7 +246,99 @@ module.exports = function (app, client) {
                     ::-webkit-scrollbar-track { background: #0b0d14; }
                     ::-webkit-scrollbar-thumb { background: #2f3146; border-radius: 10px; }
                 </style>
-            </head>
+            
+    <script>
+    window.toggleNavGroup = function(groupId) {
+        const el = document.getElementById(groupId);
+        const arrow = document.getElementById('arrow_' + groupId);
+        if (!el) return;
+        el.classList.toggle('hidden');
+        if (arrow) arrow.classList.toggle('rotate-180');
+    };
+
+    window.switchTab = function(tabId, btn) {
+        const tabs = document.querySelectorAll('.tab-content');
+        tabs.forEach(t => t.classList.add('hidden'));
+
+        const target = document.getElementById(tabId);
+        if (target) {
+            target.classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        if (btn) {
+            const allNavBtns = document.querySelectorAll('.nav-btn');
+            allNavBtns.forEach(b => {
+                b.classList.remove('bg-purple-600', 'text-white', 'font-bold', 'shadow-md');
+                b.classList.add('text-gray-300', 'hover:text-white', 'hover:bg-[#151724]', 'font-medium');
+            });
+            btn.classList.add('bg-purple-600', 'text-white', 'font-bold', 'shadow-md');
+            btn.classList.remove('text-gray-300', 'hover:text-white', 'hover:bg-[#151724]', 'font-medium');
+        }
+    };
+
+    window.claimDailyReward = async function() {
+        const btn = document.getElementById('claimDailyBtn');
+        if (btn) {
+            btn.disabled = true;
+            btn.textContent = 'جارٍ الاستلام... ⏳';
+        }
+        try {
+            const res = await fetch('/api/user/daily', { method: 'POST' });
+            const data = await res.json();
+            if (data.success) {
+                alert('🎉 تم استلام ' + data.amount + ' من الذهب بنجاح! رصيدك الجديد: ' + data.newBalance.toLocaleString() + ' 🪙');
+                location.reload();
+            } else {
+                alert('❌ ' + (data.error || 'فشل استلام الراتب اليومي'));
+                if (btn) {
+                    btn.disabled = false;
+                    btn.textContent = 'استلام الرصيد 🎁';
+                }
+            }
+        } catch(e) {
+            alert('حدث خطأ في الاتصال بالسيرفر');
+            if (btn) {
+                btn.disabled = false;
+                btn.textContent = 'استلام الرصيد 🎁';
+            }
+        }
+    };
+
+    window.buyItem = async function(type, name, price, btn) {
+        if (!confirm('هل أنت متأكد من شراء وتفعيل "' + name + '" مقابل ' + price.toLocaleString() + ' 🪙؟')) return;
+        if (btn) {
+            btn.disabled = true;
+            btn.textContent = 'جارٍ الشراء... ⏳';
+        }
+        try {
+            const res = await fetch('/api/user/buy', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ type: type, name: name, price: price })
+            });
+            const data = await res.json();
+            if (data.success) {
+                alert('✅ تم الشراء والتفعيل بنجاح!');
+                location.reload();
+            } else {
+                alert('❌ ' + (data.error || 'رصيدك لا يكفي لإتمام الشراء'));
+                if (btn) {
+                    btn.disabled = false;
+                    btn.textContent = 'شراء وتجهيز';
+                }
+            }
+        } catch(e) {
+            alert('حدث خطأ أثناء الشراء');
+            if (btn) {
+                btn.disabled = false;
+                btn.textContent = 'شراء وتجهيز';
+            }
+        }
+    };
+    </script>
+
+</head>
             <body class="min-h-screen flex flex-col bg-[#0b0d14] text-gray-200">
                 <header class="h-16 bg-[#10121b]/95 backdrop-blur-md border-b border-white/5 px-6 flex items-center justify-between sticky top-0 z-40">
                     <div class="flex items-center gap-4">
