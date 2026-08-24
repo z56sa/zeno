@@ -179,7 +179,7 @@ module.exports = function (app, client) {
                 return `
                     <div class="bg-[#151724] border border-white/5 p-3 rounded-2xl flex items-center justify-between shadow-sm">
                         <div class="flex items-center gap-2">
-                            <span class="text-xs font-mono font-bold text-amber-400">${(r.total_coins || 0).toLocaleString()} ⭐</span>
+                            <span class="text-xs font-mono font-bold text-amber-400">${(r.total_coins || 0).toLocaleString()} 🪙</span>
                         </div>
                         <div class="flex items-center gap-3">
                             <div class="text-right">
@@ -216,12 +216,12 @@ module.exports = function (app, client) {
             const dailyActionBoxHtml = canClaimDaily ? `
                 <button id="claimDailyBtn" onclick="claimDaily()" class="w-full py-4 bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 hover:from-purple-500 hover:to-indigo-500 text-white font-black text-sm rounded-2xl shadow-xl shadow-purple-900/40 transition transform active:scale-95 flex items-center justify-center gap-2">
                     <span>🎁</span>
-                    <span>استلام المكافأة اليومية الآن (+500 ⭐)</span>
+                    <span>استلام الراتب اليومي الآن (+500 🪙)</span>
                 </button>
             ` : `
                 <div class="bg-[#0b0d14] border border-purple-950/60 rounded-2xl p-5 space-y-4">
                     <div class="flex items-center justify-between text-xs font-bold text-gray-300">
-                        <span class="flex items-center gap-1 text-purple-400"><span>⏰</span><span>المكافأة القادمة</span></span>
+                        <span class="flex items-center gap-1 text-purple-400"><span>⏰</span><span>الراتب القادم</span></span>
                         <span class="text-gray-400">الوقت المتبقي بالضبط</span>
                     </div>
 
@@ -242,7 +242,7 @@ module.exports = function (app, client) {
 
                     <button disabled class="w-full py-3 bg-[#151722] border border-white/5 text-gray-400 font-bold text-xs rounded-xl cursor-not-allowed flex items-center justify-center gap-2">
                         <span>⌛</span>
-                        <span>تم استلام مكافأة اليوم! عد بعد انتهاء الوقت أعلاه</span>
+                        <span>تم استلام راتب اليوم! عد بعد انتهاء الوقت أعلاه</span>
                     </button>
                 </div>
             `;
@@ -291,20 +291,23 @@ module.exports = function (app, client) {
                     <!-- Main Content (Left in RTL - Novax User Dashboard Style) -->
                     <main class="flex-1 p-8 overflow-y-auto custom-scrollbar space-y-6">
                         
-                        <!-- Tab 1: نظرة عامة والملف الشخصي -->
+                        <!-- Tab 1: نظرة عامة والملف الشخصي (Novax Exact Style) -->
                         <div id="tabOverview" class="tab-content space-y-6">
+                            
+                            <!-- Header Title -->
                             <div class="flex items-center justify-end gap-2 text-white font-black text-lg">
                                 <span>نظرة عامة</span>
                                 <span class="text-purple-400">🎛️</span>
                             </div>
-                            <!-- Top Stats 4-Grid (Novax Exact Order & Icons: Star / السمعة / التصنيف / المستوى) -->
+
+                            <!-- Top Stats 4-Grid (Novax Exact Order & Icons: الذهب / السمعة / التصنيف / المستوى) -->
                             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                                 
-                                <!-- 1. Star -->
+                                <!-- 1. الذهب (Golds / Golds) -->
                                 <div class="bg-[#10121b] border border-white/5 hover:border-purple-500/30 rounded-2xl p-4 flex items-center justify-between shadow-lg transition">
-                                    <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center text-xl font-bold shadow-inner">⭐</div>
+                                    <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center text-xl font-bold shadow-inner">🪙</div>
                                     <div class="text-right">
-                                        <span class="text-xs font-bold text-gray-400">Star</span>
+                                        <span class="text-xs font-bold text-gray-400">الذهب</span>
                                         <h3 id="userCoinsDisplay" class="text-xl font-black text-white mt-0.5">${userCoins.toLocaleString()}</h3>
                                     </div>
                                 </div>
@@ -314,7 +317,7 @@ module.exports = function (app, client) {
                                     <div class="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center text-xl shadow-inner">👍</div>
                                     <div class="text-right">
                                         <span class="text-xs font-bold text-gray-400">السمعة</span>
-                                        <h3 class="text-xl font-black text-white mt-0.5">${userStars}</h3>
+                                        <h3 class="text-xl font-black text-white mt-0.5">${userGolds}</h3>
                                     </div>
                                 </div>
 
@@ -349,11 +352,11 @@ module.exports = function (app, client) {
                                 </div>
                             </div>
 
-                            <!-- آخر معاملات Star (Recent Star Transactions) -->
+                            <!-- آخر معاملات الذهب (Recent Gold Transactions - Novax Exact Style) -->
                             <div class="bg-[#10121b] border border-white/5 rounded-3xl p-6 shadow-xl space-y-4 text-right">
                                 <div class="flex items-center justify-between border-b border-white/5 pb-3">
                                     <span class="text-xs text-gray-400">سجل التحويلات والمكافآت</span>
-                                    <h3 class="text-sm font-black text-white flex items-center gap-2"><span>آخر 5 معاملات Star</span><span class="text-amber-400">⭐</span></h3>
+                                    <h3 class="text-sm font-black text-white flex items-center gap-2"><span>آخر 5 معاملات الذهب</span><span>🪙</span></h3>
                                 </div>
 
                                 <div class="overflow-x-auto">
@@ -381,7 +384,7 @@ module.exports = function (app, client) {
                                 </div>
                             </div>
 
-                            <!-- قسم الملف الشخصي وبطاقة الهوية (Profile Card & Identity Card) -->
+                            <!-- قسم الملف الشخصي وبطاقة الهوية (Profile Card & Identity Card - Novax Exact Style) -->
                             <div class="space-y-4 text-right">
                                 <h3 class="text-sm font-black text-white flex items-center justify-end gap-2"><span>الملف الشخصي</span><span>👤</span></h3>
                                 
@@ -398,63 +401,114 @@ module.exports = function (app, client) {
                                         </div>
 
                                         <!-- The Graphic Discord Card (Purple Nebula Design) -->
-                                        <div dir="ltr" class="relative rounded-2xl overflow-hidden bg-gradient-to-br from-purple-950 via-[#18112e] to-[#0d071a] border border-purple-500/30 p-5 shadow-2xl space-y-4 text-left font-sans">
+                                        <div class="relative rounded-2xl overflow-hidden bg-gradient-to-br from-purple-950 via-[#18112e] to-[#0d071a] border border-purple-500/30 p-5 shadow-2xl space-y-4">
                                             <!-- Top Header in Card -->
                                             <div class="flex items-center justify-between">
+                                                <span class="px-2.5 py-1 bg-purple-900/60 border border-purple-500/40 text-purple-200 text-[10px] font-bold rounded-lg">+0 REP</span>
                                                 <div class="flex items-center gap-3">
-                                                    <img src="${userAvatar}" class="w-12 h-12 rounded-2xl object-cover ring-2 ring-purple-500/60 shadow-lg shadow-black/40">
-                                                    <div>
+                                                    <div class="text-right">
                                                         <h4 class="text-sm font-black text-white leading-tight">@${user.username}</h4>
-                                                        <span class="text-[10px] text-gray-400">ZENO MEMBER</span>
                                                     </div>
+                                                    <img src="${userAvatar}" class="w-12 h-12 rounded-2xl object-cover ring-2 ring-purple-500/60 shadow-lg shadow-black/40">
                                                 </div>
-                                                <span class="px-2.5 py-1 bg-purple-900/60 border border-purple-500/40 text-purple-200 text-[10px] font-bold rounded-lg">+${userStars} REP</span>
                                             </div>
 
                                             <!-- About Me Box -->
-                                            <div class="bg-black/30 border border-white/5 rounded-xl p-3">
-                                                <span class="text-[9px] font-bold text-gray-400 block mb-0.5 tracking-wider">ABOUT ME</span>
+                                            <div class="bg-black/30 border border-white/5 rounded-xl p-3 text-right">
+                                                <span class="text-[9px] font-bold text-gray-400 block mb-0.5">ABOUT ME</span>
                                                 <p class="text-xs text-gray-200">مرحباً بك في لوحة تحكم ZENO Bot!</p>
                                             </div>
 
                                             <!-- Stats & Gold in Card -->
-                                            <div class="grid grid-cols-2 gap-3">
-                                                <div class="bg-black/30 border border-white/5 rounded-xl p-3 space-y-1.5 text-xs">
-                                                    <span class="text-[9px] font-bold text-gray-400 block tracking-wider">STATISTICS</span>
+                                            <div class="grid grid-cols-2 gap-3 text-right">
+                                                <div class="bg-black/30 border border-white/5 rounded-xl p-3 space-y-1 text-xs">
+                                                    <span class="text-[9px] font-bold text-gray-400 block">STATISTICS</span>
                                                     <div class="text-[11px] text-gray-300 flex items-center justify-between">
-                                                        <span class="text-gray-400">⚡ LEVEL:</span>
                                                         <span class="font-bold text-purple-300">${userLevel}</span>
+                                                        <span>⚡ LEVEL:</span>
                                                     </div>
                                                     <div class="text-[11px] text-gray-300 flex items-center justify-between">
-                                                        <span class="text-gray-400">🏆 RANK:</span>
                                                         <span class="font-bold text-emerald-400">#${userRankXp}</span>
+                                                        <span>🏆 RANK:</span>
                                                     </div>
                                                     <div class="text-[11px] text-gray-300 flex items-center justify-between">
-                                                        <span class="text-gray-400">✨ XP:</span>
-                                                        <span class="font-bold text-gray-200 font-mono">${userXp}</span>
+                                                        <span class="font-bold text-gray-200 font-mono">${userXp} XP</span>
+                                                        <span>✨ XP:</span>
                                                     </div>
                                                 </div>
 
-                                                <div class="bg-black/30 border border-white/5 rounded-xl p-3 space-y-2">
-                                                    <span class="text-[9px] font-bold text-gray-400 block tracking-wider">STAR COINS</span>
-                                                    <div class="flex items-center gap-1.5 text-amber-400 font-black text-sm">
-                                                        <span class="text-base">⭐</span>
+                                                <div class="bg-black/30 border border-white/5 rounded-xl p-3 space-y-2 text-right">
+                                                    <span class="text-[9px] font-bold text-gray-400 block">GOLDS</span>
+                                                    <div class="flex items-center justify-end gap-1.5 text-amber-400 font-black text-sm">
                                                         <span>${userCoins.toLocaleString()}</span>
+                                                        <span class="text-base">🪙</span>
                                                     </div>
-                                                    <span class="text-[9px] font-bold text-gray-400 block pt-1 tracking-wider">BADGES</span>
-                                                    <div class="flex items-center gap-1.5 text-base">
+                                                    <span class="text-[9px] font-bold text-gray-400 block pt-1">BADGES</span>
+                                                    <div class="flex items-center justify-end gap-1 text-base">
                                                         <span>👑</span><span>💎</span><span>🔥</span><span>⚡</span>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
+
+                                    <!-- 2. بطاقة الهوية (Identity / Voice & Invites Card) -->
+                                    <div class="bg-[#10121b] border border-white/5 rounded-3xl p-5 shadow-xl space-y-4">
+                                        <div class="flex items-center justify-between border-b border-white/5 pb-3">
+                                            <button onclick="switchTab('tabIdentity')" class="px-3 py-1.5 bg-purple-600/20 hover:bg-purple-600/30 text-purple-300 border border-purple-500/30 rounded-xl text-xs font-bold transition flex items-center gap-1.5">
+                                                <span>✏️</span>
+                                                <span>تعديل البطاقة</span>
+                                            </button>
+                                            <h4 class="text-xs font-black text-white">بطاقة الهوية</h4>
+                                        </div>
+
+                                        <!-- The Graphic Identity Card -->
+                                        <div class="relative rounded-2xl overflow-hidden bg-gradient-to-br from-indigo-950 via-[#101426] to-[#090b14] border border-indigo-500/30 p-5 shadow-2xl space-y-4">
+                                            <div class="flex items-center justify-between">
+                                                <div class="text-left text-xs font-bold text-indigo-300 bg-indigo-950/60 border border-indigo-800/40 px-3 py-1 rounded-xl">
+                                                    <span>INVITES: 0</span>
+                                                </div>
+                                                <div class="flex items-center gap-3">
+                                                    <div class="text-right">
+                                                        <h4 class="text-sm font-black text-white leading-tight">@${user.username}</h4>
+                                                        <span class="text-[10px] text-gray-400">ID CARD</span>
+                                                    </div>
+                                                    <img src="${userAvatar}" class="w-12 h-12 rounded-2xl object-cover ring-2 ring-indigo-500/60 shadow-lg shadow-black/40">
+                                                </div>
+                                            </div>
+
+                                            <div class="grid grid-cols-2 gap-3 text-right">
+                                                <div class="bg-black/30 border border-white/5 rounded-xl p-3 space-y-1">
+                                                    <div class="flex items-center justify-between text-xs text-indigo-400 font-bold mb-1">
+                                                        <span>TOP #1</span>
+                                                        <span>💬 TEXT</span>
+                                                    </div>
+                                                    <div class="text-[10px] text-gray-300">TOTAL XP: <span class="font-mono text-white">${userXp}</span></div>
+                                                    <div class="text-[10px] text-gray-300">STREAK: <span class="font-mono text-emerald-400">Active</span></div>
+                                                </div>
+
+                                                <div class="bg-black/30 border border-white/5 rounded-xl p-3 space-y-1">
+                                                    <div class="flex items-center justify-between text-xs text-purple-400 font-bold mb-1">
+                                                        <span>TOP #1</span>
+                                                        <span>🎙️ VOICE</span>
+                                                    </div>
+                                                    <div class="text-[10px] text-gray-300">VOICE TIME: <span class="font-mono text-white">Online</span></div>
+                                                    <div class="text-[10px] text-gray-300">STREAK: <span class="font-mono text-emerald-400">Level ${userLevel}</span></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+
                         </div>
+
                         <!-- Tab 2: متجر خلفيات البروفايل (Wallpapers Shop) -->
                         <div id="tabWallpapers" class="tab-content hidden space-y-6">
                             <div class="probot-card border border-white/5 rounded-3xl p-6 shadow-xl">
                                 <div class="flex items-center justify-between pb-4 mb-4 border-b border-white/5">
-                                    <span class="text-xs text-amber-400 font-bold">رصيدك: <span class="user-coins-val">${userCoins.toLocaleString()}</span> ⭐ Star Coin</span>
+                                    <span class="text-xs text-amber-400 font-bold">رصيدك: <span class="user-coins-val">${userCoins.toLocaleString()}</span> 🪙 الذهب</span>
                                     <h3 class="text-sm font-black text-white text-right">متجر خلفيات الملف الشخصي 🖼️</h3>
                                 </div>
                                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -466,7 +520,7 @@ module.exports = function (app, client) {
                                             <p class="text-[10px] text-gray-400 mt-0.5">خلفية النجوم والنيون الأرجواني</p>
                                             <div class="mt-3 flex items-center justify-between">
                                                 <button onclick="buyItem('wallpaper', 'Galaxy Neon', 5000, this)" class="px-4 py-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-xs font-bold shadow-md hover:from-purple-500 hover:to-indigo-500 transition">شراء وتجهيز</button>
-                                                <span class="text-xs font-mono text-amber-300 font-bold">5,000 ⭐</span>
+                                                <span class="text-xs font-mono text-amber-300 font-bold">5,000 🪙</span>
                                             </div>
                                         </div>
                                     </div>
@@ -478,7 +532,7 @@ module.exports = function (app, client) {
                                             <p class="text-[10px] text-gray-400 mt-0.5">خلفية الطبيعة والزمرد الفخم</p>
                                             <div class="mt-3 flex items-center justify-between">
                                                 <button onclick="buyItem('wallpaper', 'Emerald Forest', 7500, this)" class="px-4 py-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-xs font-bold shadow-md hover:from-purple-500 hover:to-indigo-500 transition">شراء وتجهيز</button>
-                                                <span class="text-xs font-mono text-amber-300 font-bold">7,500 ⭐</span>
+                                                <span class="text-xs font-mono text-amber-300 font-bold">7,500 🪙</span>
                                             </div>
                                         </div>
                                     </div>
@@ -487,10 +541,10 @@ module.exports = function (app, client) {
                                         <div class="h-28 bg-gradient-to-r from-rose-950 via-zinc-900 to-amber-950 flex items-center justify-center text-3xl">🔥</div>
                                         <div class="p-4 text-right">
                                             <h4 class="text-xs font-bold text-white">Cyberpunk Gold</h4>
-                                            <p class="text-[10px] text-gray-400 mt-0.5">خلفية اللهب وتوهج النجوم</p>
+                                            <p class="text-[10px] text-gray-400 mt-0.5">خلفية اللهب والذهب الخالص</p>
                                             <div class="mt-3 flex items-center justify-between">
                                                 <button onclick="buyItem('wallpaper', 'Cyberpunk Gold', 12000, this)" class="px-4 py-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-xs font-bold shadow-md hover:from-purple-500 hover:to-indigo-500 transition">شراء وتجهيز</button>
-                                                <span class="text-xs font-mono text-amber-300 font-bold">12,000 ⭐</span>
+                                                <span class="text-xs font-mono text-amber-300 font-bold">12,000 🪙</span>
                                             </div>
                                         </div>
                                     </div>
@@ -503,7 +557,7 @@ module.exports = function (app, client) {
                         <div id="tabBadges" class="tab-content hidden space-y-6">
                             <div class="probot-card border border-white/5 rounded-3xl p-6 shadow-xl">
                                 <div class="flex items-center justify-between pb-4 mb-4 border-b border-white/5">
-                                    <span class="text-xs text-amber-400 font-bold">رصيدك: <span class="user-coins-val">${userCoins.toLocaleString()}</span> ⭐ Star Coin</span>
+                                    <span class="text-xs text-amber-400 font-bold">رصيدك: <span class="user-coins-val">${userCoins.toLocaleString()}</span> 🪙 الذهب</span>
                                     <h3 class="text-sm font-black text-white text-right">متجر شارات وأوسمة الملف الشخصي 🎖️</h3>
                                 </div>
                                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -511,25 +565,25 @@ module.exports = function (app, client) {
                                         <span class="text-3xl block">👑</span>
                                         <h4 class="text-xs font-bold text-white">تاج الأساطير</h4>
                                         <p class="text-[10px] text-gray-400">شارة ملكية ذهبية</p>
-                                        <button onclick="buyItem('badge', 'Crown Badge', 10000, this)" class="w-full py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-xs font-bold transition shadow-md">شراء (10,000 ⭐)</button>
+                                        <button onclick="buyItem('badge', 'Crown Badge', 10000, this)" class="w-full py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-xs font-bold transition shadow-md">شراء (10,000 🪙)</button>
                                     </div>
                                     <div class="bg-[#1c1f2e] border border-white/5 p-4 rounded-2xl text-center space-y-2">
                                         <span class="text-3xl block">💎</span>
                                         <h4 class="text-xs font-bold text-white">الماسة اللامعة</h4>
                                         <p class="text-[10px] text-gray-400">شارة النقاء والتميز</p>
-                                        <button onclick="buyItem('badge', 'Diamond Badge', 15000, this)" class="w-full py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-xs font-bold transition shadow-md">شراء (15,000 ⭐)</button>
+                                        <button onclick="buyItem('badge', 'Diamond Badge', 15000, this)" class="w-full py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-xs font-bold transition shadow-md">شراء (15,000 🪙)</button>
                                     </div>
                                     <div class="bg-[#1c1f2e] border border-white/5 p-4 rounded-2xl text-center space-y-2">
                                         <span class="text-3xl block">⚡</span>
                                         <h4 class="text-xs font-bold text-white">صاعقة النيون</h4>
                                         <p class="text-[10px] text-gray-400">شارة السرعة والقوة</p>
-                                        <button onclick="buyItem('badge', 'Lightning Badge', 8000, this)" class="w-full py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-xs font-bold transition shadow-md">شراء (8,000 ⭐)</button>
+                                        <button onclick="buyItem('badge', 'Lightning Badge', 8000, this)" class="w-full py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-xs font-bold transition shadow-md">شراء (8,000 🪙)</button>
                                     </div>
                                     <div class="bg-[#1c1f2e] border border-white/5 p-4 rounded-2xl text-center space-y-2">
                                         <span class="text-3xl block">🔥</span>
                                         <h4 class="text-xs font-bold text-white">لهب العزيمة</h4>
                                         <p class="text-[10px] text-gray-400">شارة النشاط والحماس</p>
-                                        <button onclick="buyItem('badge', 'Fire Badge', 7000, this)" class="w-full py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-xs font-bold transition shadow-md">شراء (7,000 ⭐)</button>
+                                        <button onclick="buyItem('badge', 'Fire Badge', 7000, this)" class="w-full py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-xs font-bold transition shadow-md">شراء (7,000 🪙)</button>
                                     </div>
                                 </div>
                             </div>
@@ -543,14 +597,14 @@ module.exports = function (app, client) {
                                 
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div class="bg-[#1c1f2e] border border-white/5 p-4 rounded-2xl flex items-center justify-between">
-                                        <button onclick="buyItem('identity', 'Dark Minimalist', 3000, this)" class="px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-xs font-bold">تفعيل (3,000 ⭐)</button>
+                                        <button onclick="buyItem('identity', 'Dark Minimalist', 3000, this)" class="px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-xs font-bold">تفعيل (3,000 🪙)</button>
                                         <div>
                                             <h4 class="text-xs font-bold text-white">Dark Minimalist</h4>
                                             <p class="text-[10px] text-gray-400">تصميم أسود داكن كلاسيكي فخم</p>
                                         </div>
                                     </div>
                                     <div class="bg-[#1c1f2e] border border-white/5 p-4 rounded-2xl flex items-center justify-between">
-                                        <button onclick="buyItem('identity', 'Purple Glow Pro', 4500, this)" class="px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-xs font-bold">تفعيل (4,500 ⭐)</button>
+                                        <button onclick="buyItem('identity', 'Purple Glow Pro', 4500, this)" class="px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-xs font-bold">تفعيل (4,500 🪙)</button>
                                         <div>
                                             <h4 class="text-xs font-bold text-white">Purple Glow Pro</h4>
                                             <p class="text-[10px] text-gray-400">توهج بنفسجي متدرج ملكي</p>
@@ -578,7 +632,7 @@ module.exports = function (app, client) {
                             <div class="probot-card border border-white/5 rounded-3xl p-6 shadow-xl">
                                 <div class="flex items-center justify-between mb-4 border-b border-white/5 pb-3">
                                     <span class="text-xs text-amber-400 font-mono font-bold">ترتيبك المالي: #${userRankCoins}</span>
-                                    <h3 class="text-sm font-black text-white text-right">أغنى الأثرياء برصيد Star Coin ⭐</h3>
+                                    <h3 class="text-sm font-black text-white text-right">أغنى الأثرياء برصيد الذهب 🪙</h3>
                                 </div>
                                 <div class="space-y-2.5 max-h-[600px] overflow-y-auto pr-1">
                                     ${coinsLeaderboardHtml}
@@ -586,23 +640,23 @@ module.exports = function (app, client) {
                             </div>
                         </div>
 
-                        <!-- Tab 6: الراتب والمكافأة اليومية (Daily Reward) -->
+                        <!-- Tab 6: الراتب اليومي (Daily Reward) -->
                         <div id="tabDaily" class="tab-content hidden space-y-6">
                             <div class="probot-card border border-white/5 rounded-3xl p-8 shadow-xl text-center space-y-5 max-w-xl mx-auto">
                                 <div class="w-20 h-20 rounded-3xl bg-gradient-to-tr from-purple-600/30 to-indigo-600/30 border border-purple-500/40 flex items-center justify-center text-4xl mx-auto shadow-xl shadow-black/20">
                                     🎁
                                 </div>
                                 <div>
-                                    <h3 class="text-xl font-black text-white">المكافأة اليومية (Daily Star Coin)</h3>
+                                    <h3 class="text-xl font-black text-white">الراتب اليومي (Daily Reward)</h3>
                                     <p class="text-gray-400 text-xs mt-2 leading-relaxed">
-                                        احصل على <span class="text-amber-300 font-bold">500 إلى 1,000 من عملات Star Coin</span> مجاناً كل 24 ساعة!
+                                        احصل على <span class="text-amber-300 font-bold">500 إلى 1,000 من الذهب</span> مجاناً كل 24 ساعة!
                                     </p>
                                 </div>
 
                                 <div class="bg-[#1c1f2e] border border-white/5 rounded-2xl p-4 flex items-center justify-around text-xs">
                                     <div>
                                         <span class="text-gray-400 block text-[11px]">مكافأة اليوم</span>
-                                        <span class="text-amber-400 font-black font-mono text-sm">+500 ⭐</span>
+                                        <span class="text-amber-400 font-black font-mono text-sm">+500 🪙</span>
                                     </div>
                                     <div class="w-px h-8 bg-purple-950/50"></div>
                                     <div>
@@ -616,40 +670,49 @@ module.exports = function (app, client) {
                                 </div>
                             </div>
                         </div>
+
                     </main>
-                    <!-- User Dashboard Sidebar (Novax Style) -->
+
+                    <!-- Sidebar Right (Novax User Dashboard Menu with Exact Categories) -->
                     <aside class="w-72 bg-[#090a10] border-l border-white/5 flex flex-col shrink-0 h-full select-none">
-                        <!-- User Card Top -->
+                        
+                        <!-- Top Server Management Switcher Card (Novax Style) -->
                         <div class="p-3">
-                            <div class="bg-[#12141f] border border-white/5 rounded-2xl p-3 flex items-center justify-between shadow-lg">
+                            <a href="#servers" onclick="switchTab('tabOverview')" class="bg-[#12141f] hover:bg-[#181926] border border-white/5 rounded-2xl p-3 flex items-center justify-between shadow-lg transition group">
                                 <div class="text-gray-400 text-xs">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"/></svg>
                                 </div>
-                                <div class="flex items-center gap-3">
-                                    <div class="text-right">
-                                        <h3 class="font-bold text-white text-xs truncate max-w-[130px]">${user.username}</h3>
-                                        <span class="text-[10px] text-gray-400">ID: ${user.id}</span>
-                                    </div>
-                                    <div class="relative">
-                                        <img src="${userAvatar}" class="w-10 h-10 rounded-xl bg-[#1c1f2e] object-cover ring-2 ring-purple-600/50 shadow-md">
+                                <div class="flex items-center gap-2.5">
+                                    <span class="font-bold text-white text-xs">إدارة سيرفر</span>
+                                    <div class="w-8 h-8 rounded-xl bg-purple-600/20 text-purple-400 flex items-center justify-center text-sm border border-purple-500/30">
+                                        🗂️
                                     </div>
                                 </div>
-                            </div>
+                            </a>
                         </div>
+
                         <!-- Categorized Scrollable Nav Menu -->
                         <div class="flex-1 overflow-y-auto px-3 py-2 space-y-4 text-xs text-right custom-scrollbar">
-                            <!-- الرئيسية -->
+
+                            <!-- عام -->
                             <div class="space-y-1">
-                                <button onclick="switchTab('tabOverview', this)" class="nav-btn px-3 py-2 rounded-xl bg-purple-600/20 text-purple-300 font-bold border border-purple-500/30 flex items-center justify-between transition w-full">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-purple-400 shadow-sm shadow-purple-400"></span>
-                                    <span class="flex items-center gap-2"><span>نظرة عامة</span><span class="text-purple-400">🎛️</span></span>
+                                <button type="button" onclick="toggleNavGroup('user_grp_general')" class="w-full flex items-center justify-between text-gray-400 hover:text-white px-2 py-1 font-bold text-[11px] transition">
+                                    <svg id="arrow_user_grp_general" class="w-3.5 h-3.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                    <span class="flex items-center gap-1.5"><span>عام</span></span>
                                 </button>
+                                <div id="user_grp_general" class="space-y-1">
+                                    <button onclick="switchTab('tabOverview', this)" class="nav-btn px-3 py-2 rounded-xl bg-purple-600 text-white font-bold flex items-center justify-between shadow-md w-full transition">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-white"></span>
+                                        <span class="flex items-center gap-2"><span>نظرة عامة</span><span class="text-purple-300">🎛️</span></span>
+                                    </button>
+                                </div>
                             </div>
-                            <!-- متجر Star (Shop) -->
+
+                            <!-- متجر القولد (Shop) -->
                             <div class="space-y-1">
                                 <button type="button" onclick="toggleNavGroup('user_grp_shop')" class="w-full flex items-center justify-between text-gray-400 hover:text-white px-2 py-1 font-bold text-[11px] transition">
                                     <svg id="arrow_user_grp_shop" class="w-3.5 h-3.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                                    <span class="flex items-center gap-1.5"><span>متجر Star</span></span>
+                                    <span class="flex items-center gap-1.5"><span>متجر القولد</span></span>
                                 </button>
                                 <div id="user_grp_shop" class="space-y-1">
                                     <button onclick="switchTab('tabWallpapers', this)" class="nav-btn px-3 py-2 rounded-xl text-gray-300 hover:text-white hover:bg-[#151724] font-medium flex items-center justify-between transition w-full">
@@ -676,7 +739,7 @@ module.exports = function (app, client) {
                                 <div id="user_grp_leaderboard" class="space-y-1">
                                     <button onclick="switchTab('tabCoinsLeaderboard', this)" class="nav-btn px-3 py-2 rounded-xl text-gray-300 hover:text-white hover:bg-[#151724] font-medium flex items-center justify-between transition w-full">
                                         <span></span>
-                                        <span class="flex items-center gap-2"><span>أغنى الأثرياء (Star)</span><span class="text-amber-400">⭐</span></span>
+                                        <span class="flex items-center gap-2"><span>أغنى الأثرياء</span><span class="text-gray-400">🪙</span></span>
                                     </button>
                                     <button onclick="switchTab('tabLeaderboard', this)" class="nav-btn px-3 py-2 rounded-xl text-gray-300 hover:text-white hover:bg-[#151724] font-medium flex items-center justify-between transition w-full">
                                         <span></span>
@@ -684,7 +747,8 @@ module.exports = function (app, client) {
                                     </button>
                                 </div>
                             </div>
-                            <!-- أخرى -->
+
+                            <!-- أخرى (Other) -->
                             <div class="space-y-1">
                                 <button type="button" onclick="toggleNavGroup('user_grp_other')" class="w-full flex items-center justify-between text-gray-400 hover:text-white px-2 py-1 font-bold text-[11px] transition">
                                     <svg id="arrow_user_grp_other" class="w-3.5 h-3.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
@@ -701,8 +765,10 @@ module.exports = function (app, client) {
                                     </a>
                                 </div>
                             </div>
+
                         </div>
-                        <!-- User Profile Bottom Bar -->
+
+                        <!-- User Profile Bottom Bar (Novax Exact Style) -->
                         <div class="p-3 border-t border-white/5">
                             <div class="bg-gradient-to-r from-purple-700 to-indigo-700 rounded-2xl p-2.5 flex items-center justify-between shadow-lg shadow-purple-950/40">
                                 <div class="text-white/80 hover:text-white cursor-pointer px-1">
@@ -716,16 +782,30 @@ module.exports = function (app, client) {
                                 </div>
                             </div>
                         </div>
+
                     </aside>
+
                     <!-- Server Rail (Far Right Column - Novax Style) -->
                     <div class="w-18 bg-[#05060a] border-l border-white/5 py-4 px-2 flex flex-col items-center gap-3 shrink-0 overflow-y-auto select-none">
+                        <!-- Home Icon Button -->
                         <a href="/dashboard" title="الصفحة الرئيسية" class="w-12 h-12 rounded-2xl bg-purple-600/30 border border-purple-500/50 flex items-center justify-center text-purple-300 hover:text-white transition shadow-lg mb-1 group">
                             <svg class="w-6 h-6 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
                         </a>
                         <div class="w-8 h-[1px] bg-white/5"></div>
                         ${serverRailHtml}
                     </div>
+
                 </div>
+
+                <script>
+                function toggleNavGroup(groupId) {
+                    const el = document.getElementById(groupId);
+                    const arrow = document.getElementById('arrow_' + groupId);
+                    if (!el) return;
+                    el.classList.toggle('hidden');
+                    if (arrow) arrow.classList.toggle('rotate-180');
+                }
+                </script>
 
                 <script>
                 function toggleNavGroup(groupId) {
@@ -743,10 +823,10 @@ module.exports = function (app, client) {
 
                     if (btn) {
                         document.querySelectorAll('.nav-btn').forEach(b => {
-                            b.classList.remove('bg-purple-600/20', 'text-purple-300', 'font-bold', 'border', 'border-purple-500/30');
+                            b.classList.remove('bg-purple-600', 'text-white', 'font-bold', 'shadow-md');
                             b.classList.add('text-gray-300');
                         });
-                        btn.classList.add('bg-purple-600/20', 'text-purple-300', 'font-bold', 'border', 'border-purple-500/30');
+                        btn.classList.add('bg-purple-600', 'text-white', 'font-bold', 'shadow-md');
                         btn.classList.remove('text-gray-300');
                     }
                 }
@@ -758,7 +838,7 @@ module.exports = function (app, client) {
                         const res = await fetch('/api/user/daily', { method: 'POST' });
                         const data = await res.json();
                         if (data.success) {
-                            alert('🎉 مبروك! استلمت المكافأة اليومية (+500 ⭐)!');
+                            alert('🎉 مبروك! استلمت الراتب اليومي (+500 🪙)!');
                             location.reload();
                         } else {
                             alert('❌ خطأ: ' + (data.error || 'فشل الاستلام'));
@@ -771,7 +851,7 @@ module.exports = function (app, client) {
                 }
 
                 async function buyItem(type, name, price, btn) {
-                    if (!confirm('هل أنت متأكد من رغبتك في شراء هذا العنصر؟')) return;
+                    if (!confirm('هل أنت متأكد من رغبتك في شراء هذا العنصر مقابل ' + price + ' 🪙؟')) return;
                     try {
                         const res = await fetch('/api/user/shop/buy', {
                             method: 'POST',
@@ -900,7 +980,7 @@ module.exports = function (app, client) {
             let formFieldsHtml = '';
 
             if (section === 'general') {
-                                formFieldsHtml = `
+formFieldsHtml = `
                     <div class="space-y-6">
                         <!-- General Commands Overview -->
                         <div class="bg-[#1c1f2e] border border-white/5 p-5 rounded-2xl flex items-center justify-between">
@@ -1226,7 +1306,7 @@ module.exports = function (app, client) {
                     </div>
                 `;
             } else if (section === 'automod') {
-                
+
                 formFieldsHtml = `
                     <div class="space-y-6 text-right" dir="rtl">
 
@@ -1504,7 +1584,7 @@ module.exports = function (app, client) {
                     </script>
                 `;
             } else if (section === 'invites') {
-                const leaderboard = database.getInvitesLeaderboard ? database.getInvitesLeaderboard(guildId, 20) : [];
+const leaderboard = database.getInvitesLeaderboard ? database.getInvitesLeaderboard(guildId, 20) : [];
                 const totalInvitesCount = leaderboard.reduce((acc, r) => acc + (r.total || 0), 0);
                 const topInviter = leaderboard.length > 0 ? leaderboard[0] : null;
 
@@ -1636,7 +1716,7 @@ module.exports = function (app, client) {
                     </script>
                 `;
             } else if (section === 'broadcast' || section === 'announcements') {
-                const broadcasts = database.getGuildBroadcasts ? database.getGuildBroadcasts(guildId) : [];
+const broadcasts = database.getGuildBroadcasts ? database.getGuildBroadcasts(guildId) : [];
 
                 const broadcastRowsHtml = broadcasts.length > 0 ? broadcasts.map(b => {
                     const statusBadge = b.status === 'active' ? '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-950 text-emerald-300 border border-emerald-800">🟢 نشط</span>' : '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-gray-800 text-gray-400">⚪ منتهي</span>';
@@ -1802,32 +1882,50 @@ module.exports = function (app, client) {
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div class="bg-[#1c1f2e] border border-white/5 p-4 rounded-2xl flex items-center justify-between">
                                 <label class="toggle"><input type="checkbox" name="anti_link" value="1" ${settings.anti_link ? 'checked' : ''}><span class="slider"></span></label>
-                                <span class="font-bold text-white text-xs">منع الروابط (Anti-Link)</span>
+                                <div class="text-right">
+                                    <span class="font-bold text-white text-xs block">منع الروابط (Anti-Link)</span>
+                                    <span class="text-[10px] text-gray-400">حذف روابط الديسكورد والمواقع غير المصرح بها فوراً</span>
+                                </div>
                             </div>
                             <div class="bg-[#1c1f2e] border border-white/5 p-4 rounded-2xl flex items-center justify-between">
                                 <label class="toggle"><input type="checkbox" name="anti_spam" value="1" ${settings.anti_spam ? 'checked' : ''}><span class="slider"></span></label>
-                                <span class="font-bold text-white text-xs">مكافحة السبام (Anti-Spam)</span>
+                                <div class="text-right">
+                                    <span class="font-bold text-white text-xs block">مكافحة السبام (Anti-Spam)</span>
+                                    <span class="text-[10px] text-gray-400">منع تكرار الرسائل السريعة تلقائياً لحماية الشات</span>
+                                </div>
                             </div>
                             <div class="bg-[#1c1f2e] border border-white/5 p-4 rounded-2xl flex items-center justify-between">
                                 <label class="toggle"><input type="checkbox" name="anti_nuke" value="1" ${settings.anti_nuke ? 'checked' : ''}><span class="slider"></span></label>
-                                <span class="font-bold text-white text-xs">مكافحة التخريب (Anti-Nuke)</span>
+                                <div class="text-right">
+                                    <span class="font-bold text-white text-xs block">مكافحة التخريب (Anti-Nuke)</span>
+                                    <span class="text-[10px] text-gray-400">حماية السيرفر من طرد أو حظر الرتب وتدمير القنوات</span>
+                                </div>
                             </div>
                             <div class="bg-[#1c1f2e] border border-white/5 p-4 rounded-2xl flex items-center justify-between">
                                 <label class="toggle"><input type="checkbox" name="anti_alt" value="1" ${settings.anti_alt ? 'checked' : ''}><span class="slider"></span></label>
-                                <span class="font-bold text-white text-xs">الحد الأدنى لعمر الحساب (Anti-Alt)</span>
+                                <div class="text-right">
+                                    <span class="font-bold text-white text-xs block">الحد الأدنى لعمر الحساب (Anti-Alt)</span>
+                                    <span class="text-[10px] text-gray-400">طرد الحسابات الوهمية والحديثة التي عمرها أقل من المحدد</span>
+                                </div>
                             </div>
                         </div>
 
                         <div class="bg-[#1c1f2e] border border-white/5 p-5 rounded-2xl space-y-4">
-                            <h4 class="font-bold text-white text-xs">فلاتر الرقابة التلقائية الإضافية (Automod Filters) 🛡️</h4>
+                            <h4 class="font-bold text-white text-xs flex items-center gap-2"><span>فلاتر الرقابة التلقائية الإضافية (Automod Filters)</span><span>🛡️</span></h4>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                                 <div class="bg-[#0b0d14] border border-white/5 p-3 rounded-xl flex items-center justify-between">
                                     <label class="toggle"><input type="checkbox" name="anti_caps" value="1" ${settings.anti_caps ? 'checked' : ''}><span class="slider"></span></label>
-                                    <span class="text-xs text-gray-300">منع الحروف الكبيرة (Anti-Caps)</span>
+                                    <div class="text-right">
+                                        <span class="text-xs font-bold text-white block">منع الحروف الكبيرة (Anti-Caps)</span>
+                                        <span class="text-[10px] text-gray-400">حذف الرسائل المكتوبة بحروف كبيرة مفرطة</span>
+                                    </div>
                                 </div>
                                 <div class="bg-[#0b0d14] border border-white/5 p-3 rounded-xl flex items-center justify-between">
                                     <label class="toggle"><input type="checkbox" name="anti_emoji_spam" value="1" ${settings.anti_emoji_spam ? 'checked' : ''}><span class="slider"></span></label>
-                                    <span class="text-xs text-gray-300">منع سبام الإيموجي (Anti-Emoji)</span>
+                                    <div class="text-right">
+                                        <span class="text-xs font-bold text-white block">منع سبام الإيموجي (Anti-Emoji)</span>
+                                        <span class="text-[10px] text-gray-400">منع إرسال الرسائل التي تحتوي على عدد كبير من الإيموجيات</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -1836,41 +1934,81 @@ module.exports = function (app, client) {
             } else if (section === 'embed') {
                 formFieldsHtml = `
                     <div class="space-y-6 text-right" dir="rtl">
-                        <div class="bg-[#1c1f2e] border border-white/5 p-6 rounded-2xl">
-                            <h3 class="font-black text-white text-xl">صانع رسائل الإيمبد المتقدم 📄</h3>
-                            <p class="text-gray-400 text-xs mt-1">صمم وأرسل رسائل إيمبد منسقة واحترافية مباشرة إلى أي قناة في سيرفرك</p>
+                        <div class="bg-[#1c1f2e] border border-white/5 p-6 rounded-2xl flex items-center justify-between">
+                            <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
+                            <div>
+                                <h3 class="font-black text-white text-xl flex items-center gap-2 justify-end"><span>صانع رسائل الإيمبد المتقدم</span><span>📄</span></h3>
+                                <p class="text-gray-400 text-xs mt-1">صمم وأرسل رسائل إيمبد منسقة واحترافية مباشرة إلى أي قناة في سيرفرك</p>
+                            </div>
                         </div>
 
-                        <div class="bg-[#1c1f2e] border border-white/5 p-6 rounded-2xl space-y-4">
+                        <!-- Card 1: Add new embed box (Exact to Image) -->
+                        <div class="bg-[#1c1f2e] border border-dashed border-purple-500/30 hover:border-purple-500/60 p-8 rounded-2xl text-center cursor-pointer transition group" onclick="document.getElementById('embBuilderCard').scrollIntoView({ behavior: 'smooth' })">
+                            <div class="w-12 h-12 rounded-2xl bg-purple-600/20 text-purple-400 border border-purple-500/30 flex items-center justify-center text-xl mx-auto mb-2 group-hover:scale-110 transition">
+                                ➕
+                            </div>
+                            <h4 class="font-bold text-white text-sm">+ إنشاء رسالة إمبد</h4>
+                            <p class="text-gray-400 text-xs mt-1">اضغط هنا لفتح المحرر التفاعلي وتصميم وإرسال رسالة إمبد جديدة</p>
+                        </div>
+
+                        <!-- Card 2: Interactive Embed Builder Form (Exact to Image) -->
+                        <div id="embBuilderCard" class="bg-[#1c1f2e] border border-white/5 p-6 rounded-2xl space-y-4">
+                            <h4 class="font-bold text-white text-sm border-b border-white/5 pb-3 flex items-center gap-2 justify-end">
+                                <span>محرر رسائل الإيمبد التفاعلي (Interactive Embed Builder)</span>
+                                <span>📄</span>
+                            </h4>
+
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <label class="block text-xs font-bold text-gray-300 mb-2">القناة المستهدفة</label>
+                                    <label class="block text-xs font-bold text-gray-300 mb-2">القناة المستهدفة (Channel ID) <span class="text-purple-400">*</span></label>
                                     ${renderChannelSelect('embedChannel', '')}
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-bold text-gray-300 mb-2">لون الإيمبد</label>
-                                    <input type="color" id="embColor" value="#9333ea" class="w-full h-11 bg-[#0b0d14] border border-white/5 rounded-xl cursor-pointer p-1">
+                                    <label class="block text-xs font-bold text-gray-300 mb-2">لون الإيمبد (Hex Color)</label>
+                                    <input type="color" id="embColor" value="#9333ea" oninput="updateEmbedPreview()" class="w-full h-11 bg-[#0b0d14] border border-white/5 rounded-xl cursor-pointer p-1">
                                 </div>
                             </div>
 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <label class="block text-xs font-bold text-gray-300 mb-2">عنوان الرسالة (Title)</label>
-                                    <input type="text" id="embTitle" placeholder="اكتب العنوان الرئيسي..." class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right">
+                                    <label class="block text-xs font-bold text-gray-300 mb-2">عنوان الرسالة (Embed Title)</label>
+                                    <input type="text" id="embTitle" oninput="updateEmbedPreview()" placeholder="اكتب العنوان الرئيسي هنا..." class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-gray-300 mb-2">اسم الكاتب (Author Name)</label>
-                                    <input type="text" id="embAuthor" placeholder="اسم الكاتب أو الإدارة..." class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right">
+                                    <input type="text" id="embAuthor" oninput="updateEmbedPreview()" placeholder="اسم الكاتب أو الإدارة..." class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right">
                                 </div>
                             </div>
 
                             <div>
-                                <label class="block text-xs font-bold text-gray-300 mb-2">محتوى الرسالة (Description)</label>
-                                <textarea id="embDesc" rows="4" placeholder="اكتب تفاصيل الرسالة والإعلان هنا..." class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right leading-relaxed"></textarea>
+                                <label class="block text-xs font-bold text-gray-300 mb-2">محتوى الرسالة (Description) <span class="text-purple-400">*</span></label>
+                                <textarea id="embDesc" rows="4" oninput="updateEmbedPreview()" placeholder="اكتب تفاصيل الرسالة والإعلان والتنسيق هنا..." class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right leading-relaxed"></textarea>
                             </div>
 
-                            <div class="pt-2 flex justify-end">
-                                <button type="button" onclick="sendEmbedDirect()" class="px-8 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold transition shadow-lg flex items-center gap-2">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-300 mb-2">النص السفلي (Footer Text)</label>
+                                    <input type="text" id="embFooter" oninput="updateEmbedPreview()" placeholder="حقوق السيرفر أو نص التذييل..." class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-300 mb-2">رابط صورة البنر الكبيرة (Banner Image URL)</label>
+                                    <input type="text" id="embImage" placeholder="https://..." class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-left font-mono">
+                                </div>
+                            </div>
+
+                            <!-- Live Discord Preview Box (Exact to Image) -->
+                            <div class="pt-4 border-t border-white/5 space-y-2">
+                                <span class="text-[11px] text-gray-400 font-bold block">المعاينة الحية لرسالة الإيمبد (Discord Live Preview):</span>
+                                <div id="previewCard" class="bg-[#0b0d14] border-r-4 border-purple-600 rounded-xl p-4 text-right space-y-2 shadow-inner">
+                                    <span id="pvAuthor" class="text-[11px] text-gray-400 font-bold block hidden"></span>
+                                    <h4 id="pvTitle" class="text-sm font-bold text-white">عنوان الرسالة التجريبي</h4>
+                                    <p id="pvDesc" class="text-xs text-gray-300 leading-relaxed">ستكون رسالة الإيمبد تظهر هنا كما سيبدو تماماً في الديسكورد...</p>
+                                    <span id="pvFooter" class="text-[10px] text-gray-500 font-mono block pt-1 border-t border-white/5 hidden"></span>
+                                </div>
+                            </div>
+
+                            <div class="pt-3 flex justify-end">
+                                <button type="button" onclick="sendEmbedDirect()" id="btnSendEmbed" class="px-8 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold transition shadow-lg flex items-center gap-2">
                                     <span>🚀 إرسال الإيمبد إلى ديسكورد الآن</span>
                                 </button>
                             </div>
@@ -1878,24 +2016,67 @@ module.exports = function (app, client) {
                     </div>
 
                     <script>
+                    function updateEmbedPreview() {
+                        const title = document.getElementById('embTitle').value.trim();
+                        const desc = document.getElementById('embDesc').value.trim();
+                        const author = document.getElementById('embAuthor').value.trim();
+                        const footer = document.getElementById('embFooter').value.trim();
+                        const color = document.getElementById('embColor').value;
+
+                        const pvTitle = document.getElementById('pvTitle');
+                        const pvDesc = document.getElementById('pvDesc');
+                        const pvAuthor = document.getElementById('pvAuthor');
+                        const pvFooter = document.getElementById('pvFooter');
+                        const card = document.getElementById('previewCard');
+
+                        if (card) card.style.borderRightColor = color;
+                        if (pvTitle) pvTitle.innerText = title || 'عنوان الرسالة التجريبي';
+                        if (pvDesc) pvDesc.innerText = desc || 'ستكون رسالة الإيمبد تظهر هنا كما سيبدو تماماً في الديسكورد...';
+                        
+                        if (pvAuthor) {
+                            if (author) { pvAuthor.innerText = author; pvAuthor.classList.remove('hidden'); }
+                            else { pvAuthor.classList.add('hidden'); }
+                        }
+                        if (pvFooter) {
+                            if (footer) { pvFooter.innerText = footer; pvFooter.classList.remove('hidden'); }
+                            else { pvFooter.classList.add('hidden'); }
+                        }
+                    }
+
                     async function sendEmbedDirect() {
                         const channelId = document.getElementById('embedChannel').value;
                         const title = document.getElementById('embTitle').value.trim();
                         const desc = document.getElementById('embDesc').value.trim();
                         const author = document.getElementById('embAuthor').value.trim();
+                        const footer = document.getElementById('embFooter').value.trim();
+                        const image = document.getElementById('embImage').value.trim();
                         const color = document.getElementById('embColor').value;
 
-                        if (!channelId) return alert('يرجى اختيار القناة أولاً!');
+                        if (!channelId) return alert('يرجى اختيار القناة المستهدفة أولاً!');
                         if (!desc && !title) return alert('يرجى كتابة عنوان أو محتوى للرسالة!');
 
-                        const res = await fetch('/api/guild/${guildId}/send-embed', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ channelId, title, desc, author, color })
-                        });
-                        const data = await res.json();
-                        if (data.success) alert('✅ تم إرسال الإيمبد بنجاح في القناة!');
-                        else alert('❌ خطأ: ' + (data.error || 'فشل الإرسال'));
+                        const btn = document.getElementById('btnSendEmbed');
+                        btn.disabled = true;
+                        btn.innerHTML = '⏳ جارٍ الإرسال...';
+
+                        try {
+                            const res = await fetch('/api/guild/${guildId}/send-embed', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ channelId, title, desc, author, footer, image, color })
+                            });
+                            const data = await res.json();
+                            if (data.success) {
+                                alert('✅ تم إرسال الإيمبد بنجاح في القناة!');
+                            } else {
+                                alert('❌ خطأ: ' + (data.error || 'فشل الإرسال'));
+                            }
+                        } catch(e) {
+                            alert('حدث خطأ أثناء الاتصال بالخادم');
+                        } finally {
+                            btn.disabled = false;
+                            btn.innerHTML = '<span>🚀 إرسال الإيمبد إلى ديسكورد الآن</span>';
+                        }
                     }
                     </script>
                 `;
@@ -2296,7 +2477,7 @@ module.exports = function (app, client) {
             const now = Date.now();
             const cooldown = 24 * 60 * 60 * 1000;
             if (userRow?.last_daily && (now - userRow.last_daily) < cooldown) {
-                return res.status(400).json({ success: false, error: 'لقد استلمت المكافأة اليومية بالفعل!' });
+                return res.status(400).json({ success: false, error: 'لقد استلمت الراتب اليومي بالفعل!' });
             }
             rawDb.prepare('UPDATE users SET coins = COALESCE(coins, 0) + 500, last_daily = ? WHERE user_id = ?').run(now, userId);
             res.json({ success: true });
@@ -2313,7 +2494,7 @@ module.exports = function (app, client) {
             const userRow = rawDb.prepare('SELECT SUM(coins) as coins FROM users WHERE user_id = ?').get(userId);
             const currentCoins = userRow?.coins || 0;
             if (currentCoins < price) {
-                return res.status(400).json({ success: false, error: 'رصيد Star Coin غير كافٍ!' });
+                return res.status(400).json({ success: false, error: 'رصيد الذهب (Gold) غير كافٍ!' });
             }
             rawDb.prepare('UPDATE users SET coins = coins - ? WHERE user_id = ?').run(price, userId);
             res.json({ success: true });
@@ -2326,16 +2507,18 @@ module.exports = function (app, client) {
         try {
             if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
             const { guildId } = req.params;
-            const { channelId, title, desc, author, color } = req.body;
+            const { channelId, title, desc, author, footer, image, color } = req.body;
             const channel = client.channels.cache.get(channelId) || await client.channels.fetch(channelId).catch(() => null);
             if (!channel || !channel.isTextBased()) {
-                return res.status(404).json({ success: false, error: 'لم يتم العثور على القناة' });
+                return res.status(404).json({ success: false, error: 'لم يتم العثور على القناة أو البوت ليس لديه صلاحيات فيها' });
             }
             const { EmbedBuilder } = require('discord.js');
             const emb = new EmbedBuilder().setColor(color || '#9333ea');
             if (title) emb.setTitle(title);
             if (desc) emb.setDescription(desc);
             if (author) emb.setAuthor({ name: author });
+            if (footer) emb.setFooter({ text: footer });
+            if (image) emb.setImage(image);
             emb.setTimestamp();
             await channel.send({ embeds: [emb] });
             res.json({ success: true });
