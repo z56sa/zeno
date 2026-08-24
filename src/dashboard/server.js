@@ -4216,10 +4216,6 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                         <!-- 1. Master Header Card (Exact to Image 1: الإشراف & Action Buttons) -->
                         <div class="bg-[#12141f] border border-white/5 p-6 rounded-2xl flex items-center justify-between shadow-xl">
                             <div class="flex items-center gap-3">
-                                <button type="submit" class="px-6 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-amber-400 hover:to-orange-500 text-white rounded-xl text-xs font-black transition flex items-center gap-1.5 shadow-lg shadow-orange-950/40">
-                                    <span>💾</span>
-                                    <span>حفظ الإعدادات</span>
-                                </button>
                                 <button type="button" onclick="clearAllServerWarnings()" class="px-4 py-2.5 bg-rose-950/40 hover:bg-rose-900/60 text-rose-400 border border-rose-800/40 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow">
                                     <span>🗑️</span>
                                     <span>مسح كل التحذيرات</span>
