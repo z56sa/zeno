@@ -5256,54 +5256,373 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                     </div>`;
             } else if (section === 'appearance') {
 formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl">
-                        <div class="bg-[#12141f] border border-white/5 p-6 rounded-2xl flex items-center justify-between shadow-xl">
+                        
+                        <!-- Header Banner -->
+                        <div class="bg-gradient-to-r from-[#141724] via-[#1c1f2e] to-[#141724] border border-white/5 p-6 rounded-3xl flex items-center justify-between shadow-2xl">
                             <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-2xl bg-purple-600/20 text-purple-400 border border-purple-500/30 flex items-center justify-center text-xl shadow-lg">⭐</div>
                                 <div class="text-right">
-                                    <h4 class="font-black text-white text-base">مظهر وتخصيص البوت</h4>
-                                    <p class="text-gray-400 text-xs mt-0.5">تخصيص ألوان الإيمبد، الصور، وخلفيات بطاقة البروفايل</p>
+                                    <h3 class="font-black text-white text-lg">تخصيص البوت</h3>
+                                    <p class="text-gray-400 text-xs mt-0.5">غير اسم البوت وصورته وبنره لكل سيرفر</p>
                                 </div>
-                                <div class="w-10 h-10 rounded-xl bg-purple-600/20 text-purple-400 flex items-center justify-center text-lg border border-purple-500/30">🎨</div>
+                            </div>
+                            <!-- Server selector pill (Exact to image) -->
+                            <div class="bg-[#0b0d14] border border-white/5 px-4 py-2 rounded-2xl flex items-center gap-2.5 shadow-inner">
+                                <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+                                <span class="text-xs font-bold text-white">${guild.name || "ZENO'BOT"}</span>
+                                <div class="w-6 h-6 rounded-lg bg-purple-950/60 text-purple-300 text-xs font-black flex items-center justify-center border border-purple-500/30">Z</div>
                             </div>
                         </div>
 
-                        <div class="bg-[#12141f] border border-white/5 p-6 rounded-2xl space-y-4 shadow-xl">
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-xs font-bold text-gray-300 mb-2">اللون الأساسي للإيمبدات (Hex Color)</label>
-                                    <input type="color" name="embed_color" value="${settings.embed_color || '#9333ea'}" class="w-full h-11 bg-[#0b0d14] border border-white/5 rounded-xl cursor-pointer p-1">
+                        <!-- Live Preview Card (Exact to Image 1 & 2) -->
+                        <div class="bg-[#12141f] border border-white/5 rounded-3xl overflow-hidden shadow-2xl">
+                            <!-- Banner area -->
+                            <div id="prevBannerBox" class="h-32 bg-cover bg-center relative transition-all flex items-center justify-center" style="background-image: url('${settings.bot_banner || ''}'); background-color: #1c1f2e;">
+                                ${!settings.bot_banner ? `
+                                    <div class="text-center">
+                                        <h2 class="text-2xl font-black text-amber-100 tracking-wider shadow-sm">Best System Bot</h2>
+                                        <p class="text-xs text-amber-200/80 font-mono mt-0.5">discord.gg/zeno</p>
+                                    </div>
+                                ` : ''}
+                                <!-- Avatar Overlap -->
+                                <div class="absolute -bottom-6 right-8 flex items-center gap-3">
+                                    <div class="relative group">
+                                        <img id="prevAvatarImg" src="${settings.bot_avatar || (botGuild?.members?.me?.user?.displayAvatarURL() || userAvatar)}" class="w-16 h-16 rounded-2xl bg-[#0b0d14] object-cover ring-4 ring-[#12141f] shadow-xl">
+                                        <span class="w-3.5 h-3.5 rounded-full bg-emerald-500 ring-2 ring-[#12141f] absolute -bottom-0.5 -right-0.5"></span>
+                                    </div>
                                 </div>
-                                <div>
-                                    <label class="block text-xs font-bold text-gray-300 mb-2">رابط صورة الفوتر أو الشعار</label>
-                                    <input type="text" name="bot_footer_icon" value="${settings.bot_footer_icon || ''}" placeholder="https://..." class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-left font-mono">
+                            </div>
+                            <div class="pt-8 pb-5 px-8 flex items-center justify-between">
+                                <div class="text-left">
+                                    <span class="text-[10px] text-gray-500 font-mono">ID: ${client?.user?.id || 'BOT_ID'}</span>
+                                </div>
+                                <div class="text-right">
+                                    <h4 id="prevNickText" class="font-black text-white text-base">${settings.bot_nickname || client?.user?.username || 'ZENO'}</h4>
+                                    <span class="text-[11px] text-gray-400 font-mono">@${client?.user?.username || 'zeno'}</span>
                                 </div>
                             </div>
                         </div>
-                    </div>`;
+
+                        <!-- 1. اسم البوت في السيرفر (Bot Nickname) -->
+                        <div class="bg-[#12141f] border border-white/5 p-6 rounded-3xl space-y-3 shadow-xl">
+                            <div class="flex items-center justify-between">
+                                <div class="w-8 h-8 rounded-xl bg-purple-600/20 text-purple-400 flex items-center justify-center text-sm border border-purple-500/30">✏️</div>
+                                <div class="text-right">
+                                    <h4 class="font-black text-white text-sm">اسم البوت في السيرفر</h4>
+                                    <p class="text-gray-400 text-xs mt-0.5">تغيير اسم البوت المعروض في هذا السيرفر فقط</p>
+                                </div>
+                            </div>
+                            <input type="text" name="bot_nickname" id="inpBotNick" value="${settings.bot_nickname || ''}" placeholder="${client?.user?.username || 'ZENO'}" oninput="document.getElementById('prevNickText').innerText = this.value || '${client?.user?.username || 'ZENO'}'" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-2xl px-5 py-3.5 text-xs text-white outline-none text-right font-bold transition">
+                        </div>
+
+                        <!-- 2. وصف البوت في السيرفر (About Me) -->
+                        <div class="bg-[#12141f] border border-white/5 p-6 rounded-3xl space-y-3 shadow-xl">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <span id="aboutCount" class="text-[10px] font-mono font-bold text-amber-400 bg-amber-950/60 px-2 py-0.5 rounded-lg">${(settings.bot_about || '').length}/190</span>
+                                    <div class="w-8 h-8 rounded-xl bg-purple-600/20 text-purple-400 flex items-center justify-center text-sm border border-purple-500/30">💬</div>
+                                </div>
+                                <div class="text-right">
+                                    <h4 class="font-black text-white text-sm">وصف البوت في السيرفر</h4>
+                                    <p class="text-gray-400 text-xs mt-0.5">تغيير وصف البوت (About Me) المعروض في هذا السيرفر فقط</p>
+                                </div>
+                            </div>
+                            <textarea name="bot_about" id="inpBotAbout" rows="3" maxlength="190" placeholder="اكتب وصفاً للبوت في هذا السيرفر..." oninput="document.getElementById('aboutCount').innerText = this.value.length + '/190'" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-2xl px-5 py-3.5 text-xs text-white outline-none text-right leading-relaxed transition">${settings.bot_about || ''}</textarea>
+                        </div>
+
+                        <!-- 3. صورة وبنر البوت في السيرفر (Avatar & Banner 2-Grid) -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            
+                            <!-- صورة البوت في السيرفر -->
+                            <div class="bg-[#12141f] border border-white/5 p-6 rounded-3xl space-y-4 shadow-xl text-right">
+                                <div class="flex items-center justify-between">
+                                    <div class="w-8 h-8 rounded-xl bg-rose-600/20 text-rose-400 flex items-center justify-center text-sm border border-rose-500/30">🎯</div>
+                                    <div>
+                                        <h4 class="font-black text-white text-sm">صورة البوت في السيرفر</h4>
+                                        <p class="text-gray-400 text-[11px] mt-0.5">تغيير صورة البوت المعروضة في هذا السيرفر فقط (Per-Server Avatar)</p>
+                                    </div>
+                                </div>
+
+                                <div class="flex items-center justify-between p-4 bg-[#0b0d14] border border-white/5 rounded-2xl">
+                                    <button type="button" onclick="document.getElementById('inpAvatarUrl').focus()" class="px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold transition shadow-md flex items-center gap-1.5">
+                                        <span>🖼️</span>
+                                        <span>اختر صورة</span>
+                                    </button>
+                                    <div class="flex items-center gap-3">
+                                        <span class="text-[11px] text-gray-400">اضغط أو الصق رابط صورة جديدة</span>
+                                        <img id="cardAvatarPreview" src="${settings.bot_avatar || (botGuild?.members?.me?.user?.displayAvatarURL() || userAvatar)}" class="w-10 h-10 rounded-xl object-cover ring-2 ring-purple-600/50">
+                                    </div>
+                                </div>
+                                <input type="url" name="bot_avatar" id="inpAvatarUrl" value="${settings.bot_avatar || ''}" placeholder="https://i.imgur.com/... (رابط الصورة المباشر)" oninput="updateAvatarPreview(this.value)" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-left font-mono">
+                            </div>
+
+                            <!-- بنر البوت في السيرفر -->
+                            <div class="bg-[#12141f] border border-white/5 p-6 rounded-3xl space-y-4 shadow-xl text-right">
+                                <div class="flex items-center justify-between">
+                                    <div class="w-8 h-8 rounded-xl bg-amber-600/20 text-amber-400 flex items-center justify-center text-sm border border-amber-500/30">🖼️</div>
+                                    <div>
+                                        <h4 class="font-black text-white text-sm">بنر البوت في السيرفر</h4>
+                                        <p class="text-gray-400 text-[11px] mt-0.5">تغيير بنر البوت المعروض في هذا السيرفر فقط (Per-Server Banner)</p>
+                                    </div>
+                                </div>
+
+                                <div class="flex items-center justify-between p-4 bg-[#0b0d14] border border-white/5 rounded-2xl">
+                                    <button type="button" onclick="document.getElementById('inpBannerUrl').focus()" class="px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold transition shadow-md flex items-center gap-1.5">
+                                        <span>🖼️</span>
+                                        <span>اختر بنر</span>
+                                    </button>
+                                    <span class="text-[11px] text-gray-400">الصق رابط صورة البنر المباشر</span>
+                                </div>
+                                <input type="url" name="bot_banner" id="inpBannerUrl" value="${settings.bot_banner || ''}" placeholder="https://i.imgur.com/... (رابط البنر المباشر)" oninput="updateBannerPreview(this.value)" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-left font-mono">
+                            </div>
+
+                        </div>
+
+                        <!-- Important Notes Alert (Exact to Image 2) -->
+                        <div class="bg-[#12141f] border border-white/5 p-5 rounded-3xl space-y-2 text-right shadow-lg">
+                            <div class="flex items-center justify-end gap-2 text-amber-400 font-bold text-xs">
+                                <span>ملاحظات مهمة</span>
+                                <span>💬</span>
+                            </div>
+                            <ul class="text-[11px] text-gray-400 space-y-1 pr-2 list-none">
+                                <li>• تغيير الاسم والصورة والبنر يؤثر فقط على السيرفر المحدد.</li>
+                                <li>• قد يستغرق ظهور التغييرات بضع ثوانٍ في ديسكورد فور الضغط على حفظ.</li>
+                                <li>• الصور يجب أن تكون بروابط مباشرة بصيغة PNG أو JPG أو WEBP أو GIF.</li>
+                            </ul>
+                        </div>
+
+                    </div>
+
+                    <script>
+                    function updateAvatarPreview(url) {
+                        if (url) {
+                            document.getElementById('prevAvatarImg').src = url;
+                            document.getElementById('cardAvatarPreview').src = url;
+                        }
+                    }
+                    function updateBannerPreview(url) {
+                        const box = document.getElementById('prevBannerBox');
+                        if (url) {
+                            box.style.backgroundImage = 'url(' + url + ')';
+                        }
+                    }
+                    </script>`;
             } else if (section === 'settings') {
 formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl">
-                        <div class="bg-[#12141f] border border-white/5 p-6 rounded-2xl flex items-center justify-between shadow-xl">
+                        
+                        <!-- Top Header Title -->
+                        <div class="bg-gradient-to-r from-[#141724] via-[#1c1f2e] to-[#141724] border border-white/5 p-6 rounded-3xl flex items-center justify-between shadow-2xl">
                             <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-2xl bg-purple-600/20 text-purple-400 border border-purple-500/30 flex items-center justify-center text-xl shadow-lg">⚙️</div>
                                 <div class="text-right">
-                                    <h4 class="font-black text-white text-base">إعدادات السيرفر العامة</h4>
-                                    <p class="text-gray-400 text-xs mt-0.5">تحديد البرفكس وقناة السجلات الأساسية ولغة البوت</p>
+                                    <h3 class="font-black text-white text-lg">الإعدادات العامة</h3>
+                                    <p class="text-gray-400 text-xs mt-0.5">إعدادات البوت لسيرفر ${guild.name || "ZENO'BOT"}</p>
                                 </div>
-                                <div class="w-10 h-10 rounded-xl bg-purple-600/20 text-purple-400 flex items-center justify-center text-lg border border-purple-500/30">⚙️</div>
+                            </div>
+                            <div class="bg-[#0b0d14] border border-white/5 px-4 py-2 rounded-2xl flex items-center gap-2.5 shadow-inner">
+                                <span class="w-2 h-2 rounded-full bg-purple-500 animate-pulse"></span>
+                                <span class="text-xs font-bold text-white">${guild.name || "ZENO'BOT"}</span>
+                                <div class="w-6 h-6 rounded-lg bg-purple-950/60 text-purple-300 text-xs font-black flex items-center justify-center border border-purple-500/30">Z</div>
                             </div>
                         </div>
 
-                        <div class="bg-[#12141f] border border-white/5 p-6 rounded-2xl space-y-4 shadow-xl">
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Top 2-Grid: البادئة (Prefix) & لغة البوت (Bot Language) - Exact to Image -->
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            
+                            <!-- 1. البادئة (Prefix) Card -->
+                            <div class="bg-[#12141f] border border-white/5 p-6 rounded-3xl flex flex-col justify-between shadow-xl">
                                 <div>
-                                    <label class="block text-xs font-bold text-gray-300 mb-2">برفكس الأوامر (Command Prefix)</label>
-                                    <input type="text" name="prefix" value="${settings.prefix || '#'}" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right font-mono">
+                                    <div class="flex items-center justify-between mb-4">
+                                        <span class="text-[10px] text-gray-500">Command Prefix</span>
+                                        <h4 class="font-black text-white text-sm">البادئة (Prefix)</h4>
+                                    </div>
+                                    <input type="text" name="prefix" id="inpPrefix" value="${settings.prefix || '!'}" placeholder="!" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-2xl px-6 py-4 text-center text-xl text-white font-mono font-black outline-none shadow-inner transition">
                                 </div>
-                                <div>
-                                    <label class="block text-xs font-bold text-gray-300 mb-2">قناة السجلات العامة (Default Log Channel)</label>
-                                    ${renderChannelSelect('log_channel', settings.log_channel || '')}
+                                <p class="text-[11px] text-gray-500 text-right mt-4">الرمز المستخدم قبل الأوامر النصية</p>
+                            </div>
+
+                            <!-- 2. لغة البوت (Bot Language) Card with Flag Grid - Exact to Image -->
+                            <div class="bg-[#12141f] border border-white/5 p-6 rounded-3xl shadow-xl space-y-4">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-[10px] text-purple-400 font-bold bg-purple-950/60 px-2 py-0.5 rounded-lg font-mono">LANG</span>
+                                    <h4 class="font-black text-white text-sm">لغة البوت</h4>
+                                </div>
+
+                                <input type="hidden" name="bot_language" id="inpHiddenLang" value="${settings.bot_language || 'AR'}">
+
+                                <div class="grid grid-cols-3 gap-2.5 text-center">
+                                    <!-- IQ / AR -->
+                                    <button type="button" onclick="selectBotLanguage('AR', this)" class="lang-btn p-3 rounded-2xl border transition flex flex-col items-center justify-center gap-0.5 ${(settings.bot_language || 'AR') === 'AR' ? 'bg-purple-900/30 border-purple-500 text-white font-black shadow-lg shadow-purple-950/50' : 'bg-[#0b0d14] border-white/5 text-gray-400 hover:text-white hover:border-white/10'}">
+                                        <span class="text-xs font-black">IQ</span>
+                                        <span class="text-[10px] font-bold text-gray-400">AR</span>
+                                    </button>
+
+                                    <!-- US / EN -->
+                                    <button type="button" onclick="selectBotLanguage('EN', this)" class="lang-btn p-3 rounded-2xl border transition flex flex-col items-center justify-center gap-0.5 ${settings.bot_language === 'EN' ? 'bg-purple-900/30 border-purple-500 text-white font-black shadow-lg shadow-purple-950/50' : 'bg-[#0b0d14] border-white/5 text-gray-400 hover:text-white hover:border-white/10'}">
+                                        <span class="text-xs font-black">US</span>
+                                        <span class="text-[10px] font-bold text-gray-400">EN</span>
+                                    </button>
+
+                                    <!-- TR -->
+                                    <button type="button" onclick="selectBotLanguage('TR', this)" class="lang-btn p-3 rounded-2xl border transition flex flex-col items-center justify-center gap-0.5 ${settings.bot_language === 'TR' ? 'bg-purple-900/30 border-purple-500 text-white font-black shadow-lg shadow-purple-950/50' : 'bg-[#0b0d14] border-white/5 text-gray-400 hover:text-white hover:border-white/10'}">
+                                        <span class="text-xs font-black">TR</span>
+                                        <span class="text-[10px] font-bold text-gray-400">TR</span>
+                                    </button>
+
+                                    <!-- RU -->
+                                    <button type="button" onclick="selectBotLanguage('RU', this)" class="lang-btn p-3 rounded-2xl border transition flex flex-col items-center justify-center gap-0.5 ${settings.bot_language === 'RU' ? 'bg-purple-900/30 border-purple-500 text-white font-black shadow-lg shadow-purple-950/50' : 'bg-[#0b0d14] border-white/5 text-gray-400 hover:text-white hover:border-white/10'}">
+                                        <span class="text-xs font-black">RU</span>
+                                        <span class="text-[10px] font-bold text-gray-400">RU</span>
+                                    </button>
+
+                                    <!-- ES -->
+                                    <button type="button" onclick="selectBotLanguage('ES', this)" class="lang-btn p-3 rounded-2xl border transition flex flex-col items-center justify-center gap-0.5 ${settings.bot_language === 'ES' ? 'bg-purple-900/30 border-purple-500 text-white font-black shadow-lg shadow-purple-950/50' : 'bg-[#0b0d14] border-white/5 text-gray-400 hover:text-white hover:border-white/10'}">
+                                        <span class="text-xs font-black">ES</span>
+                                        <span class="text-[10px] font-bold text-gray-400">ES</span>
+                                    </button>
+
+                                    <!-- FR -->
+                                    <button type="button" onclick="selectBotLanguage('FR', this)" class="lang-btn p-3 rounded-2xl border transition flex flex-col items-center justify-center gap-0.5 ${settings.bot_language === 'FR' ? 'bg-purple-900/30 border-purple-500 text-white font-black shadow-lg shadow-purple-950/50' : 'bg-[#0b0d14] border-white/5 text-gray-400 hover:text-white hover:border-white/10'}">
+                                        <span class="text-xs font-black">FR</span>
+                                        <span class="text-[10px] font-bold text-gray-400">FR</span>
+                                    </button>
+
+                                    <!-- DE -->
+                                    <button type="button" onclick="selectBotLanguage('DE', this)" class="lang-btn p-3 rounded-2xl border transition flex flex-col items-center justify-center gap-0.5 ${settings.bot_language === 'DE' ? 'bg-purple-900/30 border-purple-500 text-white font-black shadow-lg shadow-purple-950/50' : 'bg-[#0b0d14] border-white/5 text-gray-400 hover:text-white hover:border-white/10'}">
+                                        <span class="text-xs font-black">DE</span>
+                                        <span class="text-[10px] font-bold text-gray-400">DE</span>
+                                    </button>
+
+                                    <!-- BR / PT -->
+                                    <button type="button" onclick="selectBotLanguage('PT', this)" class="lang-btn p-3 rounded-2xl border transition flex flex-col items-center justify-center gap-0.5 ${settings.bot_language === 'PT' ? 'bg-purple-900/30 border-purple-500 text-white font-black shadow-lg shadow-purple-950/50' : 'bg-[#0b0d14] border-white/5 text-gray-400 hover:text-white hover:border-white/10'}">
+                                        <span class="text-xs font-black">BR</span>
+                                        <span class="text-[10px] font-bold text-gray-400">PT</span>
+                                    </button>
+
+                                    <!-- JP / JA -->
+                                    <button type="button" onclick="selectBotLanguage('JA', this)" class="lang-btn p-3 rounded-2xl border transition flex flex-col items-center justify-center gap-0.5 ${settings.bot_language === 'JA' ? 'bg-purple-900/30 border-purple-500 text-white font-black shadow-lg shadow-purple-950/50' : 'bg-[#0b0d14] border-white/5 text-gray-400 hover:text-white hover:border-white/10'}">
+                                        <span class="text-xs font-black">JP</span>
+                                        <span class="text-[10px] font-bold text-gray-400">JA</span>
+                                    </button>
                                 </div>
                             </div>
+
                         </div>
-                    </div>`;
+
+                        <!-- 3. تصفير سجلات العقوبات التلقائي (Auto-Clear Infractions) - Exact to Image -->
+                        <div class="bg-[#12141f] border border-white/5 p-6 rounded-3xl space-y-5 shadow-xl">
+                            
+                            <!-- Master Header & Switch -->
+                            <div class="flex items-center justify-between border-b border-white/5 pb-4">
+                                <label class="toggle">
+                                    <input type="checkbox" name="auto_clear_punishments" value="1" ${settings.auto_clear_punishments ? 'checked' : ''} onchange="document.getElementById('autoClearContent').classList.toggle('opacity-40', !this.checked)">
+                                    <span class="slider"></span>
+                                </label>
+                                <div class="flex items-center gap-3">
+                                    <div class="text-right">
+                                        <h4 class="font-black text-white text-sm">تصفير سجلات العقوبات التلقائي</h4>
+                                        <p class="text-gray-400 text-xs mt-0.5">حذف دوري لسجلات العقوبات المنتهية / المزالة – العقوبات النشطة لا تتأثر إطلاقاً.</p>
+                                    </div>
+                                    <div class="w-8 h-8 rounded-xl bg-purple-600/20 text-purple-400 flex items-center justify-center text-sm border border-purple-500/30">⏱️</div>
+                                </div>
+                            </div>
+
+                            <div id="autoClearContent" class="space-y-4 ${settings.auto_clear_punishments ? '' : 'opacity-40'} transition-opacity">
+                                <!-- فترة التصفير (Clear Period Buttons) -->
+                                <div>
+                                    <span class="block text-xs font-bold text-gray-400 mb-2.5 text-right">فترة التصفير</span>
+                                    <input type="hidden" name="auto_clear_period" id="inpClearPeriod" value="${settings.auto_clear_period || 'week'}">
+                                    
+                                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                        <button type="button" onclick="selectClearPeriod('week', this)" class="period-btn py-3 px-4 rounded-2xl border text-xs font-bold transition ${(settings.auto_clear_period || 'week') === 'week' ? 'bg-purple-900/40 border-purple-500 text-white shadow-md' : 'bg-[#0b0d14] border-white/5 text-gray-400 hover:text-white'}">
+                                            كل أسبوع
+                                        </button>
+                                        <button type="button" onclick="selectClearPeriod('2weeks', this)" class="period-btn py-3 px-4 rounded-2xl border text-xs font-bold transition ${settings.auto_clear_period === '2weeks' ? 'bg-purple-900/40 border-purple-500 text-white shadow-md' : 'bg-[#0b0d14] border-white/5 text-gray-400 hover:text-white'}">
+                                            كل أسبوعين
+                                        </button>
+                                        <button type="button" onclick="selectClearPeriod('3weeks', this)" class="period-btn py-3 px-4 rounded-2xl border text-xs font-bold transition ${settings.auto_clear_period === '3weeks' ? 'bg-purple-900/40 border-purple-500 text-white shadow-md' : 'bg-[#0b0d14] border-white/5 text-gray-400 hover:text-white'}">
+                                            كل 3 أسابيع
+                                        </button>
+                                        <button type="button" onclick="selectClearPeriod('month', this)" class="period-btn py-3 px-4 rounded-2xl border text-xs font-bold transition ${settings.auto_clear_period === 'month' ? 'bg-purple-900/40 border-purple-500 text-white shadow-md' : 'bg-[#0b0d14] border-white/5 text-gray-400 hover:text-white'}">
+                                            كل شهر
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- أنواع العقوبات المشمولة (Punishment Types Pills) -->
+                                <div>
+                                    <span class="block text-xs font-bold text-gray-400 mb-2.5 text-right">أنواع العقوبات المشمولة</span>
+                                    <div class="flex flex-wrap items-center gap-2 justify-end">
+                                        <span class="px-3 py-1.5 rounded-xl bg-purple-600/30 text-purple-300 border border-purple-500/40 text-xs font-bold">كل الأنواع</span>
+                                        <span class="px-3 py-1.5 rounded-xl bg-[#0b0d14] text-gray-400 border border-white/5 text-xs font-medium">حظر</span>
+                                        <span class="px-3 py-1.5 rounded-xl bg-[#0b0d14] text-gray-400 border border-white/5 text-xs font-medium">حظر مؤقت</span>
+                                        <span class="px-3 py-1.5 rounded-xl bg-[#0b0d14] text-gray-400 border border-white/5 text-xs font-medium">ميوت</span>
+                                        <span class="px-3 py-1.5 rounded-xl bg-[#0b0d14] text-gray-400 border border-white/5 text-xs font-medium">ميوت صوتي</span>
+                                        <span class="px-3 py-1.5 rounded-xl bg-[#0b0d14] text-gray-400 border border-white/5 text-xs font-medium">سجن</span>
+                                        <span class="px-3 py-1.5 rounded-xl bg-[#0b0d14] text-gray-400 border border-white/5 text-xs font-medium">تحذير</span>
+                                        <span class="px-3 py-1.5 rounded-xl bg-[#0b0d14] text-gray-400 border border-white/5 text-xs font-medium">طرد</span>
+                                        <span class="px-3 py-1.5 rounded-xl bg-[#0b0d14] text-gray-400 border border-white/5 text-xs font-medium">داون</span>
+                                        <span class="px-3 py-1.5 rounded-xl bg-[#0b0d14] text-gray-400 border border-white/5 text-xs font-medium">بلوك</span>
+                                        <span class="px-3 py-1.5 rounded-xl bg-[#0b0d14] text-gray-400 border border-white/5 text-xs font-medium">بلاك لست</span>
+                                        <span class="px-3 py-1.5 rounded-xl bg-[#0b0d14] text-gray-400 border border-white/5 text-xs font-medium">تايم اوت</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- 4. منطقة الخطر (Danger Zone) - Exact to Image -->
+                        <div class="bg-rose-950/20 border border-rose-500/30 p-6 rounded-3xl flex flex-col md:flex-row items-center justify-between gap-4 shadow-xl">
+                            <button type="button" onclick="confirmResetGuildData()" class="px-6 py-3 bg-gradient-to-r from-rose-700 to-red-600 hover:from-rose-600 hover:to-red-500 text-white rounded-2xl text-xs font-black transition shadow-lg flex items-center gap-2 shrink-0">
+                                <span>⚠️</span>
+                                <span>تصفير قاعدة بيانات السيرفر</span>
+                            </button>
+                            <div class="text-right space-y-1">
+                                <div class="flex items-center justify-end gap-2 text-rose-400 font-black text-sm">
+                                    <span>منطقة الخطر</span>
+                                    <span>🚫</span>
+                                </div>
+                                <p class="text-[11px] text-rose-300/80 leading-relaxed">
+                                    أونر السيرفر حصراً. يمسح كل بيانات البوت لهذا السيرفر نهائياً – الإعدادات، الحماية، سجل العقوبات، كل شيء (عدا التوب الكتابي/الصوتي والدعوات، تُدار منفصلة عبر أمر reset).
+                                </p>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <script>
+                    function selectBotLanguage(lang, btn) {
+                        document.getElementById('inpHiddenLang').value = lang;
+                        document.querySelectorAll('.lang-btn').forEach(b => {
+                            b.className = 'lang-btn p-3 rounded-2xl border transition flex flex-col items-center justify-center gap-0.5 bg-[#0b0d14] border-white/5 text-gray-400 hover:text-white hover:border-white/10';
+                        });
+                        btn.className = 'lang-btn p-3 rounded-2xl border transition flex flex-col items-center justify-center gap-0.5 bg-purple-900/30 border-purple-500 text-white font-black shadow-lg shadow-purple-950/50';
+                    }
+
+                    function selectClearPeriod(period, btn) {
+                        document.getElementById('inpClearPeriod').value = period;
+                        document.querySelectorAll('.period-btn').forEach(b => {
+                            b.className = 'period-btn py-3 px-4 rounded-2xl border text-xs font-bold transition bg-[#0b0d14] border-white/5 text-gray-400 hover:text-white';
+                        });
+                        btn.className = 'period-btn py-3 px-4 rounded-2xl border text-xs font-bold transition bg-purple-900/40 border-purple-500 text-white shadow-md';
+                    }
+
+                    async function confirmResetGuildData() {
+                        if (!confirm('⚠️ تحذير شديد الخطورة:\\nهل أنت متأكد تماماً من تصفير كافة إعدادات وسجلات وحماية هذا السيرفر؟\\nلا يمكن التراجع عن هذا الإجراء!')) return;
+                        try {
+                            const res = await fetch('/api/guild/${guildId}/reset-data', { method: 'POST' });
+                            const d = await res.json();
+                            if (d.success) {
+                                alert('✅ تم تصفير بيانات وإعدادات السيرفر بنجاح!');
+                                location.reload();
+                            } else {
+                                alert('❌ فشل التصفير: ' + (d.error || 'حدث خطأ'));
+                            }
+                        } catch(e) {
+                            alert('حدث خطأ في الاتصال');
+                        }
+                    }
+                    </script>`;
             } else if (section === 'embed') {
                 formFieldsHtml = `
                     <div class="space-y-6 text-right" dir="rtl">
@@ -5862,6 +6181,13 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
             if (database.updateGuildSettings) {
                 database.updateGuildSettings(guildId, settings);
             }
+            // تطبيق اسم البوت في السيرفر في ديسكورد فوراً
+            if (settings.bot_nickname !== undefined && client?.guilds?.cache) {
+                const targetGuild = client.guilds.cache.get(guildId);
+                if (targetGuild?.members?.me) {
+                    targetGuild.members.me.setNickname(settings.bot_nickname || null).catch(() => {});
+                }
+            }
             res.json({ success: true });
         } catch (e) {
             res.status(500).json({ success: false, error: e.message });
@@ -5874,6 +6200,23 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
             const { guildId } = req.params;
             rawDb.prepare('DELETE FROM warnings WHERE guild_id = ?').run(guildId);
             rawDb.prepare('UPDATE users SET warnings = 0 WHERE guild_id = ?').run(guildId);
+            res.json({ success: true });
+        } catch (e) {
+            res.status(500).json({ success: false, error: e.message });
+        }
+    });
+
+    app.post('/api/guild/:guildId/reset-data', async (req, res) => {
+        try {
+            if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
+            const { guildId } = req.params;
+            rawDb.prepare('DELETE FROM guild_settings WHERE guild_id = ?').run(guildId);
+            rawDb.prepare('DELETE FROM warnings WHERE guild_id = ?').run(guildId);
+            rawDb.prepare('DELETE FROM autoresponders WHERE guild_id = ?').run(guildId);
+            rawDb.prepare('DELETE FROM tickets WHERE guild_id = ?').run(guildId);
+            rawDb.prepare('DELETE FROM giveaways WHERE guild_id = ?').run(guildId);
+            rawDb.prepare('DELETE FROM suggestions WHERE guild_id = ?').run(guildId);
+            rawDb.prepare('DELETE FROM security_logs WHERE guild_id = ?').run(guildId);
             res.json({ success: true });
         } catch (e) {
             res.status(500).json({ success: false, error: e.message });
