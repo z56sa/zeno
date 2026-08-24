@@ -1592,7 +1592,14 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                     let currentCat = 'punishments';
                     let currentFilter = 'all';
 
-                    let disabledCommands = new Set(\${JSON.stringify(settings.disabled_commands ? JSON.parse(settings.disabled_commands || '[]') : [])});
+                    let disabledCommands = new Set();
+                    try {
+                        const rawDisabled = ${JSON.stringify(settings.disabled_commands || '[]')};
+                        const parsed = typeof rawDisabled === 'string' ? JSON.parse(rawDisabled) : rawDisabled;
+                        if (Array.isArray(parsed)) {
+                            parsed.forEach(c => disabledCommands.add(c));
+                        }
+                    } catch(e) {}
 
                     function updateStatCounters() {
                         let total = 0;
@@ -1742,7 +1749,8 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
 
                     async function saveCommandStates() {
                         try {
-                            const res = await fetch('/api/guild/\${guildId}/settings', {
+                            const gId = window.location.pathname.split('/')[2] || '${guildId}';
+                            const res = await fetch('/api/guild/' + gId + '/settings', {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' },
                                 body: JSON.stringify({ disabled_commands: JSON.stringify([...disabledCommands]) })
