@@ -58,7 +58,10 @@ module.exports = function (app, client) {
 
             const tokenRes = await fetch('https://discord.com/api/oauth2/token', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                headers: { 
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'User-Agent': 'DiscordBot (https://zeno.bot, 1.0.0)'
+                },
                 body: new URLSearchParams({
                     client_id: clientId,
                     client_secret: clientSecret,
@@ -68,18 +71,35 @@ module.exports = function (app, client) {
                 })
             });
 
-            const tokenData = await tokenRes.json();
-            if (!tokenData.access_token) return res.redirect('/');
+            const tokenText = await tokenRes.text();
+            let tokenData = {};
+            try {
+                tokenData = JSON.parse(tokenText);
+            } catch(pe) {
+                console.error('[OAuth] Token exchange failed with non-JSON response (Status:', tokenRes.status, '):', tokenText.slice(0, 200));
+                return res.redirect('/auth/discord');
+            }
+
+            if (!tokenData.access_token) {
+                console.error('[OAuth] No access_token returned:', tokenData);
+                return res.redirect('/auth/discord');
+            }
 
             const userRes = await fetch('https://discord.com/api/users/@me', {
-                headers: { Authorization: `Bearer ${tokenData.access_token}` }
+                headers: { 
+                    Authorization: `Bearer ${tokenData.access_token}`,
+                    'User-Agent': 'DiscordBot (https://zeno.bot, 1.0.0)'
+                }
             });
-            const userData = await userRes.json();
+            const userData = await userRes.json().catch(() => ({}));
 
             const guildsRes = await fetch('https://discord.com/api/users/@me/guilds', {
-                headers: { Authorization: `Bearer ${tokenData.access_token}` }
+                headers: { 
+                    Authorization: `Bearer ${tokenData.access_token}`,
+                    'User-Agent': 'DiscordBot (https://zeno.bot, 1.0.0)'
+                }
             });
-            const allGuilds = await guildsRes.json();
+            const allGuilds = await guildsRes.json().catch(() => []);
 
             req.session.user = userData;
             req.session.guilds = Array.isArray(allGuilds) ? allGuilds.filter(g => (g.permissions & 0x8) === 0x8 || (g.permissions & 0x20) === 0x20) : [];
