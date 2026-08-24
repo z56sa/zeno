@@ -6406,136 +6406,136 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
             res.status(500).json({ success: false, error: e.message });
         }
     });
-};
-
 
 // ==================== NEW API ROUTES ====================
 // Radio API
-app.get('/api/guild/:guildId/radio/status', (req, res) => {
-    try {
-        const { radioService } = require('../services/radioService');
-        const st = radioService.getStatus(req.params.guildId);
-        res.json(st);
-    } catch(e) { res.json({ playing: false }); }
-});
+    app.get('/api/guild/:guildId/radio/status', (req, res) => {
+        try {
+            const { radioService } = require('../services/radioService');
+            const st = radioService.getStatus(req.params.guildId);
+            res.json(st);
+        } catch(e) { res.json({ playing: false }); }
+    });
 
-app.post('/api/guild/:guildId/radio/start', async (req, res) => {
-    try {
-        const { channel_id, station } = req.body;
-        const guild = req.client ? req.client.guilds.cache.get(req.params.guildId) : null;
-        if (!guild) return res.status(404).json({ error: 'السيرفر غير موجود أو البوت غير متصل' });
-        const channel = guild.channels.cache.get(channel_id);
-        if (!channel) return res.status(404).json({ error: 'القناة الصوتية غير موجودة' });
-        const { radioService } = require('../services/radioService');
-        await radioService.play(channel, station || 'quran_makkah');
-        res.json({ success: true });
-    } catch(e) { res.status(500).json({ error: e.message }); }
-});
+    app.post('/api/guild/:guildId/radio/start', async (req, res) => {
+        try {
+            const { channel_id, station } = req.body;
+            const guild = client ? client.guilds.cache.get(req.params.guildId) : null;
+            if (!guild) return res.status(404).json({ error: 'السيرفر غير موجود أو البوت غير متصل' });
+            const channel = guild.channels.cache.get(channel_id);
+            if (!channel) return res.status(404).json({ error: 'القناة الصوتية غير موجودة' });
+            const { radioService } = require('../services/radioService');
+            await radioService.play(channel, station || 'quran_makkah');
+            res.json({ success: true });
+        } catch(e) { res.status(500).json({ error: e.message }); }
+    });
 
-app.post('/api/guild/:guildId/radio/stop', (req, res) => {
-    try {
-        const { radioService } = require('../services/radioService');
-        radioService.stop(req.params.guildId);
-        res.json({ success: true });
-    } catch(e) { res.status(500).json({ error: e.message }); }
-});
+    app.post('/api/guild/:guildId/radio/stop', (req, res) => {
+        try {
+            const { radioService } = require('../services/radioService');
+            radioService.stop(req.params.guildId);
+            res.json({ success: true });
+        } catch(e) { res.status(500).json({ error: e.message }); }
+    });
 
-// Staff Activity API
-app.get('/api/guild/:guildId/staff-activity', (req, res) => {
-    try {
-        const { getDb } = require('../database');
-        const db = getDb();
-        const period = req.query.period || 'all';
-        const rows = db.prepare('SELECT * FROM staff_activity WHERE guild_id = ? ORDER BY points DESC, messages_count DESC').all(req.params.guildId);
-        res.json({ data: rows });
-    } catch(e) { res.json({ data: [] }); }
-});
+    // Staff Activity API
+    app.get('/api/guild/:guildId/staff-activity', (req, res) => {
+        try {
+            const { getDb } = require('../database');
+            const db = getDb();
+            const period = req.query.period || 'all';
+            const rows = db.prepare('SELECT * FROM staff_activity WHERE guild_id = ? ORDER BY points DESC, messages_count DESC').all(req.params.guildId);
+            res.json({ data: rows });
+        } catch(e) { res.json({ data: [] }); }
+    });
 
-app.get('/api/guild/:guildId/staff-goals', (req, res) => {
-    try {
-        const { getDb } = require('../database');
-        const db = getDb();
-        const rows = db.prepare('SELECT * FROM staff_goals WHERE guild_id = ?').all(req.params.guildId);
-        res.json({ data: rows });
-    } catch(e) { res.json({ data: [] }); }
-});
+    app.get('/api/guild/:guildId/staff-goals', (req, res) => {
+        try {
+            const { getDb } = require('../database');
+            const db = getDb();
+            const rows = db.prepare('SELECT * FROM staff_goals WHERE guild_id = ?').all(req.params.guildId);
+            res.json({ data: rows });
+        } catch(e) { res.json({ data: [] }); }
+    });
 
-app.post('/api/guild/:guildId/staff-goals', (req, res) => {
-    try {
-        const { getDb } = require('../database');
-        const db = getDb();
-        const { title, target_type, target_value, reward_points } = req.body;
-        db.prepare('INSERT INTO staff_goals (guild_id, title, target_type, target_value, reward_points) VALUES (?, ?, ?, ?, ?)').run(req.params.guildId, title, target_type, target_value || 10, reward_points || 50);
-        res.json({ success: true });
-    } catch(e) { res.status(500).json({ error: e.message }); }
-});
+    app.post('/api/guild/:guildId/staff-goals', (req, res) => {
+        try {
+            const { getDb } = require('../database');
+            const db = getDb();
+            const { title, target_type, target_value, reward_points } = req.body;
+            db.prepare('INSERT INTO staff_goals (guild_id, title, target_type, target_value, reward_points) VALUES (?, ?, ?, ?, ?)').run(req.params.guildId, title, target_type, target_value || 10, reward_points || 50);
+            res.json({ success: true });
+        } catch(e) { res.status(500).json({ error: e.message }); }
+    });
 
-app.delete('/api/guild/:guildId/staff-goals/:id', (req, res) => {
-    try {
-        const { getDb } = require('../database');
-        const db = getDb();
-        db.prepare('DELETE FROM staff_goals WHERE id = ? AND guild_id = ?').run(req.params.id, req.params.guildId);
-        res.json({ success: true });
-    } catch(e) { res.status(500).json({ error: e.message }); }
-});
+    app.delete('/api/guild/:guildId/staff-goals/:id', (req, res) => {
+        try {
+            const { getDb } = require('../database');
+            const db = getDb();
+            db.prepare('DELETE FROM staff_goals WHERE id = ? AND guild_id = ?').run(req.params.id, req.params.guildId);
+            res.json({ success: true });
+        } catch(e) { res.status(500).json({ error: e.message }); }
+    });
 
-app.post('/api/guild/:guildId/reset-staff-stats', (req, res) => {
-    try {
-        const { getDb } = require('../database');
-        const db = getDb();
-        db.prepare('DELETE FROM staff_activity WHERE guild_id = ?').run(req.params.guildId);
-        res.json({ success: true });
-    } catch(e) { res.status(500).json({ error: e.message }); }
-});
+    app.post('/api/guild/:guildId/reset-staff-stats', (req, res) => {
+        try {
+            const { getDb } = require('../database');
+            const db = getDb();
+            db.prepare('DELETE FROM staff_activity WHERE guild_id = ?').run(req.params.guildId);
+            res.json({ success: true });
+        } catch(e) { res.status(500).json({ error: e.message }); }
+    });
 
-// Applications API
-app.get('/api/guild/:guildId/applications', (req, res) => {
-    try {
-        const { getDb } = require('../database');
-        const db = getDb();
-        const status = req.query.status;
-        let query = 'SELECT s.*, a.title as app_title FROM application_submissions s LEFT JOIN applications a ON s.app_id = a.id WHERE s.guild_id = ?';
-        const params = [req.params.guildId];
-        if (status && status !== 'all') {
-            query += ' AND s.status = ?';
-            params.push(status);
-        }
-        query += ' ORDER BY s.id DESC';
-        const rows = db.prepare(query).all(...params);
-        const total = db.prepare('SELECT count(*) as c FROM application_submissions WHERE guild_id = ?').get(req.params.guildId)?.c || 0;
-        const pending = db.prepare('SELECT count(*) as c FROM application_submissions WHERE guild_id = ? AND status = "pending"').get(req.params.guildId)?.c || 0;
-        const accepted = db.prepare('SELECT count(*) as c FROM application_submissions WHERE guild_id = ? AND status = "accepted"').get(req.params.guildId)?.c || 0;
-        res.json({ data: rows, total, pending, accepted });
-    } catch(e) { res.json({ data: [], total: 0, pending: 0, accepted: 0 }); }
-});
+    // Applications API
+    app.get('/api/guild/:guildId/applications', (req, res) => {
+        try {
+            const { getDb } = require('../database');
+            const db = getDb();
+            const status = req.query.status;
+            let query = 'SELECT s.*, a.title as app_title FROM application_submissions s LEFT JOIN applications a ON s.app_id = a.id WHERE s.guild_id = ?';
+            const params = [req.params.guildId];
+            if (status && status !== 'all') {
+                query += ' AND s.status = ?';
+                params.push(status);
+            }
+            query += ' ORDER BY s.id DESC';
+            const rows = db.prepare(query).all(...params);
+            const total = db.prepare('SELECT count(*) as c FROM application_submissions WHERE guild_id = ?').get(req.params.guildId)?.c || 0;
+            const pending = db.prepare('SELECT count(*) as c FROM application_submissions WHERE guild_id = ? AND status = "pending"').get(req.params.guildId)?.c || 0;
+            const accepted = db.prepare('SELECT count(*) as c FROM application_submissions WHERE guild_id = ? AND status = "accepted"').get(req.params.guildId)?.c || 0;
+            res.json({ data: rows, total, pending, accepted });
+        } catch(e) { res.json({ data: [], total: 0, pending: 0, accepted: 0 }); }
+    });
 
-app.post('/api/guild/:guildId/applications/create', (req, res) => {
-    try {
-        const { getDb } = require('../database');
-        const db = getDb();
-        const { title, description, questions, log_channel, accepted_role } = req.body;
-        db.prepare('INSERT INTO applications (guild_id, title, description, questions, log_channel, accepted_role, status) VALUES (?, ?, ?, ?, ?, ?, "open")').run(req.params.guildId, title, description || '', JSON.stringify(questions || []), log_channel || null, accepted_role || null);
-        res.json({ success: true });
-    } catch(e) { res.status(500).json({ error: e.message }); }
-});
+    app.post('/api/guild/:guildId/applications/create', (req, res) => {
+        try {
+            const { getDb } = require('../database');
+            const db = getDb();
+            const { title, description, questions, log_channel, accepted_role } = req.body;
+            db.prepare('INSERT INTO applications (guild_id, title, description, questions, log_channel, accepted_role, status) VALUES (?, ?, ?, ?, ?, ?, "open")').run(req.params.guildId, title, description || '', JSON.stringify(questions || []), log_channel || null, accepted_role || null);
+            res.json({ success: true });
+        } catch(e) { res.status(500).json({ error: e.message }); }
+    });
 
-app.post('/api/guild/:guildId/applications/:id/review', async (req, res) => {
-    try {
-        const { getDb } = require('../database');
-        const db = getDb();
-        const { status } = req.body;
-        db.prepare('UPDATE application_submissions SET status = ? WHERE id = ? AND guild_id = ?').run(status, req.params.id, req.params.guildId);
-        
-        if (status === 'accepted' && req.client) {
-            const sub = db.prepare('SELECT s.*, a.accepted_role FROM application_submissions s JOIN applications a ON s.app_id = a.id WHERE s.id = ?').get(req.params.id);
-            if (sub && sub.accepted_role) {
-                const guild = req.client.guilds.cache.get(req.params.guildId);
-                if (guild) {
-                    const member = await guild.members.fetch(sub.user_id).catch(() => null);
-                    if (member) await member.roles.add(sub.accepted_role).catch(() => null);
+    app.post('/api/guild/:guildId/applications/:id/review', async (req, res) => {
+        try {
+            const { getDb } = require('../database');
+            const db = getDb();
+            const { status } = req.body;
+            db.prepare('UPDATE application_submissions SET status = ? WHERE id = ? AND guild_id = ?').run(status, req.params.id, req.params.guildId);
+            
+            if (status === 'accepted' && client) {
+                const sub = db.prepare('SELECT s.*, a.accepted_role FROM application_submissions s JOIN applications a ON s.app_id = a.id WHERE s.id = ?').get(req.params.id);
+                if (sub && sub.accepted_role) {
+                    const guild = client.guilds.cache.get(req.params.guildId);
+                    if (guild) {
+                        const member = await guild.members.fetch(sub.user_id).catch(() => null);
+                        if (member) await member.roles.add(sub.accepted_role).catch(() => null);
+                    }
                 }
             }
-        }
-        res.json({ success: true });
-    } catch(e) { res.status(500).json({ error: e.message }); }
-});
+            res.json({ success: true });
+        } catch(e) { res.status(500).json({ error: e.message }); }
+    });
+};
+
