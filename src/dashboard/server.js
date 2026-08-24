@@ -1671,13 +1671,31 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                         updateStatCounters();
                     }
 
+                    const categoryBtnIds = {
+                        basic: 'btnCatBasic',
+                        punishments: 'btnCatPunishments',
+                        punishment_logs: 'btnCatPunishmentLogs',
+                        channels: 'btnCatChannels',
+                        chat: 'btnCatChat',
+                        voice: 'btnCatVoice',
+                        roles: 'btnCatRoles',
+                        custom_roles: 'btnCatCustomRoles',
+                        server_info: 'btnCatServerInfo',
+                        custom_bot: 'btnCatCustomBot',
+                        security: 'btnCatSecurity',
+                        levels_cat: 'btnCatLevels',
+                        server_stats: 'btnCatServerStats',
+                        profile_cat: 'btnCatProfile'
+                    };
+
                     function switchCmdCategory(catKey) {
                         currentCat = catKey;
                         const btns = document.querySelectorAll('[id^="btnCat"]');
                         btns.forEach(b => {
                             b.className = "w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-white hover:bg-white/5 transition cursor-pointer";
                         });
-                        const activeBtn = document.getElementById('btnCat' + catKey.charAt(0).toUpperCase() + catKey.slice(1));
+                        const targetId = categoryBtnIds[catKey] || ('btnCat' + catKey);
+                        const activeBtn = document.getElementById(targetId);
                         if (activeBtn) {
                             activeBtn.className = "w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold bg-purple-600 text-white shadow-lg transition cursor-pointer";
                         }
