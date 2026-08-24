@@ -441,6 +441,36 @@ try { db.exec("ALTER TABLE guild_settings ADD COLUMN mod_emoji_spam_enabled INTE
 try { db.exec("ALTER TABLE guild_settings ADD COLUMN mod_staff_roles TEXT DEFAULT '';"); } catch(e) {}
 try { db.exec("ALTER TABLE guild_settings ADD COLUMN mod_exempt_roles TEXT DEFAULT '';"); } catch(e) {}
 
+// نظام الاقتراحات والشكاوي المتقدم (Suggestions System)
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN suggestions_enabled INTEGER DEFAULT 1;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN suggestions_channel TEXT;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN suggestions_log_channel TEXT;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN suggestions_staff_roles TEXT DEFAULT '';"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN suggestions_auto_thread INTEGER DEFAULT 1;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN suggestions_dm_notify INTEGER DEFAULT 1;"); } catch(e) {}
+
+try {
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS suggestions (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      guild_id TEXT NOT NULL,
+      channel_id TEXT,
+      message_id TEXT UNIQUE,
+      user_id TEXT NOT NULL,
+      title TEXT,
+      content TEXT NOT NULL,
+      category TEXT DEFAULT 'عام',
+      status TEXT DEFAULT 'pending', -- 'pending', 'accepted', 'rejected', 'implemented', 'considered'
+      status_reason TEXT,
+      reviewed_by TEXT,
+      reviewed_at INTEGER,
+      upvotes TEXT DEFAULT '[]',
+      downvotes TEXT DEFAULT '[]',
+      created_at INTEGER DEFAULT (strftime('%s','now'))
+    );
+  `);
+} catch(e) {}
+
 console.log('[DB] ✅ SQLite database initialized successfully');
 
 // ==========================================
@@ -1457,6 +1487,61 @@ module.exports = {
   toggleGiveawayEntry,
   endGiveaway,
   getGuildGiveaways: (guildId) => db.prepare('SELECT * FROM giveaways WHERE guild_id = ? ORDER BY end_time DESC LIMIT 50').all(guildId),
+  // 💡 Suggestions Exports
+  createSuggestion: (data) => {
+    const res = db.prepare(`
+      INSERT INTO suggestions (guild_id, channel_id, message_id, user_id, title, content, category, status, upvotes, downvotes)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, '[]', '[]')
+    `).run(
+      data.guild_id, data.channel_id || null, data.message_id || null, 
+      data.user_id, data.title || null, data.content, 
+      data.category || 'عام', data.status || 'pending'
+    );
+    return db.prepare('SELECT * FROM suggestions WHERE id = ?').get(res.lastInsertRowid);
+  },
+  getGuildSuggestions: (guildId, status = null) => {
+    if (status) {
+      return db.prepare('SELECT * FROM suggestions WHERE guild_id = ? AND status = ? ORDER BY id DESC').all(guildId, status);
+    }
+    return db.prepare('SELECT * FROM suggestions WHERE guild_id = ? ORDER BY id DESC').all(guildId);
+  },
+  getSuggestion: (idOrMsgId) => {
+    if (!isNaN(idOrMsgId)) {
+      return db.prepare('SELECT * FROM suggestions WHERE id = ? OR message_id = ?').get(Number(idOrMsgId), String(idOrMsgId));
+    }
+    return db.prepare('SELECT * FROM suggestions WHERE message_id = ?').get(String(idOrMsgId));
+  },
+  updateSuggestionStatus: (id, status, statusReason = null, reviewerId = null) => {
+    db.prepare(`
+      UPDATE suggestions 
+      SET status = ?, status_reason = ?, reviewed_by = ?, reviewed_at = strftime('%s','now')
+      WHERE id = ? OR message_id = ?
+    `).run(status, statusReason, reviewerId, id, id);
+    return db.prepare('SELECT * FROM suggestions WHERE id = ? OR message_id = ?').get(id, id);
+  },
+  voteSuggestion: (id, userId, voteType = 'up') => {
+    const row = db.prepare('SELECT * FROM suggestions WHERE id = ? OR message_id = ?').get(id, id);
+    if (!row) return null;
+    let upvotes = [];
+    let downvotes = [];
+    try { upvotes = JSON.parse(row.upvotes || '[]'); } catch(e) {}
+    try { downvotes = JSON.parse(row.downvotes || '[]'); } catch(e) {}
+
+    upvotes = upvotes.filter(u => u !== userId);
+    downvotes = downvotes.filter(u => u !== userId);
+
+    if (voteType === 'up') {
+      upvotes.push(userId);
+    } else if (voteType === 'down') {
+      downvotes.push(userId);
+    }
+
+    db.prepare('UPDATE suggestions SET upvotes = ?, downvotes = ? WHERE id = ?').run(
+      JSON.stringify(upvotes), JSON.stringify(downvotes), row.id
+    );
+    return { upvotesCount: upvotes.length, downvotesCount: downvotes.length };
+  },
+  deleteSuggestion: (id) => db.prepare('DELETE FROM suggestions WHERE id = ? OR message_id = ?').run(id, id),
   // Compatibility aliases
   getTopXp: getLeaderboard,
   getTopCredits: getCoinsLeaderboard,

@@ -912,6 +912,12 @@ module.exports = function (app, client) {
             let autoRespondersList = [];
             let guildTicketsList = [];
             let guildGiveawaysList = [];
+            let guildSuggestionsList = [];
+            try {
+                if (database.getGuildSuggestions) {
+                    guildSuggestionsList = database.getGuildSuggestions(guildId, req.query?.status || null) || [];
+                }
+            } catch(e) {}
             try {
                 if (database.getGuildGiveaways) {
                     guildGiveawaysList = database.getGuildGiveaways(guildId) || [];
@@ -4874,6 +4880,261 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                     }
                     </script>
 `;
+            } else if (section === 'suggestions') {
+formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl">
+
+                        <!-- 1. Master Header Card (Suggestions & Feedback) -->
+                        <div class="bg-[#12141f] border border-white/5 p-6 rounded-2xl flex items-center justify-between shadow-xl">
+                            <button type="button" onclick="openCreateSuggestionModal()" class="px-6 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-xl text-xs font-black transition flex items-center gap-1.5 shadow-lg shadow-purple-950/40">
+                                <span>➕</span>
+                                <span>إضافة اقتراح جديد</span>
+                            </button>
+                            <div class="flex items-center gap-3">
+                                <div class="text-right">
+                                    <h4 class="font-black text-white text-base">نظام الاقتراحات والشكاوي</h4>
+                                    <p class="text-gray-400 text-xs mt-0.5">جمع آراء وتصويتات الأعضاء ومراجعة وتحديث حالات الاقتراحات</p>
+                                </div>
+                                <div class="w-10 h-10 rounded-xl bg-purple-600/20 text-purple-400 flex items-center justify-center text-lg border border-purple-500/30">
+                                    💡
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 2. Quad Stats Badges (إجمالي الاقتراحات / قيد الانتظار / مقبولة / مرفوضة) -->
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <div class="bg-[#12141f] border border-white/5 p-5 rounded-2xl text-center space-y-1 shadow-lg">
+                                <span class="text-2xl font-black text-white font-mono">${(guildSuggestionsList || []).length}</span>
+                                <span class="text-xs font-bold text-gray-400 block">إجمالي الاقتراحات</span>
+                            </div>
+                            <div class="bg-[#12141f] border border-white/5 p-5 rounded-2xl text-center space-y-1 shadow-lg">
+                                <span class="text-2xl font-black text-amber-400 font-mono">${(guildSuggestionsList || []).filter(s => s.status === 'pending').length}</span>
+                                <span class="text-xs font-bold text-gray-400 block">قيد المراجعة</span>
+                            </div>
+                            <div class="bg-[#12141f] border border-white/5 p-5 rounded-2xl text-center space-y-1 shadow-lg">
+                                <span class="text-2xl font-black text-emerald-400 font-mono">${(guildSuggestionsList || []).filter(s => s.status === 'accepted' || s.status === 'implemented').length}</span>
+                                <span class="text-xs font-bold text-gray-400 block">مقبولة / منفذة</span>
+                            </div>
+                            <div class="bg-[#12141f] border border-white/5 p-5 rounded-2xl text-center space-y-1 shadow-lg">
+                                <span class="text-2xl font-black text-rose-400 font-mono">${(guildSuggestionsList || []).filter(s => s.status === 'rejected').length}</span>
+                                <span class="text-xs font-bold text-gray-400 block">مرفوضة</span>
+                            </div>
+                        </div>
+
+                        <!-- 3. إعدادات نظام الاقتراحات الأساسية (قناة الاقتراحات، رتب المراجعة، الخيوط التلقائية) -->
+                        <div class="bg-[#12141f] border border-white/5 p-6 rounded-2xl space-y-4 shadow-xl">
+                            <h4 class="text-xs font-black text-white border-b border-white/5 pb-3">إعدادات قناة وصلاحيات الاقتراحات</h4>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-300 mb-2">قناة نشر الاقتراحات (Suggestions Channel)</label>
+                                    ${renderChannelSelect('suggestions_channel', settings.suggestions_channel || '')}
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-300 mb-2">قناة سجلات الإدارة (Log Channel)</label>
+                                    ${renderChannelSelect('suggestions_log_channel', settings.suggestions_log_channel || settings.log_channel || '')}
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-300 mb-2">رتب الإدارة المسؤولة عن المراجعة (Staff Roles)</label>
+                                    ${renderRoleSelect('suggestions_staff_roles', settings.suggestions_staff_roles || '')}
+                                </div>
+                                <div class="flex items-center justify-between p-3.5 bg-[#0b0d14] border border-white/5 rounded-xl mt-6">
+                                    <label class="toggle"><input type="checkbox" name="suggestions_auto_thread" value="1" ${settings.suggestions_auto_thread !== 0 ? 'checked' : ''}><span class="slider"></span></label>
+                                    <div class="text-right">
+                                        <h5 class="text-xs font-bold text-white">إنشاء خيط نقاش تلقائي (Thread)</h5>
+                                        <p class="text-[10px] text-gray-500">فتح ثريد تحت كل اقتراح لتمكين الأعضاء من النقاش</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 4. قائمة وجدول الاقتراحات الحية والتفاعل (Live Suggestions List) -->
+                        <div class="bg-[#12141f] border border-white/5 p-6 rounded-2xl space-y-6 shadow-xl">
+                            <div class="flex items-center justify-between border-b border-white/5 pb-4">
+                                <button type="button" onclick="location.reload()" class="p-2 bg-[#0b0d14] hover:bg-white/5 border border-white/5 text-gray-400 hover:text-white rounded-xl transition">
+                                    🔄
+                                </button>
+                                <div class="flex items-center gap-1.5 bg-[#0b0d14] p-1 rounded-xl border border-white/5 text-xs font-bold">
+                                    <button type="button" onclick="filterSuggTab('rejected')" id="btnSgRejected" class="px-3 py-1 rounded-lg text-gray-400 hover:text-white transition">المرفوضة</button>
+                                    <button type="button" onclick="filterSuggTab('accepted')" id="btnSgAccepted" class="px-3 py-1 rounded-lg text-gray-400 hover:text-white transition">المقبولة</button>
+                                    <button type="button" onclick="filterSuggTab('pending')" id="btnSgPending" class="px-3 py-1 rounded-lg text-gray-400 hover:text-white transition">قيد المراجعة</button>
+                                    <button type="button" onclick="filterSuggTab('all')" id="btnSgAll" class="px-3 py-1 rounded-lg bg-purple-600 text-white transition shadow">الكل</button>
+                                </div>
+                            </div>
+
+                            <div id="suggestionsListContainer" class="space-y-4">
+                                ${(guildSuggestionsList && guildSuggestionsList.length > 0) ? guildSuggestionsList.map(s => {
+                                    let upCount = 0;
+                                    let downCount = 0;
+                                    try { upCount = JSON.parse(s.upvotes || '[]').length; } catch(e) {}
+                                    try { downCount = JSON.parse(s.downvotes || '[]').length; } catch(e) {}
+
+                                    let statusBadge = '<span class="px-2.5 py-0.5 bg-amber-950/60 text-amber-400 border border-amber-800/30 rounded-lg text-[10px] font-bold">⏳ قيد المراجعة</span>';
+                                    if (s.status === 'accepted') statusBadge = '<span class="px-2.5 py-0.5 bg-emerald-950/60 text-emerald-400 border border-emerald-800/30 rounded-lg text-[10px] font-bold">✅ مقبول</span>';
+                                    if (s.status === 'implemented') statusBadge = '<span class="px-2.5 py-0.5 bg-indigo-950/60 text-indigo-400 border border-indigo-800/30 rounded-lg text-[10px] font-bold">🚀 تم التنفيذ</span>';
+                                    if (s.status === 'rejected') statusBadge = '<span class="px-2.5 py-0.5 bg-rose-950/60 text-rose-400 border border-rose-800/30 rounded-lg text-[10px] font-bold">❌ مرفوض</span>';
+
+                                    return '<div class="bg-[#0b0d14] border border-white/5 p-5 rounded-2xl space-y-3 hover:border-purple-500/40 transition text-right">' +
+                                        '<div class="flex items-center justify-between border-b border-white/5 pb-2">' +
+                                            '<div class="flex items-center gap-2">' +
+                                                '<button type="button" onclick="updateSuggestionStatus(' + s.id + ', &quot;accepted&quot;)" class="px-2.5 py-1 bg-emerald-950/40 hover:bg-emerald-900/60 text-emerald-400 border border-emerald-800/40 rounded-lg text-[10px] font-bold transition">قبول ✅</button>' +
+                                                '<button type="button" onclick="updateSuggestionStatus(' + s.id + ', &quot;rejected&quot;)" class="px-2.5 py-1 bg-rose-950/40 hover:bg-rose-900/60 text-rose-400 border border-rose-800/40 rounded-lg text-[10px] font-bold transition">رفض ❌</button>' +
+                                                '<button type="button" onclick="updateSuggestionStatus(' + s.id + ', &quot;implemented&quot;)" class="px-2.5 py-1 bg-indigo-950/40 hover:bg-indigo-900/60 text-indigo-400 border border-indigo-800/40 rounded-lg text-[10px] font-bold transition">تنفيذ 🚀</button>' +
+                                            '</div>' +
+                                            '<div class="flex items-center gap-2">' +
+                                                statusBadge +
+                                                '<span class="text-xs font-bold text-white font-mono">#' + s.id + '</span>' +
+                                            '</div>' +
+                                        '</div>' +
+                                        '<div>' +
+                                            (s.title ? '<h5 class="text-sm font-bold text-white mb-1">' + s.title + '</h5>' : '') +
+                                            '<p class="text-xs text-gray-300 leading-relaxed">' + s.content + '</p>' +
+                                        '</div>' +
+                                        (s.status_reason ? '<div class="bg-[#12141f] p-3 rounded-xl border border-white/5 text-[11px] text-gray-400"><span class="text-white font-bold">رد الإدارة: </span>' + s.status_reason + '</div>' : '') +
+                                        '<div class="flex items-center justify-between text-[11px] text-gray-500 pt-2 border-t border-white/5">' +
+                                            '<div class="flex items-center gap-3">' +
+                                                '<span class="text-emerald-400 font-mono font-bold">👍 ' + upCount + '</span>' +
+                                                '<span class="text-rose-400 font-mono font-bold">👎 ' + downCount + '</span>' +
+                                            '</div>' +
+                                            '<div class="flex items-center gap-2">' +
+                                                '<span>صاحب الاقتراح: <span class="font-mono text-purple-300">' + s.user_id + '</span></span>' +
+                                                '<span>•</span>' +
+                                                '<span>' + (s.category || 'عام') + '</span>' +
+                                            '</div>' +
+                                        '</div>' +
+                                    '</div>';
+                                }).join('') : `
+                                    <div class="py-14 text-center space-y-4">
+                                        <div class="w-16 h-16 rounded-2xl bg-purple-950/30 text-purple-400 flex items-center justify-center text-3xl mx-auto border border-purple-500/20 shadow-inner">
+                                            💡
+                                        </div>
+                                        <div class="space-y-1">
+                                            <h5 class="text-sm font-black text-white">لا توجد اقتراحات بعد</h5>
+                                            <p class="text-xs text-gray-400">كن أول من يقترح فكرة لتطوير وتحسين السيرفر!</p>
+                                        </div>
+                                        <button type="button" onclick="openCreateSuggestionModal()" class="px-6 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-xl text-xs font-black transition inline-flex items-center gap-2 shadow-lg shadow-purple-950/40">
+                                            <span>إضافة اقتراح</span>
+                                        </button>
+                                    </div>
+                                `}
+                            </div>
+                        </div>
+
+                        <!-- 5. نافذة إضافة اقتراح منبثقة (Create Suggestion Modal) -->
+                        <div id="createSuggestionModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+                            <div class="bg-[#12141f] border border-white/10 rounded-3xl w-full max-w-lg p-6 space-y-5 text-right shadow-2xl" dir="rtl">
+                                <div class="flex items-center justify-between border-b border-white/5 pb-4">
+                                    <button type="button" onclick="closeCreateSuggestionModal()" class="text-gray-400 hover:text-white text-lg font-bold">✕</button>
+                                    <h3 class="text-base font-black text-white">تقديم اقتراح جديد 💡</h3>
+                                </div>
+
+                                <div class="space-y-3">
+                                    <div>
+                                        <label class="block text-xs font-bold text-gray-300 mb-1.5">عنوان الفكرة (اختياري)</label>
+                                        <input type="text" id="sgTitle" placeholder="اكتب عنواناً مختصراً..." class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right">
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-xs font-bold text-gray-300 mb-1.5">تصنيف الاقتراح</label>
+                                        <select id="sgCategory" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right cursor-pointer">
+                                            <option value="عام">💡 اقتراح عام</option>
+                                            <option value="فعاليات">🎉 فعاليات ومسابقات</option>
+                                            <option value="رتب">🎖️ رتب وأدوار</option>
+                                            <option value="رومات">💬 قنوات ورومات صوتية</option>
+                                            <option value="بوت">🤖 ميزات البوت</option>
+                                            <option value="شكوى">⚠️ شكوى أو بلاغ</option>
+                                        </select>
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-xs font-bold text-gray-300 mb-1.5">تفاصيل الاقتراح <span class="text-purple-400">*</span></label>
+                                        <textarea id="sgContent" rows="4" placeholder="اشرح فكرتك بالتفصيل وكيف ستفيد السيرفر..." class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl p-3 text-xs text-white outline-none text-right leading-relaxed"></textarea>
+                                    </div>
+                                </div>
+
+                                <div class="flex items-center justify-between pt-4 border-t border-white/5 flex-row-reverse">
+                                    <button type="button" onclick="submitCreateSuggestion()" class="px-8 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-xl text-xs font-black transition shadow-lg shadow-purple-950/40">
+                                        إرسال الاقتراح
+                                    </button>
+                                    <button type="button" onclick="closeCreateSuggestionModal()" class="px-6 py-2.5 bg-[#0b0d14] hover:bg-white/5 border border-white/5 text-gray-400 hover:text-white rounded-xl text-xs font-bold transition">
+                                        إلغاء
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <script>
+                    function openCreateSuggestionModal() {
+                        document.getElementById('createSuggestionModal').classList.remove('hidden');
+                    }
+
+                    function closeCreateSuggestionModal() {
+                        document.getElementById('createSuggestionModal').classList.add('hidden');
+                    }
+
+                    async function submitCreateSuggestion() {
+                        const title = document.getElementById('sgTitle').value.trim();
+                        const category = document.getElementById('sgCategory').value;
+                        const content = document.getElementById('sgContent').value.trim();
+
+                        if (!content) { alert('يرجى كتابة تفاصيل الاقتراح'); return; }
+
+                        try {
+                            const res = await fetch('/api/guild/${guildId}/suggestions', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ title, category, content })
+                            });
+                            const data = await res.json();
+                            if (data.success) {
+                                alert('✅ تم إرسال الاقتراح بنجاح ونشره في السيرفر!');
+                                location.reload();
+                            } else {
+                                alert('❌ خطأ: ' + (data.error || 'فشل إرسال الاقتراح'));
+                            }
+                        } catch(e) {
+                            alert('حدث خطأ في الاتصال');
+                        }
+                    }
+
+                    async function updateSuggestionStatus(id, status) {
+                        const reason = prompt('أدخل سبب أو رد الإدارة على هذا القرار (اختياري):');
+                        try {
+                            const res = await fetch('/api/guild/${guildId}/suggestions/' + id + '/status', {
+                                method: 'PATCH',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ status, reason })
+                            });
+                            const data = await res.json();
+                            if (data.success) {
+                                alert('✅ تم تحديث حالة الاقتراح بنجاح!');
+                                location.reload();
+                            } else {
+                                alert('❌ فشل تحديث الحالة');
+                            }
+                        } catch(e) {
+                            alert('حدث خطأ في الاتصال');
+                        }
+                    }
+
+                    function filterSuggTab(status) {
+                        // Switch active class
+                        ['all', 'pending', 'accepted', 'rejected'].forEach(s => {
+                            const btn = document.getElementById('btnSg' + s.charAt(0).toUpperCase() + s.slice(1));
+                            if (btn) {
+                                btn.className = s === status 
+                                    ? "px-3 py-1 rounded-lg bg-purple-600 text-white transition shadow"
+                                    : "px-3 py-1 rounded-lg text-gray-400 hover:text-white transition";
+                            }
+                        });
+                        location.href = '/dashboard/${guildId}/suggestions?status=' + (status === 'all' ? '' : status);
+                    }
+                    </script>
+`;
             } else if (section === 'embed') {
                 formFieldsHtml = `
                     <div class="space-y-6 text-right" dir="rtl">
@@ -5257,6 +5518,10 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                                     <a href="/dashboard/${guildId}/applications" class="flex items-center justify-between px-3 py-2 rounded-xl ${section === 'applications' ? 'bg-purple-600 text-white font-bold shadow-md' : 'text-gray-300 hover:text-white hover:bg-[#151724]'} transition group">
                                         <span class="text-[9px] font-bold text-rose-400 bg-rose-950/60 px-1.5 py-0.2 rounded">جديد</span>
                                         <span class="flex items-center gap-2"><span>التقديمات</span><span class="text-gray-400 group-hover:text-purple-400">📝</span></span>
+                                    </a>
+                                    <a href="/dashboard/${guildId}/suggestions" class="flex items-center justify-between px-3 py-2 rounded-xl ${section === 'suggestions' ? 'bg-purple-600 text-white font-bold shadow-md' : 'text-gray-300 hover:text-white hover:bg-[#151724]'} transition group">
+                                        <span class="text-[9px] font-bold text-amber-400 bg-amber-950/60 px-1.5 py-0.2 rounded">جديد</span>
+                                        <span class="flex items-center gap-2"><span>الاقتراحات والشكاوي</span><span class="text-gray-400 group-hover:text-purple-400">💡</span></span>
                                     </a>
                                 </div>
                             </div>
@@ -5705,6 +5970,109 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
 
             res.json({ success: true, messageId: msg.id });
         } catch (e) {
+            res.status(500).json({ success: false, error: e.message });
+        }
+    });
+
+    app.post('/api/guild/:guildId/suggestions', express.json(), async (req, res) => {
+        try {
+            if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
+            const { guildId } = req.params;
+            const { title, category, content } = req.body;
+            if (!content) return res.status(400).json({ success: false, error: 'Content is required' });
+
+            const settings = database.getGuildSettings(guildId);
+            const channelId = settings.suggestions_channel;
+            let msgId = null;
+
+            if (channelId) {
+                const channel = client.channels.cache.get(channelId) || await client.channels.fetch(channelId).catch(() => null);
+                if (channel && channel.isTextBased()) {
+                    const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+                    const suggEmbed = new EmbedBuilder()
+                        .setColor('#9333ea')
+                        .setAuthor({ name: req.session.user.username, iconURL: req.session.user.avatar ? 'https://cdn.discordapp.com/avatars/' + req.session.user.id + '/' + req.session.user.avatar + '.png' : undefined })
+                        .setTitle(title ? ('💡 ' + title) : '💡 اقتراح جديد')
+                        .setDescription(content)
+                        .addFields(
+                            { name: '📂 التصنيف', value: category || 'عام', inline: true },
+                            { name: '⏳ الحالة', value: 'قيد المراجعة', inline: true }
+                        )
+                        .setFooter({ text: 'صاحب الاقتراح: ' + req.session.user.username })
+                        .setTimestamp();
+
+                    const row = new ActionRowBuilder().addComponents(
+                        new ButtonBuilder().setCustomId('sugg_upvote').setLabel('0').setEmoji('👍').setStyle(ButtonStyle.Success),
+                        new ButtonBuilder().setCustomId('sugg_downvote').setLabel('0').setEmoji('👎').setStyle(ButtonStyle.Danger)
+                    );
+
+                    const sentMsg = await channel.send({ embeds: [suggEmbed], components: [row] });
+                    msgId = sentMsg.id;
+
+                    if (settings.suggestions_auto_thread !== 0) {
+                        sentMsg.startThread({
+                            name: title ? ('مناقشة: ' + title).slice(0, 95) : 'مناقشة الاقتراح',
+                            autoArchiveDuration: 1440
+                        }).catch(() => {});
+                    }
+                }
+            }
+
+            const newSugg = database.createSuggestion({
+                guild_id: guildId,
+                channel_id: channelId,
+                message_id: msgId,
+                user_id: req.session.user.id,
+                title: title,
+                content: content,
+                category: category || 'عام'
+            });
+
+            res.json({ success: true, suggestion: newSugg });
+        } catch(e) {
+            res.status(500).json({ success: false, error: e.message });
+        }
+    });
+
+    app.patch('/api/guild/:guildId/suggestions/:id/status', express.json(), async (req, res) => {
+        try {
+            if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
+            const { guildId, id } = req.params;
+            const { status, reason } = req.body;
+
+            const updated = database.updateSuggestionStatus(id, status, reason, req.session.user.id);
+
+            // Update Discord message embed color if available
+            if (updated && updated.channel_id && updated.message_id) {
+                try {
+                    const channel = client.channels.cache.get(updated.channel_id) || await client.channels.fetch(updated.channel_id).catch(() => null);
+                    if (channel) {
+                        const targetMsg = await channel.messages.fetch(updated.message_id).catch(() => null);
+                        if (targetMsg && targetMsg.embeds[0]) {
+                            const { EmbedBuilder } = require('discord.js');
+                            const oldEmbed = targetMsg.embeds[0];
+                            let newColor = '#9333ea';
+                            let statusText = 'قيد المراجعة ⏳';
+                            if (status === 'accepted') { newColor = '#10b981'; statusText = 'تم قبول الاقتراح ✅'; }
+                            if (status === 'implemented') { newColor = '#6366f1'; statusText = 'تم تنفيذ الاقتراح 🚀'; }
+                            if (status === 'rejected') { newColor = '#ef4444'; statusText = 'تم رفض الاقتراح ❌'; }
+
+                            const newEmbed = EmbedBuilder.from(oldEmbed)
+                                .setColor(newColor)
+                                .spliceFields(1, 1, { name: 'الحالة', value: statusText, inline: true });
+
+                            if (reason) {
+                                newEmbed.addFields({ name: 'رد الإدارة', value: reason, inline: false });
+                            }
+
+                            await targetMsg.edit({ embeds: [newEmbed] });
+                        }
+                    }
+                } catch(e) {}
+            }
+
+            res.json({ success: true, updated });
+        } catch(e) {
             res.status(500).json({ success: false, error: e.message });
         }
     });

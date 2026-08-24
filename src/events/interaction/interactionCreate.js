@@ -50,6 +50,41 @@ module.exports = {
         return;
       }
 
+      // 2.1 التعامل مع تصويتات الاقتراحات (Suggestion Upvote & Downvote Buttons)
+      if (interaction.isButton() && (interaction.customId === 'sugg_upvote' || interaction.customId === 'sugg_downvote')) {
+        const voteType = interaction.customId === 'sugg_upvote' ? 'up' : 'down';
+        const res = db.voteSuggestion(interaction.message.id, interaction.user.id, voteType);
+        if (!res) {
+          return interaction.reply({ content: '❌ تعذر العثور على بيانات هذا الاقتراح في قاعدة البيانات.', ephemeral: true });
+        }
+
+        const upBtn = ButtonBuilder.from(interaction.message.components[0].components[0]).setLabel(String(res.upvotesCount));
+        const downBtn = ButtonBuilder.from(interaction.message.components[0].components[1]).setLabel(String(res.downvotesCount));
+        const newRow = new ActionRowBuilder().addComponents(upBtn, downBtn);
+
+        await interaction.message.edit({ components: [newRow] }).catch(() => {});
+        return interaction.reply({ content: `✅ تم تسجيل تصويتك (${voteType === 'up' ? 'مؤيد 👍' : 'معارض 👎'}) بنجاح!`, ephemeral: true });
+      }
+
+      // 2.2 التعامل مع زر المشاركة في القيف اواي (Giveaway Enter Button)
+      if (interaction.isButton() && interaction.customId === 'gw_enter_btn') {
+        const gw = db.getGiveaway(interaction.message.id);
+        if (!gw || gw.status !== 'active') {
+          return interaction.reply({ content: '❌ هذا السحب منتهي أو غير متوفر حالياً.', ephemeral: true });
+        }
+
+        if (gw.required_role && !interaction.member.roles.cache.has(gw.required_role)) {
+          return interaction.reply({ content: `❌ لا يمكنك المشاركة، يجب أن تمتلك رتبة <@&${gw.required_role}> للمشاركة في هذا السحب.`, ephemeral: true });
+        }
+
+        const res = db.toggleGiveawayEntry(interaction.message.id, interaction.user.id);
+        if (res.joined) {
+          return interaction.reply({ content: `🎉 تم اشتراكك في سحب **${gw.prize}** بنجاح! إجمالي المشاركين الآن: ${res.count}`, ephemeral: true });
+        } else {
+          return interaction.reply({ content: `🗑️ تم إلغاء اشتراكك من سحب **${gw.prize}**. إجمالي المشاركين الآن: ${res.count}`, ephemeral: true });
+        }
+      }
+
       // 2.4 نظام التحقق الأمني (Verification Button & Direct Role)
       if (interaction.isButton() && (interaction.customId === 'btn_start_verification' || interaction.customId === 'btn_quick_verify' || interaction.customId === 'verify_button' || interaction.customId === 'verify_member')) {
         const settings = db.getGuildSettings(interaction.guild.id);
