@@ -165,6 +165,26 @@ module.exports = function (app, client) {
                 </div>
             `).join('');
 
+            const xpLeaderboardHtml = xpLeaderboard.slice(0, 100).map((r, i) => `
+                <div class="bg-[#1c1f2e] border border-white/5 p-3 rounded-2xl flex items-center justify-between">
+                    <span class="text-xs font-mono font-bold text-purple-400">⚡ ${Number(r.total_xp || 0).toLocaleString()} XP</span>
+                    <div class="flex items-center gap-3">
+                        <span class="text-xs text-white font-bold">${r.user_id}</span>
+                        <span class="w-6 h-6 rounded-full bg-purple-950/60 text-purple-300 text-[10px] font-black flex items-center justify-center">#${i + 1}</span>
+                    </div>
+                </div>
+            `).join('') || '<p class="text-xs text-gray-500 text-center py-4">لا توجد بيانات خبرة مسجلة بعد</p>';
+
+            const coinsLeaderboardHtml = coinsLeaderboard.slice(0, 100).map((r, i) => `
+                <div class="bg-[#1c1f2e] border border-white/5 p-3 rounded-2xl flex items-center justify-between">
+                    <span class="text-xs font-mono font-bold text-amber-400">🪙 ${Number(r.total_coins || 0).toLocaleString()}</span>
+                    <div class="flex items-center gap-3">
+                        <span class="text-xs text-white font-bold">${r.user_id}</span>
+                        <span class="w-6 h-6 rounded-full bg-amber-950/60 text-amber-300 text-[10px] font-black flex items-center justify-center">#${i + 1}</span>
+                    </div>
+                </div>
+            `).join('') || '<p class="text-xs text-gray-500 text-center py-4">لا توجد بيانات ذهب مسجلة بعد</p>';
+
             const dailyActionBoxHtml = canClaimDaily ? `
                 <button type="button" onclick="claimDailyReward()" id="claimDailyBtn" class="px-5 py-2 bg-gradient-to-r from-yellow-500 to-amber-600 hover:from-yellow-400 hover:to-amber-500 text-black font-black text-xs rounded-xl shadow-lg shadow-yellow-950/40 transition">
                     استلام الرصيد 🎁
