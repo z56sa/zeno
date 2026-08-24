@@ -1097,9 +1097,12 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                     </div>
 `;
             } else if (section === 'general' || section === 'commands') {
-formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl">
+formFieldsHtml = `                    <!-- COMMANDS MANAGEMENT SECTION — standalone, outside form logic -->
+                    </form><!-- close outer settings form so our buttons don't submit it -->
 
-                        <!-- 1. Master Header Card (Exact to Image 1: إدارة الأوامر & Triple Badges) -->
+                    <div class="space-y-6 text-right" dir="rtl" id="cmdsMgmtRoot">
+
+                        <!-- Header Card -->
                         <div class="bg-[#12141f] border border-white/5 p-6 rounded-2xl flex items-center justify-between shadow-xl">
                             <div class="flex items-center gap-6">
                                 <div class="text-center">
@@ -1120,658 +1123,575 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                                     <h4 class="font-black text-white text-base">إدارة الأوامر</h4>
                                     <p class="text-gray-400 text-xs mt-0.5">تخصيص وإدارة جميع أوامر البوت والصلاحيات</p>
                                 </div>
-                                <div class="w-10 h-10 rounded-xl bg-purple-600/20 text-purple-400 flex items-center justify-center text-lg border border-purple-500/30">
-                                    🎛️
-                                </div>
+                                <div class="w-10 h-10 rounded-xl bg-purple-600/20 text-purple-400 flex items-center justify-center text-lg border border-purple-500/30">🎛️</div>
                             </div>
                         </div>
 
-                        <!-- 2. Search & Filter Bar (Exact to Image 1) -->
+                        <!-- Search & Filter Bar -->
                         <div class="flex items-center justify-between gap-4">
                             <div class="flex items-center gap-1.5 bg-[#12141f] border border-white/5 p-1 rounded-xl">
-                                <button type="button" onclick="filterCmdStatus('disabled')" id="btnFilterDisabled" class="px-3 py-1 rounded-lg text-xs font-bold text-gray-400 hover:text-white transition cursor-pointer">معطل</button>
-                                <button type="button" onclick="filterCmdStatus('enabled')" id="btnFilterEnabled" class="px-3 py-1 rounded-lg text-xs font-bold text-gray-400 hover:text-white transition cursor-pointer">مفعل</button>
-                                <button type="button" onclick="filterCmdStatus('all')" id="btnFilterAll" class="px-3 py-1 rounded-lg text-xs font-bold bg-purple-600 text-white transition shadow cursor-pointer">الكل</button>
+                                <button type="button" id="btnFilterDisabled" class="px-3 py-1 rounded-lg text-xs font-bold text-gray-400 hover:text-white transition cursor-pointer" onclick="window.filterCmdStatus('disabled')">معطل</button>
+                                <button type="button" id="btnFilterEnabled" class="px-3 py-1 rounded-lg text-xs font-bold text-gray-400 hover:text-white transition cursor-pointer" onclick="window.filterCmdStatus('enabled')">مفعل</button>
+                                <button type="button" id="btnFilterAll" class="px-3 py-1 rounded-lg text-xs font-bold bg-purple-600 text-white transition shadow cursor-pointer" onclick="window.filterCmdStatus('all')">الكل</button>
                             </div>
-
                             <div class="flex-1 relative">
-                                <input type="text" id="cmdSearchInput" oninput="searchCommands()" placeholder="...ابحث عن أمر" class="w-full bg-[#12141f] border border-white/5 focus:border-purple-500 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right pr-10">
+                                <input type="text" id="cmdSearchInput" placeholder="...ابحث عن أمر" class="w-full bg-[#12141f] border border-white/5 focus:border-purple-500 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right pr-10" oninput="window.searchCommands()">
                                 <span class="absolute right-3 top-2.5 text-gray-400">🔍</span>
                             </div>
                         </div>
 
-                        <!-- 3. Layout: Left Commands List + Right Categories Sidebar (Exact to Images 1, 2, 3, 4) -->
+                        <!-- Main Grid: Sidebar + Commands -->
                         <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
 
-                            <!-- العمود الأيمن: قائمة الأقسام (Categories Sidebar) -->
+                            <!-- Sidebar: Categories -->
                             <div class="lg:col-span-1 space-y-1.5 bg-[#12141f] border border-white/5 p-3 rounded-2xl shadow-xl h-fit">
                                 <div class="flex items-center justify-end gap-1.5 text-xs font-black text-white px-2 py-1.5 border-b border-white/5 mb-1">
-                                    <span>الأقسام</span>
-                                    <span>📁</span>
+                                    <span>الأقسام</span><span>📁</span>
                                 </div>
-
-                                <button type="button" onclick="switchCmdCategory('basic')" id="btnCatBasic" class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-white hover:bg-white/5 transition cursor-pointer">
-                                    <span class="px-2 py-0.5 bg-emerald-950/60 text-emerald-400 rounded-lg text-[10px] font-mono">17/17</span>
+                                <button type="button" onclick="window.switchCmdCategory('basic')" id="btnCatBasic" class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-white hover:bg-white/5 transition cursor-pointer">
+                                    <span id="badgeCatBasic" class="px-2 py-0.5 bg-emerald-950/60 text-emerald-400 rounded-lg text-[10px] font-mono">17/17</span>
                                     <span class="flex items-center gap-1.5"><span>الأوامر الأساسية</span><span>⚙️</span></span>
                                 </button>
-
-                                <button type="button" onclick="switchCmdCategory('punishments')" id="btnCatPunishments" class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold bg-purple-600 text-white shadow-lg transition cursor-pointer">
-                                    <span class="px-2 py-0.5 bg-white/20 text-white rounded-lg text-[10px] font-mono">22/22</span>
+                                <button type="button" onclick="window.switchCmdCategory('punishments')" id="btnCatPunishments" class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold bg-purple-600 text-white shadow-lg transition cursor-pointer">
+                                    <span id="badgeCatPunishments" class="px-2 py-0.5 bg-white/20 text-white rounded-lg text-[10px] font-mono">22/22</span>
                                     <span class="flex items-center gap-1.5"><span>العقوبات</span><span>🔨</span></span>
                                 </button>
-
-                                <button type="button" onclick="switchCmdCategory('punishment_logs')" id="btnCatPunishmentLogs" class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-white hover:bg-white/5 transition cursor-pointer">
-                                    <span class="px-2 py-0.5 bg-emerald-950/60 text-emerald-400 rounded-lg text-[10px] font-mono">17/17</span>
+                                <button type="button" onclick="window.switchCmdCategory('punishment_logs')" id="btnCatPunishmentLogs" class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-white hover:bg-white/5 transition cursor-pointer">
+                                    <span id="badgeCatPunishmentLogs" class="px-2 py-0.5 bg-emerald-950/60 text-emerald-400 rounded-lg text-[10px] font-mono">17/17</span>
                                     <span class="flex items-center gap-1.5"><span>سجلات العقوبات</span><span>📜</span></span>
                                 </button>
-
-                                <button type="button" onclick="switchCmdCategory('channels')" id="btnCatChannels" class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-white hover:bg-white/5 transition cursor-pointer">
-                                    <span class="px-2 py-0.5 bg-emerald-950/60 text-emerald-400 rounded-lg text-[10px] font-mono">9/9</span>
+                                <button type="button" onclick="window.switchCmdCategory('channels')" id="btnCatChannels" class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-white hover:bg-white/5 transition cursor-pointer">
+                                    <span id="badgeCatChannels" class="px-2 py-0.5 bg-emerald-950/60 text-emerald-400 rounded-lg text-[10px] font-mono">9/9</span>
                                     <span class="flex items-center gap-1.5"><span>إدارة القنوات</span><span>📌</span></span>
                                 </button>
-
-                                <button type="button" onclick="switchCmdCategory('chat')" id="btnCatChat" class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-white hover:bg-white/5 transition cursor-pointer">
-                                    <span class="px-2 py-0.5 bg-emerald-950/60 text-emerald-400 rounded-lg text-[10px] font-mono">12/12</span>
+                                <button type="button" onclick="window.switchCmdCategory('chat')" id="btnCatChat" class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-white hover:bg-white/5 transition cursor-pointer">
+                                    <span id="badgeCatChat" class="px-2 py-0.5 bg-emerald-950/60 text-emerald-400 rounded-lg text-[10px] font-mono">12/12</span>
                                     <span class="flex items-center gap-1.5"><span>أدوات الشات</span><span>💬</span></span>
                                 </button>
-
-                                <button type="button" onclick="switchCmdCategory('voice')" id="btnCatVoice" class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-white hover:bg-white/5 transition cursor-pointer">
-                                    <span class="px-2 py-0.5 bg-emerald-950/60 text-emerald-400 rounded-lg text-[10px] font-mono">19/19</span>
+                                <button type="button" onclick="window.switchCmdCategory('voice')" id="btnCatVoice" class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-white hover:bg-white/5 transition cursor-pointer">
+                                    <span id="badgeCatVoice" class="px-2 py-0.5 bg-emerald-950/60 text-emerald-400 rounded-lg text-[10px] font-mono">19/19</span>
                                     <span class="flex items-center gap-1.5"><span>إدارة الصوت</span><span>🎙️</span></span>
                                 </button>
-
-                                <button type="button" onclick="switchCmdCategory('roles')" id="btnCatRoles" class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-white hover:bg-white/5 transition cursor-pointer">
-                                    <span class="px-2 py-0.5 bg-emerald-950/60 text-emerald-400 rounded-lg text-[10px] font-mono">10/10</span>
+                                <button type="button" onclick="window.switchCmdCategory('roles')" id="btnCatRoles" class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-white hover:bg-white/5 transition cursor-pointer">
+                                    <span id="badgeCatRoles" class="px-2 py-0.5 bg-emerald-950/60 text-emerald-400 rounded-lg text-[10px] font-mono">10/10</span>
                                     <span class="flex items-center gap-1.5"><span>إدارة الرتب</span><span>🎖️</span></span>
                                 </button>
-
-                                <button type="button" onclick="switchCmdCategory('custom_roles')" id="btnCatCustomRoles" class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-white hover:bg-white/5 transition cursor-pointer">
-                                    <span class="px-2 py-0.5 bg-emerald-950/60 text-emerald-400 rounded-lg text-[10px] font-mono">9/9</span>
+                                <button type="button" onclick="window.switchCmdCategory('custom_roles')" id="btnCatCustomRoles" class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-white hover:bg-white/5 transition cursor-pointer">
+                                    <span id="badgeCatCustomRoles" class="px-2 py-0.5 bg-emerald-950/60 text-emerald-400 rounded-lg text-[10px] font-mono">9/9</span>
                                     <span class="flex items-center gap-1.5"><span>الرتب الخاصة</span><span>👑</span></span>
                                 </button>
-
-                                <button type="button" onclick="switchCmdCategory('server_info')" id="btnCatServerInfo" class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-white hover:bg-white/5 transition cursor-pointer">
-                                    <span class="px-2 py-0.5 bg-emerald-950/60 text-emerald-400 rounded-lg text-[10px] font-mono">19/19</span>
+                                <button type="button" onclick="window.switchCmdCategory('server_info')" id="btnCatServerInfo" class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-white hover:bg-white/5 transition cursor-pointer">
+                                    <span id="badgeCatServerInfo" class="px-2 py-0.5 bg-emerald-950/60 text-emerald-400 rounded-lg text-[10px] font-mono">19/19</span>
                                     <span class="flex items-center gap-1.5"><span>معلومات السيرفر</span><span>📊</span></span>
                                 </button>
-
-                                <button type="button" onclick="switchCmdCategory('custom_bot')" id="btnCatCustomBot" class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-white hover:bg-white/5 transition cursor-pointer">
-                                    <span class="px-2 py-0.5 bg-emerald-950/60 text-emerald-400 rounded-lg text-[10px] font-mono">5/5</span>
+                                <button type="button" onclick="window.switchCmdCategory('custom_bot')" id="btnCatCustomBot" class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-white hover:bg-white/5 transition cursor-pointer">
+                                    <span id="badgeCatCustomBot" class="px-2 py-0.5 bg-emerald-950/60 text-emerald-400 rounded-lg text-[10px] font-mono">5/5</span>
                                     <span class="flex items-center gap-1.5"><span>أدوات البوت الخاص</span><span>🤖</span></span>
                                 </button>
-
-                                <button type="button" onclick="switchCmdCategory('security')" id="btnCatSecurity" class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-white hover:bg-white/5 transition cursor-pointer">
-                                    <span class="px-2 py-0.5 bg-emerald-950/60 text-emerald-400 rounded-lg text-[10px] font-mono">15/15</span>
+                                <button type="button" onclick="window.switchCmdCategory('security')" id="btnCatSecurity" class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-white hover:bg-white/5 transition cursor-pointer">
+                                    <span id="badgeCatSecurity" class="px-2 py-0.5 bg-emerald-950/60 text-emerald-400 rounded-lg text-[10px] font-mono">15/15</span>
                                     <span class="flex items-center gap-1.5"><span>الحماية</span><span>🛡️</span></span>
                                 </button>
-
-                                <button type="button" onclick="switchCmdCategory('levels_cat')" id="btnCatLevels" class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-white hover:bg-white/5 transition cursor-pointer">
-                                    <span class="px-2 py-0.5 bg-emerald-950/60 text-emerald-400 rounded-lg text-[10px] font-mono">10/10</span>
+                                <button type="button" onclick="window.switchCmdCategory('levels_cat')" id="btnCatLevels" class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-white hover:bg-white/5 transition cursor-pointer">
+                                    <span id="badgeCatLevels" class="px-2 py-0.5 bg-emerald-950/60 text-emerald-400 rounded-lg text-[10px] font-mono">10/10</span>
                                     <span class="flex items-center gap-1.5"><span>المستويات والخبرة</span><span>⭐</span></span>
                                 </button>
-
-                                <button type="button" onclick="switchCmdCategory('server_stats')" id="btnCatServerStats" class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-white hover:bg-white/5 transition cursor-pointer">
-                                    <span class="px-2 py-0.5 bg-emerald-950/60 text-emerald-400 rounded-lg text-[10px] font-mono">11/11</span>
+                                <button type="button" onclick="window.switchCmdCategory('server_stats')" id="btnCatServerStats" class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-white hover:bg-white/5 transition cursor-pointer">
+                                    <span id="badgeCatServerStats" class="px-2 py-0.5 bg-emerald-950/60 text-emerald-400 rounded-lg text-[10px] font-mono">11/11</span>
                                     <span class="flex items-center gap-1.5"><span>إحصائيات السيرفر</span><span>📈</span></span>
                                 </button>
-
-                                <button type="button" onclick="switchCmdCategory('profile_cat')" id="btnCatProfile" class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-white hover:bg-white/5 transition cursor-pointer">
-                                    <span class="px-2 py-0.5 bg-emerald-950/60 text-emerald-400 rounded-lg text-[10px] font-mono">10/10</span>
+                                <button type="button" onclick="window.switchCmdCategory('profile_cat')" id="btnCatProfile" class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-white hover:bg-white/5 transition cursor-pointer">
+                                    <span id="badgeCatProfile" class="px-2 py-0.5 bg-emerald-950/60 text-emerald-400 rounded-lg text-[10px] font-mono">10/10</span>
                                     <span class="flex items-center gap-1.5"><span>الملف الشخصي</span><span>👤</span></span>
                                 </button>
                             </div>
 
-                            <!-- العمود الأيسر: قائمة الأوامر المعروضة (Commands Container) -->
+                            <!-- Commands Display Area -->
                             <div class="lg:col-span-3 space-y-4">
 
-                                <!-- رأس القسم النشط والأزرار السريعة (تفعيل الكل / تعطيل الكل) -->
+                                <!-- Active Category Header -->
                                 <div class="bg-[#12141f] border border-white/5 p-4 rounded-2xl flex items-center justify-between shadow-xl">
                                     <div class="flex items-center gap-2">
                                         <span id="cmdSaveIndicator" class="text-xs font-bold text-emerald-400 bg-emerald-950/60 px-2 py-1 rounded-lg opacity-0 transition-opacity duration-300">✓ حُفظ</span>
-                                        <button type="button" onclick="toggleAllCategoryCmds(false)" class="px-3.5 py-1.5 bg-rose-950/40 hover:bg-rose-900/60 text-rose-400 border border-rose-800/40 rounded-xl text-xs font-bold transition flex items-center gap-1">
-                                            <span>✕</span>
-                                            <span>تعطيل الكل</span>
+                                        <button type="button" onclick="window.toggleAllCategoryCmds(false)" class="px-3.5 py-1.5 bg-rose-950/40 hover:bg-rose-900/60 text-rose-400 border border-rose-800/40 rounded-xl text-xs font-bold transition flex items-center gap-1">
+                                            <span>✕</span><span>تعطيل الكل</span>
                                         </button>
-                                        <button type="button" onclick="toggleAllCategoryCmds(true)" class="px-3.5 py-1.5 bg-emerald-950/40 hover:bg-emerald-900/60 text-emerald-400 border border-emerald-800/40 rounded-xl text-xs font-bold transition flex items-center gap-1">
-                                            <span>✓</span>
-                                            <span>تفعيل الكل</span>
+                                        <button type="button" onclick="window.toggleAllCategoryCmds(true)" class="px-3.5 py-1.5 bg-emerald-950/40 hover:bg-emerald-900/60 text-emerald-400 border border-emerald-800/40 rounded-xl text-xs font-bold transition flex items-center gap-1">
+                                            <span>✓</span><span>تفعيل الكل</span>
                                         </button>
                                     </div>
-                                    <div class="text-right flex items-center gap-2">
-                                        <div>
-                                            <h4 id="catTitle" class="text-sm font-black text-white">العقوبات</h4>
-                                            <p id="catDesc" class="text-[10px] text-gray-400">أوامر تنفيذ العقوبات المباشرة على الأعضاء</p>
+                                    <div class="flex items-center gap-3">
+                                        <div class="text-right">
+                                            <h5 id="catTitle" class="font-black text-white text-sm">العقوبات</h5>
+                                            <p id="catDesc" class="text-gray-400 text-[11px] mt-0.5">أوامر تنفيذ العقوبات المباشرة على الأعضاء</p>
                                         </div>
                                         <span id="catIcon" class="text-xl">🔨</span>
                                     </div>
                                 </div>
 
-                                <!-- بطاقات الأوامر التفاعلية (Exact to Images 1, 2, 3, 4) -->
+                                <!-- Commands List Container -->
                                 <div id="cmdsListContainer" class="space-y-3">
-                                    ${(() => {
-                                        const defaultItems = [
-                                            { name: '/ban', desc: 'حظر عضو', badge: 'صلاحيات ديسكورد', icon: '🪓' },
-                                            { name: '/unban', desc: 'فك حظر عضو', badge: 'صلاحيات ديسكورد', icon: '🛡️' },
-                                            { name: '/kick', desc: 'طرد عضو', badge: 'صلاحيات ديسكورد', icon: '🪓' },
-                                            { name: '/mute', desc: 'كتم عضو', badge: 'صلاحيات ديسكورد', icon: '🚨' },
-                                            { name: '/unmute', desc: 'فك كتم عضو', badge: 'صلاحيات ديسكورد', icon: '📢' },
-                                            { name: '/timeout', desc: 'عزل عضو', badge: 'صلاحيات ديسكورد', icon: '⏳' },
-                                            { name: '/untimeout', desc: 'فك عزل عضو', badge: 'صلاحيات ديسكورد', icon: '🛡️' },
-                                            { name: '/warn', desc: 'تحذير عضو', badge: 'صلاحيات ديسكورد', icon: '🚨' },
-                                            { name: '/delwarn', desc: 'حذف تحذير', badge: 'صلاحيات ديسكورد', icon: '🗑️' },
-                                            { name: '/clearwarns', desc: 'مسح جميع التحذيرات', badge: 'صلاحيات ديسكورد', icon: '🗑️' },
-                                            { name: '/clearallwarns', desc: 'مسح جميع التحذيرات لعضو', badge: 'صلاحيات ديسكورد', icon: '🗑️' },
-                                            { name: '/clearallpunishments', desc: 'حذف نهائي لكل سجلات العقوبات بالسيرفر — لا يمكن التراجع', badge: '', icon: '🗑️' },
-                                            { name: '/prison', desc: 'سجن عضو', badge: 'صلاحيات ديسكورد', icon: '🪓' },
-                                            { name: '/unprison', desc: 'إخراج من السجن', badge: 'صلاحيات ديسكورد', icon: '🛡️' },
-                                            { name: '/setnick', desc: 'تغيير الاسم المستعار', badge: 'صلاحيات ديسكورد', icon: '✏️' },
-                                            { name: '/blacklist', desc: 'بلاك لست عضو (دائم)', badge: 'صلاحيات ديسكورد', icon: '🪓' },
-                                            { name: '/unblacklist', desc: 'فك بلاك لست عضو', badge: 'صلاحيات ديسكورد', icon: '🛡️' },
-                                            { name: '/remove', desc: 'حذف عقوبة من عضو', badge: 'صلاحيات ديسكورد', icon: '🗑️' },
-                                            { name: '/down', desc: 'إزالة الرتب الإدارية لمدة محددة', badge: 'صلاحيات ديسكورد', icon: '🪓' },
-                                            { name: '/undown', desc: 'استعادة الرتب الإدارية المزالة', badge: '', icon: '🛡️' },
-                                            { name: '/block', desc: 'حظر عضو من رتبة', badge: 'صلاحيات ديسكورد', icon: '🛡️' },
-                                            { name: '/unblock', desc: 'فك حظر عضو من رتبة', badge: 'صلاحيات ديسكورد', icon: '🛡️' }
-                                        ];
-                                        let disabledArr = [];
-                                        try { disabledArr = JSON.parse(settings.disabled_commands || '[]'); } catch(e) {}
-                                        return defaultItems.map(item => {
-                                            const isEnabled = !disabledArr.includes(item.name);
-                                            const badgeHtml = item.badge ? `<span class="px-2.5 py-0.5 bg-purple-950/60 text-purple-300 border border-purple-800/40 rounded-lg text-[10px] font-bold flex items-center gap-1"><span>${item.badge}</span><span>🛡️</span></span>` : '';
-                                            return `
-                                            <div class="bg-[#12141f] border border-white/5 p-4 rounded-2xl flex items-center justify-between hover:border-purple-500/40 transition ${!isEnabled ? 'opacity-50' : ''}">
-                                                <div class="flex items-center gap-3">
-                                                    <label class="toggle"><input type="checkbox" data-cmd="${item.name}" ${isEnabled ? 'checked' : ''} onchange="toggleSingleCmd('${item.name}', this.checked); this.closest('div.flex').parentElement.parentElement.classList.toggle('opacity-50', !this.checked)"><span class="slider"></span></label>
-                                                    <button type="button" class="text-gray-500 hover:text-white text-xs">▼</button>
-                                                </div>
-                                                <div class="flex items-center gap-3">
-                                                    <div class="text-right">
-                                                        <div class="flex items-center justify-end gap-2">${badgeHtml}<span class="font-black text-white text-xs font-mono">${item.name}</span></div>
-                                                        <p class="text-[11px] text-gray-400 mt-0.5">${item.desc}</p>
-                                                    </div>
-                                                    <div class="w-9 h-9 rounded-xl bg-[#0b0d14] border border-white/5 flex items-center justify-center text-sm shadow-inner">${item.icon || '⚙️'}</div>
-                                                </div>
-                                            </div>`;
-                                        }).join('');
-                                    })()}
+                                    <div class="py-12 bg-[#12141f] border border-white/5 rounded-2xl text-center text-xs text-gray-500">جارٍ التحميل...</div>
                                 </div>
 
                             </div>
-
                         </div>
+                    </div><!-- end cmdsMgmtRoot -->
 
-                    </div>
+                    <!-- Dummy reopen form so the rest of the page works -->
+                    <form id="settingsFormDummy" style="display:none">
 
                     <script>
-                    const commandsDatabase = {
-                        punishments: {
-                            title: 'العقوبات',
-                            desc: 'أوامر تنفيذ العقوبات المباشرة على الأعضاء',
-                            icon: '🔨',
-                            items: [
-                                { name: '/ban', desc: 'حظر عضو', badge: 'صلاحيات ديسكورد', icon: '🪓' },
-                                { name: '/unban', desc: 'فك حظر عضو', badge: 'صلاحيات ديسكورد', icon: '🛡️' },
-                                { name: '/kick', desc: 'طرد عضو', badge: 'صلاحيات ديسكورد', icon: '🪓' },
-                                { name: '/mute', desc: 'كتم عضو', badge: 'صلاحيات ديسكورد', icon: '🚨' },
-                                { name: '/unmute', desc: 'فك كتم عضو', badge: 'صلاحيات ديسكورد', icon: '📢' },
-                                { name: '/timeout', desc: 'عزل عضو', badge: 'صلاحيات ديسكورد', icon: '⏳' },
-                                { name: '/untimeout', desc: 'فك عزل عضو', badge: 'صلاحيات ديسكورد', icon: '🛡️' },
-                                { name: '/warn', desc: 'تحذير عضو', badge: 'صلاحيات ديسكورد', icon: '🚨' },
-                                { name: '/delwarn', desc: 'حذف تحذير', badge: 'صلاحيات ديسكورد', icon: '🗑️' },
-                                { name: '/clearwarns', desc: 'مسح جميع التحذيرات', badge: 'صلاحيات ديسكورد', icon: '🗑️' },
-                                { name: '/clearallwarns', desc: 'مسح جميع التحذيرات لعضو', badge: 'صلاحيات ديسكورد', icon: '🗑️' },
-                                { name: '/clearallpunishments', desc: 'حذف نهائي لكل سجلات العقوبات بالسيرفر — لا يمكن التراجع', badge: '', icon: '🗑️' },
-                                { name: '/prison', desc: 'سجن عضو', badge: 'صلاحيات ديسكورد', icon: '🪓' },
-                                { name: '/unprison', desc: 'إخراج من السجن', badge: 'صلاحيات ديسكورد', icon: '🛡️' },
-                                { name: '/setnick', desc: 'تغيير الاسم المستعار', badge: 'صلاحيات ديسكورد', icon: '✏️' },
-                                { name: '/blacklist', desc: 'بلاك لست عضو (دائم)', badge: 'صلاحيات ديسكورد', icon: '🪓' },
-                                { name: '/unblacklist', desc: 'فك بلاك لست عضو', badge: 'صلاحيات ديسكورد', icon: '🛡️' },
-                                { name: '/remove', desc: 'حذف عقوبة من عضو', badge: 'صلاحيات ديسكورد', icon: '🗑️' },
-                                { name: '/down', desc: 'إزالة الرتب الإدارية لمدة محددة', badge: 'صلاحيات ديسكورد', icon: '🪓' },
-                                { name: '/undown', desc: 'استعادة الرتب الإدارية المزالة', badge: '', icon: '🛡️' },
-                                { name: '/block', desc: 'حظر عضو من رتبة', badge: 'صلاحيات ديسكورد', icon: '🛡️' },
-                                { name: '/unblock', desc: 'فك حظر عضو من رتبة', badge: 'صلاحيات ديسكورد', icon: '🛡️' }
-                            ]
-                        },
-                        punishment_logs: {
-                            title: 'سجلات العقوبات',
-                            desc: 'استعلام وعرض سجلات العقوبات السابقة',
-                            icon: '📜',
-                            items: [
-                                { name: '/allwarns', desc: 'عرض كل التحذيرات النشطة بالسيرفر', badge: '', icon: '📋' },
-                                { name: '/bans', desc: 'سجل باندات عضو', badge: '', icon: '📜' },
-                                { name: '/blacklists', desc: 'سجل بلاك لست عضو', badge: '', icon: '📜' },
-                                { name: '/blocks', desc: 'سجل بلوكات عضو', badge: '', icon: '📜' },
-                                { name: '/case', desc: 'عرض تفاصيل عقوبة', badge: 'صلاحيات ديسكورد', icon: '📄' },
-                                { name: '/crime', desc: 'سجل عقوبات العضو الكامل', badge: '', icon: '📜' },
-                                { name: '/crimes', desc: 'عقوبات العضو النشطة حالياً', badge: '', icon: '📜' },
-                                { name: '/downs', desc: 'سجل داونات عضو', badge: '', icon: '📜' },
-                                { name: '/modlogs', desc: 'سجل إشراف المشرفين', badge: 'صلاحيات ديسكورد', icon: '📜' },
-                                { name: '/kicks', desc: 'سجل طرد عضو', badge: '', icon: '📜' },
-                                { name: '/mutes', desc: 'سجل كتم عضو', badge: '', icon: '📜' },
-                                { name: '/prisons', desc: 'سجل سجن عضو', badge: '', icon: '📜' },
-                                { name: '/timeouts', desc: 'سجل عزل عضو', badge: '', icon: '📜' },
-                                { name: '/warns', desc: 'سجل تحذيرات عضو', badge: '', icon: '📜' },
-                                { name: '/staffactivity', desc: 'تقرير نشاط الطاقم الإداري', badge: '', icon: '📊' },
-                                { name: '/audit', desc: 'سجل تدقيق الإجراءات الحساسة', badge: 'صلاحيات ديسكورد', icon: '🔍' },
-                                { name: '/punishments', desc: 'لوحة سجلات العقوبات الشاملة', badge: '', icon: '⚖️' }
-                            ]
-                        },
-                        basic: {
-                            title: 'الأوامر الأساسية',
-                            desc: 'أوامر المساعدة والمعلومات الأساسية للأعضاء',
-                            icon: '⚙️',
-                            items: [
-                                { name: '/help', desc: 'قائمة المساعدة الشاملة', badge: '', icon: '❓' },
-                                { name: '/ping', desc: 'فحص سرعة استجابة البوت', badge: '', icon: '📶' },
-                                { name: '/botinfo', desc: 'معلومات وإحصائيات البوت', badge: '', icon: '🤖' },
-                                { name: '/serverinfo', desc: 'معلومات السيرفر وتاريخ إنشائه', badge: '', icon: '🏰' },
-                                { name: '/userinfo', desc: 'معلومات العضو وتاريخ انضمامه', badge: '', icon: '👤' },
-                                { name: '/avatar', desc: 'عرض الصورة الرمزية للعضو أو السيرفر', badge: '', icon: '🖼️' },
-                                { name: '/banner', desc: 'عرض بنر الملف الشخصي أو السيرفر', badge: '', icon: '🎨' },
-                                { name: '/invites', desc: 'معرفة عدد دعواتك الحقيقية والوهمية', badge: '', icon: '🔗' },
-                                { name: '/roles', desc: 'قائمة رتب السيرفر وأعداد الأعضاء', badge: '', icon: '🎖️' },
-                                { name: '/channels', desc: 'قائمة قنوات السيرفر وتوزيعها', badge: '', icon: '📁' },
-                                { name: '/emojis', desc: 'استعراض إيموجيات وستيكرات السيرفر', badge: '', icon: '😃' },
-                                { name: '/apply', desc: 'تقديم على الرتب والوظائف المتاحة', badge: '', icon: '📝' },
-                                { name: '/ticket', desc: 'فتح تذكرة دعم فني جديدة', badge: '', icon: '🎫' },
-                                { name: '/daily', desc: 'استلام الراتب اليومي المجاني (Gold)', badge: '', icon: '🪙' },
-                                { name: '/profile', desc: 'بطاقة الملف الشخصي التفاعلية', badge: '', icon: '💳' },
-                                { name: '/leaderboard', desc: 'لوحة المتصدرين في السيرفر', badge: '', icon: '🏆' },
-                                { name: '/stars', desc: 'رصيد النجوم والسمعة والتقييم', badge: '', icon: '⭐' }
-                            ]
-                        },
-                        channels: {
-                            title: 'إدارة القنوات',
-                            desc: 'أوامر قفل وفتح وتعديل القنوات النصية والصوتية',
-                            icon: '📌',
-                            items: [
-                                { name: '/lock', desc: 'قفل القناة الحالية', badge: 'صلاحيات ديسكورد', icon: '🔒' },
-                                { name: '/unlock', desc: 'فتح القناة المقفلة', badge: 'صلاحيات ديسكورد', icon: '🔓' },
-                                { name: '/hide', desc: 'إخفاء القناة عن الأعضاء', badge: 'صلاحيات ديسكورد', icon: '👁️' },
-                                { name: '/unhide', desc: 'إظهار القناة المخفية', badge: 'صلاحيات ديسكورد', icon: '👁️' },
-                                { name: '/slowmode', desc: 'تحديد وقت التهدئة للشات', badge: 'صلاحيات ديسكورد', icon: '⏳' },
-                                { name: '/clone', desc: 'استنساخ القناة بالكامل', badge: 'صلاحيات ديسكورد', icon: '📑' },
-                                { name: '/rename', desc: 'تغيير اسم القناة', badge: 'صلاحيات ديسكورد', icon: '✏️' },
-                                { name: '/settopic', desc: 'تغيير وصف القناة', badge: 'صلاحيات ديسكورد', icon: '📝' },
-                                { name: '/setnsfw', desc: 'تحديد القناة كـ NSFW', badge: 'صلاحيات ديسكورد', icon: '🔞' }
-                            ]
-                        },
-                        chat: {
-                            title: 'أدوات الشات',
-                            desc: 'أوامر تنظيف الشات والرسائل والتفاعل',
-                            icon: '💬',
-                            items: [
-                                { name: '/clear', desc: 'مسح عدد محدد من الرسائل', badge: 'صلاحيات ديسكورد', icon: '🗑️' },
-                                { name: '/clearpinned', desc: 'مسح الرسائل المثبتة', badge: 'صلاحيات ديسكورد', icon: '📌' },
-                                { name: '/clearbots', desc: 'مسح رسائل البوتات فقط', badge: 'صلاحيات ديسكورد', icon: '🤖' },
-                                { name: '/clearuser', desc: 'مسح رسائل عضو محدد', badge: 'صلاحيات ديسكورد', icon: '👤' },
-                                { name: '/say', desc: 'إرسال رسالة باسم البوت', badge: 'صلاحيات ديسكورد', icon: '📢' },
-                                { name: '/embed', desc: 'إرسال إيمبد مخصص', badge: 'صلاحيات ديسكورد', icon: '📄' },
-                                { name: '/poll', desc: 'إنشاء تصويت تفاعلي', badge: '', icon: '📊' },
-                                { name: '/remind', desc: 'ضبط تذكير شخصي', badge: '', icon: '⏰' },
-                                { name: '/announce', desc: 'إرسال إعلان مخصص', badge: 'صلاحيات ديسكورد', icon: '📣' },
-                                { name: '/broadcast', desc: 'بث رسالة لعدة قنوات', badge: 'صلاحيات ديسكورد', icon: '📡' },
-                                { name: '/translate', desc: 'ترجمة الرسائل والنصوص', badge: '', icon: '🌐' },
-                                { name: '/quote', desc: 'اقتباس رسالة من قناة', badge: '', icon: '💬' }
-                            ]
-                        },
-                        voice: {
-                            title: 'إدارة الصوت',
-                            desc: 'أوامر إدارة الرومات الصوتية والأعضاء',
-                            icon: '🎙️',
-                            items: [
-                                { name: '/vcmute', desc: 'كتم صوتي لعضو', badge: 'صلاحيات ديسكورد', icon: '🔇' },
-                                { name: '/vcunmute', desc: 'فك الكتم الصوتي', badge: 'صلاحيات ديسكورد', icon: '🔊' },
-                                { name: '/vcdeafen', desc: 'تصميت صوتي لعضو', badge: 'صلاحيات ديسكورد', icon: '🔇' },
-                                { name: '/vcundeafen', desc: 'فك التصميت الصوتي', badge: 'صلاحيات ديسكورد', icon: '🔊' },
-                                { name: '/vckick', desc: 'طرد عضو من الروم الصوتي', badge: 'صلاحيات ديسكورد', icon: '🪓' },
-                                { name: '/vcmove', desc: 'نقل عضو لروم صوتي آخر', badge: 'صلاحيات ديسكورد', icon: '🔀' },
-                                { name: '/vcmoveall', desc: 'نقل كل الأعضاء لروم آخر', badge: 'صلاحيات ديسكورد', icon: '🔀' },
-                                { name: '/vclimit', desc: 'تحديد سعة الروم الصوتي', badge: 'صلاحيات ديسكورد', icon: '👥' },
-                                { name: '/vclock', desc: 'قفل الروم الصوتي', badge: 'صلاحيات ديسكورد', icon: '🔒' },
-                                { name: '/vcunlock', desc: 'فتح الروم الصوتي', badge: 'صلاحيات ديسكورد', icon: '🔓' },
-                                { name: '/vchide', desc: 'إخفاء الروم الصوتي', badge: 'صلاحيات ديسكورد', icon: '👁️' },
-                                { name: '/vcunhide', desc: 'إظهار الروم الصوتي', badge: 'صلاحيات ديسكورد', icon: '👁️' },
-                                { name: '/vcbitrate', desc: 'تعديل جودة الصوت', badge: 'صلاحيات ديسكورد', icon: '📶' },
-                                { name: '/tempvoice', desc: 'إعداد الرومات المؤقتة', badge: 'صلاحيات ديسكورد', icon: '🕒' },
-                                { name: '/vcinfo', desc: 'معلومات الروم الصوتي', badge: '', icon: '📊' },
-                                { name: '/vcactivity', desc: 'نشاط الأعضاء في الصوت', badge: '', icon: '📈' },
-                                { name: '/vcrename', desc: 'تغيير اسم الروم الصوتي', badge: 'صلاحيات ديسكورد', icon: '✏️' },
-                                { name: '/vcpermit', desc: 'السماح لعضو بالدخول للروم', badge: 'صلاحيات ديسكورد', icon: '✅' },
-                                { name: '/vcreject', desc: 'منع عضو من دخول الروم', badge: 'صلاحيات ديسكورد', icon: '❌' }
-                            ]
-                        },
-                        roles: {
-                            title: 'إدارة الرتب',
-                            desc: 'أوامر إنشاء وإعطاء وإزالة الرتب للأعضاء',
-                            icon: '🎖️',
-                            items: [
-                                { name: '/giverole', desc: 'إعطاء رتبة لعضو', badge: 'صلاحيات ديسكورد', icon: '➕' },
-                                { name: '/removerole', desc: 'إزالة رتبة من عضو', badge: 'صلاحيات ديسكورد', icon: '➖' },
-                                { name: '/roleall', desc: 'إعطاء رتبة لجميع الأعضاء', badge: 'صلاحيات ديسكورد', icon: '👥' },
-                                { name: '/rolebots', desc: 'إعطاء رتبة لجميع البوتات', badge: 'صلاحيات ديسكورد', icon: '🤖' },
-                                { name: '/rolehumans', desc: 'إعطاء رتبة للبشر فقط', badge: 'صلاحيات ديسكورد', icon: '👤' },
-                                { name: '/createrole', desc: 'إنشاء رتبة جديدة', badge: 'صلاحيات ديسكورد', icon: '🆕' },
-                                { name: '/deleterole', desc: 'حذف رتبة نهائياً', badge: 'صلاحيات ديسكورد', icon: '🗑️' },
-                                { name: '/rolecolor', desc: 'تغيير لون الرتبة', badge: 'صلاحيات ديسكورد', icon: '🎨' },
-                                { name: '/roleinfo', desc: 'معلومات وتفاصيل الرتبة', badge: '', icon: 'ℹ️' },
-                                { name: '/inrole', desc: 'عرض أعضاء رتبة محددة', badge: '', icon: '📋' }
-                            ]
-                        },
-                        custom_roles: {
-                            title: 'الرتب الخاصة',
-                            desc: 'أوامر ونظام الرتب الخاصة والمميزة للمشتركين',
-                            icon: '👑',
-                            items: [
-                                { name: '/customrole', desc: 'إنشاء رتبة خاصة للشخص', badge: '', icon: '👑' },
-                                { name: '/myrole', desc: 'تعديل رتبتك الخاصة', badge: '', icon: '🎨' },
-                                { name: '/myrole-color', desc: 'تغيير لون رتبتك الخاصة', badge: '', icon: '🌈' },
-                                { name: '/myrole-name', desc: 'تغيير اسم رتبتك الخاصة', badge: '', icon: '✏️' },
-                                { name: '/myrole-icon', desc: 'تغيير أيقونة رتبتك الخاصة', badge: '', icon: '🖼️' },
-                                { name: '/myrole-give', desc: 'إهداء رتبتك لصديق', badge: '', icon: '🎁' },
-                                { name: '/myrole-remove', desc: 'سحب رتبتك من صديق', badge: '', icon: '❌' },
-                                { name: '/myrole-delete', desc: 'حذف رتبتك الخاصة', badge: '', icon: '🗑️' },
-                                { name: '/customroles-list', desc: 'قائمة كل الرتب الخاصة بالسيرفر', badge: '', icon: '📜' }
-                            ]
-                        },
-                        server_info: {
-                            title: 'معلومات السيرفر',
-                            desc: 'أوامر استعراض تفاصيل وإحصائيات وإيموجيات السيرفر',
-                            icon: '📊',
-                            items: [
-                                { name: '/serverinfo', desc: 'معلومات السيرفر الكاملة', badge: '', icon: '🏰' },
-                                { name: '/serverbanner', desc: 'عرض بنر السيرفر', badge: '', icon: '🎨' },
-                                { name: '/servericon', desc: 'عرض صورة السيرفر', badge: '', icon: '🖼️' },
-                                { name: '/serverstats', desc: 'إحصائيات الأعضاء والتفاعل', badge: '', icon: '📈' },
-                                { name: '/boosts', desc: 'قائمة الداعمين (Booster)', badge: '', icon: '💎' },
-                                { name: '/invites-top', desc: 'أعلى الأعضاء دعوة', badge: '', icon: '🔗' },
-                                { name: '/channels-list', desc: 'توزيع القنوات وتفاصيلها', badge: '', icon: '📁' },
-                                { name: '/roles-list', desc: 'قائمة وتوزيع الرتب', badge: '', icon: '🎖️' },
-                                { name: '/emojis-list', desc: 'قائمة الإيموجيات المخصصة', badge: '', icon: '😃' },
-                                { name: '/stickers-list', desc: 'قائمة الستيكرات', badge: '', icon: '🏷️' },
-                                { name: '/bans-list', desc: 'قائمة المحظورين بالسيرفر', badge: 'صلاحيات ديسكورد', icon: '🔨' },
-                                { name: '/admins', desc: 'قائمة الإدارة والمشرفين', badge: '', icon: '👮' },
-                                { name: '/bots', desc: 'قائمة بوتات السيرفر', badge: '', icon: '🤖' },
-                                { name: '/vanity', desc: 'رابط السيرفر المخصص', badge: '', icon: '🌐' },
-                                { name: '/features', desc: 'ميزات السيرفر المفعلة', badge: '', icon: '✨' },
-                                { name: '/created', desc: 'تاريخ إنشاء السيرفر وحسابات الأعضاء', badge: '', icon: '📅' },
-                                { name: '/uptime', desc: 'مدة تشغيل واستقرار البوت', badge: '', icon: '⏱️' },
-                                { name: '/ping', desc: 'سرعة الاستجابة والاتصال', badge: '', icon: '📶' },
-                                { name: '/shards', desc: 'معلومات الشاردات والخوادم', badge: '', icon: '🖧' }
-                            ]
-                        },
-                        custom_bot: {
-                            title: 'أدوات البوت الخاص',
-                            desc: 'أوامر تخصيص اسم ومظهر وحالة البوت الخاص',
-                            icon: '🤖',
-                            items: [
-                                { name: '/bot-setnick', desc: 'تغيير اسم البوت في السيرفر', badge: 'صلاحيات ديسكورد', icon: '✏️' },
-                                { name: '/bot-setavatar', desc: 'تغيير صورة البوت الخاصة', badge: 'صلاحيات ديسكورد', icon: '🖼️' },
-                                { name: '/bot-setbanner', desc: 'تغيير بنر البوت', badge: 'صلاحيات ديسكورد', icon: '🎨' },
-                                { name: '/bot-setactivity', desc: 'تغيير نشاط وحالة البوت', badge: 'صلاحيات ديسكورد', icon: '🎮' },
-                                { name: '/bot-setstatus', desc: 'تغيير حالة التواجد (Online/DND/Idle)', badge: 'صلاحيات ديسكورد', icon: '🟢' }
-                            ]
-                        },
-                        security: {
-                            title: 'الحماية',
-                            desc: 'أوامر الحماية من التخريب ومكافحة السبام والدخول الجماعي',
-                            icon: '🛡️',
-                            items: [
-                                { name: '/antiraid', desc: 'تفعيل/تعطيل مكافحة الغزو', badge: 'صلاحيات ديسكورد', icon: '🚨' },
-                                { name: '/antinuke', desc: 'إعدادات جدار الحماية Anti-Nuke', badge: 'صلاحيات ديسكورد', icon: '🛡️' },
-                                { name: '/whitelist-add', desc: 'إضافة عضو للقائمة البيضاء', badge: 'صلاحيات ديسكورد', icon: '⚪' },
-                                { name: '/whitelist-remove', desc: 'إزالة عضو من القائمة البيضاء', badge: 'صلاحيات ديسكورد', icon: '⚫' },
-                                { name: '/whitelist-list', desc: 'عرض القائمة البيضاء', badge: 'صلاحيات ديسكورد', icon: '📋' },
-                                { name: '/antibot', desc: 'منع دخول البوتات غير الموثقة', badge: 'صلاحيات ديسكورد', icon: '🤖' },
-                                { name: '/antispam', desc: 'مكافحة السبام والرسائل المتكررة', badge: 'صلاحيات ديسكورد', icon: '⚡' },
-                                { name: '/antilink', desc: 'منع نشر الروابط وإعلانات الديسكورد', badge: 'صلاحيات ديسكورد', icon: '🔗' },
-                                { name: '/backup-create', desc: 'إنشاء نسخة احتياطية للسيرفر', badge: 'صلاحيات ديسكورد', icon: '📦' },
-                                { name: '/backup-load', desc: 'استعادة نسخة احتياطية', badge: 'صلاحيات ديسكورد', icon: '🔄' },
-                                { name: '/backup-list', desc: 'قائمة النسخ الاحتياطية', badge: 'صلاحيات ديسكورد', icon: '📜' },
-                                { name: '/lockdown', desc: 'إغلاق كامل قنوات السيرفر فوراً', badge: 'صلاحيات ديسكورد', icon: '🔒' },
-                                { name: '/unlockdown', desc: 'إعادة فتح جميع القنوات المغلقة', badge: 'صلاحيات ديسكورد', icon: '🔓' },
-                                { name: '/security-status', desc: 'تقرير حالة الحماية بالسيرفر', badge: '', icon: '📊' },
-                                { name: '/security-audit', desc: 'فحص ثغرات وصلاحيات السيرفر', badge: 'صلاحيات ديسكورد', icon: '🔍' }
-                            ]
-                        },
-                        levels_cat: {
-                            title: 'المستويات والخبرة',
-                            desc: 'أوامر المستويات وبطاقات الرانك والرول ريواردز',
-                            icon: '⭐',
-                            items: [
-                                { name: '/rank', desc: 'عرض بطاقة المستواك الحالية', badge: '', icon: '💳' },
-                                { name: '/levels-leaderboard', desc: 'المتصدرين في التفاعل والمستويات', badge: '', icon: '🏆' },
-                                { name: '/setxp', desc: 'تعديل نقاط الخبرة لعضو', badge: 'صلاحيات ديسكورد', icon: '⚡' },
-                                { name: '/setlevel', desc: 'تعديل مستوى عضو', badge: 'صلاحيات ديسكورد', icon: '🎖️' },
-                                { name: '/resetlevels', desc: 'تصفير نظام المستويات بالسيرفر', badge: 'صلاحيات ديسكورد', icon: '🗑️' },
-                                { name: '/level-reward-add', desc: 'إضافة رتبة مكافأة عند مستوى محدد', badge: 'صلاحيات ديسكورد', icon: '🎁' },
-                                { name: '/level-reward-remove', desc: 'إزالة رتبة مكافأة', badge: 'صلاحيات ديسكورد', icon: '❌' },
-                                { name: '/level-rewards-list', desc: 'قائمة جميع رتب المكافآت', badge: '', icon: '📜' },
-                                { name: '/levelcard-bg', desc: 'تغيير خلفية بطاقة الرانك الخاصة بك', badge: '', icon: '🎨' },
-                                { name: '/doublexp', desc: 'تفعيل مضاعفة الخبرة 2x بالسيرفر', badge: 'صلاحيات ديسكورد', icon: '🚀' }
-                            ]
-                        },
-                        server_stats: {
-                            title: 'إحصائيات السيرفر',
-                            desc: 'أوامر قنوات العدادات التلقائية والإحصائيات الحية',
-                            icon: '📈',
-                            items: [
-                                { name: '/stats-setup', desc: 'إنشاء قنوات عدادات السيرفر التلقائية', badge: 'صلاحيات ديسكورد', icon: '📊' },
-                                { name: '/stats-members', desc: 'تفعيل عداد الأعضاء', badge: 'صلاحيات ديسكورد', icon: '👥' },
-                                { name: '/stats-bots', desc: 'تفعيل عداد البوتات', badge: 'صلاحيات ديسكورد', icon: '🤖' },
-                                { name: '/stats-channels', desc: 'تفعيل عداد القنوات', badge: 'صلاحيات ديسكورد', icon: '📁' },
-                                { name: '/stats-roles', desc: 'تفعيل عداد الرتب', badge: 'صلاحيات ديسكورد', icon: '🎖️' },
-                                { name: '/stats-boosts', desc: 'تفعيل عداد البوستات', badge: 'صلاحيات ديسكورد', icon: '💎' },
-                                { name: '/stats-online', desc: 'تفعيل عداد المتواجدين أونلاين', badge: 'صلاحيات ديسكورد', icon: '🟢' },
-                                { name: '/stats-voice', desc: 'تفعيل عداد المتواجدين في الصوت', badge: 'صلاحيات ديسكورد', icon: '🎙️' },
-                                { name: '/stats-delete', desc: 'حذف جميع قنوات العدادات', badge: 'صلاحيات ديسكورد', icon: '🗑️' },
-                                { name: '/stats-refresh', desc: 'تحديث فوري لأرقام العدادات', badge: 'صلاحيات ديسكورد', icon: '🔄' },
-                                { name: '/stats-format', desc: 'تعديل شكل واسم قنوات العدادات', badge: 'صلاحيات ديسكورد', icon: '✏️' }
-                            ]
-                        },
-                        profile_cat: {
-                            title: 'الملف الشخصي',
-                            desc: 'أوامر الملف الشخصي والسمعة والراتب اليومي والعملات',
-                            icon: '👤',
-                            items: [
-                                { name: '/profile', desc: 'عرض بطاقة بروفايلك الشاملة', badge: '', icon: '💳' },
-                                { name: '/rep', desc: 'إعطاء نقطة سمعة وشكر لعضو (+rep)', badge: '', icon: '⭐' },
-                                { name: '/daily', desc: 'استلام الراتب اليومي (Gold)', badge: '', icon: '🪙' },
-                                { name: '/coins', desc: 'رصيدك من عملات Gold', badge: '', icon: '💰' },
-                                { name: '/pay', desc: 'تحويل عملات Gold لعضو آخر', badge: '', icon: '💸' },
-                                { name: '/setbio', desc: 'تعديل النبذة الشخصية (Bio)', badge: '', icon: '📝' },
-                                { name: '/settitle', desc: 'تعديل اللقب الشخصي بالبروفايل', badge: '', icon: '🏷️' },
-                                { name: '/setbadge', desc: 'تعديل الشارة المفضلة بالبروفايل', badge: '', icon: '🎖️' },
-                                { name: '/profile-bg', desc: 'تغيير خلفية بطاقة البروفايل', badge: '', icon: '🎨' },
-                                { name: '/marry', desc: 'الزواج التفاعلي في السيرفر', badge: '', icon: '💍' }
-                            ]
-                        }
-                    };
-
-                    let currentCat = 'punishments';
-                    let currentFilter = 'all';
-
-                    let disabledCommands = new Set();
-                    try {
-                        const rawDisabled = ${JSON.stringify(settings.disabled_commands || '[]')};
-                        const parsed = typeof rawDisabled === 'string' ? JSON.parse(rawDisabled) : rawDisabled;
-                        if (Array.isArray(parsed)) {
-                            parsed.forEach(c => disabledCommands.add(c));
-                        }
-                    } catch(e) {}
-
-                    function updateStatCounters() {
-                        let total = 0;
-                        let enabled = 0;
-                        Object.keys(commandsDatabase).forEach(cat => {
-                            const items = commandsDatabase[cat].items;
-                            total += items.length;
-                            const catEnabled = items.filter(it => !disabledCommands.has(it.name)).length;
-                            enabled += catEnabled;
-
-                            // تحديث شارة القسم في الشريط الجانبي
-                            const btn = document.getElementById('btnCat' + cat.charAt(0).toUpperCase() + cat.slice(1));
-                            if (btn) {
-                                const badge = btn.querySelector('span[class*="font-mono"]');
-                                if (badge) {
-                                    badge.innerText = catEnabled + '/' + items.length;
-                                    if (catEnabled === 0) {
-                                        badge.className = 'px-2 py-0.5 bg-rose-950/60 text-rose-400 rounded-lg text-[10px] font-mono';
-                                    } else if (catEnabled < items.length) {
-                                        badge.className = 'px-2 py-0.5 bg-amber-950/60 text-amber-400 rounded-lg text-[10px] font-mono';
-                                    } else {
-                                        badge.className = 'px-2 py-0.5 bg-emerald-950/60 text-emerald-400 rounded-lg text-[10px] font-mono';
-                                    }
-                                }
+                    (function() {
+                        var DB = {
+                            basic: {
+                                title: 'الأوامر الأساسية', desc: 'الأوامر الرئيسية للبوت والاستخدام اليومي', icon: '⚙️',
+                                items: [
+                                    { name: '/help', desc: 'قائمة جميع الأوامر المتاحة', badge: '', icon: '📖' },
+                                    { name: '/ping', desc: 'سرعة استجابة البوت', badge: '', icon: '📶' },
+                                    { name: '/botinfo', desc: 'معلومات البوت الكاملة', badge: '', icon: '🤖' },
+                                    { name: '/serverinfo', desc: 'معلومات السيرفر الشاملة', badge: '', icon: '🏠' },
+                                    { name: '/userinfo', desc: 'معلومات عضو في السيرفر', badge: '', icon: '👤' },
+                                    { name: '/avatar', desc: 'عرض صورة عضو بدقة عالية', badge: '', icon: '🖼️' },
+                                    { name: '/banner', desc: 'عرض بنر عضو', badge: '', icon: '🎨' },
+                                    { name: '/invites', desc: 'عدد دعوات عضو في السيرفر', badge: '', icon: '🔗' },
+                                    { name: '/roles', desc: 'قائمة رتب السيرفر الكاملة', badge: '', icon: '🎖️' },
+                                    { name: '/channels', desc: 'قائمة قنوات السيرفر', badge: '', icon: '📁' },
+                                    { name: '/emojis', desc: 'قائمة إيموجيات السيرفر المخصصة', badge: '', icon: '😃' },
+                                    { name: '/apply', desc: 'تقديم طلب وظيفي بالسيرفر', badge: '', icon: '📝' },
+                                    { name: '/ticket', desc: 'فتح تذكرة دعم', badge: '', icon: '🎫' },
+                                    { name: '/daily', desc: 'استلام الراتب اليومي', badge: '', icon: '🪙' },
+                                    { name: '/profile', desc: 'عرض بطاقة البروفايل', badge: '', icon: '💳' },
+                                    { name: '/leaderboard', desc: 'قائمة المتصدرين', badge: '', icon: '🏆' },
+                                    { name: '/stars', desc: 'رصيد النجوم والتقييمات', badge: '', icon: '⭐' }
+                                ]
+                            },
+                            punishments: {
+                                title: 'العقوبات', desc: 'أوامر تنفيذ العقوبات المباشرة على الأعضاء', icon: '🔨',
+                                items: [
+                                    { name: '/ban', desc: 'حظر عضو', badge: 'صلاحيات ديسكورد', icon: '🪓' },
+                                    { name: '/unban', desc: 'فك حظر عضو', badge: 'صلاحيات ديسكورد', icon: '🛡️' },
+                                    { name: '/kick', desc: 'طرد عضو', badge: 'صلاحيات ديسكورد', icon: '🪓' },
+                                    { name: '/mute', desc: 'كتم عضو', badge: 'صلاحيات ديسكورد', icon: '🚨' },
+                                    { name: '/unmute', desc: 'فك كتم عضو', badge: 'صلاحيات ديسكورد', icon: '📢' },
+                                    { name: '/timeout', desc: 'عزل عضو', badge: 'صلاحيات ديسكورد', icon: '⏳' },
+                                    { name: '/untimeout', desc: 'فك عزل عضو', badge: 'صلاحيات ديسكورد', icon: '🛡️' },
+                                    { name: '/warn', desc: 'تحذير عضو', badge: 'صلاحيات ديسكورد', icon: '🚨' },
+                                    { name: '/delwarn', desc: 'حذف تحذير', badge: 'صلاحيات ديسكورد', icon: '🗑️' },
+                                    { name: '/clearwarns', desc: 'مسح جميع التحذيرات', badge: 'صلاحيات ديسكورد', icon: '🗑️' },
+                                    { name: '/clearallwarns', desc: 'مسح جميع تحذيرات عضو', badge: 'صلاحيات ديسكورد', icon: '🗑️' },
+                                    { name: '/clearallpunishments', desc: 'حذف نهائي لكل سجلات العقوبات', badge: '', icon: '🗑️' },
+                                    { name: '/prison', desc: 'سجن عضو', badge: 'صلاحيات ديسكورد', icon: '🪓' },
+                                    { name: '/unprison', desc: 'إخراج من السجن', badge: 'صلاحيات ديسكورد', icon: '🛡️' },
+                                    { name: '/setnick', desc: 'تغيير الاسم المستعار', badge: 'صلاحيات ديسكورد', icon: '✏️' },
+                                    { name: '/blacklist', desc: 'بلاك لست عضو (دائم)', badge: 'صلاحيات ديسكورد', icon: '🪓' },
+                                    { name: '/unblacklist', desc: 'فك بلاك لست عضو', badge: 'صلاحيات ديسكورد', icon: '🛡️' },
+                                    { name: '/remove', desc: 'حذف عقوبة من عضو', badge: 'صلاحيات ديسكورد', icon: '🗑️' },
+                                    { name: '/down', desc: 'إزالة الرتب الإدارية لمدة محددة', badge: 'صلاحيات ديسكورد', icon: '🪓' },
+                                    { name: '/undown', desc: 'استعادة الرتب الإدارية المزالة', badge: '', icon: '🛡️' },
+                                    { name: '/block', desc: 'حظر عضو من رتبة', badge: 'صلاحيات ديسكورد', icon: '🛡️' },
+                                    { name: '/unblock', desc: 'فك حظر عضو من رتبة', badge: 'صلاحيات ديسكورد', icon: '🛡️' }
+                                ]
+                            },
+                            punishment_logs: {
+                                title: 'سجلات العقوبات', desc: 'استعلام وعرض سجلات العقوبات السابقة', icon: '📜',
+                                items: [
+                                    { name: '/allwarns', desc: 'عرض كل التحذيرات النشطة', badge: '', icon: '📋' },
+                                    { name: '/bans', desc: 'سجل باندات عضو', badge: '', icon: '📜' },
+                                    { name: '/blacklists', desc: 'سجل بلاك لست عضو', badge: '', icon: '📜' },
+                                    { name: '/blocks', desc: 'سجل بلوكات عضو', badge: '', icon: '📜' },
+                                    { name: '/case', desc: 'عرض تفاصيل عقوبة', badge: 'صلاحيات ديسكورد', icon: '📄' },
+                                    { name: '/crime', desc: 'سجل عقوبات العضو الكامل', badge: '', icon: '📜' },
+                                    { name: '/crimes', desc: 'عقوبات العضو النشطة حالياً', badge: '', icon: '📜' },
+                                    { name: '/downs', desc: 'سجل داونات عضو', badge: '', icon: '📜' },
+                                    { name: '/modlogs', desc: 'سجل إشراف المشرفين', badge: 'صلاحيات ديسكورد', icon: '📜' },
+                                    { name: '/kicks', desc: 'سجل طرديات عضو', badge: '', icon: '📜' },
+                                    { name: '/mutes', desc: 'سجل كتمات عضو', badge: '', icon: '📜' },
+                                    { name: '/prisons', desc: 'سجل سجنات عضو', badge: '', icon: '📜' },
+                                    { name: '/timeouts', desc: 'سجل عزلات عضو', badge: '', icon: '📜' },
+                                    { name: '/warns', desc: 'سجل تحذيرات عضو', badge: '', icon: '📜' },
+                                    { name: '/staffactivity', desc: 'تقرير نشاط فريق الإدارة', badge: 'صلاحيات ديسكورد', icon: '📊' },
+                                    { name: '/audit', desc: 'سجل التدقيق والعمليات', badge: 'صلاحيات ديسكورد', icon: '🔍' },
+                                    { name: '/punishments', desc: 'ملخص جميع العقوبات النشطة', badge: '', icon: '📋' }
+                                ]
+                            },
+                            channels: {
+                                title: 'إدارة القنوات', desc: 'أوامر قفل وإخفاء وإدارة القنوات', icon: '📌',
+                                items: [
+                                    { name: '/lock', desc: 'قفل قناة', badge: 'صلاحيات ديسكورد', icon: '🔒' },
+                                    { name: '/unlock', desc: 'فتح قناة مقفولة', badge: 'صلاحيات ديسكورد', icon: '🔓' },
+                                    { name: '/hide', desc: 'إخفاء قناة عن الأعضاء', badge: 'صلاحيات ديسكورد', icon: '👁️' },
+                                    { name: '/unhide', desc: 'إظهار قناة مخفية', badge: 'صلاحيات ديسكورد', icon: '👁️' },
+                                    { name: '/slowmode', desc: 'تفعيل السلو مود في القناة', badge: 'صلاحيات ديسكورد', icon: '🐌' },
+                                    { name: '/clone', desc: 'نسخ قناة بكامل إعداداتها', badge: 'صلاحيات ديسكورد', icon: '📋' },
+                                    { name: '/rename', desc: 'تغيير اسم القناة', badge: 'صلاحيات ديسكورد', icon: '✏️' },
+                                    { name: '/settopic', desc: 'تغيير وصف القناة', badge: 'صلاحيات ديسكورد', icon: '📝' },
+                                    { name: '/setnsfw', desc: 'تفعيل/تعطيل وضع NSFW', badge: 'صلاحيات ديسكورد', icon: '🔞' }
+                                ]
+                            },
+                            chat: {
+                                title: 'أدوات الشات', desc: 'أوامر حذف الرسائل والإعلانات والتفاعل', icon: '💬',
+                                items: [
+                                    { name: '/clear', desc: 'حذف عدد محدد من الرسائل', badge: 'صلاحيات ديسكورد', icon: '🗑️' },
+                                    { name: '/clearpinned', desc: 'حذف الرسائل المثبتة', badge: 'صلاحيات ديسكورد', icon: '🗑️' },
+                                    { name: '/clearbots', desc: 'حذف رسائل البوتات', badge: 'صلاحيات ديسكورد', icon: '🗑️' },
+                                    { name: '/clearuser', desc: 'حذف رسائل عضو معين', badge: 'صلاحيات ديسكورد', icon: '🗑️' },
+                                    { name: '/say', desc: 'إرسال رسالة عبر البوت', badge: 'صلاحيات ديسكورد', icon: '💬' },
+                                    { name: '/embed', desc: 'إنشاء Embed مخصص', badge: 'صلاحيات ديسكورد', icon: '📦' },
+                                    { name: '/poll', desc: 'إنشاء استطلاع رأي', badge: 'صلاحيات ديسكورد', icon: '📊' },
+                                    { name: '/remind', desc: 'تعيين تذكير مؤقت', badge: '', icon: '⏰' },
+                                    { name: '/announce', desc: 'إرسال إعلان رسمي', badge: 'صلاحيات ديسكورد', icon: '📢' },
+                                    { name: '/broadcast', desc: 'بث رسالة في جميع القنوات', badge: 'صلاحيات ديسكورد', icon: '📡' },
+                                    { name: '/translate', desc: 'ترجمة نص إلى لغة أخرى', badge: '', icon: '🌐' },
+                                    { name: '/quote', desc: 'اقتباس رسالة قديمة', badge: '', icon: '💬' }
+                                ]
+                            },
+                            voice: {
+                                title: 'إدارة الصوت', desc: 'أوامر التحكم في قنوات الصوت والأعضاء', icon: '🎙️',
+                                items: [
+                                    { name: '/vcmute', desc: 'كتم عضو في الصوت', badge: 'صلاحيات ديسكورد', icon: '🔇' },
+                                    { name: '/vcunmute', desc: 'فك كتم عضو في الصوت', badge: 'صلاحيات ديسكورد', icon: '🔊' },
+                                    { name: '/vcdeafen', desc: 'صمم عضو في الصوت', badge: 'صلاحيات ديسكورد', icon: '🔕' },
+                                    { name: '/vcundeafen', desc: 'فك تصميم عضو في الصوت', badge: 'صلاحيات ديسكورد', icon: '🔔' },
+                                    { name: '/vckick', desc: 'طرد عضو من قناة الصوت', badge: 'صلاحيات ديسكورد', icon: '👢' },
+                                    { name: '/vcmove', desc: 'نقل عضو بين قنوات الصوت', badge: 'صلاحيات ديسكورد', icon: '🔀' },
+                                    { name: '/vcmoveall', desc: 'نقل جميع الأعضاء لقناة أخرى', badge: 'صلاحيات ديسكورد', icon: '🔀' },
+                                    { name: '/vclimit', desc: 'تحديد الحد الأقصى للمستخدمين', badge: 'صلاحيات ديسكورد', icon: '🔢' },
+                                    { name: '/vclock', desc: 'قفل قناة الصوت', badge: 'صلاحيات ديسكورد', icon: '🔒' },
+                                    { name: '/vcunlock', desc: 'فتح قناة الصوت', badge: 'صلاحيات ديسكورد', icon: '🔓' },
+                                    { name: '/vchide', desc: 'إخفاء قناة الصوت', badge: 'صلاحيات ديسكورد', icon: '👁️' },
+                                    { name: '/vcunhide', desc: 'إظهار قناة الصوت', badge: 'صلاحيات ديسكورد', icon: '👁️' },
+                                    { name: '/vcbitrate', desc: 'تغيير جودة الصوت (Bitrate)', badge: 'صلاحيات ديسكورد', icon: '🎵' },
+                                    { name: '/tempvoice', desc: 'إنشاء قناة صوتية مؤقتة', badge: '', icon: '⏳' },
+                                    { name: '/vcinfo', desc: 'معلومات قناة الصوت الحالية', badge: '', icon: '📊' },
+                                    { name: '/vcactivity', desc: 'تشغيل نشاط جماعي بالصوت', badge: '', icon: '🎮' },
+                                    { name: '/vcrename', desc: 'تغيير اسم قناة الصوت', badge: 'صلاحيات ديسكورد', icon: '✏️' },
+                                    { name: '/vcpermit', desc: 'السماح لعضو بالدخول', badge: 'صلاحيات ديسكورد', icon: '✅' },
+                                    { name: '/vcreject', desc: 'منع عضو من الدخول', badge: 'صلاحيات ديسكورد', icon: '🚫' }
+                                ]
+                            },
+                            roles: {
+                                title: 'إدارة الرتب', desc: 'أوامر إعطاء وإزالة وإنشاء الرتب', icon: '🎖️',
+                                items: [
+                                    { name: '/giverole', desc: 'إعطاء رتبة لعضو', badge: 'صلاحيات ديسكورد', icon: '🎁' },
+                                    { name: '/removerole', desc: 'إزالة رتبة من عضو', badge: 'صلاحيات ديسكورد', icon: '❌' },
+                                    { name: '/roleall', desc: 'إعطاء رتبة لجميع الأعضاء', badge: 'صلاحيات ديسكورد', icon: '👥' },
+                                    { name: '/rolebots', desc: 'إعطاء رتبة لجميع البوتات', badge: 'صلاحيات ديسكورد', icon: '🤖' },
+                                    { name: '/rolehumans', desc: 'إعطاء رتبة لجميع البشر', badge: 'صلاحيات ديسكورد', icon: '👤' },
+                                    { name: '/createrole', desc: 'إنشاء رتبة جديدة', badge: 'صلاحيات ديسكورد', icon: '✨' },
+                                    { name: '/deleterole', desc: 'حذف رتبة من السيرفر', badge: 'صلاحيات ديسكورد', icon: '🗑️' },
+                                    { name: '/rolecolor', desc: 'تغيير لون رتبة', badge: 'صلاحيات ديسكورد', icon: '🎨' },
+                                    { name: '/roleinfo', desc: 'معلومات رتبة مفصلة', badge: '', icon: '📋' },
+                                    { name: '/inrole', desc: 'قائمة أعضاء رتبة معينة', badge: '', icon: '👥' }
+                                ]
+                            },
+                            custom_roles: {
+                                title: 'الرتب الخاصة', desc: 'أوامر الرتب الشخصية المخصصة لكل عضو', icon: '👑',
+                                items: [
+                                    { name: '/customrole', desc: 'إنشاء رتبة خاصة بك', badge: '', icon: '👑' },
+                                    { name: '/myrole', desc: 'عرض معلومات رتبتك الخاصة', badge: '', icon: '👤' },
+                                    { name: '/myrole-color', desc: 'تغيير لون رتبتك الخاصة', badge: '', icon: '🎨' },
+                                    { name: '/myrole-name', desc: 'تغيير اسم رتبتك الخاصة', badge: '', icon: '✏️' },
+                                    { name: '/myrole-icon', desc: 'تغيير أيقونة رتبتك الخاصة', badge: '', icon: '🖼️' },
+                                    { name: '/myrole-give', desc: 'مشاركة رتبتك الخاصة مع عضو', badge: '', icon: '🎁' },
+                                    { name: '/myrole-remove', desc: 'إلغاء مشاركة الرتبة مع عضو', badge: '', icon: '❌' },
+                                    { name: '/myrole-delete', desc: 'حذف رتبتك الخاصة نهائياً', badge: '', icon: '🗑️' },
+                                    { name: '/customroles-list', desc: 'قائمة جميع الرتب الخاصة', badge: 'صلاحيات ديسكورد', icon: '📋' }
+                                ]
+                            },
+                            server_info: {
+                                title: 'معلومات السيرفر', desc: 'أوامر عرض إحصائيات ومعلومات السيرفر', icon: '📊',
+                                items: [
+                                    { name: '/serverinfo', desc: 'معلومات السيرفر الشاملة', badge: '', icon: '🏠' },
+                                    { name: '/serverbanner', desc: 'بنر السيرفر الرسمي', badge: '', icon: '🎨' },
+                                    { name: '/servericon', desc: 'أيقونة السيرفر بدقة عالية', badge: '', icon: '🖼️' },
+                                    { name: '/serverstats', desc: 'إحصائيات السيرفر المفصلة', badge: '', icon: '📊' },
+                                    { name: '/boosts', desc: 'قائمة المبوستين وعدد البوستات', badge: '', icon: '💎' },
+                                    { name: '/invites-top', desc: 'أكثر الأعضاء دعوةً', badge: '', icon: '🔗' },
+                                    { name: '/channels-list', desc: 'قائمة كاملة بالقنوات', badge: '', icon: '📁' },
+                                    { name: '/roles-list', desc: 'قائمة وتوزيع الرتب', badge: '', icon: '🎖️' },
+                                    { name: '/emojis-list', desc: 'قائمة الإيموجيات المخصصة', badge: '', icon: '😃' },
+                                    { name: '/stickers-list', desc: 'قائمة الستيكرات', badge: '', icon: '🏷️' },
+                                    { name: '/bans-list', desc: 'قائمة المحظورين', badge: 'صلاحيات ديسكورد', icon: '🔨' },
+                                    { name: '/admins', desc: 'قائمة الإدارة والمشرفين', badge: '', icon: '👮' },
+                                    { name: '/bots', desc: 'قائمة بوتات السيرفر', badge: '', icon: '🤖' },
+                                    { name: '/vanity', desc: 'رابط السيرفر المخصص', badge: '', icon: '🌐' },
+                                    { name: '/features', desc: 'ميزات السيرفر المفعلة', badge: '', icon: '✨' },
+                                    { name: '/created', desc: 'تاريخ إنشاء السيرفر', badge: '', icon: '📅' },
+                                    { name: '/uptime', desc: 'مدة تشغيل البوت', badge: '', icon: '⏱️' },
+                                    { name: '/ping', desc: 'سرعة الاستجابة', badge: '', icon: '📶' },
+                                    { name: '/shards', desc: 'معلومات الشاردات', badge: '', icon: '🖧' }
+                                ]
+                            },
+                            custom_bot: {
+                                title: 'أدوات البوت الخاص', desc: 'أوامر تخصيص مظهر وحالة البوت الخاص', icon: '🤖',
+                                items: [
+                                    { name: '/bot-setnick', desc: 'تغيير اسم البوت في السيرفر', badge: 'صلاحيات ديسكورد', icon: '✏️' },
+                                    { name: '/bot-setavatar', desc: 'تغيير صورة البوت', badge: 'صلاحيات ديسكورد', icon: '🖼️' },
+                                    { name: '/bot-setbanner', desc: 'تغيير بنر البوت', badge: 'صلاحيات ديسكورد', icon: '🎨' },
+                                    { name: '/bot-setactivity', desc: 'تغيير نشاط وحالة البوت', badge: 'صلاحيات ديسكورد', icon: '🎮' },
+                                    { name: '/bot-setstatus', desc: 'تغيير حالة التواجد (Online/DND/Idle)', badge: 'صلاحيات ديسكورد', icon: '🟢' }
+                                ]
+                            },
+                            security: {
+                                title: 'الحماية', desc: 'أوامر الحماية من التخريب ومكافحة السبام', icon: '🛡️',
+                                items: [
+                                    { name: '/antiraid', desc: 'تفعيل/تعطيل مكافحة الغزو', badge: 'صلاحيات ديسكورد', icon: '🚨' },
+                                    { name: '/antinuke', desc: 'إعدادات جدار الحماية Anti-Nuke', badge: 'صلاحيات ديسكورد', icon: '🛡️' },
+                                    { name: '/whitelist-add', desc: 'إضافة عضو للقائمة البيضاء', badge: 'صلاحيات ديسكورد', icon: '⚪' },
+                                    { name: '/whitelist-remove', desc: 'إزالة عضو من القائمة البيضاء', badge: 'صلاحيات ديسكورد', icon: '⚫' },
+                                    { name: '/whitelist-list', desc: 'عرض القائمة البيضاء', badge: 'صلاحيات ديسكورد', icon: '📋' },
+                                    { name: '/antibot', desc: 'منع دخول البوتات غير الموثقة', badge: 'صلاحيات ديسكورد', icon: '🤖' },
+                                    { name: '/antispam', desc: 'مكافحة السبام والرسائل المتكررة', badge: 'صلاحيات ديسكورد', icon: '⚡' },
+                                    { name: '/antilink', desc: 'منع نشر الروابط', badge: 'صلاحيات ديسكورد', icon: '🔗' },
+                                    { name: '/backup-create', desc: 'إنشاء نسخة احتياطية للسيرفر', badge: 'صلاحيات ديسكورد', icon: '📦' },
+                                    { name: '/backup-load', desc: 'استعادة نسخة احتياطية', badge: 'صلاحيات ديسكورد', icon: '🔄' },
+                                    { name: '/backup-list', desc: 'قائمة النسخ الاحتياطية', badge: 'صلاحيات ديسكورد', icon: '📜' },
+                                    { name: '/lockdown', desc: 'إغلاق كامل قنوات السيرفر فوراً', badge: 'صلاحيات ديسكورد', icon: '🔒' },
+                                    { name: '/unlockdown', desc: 'إعادة فتح جميع القنوات المغلقة', badge: 'صلاحيات ديسكورد', icon: '🔓' },
+                                    { name: '/security-status', desc: 'تقرير حالة الحماية', badge: '', icon: '📊' },
+                                    { name: '/security-audit', desc: 'فحص ثغرات وصلاحيات السيرفر', badge: 'صلاحيات ديسكورد', icon: '🔍' }
+                                ]
+                            },
+                            levels_cat: {
+                                title: 'المستويات والخبرة', desc: 'أوامر المستويات وبطاقات الرانك', icon: '⭐',
+                                items: [
+                                    { name: '/rank', desc: 'عرض بطاقة مستواك الحالية', badge: '', icon: '💳' },
+                                    { name: '/levels-leaderboard', desc: 'المتصدرين في المستويات', badge: '', icon: '🏆' },
+                                    { name: '/setxp', desc: 'تعديل نقاط الخبرة لعضو', badge: 'صلاحيات ديسكورد', icon: '⚡' },
+                                    { name: '/setlevel', desc: 'تعديل مستوى عضو', badge: 'صلاحيات ديسكورد', icon: '🎖️' },
+                                    { name: '/resetlevels', desc: 'تصفير نظام المستويات', badge: 'صلاحيات ديسكورد', icon: '🗑️' },
+                                    { name: '/level-reward-add', desc: 'إضافة رتبة مكافأة عند مستوى', badge: 'صلاحيات ديسكورد', icon: '🎁' },
+                                    { name: '/level-reward-remove', desc: 'إزالة رتبة مكافأة', badge: 'صلاحيات ديسكورد', icon: '❌' },
+                                    { name: '/level-rewards-list', desc: 'قائمة جميع رتب المكافآت', badge: '', icon: '📜' },
+                                    { name: '/levelcard-bg', desc: 'تغيير خلفية بطاقة الرانك', badge: '', icon: '🎨' },
+                                    { name: '/doublexp', desc: 'تفعيل مضاعفة الخبرة 2x', badge: 'صلاحيات ديسكورد', icon: '🚀' }
+                                ]
+                            },
+                            server_stats: {
+                                title: 'إحصائيات السيرفر', desc: 'أوامر قنوات العدادات التلقائية', icon: '📈',
+                                items: [
+                                    { name: '/stats-setup', desc: 'إنشاء قنوات عدادات السيرفر', badge: 'صلاحيات ديسكورد', icon: '📊' },
+                                    { name: '/stats-members', desc: 'تفعيل عداد الأعضاء', badge: 'صلاحيات ديسكورد', icon: '👥' },
+                                    { name: '/stats-bots', desc: 'تفعيل عداد البوتات', badge: 'صلاحيات ديسكورد', icon: '🤖' },
+                                    { name: '/stats-channels', desc: 'تفعيل عداد القنوات', badge: 'صلاحيات ديسكورد', icon: '📁' },
+                                    { name: '/stats-roles', desc: 'تفعيل عداد الرتب', badge: 'صلاحيات ديسكورد', icon: '🎖️' },
+                                    { name: '/stats-boosts', desc: 'تفعيل عداد البوستات', badge: 'صلاحيات ديسكورد', icon: '💎' },
+                                    { name: '/stats-online', desc: 'تفعيل عداد المتواجدين أونلاين', badge: 'صلاحيات ديسكورد', icon: '🟢' },
+                                    { name: '/stats-voice', desc: 'تفعيل عداد المتواجدين في الصوت', badge: 'صلاحيات ديسكورد', icon: '🎙️' },
+                                    { name: '/stats-delete', desc: 'حذف جميع قنوات العدادات', badge: 'صلاحيات ديسكورد', icon: '🗑️' },
+                                    { name: '/stats-refresh', desc: 'تحديث فوري لأرقام العدادات', badge: 'صلاحيات ديسكورد', icon: '🔄' },
+                                    { name: '/stats-format', desc: 'تعديل شكل قنوات العدادات', badge: 'صلاحيات ديسكورد', icon: '✏️' }
+                                ]
+                            },
+                            profile_cat: {
+                                title: 'الملف الشخصي', desc: 'أوامر البروفايل والسمعة والعملات', icon: '👤',
+                                items: [
+                                    { name: '/profile', desc: 'عرض بطاقة بروفايلك الشاملة', badge: '', icon: '💳' },
+                                    { name: '/rep', desc: 'إعطاء نقطة سمعة لعضو (+rep)', badge: '', icon: '⭐' },
+                                    { name: '/daily', desc: 'استلام الراتب اليومي (Gold)', badge: '', icon: '🪙' },
+                                    { name: '/coins', desc: 'رصيدك من عملات Gold', badge: '', icon: '💰' },
+                                    { name: '/pay', desc: 'تحويل عملات Gold لعضو آخر', badge: '', icon: '💸' },
+                                    { name: '/setbio', desc: 'تعديل النبذة الشخصية', badge: '', icon: '📝' },
+                                    { name: '/settitle', desc: 'تعديل اللقب الشخصي', badge: '', icon: '🏷️' },
+                                    { name: '/setbadge', desc: 'تعديل الشارة المفضلة', badge: '', icon: '🎖️' },
+                                    { name: '/profile-bg', desc: 'تغيير خلفية بطاقة البروفايل', badge: '', icon: '🎨' },
+                                    { name: '/marry', desc: 'الزواج التفاعلي في السيرفر', badge: '', icon: '💍' }
+                                ]
                             }
-                        });
-                        const totalEl = document.getElementById('totalCmdsCount');
-                        const enabledEl = document.getElementById('enabledCmdsCount');
-                        if (totalEl) totalEl.innerText = total;
-                        if (enabledEl) enabledEl.innerText = enabled;
-                    }
+                        };
 
-                    function renderCommands() {
-                        const container = document.getElementById('cmdsListContainer');
-                        const data = commandsDatabase[currentCat] || commandsDatabase.punishments;
-                        
-                        document.getElementById('catTitle').innerText = data.title;
-                        document.getElementById('catDesc').innerText = data.desc;
-                        document.getElementById('catIcon').innerText = data.icon;
+                        var catBtnMap = {
+                            basic: 'btnCatBasic',
+                            punishments: 'btnCatPunishments',
+                            punishment_logs: 'btnCatPunishmentLogs',
+                            channels: 'btnCatChannels',
+                            chat: 'btnCatChat',
+                            voice: 'btnCatVoice',
+                            roles: 'btnCatRoles',
+                            custom_roles: 'btnCatCustomRoles',
+                            server_info: 'btnCatServerInfo',
+                            custom_bot: 'btnCatCustomBot',
+                            security: 'btnCatSecurity',
+                            levels_cat: 'btnCatLevels',
+                            server_stats: 'btnCatServerStats',
+                            profile_cat: 'btnCatProfile'
+                        };
 
-                        const searchVal = document.getElementById('cmdSearchInput').value.toLowerCase().trim();
+                        var catBadgeMap = {
+                            basic: 'badgeCatBasic',
+                            punishments: 'badgeCatPunishments',
+                            punishment_logs: 'badgeCatPunishmentLogs',
+                            channels: 'badgeCatChannels',
+                            chat: 'badgeCatChat',
+                            voice: 'badgeCatVoice',
+                            roles: 'badgeCatRoles',
+                            custom_roles: 'badgeCatCustomRoles',
+                            server_info: 'badgeCatServerInfo',
+                            custom_bot: 'badgeCatCustomBot',
+                            security: 'badgeCatSecurity',
+                            levels_cat: 'badgeCatLevels',
+                            server_stats: 'badgeCatServerStats',
+                            profile_cat: 'badgeCatProfile'
+                        };
 
-                        const filtered = data.items.filter(item => {
-                            const isEnabled = !disabledCommands.has(item.name);
-                            if (currentFilter === 'enabled' && !isEnabled) return false;
-                            if (currentFilter === 'disabled' && isEnabled) return false;
-                            if (searchVal && !item.name.toLowerCase().includes(searchVal) && !item.desc.toLowerCase().includes(searchVal)) {
-                                return false;
-                            }
-                            return true;
-                        });
+                        var currentCat = 'punishments';
+                        var currentFilter = 'all';
+                        var disabledCommands = {};
 
-                        if (filtered.length === 0) {
-                            container.innerHTML = '<div class="py-12 bg-[#12141f] border border-white/5 rounded-2xl text-center text-xs text-gray-500">لا توجد أوامر مطابقة لنتائج البحث أو الفلتر 🔍</div>';
-                            return;
-                        }
-
-                        container.innerHTML = filtered.map(item => {
-                            const isEnabled = !disabledCommands.has(item.name);
-                            const badgeHtml = item.badge ? '<span class="px-2.5 py-0.5 bg-purple-950/60 text-purple-300 border border-purple-800/40 rounded-lg text-[10px] font-bold flex items-center gap-1"><span>' + item.badge + '</span><span>🛡️</span></span>' : '';
-                            return '<div class="bg-[#12141f] border border-white/5 p-4 rounded-2xl flex items-center justify-between hover:border-purple-500/40 transition ' + (!isEnabled ? 'opacity-50' : '') + '">' +
-                                '<div class="flex items-center gap-3">' +
-                                    '<label class="toggle"><input type="checkbox" data-cmd="' + item.name + '" ' + (isEnabled ? 'checked' : '') + ' onchange="toggleSingleCmd(\'' + item.name + '\', this.checked); this.closest(\'div.flex\').parentElement.parentElement.classList.toggle(\'opacity-50\', !this.checked)"><span class="slider"></span></label>' +
-                                    '<button type="button" class="text-gray-500 hover:text-white text-xs">▼</button>' +
-                                '</div>' +
-                                '<div class="flex items-center gap-3">' +
-                                    '<div class="text-right">' +
-                                        '<div class="flex items-center justify-end gap-2">' + badgeHtml + '<span class="font-black text-white text-xs font-mono">' + item.name + '</span></div>' +
-                                        '<p class="text-[11px] text-gray-400 mt-0.5">' + item.desc + '</p>' +
-                                    '</div>' +
-                                    '<div class="w-9 h-9 rounded-xl bg-[#0b0d14] border border-white/5 flex items-center justify-center text-sm shadow-inner">' + (item.icon || '⚙️') + '</div>' +
-                                '</div>' +
-                            '</div>';
-                        }).join('');
-
-                        updateStatCounters();
-                    }
-
-                    const categoryBtnIds = {
-                        basic: 'btnCatBasic',
-                        punishments: 'btnCatPunishments',
-                        punishment_logs: 'btnCatPunishmentLogs',
-                        channels: 'btnCatChannels',
-                        chat: 'btnCatChat',
-                        voice: 'btnCatVoice',
-                        roles: 'btnCatRoles',
-                        custom_roles: 'btnCatCustomRoles',
-                        server_info: 'btnCatServerInfo',
-                        custom_bot: 'btnCatCustomBot',
-                        security: 'btnCatSecurity',
-                        levels_cat: 'btnCatLevels',
-                        server_stats: 'btnCatServerStats',
-                        profile_cat: 'btnCatProfile'
-                    };
-
-                    window.switchCmdCategory = function(catKey) {
-                        currentCat = catKey;
-                        const btns = document.querySelectorAll('[id^="btnCat"]');
-                        btns.forEach(b => {
-                            b.className = "w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-white hover:bg-white/5 transition cursor-pointer";
-                        });
-                        const targetId = categoryBtnIds[catKey] || ('btnCat' + catKey);
-                        const activeBtn = document.getElementById(targetId);
-                        if (activeBtn) {
-                            activeBtn.className = "w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold bg-purple-600 text-white shadow-lg transition cursor-pointer";
-                        }
-                        renderCommands();
-                    };
-
-                    window.searchCommands = function() {
-                        renderCommands();
-                    };
-
-                    window.filterCmdStatus = function(status) {
-                        currentFilter = status;
-                        const btnAll = document.getElementById('btnFilterAll');
-                        const btnEn = document.getElementById('btnFilterEnabled');
-                        const btnDis = document.getElementById('btnFilterDisabled');
-                        if (btnAll) btnAll.className = status === 'all' ? "px-3 py-1 rounded-lg text-xs font-bold bg-purple-600 text-white transition shadow cursor-pointer" : "px-3 py-1 rounded-lg text-xs font-bold text-gray-400 hover:text-white transition cursor-pointer";
-                        if (btnEn) btnEn.className = status === 'enabled' ? "px-3 py-1 rounded-lg text-xs font-bold bg-purple-600 text-white transition shadow cursor-pointer" : "px-3 py-1 rounded-lg text-xs font-bold text-gray-400 hover:text-white transition cursor-pointer";
-                        if (btnDis) btnDis.className = status === 'disabled' ? "px-3 py-1 rounded-lg text-xs font-bold bg-purple-600 text-white transition shadow cursor-pointer" : "px-3 py-1 rounded-lg text-xs font-bold text-gray-400 hover:text-white transition cursor-pointer";
-                        renderCommands();
-                    };
-
-                    window.toggleAllCategoryCmds = function(enable) {
-                        const data = commandsDatabase[currentCat] || commandsDatabase.punishments;
-                        data.items.forEach(it => {
-                            if (enable) {
-                                disabledCommands.delete(it.name);
-                            } else {
-                                disabledCommands.add(it.name);
-                            }
-                        });
-                        saveCommandStates();
-                        renderCommands();
-                    };
-
-                    window.toggleSingleCmd = async function(cmdName, isEnabled) {
-                        if (isEnabled) {
-                            disabledCommands.delete(cmdName);
-                        } else {
-                            disabledCommands.add(cmdName);
-                        }
-                        await saveCommandStates();
-                        updateStatCounters();
-                    };
-
-                    async function saveCommandStates() {
+                        // Load disabled commands from server
                         try {
-                            const gId = window.location.pathname.split('/')[2] || '${guildId}';
-                            const res = await fetch('/api/guild/' + gId + '/settings', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ disabled_commands: JSON.stringify([...disabledCommands]) })
-                            });
-                            const d = await res.json();
-                            if (d.success) {
-                                const indicator = document.getElementById('cmdSaveIndicator');
-                                if (indicator) {
-                                    indicator.classList.remove('opacity-0');
-                                    setTimeout(() => indicator.classList.add('opacity-0'), 2000);
-                                }
+                            var rawDis = ${JSON.stringify(settings && settings.disabled_commands ? settings.disabled_commands : '[]')};
+                            var parsed = typeof rawDis === 'string' ? JSON.parse(rawDis) : rawDis;
+                            if (Array.isArray(parsed)) {
+                                parsed.forEach(function(c) { disabledCommands[c] = true; });
                             }
                         } catch(e) {}
-                    }
 
-                    // Initial render immediately and after DOM ready
-                    if (document.readyState === 'loading') {
-                        document.addEventListener('DOMContentLoaded', renderCommands);
-                    } else {
-                        renderCommands();
-                    }
+                        function isEnabled(name) { return !disabledCommands[name]; }
+
+                        function renderCommands() {
+                            var container = document.getElementById('cmdsListContainer');
+                            if (!container) return;
+                            var data = DB[currentCat] || DB.punishments;
+
+                            var t = document.getElementById('catTitle');
+                            var d = document.getElementById('catDesc');
+                            var ic = document.getElementById('catIcon');
+                            if (t) t.innerText = data.title;
+                            if (d) d.innerText = data.desc;
+                            if (ic) ic.innerText = data.icon;
+
+                            var searchEl = document.getElementById('cmdSearchInput');
+                            var searchVal = searchEl ? searchEl.value.toLowerCase().trim() : '';
+
+                            var filtered = data.items.filter(function(item) {
+                                var en = isEnabled(item.name);
+                                if (currentFilter === 'enabled' && !en) return false;
+                                if (currentFilter === 'disabled' && en) return false;
+                                if (searchVal && item.name.toLowerCase().indexOf(searchVal) === -1 && item.desc.toLowerCase().indexOf(searchVal) === -1) return false;
+                                return true;
+                            });
+
+                            if (filtered.length === 0) {
+                                container.innerHTML = '<div class="py-12 bg-[#12141f] border border-white/5 rounded-2xl text-center text-xs text-gray-500">لا توجد أوامر مطابقة 🔍</div>';
+                                return;
+                            }
+
+                            container.innerHTML = filtered.map(function(item) {
+                                var en = isEnabled(item.name);
+                                var badgeHtml = item.badge ? '<span class="px-2.5 py-0.5 bg-purple-950/60 text-purple-300 border border-purple-800/40 rounded-lg text-[10px] font-bold flex items-center gap-1"><span>' + item.badge + '</span><span>🛡️</span></span>' : '';
+                                var safeName = item.name.replace(/'/g, "\\'");
+                                return '<div class="bg-[#12141f] border border-white/5 p-4 rounded-2xl flex items-center justify-between hover:border-purple-500/40 transition ' + (en ? '' : 'opacity-50') + '">' +
+                                    '<div class="flex items-center gap-3">' +
+                                        '<label class="toggle"><input type="checkbox" ' + (en ? 'checked' : '') + ' onchange="window.toggleSingleCmd(\'' + safeName + '\',this.checked)"><span class="slider"></span></label>' +
+                                        '<button type="button" class="text-gray-500 hover:text-white text-xs">▼</button>' +
+                                    '</div>' +
+                                    '<div class="flex items-center gap-3">' +
+                                        '<div class="text-right">' +
+                                            '<div class="flex items-center justify-end gap-2">' + badgeHtml + '<span class="font-black text-white text-xs font-mono">' + item.name + '</span></div>' +
+                                            '<p class="text-[11px] text-gray-400 mt-0.5">' + item.desc + '</p>' +
+                                        '</div>' +
+                                        '<div class="w-9 h-9 rounded-xl bg-[#0b0d14] border border-white/5 flex items-center justify-center text-sm shadow-inner">' + (item.icon || '⚙️') + '</div>' +
+                                    '</div>' +
+                                '</div>';
+                            }).join('');
+
+                            updateCounters();
+                        }
+
+                        function updateCounters() {
+                            var total = 0, enabled = 0;
+                            Object.keys(DB).forEach(function(cat) {
+                                var items = DB[cat].items;
+                                total += items.length;
+                                var catEnabled = items.filter(function(it) { return isEnabled(it.name); }).length;
+                                enabled += catEnabled;
+                                var badgeId = catBadgeMap[cat];
+                                if (badgeId) {
+                                    var badge = document.getElementById(badgeId);
+                                    if (badge) {
+                                        badge.textContent = catEnabled + '/' + items.length;
+                                        if (catEnabled === 0) badge.className = 'px-2 py-0.5 bg-rose-950/60 text-rose-400 rounded-lg text-[10px] font-mono';
+                                        else if (catEnabled < items.length) badge.className = 'px-2 py-0.5 bg-amber-950/60 text-amber-400 rounded-lg text-[10px] font-mono';
+                                        else badge.className = 'px-2 py-0.5 bg-emerald-950/60 text-emerald-400 rounded-lg text-[10px] font-mono';
+                                    }
+                                }
+                            });
+                            var totalEl = document.getElementById('totalCmdsCount');
+                            var enabledEl = document.getElementById('enabledCmdsCount');
+                            if (totalEl) totalEl.textContent = total;
+                            if (enabledEl) enabledEl.textContent = enabled;
+                        }
+
+                        function showSavedIndicator() {
+                            var el = document.getElementById('cmdSaveIndicator');
+                            if (el) { el.classList.remove('opacity-0'); setTimeout(function() { el.classList.add('opacity-0'); }, 2000); }
+                        }
+
+                        async function saveStates() {
+                            try {
+                                var gId = window.location.pathname.split('/')[2];
+                                if (!gId) return;
+                                var disArr = Object.keys(disabledCommands).filter(function(k) { return disabledCommands[k]; });
+                                var res = await fetch('/api/guild/' + gId + '/settings', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ disabled_commands: JSON.stringify(disArr) })
+                                });
+                                var d = await res.json();
+                                if (d.success) showSavedIndicator();
+                            } catch(e) {}
+                        }
+
+                        window.switchCmdCategory = function(catKey) {
+                            currentCat = catKey;
+                            Object.keys(catBtnMap).forEach(function(key) {
+                                var btn = document.getElementById(catBtnMap[key]);
+                                if (!btn) return;
+                                if (key === catKey) {
+                                    btn.className = 'w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold bg-purple-600 text-white shadow-lg transition cursor-pointer';
+                                } else {
+                                    btn.className = 'w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-white hover:bg-white/5 transition cursor-pointer';
+                                }
+                            });
+                            renderCommands();
+                        };
+
+                        window.searchCommands = function() { renderCommands(); };
+
+                        window.filterCmdStatus = function(status) {
+                            currentFilter = status;
+                            ['all','enabled','disabled'].forEach(function(s) {
+                                var btn = document.getElementById('btnFilter' + s.charAt(0).toUpperCase() + s.slice(1));
+                                if (btn) btn.className = (s === status)
+                                    ? 'px-3 py-1 rounded-lg text-xs font-bold bg-purple-600 text-white transition shadow cursor-pointer'
+                                    : 'px-3 py-1 rounded-lg text-xs font-bold text-gray-400 hover:text-white transition cursor-pointer';
+                            });
+                            renderCommands();
+                        };
+
+                        window.toggleAllCategoryCmds = function(enable) {
+                            var data = DB[currentCat] || DB.punishments;
+                            data.items.forEach(function(it) { disabledCommands[it.name] = !enable; });
+                            saveStates();
+                            renderCommands();
+                        };
+
+                        window.toggleSingleCmd = function(cmdName, enabled) {
+                            disabledCommands[cmdName] = !enabled;
+                            saveStates();
+                            updateCounters();
+                        };
+
+                        // Initial render
+                        if (document.readyState === 'loading') {
+                            document.addEventListener('DOMContentLoaded', function() { renderCommands(); });
+                        } else {
+                            renderCommands();
+                        }
+
+                    })();
                     </script>
 `;
             } else if (section === 'automod') {
