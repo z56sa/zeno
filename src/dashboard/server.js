@@ -1248,7 +1248,52 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
 
                                 <!-- بطاقات الأوامر التفاعلية (Exact to Images 1, 2, 3, 4) -->
                                 <div id="cmdsListContainer" class="space-y-3">
-                                    <!-- يتم تعبئة الأوامر تفاعلياً بواسطة JavaScript بحسب القسم والبحث -->
+                                    ${(() => {
+                                        const defaultItems = [
+                                            { name: '/ban', desc: 'حظر عضو', badge: 'صلاحيات ديسكورد', icon: '🪓' },
+                                            { name: '/unban', desc: 'فك حظر عضو', badge: 'صلاحيات ديسكورد', icon: '🛡️' },
+                                            { name: '/kick', desc: 'طرد عضو', badge: 'صلاحيات ديسكورد', icon: '🪓' },
+                                            { name: '/mute', desc: 'كتم عضو', badge: 'صلاحيات ديسكورد', icon: '🚨' },
+                                            { name: '/unmute', desc: 'فك كتم عضو', badge: 'صلاحيات ديسكورد', icon: '📢' },
+                                            { name: '/timeout', desc: 'عزل عضو', badge: 'صلاحيات ديسكورد', icon: '⏳' },
+                                            { name: '/untimeout', desc: 'فك عزل عضو', badge: 'صلاحيات ديسكورد', icon: '🛡️' },
+                                            { name: '/warn', desc: 'تحذير عضو', badge: 'صلاحيات ديسكورد', icon: '🚨' },
+                                            { name: '/delwarn', desc: 'حذف تحذير', badge: 'صلاحيات ديسكورد', icon: '🗑️' },
+                                            { name: '/clearwarns', desc: 'مسح جميع التحذيرات', badge: 'صلاحيات ديسكورد', icon: '🗑️' },
+                                            { name: '/clearallwarns', desc: 'مسح جميع التحذيرات لعضو', badge: 'صلاحيات ديسكورد', icon: '🗑️' },
+                                            { name: '/clearallpunishments', desc: 'حذف نهائي لكل سجلات العقوبات بالسيرفر — لا يمكن التراجع', badge: '', icon: '🗑️' },
+                                            { name: '/prison', desc: 'سجن عضو', badge: 'صلاحيات ديسكورد', icon: '🪓' },
+                                            { name: '/unprison', desc: 'إخراج من السجن', badge: 'صلاحيات ديسكورد', icon: '🛡️' },
+                                            { name: '/setnick', desc: 'تغيير الاسم المستعار', badge: 'صلاحيات ديسكورد', icon: '✏️' },
+                                            { name: '/blacklist', desc: 'بلاك لست عضو (دائم)', badge: 'صلاحيات ديسكورد', icon: '🪓' },
+                                            { name: '/unblacklist', desc: 'فك بلاك لست عضو', badge: 'صلاحيات ديسكورد', icon: '🛡️' },
+                                            { name: '/remove', desc: 'حذف عقوبة من عضو', badge: 'صلاحيات ديسكورد', icon: '🗑️' },
+                                            { name: '/down', desc: 'إزالة الرتب الإدارية لمدة محددة', badge: 'صلاحيات ديسكورد', icon: '🪓' },
+                                            { name: '/undown', desc: 'استعادة الرتب الإدارية المزالة', badge: '', icon: '🛡️' },
+                                            { name: '/block', desc: 'حظر عضو من رتبة', badge: 'صلاحيات ديسكورد', icon: '🛡️' },
+                                            { name: '/unblock', desc: 'فك حظر عضو من رتبة', badge: 'صلاحيات ديسكورد', icon: '🛡️' }
+                                        ];
+                                        let disabledArr = [];
+                                        try { disabledArr = JSON.parse(settings.disabled_commands || '[]'); } catch(e) {}
+                                        return defaultItems.map(item => {
+                                            const isEnabled = !disabledArr.includes(item.name);
+                                            const badgeHtml = item.badge ? `<span class="px-2.5 py-0.5 bg-purple-950/60 text-purple-300 border border-purple-800/40 rounded-lg text-[10px] font-bold flex items-center gap-1"><span>${item.badge}</span><span>🛡️</span></span>` : '';
+                                            return `
+                                            <div class="bg-[#12141f] border border-white/5 p-4 rounded-2xl flex items-center justify-between hover:border-purple-500/40 transition ${!isEnabled ? 'opacity-50' : ''}">
+                                                <div class="flex items-center gap-3">
+                                                    <label class="toggle"><input type="checkbox" data-cmd="${item.name}" ${isEnabled ? 'checked' : ''} onchange="toggleSingleCmd('${item.name}', this.checked); this.closest('div.flex').parentElement.parentElement.classList.toggle('opacity-50', !this.checked)"><span class="slider"></span></label>
+                                                    <button type="button" class="text-gray-500 hover:text-white text-xs">▼</button>
+                                                </div>
+                                                <div class="flex items-center gap-3">
+                                                    <div class="text-right">
+                                                        <div class="flex items-center justify-end gap-2">${badgeHtml}<span class="font-black text-white text-xs font-mono">${item.name}</span></div>
+                                                        <p class="text-[11px] text-gray-400 mt-0.5">${item.desc}</p>
+                                                    </div>
+                                                    <div class="w-9 h-9 rounded-xl bg-[#0b0d14] border border-white/5 flex items-center justify-center text-sm shadow-inner">${item.icon || '⚙️'}</div>
+                                                </div>
+                                            </div>`;
+                                        }).join('');
+                                    })()}
                                 </div>
 
                             </div>
