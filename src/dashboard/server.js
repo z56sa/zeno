@@ -6530,6 +6530,64 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
         } catch(e) { res.status(500).json({ error: e.message }); }
     });
 
+
+    // User Economy API
+    app.post('/api/user/daily', (req, res) => {
+        try {
+            if (!req.session?.user) return res.status(401).json({ success: false, error: 'يجب تسجيل الدخول أولاً' });
+            const { getDb } = require('../database');
+            const db = getDb();
+            const userId = req.session.user.id;
+            const now = Date.now();
+            
+            const userRow = db.prepare('SELECT SUM(coins) as coins, MAX(last_daily) as last_daily FROM users WHERE user_id = ?').get(userId);
+            const lastDaily = userRow?.last_daily || 0;
+            
+            if ((now - lastDaily) < 24 * 60 * 60 * 1000) {
+                const remaining = Math.ceil((24 * 60 * 60 * 1000 - (now - lastDaily)) / (1000 * 60));
+                return res.status(400).json({ success: false, error: 'لقد استلمت راتبك بالفعل، يرجى المحاولة لاحقاً بعد ' + remaining + ' دقيقة' });
+            }
+
+            const reward = 500;
+            // Update or insert for first guild or fallback
+            const guilds = req.session.guilds || [];
+            const primaryGuildId = guilds.length > 0 ? guilds[0].id : 'global';
+
+            db.prepare('INSERT OR IGNORE INTO users (user_id, guild_id, coins, last_daily) VALUES (?, ?, 0, 0)').run(userId, primaryGuildId);
+            db.prepare('UPDATE users SET coins = coins + ?, last_daily = ? WHERE user_id = ? AND guild_id = ?').run(reward, now, userId, primaryGuildId);
+
+            const updatedRow = db.prepare('SELECT SUM(coins) as coins FROM users WHERE user_id = ?').get(userId);
+            res.json({ success: true, amount: reward, newBalance: updatedRow?.coins || reward });
+        } catch(e) {
+            res.status(500).json({ success: false, error: e.message });
+        }
+    });
+
+    app.post('/api/user/buy', express.json(), (req, res) => {
+        try {
+            if (!req.session?.user) return res.status(401).json({ success: false, error: 'يجب تسجيل الدخول أولاً' });
+            const { getDb } = require('../database');
+            const db = getDb();
+            const userId = req.session.user.id;
+            const { type, name, price } = req.body;
+
+            const userRow = db.prepare('SELECT SUM(coins) as coins FROM users WHERE user_id = ?').get(userId);
+            const coins = userRow?.coins || 0;
+
+            if (coins < price) {
+                return res.status(400).json({ success: false, error: 'رصيدك الحالي (' + coins.toLocaleString() + ') لا يكفي لشراء هذا العنصر (' + price.toLocaleString() + ' 🪙)' });
+            }
+
+            const guilds = req.session.guilds || [];
+            const primaryGuildId = guilds.length > 0 ? guilds[0].id : 'global';
+
+            db.prepare('UPDATE users SET coins = MAX(0, coins - ?), wallpaper = ? WHERE user_id = ? AND guild_id = ?').run(price, name, userId, primaryGuildId);
+            res.json({ success: true });
+        } catch(e) {
+            res.status(500).json({ success: false, error: e.message });
+        }
+    });
+
     app.post('/api/guild/:guildId/applications/:id/review', async (req, res) => {
         try {
             const { getDb } = require('../database');
