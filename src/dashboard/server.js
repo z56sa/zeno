@@ -14,7 +14,7 @@ const SecretManager = require('../utils/secretManager'); // <-- CRITICAL: Import
 
 module.exports = function (app, client) {
     // --- SECURITY ENHANCEMENT ZONE START: Session Setup & Initialization ---
-    const sessionStore = new SqliteStore({ /* ... */ });
+    const sessionStore = new SqliteStore({ client: rawDb });
     let sessionSecret = '';
     try {
         const secrets = SecretManager.getMultipleSecrets(['SESSION_SECRET']);
