@@ -262,7 +262,7 @@ module.exports = function (app, client) {
                                 
                                 <!-- 1. الذهب (Golds / Gold) -->
                                 <div class="bg-[#10121b] border border-white/5 hover:border-purple-500/30 rounded-2xl p-4 flex items-center justify-between shadow-lg transition">
-                                    <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center text-xl font-bold shadow-inner">🪙</div>
+                                    <div class="w-10 h-10 rounded-xl bg-purple-600/10 text-amber-400 flex items-center justify-center text-xl font-bold shadow-inner">🪙</div>
                                     <div class="text-right">
                                         <span class="text-xs font-bold text-gray-400">الذهب</span>
                                         <h3 id="userCoinsDisplay" class="text-xl font-black text-white mt-0.5">${userCoins.toLocaleString()}</h3>
@@ -1086,7 +1086,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                                         <span class="text-xs text-gray-300 font-mono truncate max-w-[120px]">${u.user_id}</span>
                                     </div>
                                     <div class="flex items-center gap-2">
-                                        <span class="w-6 h-6 rounded-lg ${i === 0 ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' : i === 1 ? 'bg-gray-400/20 text-gray-300 border border-gray-400/30' : i === 2 ? 'bg-purple-700/20 text-purple-400 border border-purple-500/30' : 'bg-purple-600/20 text-purple-400 border border-purple-500/30'} text-[10px] font-black flex items-center justify-center">#${i+1}</span>
+                                        <span class="w-6 h-6 rounded-lg ${i === 0 ? 'bg-purple-600/20 text-amber-400 border border-amber-500/30' : i === 1 ? 'bg-gray-400/20 text-gray-300 border border-gray-400/30' : i === 2 ? 'bg-purple-700/20 text-purple-400 border border-purple-500/30' : 'bg-purple-600/20 text-purple-400 border border-purple-500/30'} text-[10px] font-black flex items-center justify-center">#${i+1}</span>
                                     </div>
                                 </div>
                                 `).join('')}
@@ -2604,7 +2604,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                                     <input type="text" id="antiModSearchUser" placeholder="ابحث عن عضو لإضافته..." class="w-full bg-[#0b0d14] border border-white/5 focus:border-amber-500 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right placeholder-gray-500">
                                 </div>
                                 <div class="flex items-center gap-3">
-                                    <button type="button" onclick="addWhitelistUser('antimod')" class="px-6 py-2.5 bg-amber-600 hover:bg-amber-500 text-white rounded-xl text-xs font-black transition flex items-center gap-1.5 shadow-lg shadow-amber-950/40">
+                                    <button type="button" onclick="addWhitelistUser('antimod')" class="px-6 py-2.5 bg-amber-600 hover:bg-purple-600 text-white rounded-xl text-xs font-black transition flex items-center gap-1.5 shadow-lg shadow-amber-950/40">
                                         <span>إضافة</span>
                                     </button>
                                     <input type="text" id="antiModUserId" placeholder="أدخل User ID لإضافته إلى Anti Mod" class="flex-1 bg-[#0b0d14] border border-white/5 focus:border-amber-500 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right font-mono placeholder-gray-500" onkeydown="if(event.key==='Enter') addWhitelistUser('antimod')">
@@ -5266,7 +5266,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                             </div>
                             <!-- Server selector pill (Exact to image) -->
                             <div class="bg-[#0b0d14] border border-white/5 px-4 py-2 rounded-2xl flex items-center gap-2.5 shadow-inner">
-                                <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+                                <span class="w-2 h-2 rounded-full bg-purple-600 animate-pulse"></span>
                                 <span class="text-xs font-bold text-white">${guild.name || "ZENO'BOT"}</span>
                                 <div class="w-6 h-6 rounded-lg bg-purple-950/60 text-purple-300 text-xs font-black flex items-center justify-center border border-purple-500/30">Z</div>
                             </div>
@@ -6026,10 +6026,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                                         <span class="w-4 h-4 rounded-full border border-emerald-500/60 bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-[9px] font-black">✓</span>
                                         <span class="flex items-center gap-2"><span>القرآن & الراديو</span><span class="text-gray-400 group-hover:text-purple-400">📻</span></span>
                                     </a>
-                                    <a href="/dashboard/${guildId}/social" class="flex items-center justify-between px-3 py-2 rounded-xl ${section === 'social' ? 'bg-purple-600 text-white font-bold shadow-md' : 'text-gray-300 hover:text-white hover:bg-[#151724]'} transition group">
-                                        <span class="text-[9px] font-bold text-red-400 bg-red-950/60 px-1.5 py-0.2 rounded">بث</span>
-                                        <span class="flex items-center gap-2"><span>تنبيهات السوشيال</span><span class="text-gray-400 group-hover:text-purple-400">📺</span></span>
-                                    </a>
+                                    
                                 </div>
                             </div>
 
