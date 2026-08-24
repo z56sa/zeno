@@ -431,18 +431,15 @@ try { db.exec("ALTER TABLE guild_settings ADD COLUMN level_exempt_roles TEXT DEF
 try { db.exec("ALTER TABLE level_rewards ADD COLUMN reward_type TEXT DEFAULT 'text';"); } catch(e) {}
 try { db.exec("ALTER TABLE level_rewards ADD COLUMN voice_level INTEGER DEFAULT 0;"); } catch(e) {}
 
-// ترقية جدول الرد التلقائي بكامل خيارات Versa
-try { db.exec("ALTER TABLE auto_responders ADD COLUMN match_mode TEXT DEFAULT 'contains';"); } catch(e) {}
-try { db.exec("ALTER TABLE auto_responders ADD COLUMN reply_type TEXT DEFAULT 'text';"); } catch(e) {}
-try { db.exec("ALTER TABLE auto_responders ADD COLUMN case_sensitive INTEGER DEFAULT 0;"); } catch(e) {}
-try { db.exec("ALTER TABLE auto_responders ADD COLUMN delete_trigger INTEGER DEFAULT 0;"); } catch(e) {}
-try { db.exec("ALTER TABLE auto_responders ADD COLUMN cooldown_seconds INTEGER DEFAULT 0;"); } catch(e) {}
-try { db.exec("ALTER TABLE auto_responders ADD COLUMN allowed_channels TEXT DEFAULT '';"); } catch(e) {}
-try { db.exec("ALTER TABLE auto_responders ADD COLUMN allowed_roles TEXT DEFAULT '';"); } catch(e) {}
-try { db.exec("ALTER TABLE auto_responders ADD COLUMN exempt_channels TEXT DEFAULT '';"); } catch(e) {}
-try { db.exec("ALTER TABLE auto_responders ADD COLUMN exempt_roles TEXT DEFAULT '';"); } catch(e) {}
-try { db.exec("ALTER TABLE auto_responders ADD COLUMN uses_count INTEGER DEFAULT 0;"); } catch(e) {}
-try { db.exec("ALTER TABLE auto_responders ADD COLUMN is_active INTEGER DEFAULT 1;"); } catch(e) {}
+// ترقية جدول الإشراف والعقوبات الشاملة (Moderation System Settings)
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN mod_warn_enabled INTEGER DEFAULT 1;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN mod_mute_enabled INTEGER DEFAULT 1;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN mod_badwords_enabled INTEGER DEFAULT 1;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN mod_caps_enabled INTEGER DEFAULT 0;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN mod_mention_spam_enabled INTEGER DEFAULT 1;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN mod_emoji_spam_enabled INTEGER DEFAULT 0;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN mod_staff_roles TEXT DEFAULT '';"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN mod_exempt_roles TEXT DEFAULT '';"); } catch(e) {}
 
 console.log('[DB] ✅ SQLite database initialized successfully');
 
@@ -1112,6 +1109,10 @@ function toggleGiveawayEntry(messageId, userId) {
 
 function endGiveaway(messageId) {
   db.prepare("UPDATE giveaways SET status = 'ended' WHERE message_id = ?").run(messageId);
+}
+
+function getGuildGiveaways(guildId) {
+  return db.prepare('SELECT * FROM giveaways WHERE guild_id = ? ORDER BY id DESC').all(guildId);
 }
 
 // ==========================================

@@ -911,6 +911,12 @@ module.exports = function (app, client) {
             let warnPunishmentsList = [];
             let autoRespondersList = [];
             let guildTicketsList = [];
+            let guildGiveawaysList = [];
+            try {
+                if (database.getGuildGiveaways) {
+                    guildGiveawaysList = database.getGuildGiveaways(guildId) || [];
+                }
+            } catch(e) {}
             let levelRewardsList = [];
             let guildLeaderboardUsers = [];
             const currentTab = req.query?.tab || 'settings';
@@ -1023,332 +1029,329 @@ module.exports = function (app, client) {
 
             let formFieldsHtml = '';
 
-            if (section === 'general') {
-formFieldsHtml = `
-                    <div class="space-y-6">
-                        <!-- General Commands Overview -->
-                        <div class="bg-[#1c1f2e] border border-white/5 p-5 rounded-2xl flex items-center justify-between">
-                            <span class="px-3 py-1 bg-purple-950/60 text-purple-300 border border-purple-800/40 rounded-xl text-xs font-bold font-mono">36+ أمراً متاحاً</span>
-                            <div class="text-right">
-                                <h4 class="font-bold text-white text-sm">جميع الأوامر العامة والخدمية للأعضاء ⚙️</h4>
-                                <p class="text-gray-400 text-xs mt-0.5">أوامر التفاعل والمعلومات والاقتصاد والألعاب والخدمات المتاحة لجميع أعضاء السيرفر</p>
+            if (section === 'general' || section === 'commands') {
+formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl">
+
+                        <!-- 1. Master Header Card (Exact to Image 1: إدارة الأوامر & Triple Badges) -->
+                        <div class="bg-[#12141f] border border-white/5 p-6 rounded-2xl flex items-center justify-between shadow-xl">
+                            <div class="flex items-center gap-6">
+                                <div class="text-center">
+                                    <span class="text-xl font-black text-purple-400 font-mono">0</span>
+                                    <span class="text-[10px] text-gray-400 block font-bold">اختصارات مخصصة</span>
+                                </div>
+                                <div class="text-center">
+                                    <span class="text-xl font-black text-emerald-400 font-mono">185</span>
+                                    <span class="text-[10px] text-gray-400 block font-bold">الأوامر المفعلة</span>
+                                </div>
+                                <div class="text-center">
+                                    <span class="text-xl font-black text-white font-mono">185</span>
+                                    <span class="text-[10px] text-gray-400 block font-bold">إجمالي الأوامر</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <div class="text-right">
+                                    <h4 class="font-black text-white text-base">إدارة الأوامر</h4>
+                                    <p class="text-gray-400 text-xs mt-0.5">تخصيص وإدارة جميع أوامر البوت والصلاحيات</p>
+                                </div>
+                                <div class="w-10 h-10 rounded-xl bg-indigo-600/20 text-indigo-400 flex items-center justify-center text-lg border border-indigo-500/30">
+                                    🎛️
+                                </div>
                             </div>
                         </div>
 
-                        <!-- 1. أوامر المعلومات والبروفايل (General & Identity) -->
-                        <div class="bg-[#1c1f2e] border border-white/5 p-5 rounded-2xl space-y-3">
-                            <h4 class="font-bold text-white text-xs mb-3 text-right flex items-center justify-end gap-2"><span>أوامر المعلومات والهوية والبروفايل</span><span class="text-purple-400">👤</span></h4>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                
-                                <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
-                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
-                                    <div class="text-right">
-                                        <p class="font-bold text-white text-xs">help & #help</p>
-                                        <p class="text-gray-400 text-[10px]">قائمة المساعدة التفاعلية المنسدلة لجميع أوامر البوت</p>
-                                    </div>
-                                </div>
+                        <!-- 2. Search & Filter Bar (Exact to Image 1) -->
+                        <div class="flex items-center justify-between gap-4">
+                            <div class="flex items-center gap-1.5 bg-[#12141f] border border-white/5 p-1 rounded-xl">
+                                <button type="button" onclick="filterCmdStatus('disabled')" id="btnFilterDisabled" class="px-3 py-1 rounded-lg text-xs font-bold text-gray-400 hover:text-white transition">معطل</button>
+                                <button type="button" onclick="filterCmdStatus('enabled')" id="btnFilterEnabled" class="px-3 py-1 rounded-lg text-xs font-bold text-gray-400 hover:text-white transition">مفعل</button>
+                                <button type="button" onclick="filterCmdStatus('all')" id="btnFilterAll" class="px-3 py-1 rounded-lg text-xs font-bold bg-indigo-600 text-white transition shadow">الكل</button>
+                            </div>
 
-                                <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
-                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
-                                    <div class="text-right">
-                                        <p class="font-bold text-white text-xs">profile & /profile & /id</p>
-                                        <p class="text-gray-400 text-[10px]">بطاقة البروفايل التفاعلية مع الرصيد والمستوى والسمعة</p>
-                                    </div>
-                                </div>
-
-                                <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
-                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
-                                    <div class="text-right">
-                                        <p class="font-bold text-white text-xs">avatar & #avatar</p>
-                                        <p class="text-gray-400 text-[10px]">عرض وتحميل الصورة الرمزية للعضو أو أيقونة السيرفر</p>
-                                    </div>
-                                </div>
-
-                                <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
-                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
-                                    <div class="text-right">
-                                        <p class="font-bold text-white text-xs">banner & #banner</p>
-                                        <p class="text-gray-400 text-[10px]">عرض بنر الملف الشخصي أو بنر السيرفر بجودة عالية</p>
-                                    </div>
-                                </div>
-
-                                <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
-                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
-                                    <div class="text-right">
-                                        <p class="font-bold text-white text-xs">user & #user</p>
-                                        <p class="text-gray-400 text-[10px]">عرض بطاقة معلومات العضو، ورتبه، وتاريخ انضمامه وديسكورد</p>
-                                    </div>
-                                </div>
-
-                                <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
-                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
-                                    <div class="text-right">
-                                        <p class="font-bold text-white text-xs">server & #server</p>
-                                        <p class="text-gray-400 text-[10px]">عرض معلومات وإحصائيات السيرفر، الأونر وتاريخ الإنشاء</p>
-                                    </div>
-                                </div>
-
-                                <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
-                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
-                                    <div class="text-right">
-                                        <p class="font-bold text-white text-xs">invites & #invites</p>
-                                        <p class="text-gray-400 text-[10px]">معرفة عدد دعواتك الحقيقية، الوهمية، ومن قام بدعوتك</p>
-                                    </div>
-                                </div>
-
-                                <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
-                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
-                                    <div class="text-right">
-                                        <p class="font-bold text-white text-xs">ping & #ping</p>
-                                        <p class="text-gray-400 text-[10px]">فحص سرعة استجابة البوت وبنج سيرفرات ديسكورد</p>
-                                    </div>
-                                </div>
-
-                                <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
-                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
-                                    <div class="text-right">
-                                        <p class="font-bold text-white text-xs">roles & #roles</p>
-                                        <p class="text-gray-400 text-[10px]">عرض قائمة جميع رتب السيرفر وأعداد أعضاء كل رتبة</p>
-                                    </div>
-                                </div>
-
-                                <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
-                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
-                                    <div class="text-right">
-                                        <p class="font-bold text-white text-xs">channels & #channels</p>
-                                        <p class="text-gray-400 text-[10px]">إحصائيات القنوات الصوتية والنصية والكاتيجوري</p>
-                                    </div>
-                                </div>
-
-                                <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
-                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
-                                    <div class="text-right">
-                                        <p class="font-bold text-white text-xs">emojis & #emojis</p>
-                                        <p class="text-gray-400 text-[10px]">استعراض وإحصاء جميع إيموجيات وستيكرات السيرفر</p>
-                                    </div>
-                                </div>
-
-                                <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
-                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
-                                    <div class="text-right">
-                                        <p class="font-bold text-white text-xs">apply & /apply</p>
-                                        <p class="text-gray-400 text-[10px]">التقديم على رتب الإدارة والوظائف المتاحة في السيرفر</p>
-                                    </div>
-                                </div>
-
+                            <div class="flex-1 relative">
+                                <input type="text" id="cmdSearchInput" oninput="searchCommands()" placeholder="...ابحث عن أمر" class="w-full bg-[#12141f] border border-white/5 focus:border-indigo-500 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right pr-10">
+                                <span class="absolute right-3 top-2.5 text-gray-400">🔍</span>
                             </div>
                         </div>
 
-                        <!-- 2. أوامر الاقتصاد والعملات (Economy & Stars) -->
-                        <div class="bg-[#1c1f2e] border border-white/5 p-5 rounded-2xl space-y-3">
-                            <h4 class="font-bold text-white text-xs mb-3 text-right flex items-center justify-end gap-2"><span>أوامر الاقتصاد ورصيد الذهب & Star Coins</span><span class="text-amber-400">🪙</span></h4>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <!-- 3. Layout: Left Commands List + Right Categories Sidebar (Exact to Images 1, 2, 3, 4) -->
+                        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
 
-                                <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
-                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
-                                    <div class="text-right">
-                                        <p class="font-bold text-white text-xs">star & #star & #stars & /stars</p>
-                                        <p class="text-gray-400 text-[10px]">عرض رصيد Star Coin وإعطاء النجوم والسمعة للأعضاء</p>
+                            <!-- العمود الأيمن: قائمة الأقسام (Categories Sidebar) -->
+                            <div class="lg:col-span-1 space-y-1.5 bg-[#12141f] border border-white/5 p-3 rounded-2xl shadow-xl h-fit">
+                                <div class="flex items-center justify-end gap-1.5 text-xs font-black text-white px-2 py-1.5 border-b border-white/5 mb-1">
+                                    <span>الأقسام</span>
+                                    <span>📁</span>
+                                </div>
+
+                                <button type="button" onclick="switchCmdCategory('basic')" id="btnCatBasic" class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-white hover:bg-white/5 transition">
+                                    <span class="px-2 py-0.5 bg-emerald-950/60 text-emerald-400 rounded-lg text-[10px] font-mono">17/17</span>
+                                    <span class="flex items-center gap-1.5"><span>الأوامر الأساسية</span><span>⚙️</span></span>
+                                </button>
+
+                                <button type="button" onclick="switchCmdCategory('punishments')" id="btnCatPunishments" class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold bg-indigo-600 text-white shadow-lg transition">
+                                    <span class="px-2 py-0.5 bg-white/20 text-white rounded-lg text-[10px] font-mono">22/22</span>
+                                    <span class="flex items-center gap-1.5"><span>العقوبات</span><span>🔨</span></span>
+                                </button>
+
+                                <button type="button" onclick="switchCmdCategory('punishment_logs')" id="btnCatPunishmentLogs" class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-white hover:bg-white/5 transition">
+                                    <span class="px-2 py-0.5 bg-emerald-950/60 text-emerald-400 rounded-lg text-[10px] font-mono">17/17</span>
+                                    <span class="flex items-center gap-1.5"><span>سجلات العقوبات</span><span>📜</span></span>
+                                </button>
+
+                                <button type="button" onclick="switchCmdCategory('channels')" id="btnCatChannels" class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-white hover:bg-white/5 transition">
+                                    <span class="px-2 py-0.5 bg-emerald-950/60 text-emerald-400 rounded-lg text-[10px] font-mono">9/9</span>
+                                    <span class="flex items-center gap-1.5"><span>إدارة القنوات</span><span>📌</span></span>
+                                </button>
+
+                                <button type="button" onclick="switchCmdCategory('chat')" id="btnCatChat" class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-white hover:bg-white/5 transition">
+                                    <span class="px-2 py-0.5 bg-emerald-950/60 text-emerald-400 rounded-lg text-[10px] font-mono">12/12</span>
+                                    <span class="flex items-center gap-1.5"><span>أدوات الشات</span><span>💬</span></span>
+                                </button>
+
+                                <button type="button" onclick="switchCmdCategory('voice')" id="btnCatVoice" class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-white hover:bg-white/5 transition">
+                                    <span class="px-2 py-0.5 bg-emerald-950/60 text-emerald-400 rounded-lg text-[10px] font-mono">19/19</span>
+                                    <span class="flex items-center gap-1.5"><span>إدارة الصوت</span><span>🎙️</span></span>
+                                </button>
+
+                                <button type="button" onclick="switchCmdCategory('roles')" id="btnCatRoles" class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-white hover:bg-white/5 transition">
+                                    <span class="px-2 py-0.5 bg-emerald-950/60 text-emerald-400 rounded-lg text-[10px] font-mono">10/10</span>
+                                    <span class="flex items-center gap-1.5"><span>إدارة الرتب</span><span>🎖️</span></span>
+                                </button>
+
+                                <button type="button" onclick="switchCmdCategory('custom_roles')" id="btnCatCustomRoles" class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-white hover:bg-white/5 transition">
+                                    <span class="px-2 py-0.5 bg-emerald-950/60 text-emerald-400 rounded-lg text-[10px] font-mono">9/9</span>
+                                    <span class="flex items-center gap-1.5"><span>الرتب الخاصة</span><span>👑</span></span>
+                                </button>
+
+                                <button type="button" onclick="switchCmdCategory('server_info')" id="btnCatServerInfo" class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-white hover:bg-white/5 transition">
+                                    <span class="px-2 py-0.5 bg-emerald-950/60 text-emerald-400 rounded-lg text-[10px] font-mono">19/19</span>
+                                    <span class="flex items-center gap-1.5"><span>معلومات السيرفر</span><span>📊</span></span>
+                                </button>
+
+                                <button type="button" onclick="switchCmdCategory('custom_bot')" id="btnCatCustomBot" class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-white hover:bg-white/5 transition">
+                                    <span class="px-2 py-0.5 bg-emerald-950/60 text-emerald-400 rounded-lg text-[10px] font-mono">5/5</span>
+                                    <span class="flex items-center gap-1.5"><span>أدوات البوت الخاص</span><span>🤖</span></span>
+                                </button>
+
+                                <button type="button" onclick="switchCmdCategory('security')" id="btnCatSecurity" class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-white hover:bg-white/5 transition">
+                                    <span class="px-2 py-0.5 bg-emerald-950/60 text-emerald-400 rounded-lg text-[10px] font-mono">15/15</span>
+                                    <span class="flex items-center gap-1.5"><span>الحماية</span><span>🛡️</span></span>
+                                </button>
+
+                                <button type="button" onclick="switchCmdCategory('levels_cat')" id="btnCatLevels" class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-white hover:bg-white/5 transition">
+                                    <span class="px-2 py-0.5 bg-emerald-950/60 text-emerald-400 rounded-lg text-[10px] font-mono">10/10</span>
+                                    <span class="flex items-center gap-1.5"><span>المستويات والخبرة</span><span>⭐</span></span>
+                                </button>
+
+                                <button type="button" onclick="switchCmdCategory('server_stats')" id="btnCatServerStats" class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-white hover:bg-white/5 transition">
+                                    <span class="px-2 py-0.5 bg-emerald-950/60 text-emerald-400 rounded-lg text-[10px] font-mono">11/11</span>
+                                    <span class="flex items-center gap-1.5"><span>إحصائيات السيرفر</span><span>📈</span></span>
+                                </button>
+
+                                <button type="button" onclick="switchCmdCategory('profile_cat')" id="btnCatProfile" class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-white hover:bg-white/5 transition">
+                                    <span class="px-2 py-0.5 bg-emerald-950/60 text-emerald-400 rounded-lg text-[10px] font-mono">10/10</span>
+                                    <span class="flex items-center gap-1.5"><span>الملف الشخصي</span><span>👤</span></span>
+                                </button>
+                            </div>
+
+                            <!-- العمود الأيسر: قائمة الأوامر المعروضة (Commands Container) -->
+                            <div class="lg:col-span-3 space-y-4">
+
+                                <!-- رأس القسم النشط والأزرار السريعة (تفعيل الكل / تعطيل الكل) -->
+                                <div class="bg-[#12141f] border border-white/5 p-4 rounded-2xl flex items-center justify-between shadow-xl">
+                                    <div class="flex items-center gap-2">
+                                        <button type="button" onclick="toggleAllCategoryCmds(false)" class="px-3.5 py-1.5 bg-rose-950/40 hover:bg-rose-900/60 text-rose-400 border border-rose-800/40 rounded-xl text-xs font-bold transition flex items-center gap-1">
+                                            <span>✕</span>
+                                            <span>تعطيل الكل</span>
+                                        </button>
+                                        <button type="button" onclick="toggleAllCategoryCmds(true)" class="px-3.5 py-1.5 bg-emerald-950/40 hover:bg-emerald-900/60 text-emerald-400 border border-emerald-800/40 rounded-xl text-xs font-bold transition flex items-center gap-1">
+                                            <span>✓</span>
+                                            <span>تفعيل الكل</span>
+                                        </button>
+                                    </div>
+                                    <div class="text-right flex items-center gap-2">
+                                        <div>
+                                            <h4 id="catTitle" class="text-sm font-black text-white">العقوبات</h4>
+                                            <p id="catDesc" class="text-[10px] text-gray-400">أوامر تنفيذ العقوبات المباشرة على الأعضاء</p>
+                                        </div>
+                                        <span id="catIcon" class="text-xl">🔨</span>
                                     </div>
                                 </div>
 
-                                <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
-                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
-                                    <div class="text-right">
-                                        <p class="font-bold text-white text-xs">daily & #daily & /daily</p>
-                                        <p class="text-gray-400 text-[10px]">استلام المكافأة اليومية المجانية كل 24 ساعة (+500 إلى 1,000 ⭐)</p>
-                                    </div>
-                                </div>
-
-                                <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
-                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
-                                    <div class="text-right">
-                                        <p class="font-bold text-white text-xs">pay & #pay & #star &lt;user&gt; &lt;amount&gt;</p>
-                                        <p class="text-gray-400 text-[10px]">تحويل العملات والنجوم لعضو آخر مع حساب الضريبة</p>
-                                    </div>
-                                </div>
-
-                                <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
-                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
-                                    <div class="text-right">
-                                        <p class="font-bold text-white text-xs">work & #work & /work</p>
-                                        <p class="text-gray-400 text-[10px]">العمل في وظائف عشوائية لكسب الذهب والعملات (كل 4 ساعات)</p>
-                                    </div>
-                                </div>
-
-                                <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
-                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
-                                    <div class="text-right">
-                                        <p class="font-bold text-white text-xs">bank & #bank & /bank</p>
-                                        <p class="text-gray-400 text-[10px]">إيداع وسحب الأموال والتحكم بحساب البنك لحماية الرصيد</p>
-                                    </div>
-                                </div>
-
-                                <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
-                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
-                                    <div class="text-right">
-                                        <p class="font-bold text-white text-xs">rank & #rank & /rank & /level</p>
-                                        <p class="text-gray-400 text-[10px]">بطاقة مستوى العضو ونقاط الخبرة والترتيب في السيرفر</p>
-                                    </div>
-                                </div>
-
-                                <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
-                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
-                                    <div class="text-right">
-                                        <p class="font-bold text-white text-xs">leaderboard & #top & /top</p>
-                                        <p class="text-gray-400 text-[10px]">قائمة المتصدرين في السيرفر (XP المستويات أو أغنى الأعضاء)</p>
-                                    </div>
-                                </div>
-
-                                <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
-                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
-                                    <div class="text-right">
-                                        <p class="font-bold text-white text-xs">tax & #tax & /tax</p>
-                                        <p class="text-gray-400 text-[10px]">حاسبة ضريبة بروبوت والتحويلات الذكية والمبالغ الصافية</p>
-                                    </div>
-                                </div>
-
-                                <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
-                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
-                                    <div class="text-right">
-                                        <p class="font-bold text-white text-xs">setwallpaper & /setwallpaper</p>
-                                        <p class="text-gray-400 text-[10px]">تغيير خلفية بروفايل العضو وتعيين رابط صورة مخصصة</p>
-                                    </div>
-                                </div>
-
-                                <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
-                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
-                                    <div class="text-right">
-                                        <p class="font-bold text-white text-xs">gamble & #gamble & /gamble</p>
-                                        <p class="text-gray-400 text-[10px]">المراهنة بالعملات في لعبة الكازينو لمضاعفة الأرباح</p>
-                                    </div>
+                                <!-- بطاقات الأوامر التفاعلية (Exact to Images 1, 2, 3, 4) -->
+                                <div id="cmdsListContainer" class="space-y-3">
+                                    <!-- يتم تعبئة الأوامر تفاعلياً بواسطة JavaScript بحسب القسم والبحث -->
                                 </div>
 
                             </div>
-                        </div>
 
-                        <!-- 3. أوامر الألعاب والتسلية والمسابقات (Fun & Games) -->
-                        <div class="bg-[#1c1f2e] border border-white/5 p-5 rounded-2xl space-y-3">
-                            <h4 class="font-bold text-white text-xs mb-3 text-right flex items-center justify-end gap-2"><span>أوامر الألعاب والتسلية والمسابقات</span><span class="text-pink-400">🎮</span></h4>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-
-                                <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
-                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
-                                    <div class="text-right">
-                                        <p class="font-bold text-white text-xs">trivia & #trivia & /trivia</p>
-                                        <p class="text-gray-400 text-[10px]">مسابقة الأسئلة الثقافية التفاعلية مع جوائز Star Coins</p>
-                                    </div>
-                                </div>
-
-                                <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
-                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
-                                    <div class="text-right">
-                                        <p class="font-bold text-white text-xs">fight & #fight & /fight</p>
-                                        <p class="text-gray-400 text-[10px]">قتال ومبارزة تفاعلية بالدور بين عضوين بأزرار وأسلحة متنوعة</p>
-                                    </div>
-                                </div>
-
-                                <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
-                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
-                                    <div class="text-right">
-                                        <p class="font-bold text-white text-xs">chairs & #chairs & /chairs</p>
-                                        <p class="text-gray-400 text-[10px]">لعبة الكراسي الموسيقية الشهيرة للأعضاء داخل الروم</p>
-                                    </div>
-                                </div>
-
-                                <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
-                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
-                                    <div class="text-right">
-                                        <p class="font-bold text-white text-xs">mafia & #mafia & /mafia</p>
-                                        <p class="text-gray-400 text-[10px]">لعبة المافيا والغموض والتحقيق الجماعية</p>
-                                    </div>
-                                </div>
-
-                                <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
-                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
-                                    <div class="text-right">
-                                        <p class="font-bold text-white text-xs">hideseek & #hideseek & /hideseek</p>
-                                        <p class="text-gray-400 text-[10px]">لعبة الغميمة والاختباء التفاعلية</p>
-                                    </div>
-                                </div>
-
-                                <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
-                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
-                                    <div class="text-right">
-                                        <p class="font-bold text-white text-xs">coinflip & #coinflip & /coinflip</p>
-                                        <p class="text-gray-400 text-[10px]">رمي العملة (ملك/كتابة) والمراهنة بالنجوم</p>
-                                    </div>
-                                </div>
-
-                                <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
-                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
-                                    <div class="text-right">
-                                        <p class="font-bold text-white text-xs">roulette & #roulette & /roulette</p>
-                                        <p class="text-gray-400 text-[10px]">لعبة الروليت الكلاسيكية مع عجلة الحظ والأرقام</p>
-                                    </div>
-                                </div>
-
-                                <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
-                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
-                                    <div class="text-right">
-                                        <p class="font-bold text-white text-xs">poll & #poll & /poll</p>
-                                        <p class="text-gray-400 text-[10px]">إنشاء استطلاعات وتصويت تفاعلي للأعضاء مع خيارات متعددة</p>
-                                    </div>
-                                </div>
-
-                                <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
-                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
-                                    <div class="text-right">
-                                        <p class="font-bold text-white text-xs">giveaway & #giveaway & /giveaway</p>
-                                        <p class="text-gray-400 text-[10px]">إنشاء وإدارة مسابقات الجيف أواي وتحديد الفائزين تلقائياً</p>
-                                    </div>
-                                </div>
-
-                                <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
-                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
-                                    <div class="text-right">
-                                        <p class="font-bold text-white text-xs">embed & /embed</p>
-                                        <p class="text-gray-400 text-[10px]">إنشاء رسائل أمبد احترافية وتنسيق الألوان والحقول</p>
-                                    </div>
-                                </div>
-
-                            </div>
-                        </div>
-
-                        <!-- 4. أوامر القرآن الكريم والراديو الإسلامي (Islamic & Audio) -->
-                        <div class="bg-[#1c1f2e] border border-white/5 p-5 rounded-2xl space-y-3">
-                            <h4 class="font-bold text-white text-xs mb-3 text-right flex items-center justify-end gap-2"><span>القرآن الكريم والإذاعة الإسلامية 24/7</span><span class="text-emerald-400">📻</span></h4>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-
-                                <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
-                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
-                                    <div class="text-right">
-                                        <p class="font-bold text-white text-xs">quran & #quran & /quran</p>
-                                        <p class="text-gray-400 text-[10px]">الاستماع لآيات وسور القرآن الكريم بصوت أشهر القراء</p>
-                                    </div>
-                                </div>
-
-                                <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
-                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
-                                    <div class="text-right">
-                                        <p class="font-bold text-white text-xs">radio & #radio & /radio</p>
-                                        <p class="text-gray-400 text-[10px]">تشغيل إذاعة القرآن الكريم والتلاوات المباشرة على مدار 24 ساعة</p>
-                                    </div>
-                                </div>
-
-                                <div class="bg-[#0b0d14] border border-purple-950/30 p-3.5 rounded-xl flex items-center justify-between">
-                                    <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
-                                    <div class="text-right">
-                                        <p class="font-bold text-white text-xs">stop & #stop & /stop</p>
-                                        <p class="text-gray-400 text-[10px]">إيقاف تشغيل الراديو أو الصوت وخروج البوت من الروم الصوتي</p>
-                                    </div>
-                                </div>
-
-                            </div>
                         </div>
 
                     </div>
-                `;
+
+                    <script>
+                    const commandsDatabase = {
+                        punishments: {
+                            title: 'العقوبات',
+                            desc: 'أوامر تنفيذ العقوبات المباشرة على الأعضاء',
+                            icon: '🔨',
+                            items: [
+                                { name: '/ban', desc: 'حظر عضو', badge: 'صلاحيات ديسكورد', icon: '🪓' },
+                                { name: '/unban', desc: 'فك حظر عضو', badge: 'صلاحيات ديسكورد', icon: '🛡️' },
+                                { name: '/kick', desc: 'طرد عضو', badge: 'صلاحيات ديسكورد', icon: '🪓' },
+                                { name: '/mute', desc: 'كتم عضو', badge: 'صلاحيات ديسكورد', icon: '🚨' },
+                                { name: '/unmute', desc: 'فك كتم عضو', badge: 'صلاحيات ديسكورد', icon: '📢' },
+                                { name: '/timeout', desc: 'عزل عضو', badge: 'صلاحيات ديسكورد', icon: '⏳' },
+                                { name: '/untimeout', desc: 'فك عزل عضو', badge: 'صلاحيات ديسكورد', icon: '🛡️' },
+                                { name: '/warn', desc: 'تحذير عضو', badge: 'صلاحيات ديسكورد', icon: '🚨' },
+                                { name: '/delwarn', desc: 'حذف تحذير', badge: 'صلاحيات ديسكورد', icon: '🗑️' },
+                                { name: '/clearwarns', desc: 'مسح جميع التحذيرات', badge: 'صلاحيات ديسكورد', icon: '🗑️' },
+                                { name: '/clearallwarns', desc: 'مسح جميع التحذيرات لعضو', badge: 'صلاحيات ديسكورد', icon: '🗑️' },
+                                { name: '/clearallpunishments', desc: 'حذف نهائي لكل سجلات العقوبات بالسيرفر — لا يمكن التراجع', badge: '', icon: '🗑️' },
+                                { name: '/prison', desc: 'سجن عضو', badge: 'صلاحيات ديسكورد', icon: '🪓' },
+                                { name: '/unprison', desc: 'إخراج من السجن', badge: 'صلاحيات ديسكورد', icon: '🛡️' },
+                                { name: '/setnick', desc: 'تغيير الاسم المستعار', badge: 'صلاحيات ديسكورد', icon: '✏️' },
+                                { name: '/blacklist', desc: 'بلاك لست عضو (دائم)', badge: 'صلاحيات ديسكورد', icon: '🪓' },
+                                { name: '/unblacklist', desc: 'فك بلاك لست عضو', badge: 'صلاحيات ديسكورد', icon: '🛡️' },
+                                { name: '/remove', desc: 'حذف عقوبة من عضو', badge: 'صلاحيات ديسكورد', icon: '🗑️' },
+                                { name: '/down', desc: 'إزالة الرتب الإدارية لمدة محددة', badge: 'صلاحيات ديسكورد', icon: '🪓' },
+                                { name: '/undown', desc: 'استعادة الرتب الإدارية المزالة', badge: '', icon: '🛡️' },
+                                { name: '/block', desc: 'حظر عضو من رتبة', badge: 'صلاحيات ديسكورد', icon: '🛡️' },
+                                { name: '/unblock', desc: 'فك حظر عضو من رتبة', badge: 'صلاحيات ديسكورد', icon: '🛡️' }
+                            ]
+                        },
+                        punishment_logs: {
+                            title: 'سجلات العقوبات',
+                            desc: 'استعلام وعرض سجلات العقوبات السابقة',
+                            icon: '📜',
+                            items: [
+                                { name: '/allwarns', desc: 'عرض كل التحذيرات النشطة بالسيرفر', badge: '', icon: '📋' },
+                                { name: '/bans', desc: 'سجل باندات عضو', badge: '', icon: '📜' },
+                                { name: '/blacklists', desc: 'سجل بلاك لست عضو', badge: '', icon: '📜' },
+                                { name: '/blocks', desc: 'سجل بلوكات عضو', badge: '', icon: '📜' },
+                                { name: '/case', desc: 'عرض تفاصيل عقوبة', badge: 'صلاحيات ديسكورد', icon: '📄' },
+                                { name: '/crime', desc: 'سجل عقوبات العضو الكامل', badge: '', icon: '📜' },
+                                { name: '/crimes', desc: 'عقوبات العضو النشطة حالياً', badge: '', icon: '📜' },
+                                { name: '/downs', desc: 'سجل داونات عضو', badge: '', icon: '📜' },
+                                { name: '/modlogs', desc: 'سجل إشراف المشرفين', badge: 'صلاحيات ديسكورد', icon: '📜' },
+                                { name: '/kicks', desc: 'سجل طرد عضو', badge: '', icon: '📜' },
+                                { name: '/mutes', desc: 'سجل كتم عضو', badge: '', icon: '📜' },
+                                { name: '/prisons', desc: 'سجل سجن عضو', badge: '', icon: '📜' },
+                                { name: '/timeouts', desc: 'سجل عزل عضو', badge: '', icon: '📜' },
+                                { name: '/warns', desc: 'سجل تحذيرات عضو', badge: '', icon: '📜' },
+                                { name: '/staffactivity', desc: 'تقرير نشاط الطاقم الإداري', badge: '', icon: '📊' },
+                                { name: '/audit', desc: 'سجل تدقيق الإجراءات الحساسة', badge: 'صلاحيات ديسكورد', icon: '🔍' },
+                                { name: '/punishments', desc: 'لوحة سجلات العقوبات الشاملة', badge: '', icon: '⚖️' }
+                            ]
+                        },
+                        basic: {
+                            title: 'الأوامر الأساسية',
+                            desc: 'أوامر المساعدة والمعلومات الأساسية للأعضاء',
+                            icon: '⚙️',
+                            items: [
+                                { name: '/help', desc: 'قائمة المساعدة الشاملة', badge: '', icon: '❓' },
+                                { name: '/ping', desc: 'فحص سرعة استجابة البوت', badge: '', icon: '📶' },
+                                { name: '/botinfo', desc: 'معلومات وإحصائيات البوت', badge: '', icon: '🤖' },
+                                { name: '/serverinfo', desc: 'معلومات السيرفر وتاريخ إنشائه', badge: '', icon: '🏰' },
+                                { name: '/userinfo', desc: 'معلومات العضو وتاريخ انضمامه', badge: '', icon: '👤' },
+                                { name: '/avatar', desc: 'عرض الصورة الرمزية للعضو أو السيرفر', badge: '', icon: '🖼️' },
+                                { name: '/banner', desc: 'عرض بنر الملف الشخصي أو السيرفر', badge: '', icon: '🎨' },
+                                { name: '/invites', desc: 'معرفة عدد دعواتك الحقيقية والوهمية', badge: '', icon: '🔗' },
+                                { name: '/roles', desc: 'قائمة رتب السيرفر وأعداد الأعضاء', badge: '', icon: '🎖️' },
+                                { name: '/channels', desc: 'قائمة قنوات السيرفر وتوزيعها', badge: '', icon: '📁' },
+                                { name: '/emojis', desc: 'استعراض إيموجيات وستيكرات السيرفر', badge: '', icon: '😃' },
+                                { name: '/apply', desc: 'تقديم على الرتب والوظائف المتاحة', badge: '', icon: '📝' },
+                                { name: '/ticket', desc: 'فتح تذكرة دعم فني جديدة', badge: '', icon: '🎫' },
+                                { name: '/daily', desc: 'استلام الراتب اليومي المجاني (Gold)', badge: '', icon: '🪙' },
+                                { name: '/profile', desc: 'بطاقة الملف الشخصي التفاعلية', badge: '', icon: '💳' },
+                                { name: '/leaderboard', desc: 'لوحة المتصدرين في السيرفر', badge: '', icon: '🏆' },
+                                { name: '/stars', desc: 'رصيد النجوم والسمعة والتقييم', badge: '', icon: '⭐' }
+                            ]
+                        }
+                    };
+
+                    let currentCat = 'punishments';
+                    let currentFilter = 'all';
+
+                    function renderCommands() {
+                        const container = document.getElementById('cmdsListContainer');
+                        const data = commandsDatabase[currentCat] || commandsDatabase.punishments;
+                        
+                        document.getElementById('catTitle').innerText = data.title;
+                        document.getElementById('catDesc').innerText = data.desc;
+                        document.getElementById('catIcon').innerText = data.icon;
+
+                        const searchVal = document.getElementById('cmdSearchInput').value.toLowerCase().trim();
+
+                        const filtered = data.items.filter(item => {
+                            if (searchVal && !item.name.toLowerCase().includes(searchVal) && !item.desc.toLowerCase().includes(searchVal)) {
+                                return false;
+                            }
+                            return true;
+                        });
+
+                        if (filtered.length === 0) {
+                            container.innerHTML = '<div class="py-12 bg-[#12141f] border border-white/5 rounded-2xl text-center text-xs text-gray-500">لا توجد أوامر مطابقة لنتائج البحث 🔍</div>';
+                            return;
+                        }
+
+                        container.innerHTML = filtered.map(item => {
+                            const badgeHtml = item.badge ? '<span class="px-2.5 py-0.5 bg-indigo-950/60 text-indigo-300 border border-indigo-800/40 rounded-lg text-[10px] font-bold flex items-center gap-1"><span>' + item.badge + '</span><span>🛡️</span></span>' : '';
+                            return '<div class="bg-[#12141f] border border-white/5 p-4 rounded-2xl flex items-center justify-between hover:border-indigo-500/40 transition">' +
+                                '<div class="flex items-center gap-3">' +
+                                    '<label class="toggle"><input type="checkbox" checked onchange="toggleSingleCmd(\\'' + item.name + '\\', this.checked)"><span class="slider"></span></label>' +
+                                    '<button type="button" class="text-gray-500 hover:text-white text-xs">▼</button>' +
+                                '</div>' +
+                                '<div class="flex items-center gap-3">' +
+                                    '<div class="text-right">' +
+                                        '<div class="flex items-center justify-end gap-2">' + badgeHtml + '<span class="font-black text-white text-xs font-mono">' + item.name + '</span></div>' +
+                                        '<p class="text-[11px] text-gray-400 mt-0.5">' + item.desc + '</p>' +
+                                    '</div>' +
+                                    '<div class="w-9 h-9 rounded-xl bg-[#0b0d14] border border-white/5 flex items-center justify-center text-sm shadow-inner">' + (item.icon || '⚙️') + '</div>' +
+                                '</div>' +
+                            '</div>';
+                        }).join('');
+                    }
+
+                    function switchCmdCategory(catKey) {
+                        currentCat = catKey;
+                        const btns = document.querySelectorAll('[id^="btnCat"]');
+                        btns.forEach(b => {
+                            b.className = "w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-white hover:bg-white/5 transition";
+                        });
+                        const activeBtn = document.getElementById('btnCat' + catKey.charAt(0).toUpperCase() + catKey.slice(1));
+                        if (activeBtn) {
+                            activeBtn.className = "w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold bg-indigo-600 text-white shadow-lg transition";
+                        }
+                        renderCommands();
+                    }
+
+                    function searchCommands() {
+                        renderCommands();
+                    }
+
+                    function filterCmdStatus(status) {
+                        currentFilter = status;
+                        document.getElementById('btnFilterAll').className = status === 'all' ? "px-3 py-1 rounded-lg text-xs font-bold bg-indigo-600 text-white transition shadow" : "px-3 py-1 rounded-lg text-xs font-bold text-gray-400 hover:text-white transition";
+                        document.getElementById('btnFilterEnabled').className = status === 'enabled' ? "px-3 py-1 rounded-lg text-xs font-bold bg-indigo-600 text-white transition shadow" : "px-3 py-1 rounded-lg text-xs font-bold text-gray-400 hover:text-white transition";
+                        document.getElementById('btnFilterDisabled').className = status === 'disabled' ? "px-3 py-1 rounded-lg text-xs font-bold bg-indigo-600 text-white transition shadow" : "px-3 py-1 rounded-lg text-xs font-bold text-gray-400 hover:text-white transition";
+                        renderCommands();
+                    }
+
+                    function toggleAllCategoryCmds(enable) {
+                        document.querySelectorAll('#cmdsListContainer input[type="checkbox"]').forEach(cb => {
+                            cb.checked = enable;
+                        });
+                    }
+
+                    function toggleSingleCmd(cmdName, isEnabled) {
+                        console.log('Command state changed:', cmdName, isEnabled);
+                    }
+
+                    // Initial render
+                    renderCommands();
+                    </script>
+`;
             } else if (section === 'automod') {
 formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl">
 
@@ -4410,6 +4413,467 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                     }
                     </script>
 `;
+            } else if (section === 'moderation') {
+formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl">
+
+                        <!-- 1. Master Header Card (Exact to Image 1: الإشراف & Action Buttons) -->
+                        <div class="bg-[#12141f] border border-white/5 p-6 rounded-2xl flex items-center justify-between shadow-xl">
+                            <div class="flex items-center gap-3">
+                                <button type="submit" class="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-white rounded-xl text-xs font-black transition flex items-center gap-1.5 shadow-lg shadow-orange-950/40">
+                                    <span>💾</span>
+                                    <span>حفظ الإعدادات</span>
+                                </button>
+                                <button type="button" onclick="clearAllServerWarnings()" class="px-4 py-2.5 bg-rose-950/40 hover:bg-rose-900/60 text-rose-400 border border-rose-800/40 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow">
+                                    <span>🗑️</span>
+                                    <span>مسح كل التحذيرات</span>
+                                </button>
+                            </div>
+
+                            <div class="flex items-center gap-3">
+                                <div class="text-right">
+                                    <h4 class="font-black text-white text-base">الإشراف</h4>
+                                    <p class="text-gray-400 text-xs mt-0.5">إعدادات الإشراف والعقوبات</p>
+                                </div>
+                                <div class="w-10 h-10 rounded-xl bg-orange-600/20 text-orange-400 flex items-center justify-center text-lg border border-orange-500/30">
+                                    🛡️
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 2. Triple Stats Badges (Exact to Image 1: رتب الإشراف / رتب مستثناة / كلمات محظورة) -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <!-- رتب الإشراف -->
+                            <div class="bg-[#12141f] border border-white/5 p-5 rounded-2xl text-center space-y-1 shadow-lg">
+                                <span class="text-2xl font-black text-white font-mono">${(settings.mod_staff_roles ? settings.mod_staff_roles.split(',').filter(Boolean).length : 0)}</span>
+                                <span class="text-xs font-bold text-gray-400 block">رتب الإشراف</span>
+                            </div>
+                            <!-- رتب مستثناة -->
+                            <div class="bg-[#12141f] border border-white/5 p-5 rounded-2xl text-center space-y-1 shadow-lg">
+                                <span class="text-2xl font-black text-emerald-400 font-mono">${(settings.mod_exempt_roles ? settings.mod_exempt_roles.split(',').filter(Boolean).length : 0)}</span>
+                                <span class="text-xs font-bold text-gray-400 block">رتب مستثناة</span>
+                            </div>
+                            <!-- كلمات محظورة -->
+                            <div class="bg-[#12141f] border border-white/5 p-5 rounded-2xl text-center space-y-1 shadow-lg">
+                                <span class="text-2xl font-black text-white font-mono">${(settings.bad_words_list ? settings.bad_words_list.split(/[\n,]+/).filter(Boolean).length : 0)}</span>
+                                <span class="text-xs font-bold text-gray-400 block">كلمات محظورة</span>
+                            </div>
+                        </div>
+
+                        <!-- 3. Grid of 6 Moderation Feature Cards (Exact to Image 1) -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            
+                            <!-- 1. نظام التحذيرات -->
+                            <div class="bg-[#12141f] border border-white/5 p-5 rounded-2xl flex items-center justify-between shadow-lg">
+                                <label class="toggle">
+                                    <input type="checkbox" name="mod_warn_enabled" value="1" ${settings.mod_warn_enabled !== 0 ? 'checked' : ''}>
+                                    <span class="slider"></span>
+                                </label>
+                                <div class="flex items-center gap-2 text-right">
+                                    <h5 class="text-xs font-bold text-white">نظام التحذيرات</h5>
+                                    <span class="text-amber-400">🛡️</span>
+                                </div>
+                            </div>
+
+                            <!-- 2. نظام الكتم -->
+                            <div class="bg-[#12141f] border border-white/5 p-5 rounded-2xl flex items-center justify-between shadow-lg">
+                                <label class="toggle">
+                                    <input type="checkbox" name="mod_mute_enabled" value="1" ${settings.mod_mute_enabled !== 0 ? 'checked' : ''}>
+                                    <span class="slider"></span>
+                                </label>
+                                <div class="flex items-center gap-2 text-right">
+                                    <h5 class="text-xs font-bold text-white">نظام الكتم</h5>
+                                    <span class="text-indigo-400">⏳</span>
+                                </div>
+                            </div>
+
+                            <!-- 3. الكلمات المحظورة -->
+                            <div class="bg-[#12141f] border border-white/5 p-5 rounded-2xl flex items-center justify-between shadow-lg">
+                                <label class="toggle">
+                                    <input type="checkbox" name="mod_badwords_enabled" value="1" ${settings.mod_badwords_enabled !== 0 ? 'checked' : ''}>
+                                    <span class="slider"></span>
+                                </label>
+                                <div class="flex items-center gap-2 text-right">
+                                    <h5 class="text-xs font-bold text-white">الكلمات المحظورة</h5>
+                                    <span class="text-rose-400">💬</span>
+                                </div>
+                            </div>
+
+                            <!-- 4. سبام المنشنات -->
+                            <div class="bg-[#12141f] border border-white/5 p-5 rounded-2xl flex items-center justify-between shadow-lg">
+                                <label class="toggle">
+                                    <input type="checkbox" name="mod_mention_spam_enabled" value="1" ${settings.mod_mention_spam_enabled !== 0 ? 'checked' : ''}>
+                                    <span class="slider"></span>
+                                </label>
+                                <div class="flex items-center gap-2 text-right">
+                                    <h5 class="text-xs font-bold text-white">سبام المنشنات</h5>
+                                    <span class="text-pink-400">📢</span>
+                                </div>
+                            </div>
+
+                            <!-- 5. فلتر الحروف الكبيرة -->
+                            <div class="bg-[#12141f] border border-white/5 p-5 rounded-2xl flex items-center justify-between shadow-lg">
+                                <label class="toggle">
+                                    <input type="checkbox" name="mod_caps_enabled" value="1" ${settings.mod_caps_enabled ? 'checked' : ''}>
+                                    <span class="slider"></span>
+                                </label>
+                                <div class="flex items-center gap-2 text-right">
+                                    <h5 class="text-xs font-bold text-white">فلتر الحروف الكبيرة</h5>
+                                    <span class="text-blue-400">🔠</span>
+                                </div>
+                            </div>
+
+                            <!-- 6. سبام الإيموجيات -->
+                            <div class="bg-[#12141f] border border-white/5 p-5 rounded-2xl flex items-center justify-between shadow-lg">
+                                <label class="toggle">
+                                    <input type="checkbox" name="mod_emoji_spam_enabled" value="1" ${settings.mod_emoji_spam_enabled ? 'checked' : ''}>
+                                    <span class="slider"></span>
+                                </label>
+                                <div class="flex items-center gap-2 text-right">
+                                    <h5 class="text-xs font-bold text-white">سبام الإيموجيات</h5>
+                                    <span class="text-amber-300">😜</span>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- 4. بطاقة رتب الإشراف والرتب المستثناة (Exact to Image 1) -->
+                        <div class="bg-[#12141f] border border-white/5 p-6 rounded-2xl space-y-5 shadow-xl">
+                            <div class="flex items-center justify-end gap-2 text-white font-black text-sm border-b border-white/5 pb-3">
+                                <span>رتب الإشراف</span>
+                                <span class="text-blue-400">👮</span>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <!-- رتب المشرفين -->
+                                <div class="space-y-1.5">
+                                    <label class="block text-xs font-bold text-gray-300">رتب المشرفين</label>
+                                    ${renderRoleSelect('mod_staff_roles', settings.mod_staff_roles || '')}
+                                </div>
+
+                                <!-- رتب مستثناة -->
+                                <div class="space-y-1.5">
+                                    <label class="block text-xs font-bold text-gray-300">رتب مستثناة</label>
+                                    ${renderRoleSelect('mod_exempt_roles', settings.mod_exempt_roles || '')}
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <script>
+                    async function clearAllServerWarnings() {
+                        if (!confirm('هل أنت متأكد من مسح جميع التحذيرات المسجلة لجميع الأعضاء في هذا السيرفر؟')) return;
+                        try {
+                            const res = await fetch('/api/guild/${guildId}/clear-all-warnings', {
+                                method: 'POST'
+                            });
+                            const data = await res.json();
+                            if (data.success) {
+                                alert('✅ تم مسح جميع التحذيرات بنجاح!');
+                                location.reload();
+                            } else {
+                                alert('❌ فشل مسح التحذيرات');
+                            }
+                        } catch(e) {
+                            alert('حدث خطأ في الاتصال');
+                        }
+                    }
+                    </script>
+`;
+            } else if (section === 'giveaways') {
+formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl">
+
+                        <!-- 1. Master Header Card (Exact to Image 1: نظام القيف اواي & Action Button) -->
+                        <div class="bg-[#12141f] border border-white/5 p-6 rounded-2xl flex items-center justify-between shadow-xl">
+                            <button type="button" onclick="openCreateGiveawayModal()" class="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-white rounded-xl text-xs font-black transition flex items-center gap-1.5 shadow-lg shadow-orange-950/40">
+                                <span>➕</span>
+                                <span>إنشاء قيف اواي</span>
+                            </button>
+                            <div class="flex items-center gap-3">
+                                <div class="text-right">
+                                    <h4 class="font-black text-white text-base">نظام القيف اواي</h4>
+                                    <p class="text-gray-400 text-xs mt-0.5">إنشاء وإدارة مسابقات القيف اواي في سيرفرك</p>
+                                </div>
+                                <div class="w-10 h-10 rounded-xl bg-orange-600/20 text-orange-400 flex items-center justify-center text-lg border border-orange-500/30">
+                                    🎁
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 2. Quad Stats Badges (Exact to Image 1: إجمالي القيف اواي / نشطة الآن / منتهية / إجمالي المشاركين) -->
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <!-- إجمالي القيف اواي -->
+                            <div class="bg-[#12141f] border border-white/5 p-5 rounded-2xl text-center space-y-1 shadow-lg">
+                                <span class="text-2xl font-black text-white font-mono">${(guildGiveawaysList || []).length}</span>
+                                <span class="text-xs font-bold text-gray-400 block">إجمالي القيف اواي</span>
+                            </div>
+                            <!-- نشطة الآن -->
+                            <div class="bg-[#12141f] border border-white/5 p-5 rounded-2xl text-center space-y-1 shadow-lg">
+                                <span class="text-2xl font-black text-emerald-400 font-mono">${(guildGiveawaysList || []).filter(g => g.status === 'active').length}</span>
+                                <span class="text-xs font-bold text-gray-400 block">نشطة الآن</span>
+                            </div>
+                            <!-- منتهية -->
+                            <div class="bg-[#12141f] border border-white/5 p-5 rounded-2xl text-center space-y-1 shadow-lg">
+                                <span class="text-2xl font-black text-white font-mono">${(guildGiveawaysList || []).filter(g => g.status === 'ended').length}</span>
+                                <span class="text-xs font-bold text-gray-400 block">منتهية</span>
+                            </div>
+                            <!-- إجمالي المشاركين -->
+                            <div class="bg-[#12141f] border border-white/5 p-5 rounded-2xl text-center space-y-1 shadow-lg">
+                                <span class="text-2xl font-black text-amber-400 font-mono">${(guildGiveawaysList || []).reduce((acc, g) => acc + ((g.entries ? (typeof g.entries === 'string' ? JSON.parse(g.entries || '[]').length : g.entries.length) : 0)), 0)}</span>
+                                <span class="text-xs font-bold text-gray-400 block">إجمالي المشاركين</span>
+                            </div>
+                        </div>
+
+                        <!-- 3. Filter Bar & List / Empty State (Exact to Image 1) -->
+                        <div class="bg-[#12141f] border border-white/5 p-6 rounded-2xl space-y-6 shadow-xl">
+                            <div class="flex items-center justify-between border-b border-white/5 pb-4">
+                                <button type="button" onclick="location.reload()" class="p-2 bg-[#0b0d14] hover:bg-white/5 border border-white/5 text-gray-400 hover:text-white rounded-xl transition">
+                                    🔄
+                                </button>
+                                <div class="flex items-center gap-1.5 bg-[#0b0d14] p-1 rounded-xl border border-white/5 text-xs font-bold">
+                                    <button type="button" onclick="filterGiveawayTab('ended')" id="btnGwEnded" class="px-3 py-1 rounded-lg text-gray-400 hover:text-white transition">المنتهية ${(guildGiveawaysList || []).filter(g => g.status === 'ended').length}</button>
+                                    <button type="button" onclick="filterGiveawayTab('active')" id="btnGwActive" class="px-3 py-1 rounded-lg text-gray-400 hover:text-white transition">النشطة ${(guildGiveawaysList || []).filter(g => g.status === 'active').length}</button>
+                                    <button type="button" onclick="filterGiveawayTab('all')" id="btnGwAll" class="px-3 py-1 rounded-lg bg-orange-600 text-white transition shadow">الكل ${(guildGiveawaysList || []).length}</button>
+                                </div>
+                            </div>
+
+                            <div id="giveawaysListContainer">
+                                ${(guildGiveawaysList && guildGiveawaysList.length > 0) ? `
+                                    <div class="space-y-3">
+                                        ${guildGiveawaysList.map(g => {
+                                            const entriesCount = g.entries ? (typeof g.entries === 'string' ? JSON.parse(g.entries || '[]').length : g.entries.length) : 0;
+                                            return '<div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between hover:border-orange-500/40 transition text-xs">' +
+                                                '<div class="flex items-center gap-3">' +
+                                                    '<span class="px-2 py-0.5 rounded text-[10px] font-bold ' + (g.status === 'active' ? 'bg-emerald-950/60 text-emerald-400 border border-emerald-800/30' : 'bg-white/5 text-gray-400') + '">' + (g.status === 'active' ? 'نشط 🟢' : 'منتهي 🔴') + '</span>' +
+                                                    '<span class="text-gray-400 font-mono">' + entriesCount + ' مشارك 👥</span>' +
+                                                '</div>' +
+                                                '<div class="text-right">' +
+                                                    '<h5 class="font-bold text-white text-sm">' + g.prize + '</h5>' +
+                                                    '<p class="text-[10px] text-gray-400">الفائزين: ' + (g.winners_count || 1) + ' • القناة: <#' + g.channel_id + '></p>' +
+                                                '</div>' +
+                                            '</div>';
+                                        }).join('')}
+                                    </div>
+                                ` : `
+                                    <div class="py-14 text-center space-y-4">
+                                        <div class="w-16 h-16 rounded-2xl bg-orange-950/30 text-orange-400 flex items-center justify-center text-3xl mx-auto border border-orange-500/20 shadow-inner">
+                                            🎁
+                                        </div>
+                                        <div class="space-y-1">
+                                            <h5 class="text-sm font-black text-white">لا توجد قيف اواي بعد</h5>
+                                            <p class="text-xs text-gray-400">ابدأ بإنشاء أول قيف اواي لسيرفرك!</p>
+                                        </div>
+                                        <button type="button" onclick="openCreateGiveawayModal()" class="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-white rounded-xl text-xs font-black transition inline-flex items-center gap-2 shadow-lg shadow-orange-950/40">
+                                            <span>إنشاء قيف اواي</span>
+                                        </button>
+                                    </div>
+                                `}
+                            </div>
+                        </div>
+
+                        <!-- ========================================================= -->
+                        <!-- 4. نافذة إنشاء قيف اواي التفاعلية الكاملة (Exact to Images 2 & 3 Modal) -->
+                        <!-- ========================================================= -->
+                        <div id="createGiveawayModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+                            <div class="bg-[#12141f] border border-white/10 rounded-3xl w-full max-w-xl max-h-[90vh] overflow-y-auto p-6 space-y-5 text-right shadow-2xl" dir="rtl">
+                                
+                                <!-- Modal Header -->
+                                <div class="flex items-center justify-between border-b border-white/5 pb-4">
+                                    <button type="button" onclick="closeCreateGiveawayModal()" class="text-gray-400 hover:text-white text-lg font-bold">✕</button>
+                                    <div class="flex items-center gap-2.5">
+                                        <div class="text-right">
+                                            <h3 class="text-base font-black text-white">إنشاء قيف اواي جديد</h3>
+                                            <p class="text-[10px] text-gray-400">أعلن عن جائزتك الآن</p>
+                                        </div>
+                                        <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-sm shadow">
+                                            🎉
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- حقل الجائزة -->
+                                <div class="space-y-1.5">
+                                    <label class="block text-xs font-bold text-gray-300">الجائزة <span class="text-orange-400">*</span></label>
+                                    <input type="text" id="gwPrize" placeholder="مثال: Discord Nitro لمدة شهر" class="w-full bg-[#0b0d14] border border-white/5 focus:border-orange-500 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right">
+                                </div>
+
+                                <!-- الوصف (اختياري) -->
+                                <div class="space-y-1.5">
+                                    <label class="block text-xs font-bold text-gray-300">الوصف (اختياري)</label>
+                                    <textarea id="gwDesc" rows="2" placeholder="...أضف تفاصيل إضافية" class="w-full bg-[#0b0d14] border border-white/5 focus:border-orange-500 rounded-xl p-3 text-xs text-white outline-none text-right leading-relaxed"></textarea>
+                                </div>
+
+                                <!-- القناة المستهدفة -->
+                                <div class="space-y-1.5">
+                                    <label class="block text-xs font-bold text-gray-300">القناة <span class="text-orange-400">*</span></label>
+                                    ${renderChannelSelect('gwChannel', '')}
+                                </div>
+
+                                <!-- المدة & عدد الفائزين -->
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div class="space-y-1.5">
+                                        <label class="block text-xs font-bold text-gray-300">عدد الفائزين</label>
+                                        <input type="number" id="gwWinners" value="1" min="1" max="50" class="w-full bg-[#0b0d14] border border-white/5 focus:border-orange-500 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-center font-mono">
+                                    </div>
+                                    <div class="space-y-1.5">
+                                        <label class="block text-xs font-bold text-gray-300">المدة</label>
+                                        <select id="gwDuration" class="w-full bg-[#0b0d14] border border-white/5 focus:border-orange-500 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right cursor-pointer">
+                                            <option value="10m">10 دقائق</option>
+                                            <option value="1h">ساعة واحدة</option>
+                                            <option value="6h">6 ساعات</option>
+                                            <option value="12h">12 ساعة</option>
+                                            <option value="24h" selected>يوم كامل (24 ساعة)</option>
+                                            <option value="3d">3 أيام</option>
+                                            <option value="7d">أسبوع كامل</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- المظهر (المجسم والإيموجي ولون الإطار) -->
+                                <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-2xl space-y-4">
+                                    <span class="text-xs font-bold text-white block border-b border-white/5 pb-2">المظهر</span>
+
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center gap-2">
+                                            <span class="text-lg">🎉</span>
+                                            <input type="text" id="gwEmoji" value="🎉" class="w-16 bg-[#12141f] border border-white/5 rounded-xl px-2 py-1 text-xs text-center text-white font-mono outline-none">
+                                        </div>
+                                        <label class="text-xs font-bold text-gray-300">الإيموجي</label>
+                                    </div>
+
+                                    <!-- ألوان الإطار -->
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center gap-2">
+                                            <input type="color" id="gwColorInput" value="#ef5700" class="w-6 h-6 rounded-md cursor-pointer bg-transparent border-0">
+                                            <div class="flex items-center gap-1.5">
+                                                <button type="button" onclick="setGwColor('#ef5700')" class="w-4 h-4 rounded-md bg-[#ef5700] ring-2 ring-white/50"></button>
+                                                <button type="button" onclick="setGwColor('#f97316')" class="w-4 h-4 rounded-md bg-[#f97316]"></button>
+                                                <button type="button" onclick="setGwColor('#10b981')" class="w-4 h-4 rounded-md bg-[#10b981]"></button>
+                                                <button type="button" onclick="setGwColor('#3b82f6')" class="w-4 h-4 rounded-md bg-[#3b82f6]"></button>
+                                                <button type="button" onclick="setGwColor('#8b5cf6')" class="w-4 h-4 rounded-md bg-[#8b5cf6]"></button>
+                                                <button type="button" onclick="setGwColor('#ec4899')" class="w-4 h-4 rounded-md bg-[#ec4899]"></button>
+                                                <button type="button" onclick="setGwColor('#ef4444')" class="w-4 h-4 rounded-md bg-[#ef4444]"></button>
+                                                <button type="button" onclick="setGwColor('#ffffff')" class="w-4 h-4 rounded-md bg-[#ffffff]"></button>
+                                                <button type="button" onclick="setGwColor('#000000')" class="w-4 h-4 rounded-md bg-[#000000]"></button>
+                                            </div>
+                                        </div>
+                                        <label class="text-xs font-bold text-gray-300">لون الإطار</label>
+                                    </div>
+
+                                    <!-- صورة القيف اواي -->
+                                    <div class="space-y-1.5 pt-2 border-t border-white/5">
+                                        <label class="block text-xs font-bold text-gray-300">صورة القيف اواي (اختياري)</label>
+                                        <input type="text" id="gwImage" placeholder="https://..." class="w-full bg-[#12141f] border border-white/5 focus:border-orange-500 rounded-xl px-4 py-2 text-xs text-white outline-none text-left font-mono">
+                                    </div>
+                                </div>
+
+                                <!-- المتطلبات والدخول -->
+                                <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-2xl space-y-4">
+                                    <span class="text-xs font-bold text-white block border-b border-white/5 pb-2">المتطلبات والدخول</span>
+
+                                    <!-- الرتب المطلوبة -->
+                                    <div class="space-y-1.5">
+                                        <label class="block text-xs font-bold text-gray-300">الرتب المطلوبة (اختياري)</label>
+                                        ${renderRoleSelect('gwReqRole', '')}
+                                    </div>
+
+                                    <!-- طريقة المشاركة & لون الزر -->
+                                    <div class="grid grid-cols-2 gap-3">
+                                        <div class="space-y-1.5">
+                                            <label class="block text-xs font-bold text-gray-300">لون الزر</label>
+                                            <select id="gwBtnStyle" class="w-full bg-[#12141f] border border-white/5 rounded-xl px-3 py-2 text-xs text-white outline-none text-right">
+                                                <option value="Primary">🔵 أزرق (Primary)</option>
+                                                <option value="Success">🟢 أخضر (Success)</option>
+                                                <option value="Danger">🔴 أحمر (Danger)</option>
+                                                <option value="Secondary">⚪ رمادي (Secondary)</option>
+                                            </select>
+                                        </div>
+                                        <div class="space-y-1.5">
+                                            <label class="block text-xs font-bold text-gray-300">طريقة المشاركة</label>
+                                            <select id="gwEntryMode" class="w-full bg-[#12141f] border border-white/5 rounded-xl px-3 py-2 text-xs text-white outline-none text-right">
+                                                <option value="button">🔘 زر (Button)</option>
+                                                <option value="reaction">😊 تفاعل (Reaction)</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <!-- إعلان الفائزين -->
+                                    <div class="flex items-center justify-between pt-2 border-t border-white/5">
+                                        <label class="toggle"><input type="checkbox" id="gwNotifyWinners" checked><span class="slider"></span></label>
+                                        <div class="text-right">
+                                            <h5 class="text-xs font-bold text-white">إعلان الفائزين</h5>
+                                            <p class="text-[10px] text-gray-500">إرسال رسالة عند اختيار الفائزين</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Modal Footer Buttons -->
+                                <div class="flex items-center justify-between pt-4 border-t border-white/5 flex-row-reverse">
+                                    <button type="button" onclick="submitCreateGiveaway()" class="px-8 py-2.5 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-white rounded-xl text-xs font-black transition shadow-lg shadow-orange-950/40">
+                                        + إنشاء قيف اواي
+                                    </button>
+                                    <button type="button" onclick="closeCreateGiveawayModal()" class="px-6 py-2.5 bg-[#0b0d14] hover:bg-white/5 border border-white/5 text-gray-400 hover:text-white rounded-xl text-xs font-bold transition">
+                                        إلغاء
+                                    </button>
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <script>
+                    function openCreateGiveawayModal() {
+                        document.getElementById('createGiveawayModal').classList.remove('hidden');
+                    }
+
+                    function closeCreateGiveawayModal() {
+                        document.getElementById('createGiveawayModal').classList.add('hidden');
+                    }
+
+                    function setGwColor(c) {
+                        document.getElementById('gwColorInput').value = c;
+                    }
+
+                    function filterGiveawayTab(status) {
+                        document.getElementById('btnGwAll').className = status === 'all' ? "px-3 py-1 rounded-lg bg-orange-600 text-white transition shadow" : "px-3 py-1 rounded-lg text-gray-400 hover:text-white transition";
+                        document.getElementById('btnGwActive').className = status === 'active' ? "px-3 py-1 rounded-lg bg-orange-600 text-white transition shadow" : "px-3 py-1 rounded-lg text-gray-400 hover:text-white transition";
+                        document.getElementById('btnGwEnded').className = status === 'ended' ? "px-3 py-1 rounded-lg bg-orange-600 text-white transition shadow" : "px-3 py-1 rounded-lg text-gray-400 hover:text-white transition";
+                    }
+
+                    async function submitCreateGiveaway() {
+                        const prize = document.getElementById('gwPrize').value.trim();
+                        const channelId = document.getElementById('gwChannel')?.value;
+                        const duration = document.getElementById('gwDuration').value;
+                        const winners = parseInt(document.getElementById('gwWinners').value) || 1;
+                        const desc = document.getElementById('gwDesc').value.trim();
+                        const color = document.getElementById('gwColorInput').value;
+                        const image = document.getElementById('gwImage').value.trim();
+                        const emoji = document.getElementById('gwEmoji').value.trim() || '🎉';
+                        const reqRole = document.getElementById('gwReqRole')?.value;
+
+                        if (!prize) { alert('يرجى كتابة اسم الجائزة'); return; }
+                        if (!channelId) { alert('يرجى اختيار القناة التي سيتم نشر القيف اواي فيها'); return; }
+
+                        try {
+                            const res = await fetch('/api/guild/${guildId}/giveaways', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ prize, channelId, duration, winners, desc, color, image, emoji, reqRole })
+                            });
+                            const data = await res.json();
+                            if (data.success) {
+                                alert('✅ تم إنشاء ونشر القيف اواي في السيرفر بنجاح!');
+                                location.reload();
+                            } else {
+                                alert('❌ خطأ: ' + (data.error || 'فشل إنشاء القيف اواي'));
+                            }
+                        } catch(e) {
+                            alert('حدث خطأ في الاتصال بالخادم');
+                        }
+                    }
+                    </script>
+`;
             } else if (section === 'embed') {
                 formFieldsHtml = `
                     <div class="space-y-6 text-right" dir="rtl">
@@ -5177,6 +5641,69 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                 database.removeLevelReward(guildId, parseInt(level));
             }
             res.json({ success: true });
+        } catch (e) {
+            res.status(500).json({ success: false, error: e.message });
+        }
+    });
+
+    app.post('/api/guild/:guildId/clear-all-warnings', async (req, res) => {
+        try {
+            if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
+            const { guildId } = req.params;
+            rawDb.prepare('DELETE FROM warnings WHERE guild_id = ?').run(guildId);
+            rawDb.prepare('UPDATE users SET warnings = 0 WHERE guild_id = ?').run(guildId);
+            res.json({ success: true });
+        } catch (e) {
+            res.status(500).json({ success: false, error: e.message });
+        }
+    });
+
+    app.post('/api/guild/:guildId/giveaways', express.json(), async (req, res) => {
+        try {
+            if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
+            const { guildId } = req.params;
+            const { prize, channelId, duration, winners, desc, color, image, emoji, reqRole } = req.body;
+            if (!prize || !channelId) return res.status(400).json({ success: false, error: 'Missing prize or channel' });
+
+            const channel = client.channels.cache.get(channelId) || await client.channels.fetch(channelId).catch(() => null);
+            if (!channel || !channel.isTextBased()) return res.status(404).json({ success: false, error: 'Channel not found' });
+
+            // Parse duration
+            let durationMs = 24 * 60 * 60 * 1000;
+            if (duration === '10m') durationMs = 10 * 60 * 1000;
+            else if (duration === '1h') durationMs = 60 * 60 * 1000;
+            else if (duration === '6h') durationMs = 6 * 60 * 60 * 1000;
+            else if (duration === '12h') durationMs = 12 * 60 * 60 * 1000;
+            else if (duration === '3d') durationMs = 3 * 24 * 60 * 60 * 1000;
+            else if (duration === '7d') durationMs = 7 * 24 * 60 * 60 * 1000;
+
+            const endTime = Date.now() + durationMs;
+            const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+
+            const gwEmbed = new EmbedBuilder()
+                .setTitle('🎉 سحب قيف اواي جديد!')
+                .setDescription('**الجائزة:** ' + prize + (desc ? ('\n\n' + desc) : '') + '\n\n**عدد الفائزين:** ' + (winners || 1) + '\n**ينتهي في:** <t:' + Math.floor(endTime / 1000) + ':R>')
+                .setColor(color || '#ef5700')
+                .setFooter({ text: 'اضغط على الزر أدناه للمشاركة!' })
+                .setTimestamp(endTime);
+
+            if (image) gwEmbed.setImage(image);
+
+            const row = new ActionRowBuilder().addComponents(
+                new ButtonBuilder()
+                    .setCustomId('gw_enter_btn')
+                    .setLabel('مشاركة في القيف اواي')
+                    .setEmoji(emoji || '🎉')
+                    .setStyle(ButtonStyle.Primary)
+            );
+
+            const msg = await channel.send({ embeds: [gwEmbed], components: [row] });
+
+            if (database.createGiveaway) {
+                database.createGiveaway(msg.id, channel.id, guildId, prize, winners || 1, req.session.user.id, endTime, reqRole);
+            }
+
+            res.json({ success: true, messageId: msg.id });
         } catch (e) {
             res.status(500).json({ success: false, error: e.message });
         }
