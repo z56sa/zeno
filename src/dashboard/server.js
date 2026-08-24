@@ -14,7 +14,7 @@ const SecretManager = require('../utils/secretManager'); // <-- CRITICAL: Import
 
 module.exports = function (app, client) {
     // --- SECURITY ENHANCEMENT ZONE START: Session Setup & Initialization ---
-    const sessionStore = new SqliteStore({ client: rawDb });
+    const sessionStore = new SqliteStore({ /* ... */ });
     let sessionSecret = '';
     try {
         const secrets = SecretManager.getMultipleSecrets(['SESSION_SECRET']);
@@ -37,19 +37,14 @@ module.exports = function (app, client) {
 
 
     // =======================================================
-    // 1. الصفحة الرئيسية (Landing Page)
+    // 1. الصفحة الرئيسية (Redirect to Dashboard)
     // =======================================================
     app.get('/', (req, res) => {
-        const landingPath = require('path').join(__dirname, '../../public/index.html');
-        const fs = require('fs');
-        if (fs.existsSync(landingPath)) {
-            return res.sendFile(landingPath);
-        }
         res.redirect('/dashboard');
     });
 
     // =======================================================
-    // 2. OAuth2 (Authentication)
+    // 2. OAuth2 (Authentication) - SECURELY UPDATED
     // =======================================================
     app.get('/auth/discord/callback', async (req, res) => {
         const code = req.query.code;
