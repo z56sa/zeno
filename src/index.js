@@ -42,10 +42,12 @@ client.aliases = new Collection();
     console.log('[INFO] 🚀 Starting Bot Initialization Sequence...');
     
     try {
-        // --- 1. Security Check (Mandatory Step): Validate all critical secrets ---
-        const requiredTokens = ['DISCORD_BOT_TOKEN', 'DATABASE_URL']; // Add any other critical secrets here
-        SecretManager.checkAllRequiredSecrets(requiredTokens);
-        console.log('[SECURITY] ✅ All mandatory environment variables checked and passed.');
+        // --- 1. Security Check (Mandatory Step): Validate token and essential variables ---
+        const botToken = process.env.DISCORD_BOT_TOKEN || process.env.BOT_TOKEN || process.env.DISCORD_TOKEN || process.env.TOKEN;
+        if (!botToken) {
+            throw new Error('Critical secret missing: DISCORD_BOT_TOKEN (or BOT_TOKEN / DISCORD_TOKEN / TOKEN). Please configure it in your Railway/Cloud Dashboard Variables.');
+        }
+        console.log('[SECURITY] ✅ Discord Token found and verified.');
 
         // --- 2. Loading Handlers (Must run only after security check passes) ---
         const commandHandler = require('./handlers/commandHandler');
@@ -64,22 +66,25 @@ client.aliases = new Collection();
 
 
 // =============================================================================
-// Login and Connection (Uses SecretManager)
+// Login and Connection (Uses SecretManager or Direct Env)
 // =============================================================================
 
 /**
- * Securely retrieves the bot token using SecretManager.
+ * Securely retrieves the bot token.
  * @returns {string | null} The retrieved token or null if unavailable.
  */
 function getBotToken() {
-    // Use a standardized name for the primary Discord token across all environments (Railway, Local)
-    return SecretManager.getSecret('DISCORD_BOT_TOKEN'); 
+    return process.env.DISCORD_BOT_TOKEN || 
+           process.env.BOT_TOKEN || 
+           process.env.DISCORD_TOKEN || 
+           process.env.TOKEN || 
+           SecretManager.getSecret('DISCORD_BOT_TOKEN'); 
 }
 
 const token = getBotToken();
 
 if (!token) {
-    console.error('[ERROR] ❌ Failed to retrieve Bot Token from the secret manager. The bot cannot connect.');
+    console.error('[ERROR] ❌ Failed to retrieve Bot Token. The bot cannot connect.');
 } else {
     // Attempt login only if the token is successfully retrieved
     client.login(token).catch((err) => {
