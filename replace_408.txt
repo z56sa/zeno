@@ -387,4 +387,28 @@
                         alert('حدث خطأ في الاتصال بالخادم');
                     }
                 });
+
+                // ✅ FIX: منع أي زر ليس submit من إطلاق الـ form
+                document.addEventListener('DOMContentLoaded', () => {
+                    const form = document.getElementById('settingsForm');
+                    if (form) {
+                        form.querySelectorAll('button:not([type="submit"])').forEach(btn => {
+                            if (!btn.hasAttribute('type')) {
+                                btn.setAttribute('type', 'button');
+                            }
+                        });
+                    }
+                });
+
+                // تشغيل الإصلاح فوراً أيضاً (للـ buttons الموجودة بالفعل)
+                setTimeout(() => {
+                    const form = document.getElementById('settingsForm');
+                    if (form) {
+                        form.querySelectorAll('button:not([type="submit"])').forEach(btn => {
+                            if (!btn.getAttribute('type') || btn.getAttribute('type') !== 'submit') {
+                                btn.type = 'button';
+                            }
+                        });
+                    }
+                }, 100);
                 </script>
