@@ -1103,15 +1103,15 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                         <div class="bg-[#12141f] border border-white/5 p-6 rounded-2xl flex items-center justify-between shadow-xl">
                             <div class="flex items-center gap-6">
                                 <div class="text-center">
-                                    <span class="text-xl font-black text-purple-400 font-mono">0</span>
+                                    <span id="customAliasesCount" class="text-xl font-black text-purple-400 font-mono">0</span>
                                     <span class="text-[10px] text-gray-400 block font-bold">اختصارات مخصصة</span>
                                 </div>
                                 <div class="text-center">
-                                    <span class="text-xl font-black text-emerald-400 font-mono">185</span>
+                                    <span id="enabledCmdsCount" class="text-xl font-black text-emerald-400 font-mono">185</span>
                                     <span class="text-[10px] text-gray-400 block font-bold">الأوامر المفعلة</span>
                                 </div>
                                 <div class="text-center">
-                                    <span class="text-xl font-black text-white font-mono">185</span>
+                                    <span id="totalCmdsCount" class="text-xl font-black text-white font-mono">185</span>
                                     <span class="text-[10px] text-gray-400 block font-bold">إجمالي الأوامر</span>
                                 </div>
                             </div>
@@ -1547,6 +1547,39 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                     let currentCat = 'punishments';
                     let currentFilter = 'all';
 
+                    let disabledCommands = new Set(${JSON.stringify(settings.disabled_commands ? JSON.parse(settings.disabled_commands || '[]') : [])});
+
+                    function updateStatCounters() {
+                        let total = 0;
+                        let enabled = 0;
+                        Object.keys(commandsDatabase).forEach(cat => {
+                            const items = commandsDatabase[cat].items;
+                            total += items.length;
+                            const catEnabled = items.filter(it => !disabledCommands.has(it.name)).length;
+                            enabled += catEnabled;
+
+                            // تحديث شارة القسم في الشريط الجانبي
+                            const btn = document.getElementById('btnCat' + cat.charAt(0).toUpperCase() + cat.slice(1));
+                            if (btn) {
+                                const badge = btn.querySelector('span[class*="font-mono"]');
+                                if (badge) {
+                                    badge.innerText = catEnabled + '/' + items.length;
+                                    if (catEnabled === 0) {
+                                        badge.className = 'px-2 py-0.5 bg-rose-950/60 text-rose-400 rounded-lg text-[10px] font-mono';
+                                    } else if (catEnabled < items.length) {
+                                        badge.className = 'px-2 py-0.5 bg-amber-950/60 text-amber-400 rounded-lg text-[10px] font-mono';
+                                    } else {
+                                        badge.className = 'px-2 py-0.5 bg-emerald-950/60 text-emerald-400 rounded-lg text-[10px] font-mono';
+                                    }
+                                }
+                            }
+                        });
+                        const totalEl = document.getElementById('totalCmdsCount');
+                        const enabledEl = document.getElementById('enabledCmdsCount');
+                        if (totalEl) totalEl.innerText = total;
+                        if (enabledEl) enabledEl.innerText = enabled;
+                    }
+
                     function renderCommands() {
                         const container = document.getElementById('cmdsListContainer');
                         const data = commandsDatabase[currentCat] || commandsDatabase.punishments;
@@ -1558,6 +1591,9 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                         const searchVal = document.getElementById('cmdSearchInput').value.toLowerCase().trim();
 
                         const filtered = data.items.filter(item => {
+                            const isEnabled = !disabledCommands.has(item.name);
+                            if (currentFilter === 'enabled' && !isEnabled) return false;
+                            if (currentFilter === 'disabled' && isEnabled) return false;
                             if (searchVal && !item.name.toLowerCase().includes(searchVal) && !item.desc.toLowerCase().includes(searchVal)) {
                                 return false;
                             }
@@ -1565,7 +1601,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                         });
 
                         if (filtered.length === 0) {
-                            container.innerHTML = '<div class="py-12 bg-[#12141f] border border-white/5 rounded-2xl text-center text-xs text-gray-500">لا توجد أوامر مطابقة لنتائج البحث 🔍</div>';
+                            container.innerHTML = '<div class="py-12 bg-[#12141f] border border-white/5 rounded-2xl text-center text-xs text-gray-500">لا توجد أوامر مطابقة لنتائج البحث أو الفلتر 🔍</div>';
                             return;
                         }
 
@@ -1586,6 +1622,8 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                                 '</div>' +
                             '</div>';
                         }).join('');
+
+                        updateStatCounters();
                     }
 
                     function switchCmdCategory(catKey) {
@@ -1613,20 +1651,17 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                         renderCommands();
                     }
 
-                    let disabledCommands = new Set(${JSON.stringify(settings.disabled_commands ? JSON.parse(settings.disabled_commands || '[]') : [])});
-
                     function toggleAllCategoryCmds(enable) {
-                        const checkboxes = document.querySelectorAll('#cmdsListContainer input[type="checkbox"]');
-                        checkboxes.forEach(cb => {
-                            const cmdName = cb.dataset.cmd;
+                        const data = commandsDatabase[currentCat] || commandsDatabase.punishments;
+                        data.items.forEach(it => {
                             if (enable) {
-                                disabledCommands.delete(cmdName);
+                                disabledCommands.delete(it.name);
                             } else {
-                                disabledCommands.add(cmdName);
+                                disabledCommands.add(it.name);
                             }
-                            cb.checked = enable;
                         });
                         saveCommandStates();
+                        renderCommands();
                     }
 
                     async function toggleSingleCmd(cmdName, isEnabled) {
@@ -1636,6 +1671,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                             disabledCommands.add(cmdName);
                         }
                         await saveCommandStates();
+                        updateStatCounters();
                     }
 
                     async function saveCommandStates() {
