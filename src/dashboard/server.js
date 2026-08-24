@@ -303,7 +303,7 @@ module.exports = function (app, client) {
                             <!-- Top Stats 4-Grid (Novax Exact Order & Icons: الذهب / السمعة / التصنيف / المستوى) -->
                             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                                 
-                                <!-- 1. الذهب (Golds / Golds) -->
+                                <!-- 1. الذهب (Golds / Gold) -->
                                 <div class="bg-[#10121b] border border-white/5 hover:border-purple-500/30 rounded-2xl p-4 flex items-center justify-between shadow-lg transition">
                                     <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center text-xl font-bold shadow-inner">🪙</div>
                                     <div class="text-right">
@@ -317,7 +317,7 @@ module.exports = function (app, client) {
                                     <div class="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center text-xl shadow-inner">👍</div>
                                     <div class="text-right">
                                         <span class="text-xs font-bold text-gray-400">السمعة</span>
-                                        <h3 class="text-xl font-black text-white mt-0.5">${userGolds}</h3>
+                                        <h3 class="text-xl font-black text-white mt-0.5">${userStars}</h3>
                                     </div>
                                 </div>
 
