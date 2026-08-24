@@ -1129,9 +1129,9 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                         <!-- 2. Search & Filter Bar (Exact to Image 1) -->
                         <div class="flex items-center justify-between gap-4">
                             <div class="flex items-center gap-1.5 bg-[#12141f] border border-white/5 p-1 rounded-xl">
-                                <button type="button" onclick="filterCmdStatus('disabled')" id="btnFilterDisabled" class="px-3 py-1 rounded-lg text-xs font-bold text-gray-400 hover:text-white transition">معطل</button>
-                                <button type="button" onclick="filterCmdStatus('enabled')" id="btnFilterEnabled" class="px-3 py-1 rounded-lg text-xs font-bold text-gray-400 hover:text-white transition">مفعل</button>
-                                <button type="button" onclick="filterCmdStatus('all')" id="btnFilterAll" class="px-3 py-1 rounded-lg text-xs font-bold bg-purple-600 text-white transition shadow">الكل</button>
+                                <button type="button" onclick="filterCmdStatus('disabled')" id="btnFilterDisabled" class="px-3 py-1 rounded-lg text-xs font-bold text-gray-400 hover:text-white transition cursor-pointer">معطل</button>
+                                <button type="button" onclick="filterCmdStatus('enabled')" id="btnFilterEnabled" class="px-3 py-1 rounded-lg text-xs font-bold text-gray-400 hover:text-white transition cursor-pointer">مفعل</button>
+                                <button type="button" onclick="filterCmdStatus('all')" id="btnFilterAll" class="px-3 py-1 rounded-lg text-xs font-bold bg-purple-600 text-white transition shadow cursor-pointer">الكل</button>
                             </div>
 
                             <div class="flex-1 relative">
@@ -1150,72 +1150,72 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                                     <span>📁</span>
                                 </div>
 
-                                <button type="button" onclick="switchCmdCategory('basic')" id="btnCatBasic" class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-white hover:bg-white/5 transition">
+                                <button type="button" onclick="switchCmdCategory('basic')" id="btnCatBasic" class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-white hover:bg-white/5 transition cursor-pointer">
                                     <span class="px-2 py-0.5 bg-emerald-950/60 text-emerald-400 rounded-lg text-[10px] font-mono">17/17</span>
                                     <span class="flex items-center gap-1.5"><span>الأوامر الأساسية</span><span>⚙️</span></span>
                                 </button>
 
-                                <button type="button" onclick="switchCmdCategory('punishments')" id="btnCatPunishments" class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold bg-purple-600 text-white shadow-lg transition">
+                                <button type="button" onclick="switchCmdCategory('punishments')" id="btnCatPunishments" class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold bg-purple-600 text-white shadow-lg transition cursor-pointer">
                                     <span class="px-2 py-0.5 bg-white/20 text-white rounded-lg text-[10px] font-mono">22/22</span>
                                     <span class="flex items-center gap-1.5"><span>العقوبات</span><span>🔨</span></span>
                                 </button>
 
-                                <button type="button" onclick="switchCmdCategory('punishment_logs')" id="btnCatPunishmentLogs" class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-white hover:bg-white/5 transition">
+                                <button type="button" onclick="switchCmdCategory('punishment_logs')" id="btnCatPunishmentLogs" class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-white hover:bg-white/5 transition cursor-pointer">
                                     <span class="px-2 py-0.5 bg-emerald-950/60 text-emerald-400 rounded-lg text-[10px] font-mono">17/17</span>
                                     <span class="flex items-center gap-1.5"><span>سجلات العقوبات</span><span>📜</span></span>
                                 </button>
 
-                                <button type="button" onclick="switchCmdCategory('channels')" id="btnCatChannels" class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-white hover:bg-white/5 transition">
+                                <button type="button" onclick="switchCmdCategory('channels')" id="btnCatChannels" class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-white hover:bg-white/5 transition cursor-pointer">
                                     <span class="px-2 py-0.5 bg-emerald-950/60 text-emerald-400 rounded-lg text-[10px] font-mono">9/9</span>
                                     <span class="flex items-center gap-1.5"><span>إدارة القنوات</span><span>📌</span></span>
                                 </button>
 
-                                <button type="button" onclick="switchCmdCategory('chat')" id="btnCatChat" class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-white hover:bg-white/5 transition">
+                                <button type="button" onclick="switchCmdCategory('chat')" id="btnCatChat" class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-white hover:bg-white/5 transition cursor-pointer">
                                     <span class="px-2 py-0.5 bg-emerald-950/60 text-emerald-400 rounded-lg text-[10px] font-mono">12/12</span>
                                     <span class="flex items-center gap-1.5"><span>أدوات الشات</span><span>💬</span></span>
                                 </button>
 
-                                <button type="button" onclick="switchCmdCategory('voice')" id="btnCatVoice" class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-white hover:bg-white/5 transition">
+                                <button type="button" onclick="switchCmdCategory('voice')" id="btnCatVoice" class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-white hover:bg-white/5 transition cursor-pointer">
                                     <span class="px-2 py-0.5 bg-emerald-950/60 text-emerald-400 rounded-lg text-[10px] font-mono">19/19</span>
                                     <span class="flex items-center gap-1.5"><span>إدارة الصوت</span><span>🎙️</span></span>
                                 </button>
 
-                                <button type="button" onclick="switchCmdCategory('roles')" id="btnCatRoles" class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-white hover:bg-white/5 transition">
+                                <button type="button" onclick="switchCmdCategory('roles')" id="btnCatRoles" class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-white hover:bg-white/5 transition cursor-pointer">
                                     <span class="px-2 py-0.5 bg-emerald-950/60 text-emerald-400 rounded-lg text-[10px] font-mono">10/10</span>
                                     <span class="flex items-center gap-1.5"><span>إدارة الرتب</span><span>🎖️</span></span>
                                 </button>
 
-                                <button type="button" onclick="switchCmdCategory('custom_roles')" id="btnCatCustomRoles" class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-white hover:bg-white/5 transition">
+                                <button type="button" onclick="switchCmdCategory('custom_roles')" id="btnCatCustomRoles" class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-white hover:bg-white/5 transition cursor-pointer">
                                     <span class="px-2 py-0.5 bg-emerald-950/60 text-emerald-400 rounded-lg text-[10px] font-mono">9/9</span>
                                     <span class="flex items-center gap-1.5"><span>الرتب الخاصة</span><span>👑</span></span>
                                 </button>
 
-                                <button type="button" onclick="switchCmdCategory('server_info')" id="btnCatServerInfo" class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-white hover:bg-white/5 transition">
+                                <button type="button" onclick="switchCmdCategory('server_info')" id="btnCatServerInfo" class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-white hover:bg-white/5 transition cursor-pointer">
                                     <span class="px-2 py-0.5 bg-emerald-950/60 text-emerald-400 rounded-lg text-[10px] font-mono">19/19</span>
                                     <span class="flex items-center gap-1.5"><span>معلومات السيرفر</span><span>📊</span></span>
                                 </button>
 
-                                <button type="button" onclick="switchCmdCategory('custom_bot')" id="btnCatCustomBot" class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-white hover:bg-white/5 transition">
+                                <button type="button" onclick="switchCmdCategory('custom_bot')" id="btnCatCustomBot" class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-white hover:bg-white/5 transition cursor-pointer">
                                     <span class="px-2 py-0.5 bg-emerald-950/60 text-emerald-400 rounded-lg text-[10px] font-mono">5/5</span>
                                     <span class="flex items-center gap-1.5"><span>أدوات البوت الخاص</span><span>🤖</span></span>
                                 </button>
 
-                                <button type="button" onclick="switchCmdCategory('security')" id="btnCatSecurity" class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-white hover:bg-white/5 transition">
+                                <button type="button" onclick="switchCmdCategory('security')" id="btnCatSecurity" class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-white hover:bg-white/5 transition cursor-pointer">
                                     <span class="px-2 py-0.5 bg-emerald-950/60 text-emerald-400 rounded-lg text-[10px] font-mono">15/15</span>
                                     <span class="flex items-center gap-1.5"><span>الحماية</span><span>🛡️</span></span>
                                 </button>
 
-                                <button type="button" onclick="switchCmdCategory('levels_cat')" id="btnCatLevels" class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-white hover:bg-white/5 transition">
+                                <button type="button" onclick="switchCmdCategory('levels_cat')" id="btnCatLevels" class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-white hover:bg-white/5 transition cursor-pointer">
                                     <span class="px-2 py-0.5 bg-emerald-950/60 text-emerald-400 rounded-lg text-[10px] font-mono">10/10</span>
                                     <span class="flex items-center gap-1.5"><span>المستويات والخبرة</span><span>⭐</span></span>
                                 </button>
 
-                                <button type="button" onclick="switchCmdCategory('server_stats')" id="btnCatServerStats" class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-white hover:bg-white/5 transition">
+                                <button type="button" onclick="switchCmdCategory('server_stats')" id="btnCatServerStats" class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-white hover:bg-white/5 transition cursor-pointer">
                                     <span class="px-2 py-0.5 bg-emerald-950/60 text-emerald-400 rounded-lg text-[10px] font-mono">11/11</span>
                                     <span class="flex items-center gap-1.5"><span>إحصائيات السيرفر</span><span>📈</span></span>
                                 </button>
 
-                                <button type="button" onclick="switchCmdCategory('profile_cat')" id="btnCatProfile" class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-white hover:bg-white/5 transition">
+                                <button type="button" onclick="switchCmdCategory('profile_cat')" id="btnCatProfile" class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-white hover:bg-white/5 transition cursor-pointer">
                                     <span class="px-2 py-0.5 bg-emerald-950/60 text-emerald-400 rounded-lg text-[10px] font-mono">10/10</span>
                                     <span class="flex items-center gap-1.5"><span>الملف الشخصي</span><span>👤</span></span>
                                 </button>
