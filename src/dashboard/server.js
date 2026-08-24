@@ -158,13 +158,13 @@ module.exports = function (app, client) {
             `).join('');
 
             const userDashboardGuildsHtml = guilds.map(g => `
-                <div class="bg-[#1c1f2e] border border-white/5 p-4 rounded-2xl flex items-center justify-between hover:border-yellow-500/30 transition group">
-                    <a href="/dashboard/${g.id}" class="px-5 py-2.5 bg-gradient-to-r from-yellow-500 to-amber-600 hover:from-yellow-400 hover:to-amber-500 text-black font-black text-xs rounded-xl transition shadow-lg shadow-yellow-950/40 flex items-center gap-2">
+                <div class="bg-[#1c1f2e] border border-white/5 p-4 rounded-2xl flex items-center justify-between hover:border-purple-500/40 transition group">
+                    <a href="/dashboard/${g.id}" class="px-5 py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs rounded-xl transition shadow-lg shadow-purple-950/40 flex items-center gap-2">
                         <span>⚙️ إدارة السيرفر</span>
                     </a>
                     <div class="flex items-center gap-3">
                         <div class="text-right">
-                            <h4 class="font-bold text-white text-sm group-hover:text-yellow-400 transition truncate max-w-[160px]">${g.name}</h4>
+                            <h4 class="font-bold text-white text-sm group-hover:text-purple-400 transition truncate max-w-[160px]">${g.name}</h4>
                             <span class="text-[10px] text-gray-500 font-mono">${g.id}</span>
                         </div>
                         <img src="${g.icon ? `https://cdn.discordapp.com/icons/${g.id}/${g.icon}.png` : 'https://cdn.discordapp.com/embed/avatars/0.png'}" class="w-12 h-12 rounded-2xl bg-[#0b0d14] object-cover ring-2 ring-white/5">
@@ -193,7 +193,7 @@ module.exports = function (app, client) {
             `).join('') || '<p class="text-xs text-gray-500 text-center py-4">لا توجد بيانات ذهب مسجلة بعد</p>';
 
             const dailyActionBoxHtml = canClaimDaily ? `
-                <button type="button" onclick="claimDailyReward()" id="claimDailyBtn" class="px-5 py-2 bg-gradient-to-r from-yellow-500 to-amber-600 hover:from-yellow-400 hover:to-amber-500 text-black font-black text-xs rounded-xl shadow-lg shadow-yellow-950/40 transition">
+                <button type="button" onclick="claimDailyReward()" id="claimDailyBtn" class="px-5 py-2 bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs rounded-xl shadow-lg shadow-purple-950/40 transition">
                     استلام الرصيد 🎁
                 </button>
             ` : `
@@ -237,9 +237,9 @@ module.exports = function (app, client) {
                     <div class="flex items-center gap-3">
                         <div class="text-right">
                             <span class="text-xs font-bold text-white block">${user.username}</span>
-                            <span class="text-[10px] text-yellow-400 font-mono">🪙 ${userCoins.toLocaleString()} Gold</span>
+                            <span class="text-[10px] text-purple-400 font-mono">🪙 ${userCoins.toLocaleString()} Gold</span>
                         </div>
-                        <img src="${userAvatar}" class="w-9 h-9 rounded-xl object-cover ring-2 ring-yellow-500/40">
+                        <img src="${userAvatar}" class="w-9 h-9 rounded-xl object-cover ring-2 ring-purple-500/40">
                     </div>
                 </header>
 
@@ -1698,7 +1698,7 @@ const leaderboard = database.getInvitesLeaderboard ? database.getInvitesLeaderbo
                             <td class="py-3 px-4 font-bold text-rose-400 font-mono text-center">${item.leaves}</td>
                             <td class="py-3 px-4 font-bold text-purple-400 font-mono text-center">${item.fake}</td>
                             <td class="py-3 px-4 font-bold text-purple-400 font-mono text-center">${item.bonus}</td>
-                            <td class="py-3 px-4 font-black text-yellow-400 font-mono text-center text-sm">${item.total}</td>
+                            <td class="py-3 px-4 font-black text-purple-400 font-mono text-center text-sm">${item.total}</td>
                         </tr>
                     `;
                 }).join('') : `<tr><td colspan="7" class="text-center py-8 text-gray-500 text-xs">لا توجد بيانات دعوات مسجلة حتى الآن</td></tr>`;
@@ -1722,7 +1722,7 @@ const leaderboard = database.getInvitesLeaderboard ? database.getInvitesLeaderbo
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div class="bg-[#1c1f2e] border border-white/5 p-4 rounded-2xl">
                                 <span class="text-gray-400 text-[11px]">إجمالي الدعوات الصالحة</span>
-                                <h4 class="text-2xl font-black text-yellow-400 mt-1 font-mono">${totalInvitesCount.toLocaleString()}</h4>
+                                <h4 class="text-2xl font-black text-purple-400 mt-1 font-mono">${totalInvitesCount.toLocaleString()}</h4>
                                 <span class="text-[10px] text-emerald-400">✨ دعوة نشطة في السيرفر</span>
                             </div>
                             <div class="bg-[#1c1f2e] border border-white/5 p-4 rounded-2xl">
