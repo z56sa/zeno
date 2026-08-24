@@ -34,16 +34,12 @@ module.exports = function (app, client) {
         }
     }));
 
-    // =======================================================
-    // 1. الصفحة الرئيسية (Redirect to Dashboard)
-    // =======================================================
+    // 1. الصفحة الرئيسية
     app.get('/', (req, res) => {
         res.redirect('/dashboard');
     });
 
-    // =======================================================
-    // 2. OAuth2 (Authentication)
-    // =======================================================
+    // 2. OAuth2
     app.get('/auth/discord', (req, res) => {
         const clientId = SecretManager.getSecret('DISCORD_CLIENT_ID') || process.env.DISCORD_CLIENT_ID;
         const redirectUri = encodeURIComponent(SecretManager.getSecret('DISCORD_REDIRECT_URI') || process.env.DISCORD_REDIRECT_URI || 'https://zeno-production-56c5.up.railway.app/auth/discord/callback');
@@ -99,9 +95,7 @@ module.exports = function (app, client) {
         req.session.destroy(() => res.redirect('/'));
     });
 
-    // =======================================================
-    // 3. لوحة تحكم المستخدم الكاملة (User Dashboard - 100% Exact to Image)
-    // =======================================================
+    // 3. User Dashboard
     app.get('/dashboard', (req, res) => {
         try {
             if (!req.session?.user) return res.redirect('/auth/discord');
@@ -148,103 +142,37 @@ module.exports = function (app, client) {
             } catch (err) {}
 
             const now = Date.now();
-            const dailyCooldown = 24 * 60 * 60 * 1000;
-            const timePassed = now - userLastDaily;
-            const canClaimDaily = timePassed >= dailyCooldown;
-            const unlockTimestamp = userLastDaily + dailyCooldown;
-            const timeLeftMs = Math.max(0, dailyCooldown - timePassed);
-            const hoursLeft = Math.floor(timeLeftMs / (1000 * 60 * 60));
-            const minsLeft = Math.floor((timeLeftMs % (1000 * 60 * 60)) / (1000 * 60));
+            const canClaimDaily = (now - userLastDaily) >= 24 * 60 * 60 * 1000;
+            const nextDailyIn = Math.max(0, 24 * 60 * 60 * 1000 - (now - userLastDaily));
+            const nextDailyHours = Math.floor(nextDailyIn / (1000 * 60 * 60));
+            const nextDailyMinutes = Math.floor((nextDailyIn % (1000 * 60 * 60)) / (1000 * 60));
 
-            const xpLeaderboardHtml = xpLeaderboard.map((r, i) => {
-                const medal = i === 0 ? '🥇' : (i === 1 ? '🥈' : (i === 2 ? '🥉' : `#${i + 1}`));
-                return `
-                    <div class="bg-[#151724] border border-white/5 p-3 rounded-2xl flex items-center justify-between shadow-sm">
-                        <div class="flex items-center gap-2">
-                            <span class="text-xs font-mono font-bold text-purple-400">${(r.total_xp || 0).toLocaleString()} XP</span>
-                            <span class="text-[10px] text-gray-500 font-mono">Lv.${r.max_level || 1}</span>
-                        </div>
-                        <div class="flex items-center gap-3">
-                            <div class="text-right">
-                                <span class="text-xs font-bold text-white block">User (${r.user_id})</span>
-                            </div>
-                            <span class="text-sm font-bold w-6 text-center">${medal}</span>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-
-            const coinsLeaderboardHtml = coinsLeaderboard.map((r, i) => {
-                const medal = i === 0 ? '🥇' : (i === 1 ? '🥈' : (i === 2 ? '🥉' : `#${i + 1}`));
-                return `
-                    <div class="bg-[#151724] border border-white/5 p-3 rounded-2xl flex items-center justify-between shadow-sm">
-                        <div class="flex items-center gap-2">
-                            <span class="text-xs font-mono font-bold text-amber-400">${(r.total_coins || 0).toLocaleString()} 🪙</span>
-                        </div>
-                        <div class="flex items-center gap-3">
-                            <div class="text-right">
-                                <span class="text-xs font-bold text-white block">User (${r.user_id})</span>
-                            </div>
-                            <span class="text-sm font-bold w-6 text-center">${medal}</span>
-                        </div>
-                    </div>
-                `;
-            }).join('');
+            const xpNeeded = userLevel * 100;
+            const xpProgress = Math.min(100, Math.floor((userXp % 100) / 100 * 100));
 
             const userDashboardGuildsHtml = guilds.map(g => `
-                <a href="/dashboard/${g.id}" class="bg-[#151724] hover:bg-[#1c1f2e] border border-white/5 hover:border-purple-500/40 p-4 rounded-2xl flex items-center justify-between transition-all group shadow-md">
-                    <div class="w-8 h-8 rounded-xl bg-[#0b0d14] flex items-center justify-center text-gray-400 group-hover:text-purple-400 group-hover:translate-x-[-2px] transition">
-                        <svg class="w-4 h-4 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-                    </div>
-                    <div class="flex items-center gap-3 text-right">
-                        <div>
-                            <h4 class="text-xs font-bold text-white group-hover:text-purple-300 transition truncate max-w-[140px]">${g.name}</h4>
-                            <span class="text-[10px] text-gray-400">صلاحية إدارية</span>
+                <div class="bg-[#1c1f2e] border border-white/5 p-4 rounded-2xl flex items-center justify-between hover:border-yellow-500/30 transition group">
+                    <a href="/dashboard/${g.id}" class="px-5 py-2.5 bg-gradient-to-r from-yellow-500 to-amber-600 hover:from-yellow-400 hover:to-amber-500 text-black font-black text-xs rounded-xl transition shadow-lg shadow-yellow-950/40 flex items-center gap-2">
+                        <span>⚙️ إدارة السيرفر</span>
+                    </a>
+                    <div class="flex items-center gap-3">
+                        <div class="text-right">
+                            <h4 class="font-bold text-white text-sm group-hover:text-yellow-400 transition truncate max-w-[160px]">${g.name}</h4>
+                            <span class="text-[10px] text-gray-500 font-mono">${g.id}</span>
                         </div>
-                        <img src="${g.icon ? `https://cdn.discordapp.com/icons/${g.id}/${g.icon}.png` : 'https://cdn.discordapp.com/embed/avatars/0.png'}" class="w-10 h-10 rounded-xl object-cover bg-[#090a10] border border-white/5 ring-1 ring-white/10 group-hover:ring-purple-500/40 transition">
+                        <img src="${g.icon ? `https://cdn.discordapp.com/icons/${g.id}/${g.icon}.png` : 'https://cdn.discordapp.com/embed/avatars/0.png'}" class="w-12 h-12 rounded-2xl bg-[#0b0d14] object-cover ring-2 ring-white/5">
                     </div>
-                </a>
-            `).join('');
-
-            const serverRailHtml = guilds.map(g => `
-                <a href="/dashboard/${g.id}" title="${g.name}" class="group relative flex items-center justify-center">
-                    <img src="${g.icon ? `https://cdn.discordapp.com/icons/${g.id}/${g.icon}.png` : 'https://cdn.discordapp.com/embed/avatars/0.png'}" 
-                         class="w-11 h-11 rounded-2xl border border-white/5 hover:border-purple-500/50 hover:rounded-xl object-cover transition-all shadow-md">
-                </a>
+                </div>
             `).join('');
 
             const dailyActionBoxHtml = canClaimDaily ? `
-                <button id="claimDailyBtn" onclick="claimDaily()" class="w-full py-4 bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 hover:from-purple-500 hover:to-indigo-500 text-white font-black text-sm rounded-2xl shadow-xl shadow-purple-900/40 transition transform active:scale-95 flex items-center justify-center gap-2">
-                    <span>🎁</span>
-                    <span>استلام الراتب اليومي الآن (+500 🪙)</span>
+                <button type="button" onclick="claimDailyReward()" id="claimDailyBtn" class="px-5 py-2 bg-gradient-to-r from-yellow-500 to-amber-600 hover:from-yellow-400 hover:to-amber-500 text-black font-black text-xs rounded-xl shadow-lg shadow-yellow-950/40 transition">
+                    استلام الرصيد 🎁
                 </button>
             ` : `
-                <div class="bg-[#0b0d14] border border-purple-950/60 rounded-2xl p-5 space-y-4">
-                    <div class="flex items-center justify-between text-xs font-bold text-gray-300">
-                        <span class="flex items-center gap-1 text-purple-400"><span>⏰</span><span>الراتب القادم</span></span>
-                        <span class="text-gray-400">الوقت المتبقي بالضبط</span>
-                    </div>
-
-                    <div class="grid grid-cols-3 gap-3">
-                        <div class="bg-[#1c1f2e] border border-purple-900/40 rounded-xl p-3 text-center shadow-inner">
-                            <span id="cdHours" class="text-2xl font-black text-white font-mono block">${String(hoursLeft).padStart(2, '0')}</span>
-                            <span class="text-[10px] text-gray-400 font-bold mt-0.5 block">ساعة</span>
-                        </div>
-                        <div class="bg-[#1c1f2e] border border-purple-900/40 rounded-xl p-3 text-center shadow-inner">
-                            <span id="cdMins" class="text-2xl font-black text-white font-mono block">${String(minsLeft).padStart(2, '0')}</span>
-                            <span class="text-[10px] text-gray-400 font-bold mt-0.5 block">دقيقة</span>
-                        </div>
-                        <div class="bg-[#1c1f2e] border border-purple-900/40 rounded-xl p-3 text-center shadow-inner">
-                            <span id="cdSecs" class="text-2xl font-black text-purple-400 font-mono block">00</span>
-                            <span class="text-[10px] text-gray-400 font-bold mt-0.5 block">ثانية</span>
-                        </div>
-                    </div>
-
-                    <button disabled class="w-full py-3 bg-[#151722] border border-white/5 text-gray-400 font-bold text-xs rounded-xl cursor-not-allowed flex items-center justify-center gap-2">
-                        <span>⌛</span>
-                        <span>تم استلام راتب اليوم! عد بعد انتهاء الوقت أعلاه</span>
-                    </button>
-                </div>
+                <span class="text-[10px] text-gray-400 font-bold bg-[#0b0d14] border border-white/5 px-3 py-1.5 rounded-xl font-mono">
+                    ⏳ متاح بعد: ${nextDailyHours}س ${nextDailyMinutes}د
+                </span>
             `;
 
             res.send(`
@@ -253,7 +181,7 @@ module.exports = function (app, client) {
             <head>
                 <meta charset="UTF-8">
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>لوحة التحكم | ZENO</title>
+                <title>لوحة التحكم | ZENO BOT</title>
                 <script src="https://cdn.tailwindcss.com"></script>
                 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
                 
@@ -270,19 +198,21 @@ module.exports = function (app, client) {
                     ::-webkit-scrollbar { width: 6px; height: 6px; }
                     ::-webkit-scrollbar-track { background: #0b0d14; }
                     ::-webkit-scrollbar-thumb { background: #2f3146; border-radius: 10px; }
-                    .probot-card { background: var(--bg-card) !important; border: 1px solid var(--border) !important; border-radius: 16px !important; }
                 </style>
             </head>
             <body class="min-h-screen flex flex-col bg-[#0b0d14] text-gray-200">
                 <header class="h-16 bg-[#10121b]/95 backdrop-blur-md border-b border-white/5 px-6 flex items-center justify-between sticky top-0 z-40">
                     <div class="flex items-center gap-4">
-                        <a href="https://discord.gg/uxqQDtbVMz" target="_blank" class="text-xs text-gray-400 hover:text-gray-200 transition">الدعم الفني</a>
+                        <a href="/logout" class="text-xs text-rose-400 hover:text-rose-300 font-bold transition">تسجيل الخروج</a>
                         <span class="text-gray-700">|</span>
-                        <a href="/#commands" class="text-xs text-gray-400 hover:text-gray-200 transition">الأوامر</a>
+                        <a href="https://discord.gg/uxqQDtbVMz" target="_blank" class="text-xs text-gray-400 hover:text-gray-200 transition">الدعم الفني</a>
                     </div>
-                    <div class="flex items-center gap-2">
-                        <span class="font-black text-sm text-white tracking-wide">ZENO</span>
-                        <div class="w-8 h-8 rounded-xl bg-purple-600/30 border border-purple-500/40 flex items-center justify-center font-black text-xs text-purple-300">Z</div>
+                    <div class="flex items-center gap-3">
+                        <div class="text-right">
+                            <span class="text-xs font-bold text-white block">${user.username}</span>
+                            <span class="text-[10px] text-yellow-400 font-mono">🪙 ${userCoins.toLocaleString()} Gold</span>
+                        </div>
+                        <img src="${userAvatar}" class="w-9 h-9 rounded-xl object-cover ring-2 ring-yellow-500/40">
                     </div>
                 </header>
 
@@ -806,82 +736,16 @@ module.exports = function (app, client) {
                     if (arrow) arrow.classList.toggle('rotate-180');
                 }
                 </script>
-
-                <script>
-                function toggleNavGroup(groupId) {
-                    const el = document.getElementById(groupId);
-                    const arrow = document.getElementById('arrow_' + groupId);
-                    if (!el) return;
-                    el.classList.toggle('hidden');
-                    if (arrow) arrow.classList.toggle('rotate-180');
-                }
-
-                function switchTab(tabId, btn) {
-                    document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-                    const target = document.getElementById(tabId);
-                    if (target) target.classList.remove('hidden');
-
-                    if (btn) {
-                        document.querySelectorAll('.nav-btn').forEach(b => {
-                            b.classList.remove('bg-purple-600', 'text-white', 'font-bold', 'shadow-md');
-                            b.classList.add('text-gray-300');
-                        });
-                        btn.classList.add('bg-purple-600', 'text-white', 'font-bold', 'shadow-md');
-                        btn.classList.remove('text-gray-300');
-                    }
-                }
-
-                async function claimDaily() {
-                    const btn = document.getElementById('claimDailyBtn');
-                    if (btn) { btn.disabled = true; btn.innerText = 'جارٍ الاستلام...'; }
-                    try {
-                        const res = await fetch('/api/user/daily', { method: 'POST' });
-                        const data = await res.json();
-                        if (data.success) {
-                            alert('🎉 مبروك! استلمت الراتب اليومي (+500 🪙)!');
-                            location.reload();
-                        } else {
-                            alert('❌ خطأ: ' + (data.error || 'فشل الاستلام'));
-                            if (btn) btn.disabled = false;
-                        }
-                    } catch (e) {
-                        alert('حدث خطأ في الاتصال بالسيرفر');
-                        if (btn) btn.disabled = false;
-                    }
-                }
-
-                async function buyItem(type, name, price, btn) {
-                    if (!confirm('هل أنت متأكد من رغبتك في شراء هذا العنصر مقابل ' + price + ' 🪙؟')) return;
-                    try {
-                        const res = await fetch('/api/user/shop/buy', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ type, name, price })
-                        });
-                        const data = await res.json();
-                        if (data.success) {
-                            alert('✅ تم الشراء والتجهيز بنجاح!');
-                            location.reload();
-                        } else {
-                            alert('❌ خطأ: ' + (data.error || 'فشل الشراء'));
-                        }
-                    } catch (e) {
-                        alert('حدث خطأ في الاتصال');
-                    }
-                }
-                </script>
             </body>
             </html>
             `);
-        } catch (error) {
-            console.error("Dashboard error:", error);
-            res.status(500).send(`<pre style="color:red;background:#111;padding:20px;font-family:monospace">${error.stack || error.message || error}</pre>`);
+        } catch (e) {
+            console.error("Dashboard render error:", e);
+            res.status(500).send("Internal error: " + e.message);
         }
     });
 
-    // =======================================================
-    // 4. صفحة إدارة السيرفر (Guild Dashboard & Sub-pages)
-    // =======================================================
+    // 4. Guild Dashboard & Sub-pages
     app.get('/dashboard/:guildId/:section?', (req, res) => {
         try {
             if (!req.session?.user) return res.redirect('/auth/discord');
@@ -940,9 +804,6 @@ module.exports = function (app, client) {
                 if (database.getAutoResponders) {
                     autoRespondersList = database.getAutoResponders(guildId) || [];
                 }
-                if (database.getGuildTickets) {
-                    guildTicketsList = database.getGuildTickets(guildId, 50) || [];
-                }
             } catch (err) {}
             try {
                 if (database.getWarnPunishments) {
@@ -977,6 +838,7 @@ module.exports = function (app, client) {
                 'appearance': 'مظهر وتخصيص البوت 🎨',
                 'settings': 'إعدادات السيرفر العامة ⚙️',
                 'general': 'جميع الأوامر والخدمات ⌨️',
+                'commands': 'مركز إدارة الأوامر الشامل ⌨️',
                 'moderation': 'الإشراف وإدارة الأعضاء 🔨',
                 'automod': 'الرقابة التلقائية وفلاتر السب والشات 🤖',
                 'welcome': 'رسائل وبطاقات الترحيب والمغادرة 👋',
@@ -994,31 +856,22 @@ module.exports = function (app, client) {
                 'levels': 'نظام المستويات والخبرة XP 🏆',
                 'autoroles': 'الرتب التلقائية عند الانضمام 🎖️',
                 'giveaways': 'نظام مسابقات القيف اواي 🎁',
+                'suggestions': 'نظام الاقتراحات والشكاوي 💡',
                 'invites': 'متتبع الدعوات المتقدم (Invite Tracker) 🔗',
                 'broadcast': 'نظام الإعلانات والمذيع الآلي 📢',
-                'embed': 'صانع رسائل الإيمبد التفاعلي 📄',
-                'applications': 'نظام التقديمات والتوظيف 📝',
-                'fun': 'الألعاب والتسلية والمسابقات 🎮',
-                'quran': 'القرآن الكريم والراديو الإسلامي 📻',
-                'social': 'تنبيهات منصات السوشيال ميديا 📺'
+                'embed': 'صانع رسائل الإيمبد المتقدم 📄'
             };
 
-            const title = sectionTitles[section] || 'لوحة تحكم السيرفر';
+            const title = sectionTitles[section] || 'لوحة الإعدادات ⚙️';
 
-            const guildTextChannels = botGuild ? botGuild.channels.cache
-                .filter(c => c.isTextBased() && !c.isVoiceBased() && !c.isThread())
-                .sort((a, b) => a.rawPosition - b.rawPosition)
-                .map(c => ({ id: c.id, name: c.name })) : [];
+            const guildTextChannels = botGuild ? Array.from(botGuild.channels.cache.values()).filter(c => c.type === 0 || c.type === 5) : [];
+            const guildVoiceChannels = botGuild ? Array.from(botGuild.channels.cache.values()).filter(c => c.type === 2) : [];
+            const guildRoles = botGuild ? Array.from(botGuild.roles.cache.values()).filter(r => r.name !== '@everyone') : [];
 
-            const guildRoles = botGuild ? botGuild.roles.cache
-                .filter(r => r.name !== '@everyone')
-                .sort((a, b) => b.rawPosition - a.rawPosition)
-                .map(r => ({ id: r.id, name: r.name, color: r.hexColor })) : [];
-
-            function renderChannelSelect(inputName, selectedId, multiple = false) {
+            function renderChannelSelect(inputName, selectedId, isMulti = false) {
                 return `
-                    <select name="${inputName}" id="${inputName}" ${multiple ? 'multiple' : ''} class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right cursor-pointer">
-                        <option value="">...اختر الروم</option>
+                    <select name="${inputName}" id="${inputName}" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right cursor-pointer">
+                        <option value="">...اختر القناة</option>
                         ${guildTextChannels.map(c => `<option value="${c.id}" ${String(selectedId).includes(String(c.id)) ? 'selected' : ''}># ${c.name}</option>`).join('')}
                     </select>
                 `;
@@ -5135,6 +4988,295 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                     }
                     </script>
 `;
+            } else if (section === 'antiraid') {
+formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl">
+                        <div class="bg-[#12141f] border border-white/5 p-6 rounded-2xl flex items-center justify-between shadow-xl">
+                            <label class="toggle"><input type="checkbox" name="antiraid_enabled" value="1" ${settings.antiraid_enabled !== 0 ? 'checked' : ''}><span class="slider"></span></label>
+                            <div class="flex items-center gap-3">
+                                <div class="text-right">
+                                    <h4 class="font-black text-white text-base">مكافحة الغزو والأعضاء الوهميين (Anti-Raid)</h4>
+                                    <p class="text-gray-400 text-xs mt-0.5">حماية السيرفر من هجمات الدخول الجماعي والحسابات الجديدة الوهمية</p>
+                                </div>
+                                <div class="w-10 h-10 rounded-xl bg-red-600/20 text-red-400 flex items-center justify-center text-lg border border-red-500/30">🚨</div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="bg-[#12141f] border border-white/5 p-5 rounded-2xl text-center space-y-1 shadow-lg">
+                                <span class="text-2xl font-black text-white font-mono">${settings.anti_alt_days || 3}</span>
+                                <span class="text-xs font-bold text-gray-400 block">أيام عمر الحساب الأدنى</span>
+                            </div>
+                            <div class="bg-[#12141f] border border-white/5 p-5 rounded-2xl text-center space-y-1 shadow-lg">
+                                <span class="text-2xl font-black text-emerald-400 font-mono">${settings.raid_threshold || 5}</span>
+                                <span class="text-xs font-bold text-gray-400 block">حد الدخول في 10 ثوانٍ</span>
+                            </div>
+                            <div class="bg-[#12141f] border border-white/5 p-5 rounded-2xl text-center space-y-1 shadow-lg">
+                                <span class="text-2xl font-black text-amber-400 font-mono">${settings.anti_bot ? 'مفعل 🟢' : 'معطل 🔴'}</span>
+                                <span class="text-xs font-bold text-gray-400 block">حظر البوتات غير الموثقة</span>
+                            </div>
+                        </div>
+
+                        <div class="bg-[#12141f] border border-white/5 p-6 rounded-2xl space-y-4 shadow-xl">
+                            <h4 class="text-xs font-black text-white border-b border-white/5 pb-3">إعدادات الحماية المتقدمة</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-300 mb-2">الحد الأدنى لعمر الحساب لدخول السيرفر (بالأيام)</label>
+                                    <input type="number" name="anti_alt_days" value="${settings.anti_alt_days || 3}" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none font-mono text-right">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-300 mb-2">حد الدخول الجماعي المشبوه (أعضاء / 10 ثوانٍ)</label>
+                                    <input type="number" name="raid_threshold" value="${settings.raid_threshold || 5}" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none font-mono text-right">
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                                <div class="flex items-center justify-between p-3.5 bg-[#0b0d14] border border-white/5 rounded-xl">
+                                    <label class="toggle"><input type="checkbox" name="anti_bot" value="1" ${settings.anti_bot ? 'checked' : ''}><span class="slider"></span></label>
+                                    <div class="text-right">
+                                        <h5 class="text-xs font-bold text-white">طرد البوتات التلقائي (Anti-Bot)</h5>
+                                        <p class="text-[10px] text-gray-500">منع إضافة أي بوتات إلا من قبل الأونر</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center justify-between p-3.5 bg-[#0b0d14] border border-white/5 rounded-xl">
+                                    <label class="toggle"><input type="checkbox" name="antiraid_dm_notify" value="1" ${settings.antiraid_dm_notify !== 0 ? 'checked' : ''}><span class="slider"></span></label>
+                                    <div class="text-right">
+                                        <h5 class="text-xs font-bold text-white">إرسال سبب الطرد في الخاص</h5>
+                                        <p class="text-[10px] text-gray-500">إشعار الحسابات المطرودة بسبب صغر السن بالخاص</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>`;
+            } else if (section === 'tempvoice') {
+formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl">
+                        <div class="bg-[#12141f] border border-white/5 p-6 rounded-2xl flex items-center justify-between shadow-xl">
+                            <label class="toggle"><input type="checkbox" name="temp_voice_enabled" value="1" ${settings.temp_voice_enabled !== 0 ? 'checked' : ''}><span class="slider"></span></label>
+                            <div class="flex items-center gap-3">
+                                <div class="text-right">
+                                    <h4 class="font-black text-white text-base">نظام الرومات الصوتية المؤقتة (Temporary Voice)</h4>
+                                    <p class="text-gray-400 text-xs mt-0.5">إنشاء غرف صوتية خاصة تلقائياً وحذفها عند خروج الأعضاء</p>
+                                </div>
+                                <div class="w-10 h-10 rounded-xl bg-purple-600/20 text-purple-400 flex items-center justify-center text-lg border border-purple-500/30">🕒</div>
+                            </div>
+                        </div>
+
+                        <div class="bg-[#12141f] border border-white/5 p-6 rounded-2xl space-y-4 shadow-xl">
+                            <h4 class="text-xs font-black text-white border-b border-white/5 pb-3">إعدادات الروم الرئيسي والكاتيجوري</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-300 mb-2">روم الدخول الرئيسي (Join-to-Create Channel)</label>
+                                    <input type="text" name="temp_voice_channel" value="${settings.temp_voice_channel || ''}" placeholder="أيدي الروم الصوتي الرئيسي..." class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none font-mono text-right">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-300 mb-2">قسم الرومات (Category ID)</label>
+                                    <input type="text" name="temp_voice_category" value="${settings.temp_voice_category || ''}" placeholder="أيدي الكاتيجوري الذي ستنشأ تحته..." class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none font-mono text-right">
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-300 mb-2">الاسم الافتراضي للروم المنشأ</label>
+                                    <input type="text" name="temp_voice_name_template" value="${settings.temp_voice_name_template || '🔊 | {username}'}" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right font-mono">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-300 mb-2">الحد الأقصى للمستخدمين الافتراضي</label>
+                                    <input type="number" name="temp_voice_user_limit" value="${settings.temp_voice_user_limit || 0}" placeholder="0 = غير محدود" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none font-mono text-right">
+                                </div>
+                            </div>
+                        </div>
+                    </div>`;
+            } else if (section === 'colors') {
+formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl">
+                        <div class="bg-[#12141f] border border-white/5 p-6 rounded-2xl flex items-center justify-between shadow-xl">
+                            <label class="toggle"><input type="checkbox" name="colors_enabled" value="1" ${settings.colors_enabled !== 0 ? 'checked' : ''}><span class="slider"></span></label>
+                            <div class="flex items-center gap-3">
+                                <div class="text-right">
+                                    <h4 class="font-black text-white text-base">نظام رتب الألوان المتقدم (Color Roles)</h4>
+                                    <p class="text-gray-400 text-xs mt-0.5">لوحة وقوائم تفاعلية لتمكين الأعضاء من اختيار ألوانهم المفضلة</p>
+                                </div>
+                                <div class="w-10 h-10 rounded-xl bg-pink-600/20 text-pink-400 flex items-center justify-center text-lg border border-pink-500/30">🎨</div>
+                            </div>
+                        </div>
+
+                        <div class="bg-[#12141f] border border-white/5 p-6 rounded-2xl space-y-4 shadow-xl">
+                            <h4 class="text-xs font-black text-white border-b border-white/5 pb-3">إعدادات نشر لوحة الألوان</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-300 mb-2">قناة لوحة الألوان</label>
+                                    ${renderChannelSelect('color_picker_channel', settings.color_picker_channel || '')}
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-300 mb-2">الرتبة المطلوبة لاختيار الألوان (اختياري)</label>
+                                    ${renderRoleSelect('colors_required_role', settings.colors_required_role || '')}
+                                </div>
+                            </div>
+                            <div class="pt-2">
+                                <label class="block text-xs font-bold text-gray-300 mb-2">رتب الألوان المتاحة (Role IDs مفصولة بفواصل)</label>
+                                <textarea name="color_role_ids" rows="3" placeholder="أيدي_رتبة_1, أيدي_رتبة_2, أيدي_رتبة_3..." class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl p-3 text-xs text-white outline-none font-mono text-right leading-relaxed">${settings.color_role_ids || ''}</textarea>
+                            </div>
+                        </div>
+                    </div>`;
+            } else if (section === 'boost') {
+formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl">
+                        <div class="bg-[#12141f] border border-white/5 p-6 rounded-2xl flex items-center justify-between shadow-xl">
+                            <label class="toggle"><input type="checkbox" name="boost_msg_enabled" value="1" ${settings.boost_msg_enabled !== 0 ? 'checked' : ''}><span class="slider"></span></label>
+                            <div class="flex items-center gap-3">
+                                <div class="text-right">
+                                    <h4 class="font-black text-white text-base">نظام تنبيهات ومعلومات البوست (Server Boost)</h4>
+                                    <p class="text-gray-400 text-xs mt-0.5">تنبيهات تلقائية في الشات وشكر البوسترز وتوزيع الرتب والمميزات</p>
+                                </div>
+                                <div class="w-10 h-10 rounded-xl bg-pink-600/20 text-pink-400 flex items-center justify-center text-lg border border-pink-500/30">💎</div>
+                            </div>
+                        </div>
+
+                        <div class="bg-[#12141f] border border-white/5 p-6 rounded-2xl space-y-4 shadow-xl">
+                            <h4 class="text-xs font-black text-white border-b border-white/5 pb-3">إعدادات رسالة البوست</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-300 mb-2">قناة تنبيهات البوست</label>
+                                    ${renderChannelSelect('boost_channel', settings.boost_channel || '')}
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-300 mb-2">رتبة مكافأة البوستر التلقائية</label>
+                                    ${renderRoleSelect('booster_reward_role', settings.booster_reward_role || '')}
+                                </div>
+                            </div>
+                            <div class="pt-2">
+                                <label class="block text-xs font-bold text-gray-300 mb-2">نص رسالة البوست (يدعم {user} و {count})</label>
+                                <textarea name="boost_message" rows="3" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl p-3 text-xs text-white outline-none text-right leading-relaxed">${settings.boost_message || 'شكراً لك {user} على تعزيز السيرفر 💎! أصبح عدد البوستات الآن {count} بوست!'}</textarea>
+                            </div>
+                        </div>
+                    </div>`;
+            } else if (section === 'logs') {
+formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl">
+                        <div class="bg-[#12141f] border border-white/5 p-6 rounded-2xl flex items-center justify-between shadow-xl">
+                            <label class="toggle"><input type="checkbox" name="logs_enabled" value="1" ${settings.logs_enabled !== 0 ? 'checked' : ''}><span class="slider"></span></label>
+                            <div class="flex items-center gap-3">
+                                <div class="text-right">
+                                    <h4 class="font-black text-white text-base">سجلات السيرفر الشاملة (Server Audit Logs)</h4>
+                                    <p class="text-gray-400 text-xs mt-0.5">تسجيل فوري ودقيق لجميع الأحداث مع الفاعل والتفاصيل</p>
+                                </div>
+                                <div class="w-10 h-10 rounded-xl bg-amber-600/20 text-amber-400 flex items-center justify-center text-lg border border-amber-500/30">📜</div>
+                            </div>
+                        </div>
+
+                        <div class="bg-[#12141f] border border-white/5 p-6 rounded-2xl space-y-4 shadow-xl">
+                            <h4 class="text-xs font-black text-white border-b border-white/5 pb-3">قنوات السجلات المتخصصة</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-300 mb-2">سجلات الرسائل (حذف وتعديل)</label>
+                                    ${renderChannelSelect('log_channel_messages', settings.log_channel_messages || settings.log_channel || '')}
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-300 mb-2">سجلات الأعضاء (انضمام ومغادرة)</label>
+                                    ${renderChannelSelect('log_channel_members', settings.log_channel_members || settings.log_channel || '')}
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-300 mb-2">سجلات الرومات الصوتية (دخول وخروج)</label>
+                                    ${renderChannelSelect('log_channel_voice', settings.log_channel_voice || settings.log_channel || '')}
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-300 mb-2">سجلات الإدارة والعقوبات (Mod Logs)</label>
+                                    ${renderChannelSelect('log_channel_moderation', settings.log_channel_moderation || settings.log_channel || '')}
+                                </div>
+                            </div>
+                        </div>
+                    </div>`;
+            } else if (section === 'analytics' || section === 'stats') {
+formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl">
+                        <div class="bg-[#12141f] border border-white/5 p-6 rounded-2xl flex items-center justify-between shadow-xl">
+                            <div class="flex items-center gap-3">
+                                <div class="text-right">
+                                    <h4 class="font-black text-white text-base">الإحصائيات والتحليلات وعدادات الرومات</h4>
+                                    <p class="text-gray-400 text-xs mt-0.5">متابعة نمو السيرفر وربط عدادات الأعضاء الديناميكية في القنوات الصوتية</p>
+                                </div>
+                                <div class="w-10 h-10 rounded-xl bg-blue-600/20 text-blue-400 flex items-center justify-center text-lg border border-blue-500/30">📊</div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <div class="bg-[#12141f] border border-white/5 p-5 rounded-2xl text-center space-y-1 shadow-lg">
+                                <span class="text-2xl font-black text-white font-mono">${guild.memberCount || 0}</span>
+                                <span class="text-xs font-bold text-gray-400 block">إجمالي الأعضاء</span>
+                            </div>
+                            <div class="bg-[#12141f] border border-white/5 p-5 rounded-2xl text-center space-y-1 shadow-lg">
+                                <span class="text-2xl font-black text-emerald-400 font-mono">${(guildTextChannels || []).length}</span>
+                                <span class="text-xs font-bold text-gray-400 block">قناة نصية</span>
+                            </div>
+                            <div class="bg-[#12141f] border border-white/5 p-5 rounded-2xl text-center space-y-1 shadow-lg">
+                                <span class="text-2xl font-black text-purple-400 font-mono">${(guildRoles || []).length}</span>
+                                <span class="text-xs font-bold text-gray-400 block">رتبة مسجلة</span>
+                            </div>
+                            <div class="bg-[#12141f] border border-white/5 p-5 rounded-2xl text-center space-y-1 shadow-lg">
+                                <span class="text-2xl font-black text-amber-400 font-mono">${(guildSuggestionsList || []).length}</span>
+                                <span class="text-xs font-bold text-gray-400 block">اقتراح مسجل</span>
+                            </div>
+                        </div>
+
+                        <div class="bg-[#12141f] border border-white/5 p-6 rounded-2xl space-y-4 shadow-xl">
+                            <h4 class="text-xs font-black text-white border-b border-white/5 pb-3">ربط عدادات الأعضاء في القنوات الصوتية (Voice Counters)</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-300 mb-2">أيدي روم عداد الأعضاء (Members Voice ID)</label>
+                                    <input type="text" name="stat_members_channel" value="${settings.stat_members_channel || ''}" placeholder="أيدي الروم الصوتي..." class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none font-mono text-right">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-300 mb-2">أيدي روم عداد البوتات (Bots Voice ID)</label>
+                                    <input type="text" name="stat_bots_channel" value="${settings.stat_bots_channel || ''}" placeholder="أيدي الروم الصوتي..." class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none font-mono text-right">
+                                </div>
+                            </div>
+                        </div>
+                    </div>`;
+            } else if (section === 'appearance') {
+formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl">
+                        <div class="bg-[#12141f] border border-white/5 p-6 rounded-2xl flex items-center justify-between shadow-xl">
+                            <div class="flex items-center gap-3">
+                                <div class="text-right">
+                                    <h4 class="font-black text-white text-base">مظهر وتخصيص البوت</h4>
+                                    <p class="text-gray-400 text-xs mt-0.5">تخصيص ألوان الإيمبد، الصور، وخلفيات بطاقة البروفايل</p>
+                                </div>
+                                <div class="w-10 h-10 rounded-xl bg-purple-600/20 text-purple-400 flex items-center justify-center text-lg border border-purple-500/30">🎨</div>
+                            </div>
+                        </div>
+
+                        <div class="bg-[#12141f] border border-white/5 p-6 rounded-2xl space-y-4 shadow-xl">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-300 mb-2">اللون الأساسي للإيمبدات (Hex Color)</label>
+                                    <input type="color" name="embed_color" value="${settings.embed_color || '#9333ea'}" class="w-full h-11 bg-[#0b0d14] border border-white/5 rounded-xl cursor-pointer p-1">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-300 mb-2">رابط صورة الفوتر أو الشعار</label>
+                                    <input type="text" name="bot_footer_icon" value="${settings.bot_footer_icon || ''}" placeholder="https://..." class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-left font-mono">
+                                </div>
+                            </div>
+                        </div>
+                    </div>`;
+            } else if (section === 'settings') {
+formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl">
+                        <div class="bg-[#12141f] border border-white/5 p-6 rounded-2xl flex items-center justify-between shadow-xl">
+                            <div class="flex items-center gap-3">
+                                <div class="text-right">
+                                    <h4 class="font-black text-white text-base">إعدادات السيرفر العامة</h4>
+                                    <p class="text-gray-400 text-xs mt-0.5">تحديد البرفكس وقناة السجلات الأساسية ولغة البوت</p>
+                                </div>
+                                <div class="w-10 h-10 rounded-xl bg-purple-600/20 text-purple-400 flex items-center justify-center text-lg border border-purple-500/30">⚙️</div>
+                            </div>
+                        </div>
+
+                        <div class="bg-[#12141f] border border-white/5 p-6 rounded-2xl space-y-4 shadow-xl">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-300 mb-2">برفكس الأوامر (Command Prefix)</label>
+                                    <input type="text" name="prefix" value="${settings.prefix || '#'}" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right font-mono">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-300 mb-2">قناة السجلات العامة (Default Log Channel)</label>
+                                    ${renderChannelSelect('log_channel', settings.log_channel || '')}
+                                </div>
+                            </div>
+                        </div>
+                    </div>`;
             } else if (section === 'embed') {
                 formFieldsHtml = `
                     <div class="space-y-6 text-right" dir="rtl">
@@ -5146,16 +5288,6 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                             </div>
                         </div>
 
-                        <!-- Card 1: Add new embed box (Exact to Image) -->
-                        <div class="bg-[#1c1f2e] border border-dashed border-purple-500/30 hover:border-purple-500/60 p-8 rounded-2xl text-center cursor-pointer transition group" onclick="document.getElementById('embBuilderCard').scrollIntoView({ behavior: 'smooth' })">
-                            <div class="w-12 h-12 rounded-2xl bg-purple-600/20 text-purple-400 border border-purple-500/30 flex items-center justify-center text-xl mx-auto mb-2 group-hover:scale-110 transition">
-                                ➕
-                            </div>
-                            <h4 class="font-bold text-white text-sm">+ إنشاء رسالة إمبد</h4>
-                            <p class="text-gray-400 text-xs mt-1">اضغط هنا لفتح المحرر التفاعلي وتصميم وإرسال رسالة إمبد جديدة</p>
-                        </div>
-
-                        <!-- Card 2: Interactive Embed Builder Form (Exact to Image) -->
                         <div id="embBuilderCard" class="bg-[#1c1f2e] border border-white/5 p-6 rounded-2xl space-y-4">
                             <h4 class="font-bold text-white text-sm border-b border-white/5 pb-3 flex items-center gap-2 justify-end">
                                 <span>محرر رسائل الإيمبد التفاعلي (Interactive Embed Builder)</span>
@@ -5164,54 +5296,32 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <label class="block text-xs font-bold text-gray-300 mb-2">القناة المستهدفة (Channel ID) <span class="text-purple-400">*</span></label>
+                                    <label class="block text-xs font-bold text-gray-300 mb-2">القناة المستهدفة <span class="text-purple-400">*</span></label>
                                     ${renderChannelSelect('embedChannel', '')}
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-bold text-gray-300 mb-2">لون الإيمبد (Hex Color)</label>
+                                    <label class="block text-xs font-bold text-gray-300 mb-2">لون الإيمبد</label>
                                     <input type="color" id="embColor" value="#9333ea" oninput="updateEmbedPreview()" class="w-full h-11 bg-[#0b0d14] border border-white/5 rounded-xl cursor-pointer p-1">
                                 </div>
                             </div>
 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <label class="block text-xs font-bold text-gray-300 mb-2">عنوان الرسالة (Embed Title)</label>
-                                    <input type="text" id="embTitle" oninput="updateEmbedPreview()" placeholder="اكتب العنوان الرئيسي هنا..." class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right">
+                                    <label class="block text-xs font-bold text-gray-300 mb-2">اسم الكاتب (Author Name)</label>
+                                    <input type="text" id="embAuthor" placeholder="مثال: ZENO Announcement" oninput="updateEmbedPreview()" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right">
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-bold text-gray-300 mb-2">اسم الكاتب (Author Name)</label>
-                                    <input type="text" id="embAuthor" oninput="updateEmbedPreview()" placeholder="اسم الكاتب أو الإدارة..." class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right">
+                                    <label class="block text-xs font-bold text-gray-300 mb-2">عنوان الإيمبد (Title)</label>
+                                    <input type="text" id="embTitle" placeholder="عنوان الرسالة الرئيسي..." oninput="updateEmbedPreview()" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right font-bold">
                                 </div>
                             </div>
 
                             <div>
-                                <label class="block text-xs font-bold text-gray-300 mb-2">محتوى الرسالة (Description) <span class="text-purple-400">*</span></label>
-                                <textarea id="embDesc" rows="4" oninput="updateEmbedPreview()" placeholder="اكتب تفاصيل الرسالة والإعلان والتنسيق هنا..." class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right leading-relaxed"></textarea>
+                                <label class="block text-xs font-bold text-gray-300 mb-2">محتوى ونص الإيمبد (Description) <span class="text-purple-400">*</span></label>
+                                <textarea id="embDesc" rows="4" placeholder="اكتب محتوى الرسالة وتنسيقها هنا..." oninput="updateEmbedPreview()" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right leading-relaxed"></textarea>
                             </div>
 
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-xs font-bold text-gray-300 mb-2">النص السفلي (Footer Text)</label>
-                                    <input type="text" id="embFooter" oninput="updateEmbedPreview()" placeholder="حقوق السيرفر أو نص التذييل..." class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right">
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-bold text-gray-300 mb-2">رابط صورة البنر الكبيرة (Banner Image URL)</label>
-                                    <input type="text" id="embImage" placeholder="https://..." class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-left font-mono">
-                                </div>
-                            </div>
-
-                            <!-- Live Discord Preview Box (Exact to Image) -->
-                            <div class="pt-4 border-t border-white/5 space-y-2">
-                                <span class="text-[11px] text-gray-400 font-bold block">المعاينة الحية لرسالة الإيمبد (Discord Live Preview):</span>
-                                <div id="previewCard" class="bg-[#0b0d14] border-r-4 border-purple-600 rounded-xl p-4 text-right space-y-2 shadow-inner">
-                                    <span id="pvAuthor" class="text-[11px] text-gray-400 font-bold block hidden"></span>
-                                    <h4 id="pvTitle" class="text-sm font-bold text-white">عنوان الرسالة التجريبي</h4>
-                                    <p id="pvDesc" class="text-xs text-gray-300 leading-relaxed">ستكون رسالة الإيمبد تظهر هنا كما سيبدو تماماً في الديسكورد...</p>
-                                    <span id="pvFooter" class="text-[10px] text-gray-500 font-mono block pt-1 border-t border-white/5 hidden"></span>
-                                </div>
-                            </div>
-
-                            <div class="pt-3 flex justify-end">
+                            <div class="pt-4 flex justify-end">
                                 <button type="button" onclick="sendEmbedDirect()" id="btnSendEmbed" class="px-8 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold transition shadow-lg flex items-center gap-2">
                                     <span>🚀 إرسال الإيمبد إلى ديسكورد الآن</span>
                                 </button>
@@ -5220,40 +5330,11 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                     </div>
 
                     <script>
-                    function updateEmbedPreview() {
-                        const title = document.getElementById('embTitle').value.trim();
-                        const desc = document.getElementById('embDesc').value.trim();
-                        const author = document.getElementById('embAuthor').value.trim();
-                        const footer = document.getElementById('embFooter').value.trim();
-                        const color = document.getElementById('embColor').value;
-
-                        const pvTitle = document.getElementById('pvTitle');
-                        const pvDesc = document.getElementById('pvDesc');
-                        const pvAuthor = document.getElementById('pvAuthor');
-                        const pvFooter = document.getElementById('pvFooter');
-                        const card = document.getElementById('previewCard');
-
-                        if (card) card.style.borderRightColor = color;
-                        if (pvTitle) pvTitle.innerText = title || 'عنوان الرسالة التجريبي';
-                        if (pvDesc) pvDesc.innerText = desc || 'ستكون رسالة الإيمبد تظهر هنا كما سيبدو تماماً في الديسكورد...';
-                        
-                        if (pvAuthor) {
-                            if (author) { pvAuthor.innerText = author; pvAuthor.classList.remove('hidden'); }
-                            else { pvAuthor.classList.add('hidden'); }
-                        }
-                        if (pvFooter) {
-                            if (footer) { pvFooter.innerText = footer; pvFooter.classList.remove('hidden'); }
-                            else { pvFooter.classList.add('hidden'); }
-                        }
-                    }
-
                     async function sendEmbedDirect() {
                         const channelId = document.getElementById('embedChannel').value;
                         const title = document.getElementById('embTitle').value.trim();
                         const desc = document.getElementById('embDesc').value.trim();
                         const author = document.getElementById('embAuthor').value.trim();
-                        const footer = document.getElementById('embFooter').value.trim();
-                        const image = document.getElementById('embImage').value.trim();
                         const color = document.getElementById('embColor').value;
 
                         if (!channelId) return alert('يرجى اختيار القناة المستهدفة أولاً!');
@@ -5267,7 +5348,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                             const res = await fetch('/api/guild/${guildId}/send-embed', {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ channelId, title, desc, author, footer, image, color })
+                                body: JSON.stringify({ channelId, title, desc, author, color })
                             });
                             const data = await res.json();
                             if (data.success) {
@@ -5745,9 +5826,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
         }
     });
 
-    // =======================================================
-    // 5. REST APIs (Settings, Daily, Shop, Embeds)
-    // =======================================================
+    // 5. REST APIs
     app.post('/api/guild/:guildId/settings', express.json(), (req, res) => {
         try {
             if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
@@ -5755,155 +5834,6 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
             const settings = req.body;
             if (database.updateGuildSettings) {
                 database.updateGuildSettings(guildId, settings);
-            }
-            res.json({ success: true });
-        } catch (e) {
-            res.status(500).json({ success: false, error: e.message });
-        }
-    });
-
-    app.post('/api/user/daily', async (req, res) => {
-        try {
-            if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
-            const userId = req.session.user.id;
-            const userRow = rawDb.prepare('SELECT MAX(last_daily) as last_daily FROM users WHERE user_id = ?').get(userId);
-            const now = Date.now();
-            const cooldown = 24 * 60 * 60 * 1000;
-            if (userRow?.last_daily && (now - userRow.last_daily) < cooldown) {
-                return res.status(400).json({ success: false, error: 'لقد استلمت الراتب اليومي بالفعل!' });
-            }
-            rawDb.prepare('UPDATE users SET coins = COALESCE(coins, 0) + 500, last_daily = ? WHERE user_id = ?').run(now, userId);
-            res.json({ success: true });
-        } catch (e) {
-            res.status(500).json({ success: false, error: e.message });
-        }
-    });
-
-    app.post('/api/user/shop/buy', express.json(), async (req, res) => {
-        try {
-            if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
-            const userId = req.session.user.id;
-            const { type, name, price } = req.body;
-            const userRow = rawDb.prepare('SELECT SUM(coins) as coins FROM users WHERE user_id = ?').get(userId);
-            const currentCoins = userRow?.coins || 0;
-            if (currentCoins < price) {
-                return res.status(400).json({ success: false, error: 'رصيد الذهب (Gold) غير كافٍ!' });
-            }
-            rawDb.prepare('UPDATE users SET coins = coins - ? WHERE user_id = ?').run(price, userId);
-            res.json({ success: true });
-        } catch (e) {
-            res.status(500).json({ success: false, error: e.message });
-        }
-    });
-
-    app.post('/api/guild/:guildId/whitelist', express.json(), async (req, res) => {
-        try {
-            if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
-            const { guildId } = req.params;
-            const { userId, type } = req.body;
-            if (!userId) return res.status(400).json({ success: false, error: 'User ID is required' });
-            if (database.addProtectionWhitelist) {
-                database.addProtectionWhitelist(guildId, userId, type || 'whitelist', req.session.user.id);
-            }
-            res.json({ success: true });
-        } catch (e) {
-            res.status(500).json({ success: false, error: e.message });
-        }
-    });
-
-    app.delete('/api/guild/:guildId/whitelist', express.json(), async (req, res) => {
-        try {
-            if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
-            const { guildId } = req.params;
-            const { userId, type } = req.body;
-            if (!userId) return res.status(400).json({ success: false, error: 'User ID is required' });
-            if (database.removeProtectionWhitelist) {
-                database.removeProtectionWhitelist(guildId, userId, type || 'whitelist');
-            }
-            res.json({ success: true });
-        } catch (e) {
-            res.status(500).json({ success: false, error: e.message });
-        }
-    });
-
-    app.post('/api/guild/:guildId/warn-punishments', express.json(), async (req, res) => {
-        try {
-            if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
-            const { guildId } = req.params;
-            const { warnCount, actionType } = req.body;
-            if (!warnCount || !actionType) return res.status(400).json({ success: false, error: 'Missing fields' });
-            if (database.addWarnPunishment) {
-                database.addWarnPunishment(guildId, warnCount, actionType);
-            }
-            res.json({ success: true });
-        } catch (e) {
-            res.status(500).json({ success: false, error: e.message });
-        }
-    });
-
-    app.delete('/api/guild/:guildId/warn-punishments/:id', async (req, res) => {
-        try {
-            if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
-            const { guildId, id } = req.params;
-            if (database.deleteWarnPunishment) {
-                database.deleteWarnPunishment(id, guildId);
-            }
-            res.json({ success: true });
-        } catch (e) {
-            res.status(500).json({ success: false, error: e.message });
-        }
-    });
-
-    app.post('/api/guild/:guildId/autoresponder', express.json(), async (req, res) => {
-        try {
-            if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
-            const { guildId } = req.params;
-            const data = req.body;
-            if (!data.trigger_word && !data.triggerWord) return res.status(400).json({ success: false, error: 'Missing trigger' });
-            if (!data.reply_text && !data.replyText) return res.status(400).json({ success: false, error: 'Missing reply' });
-            if (database.addAutoResponder) {
-                database.addAutoResponder(guildId, data);
-            }
-            res.json({ success: true });
-        } catch (e) {
-            res.status(500).json({ success: false, error: e.message });
-        }
-    });
-
-    app.delete('/api/guild/:guildId/autoresponder/:id', async (req, res) => {
-        try {
-            if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
-            const { guildId, id } = req.params;
-            if (database.deleteAutoResponder) {
-                database.deleteAutoResponder(guildId, id);
-            }
-            res.json({ success: true });
-        } catch (e) {
-            res.status(500).json({ success: false, error: e.message });
-        }
-    });
-
-    app.post('/api/guild/:guildId/level-reward', express.json(), async (req, res) => {
-        try {
-            if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
-            const { guildId } = req.params;
-            const { level, roleId, rewardType, voiceLevel } = req.body;
-            if (!level || !roleId) return res.status(400).json({ success: false, error: 'Missing fields' });
-            if (database.addLevelReward) {
-                database.addLevelReward(guildId, level, roleId, rewardType || 'text', voiceLevel || 0);
-            }
-            res.json({ success: true });
-        } catch (e) {
-            res.status(500).json({ success: false, error: e.message });
-        }
-    });
-
-    app.delete('/api/guild/:guildId/level-reward/:level', async (req, res) => {
-        try {
-            if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
-            const { guildId, level } = req.params;
-            if (database.removeLevelReward) {
-                database.removeLevelReward(guildId, parseInt(level));
             }
             res.json({ success: true });
         } catch (e) {
@@ -5933,7 +5863,6 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
             const channel = client.channels.cache.get(channelId) || await client.channels.fetch(channelId).catch(() => null);
             if (!channel || !channel.isTextBased()) return res.status(404).json({ success: false, error: 'Channel not found' });
 
-            // Parse duration
             let durationMs = 24 * 60 * 60 * 1000;
             if (duration === '10m') durationMs = 10 * 60 * 1000;
             else if (duration === '1h') durationMs = 60 * 60 * 1000;
@@ -6041,36 +5970,6 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
             const { status, reason } = req.body;
 
             const updated = database.updateSuggestionStatus(id, status, reason, req.session.user.id);
-
-            // Update Discord message embed color if available
-            if (updated && updated.channel_id && updated.message_id) {
-                try {
-                    const channel = client.channels.cache.get(updated.channel_id) || await client.channels.fetch(updated.channel_id).catch(() => null);
-                    if (channel) {
-                        const targetMsg = await channel.messages.fetch(updated.message_id).catch(() => null);
-                        if (targetMsg && targetMsg.embeds[0]) {
-                            const { EmbedBuilder } = require('discord.js');
-                            const oldEmbed = targetMsg.embeds[0];
-                            let newColor = '#9333ea';
-                            let statusText = 'قيد المراجعة ⏳';
-                            if (status === 'accepted') { newColor = '#10b981'; statusText = 'تم قبول الاقتراح ✅'; }
-                            if (status === 'implemented') { newColor = '#6366f1'; statusText = 'تم تنفيذ الاقتراح 🚀'; }
-                            if (status === 'rejected') { newColor = '#ef4444'; statusText = 'تم رفض الاقتراح ❌'; }
-
-                            const newEmbed = EmbedBuilder.from(oldEmbed)
-                                .setColor(newColor)
-                                .spliceFields(1, 1, { name: 'الحالة', value: statusText, inline: true });
-
-                            if (reason) {
-                                newEmbed.addFields({ name: 'رد الإدارة', value: reason, inline: false });
-                            }
-
-                            await targetMsg.edit({ embeds: [newEmbed] });
-                        }
-                    }
-                } catch(e) {}
-            }
-
             res.json({ success: true, updated });
         } catch(e) {
             res.status(500).json({ success: false, error: e.message });
@@ -6081,7 +5980,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
         try {
             if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
             const { guildId } = req.params;
-            const { channelId, title, desc, author, footer, image, color } = req.body;
+            const { channelId, title, desc, author, color } = req.body;
             const channel = client.channels.cache.get(channelId) || await client.channels.fetch(channelId).catch(() => null);
             if (!channel || !channel.isTextBased()) {
                 return res.status(404).json({ success: false, error: 'لم يتم العثور على القناة أو البوت ليس لديه صلاحيات فيها' });
@@ -6091,8 +5990,6 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
             if (title) emb.setTitle(title);
             if (desc) emb.setDescription(desc);
             if (author) emb.setAuthor({ name: author });
-            if (footer) emb.setFooter({ text: footer });
-            if (image) emb.setImage(image);
             emb.setTimestamp();
             await channel.send({ embeds: [emb] });
             res.json({ success: true });
