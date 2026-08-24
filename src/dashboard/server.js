@@ -915,7 +915,188 @@ module.exports = function (app, client) {
 
             let formFieldsHtml = '';
 
-            if (section === 'general' || section === 'commands') {
+            if (section === 'overview') {
+formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl">
+
+                        <!-- Server Overview Hero Banner -->
+                        <div class="bg-gradient-to-br from-[#1a0a2e] via-[#12141f] to-[#0b0d14] border border-purple-500/20 p-6 rounded-3xl shadow-2xl relative overflow-hidden">
+                            <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(147,51,234,0.12),transparent_70%)]"></div>
+                            <div class="relative flex items-center justify-between">
+                                <div class="flex items-center gap-4">
+                                    <div class="text-right">
+                                        <h2 class="text-2xl font-black text-white">${guild.name || "ZENO'BOT"}</h2>
+                                        <p class="text-purple-300/80 text-xs font-mono mt-0.5">ID: ${guildId}</p>
+                                        <div class="flex items-center gap-1.5 mt-2 justify-end">
+                                            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                                            <span class="text-xs text-emerald-300 font-bold">البوت متصل ويعمل</span>
+                                        </div>
+                                    </div>
+                                    <img src="${guild.icon ? `https://cdn.discordapp.com/icons/${guildId}/${guild.icon}.png` : 'https://cdn.discordapp.com/embed/avatars/0.png'}" class="w-20 h-20 rounded-3xl ring-4 ring-purple-500/40 shadow-xl object-cover">
+                                </div>
+                                <div class="text-left">
+                                    <div class="text-5xl font-black text-white/10 select-none">🏰</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Real-Time Stats Grid (4 Counters) -->
+                        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                            <div class="bg-[#12141f] border border-purple-500/20 p-5 rounded-2xl shadow-xl text-right hover:border-purple-500/40 transition group">
+                                <div class="flex items-center justify-between mb-3">
+                                    <div class="w-8 h-8 rounded-xl bg-purple-600/20 border border-purple-500/30 text-purple-400 flex items-center justify-center text-sm">👥</div>
+                                    <span class="text-[10px] text-gray-500 font-mono">MEMBERS</span>
+                                </div>
+                                <div class="text-2xl font-black text-white">${(botGuild?.memberCount || 0).toLocaleString()}</div>
+                                <p class="text-xs text-gray-400 mt-1 font-bold">إجمالي الأعضاء</p>
+                            </div>
+                            <div class="bg-[#12141f] border border-emerald-500/20 p-5 rounded-2xl shadow-xl text-right hover:border-emerald-500/40 transition group">
+                                <div class="flex items-center justify-between mb-3">
+                                    <div class="w-8 h-8 rounded-xl bg-emerald-600/20 border border-emerald-500/30 text-emerald-400 flex items-center justify-center text-sm">🟢</div>
+                                    <span class="text-[10px] text-gray-500 font-mono">ONLINE</span>
+                                </div>
+                                <div class="text-2xl font-black text-white">${(botGuild?.members?.cache?.filter(m => m.presence?.status === 'online' || m.presence?.status === 'idle' || m.presence?.status === 'dnd').size || 0).toLocaleString()}</div>
+                                <p class="text-xs text-gray-400 mt-1 font-bold">الأعضاء المتصلون</p>
+                            </div>
+                            <div class="bg-[#12141f] border border-indigo-500/20 p-5 rounded-2xl shadow-xl text-right hover:border-indigo-500/40 transition group">
+                                <div class="flex items-center justify-between mb-3">
+                                    <div class="w-8 h-8 rounded-xl bg-indigo-600/20 border border-indigo-500/30 text-indigo-400 flex items-center justify-center text-sm">📁</div>
+                                    <span class="text-[10px] text-gray-500 font-mono">CHANNELS</span>
+                                </div>
+                                <div class="text-2xl font-black text-white">${(botGuild?.channels?.cache?.size || 0)}</div>
+                                <p class="text-xs text-gray-400 mt-1 font-bold">إجمالي القنوات</p>
+                            </div>
+                            <div class="bg-[#12141f] border border-amber-500/20 p-5 rounded-2xl shadow-xl text-right hover:border-amber-500/40 transition group">
+                                <div class="flex items-center justify-between mb-3">
+                                    <div class="w-8 h-8 rounded-xl bg-amber-600/20 border border-amber-500/30 text-amber-400 flex items-center justify-center text-sm">💎</div>
+                                    <span class="text-[10px] text-gray-500 font-mono">BOOSTS</span>
+                                </div>
+                                <div class="text-2xl font-black text-white">${(botGuild?.premiumSubscriptionCount || 0)}</div>
+                                <p class="text-xs text-gray-400 mt-1 font-bold">بوستات السيرفر</p>
+                            </div>
+                        </div>
+
+                        <!-- Second Row Stats -->
+                        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                            <div class="bg-[#12141f] border border-white/5 p-5 rounded-2xl shadow-xl text-right hover:border-purple-500/20 transition">
+                                <div class="flex items-center justify-between mb-3">
+                                    <div class="w-8 h-8 rounded-xl bg-pink-600/20 border border-pink-500/30 text-pink-400 flex items-center justify-center text-sm">🎖️</div>
+                                    <span class="text-[10px] text-gray-500 font-mono">ROLES</span>
+                                </div>
+                                <div class="text-2xl font-black text-white">${(botGuild?.roles?.cache?.size || 0)}</div>
+                                <p class="text-xs text-gray-400 mt-1 font-bold">إجمالي الرتب</p>
+                            </div>
+                            <div class="bg-[#12141f] border border-white/5 p-5 rounded-2xl shadow-xl text-right hover:border-purple-500/20 transition">
+                                <div class="flex items-center justify-between mb-3">
+                                    <div class="w-8 h-8 rounded-xl bg-orange-600/20 border border-orange-500/30 text-orange-400 flex items-center justify-center text-sm">😃</div>
+                                    <span class="text-[10px] text-gray-500 font-mono">EMOJIS</span>
+                                </div>
+                                <div class="text-2xl font-black text-white">${(botGuild?.emojis?.cache?.size || 0)}</div>
+                                <p class="text-xs text-gray-400 mt-1 font-bold">الإيموجيات المخصصة</p>
+                            </div>
+                            <div class="bg-[#12141f] border border-white/5 p-5 rounded-2xl shadow-xl text-right hover:border-purple-500/20 transition">
+                                <div class="flex items-center justify-between mb-3">
+                                    <div class="w-8 h-8 rounded-xl bg-cyan-600/20 border border-cyan-500/30 text-cyan-400 flex items-center justify-center text-sm">🤖</div>
+                                    <span class="text-[10px] text-gray-500 font-mono">BOTS</span>
+                                </div>
+                                <div class="text-2xl font-black text-white">${(botGuild?.members?.cache?.filter(m => m.user.bot).size || 0)}</div>
+                                <p class="text-xs text-gray-400 mt-1 font-bold">عدد البوتات</p>
+                            </div>
+                            <div class="bg-[#12141f] border border-white/5 p-5 rounded-2xl shadow-xl text-right hover:border-purple-500/20 transition">
+                                <div class="flex items-center justify-between mb-3">
+                                    <div class="w-8 h-8 rounded-xl bg-violet-600/20 border border-violet-500/30 text-violet-400 flex items-center justify-center text-sm">🎁</div>
+                                    <span class="text-[10px] text-gray-500 font-mono">GIVEAWAYS</span>
+                                </div>
+                                <div class="text-2xl font-black text-white">${guildGiveawaysList?.length || 0}</div>
+                                <p class="text-xs text-gray-400 mt-1 font-bold">إجمالي القيف اوايز</p>
+                            </div>
+                        </div>
+
+                        <!-- Server Info & Boost Level -->
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <!-- Server Details -->
+                            <div class="bg-[#12141f] border border-white/5 p-6 rounded-3xl shadow-xl space-y-3 text-right">
+                                <h4 class="font-black text-white text-sm flex items-center justify-end gap-2"><span>معلومات السيرفر</span><span>🏰</span></h4>
+                                <div class="space-y-2.5 text-xs text-gray-400">
+                                    <div class="flex items-center justify-between bg-[#0b0d14] p-3 rounded-xl border border-white/5">
+                                        <span class="text-white font-bold font-mono">${new Date((parseInt(guildId) / 4194304 + 1420070400000)).toLocaleDateString('ar-IQ', {year:'numeric',month:'long',day:'numeric'})}</span>
+                                        <span>تاريخ إنشاء السيرفر</span>
+                                    </div>
+                                    <div class="flex items-center justify-between bg-[#0b0d14] p-3 rounded-xl border border-white/5">
+                                        <span class="text-purple-300 font-bold">مستوى ${botGuild?.premiumTier || 0}</span>
+                                        <span>مستوى البوست</span>
+                                    </div>
+                                    <div class="flex items-center justify-between bg-[#0b0d14] p-3 rounded-xl border border-white/5">
+                                        <span class="text-white font-bold font-mono">${botGuild?.vanityURLCode ? `discord.gg/${botGuild.vanityURLCode}` : '—'}</span>
+                                        <span>رابط السيرفر المخصص</span>
+                                    </div>
+                                    <div class="flex items-center justify-between bg-[#0b0d14] p-3 rounded-xl border border-white/5">
+                                        <span class="text-white font-bold">${botGuild?.verificationLevel === 0 ? 'لا يوجد' : botGuild?.verificationLevel === 1 ? 'منخفض' : botGuild?.verificationLevel === 2 ? 'متوسط' : botGuild?.verificationLevel === 3 ? 'عالي' : 'عالي جداً'}</span>
+                                        <span>مستوى التحقق</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Quick Actions -->
+                            <div class="bg-[#12141f] border border-white/5 p-6 rounded-3xl shadow-xl space-y-3 text-right">
+                                <h4 class="font-black text-white text-sm flex items-center justify-end gap-2"><span>الإجراءات السريعة</span><span>⚡</span></h4>
+                                <div class="space-y-2">
+                                    <a href="/dashboard/${guildId}/commands" class="flex items-center justify-between bg-[#0b0d14] hover:bg-purple-900/20 border border-white/5 hover:border-purple-500/30 p-3 rounded-xl transition group">
+                                        <span class="text-purple-400 text-xs group-hover:text-purple-300">←</span>
+                                        <div class="flex items-center gap-2 text-right">
+                                            <span class="text-xs font-bold text-white">إدارة الأوامر</span>
+                                            <span class="text-sm">🎛️</span>
+                                        </div>
+                                    </a>
+                                    <a href="/dashboard/${guildId}/moderation" class="flex items-center justify-between bg-[#0b0d14] hover:bg-purple-900/20 border border-white/5 hover:border-purple-500/30 p-3 rounded-xl transition group">
+                                        <span class="text-purple-400 text-xs group-hover:text-purple-300">←</span>
+                                        <div class="flex items-center gap-2 text-right">
+                                            <span class="text-xs font-bold text-white">إعدادات الإشراف</span>
+                                            <span class="text-sm">🔨</span>
+                                        </div>
+                                    </a>
+                                    <a href="/dashboard/${guildId}/protection" class="flex items-center justify-between bg-[#0b0d14] hover:bg-purple-900/20 border border-white/5 hover:border-purple-500/30 p-3 rounded-xl transition group">
+                                        <span class="text-purple-400 text-xs group-hover:text-purple-300">←</span>
+                                        <div class="flex items-center gap-2 text-right">
+                                            <span class="text-xs font-bold text-white">نظام الحماية</span>
+                                            <span class="text-sm">🛡️</span>
+                                        </div>
+                                    </a>
+                                    <a href="/dashboard/${guildId}/analytics" class="flex items-center justify-between bg-[#0b0d14] hover:bg-purple-900/20 border border-white/5 hover:border-purple-500/30 p-3 rounded-xl transition group">
+                                        <span class="text-purple-400 text-xs group-hover:text-purple-300">←</span>
+                                        <div class="flex items-center gap-2 text-right">
+                                            <span class="text-xs font-bold text-white">الإحصائيات والتحليلات</span>
+                                            <span class="text-sm">📊</span>
+                                        </div>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Top Members & Leaderboard Preview -->
+                        <div class="bg-[#12141f] border border-white/5 p-6 rounded-3xl shadow-xl text-right">
+                            <div class="flex items-center justify-between mb-4">
+                                <a href="/dashboard/${guildId}/analytics" class="text-xs text-purple-400 hover:text-purple-300 font-bold transition">عرض الكل ←</a>
+                                <h4 class="font-black text-white text-sm flex items-center gap-2"><span>أكثر الأعضاء نشاطاً</span><span>🏆</span></h4>
+                            </div>
+                            <div class="space-y-2">
+                                ${guildLeaderboardUsers.slice(0, 5).map((u, i) => `
+                                <div class="flex items-center justify-between bg-[#0b0d14] border border-white/5 p-3 rounded-xl hover:border-purple-500/20 transition">
+                                    <div class="flex items-center gap-3">
+                                        <span class="text-xs font-mono font-black text-purple-400">⚡ ${Number(u.total_xp || 0).toLocaleString()} XP</span>
+                                        <span class="text-xs text-gray-300 font-mono truncate max-w-[120px]">${u.user_id}</span>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="w-6 h-6 rounded-lg ${i === 0 ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' : i === 1 ? 'bg-gray-400/20 text-gray-300 border border-gray-400/30' : i === 2 ? 'bg-orange-600/20 text-orange-400 border border-orange-500/30' : 'bg-purple-600/20 text-purple-400 border border-purple-500/30'} text-[10px] font-black flex items-center justify-center">#${i+1}</span>
+                                    </div>
+                                </div>
+                                `).join('')}
+                                ${guildLeaderboardUsers.length === 0 ? '<p class="text-xs text-gray-500 text-center py-4">لا توجد بيانات نشاط حتى الآن</p>' : ''}
+                            </div>
+                        </div>
+
+                    </div>
+`;
+            } else if (section === 'general' || section === 'commands') {
 formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl">
 
                         <!-- 1. Master Header Card (Exact to Image 1: إدارة الأوامر & Triple Badges) -->
@@ -1046,6 +1227,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                                 <!-- رأس القسم النشط والأزرار السريعة (تفعيل الكل / تعطيل الكل) -->
                                 <div class="bg-[#12141f] border border-white/5 p-4 rounded-2xl flex items-center justify-between shadow-xl">
                                     <div class="flex items-center gap-2">
+                                        <span id="cmdSaveIndicator" class="text-xs font-bold text-emerald-400 bg-emerald-950/60 px-2 py-1 rounded-lg opacity-0 transition-opacity duration-300">✓ حُفظ</span>
                                         <button type="button" onclick="toggleAllCategoryCmds(false)" class="px-3.5 py-1.5 bg-rose-950/40 hover:bg-rose-900/60 text-rose-400 border border-rose-800/40 rounded-xl text-xs font-bold transition flex items-center gap-1">
                                             <span>✕</span>
                                             <span>تعطيل الكل</span>
@@ -1182,10 +1364,11 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                         }
 
                         container.innerHTML = filtered.map(item => {
+                            const isEnabled = !disabledCommands.has(item.name);
                             const badgeHtml = item.badge ? '<span class="px-2.5 py-0.5 bg-indigo-950/60 text-indigo-300 border border-indigo-800/40 rounded-lg text-[10px] font-bold flex items-center gap-1"><span>' + item.badge + '</span><span>🛡️</span></span>' : '';
-                            return '<div class="bg-[#12141f] border border-white/5 p-4 rounded-2xl flex items-center justify-between hover:border-indigo-500/40 transition">' +
+                            return '<div class="bg-[#12141f] border border-white/5 p-4 rounded-2xl flex items-center justify-between hover:border-indigo-500/40 transition ' + (!isEnabled ? 'opacity-50' : '') + '">' +
                                 '<div class="flex items-center gap-3">' +
-                                    '<label class="toggle"><input type="checkbox" checked onchange="toggleSingleCmd(\\'' + item.name + '\\', this.checked)"><span class="slider"></span></label>' +
+                                    '<label class="toggle"><input type="checkbox" data-cmd="' + item.name + '" ' + (isEnabled ? 'checked' : '') + ' onchange="toggleSingleCmd(\'' + item.name + '\', this.checked); this.closest(\'div.flex\').parentElement.parentElement.classList.toggle(\'opacity-50\', !this.checked)"><span class="slider"></span></label>' +
                                     '<button type="button" class="text-gray-500 hover:text-white text-xs">▼</button>' +
                                 '</div>' +
                                 '<div class="flex items-center gap-3">' +
@@ -1224,14 +1407,47 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                         renderCommands();
                     }
 
+                    let disabledCommands = new Set(${JSON.stringify(settings.disabled_commands ? JSON.parse(settings.disabled_commands || '[]') : [])});
+
                     function toggleAllCategoryCmds(enable) {
-                        document.querySelectorAll('#cmdsListContainer input[type="checkbox"]').forEach(cb => {
+                        const checkboxes = document.querySelectorAll('#cmdsListContainer input[type="checkbox"]');
+                        checkboxes.forEach(cb => {
+                            const cmdName = cb.dataset.cmd;
+                            if (enable) {
+                                disabledCommands.delete(cmdName);
+                            } else {
+                                disabledCommands.add(cmdName);
+                            }
                             cb.checked = enable;
                         });
+                        saveCommandStates();
                     }
 
-                    function toggleSingleCmd(cmdName, isEnabled) {
-                        console.log('Command state changed:', cmdName, isEnabled);
+                    async function toggleSingleCmd(cmdName, isEnabled) {
+                        if (isEnabled) {
+                            disabledCommands.delete(cmdName);
+                        } else {
+                            disabledCommands.add(cmdName);
+                        }
+                        await saveCommandStates();
+                    }
+
+                    async function saveCommandStates() {
+                        try {
+                            const res = await fetch('/api/guild/${guildId}/settings', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ disabled_commands: JSON.stringify([...disabledCommands]) })
+                            });
+                            const d = await res.json();
+                            if (d.success) {
+                                const indicator = document.getElementById('cmdSaveIndicator');
+                                if (indicator) {
+                                    indicator.classList.remove('opacity-0');
+                                    setTimeout(() => indicator.classList.add('opacity-0'), 2000);
+                                }
+                            }
+                        } catch(e) {}
                     }
 
                     // Initial render
@@ -1947,158 +2163,189 @@ const leaderboard = database.getInvitesLeaderboard ? database.getInvitesLeaderbo
                     </script>
                 `;
             } else if (section === 'broadcast' || section === 'announcements') {
-const broadcasts = database.getGuildBroadcasts ? database.getGuildBroadcasts(guildId) : [];
+formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl">
 
-                const broadcastRowsHtml = broadcasts.length > 0 ? broadcasts.map(b => {
-                    const statusBadge = b.status === 'active' ? '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-950 text-emerald-300 border border-emerald-800">🟢 نشط</span>' : '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-gray-800 text-gray-400">⚪ منتهي</span>';
-                    const typeText = b.is_recurring ? `🔁 متكرر كل ${b.interval_minutes}د` : (b.scheduled_time ? `⏰ مجدول لـ ${new Date(b.scheduled_time).toLocaleString('ar-SA')}` : '⚡ فوري');
-                    const chans = b.channel_ids.split(',').map(cid => {
-                        const ch = botGuild?.channels?.cache?.get(cid);
-                        return ch ? `#${ch.name}` : cid;
-                    }).join(', ');
-
-                    return `
-                        <div class="bg-[#0b0d14] border border-white/5 rounded-xl p-4 flex flex-col md:flex-row items-center justify-between gap-4 text-right">
+                        <!-- Header -->
+                        <div class="bg-gradient-to-r from-[#0a1a10] via-[#12141f] to-[#141724] border border-emerald-500/20 p-6 rounded-3xl flex items-center justify-between shadow-2xl">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-2xl bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center text-xl shadow-lg">📢</div>
+                                <div class="text-right">
+                                    <h3 class="font-black text-white text-lg">نظام الإعلانات والمذيع الآلي</h3>
+                                    <p class="text-gray-400 text-xs mt-0.5">جدولة وإرسال إعلانات دورية تلقائية بتضمينات جذابة وتحديثات آلية</p>
+                                </div>
+                            </div>
                             <div class="flex items-center gap-2">
-                                <button type="button" onclick="deleteBroadcastDirect(${b.id})" class="px-3 py-1.5 bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 border border-rose-800/40 rounded-lg text-xs font-bold transition">🗑️ حذف</button>
-                            </div>
-                            <div class="flex-1">
-                                <div class="flex items-center gap-2 justify-end">
-                                    ${statusBadge}
-                                    <span class="text-xs font-bold text-purple-400 bg-purple-950/60 px-2 py-0.5 rounded border border-purple-800/40">${typeText}</span>
-                                    <h5 class="font-bold text-white text-sm">${b.title || 'إعلان بدون عنوان'}</h5>
-                                </div>
-                                <p class="text-gray-300 text-xs mt-1 truncate">${b.message}</p>
-                                <span class="text-[10px] text-gray-500 block mt-0.5">القنوات: ${chans}</span>
+                                <span class="text-xs font-bold ${settings.broadcast_enabled ? 'text-emerald-400 bg-emerald-950/60 border border-emerald-500/30' : 'text-red-400 bg-red-950/60 border border-red-500/30'} px-3 py-1 rounded-xl">${settings.broadcast_enabled ? '🟢 مفعل' : '🔴 معطل'}</span>
                             </div>
                         </div>
-                    `;
-                }).join('') : `<div class="text-center py-8 text-gray-500 text-xs">لا توجد أي إعلانات مجدولة أو متكررة حالياً</div>`;
 
-                formFieldsHtml = `
-                    <div class="space-y-6 text-right">
-                        <!-- Top Header -->
-                        <div class="bg-[#1c1f2e] border border-white/5 p-6 rounded-2xl">
-                            <h3 class="font-black text-white text-xl">نظام الإعلانات والمذيع الآلي المتقدم 📢</h3>
-                            <p class="text-gray-400 text-xs mt-1">إرسال إعلانات فورية، جدولة إعلانات لأوقات لاحقة، وتفعيل مذيع آلي دوري متكرر في عدة قنوات مع تصميم إيمبد احترافي</p>
+                        <!-- Master Toggle & Channel -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="bg-[#12141f] border border-white/5 p-5 rounded-3xl flex items-center justify-between shadow-xl">
+                                <label class="toggle">
+                                    <input type="checkbox" name="broadcast_enabled" value="1" id="broadcastToggle" onchange="document.getElementById('broadcastContent').classList.toggle('opacity-40', !this.checked)" ${settings.broadcast_enabled ? 'checked' : ''}>
+                                    <span class="slider"></span>
+                                </label>
+                                <div class="flex items-center gap-3">
+                                    <div class="text-right">
+                                        <h4 class="font-black text-white text-sm">تفعيل المذيع الآلي</h4>
+                                        <p class="text-gray-400 text-xs mt-0.5">إرسال رسائل إعلانية دورية تلقائياً في القناة المحددة</p>
+                                    </div>
+                                    <div class="w-8 h-8 rounded-xl bg-emerald-600/20 text-emerald-400 flex items-center justify-center text-sm border border-emerald-500/30">📡</div>
+                                </div>
+                            </div>
+
+                            <div class="bg-[#12141f] border border-white/5 p-5 rounded-3xl space-y-2 shadow-xl text-right">
+                                <h4 class="font-black text-white text-sm flex items-center justify-end gap-2"><span>قناة البث</span><span>📻</span></h4>
+                                ${renderChannelSelect('broadcast_channel', settings.broadcast_channel)}
+                            </div>
                         </div>
 
-                        <!-- Create Broadcast Card -->
-                        <div class="bg-[#1c1f2e] border border-white/5 p-6 rounded-2xl space-y-4">
-                            <h4 class="font-bold text-white text-sm border-b border-white/5 pb-3">✨ إنشاء إعلان جديد / جدولة / مذيع آلي</h4>
-                            
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-xs font-bold text-gray-300 mb-2">قناة أو قنوات الإرسال <span class="text-[#5865f2]">*</span></label>
-                                    ${renderChannelSelect('broadcastChannel', '')}
+                        <!-- Broadcast Content Area -->
+                        <div id="broadcastContent" class="${settings.broadcast_enabled ? '' : 'opacity-40'} transition-opacity space-y-6">
+
+                            <!-- Interval & Mention Role -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                                <!-- Interval Selector -->
+                                <div class="bg-[#12141f] border border-white/5 p-6 rounded-3xl space-y-4 shadow-xl text-right">
+                                    <h4 class="font-black text-white text-sm flex items-center justify-end gap-2"><span>فترة التكرار</span><span>⏱️</span></h4>
+                                    <input type="hidden" name="broadcast_interval" id="inpBroadcastInterval" value="${settings.broadcast_interval || 60}">
+                                    <div class="grid grid-cols-2 gap-2">
+                                        ${[15, 30, 60, 120, 360, 720, 1440, 2880].map(m => `
+                                        <button type="button" onclick="selectBroadcastInterval(${m}, this)" class="bc-interval-btn py-2.5 px-3 rounded-xl border text-xs font-bold transition ${(settings.broadcast_interval || 60) == m ? 'bg-purple-900/40 border-purple-500 text-white' : 'bg-[#0b0d14] border-white/5 text-gray-400 hover:text-white'}">
+                                            ${m < 60 ? m + ' دقيقة' : m === 60 ? 'ساعة' : m < 1440 ? (m/60) + ' ساعات' : (m/1440) + ' يوم'}
+                                        </button>`).join('')}
+                                    </div>
                                 </div>
-                                <div>
-                                    <label class="block text-xs font-bold text-gray-300 mb-2">عنوان الإعلان (اختياري)</label>
-                                    <input type="text" id="bcTitle" placeholder="مثال: 📢 إعلان هام وتحديث جديد!" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right">
+
+                                <!-- Mention Role -->
+                                <div class="bg-[#12141f] border border-white/5 p-6 rounded-3xl space-y-3 shadow-xl text-right">
+                                    <h4 class="font-black text-white text-sm flex items-center justify-end gap-2"><span>رتبة الإشارة (اختياري)</span><span>📣</span></h4>
+                                    <p class="text-gray-400 text-[11px]">رتبة يتم ذكرها تلقائياً مع كل إعلان للتنبيه</p>
+                                    ${renderRoleSelect('broadcast_mention_role', settings.broadcast_mention_role)}
                                 </div>
                             </div>
 
-                            <div>
-                                <label class="block text-xs font-bold text-gray-300 mb-2">نص الإعلان <span class="text-[#5865f2]">*</span></label>
-                                <textarea id="bcMessage" rows="3" placeholder="اكتب محتوى الإعلان هنا..." class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right leading-relaxed"></textarea>
+                            <!-- Messages List & Add New -->
+                            <div class="bg-[#12141f] border border-white/5 p-6 rounded-3xl space-y-4 shadow-xl">
+                                <div class="flex items-center justify-between border-b border-white/5 pb-4">
+                                    <button type="button" onclick="addBroadcastMessage()" class="px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold transition shadow-md flex items-center gap-1.5">
+                                        <span>➕</span><span>إضافة رسالة جديدة</span>
+                                    </button>
+                                    <h4 class="font-black text-white text-sm flex items-center gap-2"><span>قائمة رسائل البث</span><span>📋</span></h4>
+                                </div>
+
+                                <div id="broadcastMsgList" class="space-y-3">
+                                    ${(() => {
+                                        let msgs = [];
+                                        try { msgs = JSON.parse(settings.broadcast_messages || '[]'); } catch(e) {}
+                                        if (msgs.length === 0) return `<div class="text-center py-8 text-xs text-gray-500">لا توجد رسائل مضافة بعد — أضف رسالتك الأولى أعلاه 📢</div>`;
+                                        return msgs.map((m, i) => `
+                                        <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-2xl flex items-start justify-between gap-3 hover:border-purple-500/20 transition" id="bcMsg${i}">
+                                            <div class="flex items-center gap-2 shrink-0 mt-1">
+                                                <button type="button" onclick="deleteBroadcastMessage(${i})" class="text-rose-400 hover:text-rose-300 text-sm transition">🗑️</button>
+                                                <span class="w-6 h-6 rounded-lg bg-purple-950/60 text-purple-300 text-[10px] font-black flex items-center justify-center border border-purple-500/20">${i+1}</span>
+                                            </div>
+                                            <p class="text-xs text-gray-300 text-right leading-relaxed flex-1 truncate">${m}</p>
+                                        </div>`).join('');
+                                    })()}
+                                </div>
+
+                                <!-- Add Message Input Area (hidden by default) -->
+                                <div id="addMsgArea" class="hidden space-y-3 border-t border-white/5 pt-4">
+                                    <textarea id="newBcMsgInput" rows="3" placeholder="اكتب نص الإعلان هنا... (يدعم markdown ومتغيرات مثل {server} و {members})" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right leading-relaxed transition"></textarea>
+                                    <div class="flex items-center gap-2 justify-end">
+                                        <button type="button" onclick="cancelAddMessage()" class="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-xl text-xs font-bold transition">إلغاء</button>
+                                        <button type="button" onclick="confirmAddMessage()" class="px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-xs font-bold transition">✓ إضافة</button>
+                                    </div>
+                                </div>
                             </div>
 
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <div>
-                                    <label class="block text-xs font-bold text-gray-300 mb-2">نوع الإرسال</label>
-                                    <select id="bcTypeSelect" onchange="toggleBcType(this.value)" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right cursor-pointer">
-                                        <option value="instant">⚡ إرسال فوري الآن</option>
-                                        <option value="recurring">🔁 مذيع آلي متكرر دورياً</option>
-                                        <option value="scheduled">⏰ جدولة لوقت محدد</option>
-                                    </select>
-                                </div>
-                                <div id="recurringBox" class="hidden">
-                                    <label class="block text-xs font-bold text-gray-300 mb-2">التكرار كل (دقائق)</label>
-                                    <input type="number" id="bcInterval" value="60" min="5" placeholder="60 دقيقة" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none font-mono text-right">
-                                </div>
-                                <div id="scheduledBox" class="hidden">
-                                    <label class="block text-xs font-bold text-gray-300 mb-2">وقت وتاريخ النشر</label>
-                                    <input type="datetime-local" id="bcScheduleTime" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2 text-xs text-white outline-none text-right">
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-bold text-gray-300 mb-2">لون الإيمبد</label>
-                                    <input type="color" id="bcColor" value="#9333ea" class="w-full h-10 bg-[#0b0d14] border border-white/5 rounded-xl cursor-pointer p-1">
-                                </div>
-                            </div>
-
-                            <div class="pt-2 flex justify-end">
-                                <button type="button" onclick="submitNewBroadcast()" id="btnSaveBc" class="px-8 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold transition shadow-lg flex items-center gap-2">
-                                    <span>🚀 إرسال / حفظ الإعلان</span>
+                            <!-- Send Now (Manual Broadcast) -->
+                            <div class="bg-[#12141f] border border-white/5 p-5 rounded-3xl flex items-center justify-between shadow-xl">
+                                <button type="button" onclick="sendBroadcastNow()" id="btnBroadcastNow" class="px-6 py-3 bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-500 hover:to-green-500 text-white rounded-xl text-xs font-black transition shadow-lg flex items-center gap-2">
+                                    <span>📤</span>
+                                    <span>إرسال الآن يدوياً</span>
                                 </button>
+                                <div class="text-right">
+                                    <h4 class="font-black text-white text-sm">إرسال فوري</h4>
+                                    <p class="text-gray-400 text-[11px] mt-0.5">إرسال رسالة عشوائية من القائمة فوراً إلى القناة المحددة</p>
+                                </div>
                             </div>
+
                         </div>
 
-                        <!-- Active Broadcasts List -->
-                        <div class="bg-[#1c1f2e] border border-white/5 rounded-2xl p-6 space-y-4">
-                            <h4 class="font-bold text-white text-sm">📋 قائمة الإعلانات والمذيع الآلي النشط</h4>
-                            <div class="space-y-3">
-                                ${broadcastRowsHtml}
-                            </div>
-                        </div>
                     </div>
 
                     <script>
-                    function toggleBcType(val) {
-                        document.getElementById('recurringBox').classList.toggle('hidden', val !== 'recurring');
-                        document.getElementById('scheduledBox').classList.toggle('hidden', val !== 'scheduled');
+                    let broadcastMsgs = [];
+                    try { broadcastMsgs = JSON.parse('${(settings.broadcast_messages || '[]').replace(/'/g, "\\'")}'); } catch(e) {}
+
+                    function selectBroadcastInterval(interval, btn) {
+                        document.getElementById('inpBroadcastInterval').value = interval;
+                        document.querySelectorAll('.bc-interval-btn').forEach(b => {
+                            b.className = 'bc-interval-btn py-2.5 px-3 rounded-xl border text-xs font-bold transition bg-[#0b0d14] border-white/5 text-gray-400 hover:text-white';
+                        });
+                        btn.className = 'bc-interval-btn py-2.5 px-3 rounded-xl border text-xs font-bold transition bg-purple-900/40 border-purple-500 text-white';
                     }
 
-                    async function submitNewBroadcast() {
-                        const channelSel = document.getElementById('broadcastChannel');
-                        const channel_ids = channelSel ? channelSel.value : '';
-                        const title = document.getElementById('bcTitle').value.trim();
-                        const message = document.getElementById('bcMessage').value.trim();
-                        const type = document.getElementById('bcTypeSelect').value;
-                        const interval_minutes = type === 'recurring' ? parseInt(document.getElementById('bcInterval').value, 10) : 0;
-                        const scheduled_time = type === 'scheduled' ? document.getElementById('bcScheduleTime').value : null;
-                        const is_recurring = type === 'recurring' ? 1 : 0;
-                        const color = document.getElementById('bcColor').value;
-
-                        if (!channel_ids) return alert('يرجى اختيار القناة المستهدفة أولاً!');
-                        if (!message) return alert('يرجى كتابة نص الإعلان!');
-
-                        const btn = document.getElementById('btnSaveBc');
-                        btn.disabled = true;
-                        btn.innerHTML = '⏳ جارٍ المعالجة...';
-
-                        try {
-                            const res = await fetch('/api/guild/${guildId}/broadcast/create', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ channel_ids, title, message, color, interval_minutes, scheduled_time, is_recurring })
-                            });
-                            const data = await res.json();
-                            if (data.success) {
-                                alert('✅ تم إرسال / حفظ الإعلان بنجاح!');
-                                location.reload();
-                            } else {
-                                alert('❌ خطأ: ' + (data.error || 'فشل الحفظ'));
-                            }
-                        } catch(e) {
-                            alert('حدث خطأ أثناء الاتصال بالخادم');
-                        } finally {
-                            btn.disabled = false;
-                            btn.innerHTML = '<span>🚀 إرسال / حفظ الإعلان</span>';
-                        }
+                    function addBroadcastMessage() {
+                        document.getElementById('addMsgArea').classList.remove('hidden');
+                        document.getElementById('newBcMsgInput').focus();
                     }
 
-                    async function deleteBroadcastDirect(id) {
-                        if (!confirm('هل أنت متأكد من رغبتك في حذف هذا الإعلان؟')) return;
-                        const res = await fetch('/api/guild/${guildId}/broadcast/delete', {
+                    function cancelAddMessage() {
+                        document.getElementById('addMsgArea').classList.add('hidden');
+                        document.getElementById('newBcMsgInput').value = '';
+                    }
+
+                    async function confirmAddMessage() {
+                        const txt = document.getElementById('newBcMsgInput').value.trim();
+                        if (!txt) return alert('يرجى كتابة نص الرسالة أولاً!');
+                        broadcastMsgs.push(txt);
+                        await saveBroadcastMessages();
+                        cancelAddMessage();
+                        location.reload();
+                    }
+
+                    async function deleteBroadcastMessage(idx) {
+                        if (!confirm('هل تريد حذف هذه الرسالة؟')) return;
+                        broadcastMsgs.splice(idx, 1);
+                        await saveBroadcastMessages();
+                        location.reload();
+                    }
+
+                    async function saveBroadcastMessages() {
+                        await fetch('/api/guild/${guildId}/settings', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ id })
+                            body: JSON.stringify({ broadcast_messages: JSON.stringify(broadcastMsgs) })
                         });
-                        const data = await res.json();
-                        if (data.success) location.reload();
+                    }
+
+                    async function sendBroadcastNow() {
+                        const btn = document.getElementById('btnBroadcastNow');
+                        btn.disabled = true;
+                        btn.innerHTML = '⏳ جارٍ الإرسال...';
+                        try {
+                            const res = await fetch('/api/guild/${guildId}/broadcast-now', { method: 'POST' });
+                            const d = await res.json();
+                            if (d.success) {
+                                btn.innerHTML = '✅ تم الإرسال!';
+                                setTimeout(() => { btn.disabled = false; btn.innerHTML = '📤 إرسال الآن يدوياً'; }, 3000);
+                            } else {
+                                alert('❌ ' + (d.error || 'فشل الإرسال. تأكد من ضبط القناة وإضافة رسائل في القائمة.'));
+                                btn.disabled = false;
+                                btn.innerHTML = '📤 إرسال الآن يدوياً';
+                            }
+                        } catch(e) {
+                            btn.disabled = false;
+                            btn.innerHTML = '📤 إرسال الآن يدوياً';
+                        }
                     }
                     </script>
-                `;
+`;
             } else if (section === 'protection') {
 formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl">
 
@@ -5017,62 +5264,169 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
 `;
             } else if (section === 'antiraid') {
 formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl">
-                        <div class="bg-[#12141f] border border-white/5 p-6 rounded-2xl flex items-center justify-between shadow-xl">
-                            <label class="toggle"><input type="checkbox" name="antiraid_enabled" value="1" ${settings.antiraid_enabled !== 0 ? 'checked' : ''}><span class="slider"></span></label>
+
+                        <!-- Header -->
+                        <div class="bg-gradient-to-r from-[#1a0a0a] via-[#12141f] to-[#141724] border border-red-500/20 p-6 rounded-3xl flex items-center justify-between shadow-2xl">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-2xl bg-red-600/20 text-red-400 border border-red-500/30 flex items-center justify-center text-xl shadow-lg">🚨</div>
+                                <div class="text-right">
+                                    <h3 class="font-black text-white text-lg">مكافحة الغزو والأعضاء الوهميين</h3>
+                                    <p class="text-gray-400 text-xs mt-0.5">كشف الغزو الجماعي وحظر الحسابات الوهمية والجديدة تلقائياً</p>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-3 gap-3">
+                                <div class="bg-[#0b0d14] border border-white/5 px-4 py-2 rounded-2xl text-center">
+                                    <div class="text-xl font-black text-white">${settings.anti_alt_days || 3}</div>
+                                    <div class="text-[10px] text-gray-400 font-bold mt-0.5">أيام الحساب</div>
+                                </div>
+                                <div class="bg-[#0b0d14] border border-white/5 px-4 py-2 rounded-2xl text-center">
+                                    <div class="text-xl font-black text-emerald-400">${settings.raid_threshold || 5}</div>
+                                    <div class="text-[10px] text-gray-400 font-bold mt-0.5">حد الغزو</div>
+                                </div>
+                                <div class="bg-[#0b0d14] border border-white/5 px-4 py-2 rounded-2xl text-center">
+                                    <div class="text-xl font-black ${settings.antiraid_enabled ? 'text-emerald-400' : 'text-red-400'}">${settings.antiraid_enabled ? '🟢' : '🔴'}</div>
+                                    <div class="text-[10px] text-gray-400 font-bold mt-0.5">الحالة</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Master Toggle -->
+                        <div class="bg-[#12141f] border border-white/5 p-5 rounded-3xl flex items-center justify-between shadow-xl">
+                            <label class="toggle">
+                                <input type="checkbox" name="antiraid_enabled" value="1" ${settings.antiraid_enabled !== 0 ? 'checked' : ''}>
+                                <span class="slider"></span>
+                            </label>
                             <div class="flex items-center gap-3">
                                 <div class="text-right">
-                                    <h4 class="font-black text-white text-base">مكافحة الغزو والأعضاء الوهميين (Anti-Raid)</h4>
-                                    <p class="text-gray-400 text-xs mt-0.5">حماية السيرفر من هجمات الدخول الجماعي والحسابات الجديدة الوهمية</p>
+                                    <h4 class="font-black text-white text-sm">تفعيل نظام مكافحة الغزو (Anti-Raid)</h4>
+                                    <p class="text-gray-400 text-xs mt-0.5">رصد ومنع هجمات الدخول الجماعي والحسابات الوهمية أو الجديدة تلقائياً</p>
                                 </div>
-                                <div class="w-10 h-10 rounded-xl bg-red-600/20 text-red-400 flex items-center justify-center text-lg border border-red-500/30">🚨</div>
+                                <div class="w-8 h-8 rounded-xl bg-red-600/20 text-red-400 flex items-center justify-center text-sm border border-red-500/30">🛡️</div>
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div class="bg-[#12141f] border border-white/5 p-5 rounded-2xl text-center space-y-1 shadow-lg">
-                                <span class="text-2xl font-black text-white font-mono">${settings.anti_alt_days || 3}</span>
-                                <span class="text-xs font-bold text-gray-400 block">أيام عمر الحساب الأدنى</span>
+                        <!-- Account Age & Raid Threshold Settings -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                            <!-- Account Age Filter -->
+                            <div class="bg-[#12141f] border border-white/5 p-6 rounded-3xl space-y-4 shadow-xl">
+                                <div class="flex items-center justify-between">
+                                    <div class="w-8 h-8 rounded-xl bg-orange-600/20 text-orange-400 flex items-center justify-center text-sm border border-orange-500/30">🗓️</div>
+                                    <div class="text-right">
+                                        <h4 class="font-black text-white text-sm">الحد الأدنى لعمر الحساب</h4>
+                                        <p class="text-gray-400 text-[11px] mt-0.5">الحسابات الجديدة الأقل من هذا العمر لن تتمكن من الدخول</p>
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-4 gap-2">
+                                    ${[0, 1, 3, 7, 14, 30, 60, 90].map(d => `
+                                    <button type="button" onclick="selectAltDays(${d}, this)" class="alt-days-btn py-2 px-3 rounded-xl border text-xs font-bold transition ${(settings.anti_alt_days || 3) == d ? 'bg-purple-900/40 border-purple-500 text-white' : 'bg-[#0b0d14] border-white/5 text-gray-400 hover:text-white'}">
+                                        ${d === 0 ? 'بدون' : d + ' يوم'}
+                                    </button>`).join('')}
+                                </div>
+                                <input type="hidden" name="anti_alt_days" id="inpAltDays" value="${settings.anti_alt_days || 3}">
                             </div>
-                            <div class="bg-[#12141f] border border-white/5 p-5 rounded-2xl text-center space-y-1 shadow-lg">
-                                <span class="text-2xl font-black text-emerald-400 font-mono">${settings.raid_threshold || 5}</span>
-                                <span class="text-xs font-bold text-gray-400 block">حد الدخول في 10 ثوانٍ</span>
-                            </div>
-                            <div class="bg-[#12141f] border border-white/5 p-5 rounded-2xl text-center space-y-1 shadow-lg">
-                                <span class="text-2xl font-black text-amber-400 font-mono">${settings.anti_bot ? 'مفعل 🟢' : 'معطل 🔴'}</span>
-                                <span class="text-xs font-bold text-gray-400 block">حظر البوتات غير الموثقة</span>
+
+                            <!-- Raid Threshold (Members / 10s) -->
+                            <div class="bg-[#12141f] border border-white/5 p-6 rounded-3xl space-y-4 shadow-xl">
+                                <div class="flex items-center justify-between">
+                                    <div class="w-8 h-8 rounded-xl bg-red-600/20 text-red-400 flex items-center justify-center text-sm border border-red-500/30">⚡</div>
+                                    <div class="text-right">
+                                        <h4 class="font-black text-white text-sm">حد رصد الغزو الجماعي</h4>
+                                        <p class="text-gray-400 text-[11px] mt-0.5">عدد الأعضاء الذين ينضمون في 10 ثوانٍ لتفعيل درع الغزو</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-4">
+                                    <div class="flex-1">
+                                        <input type="range" name="raid_threshold" id="raidSlider" min="3" max="30" step="1" value="${settings.raid_threshold || 5}" oninput="document.getElementById('raidThresholdNum').innerText = this.value" class="w-full accent-purple-600">
+                                    </div>
+                                    <div class="bg-[#0b0d14] border border-purple-500/40 text-purple-300 font-black text-lg font-mono px-4 py-2 rounded-xl min-w-[52px] text-center">
+                                        <span id="raidThresholdNum">${settings.raid_threshold || 5}</span>
+                                    </div>
+                                </div>
+                                <p class="text-[11px] text-gray-500 text-right">كلما كان العدد أصغر، كلما كان النظام أكثر حساسية للغزو</p>
                             </div>
                         </div>
 
-                        <div class="bg-[#12141f] border border-white/5 p-6 rounded-2xl space-y-4 shadow-xl">
-                            <h4 class="text-xs font-black text-white border-b border-white/5 pb-3">إعدادات الحماية المتقدمة</h4>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-xs font-bold text-gray-300 mb-2">الحد الأدنى لعمر الحساب لدخول السيرفر (بالأيام)</label>
-                                    <input type="number" name="anti_alt_days" value="${settings.anti_alt_days || 3}" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none font-mono text-right">
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-bold text-gray-300 mb-2">حد الدخول الجماعي المشبوه (أعضاء / 10 ثوانٍ)</label>
-                                    <input type="number" name="raid_threshold" value="${settings.raid_threshold || 5}" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none font-mono text-right">
-                                </div>
-                            </div>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-                                <div class="flex items-center justify-between p-3.5 bg-[#0b0d14] border border-white/5 rounded-xl">
-                                    <label class="toggle"><input type="checkbox" name="anti_bot" value="1" ${settings.anti_bot ? 'checked' : ''}><span class="slider"></span></label>
+                        <!-- Action & Options Row -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                            <!-- Raid Action -->
+                            <div class="bg-[#12141f] border border-white/5 p-6 rounded-3xl space-y-3 shadow-xl">
+                                <div class="flex items-center justify-between mb-2">
+                                    <div class="w-8 h-8 rounded-xl bg-purple-600/20 text-purple-400 flex items-center justify-center text-sm border border-purple-500/30">⚖️</div>
                                     <div class="text-right">
-                                        <h5 class="text-xs font-bold text-white">طرد البوتات التلقائي (Anti-Bot)</h5>
-                                        <p class="text-[10px] text-gray-500">منع إضافة أي بوتات إلا من قبل الأونر</p>
+                                        <h4 class="font-black text-white text-sm">إجراء مكافحة الغزو</h4>
+                                        <p class="text-gray-400 text-[11px] mt-0.5">الإجراء التلقائي عند رصد غزو أو دخول مشبوه</p>
                                     </div>
                                 </div>
-                                <div class="flex items-center justify-between p-3.5 bg-[#0b0d14] border border-white/5 rounded-xl">
-                                    <label class="toggle"><input type="checkbox" name="antiraid_dm_notify" value="1" ${settings.antiraid_dm_notify !== 0 ? 'checked' : ''}><span class="slider"></span></label>
-                                    <div class="text-right">
-                                        <h5 class="text-xs font-bold text-white">إرسال سبب الطرد في الخاص</h5>
-                                        <p class="text-[10px] text-gray-500">إشعار الحسابات المطرودة بسبب صغر السن بالخاص</p>
+                                <input type="hidden" name="antiraid_action" id="inpAntiraidAction" value="${settings.antiraid_action || 'kick'}">
+                                <div class="grid grid-cols-3 gap-2">
+                                    <button type="button" onclick="selectRaidAction('kick', this)" class="raid-action-btn py-3 rounded-2xl border text-xs font-bold transition ${(settings.antiraid_action || 'kick') === 'kick' ? 'bg-purple-900/40 border-purple-500 text-white' : 'bg-[#0b0d14] border-white/5 text-gray-400 hover:text-white'}">
+                                        🪓 طرد
+                                    </button>
+                                    <button type="button" onclick="selectRaidAction('ban', this)" class="raid-action-btn py-3 rounded-2xl border text-xs font-bold transition ${settings.antiraid_action === 'ban' ? 'bg-purple-900/40 border-purple-500 text-white' : 'bg-[#0b0d14] border-white/5 text-gray-400 hover:text-white'}">
+                                        🔨 حظر
+                                    </button>
+                                    <button type="button" onclick="selectRaidAction('timeout', this)" class="raid-action-btn py-3 rounded-2xl border text-xs font-bold transition ${settings.antiraid_action === 'timeout' ? 'bg-purple-900/40 border-purple-500 text-white' : 'bg-[#0b0d14] border-white/5 text-gray-400 hover:text-white'}">
+                                        ⏳ عزل
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Toggles: Anti-Bot & DM Notify & Log Channel -->
+                            <div class="bg-[#12141f] border border-white/5 p-6 rounded-3xl space-y-3 shadow-xl">
+                                <h4 class="font-black text-white text-sm text-right border-b border-white/5 pb-3">خيارات إضافية</h4>
+                                <div class="space-y-2.5">
+                                    <div class="flex items-center justify-between p-3 bg-[#0b0d14] border border-white/5 rounded-xl">
+                                        <label class="toggle"><input type="checkbox" name="anti_bot" value="1" ${settings.anti_bot ? 'checked' : ''}><span class="slider"></span></label>
+                                        <div class="text-right">
+                                            <h5 class="text-xs font-bold text-white">منع إضافة بوتات جديدة (Anti-Bot)</h5>
+                                            <p class="text-[10px] text-gray-500">تقييد إضافة أي بوتات إلا من قِبل الأونر أو الأدمن فقط</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center justify-between p-3 bg-[#0b0d14] border border-white/5 rounded-xl">
+                                        <label class="toggle"><input type="checkbox" name="antiraid_dm_notify" value="1" ${settings.antiraid_dm_notify !== 0 ? 'checked' : ''}><span class="slider"></span></label>
+                                        <div class="text-right">
+                                            <h5 class="text-xs font-bold text-white">إشعار الأونر عبر DM</h5>
+                                            <p class="text-[10px] text-gray-500">إرسال تنبيه خاص لأونر السيرفر عند رصد أي غزو</p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>`;
+
+                        <!-- Log Channel & Whitelist Roles -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="bg-[#12141f] border border-white/5 p-6 rounded-3xl space-y-3 shadow-xl text-right">
+                                <h4 class="font-black text-white text-sm">قناة سجلات مكافحة الغزو</h4>
+                                <p class="text-gray-400 text-[11px]">تسجيل جميع الأحداث المشبوهة والإجراءات المتخذة</p>
+                                ${renderChannelSelect('antiraid_log_channel', settings.antiraid_log_channel)}
+                            </div>
+                            <div class="bg-[#12141f] border border-white/5 p-6 rounded-3xl space-y-3 shadow-xl text-right">
+                                <h4 class="font-black text-white text-sm">رتبة مستثناة من الحماية (Whitelist)</h4>
+                                <p class="text-gray-400 text-[11px]">هذه الرتبة لن تخضع لفلتر عمر الحساب أو حد الغزو</p>
+                                ${renderRoleSelect('antiraid_whitelist_roles', settings.antiraid_whitelist_roles)}
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <script>
+                    function selectAltDays(days, btn) {
+                        document.getElementById('inpAltDays').value = days;
+                        document.querySelectorAll('.alt-days-btn').forEach(b => {
+                            b.className = 'alt-days-btn py-2 px-3 rounded-xl border text-xs font-bold transition bg-[#0b0d14] border-white/5 text-gray-400 hover:text-white';
+                        });
+                        btn.className = 'alt-days-btn py-2 px-3 rounded-xl border text-xs font-bold transition bg-purple-900/40 border-purple-500 text-white';
+                    }
+                    function selectRaidAction(action, btn) {
+                        document.getElementById('inpAntiraidAction').value = action;
+                        document.querySelectorAll('.raid-action-btn').forEach(b => {
+                            b.className = 'raid-action-btn py-3 rounded-2xl border text-xs font-bold transition bg-[#0b0d14] border-white/5 text-gray-400 hover:text-white';
+                        });
+                        btn.className = 'raid-action-btn py-3 rounded-2xl border text-xs font-bold transition bg-purple-900/40 border-purple-500 text-white';
+                    }
+                    </script>`;
             } else if (section === 'tempvoice') {
 formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl">
                         <div class="bg-[#12141f] border border-white/5 p-6 rounded-2xl flex items-center justify-between shadow-xl">
@@ -6217,6 +6571,37 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
             rawDb.prepare('DELETE FROM giveaways WHERE guild_id = ?').run(guildId);
             rawDb.prepare('DELETE FROM suggestions WHERE guild_id = ?').run(guildId);
             rawDb.prepare('DELETE FROM security_logs WHERE guild_id = ?').run(guildId);
+            res.json({ success: true });
+        } catch (e) {
+            res.status(500).json({ success: false, error: e.message });
+        }
+    });
+
+    app.post('/api/guild/:guildId/broadcast-now', async (req, res) => {
+        try {
+            if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
+            const { guildId } = req.params;
+            const settings = database.getGuildSettings(guildId);
+            const channelId = settings.broadcast_channel;
+            if (!channelId) return res.status(400).json({ success: false, error: 'لم يتم تحديد قناة البث' });
+
+            let msgs = [];
+            try { msgs = JSON.parse(settings.broadcast_messages || '[]'); } catch(e) {}
+            if (msgs.length === 0) return res.status(400).json({ success: false, error: 'لا توجد رسائل مضافة في القائمة' });
+
+            const channel = client.channels.cache.get(channelId) || await client.channels.fetch(channelId).catch(() => null);
+            if (!channel || !channel.isTextBased()) return res.status(404).json({ success: false, error: 'القناة غير متاحة' });
+
+            const randomMsg = msgs[Math.floor(Math.random() * msgs.length)];
+            const { EmbedBuilder } = require('discord.js');
+            const embed = new EmbedBuilder()
+                .setColor('#9333ea')
+                .setDescription(randomMsg)
+                .setTimestamp()
+                .setFooter({ text: '📢 إعلان تلقائي — ZENO BOT' });
+
+            const mentionContent = settings.broadcast_mention_role ? `<@&${settings.broadcast_mention_role}>` : '';
+            await channel.send({ content: mentionContent || undefined, embeds: [embed] });
             res.json({ success: true });
         } catch (e) {
             res.status(500).json({ success: false, error: e.message });

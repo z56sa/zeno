@@ -106,6 +106,13 @@ app.use(express.static('public'));
 const mountDashboard = require('./dashboard/server');
 mountDashboard(app, client);
 
+// Auto-Broadcaster Service (Zero-Downtime - يقرأ الإعدادات من DB مباشرة)
+const AutoBroadcaster = require('./services/autoBroadcaster');
+const autoBroadcaster = new AutoBroadcaster(client);
+client.once('ready', () => {
+    autoBroadcaster.start();
+});
+
 
 // API Route for Stats (Keep this stateless)
 app.get('/api/stats', (req, res) => {

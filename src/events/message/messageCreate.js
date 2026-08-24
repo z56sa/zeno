@@ -470,6 +470,13 @@ module.exports = {
     if (!command) return;
 
     try {
+      // فحص الأوامر المعطلة من الداشبورد
+      const disabledCmdsRaw = settings.disabled_commands || '[]';
+      let disabledCmdsList = [];
+      try { disabledCmdsList = JSON.parse(disabledCmdsRaw); } catch(e) {}
+      const prefixCmdSlash = '/' + commandName;
+      if (disabledCmdsList.includes(prefixCmdSlash) || disabledCmdsList.includes(commandName)) return;
+
       if (command.executePrefix) {
         await command.executePrefix(message, args, client);
       }

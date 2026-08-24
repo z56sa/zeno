@@ -15,6 +15,18 @@ module.exports = {
           return interaction.reply({ content: '❌ هذا الأمر غير مسجل حالياً.', ephemeral: true }).catch(() => { });
         }
 
+        // فحص الأوامر المعطلة من لوحة الداشبورد
+        if (interaction.guild) {
+          try {
+            const gSettings = db.getGuildSettings ? db.getGuildSettings(interaction.guild.id) : {};
+            const disabledCmds = JSON.parse(gSettings?.disabled_commands || '[]');
+            const slashName = '/' + interaction.commandName;
+            if (disabledCmds.includes(slashName) || disabledCmds.includes(interaction.commandName)) {
+              return interaction.reply({ content: '❌ هذا الأمر معطّل في هذا السيرفر من قبل الإدارة.', ephemeral: true }).catch(() => {});
+            }
+          } catch(e) {}
+        }
+
         try {
           await command.execute(interaction, client);
         } catch (error) {

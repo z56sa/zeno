@@ -447,6 +447,23 @@ try { db.exec("ALTER TABLE guild_settings ADD COLUMN suggestions_channel TEXT;")
 try { db.exec("ALTER TABLE guild_settings ADD COLUMN suggestions_log_channel TEXT;"); } catch(e) {}
 try { db.exec("ALTER TABLE guild_settings ADD COLUMN suggestions_staff_roles TEXT DEFAULT '';"); } catch(e) {}
 try { db.exec("ALTER TABLE guild_settings ADD COLUMN suggestions_dm_notify INTEGER DEFAULT 1;"); } catch(e) {}
+// إعدادات الأوامر المعطلة وتحكم لوحة الداشبورد (Commands Toggle Control)
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN disabled_commands TEXT DEFAULT '[]';"); } catch(e) {}
+// نظام مكافحة الغزو والأعضاء الوهميين (Anti-Raid)
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN antiraid_enabled INTEGER DEFAULT 1;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN raid_threshold INTEGER DEFAULT 5;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN anti_bot INTEGER DEFAULT 0;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN antiraid_dm_notify INTEGER DEFAULT 1;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN antiraid_action TEXT DEFAULT 'kick';"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN antiraid_log_channel TEXT;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN antiraid_whitelist_roles TEXT DEFAULT '';"); } catch(e) {}
+// نظام الإعلانات والمذيع الآلي (Auto-Broadcaster)
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN broadcast_enabled INTEGER DEFAULT 0;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN broadcast_channel TEXT;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN broadcast_interval INTEGER DEFAULT 60;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN broadcast_messages TEXT DEFAULT '[]';"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN broadcast_mention_role TEXT;"); } catch(e) {}
+
 // تخصيص مظهر البوت لكل سيرفر (Per-Server Bot Appearance)
 try { db.exec("ALTER TABLE guild_settings ADD COLUMN bot_nickname TEXT DEFAULT '';"); } catch(e) {}
 try { db.exec("ALTER TABLE guild_settings ADD COLUMN bot_about TEXT DEFAULT '';"); } catch(e) {}
