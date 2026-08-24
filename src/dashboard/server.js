@@ -987,7 +987,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                             </div>
                             <div class="bg-[#12141f] border border-white/5 p-5 rounded-2xl shadow-xl text-right hover:border-purple-500/20 transition">
                                 <div class="flex items-center justify-between mb-3">
-                                    <div class="w-8 h-8 rounded-xl bg-orange-600/20 border border-orange-500/30 text-orange-400 flex items-center justify-center text-sm">😃</div>
+                                    <div class="w-8 h-8 rounded-xl bg-purple-700/20 border border-purple-500/30 text-purple-400 flex items-center justify-center text-sm">😃</div>
                                     <span class="text-[10px] text-gray-500 font-mono">EMOJIS</span>
                                 </div>
                                 <div class="text-2xl font-black text-white">${(botGuild?.emojis?.cache?.size || 0)}</div>
@@ -1086,7 +1086,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                                         <span class="text-xs text-gray-300 font-mono truncate max-w-[120px]">${u.user_id}</span>
                                     </div>
                                     <div class="flex items-center gap-2">
-                                        <span class="w-6 h-6 rounded-lg ${i === 0 ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' : i === 1 ? 'bg-gray-400/20 text-gray-300 border border-gray-400/30' : i === 2 ? 'bg-orange-600/20 text-orange-400 border border-orange-500/30' : 'bg-purple-600/20 text-purple-400 border border-purple-500/30'} text-[10px] font-black flex items-center justify-center">#${i+1}</span>
+                                        <span class="w-6 h-6 rounded-lg ${i === 0 ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' : i === 1 ? 'bg-gray-400/20 text-gray-300 border border-gray-400/30' : i === 2 ? 'bg-purple-700/20 text-purple-400 border border-purple-500/30' : 'bg-purple-600/20 text-purple-400 border border-purple-500/30'} text-[10px] font-black flex items-center justify-center">#${i+1}</span>
                                     </div>
                                 </div>
                                 `).join('')}
@@ -1696,7 +1696,7 @@ const leaderboard = database.getInvitesLeaderboard ? database.getInvitesLeaderbo
                             </td>
                             <td class="py-3 px-4 font-bold text-emerald-400 font-mono text-center">${item.regular}</td>
                             <td class="py-3 px-4 font-bold text-rose-400 font-mono text-center">${item.leaves}</td>
-                            <td class="py-3 px-4 font-bold text-orange-400 font-mono text-center">${item.fake}</td>
+                            <td class="py-3 px-4 font-bold text-purple-400 font-mono text-center">${item.fake}</td>
                             <td class="py-3 px-4 font-bold text-purple-400 font-mono text-center">${item.bonus}</td>
                             <td class="py-3 px-4 font-black text-yellow-400 font-mono text-center text-sm">${item.total}</td>
                         </tr>
@@ -2842,7 +2842,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                                 <span>رسائل المغادرة</span>
                                 <span class="text-rose-400">🚪</span>
                             </button>
-                            <button type="button" onclick="switchWelcomeTab('welcome')" id="btnTabWelcome" class="px-5 py-2 rounded-xl text-xs font-bold transition bg-gradient-to-r from-orange-500 to-amber-600 text-white shadow-lg">
+                            <button type="button" onclick="switchWelcomeTab('welcome')" id="btnTabWelcome" class="px-5 py-2 rounded-xl text-xs font-bold transition bg-gradient-to-r from-purple-600 to-purple-800 text-white shadow-lg">
                                 <span>رسائل الترحيب</span>
                                 <span class="text-amber-300">👋</span>
                             </button>
@@ -2872,7 +2872,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                             <!-- Card 2: قناة الترحيب والرسالة -->
                             <div class="bg-[#12141f] border border-white/5 p-6 rounded-2xl space-y-4 shadow-xl">
                                 <div>
-                                    <label class="block text-xs font-bold text-gray-300 mb-2">قناة الترحيب <span class="text-orange-400">*</span></label>
+                                    <label class="block text-xs font-bold text-gray-300 mb-2">قناة الترحيب <span class="text-purple-400">*</span></label>
                                     ${renderChannelSelect('welcome_channel', settings.welcome_channel || '')}
                                 </div>
 
@@ -2881,18 +2881,18 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                                         <span>☺</span>
                                         <span>رسالة الترحيب (نص عادي)</span>
                                     </div>
-                                    <textarea name="welcome_message" id="welcomeText" rows="3" oninput="updateWelcomePreview()" class="w-full bg-[#0b0d14] border border-white/5 focus:border-orange-500 rounded-xl p-4 text-xs text-white outline-none leading-relaxed text-right">${settings.welcome_message || 'مرحباً {user} في سيرفر **{server}**! 🎉 أنت العضو رقم **{memberCount}**'}</textarea>
+                                    <textarea name="welcome_message" id="welcomeText" rows="3" oninput="updateWelcomePreview()" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-500 rounded-xl p-4 text-xs text-white outline-none leading-relaxed text-right">${settings.welcome_message || 'مرحباً {user} في سيرفر **{server}**! 🎉 أنت العضو رقم **{memberCount}**'}</textarea>
                                     
                                     <!-- Variables Pill Badges -->
                                     <div class="flex items-center justify-between pt-1">
                                         <span class="text-[10px] text-gray-500">إذا تريد فقط Embed أو صورة بدون نص، اترك الرسالة فارغة.</span>
                                         <div class="flex flex-wrap gap-1.5 justify-end">
-                                            <span class="text-[10px] font-mono bg-[#1c1f2e] text-orange-400 px-2 py-0.5 rounded-lg border border-orange-500/20 cursor-pointer" onclick="insertVar('welcomeText', '{user}')">{user}</span>
-                                            <span class="text-[10px] font-mono bg-[#1c1f2e] text-orange-400 px-2 py-0.5 rounded-lg border border-orange-500/20 cursor-pointer" onclick="insertVar('welcomeText', '{username}')">{username}</span>
-                                            <span class="text-[10px] font-mono bg-[#1c1f2e] text-orange-400 px-2 py-0.5 rounded-lg border border-orange-500/20 cursor-pointer" onclick="insertVar('welcomeText', '{server}')">{server}</span>
-                                            <span class="text-[10px] font-mono bg-[#1c1f2e] text-orange-400 px-2 py-0.5 rounded-lg border border-orange-500/20 cursor-pointer" onclick="insertVar('welcomeText', '{memberCount}')">{memberCount}</span>
-                                            <span class="text-[10px] font-mono bg-[#1c1f2e] text-orange-400 px-2 py-0.5 rounded-lg border border-orange-500/20 cursor-pointer" onclick="insertVar('welcomeText', '{inviter}')">{inviter}</span>
-                                            <span class="text-[10px] font-mono bg-[#1c1f2e] text-orange-400 px-2 py-0.5 rounded-lg border border-orange-500/20 cursor-pointer" onclick="insertVar('welcomeText', '{joinDate}')">{joinDate}</span>
+                                            <span class="text-[10px] font-mono bg-[#1c1f2e] text-purple-400 px-2 py-0.5 rounded-lg border border-purple-500/20 cursor-pointer" onclick="insertVar('welcomeText', '{user}')">{user}</span>
+                                            <span class="text-[10px] font-mono bg-[#1c1f2e] text-purple-400 px-2 py-0.5 rounded-lg border border-purple-500/20 cursor-pointer" onclick="insertVar('welcomeText', '{username}')">{username}</span>
+                                            <span class="text-[10px] font-mono bg-[#1c1f2e] text-purple-400 px-2 py-0.5 rounded-lg border border-purple-500/20 cursor-pointer" onclick="insertVar('welcomeText', '{server}')">{server}</span>
+                                            <span class="text-[10px] font-mono bg-[#1c1f2e] text-purple-400 px-2 py-0.5 rounded-lg border border-purple-500/20 cursor-pointer" onclick="insertVar('welcomeText', '{memberCount}')">{memberCount}</span>
+                                            <span class="text-[10px] font-mono bg-[#1c1f2e] text-purple-400 px-2 py-0.5 rounded-lg border border-purple-500/20 cursor-pointer" onclick="insertVar('welcomeText', '{inviter}')">{inviter}</span>
+                                            <span class="text-[10px] font-mono bg-[#1c1f2e] text-purple-400 px-2 py-0.5 rounded-lg border border-purple-500/20 cursor-pointer" onclick="insertVar('welcomeText', '{joinDate}')">{joinDate}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -2900,15 +2900,15 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
 
                             <!-- Card 3: خيارات الترحيب الثلاثة (نص فقط / صورة ترحيب / رسالة Embed) -->
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                                <button type="button" onclick="setWelcomeType('text')" id="btnWlTypeText" class="p-4 rounded-2xl border ${settings.welcome_embed_enabled === 0 && !settings.welcome_image ? 'border-orange-500 bg-orange-950/20 text-white' : 'border-white/5 bg-[#12141f] text-gray-400'} text-center transition">
+                                <button type="button" onclick="setWelcomeType('text')" id="btnWlTypeText" class="p-4 rounded-2xl border ${settings.welcome_embed_enabled === 0 && !settings.welcome_image ? 'border-purple-500 bg-orange-950/20 text-white' : 'border-white/5 bg-[#12141f] text-gray-400'} text-center transition">
                                     <h5 class="font-bold text-xs">نص فقط</h5>
                                     <p class="text-[10px] text-gray-500 mt-1">رسالة نصية بسيطة</p>
                                 </button>
-                                <button type="button" onclick="setWelcomeType('image')" id="btnWlTypeImage" class="p-4 rounded-2xl border ${settings.welcome_image ? 'border-orange-500 bg-orange-950/20 text-white' : 'border-white/5 bg-[#12141f] text-gray-400'} text-center transition">
+                                <button type="button" onclick="setWelcomeType('image')" id="btnWlTypeImage" class="p-4 rounded-2xl border ${settings.welcome_image ? 'border-purple-500 bg-orange-950/20 text-white' : 'border-white/5 bg-[#12141f] text-gray-400'} text-center transition">
                                     <h5 class="font-bold text-xs">صورة ترحيب</h5>
                                     <p class="text-[10px] text-gray-500 mt-1">صورة مخصصة مع اسم العضو</p>
                                 </button>
-                                <button type="button" onclick="setWelcomeType('embed')" id="btnWlTypeEmbed" class="p-4 rounded-2xl border ${settings.welcome_embed_enabled !== 0 ? 'border-orange-500 bg-orange-950/20 text-white' : 'border-white/5 bg-[#12141f] text-gray-400'} text-center transition">
+                                <button type="button" onclick="setWelcomeType('embed')" id="btnWlTypeEmbed" class="p-4 rounded-2xl border ${settings.welcome_embed_enabled !== 0 ? 'border-purple-500 bg-orange-950/20 text-white' : 'border-white/5 bg-[#12141f] text-gray-400'} text-center transition">
                                     <h5 class="font-bold text-xs">رسالة Embed</h5>
                                     <p class="text-[10px] text-gray-500 mt-1">رسالة منسقة مع ألوان</p>
                                 </button>
@@ -2921,12 +2921,12 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                             <div class="bg-[#12141f] border border-white/5 p-6 rounded-2xl space-y-4 shadow-xl">
                                 <div class="flex items-center justify-between border-b border-white/5 pb-3">
                                     <div class="flex flex-wrap gap-1.5">
-                                        <span class="text-[10px] font-mono bg-[#1c1f2e] text-orange-400 px-2 py-0.5 rounded-lg border border-orange-500/20">{user}</span>
-                                        <span class="text-[10px] font-mono bg-[#1c1f2e] text-orange-400 px-2 py-0.5 rounded-lg border border-orange-500/20">{username}</span>
-                                        <span class="text-[10px] font-mono bg-[#1c1f2e] text-orange-400 px-2 py-0.5 rounded-lg border border-orange-500/20">{server}</span>
-                                        <span class="text-[10px] font-mono bg-[#1c1f2e] text-orange-400 px-2 py-0.5 rounded-lg border border-orange-500/20">{memberCount}</span>
-                                        <span class="text-[10px] font-mono bg-[#1c1f2e] text-orange-400 px-2 py-0.5 rounded-lg border border-orange-500/20">{user.avatar}</span>
-                                        <span class="text-[10px] font-mono bg-[#1c1f2e] text-orange-400 px-2 py-0.5 rounded-lg border border-orange-500/20">{inviter}</span>
+                                        <span class="text-[10px] font-mono bg-[#1c1f2e] text-purple-400 px-2 py-0.5 rounded-lg border border-purple-500/20">{user}</span>
+                                        <span class="text-[10px] font-mono bg-[#1c1f2e] text-purple-400 px-2 py-0.5 rounded-lg border border-purple-500/20">{username}</span>
+                                        <span class="text-[10px] font-mono bg-[#1c1f2e] text-purple-400 px-2 py-0.5 rounded-lg border border-purple-500/20">{server}</span>
+                                        <span class="text-[10px] font-mono bg-[#1c1f2e] text-purple-400 px-2 py-0.5 rounded-lg border border-purple-500/20">{memberCount}</span>
+                                        <span class="text-[10px] font-mono bg-[#1c1f2e] text-purple-400 px-2 py-0.5 rounded-lg border border-purple-500/20">{user.avatar}</span>
+                                        <span class="text-[10px] font-mono bg-[#1c1f2e] text-purple-400 px-2 py-0.5 rounded-lg border border-purple-500/20">{inviter}</span>
                                     </div>
                                     <h5 class="text-xs font-black text-white">تخصيص رسالة الترحيب</h5>
                                 </div>
@@ -2945,14 +2945,14 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                                             <button type="button" onclick="setWlColor('#10b981')" class="w-4 h-4 rounded-md bg-[#10b981]"></button>
                                             <button type="button" onclick="setWlColor('#ec4899')" class="w-4 h-4 rounded-md bg-[#ec4899]"></button>
                                             <button type="button" onclick="setWlColor('#ef4444')" class="w-4 h-4 rounded-md bg-[#ef4444]"></button>
-                                            <button type="button" onclick="setWlColor('#f97316')" class="w-4 h-4 rounded-md bg-[#f97316]"></button>
+                                            <button type="button" onclick="setWlColor('#9333ea')" class="w-4 h-4 rounded-md bg-[#9333ea]"></button>
                                             <button type="button" onclick="setWlColor('#ef5700')" class="w-4 h-4 rounded-md bg-[#ef5700] ring-2 ring-white/50"></button>
                                         </div>
                                     </div>
                                 </div>
 
                                 <!-- Live Interactive Embed Card (Exact to Image 3) -->
-                                <div id="wlPreviewEmbed" class="bg-[#0b0d14] border-r-4 border-orange-500 rounded-xl p-5 space-y-4 text-right shadow-inner">
+                                <div id="wlPreviewEmbed" class="bg-[#0b0d14] border-r-4 border-purple-500 rounded-xl p-5 space-y-4 text-right shadow-inner">
                                     <div class="flex items-center justify-end gap-2 text-xs font-bold text-gray-400">
                                         <span>${guild.name}</span>
                                         <img src="${guildIcon}" class="w-5 h-5 rounded-full object-cover">
@@ -3062,7 +3062,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                                         <span class="text-xs font-bold text-gray-300">لون الإيمبد</span>
                                         <div class="flex items-center gap-1.5">
                                             <button type="button" onclick="setLvColor('#ef4444')" class="w-4 h-4 rounded-md bg-[#ef4444] ring-2 ring-white/50"></button>
-                                            <button type="button" onclick="setLvColor('#f97316')" class="w-4 h-4 rounded-md bg-[#f97316]"></button>
+                                            <button type="button" onclick="setLvColor('#9333ea')" class="w-4 h-4 rounded-md bg-[#9333ea]"></button>
                                             <button type="button" onclick="setLvColor('#eab308')" class="w-4 h-4 rounded-md bg-[#eab308]"></button>
                                             <button type="button" onclick="setLvColor('#10b981')" class="w-4 h-4 rounded-md bg-[#10b981]"></button>
                                             <button type="button" onclick="setLvColor('#06b6d4')" class="w-4 h-4 rounded-md bg-[#06b6d4]"></button>
@@ -3104,7 +3104,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                         if (tab === 'welcome') {
                             secWl.classList.remove('hidden');
                             secLv.classList.add('hidden');
-                            btnWl.className = "px-5 py-2 rounded-xl text-xs font-bold transition bg-gradient-to-r from-orange-500 to-amber-600 text-white shadow-lg";
+                            btnWl.className = "px-5 py-2 rounded-xl text-xs font-bold transition bg-gradient-to-r from-purple-600 to-purple-800 text-white shadow-lg";
                             btnLv.className = "px-5 py-2 rounded-xl text-xs font-bold transition text-gray-400 hover:text-white";
                         } else {
                             secWl.classList.add('hidden');
@@ -3138,9 +3138,9 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                         document.getElementById('welcome_embed_enabled').value = type === 'embed' ? 1 : 0;
                         document.getElementById('welcome_image').value = type === 'image' ? 1 : 0;
                         
-                        document.getElementById('btnWlTypeText').className = type === 'text' ? 'p-4 rounded-2xl border border-orange-500 bg-orange-950/20 text-white text-center transition' : 'p-4 rounded-2xl border border-white/5 bg-[#12141f] text-gray-400 text-center transition';
-                        document.getElementById('btnWlTypeImage').className = type === 'image' ? 'p-4 rounded-2xl border border-orange-500 bg-orange-950/20 text-white text-center transition' : 'p-4 rounded-2xl border border-white/5 bg-[#12141f] text-gray-400 text-center transition';
-                        document.getElementById('btnWlTypeEmbed').className = type === 'embed' ? 'p-4 rounded-2xl border border-orange-500 bg-orange-950/20 text-white text-center transition' : 'p-4 rounded-2xl border border-white/5 bg-[#12141f] text-gray-400 text-center transition';
+                        document.getElementById('btnWlTypeText').className = type === 'text' ? 'p-4 rounded-2xl border border-purple-500 bg-orange-950/20 text-white text-center transition' : 'p-4 rounded-2xl border border-white/5 bg-[#12141f] text-gray-400 text-center transition';
+                        document.getElementById('btnWlTypeImage').className = type === 'image' ? 'p-4 rounded-2xl border border-purple-500 bg-orange-950/20 text-white text-center transition' : 'p-4 rounded-2xl border border-white/5 bg-[#12141f] text-gray-400 text-center transition';
+                        document.getElementById('btnWlTypeEmbed').className = type === 'embed' ? 'p-4 rounded-2xl border border-purple-500 bg-orange-950/20 text-white text-center transition' : 'p-4 rounded-2xl border border-white/5 bg-[#12141f] text-gray-400 text-center transition';
                     }
 
                     function setLeaveType(type) {
@@ -3165,7 +3165,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
 
                         <!-- 1. Master Header Card (Exact to Image 1) -->
                         <div class="bg-[#12141f] border border-white/5 p-6 rounded-2xl flex items-center justify-between shadow-xl">
-                            <button type="button" onclick="openAddAutoresponderModal()" class="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-white rounded-xl text-xs font-black transition flex items-center gap-1.5 shadow-lg shadow-orange-950/40">
+                            <button type="button" onclick="openAddAutoresponderModal()" class="px-6 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-amber-400 hover:to-orange-500 text-white rounded-xl text-xs font-black transition flex items-center gap-1.5 shadow-lg shadow-orange-950/40">
                                 <span>➕</span>
                                 <span>إضافة رد تلقائي</span>
                             </button>
@@ -3174,7 +3174,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                                     <h4 class="font-black text-white text-base">الرد التلقائي</h4>
                                     <p class="text-gray-400 text-xs mt-0.5">إعداد ردود تلقائية على كلمات أو عبارات معينة</p>
                                 </div>
-                                <div class="w-10 h-10 rounded-xl bg-orange-600/20 text-orange-400 flex items-center justify-center text-lg border border-orange-500/30">
+                                <div class="w-10 h-10 rounded-xl bg-purple-700/20 text-purple-400 flex items-center justify-center text-lg border border-purple-500/30">
                                     💬
                                 </div>
                             </div>
@@ -3208,7 +3208,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                                         <h5 class="text-xs font-black text-white">الردود التلقائية النشطة</h5>
                                     </div>
                                     ${autoRespondersList.map(r => `
-                                        <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between hover:border-orange-500/40 transition">
+                                        <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between hover:border-purple-500/40 transition">
                                             <button type="button" onclick="deleteAutoresponderItem(${r.id})" class="px-3 py-1.5 bg-rose-600/20 hover:bg-rose-600/40 text-rose-300 border border-rose-500/30 rounded-lg text-xs font-bold transition">حذف 🗑️</button>
                                             <div class="text-right space-y-1">
                                                 <div class="flex items-center justify-end gap-2">
@@ -3230,7 +3230,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                                         <h5 class="text-sm font-black text-white">لا توجد ردود تلقائية</h5>
                                         <p class="text-xs text-gray-400">أضف ردود تلقائية للرد على كلمات أو عبارات محددة</p>
                                     </div>
-                                    <button type="button" onclick="openAddAutoresponderModal()" class="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-white rounded-xl text-xs font-black transition inline-flex items-center gap-2 shadow-lg shadow-orange-950/40">
+                                    <button type="button" onclick="openAddAutoresponderModal()" class="px-6 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-amber-400 hover:to-orange-500 text-white rounded-xl text-xs font-black transition inline-flex items-center gap-2 shadow-lg shadow-orange-950/40">
                                         <span>إضافة أول رد تلقائي</span>
                                     </button>
                                 </div>
@@ -3256,7 +3256,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                                         <!-- حقل المحفز -->
                                         <div class="space-y-1.5">
                                             <label class="block text-xs font-bold text-gray-300">حقل المحفز</label>
-                                            <input type="text" id="arTrigger" placeholder="اكتب الكلمة أو العبارة..." class="w-full bg-[#0b0d14] border border-white/5 focus:border-orange-500 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right">
+                                            <input type="text" id="arTrigger" placeholder="اكتب الكلمة أو العبارة..." class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-500 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right">
                                         </div>
 
                                         <!-- نوع المطابقة (Buttons: يحتوي على / مطابقة تامة / يبدأ بـ / ينتهي بـ / Regex) -->
@@ -3267,7 +3267,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                                                 <button type="button" onclick="setArMatchMode('ends')" id="btnArEnds" class="py-1.5 rounded-lg text-gray-400 hover:text-white transition">ينتهي بـ</button>
                                                 <button type="button" onclick="setArMatchMode('starts')" id="btnArStarts" class="py-1.5 rounded-lg text-gray-400 hover:text-white transition">يبدأ بـ</button>
                                                 <button type="button" onclick="setArMatchMode('exact')" id="btnArExact" class="py-1.5 rounded-lg text-gray-400 hover:text-white transition">مطابقة تامة</button>
-                                                <button type="button" onclick="setArMatchMode('contains')" id="btnArContains" class="py-1.5 rounded-lg bg-orange-600 text-white font-bold transition">يحتوي على</button>
+                                                <button type="button" onclick="setArMatchMode('contains')" id="btnArContains" class="py-1.5 rounded-lg bg-purple-700 text-white font-bold transition">يحتوي على</button>
                                             </div>
                                         </div>
 
@@ -3283,7 +3283,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                                                     <span>رد إيمبد</span>
                                                     <span>📄</span>
                                                 </button>
-                                                <button type="button" onclick="setArReplyType('text')" id="btnArText" class="py-2 bg-orange-600 border border-orange-500 rounded-xl text-[11px] text-white font-bold flex items-center justify-center gap-1 transition">
+                                                <button type="button" onclick="setArReplyType('text')" id="btnArText" class="py-2 bg-purple-700 border border-purple-500 rounded-xl text-[11px] text-white font-bold flex items-center justify-center gap-1 transition">
                                                     <span>رد نصي</span>
                                                     <span>💬</span>
                                                 </button>
@@ -3293,12 +3293,12 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                                         <!-- الرد والبادجات -->
                                         <div class="space-y-2">
                                             <label class="block text-xs font-bold text-gray-300">الرد</label>
-                                            <textarea id="arReply" rows="3" placeholder="اكتب الرد..." class="w-full bg-[#0b0d14] border border-white/5 focus:border-orange-500 rounded-xl p-3 text-xs text-white outline-none leading-relaxed text-right"></textarea>
+                                            <textarea id="arReply" rows="3" placeholder="اكتب الرد..." class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-500 rounded-xl p-3 text-xs text-white outline-none leading-relaxed text-right"></textarea>
                                             <div class="flex flex-wrap gap-1 justify-end">
-                                                <span class="text-[10px] font-mono bg-[#1c1f2e] text-orange-400 px-2 py-0.5 rounded-lg border border-orange-500/20 cursor-pointer" onclick="insertArVar('{user}')">{user}</span>
-                                                <span class="text-[10px] font-mono bg-[#1c1f2e] text-orange-400 px-2 py-0.5 rounded-lg border border-orange-500/20 cursor-pointer" onclick="insertArVar('{server}')">{server}</span>
-                                                <span class="text-[10px] font-mono bg-[#1c1f2e] text-orange-400 px-2 py-0.5 rounded-lg border border-orange-500/20 cursor-pointer" onclick="insertArVar('{channel}')">{channel}</span>
-                                                <span class="text-[10px] font-mono bg-[#1c1f2e] text-orange-400 px-2 py-0.5 rounded-lg border border-orange-500/20 cursor-pointer" onclick="insertArVar('{memberCount}')">{memberCount}</span>
+                                                <span class="text-[10px] font-mono bg-[#1c1f2e] text-purple-400 px-2 py-0.5 rounded-lg border border-purple-500/20 cursor-pointer" onclick="insertArVar('{user}')">{user}</span>
+                                                <span class="text-[10px] font-mono bg-[#1c1f2e] text-purple-400 px-2 py-0.5 rounded-lg border border-purple-500/20 cursor-pointer" onclick="insertArVar('{server}')">{server}</span>
+                                                <span class="text-[10px] font-mono bg-[#1c1f2e] text-purple-400 px-2 py-0.5 rounded-lg border border-purple-500/20 cursor-pointer" onclick="insertArVar('{channel}')">{channel}</span>
+                                                <span class="text-[10px] font-mono bg-[#1c1f2e] text-purple-400 px-2 py-0.5 rounded-lg border border-purple-500/20 cursor-pointer" onclick="insertArVar('{memberCount}')">{memberCount}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -3358,7 +3358,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
 
                                 <!-- Modal Footer Buttons -->
                                 <div class="flex items-center justify-between pt-4 border-t border-white/5 flex-row-reverse">
-                                    <button type="button" onclick="submitNewAutoresponder()" class="px-8 py-2.5 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-white rounded-xl text-xs font-black transition shadow-lg shadow-orange-950/40">
+                                    <button type="button" onclick="submitNewAutoresponder()" class="px-8 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-amber-400 hover:to-orange-500 text-white rounded-xl text-xs font-black transition shadow-lg shadow-orange-950/40">
                                         إضافة رد تلقائي
                                     </button>
                                     <button type="button" onclick="closeAddAutoresponderModal()" class="px-6 py-2.5 bg-[#0b0d14] hover:bg-white/5 border border-white/5 text-gray-400 hover:text-white rounded-xl text-xs font-bold transition">
@@ -3390,7 +3390,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                             const btn = document.getElementById('btnAr' + m.charAt(0).toUpperCase() + m.slice(1));
                             if (btn) {
                                 btn.className = m === mode
-                                    ? "py-1.5 rounded-lg bg-orange-600 text-white font-bold transition"
+                                    ? "py-1.5 rounded-lg bg-purple-700 text-white font-bold transition"
                                     : "py-1.5 rounded-lg text-gray-400 hover:text-white transition";
                             }
                         });
@@ -3403,7 +3403,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                             const btn = document.getElementById('btnAr' + t.charAt(0).toUpperCase() + t.slice(1));
                             if (btn) {
                                 btn.className = t === type
-                                    ? "py-2 bg-orange-600 border border-orange-500 rounded-xl text-[11px] text-white font-bold flex items-center justify-center gap-1 transition"
+                                    ? "py-2 bg-purple-700 border border-purple-500 rounded-xl text-[11px] text-white font-bold flex items-center justify-center gap-1 transition"
                                     : "py-2 bg-[#0b0d14] border border-white/5 rounded-xl text-[11px] text-gray-400 hover:text-white flex items-center justify-center gap-1 transition";
                             }
                         });
@@ -3616,23 +3616,23 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
 
                             <!-- Navigation Tabs (Exact to Versa Tab Bar) -->
                             <div class="flex items-center gap-2 bg-[#10121b] border border-white/5 p-1.5 rounded-2xl">
-                                <button type="button" onclick="switchLevelTab('settings')" id="btnTabLvlSettings" class="px-4 py-1.5 rounded-xl text-xs font-bold transition ${(!currentTab || currentTab === 'settings') ? 'bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-md' : 'text-gray-400 hover:text-white'} flex items-center gap-1">
+                                <button type="button" onclick="switchLevelTab('settings')" id="btnTabLvlSettings" class="px-4 py-1.5 rounded-xl text-xs font-bold transition ${(!currentTab || currentTab === 'settings') ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md' : 'text-gray-400 hover:text-white'} flex items-center gap-1">
                                     <span>الإعدادات</span>
                                     <span>⚙️</span>
                                 </button>
-                                <button type="button" onclick="switchLevelTab('text_roles')" id="btnTabLvlText" class="px-4 py-1.5 rounded-xl text-xs font-bold transition ${(currentTab === 'text_roles') ? 'bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-md' : 'text-gray-400 hover:text-white'} flex items-center gap-1">
+                                <button type="button" onclick="switchLevelTab('text_roles')" id="btnTabLvlText" class="px-4 py-1.5 rounded-xl text-xs font-bold transition ${(currentTab === 'text_roles') ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md' : 'text-gray-400 hover:text-white'} flex items-center gap-1">
                                     <span>رتب كتابية</span>
                                     <span>📜</span>
                                 </button>
-                                <button type="button" onclick="switchLevelTab('voice_roles')" id="btnTabLvlVoice" class="px-4 py-1.5 rounded-xl text-xs font-bold transition ${(currentTab === 'voice_roles') ? 'bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-md' : 'text-gray-400 hover:text-white'} flex items-center gap-1">
+                                <button type="button" onclick="switchLevelTab('voice_roles')" id="btnTabLvlVoice" class="px-4 py-1.5 rounded-xl text-xs font-bold transition ${(currentTab === 'voice_roles') ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md' : 'text-gray-400 hover:text-white'} flex items-center gap-1">
                                     <span>رتب صوتية</span>
                                     <span>🎵</span>
                                 </button>
-                                <button type="button" onclick="switchLevelTab('shared_roles')" id="btnTabLvlShared" class="px-4 py-1.5 rounded-xl text-xs font-bold transition ${(currentTab === 'shared_roles') ? 'bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-md' : 'text-gray-400 hover:text-white'} flex items-center gap-1">
+                                <button type="button" onclick="switchLevelTab('shared_roles')" id="btnTabLvlShared" class="px-4 py-1.5 rounded-xl text-xs font-bold transition ${(currentTab === 'shared_roles') ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md' : 'text-gray-400 hover:text-white'} flex items-center gap-1">
                                     <span>رتب مشتركة</span>
                                     <span>✨</span>
                                 </button>
-                                <button type="button" onclick="switchLevelTab('leaderboard')" id="btnTabLvlLeaderboard" class="px-4 py-1.5 rounded-xl text-xs font-bold transition ${(currentTab === 'leaderboard') ? 'bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-md' : 'text-gray-400 hover:text-white'} flex items-center gap-1">
+                                <button type="button" onclick="switchLevelTab('leaderboard')" id="btnTabLvlLeaderboard" class="px-4 py-1.5 rounded-xl text-xs font-bold transition ${(currentTab === 'leaderboard') ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md' : 'text-gray-400 hover:text-white'} flex items-center gap-1">
                                     <span>المتصدرين</span>
                                     <span>🏆</span>
                                 </button>
@@ -3714,10 +3714,10 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
 
                                 <div class="space-y-2">
                                     <div class="flex items-center justify-between text-xs font-bold">
-                                        <span class="px-3 py-1 bg-orange-950/60 text-orange-400 border border-orange-800/40 rounded-xl font-mono text-sm" id="voiceMinMembersVal">${settings.level_voice_min_members || 2}</span>
+                                        <span class="px-3 py-1 bg-orange-950/60 text-purple-400 border border-orange-800/40 rounded-xl font-mono text-sm" id="voiceMinMembersVal">${settings.level_voice_min_members || 2}</span>
                                         <span class="text-white">الحد الأدنى للأعضاء في القناة</span>
                                     </div>
-                                    <input type="range" name="level_voice_min_members" min="1" max="10" value="${settings.level_voice_min_members || 2}" oninput="document.getElementById('voiceMinMembersVal').innerText = this.value" class="w-full accent-orange-500 cursor-pointer">
+                                    <input type="range" name="level_voice_min_members" min="1" max="10" value="${settings.level_voice_min_members || 2}" oninput="document.getElementById('voiceMinMembersVal').innerText = this.value" class="w-full accent-purple-600 cursor-pointer">
                                     <p class="text-[10px] text-gray-500 text-right">عدد الأعضاء المطلوب في القناة لبدء حساب XP</p>
                                 </div>
 
@@ -3781,19 +3781,19 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                                 <div class="space-y-2">
                                     <div class="flex items-center justify-between text-xs text-gray-400">
                                         <div class="flex items-center gap-1">
-                                            <span class="text-[10px] font-mono bg-[#1c1f2e] text-orange-400 px-2 py-0.5 rounded-lg border border-orange-500/20">{server}</span>
-                                            <span class="text-[10px] font-mono bg-[#1c1f2e] text-orange-400 px-2 py-0.5 rounded-lg border border-orange-500/20">{xp}</span>
-                                            <span class="text-[10px] font-mono bg-[#1c1f2e] text-orange-400 px-2 py-0.5 rounded-lg border border-orange-500/20">{level}</span>
-                                            <span class="text-[10px] font-mono bg-[#1c1f2e] text-orange-400 px-2 py-0.5 rounded-lg border border-orange-500/20">{user}</span>
+                                            <span class="text-[10px] font-mono bg-[#1c1f2e] text-purple-400 px-2 py-0.5 rounded-lg border border-purple-500/20">{server}</span>
+                                            <span class="text-[10px] font-mono bg-[#1c1f2e] text-purple-400 px-2 py-0.5 rounded-lg border border-purple-500/20">{xp}</span>
+                                            <span class="text-[10px] font-mono bg-[#1c1f2e] text-purple-400 px-2 py-0.5 rounded-lg border border-purple-500/20">{level}</span>
+                                            <span class="text-[10px] font-mono bg-[#1c1f2e] text-purple-400 px-2 py-0.5 rounded-lg border border-purple-500/20">{user}</span>
                                         </div>
                                         <span class="font-bold text-white">رسالة رفع المستوى (كتابي)</span>
                                     </div>
-                                    <input type="text" name="level_message" value="${settings.level_message || '🎉 مبروك {user}! وصلت للمستوى **{level}**!'}" class="w-full bg-[#0b0d14] border border-white/5 focus:border-orange-500 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right">
+                                    <input type="text" name="level_message" value="${settings.level_message || '🎉 مبروك {user}! وصلت للمستوى **{level}**!'}" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-500 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right">
                                 </div>
 
                                 <div class="space-y-2">
                                     <label class="block text-xs font-bold text-white text-right">رسالة رفع المستوى (صوتي)</label>
-                                    <input type="text" name="level_voice_msg" value="${settings.level_voice_msg || '🎤 مبروك {user}! وصلت للمستوى الصوتي **{level}**!'}" class="w-full bg-[#0b0d14] border border-white/5 focus:border-orange-500 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right">
+                                    <input type="text" name="level_voice_msg" value="${settings.level_voice_msg || '🎤 مبروك {user}! وصلت للمستوى الصوتي **{level}**!'}" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-500 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right">
                                 </div>
 
                                 <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between">
@@ -3845,7 +3845,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                             <div class="bg-[#12141f] border border-white/5 p-6 rounded-2xl space-y-5 shadow-xl">
                                 <div class="flex items-center justify-between border-b border-white/5 pb-3">
                                     <div class="flex items-center gap-2">
-                                        <button type="button" onclick="openAddLevelRoleModal('text')" class="px-5 py-2 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-lg shadow-orange-950/40">
+                                        <button type="button" onclick="openAddLevelRoleModal('text')" class="px-5 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-amber-400 hover:to-orange-500 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-lg shadow-orange-950/40">
                                             <span>➕</span>
                                             <span>إضافة رتبة</span>
                                         </button>
@@ -3862,14 +3862,14 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
 
                                 <div class="space-y-2">
                                     ${(levelRewardsList && levelRewardsList.filter(r => r.reward_type === 'text' || !r.reward_type).length > 0) ? levelRewardsList.filter(r => r.reward_type === 'text' || !r.reward_type).map(r => `
-                                        <div class="bg-[#0b0d14] border border-white/5 p-3.5 rounded-xl flex items-center justify-between hover:border-orange-500/40 transition text-xs">
+                                        <div class="bg-[#0b0d14] border border-white/5 p-3.5 rounded-xl flex items-center justify-between hover:border-purple-500/40 transition text-xs">
                                             <button type="button" onclick="deleteLevelRole(${r.id || r.level})" class="px-3 py-1 bg-rose-600/20 hover:bg-rose-600/40 text-rose-300 border border-rose-500/30 rounded-lg text-xs font-bold transition">حذف 🗑️</button>
                                             <div class="flex items-center gap-3">
                                                 <div class="text-right">
                                                     <span class="font-bold text-white block">مستوى كتابي ${r.level}</span>
-                                                    <span class="text-[10px] text-orange-400 font-mono">الرتبة: @${(guildRoles.find(role => role.id === r.role_id)?.name) || r.role_id}</span>
+                                                    <span class="text-[10px] text-purple-400 font-mono">الرتبة: @${(guildRoles.find(role => role.id === r.role_id)?.name) || r.role_id}</span>
                                                 </div>
-                                                <span class="w-8 h-8 rounded-lg bg-orange-600/20 text-orange-400 flex items-center justify-center font-bold">📜</span>
+                                                <span class="w-8 h-8 rounded-lg bg-purple-700/20 text-purple-400 flex items-center justify-center font-bold">📜</span>
                                             </div>
                                         </div>
                                     `).join('') : `
@@ -3877,7 +3877,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                                             <div class="w-12 h-12 rounded-full bg-white/5 text-gray-400 flex items-center justify-center text-xl mx-auto">📜</div>
                                             <h5 class="text-xs font-bold text-gray-300">لا توجد رتب مستويات</h5>
                                             <p class="text-[10px] text-gray-500">أضف رتب لمكافأة الأعضاء النشطين</p>
-                                            <button type="button" onclick="openAddLevelRoleModal('text')" class="px-5 py-2 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-white rounded-xl text-xs font-black transition inline-flex items-center gap-1.5 shadow-lg shadow-orange-950/40">
+                                            <button type="button" onclick="openAddLevelRoleModal('text')" class="px-5 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-amber-400 hover:to-orange-500 text-white rounded-xl text-xs font-black transition inline-flex items-center gap-1.5 shadow-lg shadow-orange-950/40">
                                                 <span>إضافة أول رتبة</span>
                                             </button>
                                         </div>
@@ -3888,7 +3888,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                                 <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl space-y-3">
                                     <div class="flex items-center justify-end gap-1.5 text-xs font-bold text-gray-300">
                                         <span>معادلة حساب XP</span>
-                                        <span class="text-orange-400">ℹ️</span>
+                                        <span class="text-purple-400">ℹ️</span>
                                     </div>
                                     <p class="text-[11px] text-gray-400 text-right font-mono">XP المطلوب للمستوى = (المستوى × 25)²</p>
                                     <div class="flex items-center justify-center gap-2 pt-1">
@@ -3907,7 +3907,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                             <div class="bg-[#12141f] border border-white/5 p-6 rounded-2xl space-y-5 shadow-xl">
                                 <div class="flex items-center justify-between border-b border-white/5 pb-3">
                                     <div class="flex items-center gap-2">
-                                        <button type="button" onclick="openAddLevelRoleModal('voice')" class="px-5 py-2 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-lg shadow-orange-950/40">
+                                        <button type="button" onclick="openAddLevelRoleModal('voice')" class="px-5 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-amber-400 hover:to-orange-500 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-lg shadow-orange-950/40">
                                             <span>➕</span>
                                             <span>إضافة رتبة</span>
                                         </button>
@@ -3939,7 +3939,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                                             <div class="w-12 h-12 rounded-full bg-pink-950/40 text-pink-400 flex items-center justify-center text-xl mx-auto border border-pink-500/20">🎵</div>
                                             <h5 class="text-xs font-bold text-gray-300">لا توجد رتب مستويات</h5>
                                             <p class="text-[10px] text-gray-500">أضف رتب لمكافأة الأعضاء النشطين</p>
-                                            <button type="button" onclick="openAddLevelRoleModal('voice')" class="px-5 py-2 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-white rounded-xl text-xs font-black transition inline-flex items-center gap-1.5 shadow-lg shadow-orange-950/40">
+                                            <button type="button" onclick="openAddLevelRoleModal('voice')" class="px-5 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-amber-400 hover:to-orange-500 text-white rounded-xl text-xs font-black transition inline-flex items-center gap-1.5 shadow-lg shadow-orange-950/40">
                                                 <span>إضافة أول رتبة</span>
                                             </button>
                                         </div>
@@ -3950,7 +3950,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                                 <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl space-y-3">
                                     <div class="flex items-center justify-end gap-1.5 text-xs font-bold text-gray-300">
                                         <span>معادلة حساب XP</span>
-                                        <span class="text-orange-400">ℹ️</span>
+                                        <span class="text-purple-400">ℹ️</span>
                                     </div>
                                     <p class="text-[11px] text-gray-400 text-right font-mono">XP المطلوب للمستوى = (المستوى × 25)²</p>
                                     <div class="flex items-center justify-center gap-2 pt-1">
@@ -3969,7 +3969,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                             <div class="bg-[#12141f] border border-white/5 p-6 rounded-2xl space-y-5 shadow-xl">
                                 <div class="flex items-center justify-between border-b border-white/5 pb-3">
                                     <div class="flex items-center gap-2">
-                                        <button type="button" onclick="openAddSharedRoleModal()" class="px-5 py-2 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-lg shadow-orange-950/40">
+                                        <button type="button" onclick="openAddSharedRoleModal()" class="px-5 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-amber-400 hover:to-orange-500 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-lg shadow-orange-950/40">
                                             <span>➕</span>
                                             <span>إضافة شرط</span>
                                         </button>
@@ -4033,7 +4033,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                                             <div class="w-12 h-12 rounded-full bg-amber-950/40 text-amber-400 flex items-center justify-center text-xl mx-auto border border-amber-500/20">✨</div>
                                             <h5 class="text-xs font-bold text-gray-300">لا توجد رتب مشتركة</h5>
                                             <p class="text-[10px] text-gray-500">أضف شرطاً مزدوجاً يمنح رتبة عند تحقق مستوى صوتي وكتابي معاً</p>
-                                            <button type="button" onclick="openAddSharedRoleModal()" class="px-5 py-2 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-white rounded-xl text-xs font-black transition inline-flex items-center gap-1.5 shadow-lg shadow-orange-950/40">
+                                            <button type="button" onclick="openAddSharedRoleModal()" class="px-5 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-amber-400 hover:to-orange-500 text-white rounded-xl text-xs font-black transition inline-flex items-center gap-1.5 shadow-lg shadow-orange-950/40">
                                                 <span>إضافة أول شرط</span>
                                             </button>
                                         </div>
@@ -4114,7 +4114,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                             if (el) el.classList.toggle('hidden', t !== tab);
                             if (btn) {
                                 btn.className = t === tab 
-                                    ? "px-4 py-1.5 rounded-xl text-xs font-bold transition bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-md flex items-center gap-1"
+                                    ? "px-4 py-1.5 rounded-xl text-xs font-bold transition bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md flex items-center gap-1"
                                     : "px-4 py-1.5 rounded-xl text-xs font-bold transition text-gray-400 hover:text-white flex items-center gap-1";
                             }
                         });
@@ -4196,7 +4196,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                         <!-- 1. Master Header Card (Exact to Image 1: الإشراف & Action Buttons) -->
                         <div class="bg-[#12141f] border border-white/5 p-6 rounded-2xl flex items-center justify-between shadow-xl">
                             <div class="flex items-center gap-3">
-                                <button type="submit" class="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-white rounded-xl text-xs font-black transition flex items-center gap-1.5 shadow-lg shadow-orange-950/40">
+                                <button type="submit" class="px-6 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-amber-400 hover:to-orange-500 text-white rounded-xl text-xs font-black transition flex items-center gap-1.5 shadow-lg shadow-orange-950/40">
                                     <span>💾</span>
                                     <span>حفظ الإعدادات</span>
                                 </button>
@@ -4211,7 +4211,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                                     <h4 class="font-black text-white text-base">الإشراف</h4>
                                     <p class="text-gray-400 text-xs mt-0.5">إعدادات الإشراف والعقوبات</p>
                                 </div>
-                                <div class="w-10 h-10 rounded-xl bg-orange-600/20 text-orange-400 flex items-center justify-center text-lg border border-orange-500/30">
+                                <div class="w-10 h-10 rounded-xl bg-purple-700/20 text-purple-400 flex items-center justify-center text-lg border border-purple-500/30">
                                     🛡️
                                 </div>
                             </div>
@@ -4362,7 +4362,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
 
                         <!-- 1. Master Header Card (Exact to Image 1: نظام القيف اواي & Action Button) -->
                         <div class="bg-[#12141f] border border-white/5 p-6 rounded-2xl flex items-center justify-between shadow-xl">
-                            <button type="button" onclick="openCreateGiveawayModal()" class="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-white rounded-xl text-xs font-black transition flex items-center gap-1.5 shadow-lg shadow-orange-950/40">
+                            <button type="button" onclick="openCreateGiveawayModal()" class="px-6 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-amber-400 hover:to-orange-500 text-white rounded-xl text-xs font-black transition flex items-center gap-1.5 shadow-lg shadow-orange-950/40">
                                 <span>➕</span>
                                 <span>إنشاء قيف اواي</span>
                             </button>
@@ -4371,7 +4371,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                                     <h4 class="font-black text-white text-base">نظام القيف اواي</h4>
                                     <p class="text-gray-400 text-xs mt-0.5">إنشاء وإدارة مسابقات القيف اواي في سيرفرك</p>
                                 </div>
-                                <div class="w-10 h-10 rounded-xl bg-orange-600/20 text-orange-400 flex items-center justify-center text-lg border border-orange-500/30">
+                                <div class="w-10 h-10 rounded-xl bg-purple-700/20 text-purple-400 flex items-center justify-center text-lg border border-purple-500/30">
                                     🎁
                                 </div>
                             </div>
@@ -4410,7 +4410,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                                 <div class="flex items-center gap-1.5 bg-[#0b0d14] p-1 rounded-xl border border-white/5 text-xs font-bold">
                                     <button type="button" onclick="filterGiveawayTab('ended')" id="btnGwEnded" class="px-3 py-1 rounded-lg text-gray-400 hover:text-white transition">المنتهية ${(guildGiveawaysList || []).filter(g => g.status === 'ended').length}</button>
                                     <button type="button" onclick="filterGiveawayTab('active')" id="btnGwActive" class="px-3 py-1 rounded-lg text-gray-400 hover:text-white transition">النشطة ${(guildGiveawaysList || []).filter(g => g.status === 'active').length}</button>
-                                    <button type="button" onclick="filterGiveawayTab('all')" id="btnGwAll" class="px-3 py-1 rounded-lg bg-orange-600 text-white transition shadow">الكل ${(guildGiveawaysList || []).length}</button>
+                                    <button type="button" onclick="filterGiveawayTab('all')" id="btnGwAll" class="px-3 py-1 rounded-lg bg-purple-700 text-white transition shadow">الكل ${(guildGiveawaysList || []).length}</button>
                                 </div>
                             </div>
 
@@ -4419,7 +4419,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                                     <div class="space-y-3">
                                         ${guildGiveawaysList.map(g => {
                                             const entriesCount = g.entries ? (typeof g.entries === 'string' ? JSON.parse(g.entries || '[]').length : g.entries.length) : 0;
-                                            return '<div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between hover:border-orange-500/40 transition text-xs">' +
+                                            return '<div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between hover:border-purple-500/40 transition text-xs">' +
                                                 '<div class="flex items-center gap-3">' +
                                                     '<span class="px-2 py-0.5 rounded text-[10px] font-bold ' + (g.status === 'active' ? 'bg-emerald-950/60 text-emerald-400 border border-emerald-800/30' : 'bg-white/5 text-gray-400') + '">' + (g.status === 'active' ? 'نشط 🟢' : 'منتهي 🔴') + '</span>' +
                                                     '<span class="text-gray-400 font-mono">' + entriesCount + ' مشارك 👥</span>' +
@@ -4433,14 +4433,14 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                                     </div>
                                 ` : `
                                     <div class="py-14 text-center space-y-4">
-                                        <div class="w-16 h-16 rounded-2xl bg-orange-950/30 text-orange-400 flex items-center justify-center text-3xl mx-auto border border-orange-500/20 shadow-inner">
+                                        <div class="w-16 h-16 rounded-2xl bg-orange-950/30 text-purple-400 flex items-center justify-center text-3xl mx-auto border border-purple-500/20 shadow-inner">
                                             🎁
                                         </div>
                                         <div class="space-y-1">
                                             <h5 class="text-sm font-black text-white">لا توجد قيف اواي بعد</h5>
                                             <p class="text-xs text-gray-400">ابدأ بإنشاء أول قيف اواي لسيرفرك!</p>
                                         </div>
-                                        <button type="button" onclick="openCreateGiveawayModal()" class="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-white rounded-xl text-xs font-black transition inline-flex items-center gap-2 shadow-lg shadow-orange-950/40">
+                                        <button type="button" onclick="openCreateGiveawayModal()" class="px-6 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-amber-400 hover:to-orange-500 text-white rounded-xl text-xs font-black transition inline-flex items-center gap-2 shadow-lg shadow-orange-950/40">
                                             <span>إنشاء قيف اواي</span>
                                         </button>
                                     </div>
@@ -4462,7 +4462,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                                             <h3 class="text-base font-black text-white">إنشاء قيف اواي جديد</h3>
                                             <p class="text-[10px] text-gray-400">أعلن عن جائزتك الآن</p>
                                         </div>
-                                        <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-sm shadow">
+                                        <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center text-sm shadow">
                                             🎉
                                         </div>
                                     </div>
@@ -4470,19 +4470,19 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
 
                                 <!-- حقل الجائزة -->
                                 <div class="space-y-1.5">
-                                    <label class="block text-xs font-bold text-gray-300">الجائزة <span class="text-orange-400">*</span></label>
-                                    <input type="text" id="gwPrize" placeholder="مثال: Discord Nitro لمدة شهر" class="w-full bg-[#0b0d14] border border-white/5 focus:border-orange-500 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right">
+                                    <label class="block text-xs font-bold text-gray-300">الجائزة <span class="text-purple-400">*</span></label>
+                                    <input type="text" id="gwPrize" placeholder="مثال: Discord Nitro لمدة شهر" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-500 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right">
                                 </div>
 
                                 <!-- الوصف (اختياري) -->
                                 <div class="space-y-1.5">
                                     <label class="block text-xs font-bold text-gray-300">الوصف (اختياري)</label>
-                                    <textarea id="gwDesc" rows="2" placeholder="...أضف تفاصيل إضافية" class="w-full bg-[#0b0d14] border border-white/5 focus:border-orange-500 rounded-xl p-3 text-xs text-white outline-none text-right leading-relaxed"></textarea>
+                                    <textarea id="gwDesc" rows="2" placeholder="...أضف تفاصيل إضافية" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-500 rounded-xl p-3 text-xs text-white outline-none text-right leading-relaxed"></textarea>
                                 </div>
 
                                 <!-- القناة المستهدفة -->
                                 <div class="space-y-1.5">
-                                    <label class="block text-xs font-bold text-gray-300">القناة <span class="text-orange-400">*</span></label>
+                                    <label class="block text-xs font-bold text-gray-300">القناة <span class="text-purple-400">*</span></label>
                                     ${renderChannelSelect('gwChannel', '')}
                                 </div>
 
@@ -4490,11 +4490,11 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                                 <div class="grid grid-cols-2 gap-4">
                                     <div class="space-y-1.5">
                                         <label class="block text-xs font-bold text-gray-300">عدد الفائزين</label>
-                                        <input type="number" id="gwWinners" value="1" min="1" max="50" class="w-full bg-[#0b0d14] border border-white/5 focus:border-orange-500 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-center font-mono">
+                                        <input type="number" id="gwWinners" value="1" min="1" max="50" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-500 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-center font-mono">
                                     </div>
                                     <div class="space-y-1.5">
                                         <label class="block text-xs font-bold text-gray-300">المدة</label>
-                                        <select id="gwDuration" class="w-full bg-[#0b0d14] border border-white/5 focus:border-orange-500 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right cursor-pointer">
+                                        <select id="gwDuration" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-500 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right cursor-pointer">
                                             <option value="10m">10 دقائق</option>
                                             <option value="1h">ساعة واحدة</option>
                                             <option value="6h">6 ساعات</option>
@@ -4524,7 +4524,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                                             <input type="color" id="gwColorInput" value="#ef5700" class="w-6 h-6 rounded-md cursor-pointer bg-transparent border-0">
                                             <div class="flex items-center gap-1.5">
                                                 <button type="button" onclick="setGwColor('#ef5700')" class="w-4 h-4 rounded-md bg-[#ef5700] ring-2 ring-white/50"></button>
-                                                <button type="button" onclick="setGwColor('#f97316')" class="w-4 h-4 rounded-md bg-[#f97316]"></button>
+                                                <button type="button" onclick="setGwColor('#9333ea')" class="w-4 h-4 rounded-md bg-[#9333ea]"></button>
                                                 <button type="button" onclick="setGwColor('#10b981')" class="w-4 h-4 rounded-md bg-[#10b981]"></button>
                                                 <button type="button" onclick="setGwColor('#3b82f6')" class="w-4 h-4 rounded-md bg-[#3b82f6]"></button>
                                                 <button type="button" onclick="setGwColor('#8b5cf6')" class="w-4 h-4 rounded-md bg-[#8b5cf6]"></button>
@@ -4540,7 +4540,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                                     <!-- صورة القيف اواي -->
                                     <div class="space-y-1.5 pt-2 border-t border-white/5">
                                         <label class="block text-xs font-bold text-gray-300">صورة القيف اواي (اختياري)</label>
-                                        <input type="text" id="gwImage" placeholder="https://..." class="w-full bg-[#12141f] border border-white/5 focus:border-orange-500 rounded-xl px-4 py-2 text-xs text-white outline-none text-left font-mono">
+                                        <input type="text" id="gwImage" placeholder="https://..." class="w-full bg-[#12141f] border border-white/5 focus:border-purple-500 rounded-xl px-4 py-2 text-xs text-white outline-none text-left font-mono">
                                     </div>
                                 </div>
 
@@ -4586,7 +4586,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
 
                                 <!-- Modal Footer Buttons -->
                                 <div class="flex items-center justify-between pt-4 border-t border-white/5 flex-row-reverse">
-                                    <button type="button" onclick="submitCreateGiveaway()" class="px-8 py-2.5 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-white rounded-xl text-xs font-black transition shadow-lg shadow-orange-950/40">
+                                    <button type="button" onclick="submitCreateGiveaway()" class="px-8 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-amber-400 hover:to-orange-500 text-white rounded-xl text-xs font-black transition shadow-lg shadow-orange-950/40">
                                         + إنشاء قيف اواي
                                     </button>
                                     <button type="button" onclick="closeCreateGiveawayModal()" class="px-6 py-2.5 bg-[#0b0d14] hover:bg-white/5 border border-white/5 text-gray-400 hover:text-white rounded-xl text-xs font-bold transition">
@@ -4613,9 +4613,9 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                     }
 
                     function filterGiveawayTab(status) {
-                        document.getElementById('btnGwAll').className = status === 'all' ? "px-3 py-1 rounded-lg bg-orange-600 text-white transition shadow" : "px-3 py-1 rounded-lg text-gray-400 hover:text-white transition";
-                        document.getElementById('btnGwActive').className = status === 'active' ? "px-3 py-1 rounded-lg bg-orange-600 text-white transition shadow" : "px-3 py-1 rounded-lg text-gray-400 hover:text-white transition";
-                        document.getElementById('btnGwEnded').className = status === 'ended' ? "px-3 py-1 rounded-lg bg-orange-600 text-white transition shadow" : "px-3 py-1 rounded-lg text-gray-400 hover:text-white transition";
+                        document.getElementById('btnGwAll').className = status === 'all' ? "px-3 py-1 rounded-lg bg-purple-700 text-white transition shadow" : "px-3 py-1 rounded-lg text-gray-400 hover:text-white transition";
+                        document.getElementById('btnGwActive').className = status === 'active' ? "px-3 py-1 rounded-lg bg-purple-700 text-white transition shadow" : "px-3 py-1 rounded-lg text-gray-400 hover:text-white transition";
+                        document.getElementById('btnGwEnded').className = status === 'ended' ? "px-3 py-1 rounded-lg bg-purple-700 text-white transition shadow" : "px-3 py-1 rounded-lg text-gray-400 hover:text-white transition";
                     }
 
                     async function submitCreateGiveaway() {
@@ -4955,7 +4955,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                             <!-- Account Age Filter -->
                             <div class="bg-[#12141f] border border-white/5 p-6 rounded-3xl space-y-4 shadow-xl">
                                 <div class="flex items-center justify-between">
-                                    <div class="w-8 h-8 rounded-xl bg-orange-600/20 text-orange-400 flex items-center justify-center text-sm border border-orange-500/30">🗓️</div>
+                                    <div class="w-8 h-8 rounded-xl bg-purple-700/20 text-purple-400 flex items-center justify-center text-sm border border-purple-500/30">🗓️</div>
                                     <div class="text-right">
                                         <h4 class="font-black text-white text-sm">الحد الأدنى لعمر الحساب</h4>
                                         <p class="text-gray-400 text-[11px] mt-0.5">الحسابات الجديدة الأقل من هذا العمر لن تتمكن من الدخول</p>
