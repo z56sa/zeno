@@ -1270,5 +1270,6 @@ module.exports = {
     setLastDaily(userId, guildId, now);
     const u = getUser(userId, guildId);
     return u.coins || 0;
-  }
+  },
+  db
 };
