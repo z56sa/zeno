@@ -10,6 +10,7 @@ const SecretManager = require('./utils/secretManager');
 require('dotenv').config(); // Keep dotenv for local development setup
 
 const app = express();
+app.set('trust proxy', 1);
 
 // =============================================================================
 // Discord Client Initialization and Security Check
