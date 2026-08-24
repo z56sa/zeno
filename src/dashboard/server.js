@@ -1547,7 +1547,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                     let currentCat = 'punishments';
                     let currentFilter = 'all';
 
-                    let disabledCommands = new Set(${JSON.stringify(settings.disabled_commands ? JSON.parse(settings.disabled_commands || '[]') : [])});
+                    let disabledCommands = new Set(\${JSON.stringify(settings.disabled_commands ? JSON.parse(settings.disabled_commands || '[]') : [])});
 
                     function updateStatCounters() {
                         let total = 0;
@@ -1630,11 +1630,11 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                         currentCat = catKey;
                         const btns = document.querySelectorAll('[id^="btnCat"]');
                         btns.forEach(b => {
-                            b.className = "w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-white hover:bg-white/5 transition";
+                            b.className = "w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-white hover:bg-white/5 transition cursor-pointer";
                         });
                         const activeBtn = document.getElementById('btnCat' + catKey.charAt(0).toUpperCase() + catKey.slice(1));
                         if (activeBtn) {
-                            activeBtn.className = "w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold bg-purple-600 text-white shadow-lg transition";
+                            activeBtn.className = "w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold bg-purple-600 text-white shadow-lg transition cursor-pointer";
                         }
                         renderCommands();
                     }
@@ -1645,9 +1645,9 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
 
                     function filterCmdStatus(status) {
                         currentFilter = status;
-                        document.getElementById('btnFilterAll').className = status === 'all' ? "px-3 py-1 rounded-lg text-xs font-bold bg-purple-600 text-white transition shadow" : "px-3 py-1 rounded-lg text-xs font-bold text-gray-400 hover:text-white transition";
-                        document.getElementById('btnFilterEnabled').className = status === 'enabled' ? "px-3 py-1 rounded-lg text-xs font-bold bg-purple-600 text-white transition shadow" : "px-3 py-1 rounded-lg text-xs font-bold text-gray-400 hover:text-white transition";
-                        document.getElementById('btnFilterDisabled').className = status === 'disabled' ? "px-3 py-1 rounded-lg text-xs font-bold bg-purple-600 text-white transition shadow" : "px-3 py-1 rounded-lg text-xs font-bold text-gray-400 hover:text-white transition";
+                        document.getElementById('btnFilterAll').className = status === 'all' ? "px-3 py-1 rounded-lg text-xs font-bold bg-purple-600 text-white transition shadow cursor-pointer" : "px-3 py-1 rounded-lg text-xs font-bold text-gray-400 hover:text-white transition cursor-pointer";
+                        document.getElementById('btnFilterEnabled').className = status === 'enabled' ? "px-3 py-1 rounded-lg text-xs font-bold bg-purple-600 text-white transition shadow cursor-pointer" : "px-3 py-1 rounded-lg text-xs font-bold text-gray-400 hover:text-white transition cursor-pointer";
+                        document.getElementById('btnFilterDisabled').className = status === 'disabled' ? "px-3 py-1 rounded-lg text-xs font-bold bg-purple-600 text-white transition shadow cursor-pointer" : "px-3 py-1 rounded-lg text-xs font-bold text-gray-400 hover:text-white transition cursor-pointer";
                         renderCommands();
                     }
 
@@ -1676,7 +1676,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
 
                     async function saveCommandStates() {
                         try {
-                            const res = await fetch('/api/guild/${guildId}/settings', {
+                            const res = await fetch('/api/guild/\${guildId}/settings', {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' },
                                 body: JSON.stringify({ disabled_commands: JSON.stringify([...disabledCommands]) })
@@ -1692,8 +1692,12 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                         } catch(e) {}
                     }
 
-                    // Initial render
-                    renderCommands();
+                    // Initial render immediately and after DOM ready
+                    if (document.readyState === 'loading') {
+                        document.addEventListener('DOMContentLoaded', renderCommands);
+                    } else {
+                        renderCommands();
+                    }
                     </script>
 `;
             } else if (section === 'automod') {
