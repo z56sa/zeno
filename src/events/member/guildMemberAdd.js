@@ -120,16 +120,21 @@ module.exports = {
     const inviterStats = inviterObj ? db.getInvites(guild.id, inviterObj.id) : null;
     const inviterCount = inviterStats ? inviterStats.total : 0;
 
-    // 1.5 نظام الرتب التلقائية (Auto-Role)
-    const autoRoleId = settings.auto_role || settings.autorole_id;
-    if (autoRoleId) {
-      try {
-        const role = guild.roles.cache.get(autoRoleId) || await guild.roles.fetch(autoRoleId).catch(() => null);
-        if (role && guild.members.me?.permissions.has('ManageRoles') && role.position < (guild.members.me.roles.highest?.position || 0)) {
-          await member.roles.add(role).catch(e => console.error('فشل إعطاء الرتبة التلقائية:', e.message));
+    // 1.5 نظام الرتب التلقائية (Auto-Role for Members & Bots)
+    if (settings.autoroles_enabled !== 0) {
+      const targetRoleId = member.user.bot 
+        ? (settings.autorole_bot_id || settings.auto_role_bot)
+        : (settings.autorole_id || settings.auto_role);
+
+      if (targetRoleId) {
+        try {
+          const role = guild.roles.cache.get(targetRoleId) || await guild.roles.fetch(targetRoleId).catch(() => null);
+          if (role && guild.members.me?.permissions.has('ManageRoles') && role.position < (guild.members.me.roles.highest?.position || 0)) {
+            await member.roles.add(role).catch(e => console.error('فشل إعطاء الرتبة التلقائية:', e.message));
+          }
+        } catch (err) {
+          console.error('خطأ في إعطاء الرتبة التلقائية:', err.message);
         }
-      } catch (err) {
-        console.error('خطأ في إعطاء الرتبة التلقائية:', err.message);
       }
     }
 

@@ -909,6 +909,29 @@ module.exports = function (app, client) {
             let antimodUsers = [];
             let securityLogsList = [];
             let warnPunishmentsList = [];
+            let autoRespondersList = [];
+            let guildTicketsList = [];
+            let levelRewardsList = [];
+            let guildLeaderboardUsers = [];
+            const currentTab = req.query?.tab || 'settings';
+            try {
+                if (database.getLeaderboard) {
+                    guildLeaderboardUsers = database.getLeaderboard(guildId, 20) || [];
+                }
+            } catch(e) {}
+            try {
+                if (database.getLevelRewards) {
+                    levelRewardsList = database.getLevelRewards(guildId) || [];
+                }
+            } catch (err) {}
+            try {
+                if (database.getAutoResponders) {
+                    autoRespondersList = database.getAutoResponders(guildId) || [];
+                }
+                if (database.getGuildTickets) {
+                    guildTicketsList = database.getGuildTickets(guildId, 50) || [];
+                }
+            } catch (err) {}
             try {
                 if (database.getWarnPunishments) {
                     warnPunishmentsList = database.getWarnPunishments(guildId) || [];
@@ -3030,6 +3053,1363 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
 
                     </div>
 `;
+            } else if (section === 'welcome') {
+formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl">
+
+                        <!-- Top Tab Switcher (رسائل الترحيب / رسائل المغادرة) -->
+                        <div class="flex items-center gap-3 bg-[#10121b] border border-white/5 p-2 rounded-2xl w-fit">
+                            <button type="button" onclick="switchWelcomeTab('leave')" id="btnTabLeave" class="px-5 py-2 rounded-xl text-xs font-bold transition text-gray-400 hover:text-white">
+                                <span>رسائل المغادرة</span>
+                                <span class="text-rose-400">🚪</span>
+                            </button>
+                            <button type="button" onclick="switchWelcomeTab('welcome')" id="btnTabWelcome" class="px-5 py-2 rounded-xl text-xs font-bold transition bg-gradient-to-r from-orange-500 to-amber-600 text-white shadow-lg">
+                                <span>رسائل الترحيب</span>
+                                <span class="text-amber-300">👋</span>
+                            </button>
+                        </div>
+
+                        <!-- ========================================================= -->
+                        <!-- 1. قسم رسائل الترحيب (Welcome Section - Exact to Image 2 & 3) -->
+                        <!-- ========================================================= -->
+                        <div id="sectionWelcomeBox" class="space-y-6">
+                            <!-- Card 1: Master Header Card -->
+                            <div class="bg-[#12141f] border border-white/5 p-6 rounded-2xl flex items-center justify-between shadow-xl">
+                                <label class="toggle">
+                                    <input type="checkbox" name="welcome_enabled" value="1" ${settings.welcome_enabled !== 0 ? 'checked' : ''}>
+                                    <span class="slider"></span>
+                                </label>
+                                <div class="flex items-center gap-3">
+                                    <div class="text-right">
+                                        <div class="flex items-center justify-end gap-2 text-white font-black text-base">
+                                            <span>مفعل</span>
+                                            <span class="text-emerald-400">🎁</span>
+                                        </div>
+                                        <p class="text-gray-400 text-xs mt-0.5">إرسال رسالة أو إمبد ترحيبي عند انضمام عضو جديد للسيرفر</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Card 2: قناة الترحيب والرسالة -->
+                            <div class="bg-[#12141f] border border-white/5 p-6 rounded-2xl space-y-4 shadow-xl">
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-300 mb-2">قناة الترحيب <span class="text-orange-400">*</span></label>
+                                    ${renderChannelSelect('welcome_channel', settings.welcome_channel || '')}
+                                </div>
+
+                                <div class="space-y-2">
+                                    <div class="flex items-center justify-between text-xs text-gray-400 font-bold">
+                                        <span>☺</span>
+                                        <span>رسالة الترحيب (نص عادي)</span>
+                                    </div>
+                                    <textarea name="welcome_message" id="welcomeText" rows="3" oninput="updateWelcomePreview()" class="w-full bg-[#0b0d14] border border-white/5 focus:border-orange-500 rounded-xl p-4 text-xs text-white outline-none leading-relaxed text-right">${settings.welcome_message || 'مرحباً {user} في سيرفر **{server}**! 🎉 أنت العضو رقم **{memberCount}**'}</textarea>
+                                    
+                                    <!-- Variables Pill Badges -->
+                                    <div class="flex items-center justify-between pt-1">
+                                        <span class="text-[10px] text-gray-500">إذا تريد فقط Embed أو صورة بدون نص، اترك الرسالة فارغة.</span>
+                                        <div class="flex flex-wrap gap-1.5 justify-end">
+                                            <span class="text-[10px] font-mono bg-[#1c1f2e] text-orange-400 px-2 py-0.5 rounded-lg border border-orange-500/20 cursor-pointer" onclick="insertVar('welcomeText', '{user}')">{user}</span>
+                                            <span class="text-[10px] font-mono bg-[#1c1f2e] text-orange-400 px-2 py-0.5 rounded-lg border border-orange-500/20 cursor-pointer" onclick="insertVar('welcomeText', '{username}')">{username}</span>
+                                            <span class="text-[10px] font-mono bg-[#1c1f2e] text-orange-400 px-2 py-0.5 rounded-lg border border-orange-500/20 cursor-pointer" onclick="insertVar('welcomeText', '{server}')">{server}</span>
+                                            <span class="text-[10px] font-mono bg-[#1c1f2e] text-orange-400 px-2 py-0.5 rounded-lg border border-orange-500/20 cursor-pointer" onclick="insertVar('welcomeText', '{memberCount}')">{memberCount}</span>
+                                            <span class="text-[10px] font-mono bg-[#1c1f2e] text-orange-400 px-2 py-0.5 rounded-lg border border-orange-500/20 cursor-pointer" onclick="insertVar('welcomeText', '{inviter}')">{inviter}</span>
+                                            <span class="text-[10px] font-mono bg-[#1c1f2e] text-orange-400 px-2 py-0.5 rounded-lg border border-orange-500/20 cursor-pointer" onclick="insertVar('welcomeText', '{joinDate}')">{joinDate}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Card 3: خيارات الترحيب الثلاثة (نص فقط / صورة ترحيب / رسالة Embed) -->
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                <button type="button" onclick="setWelcomeType('text')" id="btnWlTypeText" class="p-4 rounded-2xl border ${settings.welcome_embed_enabled === 0 && !settings.welcome_image ? 'border-orange-500 bg-orange-950/20 text-white' : 'border-white/5 bg-[#12141f] text-gray-400'} text-center transition">
+                                    <h5 class="font-bold text-xs">نص فقط</h5>
+                                    <p class="text-[10px] text-gray-500 mt-1">رسالة نصية بسيطة</p>
+                                </button>
+                                <button type="button" onclick="setWelcomeType('image')" id="btnWlTypeImage" class="p-4 rounded-2xl border ${settings.welcome_image ? 'border-orange-500 bg-orange-950/20 text-white' : 'border-white/5 bg-[#12141f] text-gray-400'} text-center transition">
+                                    <h5 class="font-bold text-xs">صورة ترحيب</h5>
+                                    <p class="text-[10px] text-gray-500 mt-1">صورة مخصصة مع اسم العضو</p>
+                                </button>
+                                <button type="button" onclick="setWelcomeType('embed')" id="btnWlTypeEmbed" class="p-4 rounded-2xl border ${settings.welcome_embed_enabled !== 0 ? 'border-orange-500 bg-orange-950/20 text-white' : 'border-white/5 bg-[#12141f] text-gray-400'} text-center transition">
+                                    <h5 class="font-bold text-xs">رسالة Embed</h5>
+                                    <p class="text-[10px] text-gray-500 mt-1">رسالة منسقة مع ألوان</p>
+                                </button>
+                            </div>
+
+                            <input type="hidden" name="welcome_embed_enabled" id="welcome_embed_enabled" value="${settings.welcome_embed_enabled !== 0 ? 1 : 0}">
+                            <input type="hidden" name="welcome_image" id="welcome_image" value="${settings.welcome_image ? 1 : 0}">
+
+                            <!-- Card 4: تخصيص رسالة الترحيب / الإيمبد (Live Preview & Embed Customizer - Exact to Image 2 & 3) -->
+                            <div class="bg-[#12141f] border border-white/5 p-6 rounded-2xl space-y-4 shadow-xl">
+                                <div class="flex items-center justify-between border-b border-white/5 pb-3">
+                                    <div class="flex flex-wrap gap-1.5">
+                                        <span class="text-[10px] font-mono bg-[#1c1f2e] text-orange-400 px-2 py-0.5 rounded-lg border border-orange-500/20">{user}</span>
+                                        <span class="text-[10px] font-mono bg-[#1c1f2e] text-orange-400 px-2 py-0.5 rounded-lg border border-orange-500/20">{username}</span>
+                                        <span class="text-[10px] font-mono bg-[#1c1f2e] text-orange-400 px-2 py-0.5 rounded-lg border border-orange-500/20">{server}</span>
+                                        <span class="text-[10px] font-mono bg-[#1c1f2e] text-orange-400 px-2 py-0.5 rounded-lg border border-orange-500/20">{memberCount}</span>
+                                        <span class="text-[10px] font-mono bg-[#1c1f2e] text-orange-400 px-2 py-0.5 rounded-lg border border-orange-500/20">{user.avatar}</span>
+                                        <span class="text-[10px] font-mono bg-[#1c1f2e] text-orange-400 px-2 py-0.5 rounded-lg border border-orange-500/20">{inviter}</span>
+                                    </div>
+                                    <h5 class="text-xs font-black text-white">تخصيص رسالة الترحيب</h5>
+                                </div>
+
+                                <!-- Color Pickers Palette -->
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-xs font-mono text-gray-400">#EF5700</span>
+                                        <input type="color" name="welcome_embed_color" id="wlColorInput" value="${settings.welcome_embed_color || '#ef5700'}" class="w-8 h-8 rounded-lg cursor-pointer bg-transparent border-0">
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-xs font-bold text-gray-300">لون الإيمبد</span>
+                                        <div class="flex items-center gap-1.5">
+                                            <button type="button" onclick="setWlColor('#a855f7')" class="w-4 h-4 rounded-md bg-[#a855f7]"></button>
+                                            <button type="button" onclick="setWlColor('#3b82f6')" class="w-4 h-4 rounded-md bg-[#3b82f6]"></button>
+                                            <button type="button" onclick="setWlColor('#10b981')" class="w-4 h-4 rounded-md bg-[#10b981]"></button>
+                                            <button type="button" onclick="setWlColor('#ec4899')" class="w-4 h-4 rounded-md bg-[#ec4899]"></button>
+                                            <button type="button" onclick="setWlColor('#ef4444')" class="w-4 h-4 rounded-md bg-[#ef4444]"></button>
+                                            <button type="button" onclick="setWlColor('#f97316')" class="w-4 h-4 rounded-md bg-[#f97316]"></button>
+                                            <button type="button" onclick="setWlColor('#ef5700')" class="w-4 h-4 rounded-md bg-[#ef5700] ring-2 ring-white/50"></button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Live Interactive Embed Card (Exact to Image 3) -->
+                                <div id="wlPreviewEmbed" class="bg-[#0b0d14] border-r-4 border-orange-500 rounded-xl p-5 space-y-4 text-right shadow-inner">
+                                    <div class="flex items-center justify-end gap-2 text-xs font-bold text-gray-400">
+                                        <span>${guild.name}</span>
+                                        <img src="${guildIcon}" class="w-5 h-5 rounded-full object-cover">
+                                    </div>
+
+                                    <div class="space-y-1">
+                                        <h4 class="text-sm font-black text-white flex items-center justify-end gap-1.5">
+                                            <span>مرحباً بك!</span>
+                                            <span>🎉</span>
+                                        </h4>
+                                        <p id="pvWlMsg" class="text-xs text-gray-300">مرحباً {user} في سيرفر **{server}**! أنت العضو رقم **{memberCount}**</p>
+                                    </div>
+
+                                    <div class="border border-dashed border-white/10 rounded-xl p-6 text-center text-gray-600 text-xs">
+                                        <span>🖼️ [صورة البنر أو بطاقة الترحيب]</span>
+                                    </div>
+
+                                    <div class="flex items-center justify-between text-[10px] text-gray-500 border-t border-white/5 pt-2 font-mono">
+                                        <span>نتمنى لك وقتاً ممتعاً 🕒</span>
+                                        <div class="flex items-center gap-1">
+                                            <input type="checkbox" checked id="wlShowTime">
+                                            <label for="wlShowTime">إظهار الوقت</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ========================================================= -->
+                        <!-- 2. قسم رسائل المغادرة (Leave Section - Exact to Image 4 & 5) -->
+                        <!-- ========================================================= -->
+                        <div id="sectionLeaveBox" class="space-y-6 hidden">
+                            <!-- Card 1: Master Header Card -->
+                            <div class="bg-[#12141f] border border-white/5 p-6 rounded-2xl flex items-center justify-between shadow-xl">
+                                <label class="toggle">
+                                    <input type="checkbox" name="leave_enabled" value="1" ${settings.leave_enabled ? 'checked' : ''}>
+                                    <span class="slider"></span>
+                                </label>
+                                <div class="flex items-center gap-3">
+                                    <div class="text-right">
+                                        <div class="flex items-center justify-end gap-2 text-white font-black text-base">
+                                            <span>مفعل</span>
+                                            <span class="text-rose-400">🚪</span>
+                                        </div>
+                                        <p class="text-gray-400 text-xs mt-0.5">إرسال رسالة عند مغادرة عضو من السيرفر</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Card 2: قناة المغادرة والرسالة -->
+                            <div class="bg-[#12141f] border border-white/5 p-6 rounded-2xl space-y-4 shadow-xl">
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-300 mb-2">قناة المغادرة <span class="text-rose-400">*</span></label>
+                                    ${renderChannelSelect('leave_channel', settings.leave_channel || '')}
+                                </div>
+
+                                <div class="space-y-2">
+                                    <div class="flex items-center justify-between text-xs text-gray-400 font-bold">
+                                        <span>☺</span>
+                                        <span>رسالة المغادرة (نص عادي)</span>
+                                    </div>
+                                    <textarea name="leave_message" id="leaveText" rows="3" oninput="updateLeavePreview()" class="w-full bg-[#0b0d14] border border-white/5 focus:border-rose-500 rounded-xl p-4 text-xs text-white outline-none leading-relaxed text-right">${settings.leave_message || 'وداعاً **{user}**، نتمنى لك التوفيق 👋'}</textarea>
+                                    
+                                    <!-- Variables Pill Badges -->
+                                    <div class="flex items-center justify-end gap-1.5 pt-1">
+                                        <span class="text-[10px] font-mono bg-[#1c1f2e] text-rose-400 px-2 py-0.5 rounded-lg border border-rose-500/20 cursor-pointer" onclick="insertVar('leaveText', '{user}')">{user}</span>
+                                        <span class="text-[10px] font-mono bg-[#1c1f2e] text-rose-400 px-2 py-0.5 rounded-lg border border-rose-500/20 cursor-pointer" onclick="insertVar('leaveText', '{username}')">{username}</span>
+                                        <span class="text-[10px] font-mono bg-[#1c1f2e] text-rose-400 px-2 py-0.5 rounded-lg border border-rose-500/20 cursor-pointer" onclick="insertVar('leaveText', '{server}')">{server}</span>
+                                        <span class="text-[10px] font-mono bg-[#1c1f2e] text-rose-400 px-2 py-0.5 rounded-lg border border-rose-500/20 cursor-pointer" onclick="insertVar('leaveText', '{memberCount}')">{memberCount}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Card 3: خيارات المغادرة (رسالة نصية / رسالة Embed) -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                <button type="button" onclick="setLeaveType('text')" id="btnLvTypeText" class="p-4 rounded-2xl border ${settings.leave_embed_enabled === 0 ? 'border-rose-500 bg-rose-950/20 text-white' : 'border-white/5 bg-[#12141f] text-gray-400'} text-center transition">
+                                    <h5 class="font-bold text-xs">رسالة نصية</h5>
+                                    <p class="text-[10px] text-gray-500 mt-1">رسالة بسيطة</p>
+                                </button>
+                                <button type="button" onclick="setLeaveType('embed')" id="btnLvTypeEmbed" class="p-4 rounded-2xl border ${settings.leave_embed_enabled !== 0 ? 'border-rose-500 bg-rose-950/20 text-white' : 'border-white/5 bg-[#12141f] text-gray-400'} text-center transition">
+                                    <h5 class="font-bold text-xs">رسالة Embed</h5>
+                                    <p class="text-[10px] text-gray-500 mt-1">رسالة منسقة مع ألوان</p>
+                                </button>
+                            </div>
+
+                            <input type="hidden" name="leave_embed_enabled" id="leave_embed_enabled" value="${settings.leave_embed_enabled !== 0 ? 1 : 0}">
+
+                            <!-- Card 4: تخصيص رسالة المغادرة (Live Preview & Colors) -->
+                            <div class="bg-[#12141f] border border-white/5 p-6 rounded-2xl space-y-4 shadow-xl">
+                                <div class="flex items-center justify-between border-b border-white/5 pb-3">
+                                    <div class="flex flex-wrap gap-1.5">
+                                        <span class="text-[10px] font-mono bg-[#1c1f2e] text-rose-400 px-2 py-0.5 rounded-lg border border-rose-500/20">{user}</span>
+                                        <span class="text-[10px] font-mono bg-[#1c1f2e] text-rose-400 px-2 py-0.5 rounded-lg border border-rose-500/20">{username}</span>
+                                        <span class="text-[10px] font-mono bg-[#1c1f2e] text-rose-400 px-2 py-0.5 rounded-lg border border-rose-500/20">{server}</span>
+                                        <span class="text-[10px] font-mono bg-[#1c1f2e] text-rose-400 px-2 py-0.5 rounded-lg border border-rose-500/20">{memberCount}</span>
+                                    </div>
+                                    <h5 class="text-xs font-black text-white">تخصيص رسالة المغادرة</h5>
+                                </div>
+
+                                <!-- Color Pickers Palette -->
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-xs font-mono text-gray-400">#EF4444</span>
+                                        <input type="color" name="leave_embed_color" id="lvColorInput" value="${settings.leave_embed_color || '#ef4444'}" class="w-8 h-8 rounded-lg cursor-pointer bg-transparent border-0">
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-xs font-bold text-gray-300">لون الإيمبد</span>
+                                        <div class="flex items-center gap-1.5">
+                                            <button type="button" onclick="setLvColor('#ef4444')" class="w-4 h-4 rounded-md bg-[#ef4444] ring-2 ring-white/50"></button>
+                                            <button type="button" onclick="setLvColor('#f97316')" class="w-4 h-4 rounded-md bg-[#f97316]"></button>
+                                            <button type="button" onclick="setLvColor('#eab308')" class="w-4 h-4 rounded-md bg-[#eab308]"></button>
+                                            <button type="button" onclick="setLvColor('#10b981')" class="w-4 h-4 rounded-md bg-[#10b981]"></button>
+                                            <button type="button" onclick="setLvColor('#06b6d4')" class="w-4 h-4 rounded-md bg-[#06b6d4]"></button>
+                                            <button type="button" onclick="setLvColor('#8b5cf6')" class="w-4 h-4 rounded-md bg-[#8b5cf6]"></button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Live Interactive Leave Embed Card -->
+                                <div id="lvPreviewEmbed" class="bg-[#0b0d14] border-r-4 border-rose-500 rounded-xl p-5 space-y-4 text-right shadow-inner">
+                                    <div class="flex items-center justify-end gap-2 text-xs font-bold text-gray-400">
+                                        <span>${guild.name}</span>
+                                        <img src="${guildIcon}" class="w-5 h-5 rounded-full object-cover">
+                                    </div>
+
+                                    <div class="space-y-1">
+                                        <h4 class="text-sm font-black text-white flex items-center justify-end gap-1.5">
+                                            <span>وداعاً 👋</span>
+                                        </h4>
+                                        <p id="pvLvMsg" class="text-xs text-gray-300">وداعاً **{username}**، نتمنى لك التوفيق</p>
+                                    </div>
+
+                                    <div class="border border-dashed border-white/10 rounded-xl p-6 text-center text-gray-600 text-xs">
+                                        <span>🖼️ [صورة البنر أو بطاقة المغادرة]</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <script>
+                    function switchWelcomeTab(tab) {
+                        const secWl = document.getElementById('sectionWelcomeBox');
+                        const secLv = document.getElementById('sectionLeaveBox');
+                        const btnWl = document.getElementById('btnTabWelcome');
+                        const btnLv = document.getElementById('btnTabLeave');
+
+                        if (tab === 'welcome') {
+                            secWl.classList.remove('hidden');
+                            secLv.classList.add('hidden');
+                            btnWl.className = "px-5 py-2 rounded-xl text-xs font-bold transition bg-gradient-to-r from-orange-500 to-amber-600 text-white shadow-lg";
+                            btnLv.className = "px-5 py-2 rounded-xl text-xs font-bold transition text-gray-400 hover:text-white";
+                        } else {
+                            secWl.classList.add('hidden');
+                            secLv.classList.remove('hidden');
+                            btnLv.className = "px-5 py-2 rounded-xl text-xs font-bold transition bg-gradient-to-r from-rose-600 to-red-600 text-white shadow-lg";
+                            btnWl.className = "px-5 py-2 rounded-xl text-xs font-bold transition text-gray-400 hover:text-white";
+                        }
+                    }
+
+                    function insertVar(targetId, varName) {
+                        const el = document.getElementById(targetId);
+                        if (!el) return;
+                        el.value += ' ' + varName;
+                        if (targetId === 'welcomeText') updateWelcomePreview();
+                        if (targetId === 'leaveText') updateLeavePreview();
+                    }
+
+                    function updateWelcomePreview() {
+                        const msg = document.getElementById('welcomeText').value;
+                        const pv = document.getElementById('pvWlMsg');
+                        if (pv) pv.innerText = msg || 'مرحباً {user} في سيرفر **{server}**!';
+                    }
+
+                    function updateLeavePreview() {
+                        const msg = document.getElementById('leaveText').value;
+                        const pv = document.getElementById('pvLvMsg');
+                        if (pv) pv.innerText = msg || 'وداعاً **{user}**، نتمنى لك التوفيق';
+                    }
+
+                    function setWelcomeType(type) {
+                        document.getElementById('welcome_embed_enabled').value = type === 'embed' ? 1 : 0;
+                        document.getElementById('welcome_image').value = type === 'image' ? 1 : 0;
+                        
+                        document.getElementById('btnWlTypeText').className = type === 'text' ? 'p-4 rounded-2xl border border-orange-500 bg-orange-950/20 text-white text-center transition' : 'p-4 rounded-2xl border border-white/5 bg-[#12141f] text-gray-400 text-center transition';
+                        document.getElementById('btnWlTypeImage').className = type === 'image' ? 'p-4 rounded-2xl border border-orange-500 bg-orange-950/20 text-white text-center transition' : 'p-4 rounded-2xl border border-white/5 bg-[#12141f] text-gray-400 text-center transition';
+                        document.getElementById('btnWlTypeEmbed').className = type === 'embed' ? 'p-4 rounded-2xl border border-orange-500 bg-orange-950/20 text-white text-center transition' : 'p-4 rounded-2xl border border-white/5 bg-[#12141f] text-gray-400 text-center transition';
+                    }
+
+                    function setLeaveType(type) {
+                        document.getElementById('leave_embed_enabled').value = type === 'embed' ? 1 : 0;
+                        document.getElementById('btnLvTypeText').className = type === 'text' ? 'p-4 rounded-2xl border border-rose-500 bg-rose-950/20 text-white text-center transition' : 'p-4 rounded-2xl border border-white/5 bg-[#12141f] text-gray-400 text-center transition';
+                        document.getElementById('btnLvTypeEmbed').className = type === 'embed' ? 'p-4 rounded-2xl border border-rose-500 bg-rose-950/20 text-white text-center transition' : 'p-4 rounded-2xl border border-white/5 bg-[#12141f] text-gray-400 text-center transition';
+                    }
+
+                    function setWlColor(c) {
+                        document.getElementById('wlColorInput').value = c;
+                        document.getElementById('wlPreviewEmbed').style.borderRightColor = c;
+                    }
+
+                    function setLvColor(c) {
+                        document.getElementById('lvColorInput').value = c;
+                        document.getElementById('lvPreviewEmbed').style.borderRightColor = c;
+                    }
+                    </script>
+`;
+            } else if (section === 'autoresponder') {
+formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl">
+
+                        <!-- 1. Master Header Card (Exact to Image 1) -->
+                        <div class="bg-[#12141f] border border-white/5 p-6 rounded-2xl flex items-center justify-between shadow-xl">
+                            <button type="button" onclick="openAddAutoresponderModal()" class="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-white rounded-xl text-xs font-black transition flex items-center gap-1.5 shadow-lg shadow-orange-950/40">
+                                <span>➕</span>
+                                <span>إضافة رد تلقائي</span>
+                            </button>
+                            <div class="flex items-center gap-3">
+                                <div class="text-right">
+                                    <h4 class="font-black text-white text-base">الرد التلقائي</h4>
+                                    <p class="text-gray-400 text-xs mt-0.5">إعداد ردود تلقائية على كلمات أو عبارات معينة</p>
+                                </div>
+                                <div class="w-10 h-10 rounded-xl bg-orange-600/20 text-orange-400 flex items-center justify-center text-lg border border-orange-500/30">
+                                    💬
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 2. Triple Stats Badges (Exact to Image 1) -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <!-- إجمالي الردود -->
+                            <div class="bg-[#12141f] border border-white/5 p-5 rounded-2xl text-center space-y-1 shadow-lg">
+                                <span class="text-2xl font-black text-white font-mono">${(autoRespondersList || []).length}</span>
+                                <span class="text-xs font-bold text-gray-400 block">إجمالي الردود</span>
+                            </div>
+                            <!-- ردود نشطة -->
+                            <div class="bg-[#12141f] border border-white/5 p-5 rounded-2xl text-center space-y-1 shadow-lg">
+                                <span class="text-2xl font-black text-emerald-400 font-mono">${(autoRespondersList || []).filter(r => r.is_active !== 0).length}</span>
+                                <span class="text-xs font-bold text-gray-400 block">ردود نشطة</span>
+                            </div>
+                            <!-- إجمالي الاستخدام -->
+                            <div class="bg-[#12141f] border border-white/5 p-5 rounded-2xl text-center space-y-1 shadow-lg">
+                                <span class="text-2xl font-black text-white font-mono">${(autoRespondersList || []).reduce((acc, r) => acc + (r.uses_count || 0), 0)}</span>
+                                <span class="text-xs font-bold text-gray-400 block">إجمالي الاستخدام</span>
+                            </div>
+                        </div>
+
+                        <!-- 3. Main List / Empty State Card (Exact to Image 1) -->
+                        <div class="bg-[#12141f] border border-white/5 p-8 rounded-2xl space-y-6 shadow-xl">
+                            ${(autoRespondersList && autoRespondersList.length > 0) ? `
+                                <div class="space-y-3">
+                                    <div class="flex items-center justify-between border-b border-white/5 pb-3">
+                                        <span class="text-xs font-mono text-gray-400 font-bold">${autoRespondersList.length} رد مسجل</span>
+                                        <h5 class="text-xs font-black text-white">الردود التلقائية النشطة</h5>
+                                    </div>
+                                    ${autoRespondersList.map(r => `
+                                        <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between hover:border-orange-500/40 transition">
+                                            <button type="button" onclick="deleteAutoresponderItem(${r.id})" class="px-3 py-1.5 bg-rose-600/20 hover:bg-rose-600/40 text-rose-300 border border-rose-500/30 rounded-lg text-xs font-bold transition">حذف 🗑️</button>
+                                            <div class="text-right space-y-1">
+                                                <div class="flex items-center justify-end gap-2">
+                                                    <span class="px-2 py-0.5 bg-white/5 text-gray-400 rounded text-[10px] font-mono">${r.match_mode || 'يحتوي على'}</span>
+                                                    <span class="px-2.5 py-0.5 bg-orange-950/60 text-orange-300 border border-orange-800/40 rounded-lg text-xs font-bold font-mono">${r.trigger_word}</span>
+                                                    <span class="text-gray-400 text-xs font-bold">الكلمة:</span>
+                                                </div>
+                                                <p class="text-xs text-gray-300">${r.reply_text}</p>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            ` : `
+                                <div class="py-12 text-center space-y-4">
+                                    <div class="w-14 h-14 rounded-2xl bg-white/5 text-gray-400 flex items-center justify-center text-2xl mx-auto border border-white/5">
+                                        💬
+                                    </div>
+                                    <div class="space-y-1">
+                                        <h5 class="text-sm font-black text-white">لا توجد ردود تلقائية</h5>
+                                        <p class="text-xs text-gray-400">أضف ردود تلقائية للرد على كلمات أو عبارات محددة</p>
+                                    </div>
+                                    <button type="button" onclick="openAddAutoresponderModal()" class="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-white rounded-xl text-xs font-black transition inline-flex items-center gap-2 shadow-lg shadow-orange-950/40">
+                                        <span>إضافة أول رد تلقائي</span>
+                                    </button>
+                                </div>
+                            `}
+                        </div>
+
+                        <!-- ========================================================= -->
+                        <!-- 4. نافذة الإضافة التفاعلية الكاملة (Exact to Image 2 Modal) -->
+                        <!-- ========================================================= -->
+                        <div id="addAutoresponderModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+                            <div class="bg-[#12141f] border border-white/10 rounded-3xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6 space-y-6 text-right shadow-2xl" dir="rtl">
+                                
+                                <!-- Modal Header -->
+                                <div class="flex items-center justify-between border-b border-white/5 pb-4">
+                                    <button type="button" onclick="closeAddAutoresponderModal()" class="text-gray-400 hover:text-white text-lg font-bold">✕</button>
+                                    <h3 class="text-base font-black text-white">إضافة رد جديد</h3>
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    
+                                    <!-- العمود الأيمن: المحفز ونوع المطابقة والرد -->
+                                    <div class="space-y-4">
+                                        <!-- حقل المحفز -->
+                                        <div class="space-y-1.5">
+                                            <label class="block text-xs font-bold text-gray-300">حقل المحفز</label>
+                                            <input type="text" id="arTrigger" placeholder="اكتب الكلمة أو العبارة..." class="w-full bg-[#0b0d14] border border-white/5 focus:border-orange-500 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right">
+                                        </div>
+
+                                        <!-- نوع المطابقة (Buttons: يحتوي على / مطابقة تامة / يبدأ بـ / ينتهي بـ / Regex) -->
+                                        <div class="space-y-1.5">
+                                            <label class="block text-xs font-bold text-gray-300">نوع المطابقة</label>
+                                            <div class="grid grid-cols-5 gap-1 bg-[#0b0d14] p-1 rounded-xl border border-white/5 text-[10px] text-center">
+                                                <button type="button" onclick="setArMatchMode('regex')" id="btnArRegex" class="py-1.5 rounded-lg text-gray-400 hover:text-white transition">Regex</button>
+                                                <button type="button" onclick="setArMatchMode('ends')" id="btnArEnds" class="py-1.5 rounded-lg text-gray-400 hover:text-white transition">ينتهي بـ</button>
+                                                <button type="button" onclick="setArMatchMode('starts')" id="btnArStarts" class="py-1.5 rounded-lg text-gray-400 hover:text-white transition">يبدأ بـ</button>
+                                                <button type="button" onclick="setArMatchMode('exact')" id="btnArExact" class="py-1.5 rounded-lg text-gray-400 hover:text-white transition">مطابقة تامة</button>
+                                                <button type="button" onclick="setArMatchMode('contains')" id="btnArContains" class="py-1.5 rounded-lg bg-orange-600 text-white font-bold transition">يحتوي على</button>
+                                            </div>
+                                        </div>
+
+                                        <!-- نوع الرد (Buttons: رد نصي / رد إيمبد / تفاعل) -->
+                                        <div class="space-y-1.5">
+                                            <label class="block text-xs font-bold text-gray-300">نوع الرد</label>
+                                            <div class="grid grid-cols-3 gap-1.5">
+                                                <button type="button" onclick="setArReplyType('reaction')" id="btnArReaction" class="py-2 bg-[#0b0d14] border border-white/5 rounded-xl text-[11px] text-gray-400 hover:text-white flex items-center justify-center gap-1 transition">
+                                                    <span>تفاعل</span>
+                                                    <span>😊</span>
+                                                </button>
+                                                <button type="button" onclick="setArReplyType('embed')" id="btnArEmbed" class="py-2 bg-[#0b0d14] border border-white/5 rounded-xl text-[11px] text-gray-400 hover:text-white flex items-center justify-center gap-1 transition">
+                                                    <span>رد إيمبد</span>
+                                                    <span>📄</span>
+                                                </button>
+                                                <button type="button" onclick="setArReplyType('text')" id="btnArText" class="py-2 bg-orange-600 border border-orange-500 rounded-xl text-[11px] text-white font-bold flex items-center justify-center gap-1 transition">
+                                                    <span>رد نصي</span>
+                                                    <span>💬</span>
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <!-- الرد والبادجات -->
+                                        <div class="space-y-2">
+                                            <label class="block text-xs font-bold text-gray-300">الرد</label>
+                                            <textarea id="arReply" rows="3" placeholder="اكتب الرد..." class="w-full bg-[#0b0d14] border border-white/5 focus:border-orange-500 rounded-xl p-3 text-xs text-white outline-none leading-relaxed text-right"></textarea>
+                                            <div class="flex flex-wrap gap-1 justify-end">
+                                                <span class="text-[10px] font-mono bg-[#1c1f2e] text-orange-400 px-2 py-0.5 rounded-lg border border-orange-500/20 cursor-pointer" onclick="insertArVar('{user}')">{user}</span>
+                                                <span class="text-[10px] font-mono bg-[#1c1f2e] text-orange-400 px-2 py-0.5 rounded-lg border border-orange-500/20 cursor-pointer" onclick="insertArVar('{server}')">{server}</span>
+                                                <span class="text-[10px] font-mono bg-[#1c1f2e] text-orange-400 px-2 py-0.5 rounded-lg border border-orange-500/20 cursor-pointer" onclick="insertArVar('{channel}')">{channel}</span>
+                                                <span class="text-[10px] font-mono bg-[#1c1f2e] text-orange-400 px-2 py-0.5 rounded-lg border border-orange-500/20 cursor-pointer" onclick="insertArVar('{memberCount}')">{memberCount}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- العمود الأيسر: الحساسية والمؤقت والاستثناءات -->
+                                    <div class="space-y-4">
+                                        <!-- حساس لحالة الأحرف -->
+                                        <div class="bg-[#0b0d14] border border-white/5 p-3 rounded-xl flex items-center justify-between">
+                                            <label class="toggle"><input type="checkbox" id="arCase"><span class="slider"></span></label>
+                                            <div class="text-right">
+                                                <h5 class="text-xs font-bold text-white">حساس لحالة الأحرف</h5>
+                                                <p class="text-[10px] text-gray-500">التمييز بين الأحرف الكبيرة والصغيرة</p>
+                                            </div>
+                                        </div>
+
+                                        <!-- حذف رسالة المحفز -->
+                                        <div class="bg-[#0b0d14] border border-white/5 p-3 rounded-xl flex items-center justify-between">
+                                            <label class="toggle"><input type="checkbox" id="arDeleteTrigger"><span class="slider"></span></label>
+                                            <div class="text-right">
+                                                <h5 class="text-xs font-bold text-white">حذف رسالة المحفز</h5>
+                                                <p class="text-[10px] text-gray-500">حذف الرسالة التي أطلقت الرد التلقائي</p>
+                                            </div>
+                                        </div>
+
+                                        <!-- فترة الانتظار (ثانية) -->
+                                        <div class="space-y-1">
+                                            <label class="block text-xs font-bold text-gray-300">فترة الانتظار (ثانية)</label>
+                                            <input type="number" id="arCooldown" placeholder="0" class="w-full bg-[#0b0d14] border border-white/5 rounded-xl px-4 py-2 text-xs text-white outline-none text-right font-mono">
+                                        </div>
+
+                                        <!-- القنوات المسموحة -->
+                                        <div class="space-y-1">
+                                            <label class="block text-xs font-bold text-gray-300">القنوات المسموحة (فارغ = جميع القنوات)</label>
+                                            ${renderChannelSelect('arAllowedChan', '', true)}
+                                        </div>
+
+                                        <!-- الرتب المسموحة -->
+                                        <div class="space-y-1">
+                                            <label class="block text-xs font-bold text-gray-300">الرتب المسموحة (فارغ = جميع الرتب)</label>
+                                            ${renderRoleSelect('arAllowedRole', '')}
+                                        </div>
+
+                                        <!-- قنوات مستثناة -->
+                                        <div class="space-y-1">
+                                            <label class="block text-xs font-bold text-gray-300">قنوات مستثناة</label>
+                                            ${renderChannelSelect('arExemptChan', '', true)}
+                                        </div>
+
+                                        <!-- رتب مستثناة -->
+                                        <div class="space-y-1">
+                                            <label class="block text-xs font-bold text-gray-300">رتب مستثناة</label>
+                                            ${renderRoleSelect('arExemptRole', '')}
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                <!-- Modal Footer Buttons -->
+                                <div class="flex items-center justify-between pt-4 border-t border-white/5 flex-row-reverse">
+                                    <button type="button" onclick="submitNewAutoresponder()" class="px-8 py-2.5 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-white rounded-xl text-xs font-black transition shadow-lg shadow-orange-950/40">
+                                        إضافة رد تلقائي
+                                    </button>
+                                    <button type="button" onclick="closeAddAutoresponderModal()" class="px-6 py-2.5 bg-[#0b0d14] hover:bg-white/5 border border-white/5 text-gray-400 hover:text-white rounded-xl text-xs font-bold transition">
+                                        إلغاء
+                                    </button>
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <script>
+                    let currentArMatchMode = 'contains';
+                    let currentArReplyType = 'text';
+
+                    function openAddAutoresponderModal() {
+                        document.getElementById('addAutoresponderModal').classList.remove('hidden');
+                    }
+
+                    function closeAddAutoresponderModal() {
+                        document.getElementById('addAutoresponderModal').classList.add('hidden');
+                    }
+
+                    function setArMatchMode(mode) {
+                        currentArMatchMode = mode;
+                        const modes = ['contains', 'exact', 'starts', 'ends', 'regex'];
+                        modes.forEach(m => {
+                            const btn = document.getElementById('btnAr' + m.charAt(0).toUpperCase() + m.slice(1));
+                            if (btn) {
+                                btn.className = m === mode
+                                    ? "py-1.5 rounded-lg bg-orange-600 text-white font-bold transition"
+                                    : "py-1.5 rounded-lg text-gray-400 hover:text-white transition";
+                            }
+                        });
+                    }
+
+                    function setArReplyType(type) {
+                        currentArReplyType = type;
+                        const types = ['text', 'embed', 'reaction'];
+                        types.forEach(t => {
+                            const btn = document.getElementById('btnAr' + t.charAt(0).toUpperCase() + t.slice(1));
+                            if (btn) {
+                                btn.className = t === type
+                                    ? "py-2 bg-orange-600 border border-orange-500 rounded-xl text-[11px] text-white font-bold flex items-center justify-center gap-1 transition"
+                                    : "py-2 bg-[#0b0d14] border border-white/5 rounded-xl text-[11px] text-gray-400 hover:text-white flex items-center justify-center gap-1 transition";
+                            }
+                        });
+                    }
+
+                    function insertArVar(varName) {
+                        const el = document.getElementById('arReply');
+                        if (el) el.value += ' ' + varName;
+                    }
+
+                    async function submitNewAutoresponder() {
+                        const trigger = document.getElementById('arTrigger').value.trim();
+                        const reply = document.getElementById('arReply').value.trim();
+                        if (!trigger) { alert('يرجى كتابة كلمة أو عبارة المحفز'); return; }
+                        if (!reply) { alert('يرجى كتابة الرد التلقائي'); return; }
+
+                        const payload = {
+                            trigger_word: trigger,
+                            reply_text: reply,
+                            match_mode: currentArMatchMode,
+                            reply_type: currentArReplyType,
+                            case_sensitive: document.getElementById('arCase').checked ? 1 : 0,
+                            delete_trigger: document.getElementById('arDeleteTrigger').checked ? 1 : 0,
+                            cooldown_seconds: parseInt(document.getElementById('arCooldown').value) || 0,
+                            allowed_channels: document.getElementById('arAllowedChan')?.value || '',
+                            allowed_roles: document.getElementById('arAllowedRole')?.value || '',
+                            exempt_channels: document.getElementById('arExemptChan')?.value || '',
+                            exempt_roles: document.getElementById('arExemptRole')?.value || ''
+                        };
+
+                        try {
+                            const res = await fetch('/api/guild/${guildId}/autoresponder', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify(payload)
+                            });
+                            const data = await res.json();
+                            if (data.success) {
+                                alert('✅ تمت إضافة الرد التلقائي بنجاح!');
+                                location.reload();
+                            } else {
+                                alert('❌ خطأ: ' + (data.error || 'فشل الإضافة'));
+                            }
+                        } catch(e) {
+                            alert('حدث خطأ في الاتصال بالخادم');
+                        }
+                    }
+
+                    async function deleteAutoresponderItem(id) {
+                        if (!confirm('هل أنت متأكد من حذف هذا الرد التلقائي؟')) return;
+                        try {
+                            const res = await fetch('/api/guild/${guildId}/autoresponder/' + id, {
+                                method: 'DELETE'
+                            });
+                            const data = await res.json();
+                            if (data.success) {
+                                alert('✅ تم الحذف بنجاح!');
+                                location.reload();
+                            } else {
+                                alert('❌ فشل الحذف');
+                            }
+                        } catch(e) {
+                            alert('حدث خطأ في الاتصال');
+                        }
+                    }
+                    </script>
+`;
+            } else if (section === 'tickets') {
+formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl">
+
+                        <!-- 1. Master Header Card (Tickets) -->
+                        <div class="bg-[#12141f] border border-white/5 p-6 rounded-2xl flex items-center justify-between shadow-xl">
+                            <label class="toggle">
+                                <input type="checkbox" name="tickets_enabled" value="1" ${settings.tickets_enabled !== 0 ? 'checked' : ''}>
+                                <span class="slider"></span>
+                            </label>
+                            <div class="flex items-center gap-3">
+                                <div class="text-right">
+                                    <h4 class="font-black text-white text-base">نظام التذاكر والدعم الفني 🎫</h4>
+                                    <p class="text-gray-400 text-xs mt-0.5">لوحات تذاكر تفاعلية، تصنيفات مخصصة، وتقييمات خدمة العملاء</p>
+                                </div>
+                                <div class="w-10 h-10 rounded-xl bg-purple-600/20 text-purple-400 flex items-center justify-center text-lg border border-purple-500/30">
+                                    🎫
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 2. إحصائيات التذاكر الحية (Live Ticket Stats) -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="bg-[#12141f] border border-white/5 p-5 rounded-2xl text-center space-y-1 shadow-lg">
+                                <span class="text-2xl font-black text-purple-400 font-mono">${(guildTicketsList || []).length}</span>
+                                <span class="text-xs font-bold text-gray-400 block">إجمالي التذاكر المسجلة</span>
+                            </div>
+                            <div class="bg-[#12141f] border border-white/5 p-5 rounded-2xl text-center space-y-1 shadow-lg">
+                                <span class="text-2xl font-black text-emerald-400 font-mono">${(guildTicketsList || []).filter(t => t.status === 'open').length}</span>
+                                <span class="text-xs font-bold text-gray-400 block">التذاكر المفتوحة حالياً</span>
+                            </div>
+                            <div class="bg-[#12141f] border border-white/5 p-5 rounded-2xl text-center space-y-1 shadow-lg">
+                                <span class="text-2xl font-black text-amber-400 font-mono">${(guildTicketsList || []).filter(t => t.status === 'closed').length}</span>
+                                <span class="text-xs font-bold text-gray-400 block">التذاكر المغلقة</span>
+                            </div>
+                        </div>
+
+                        <!-- 3. إعدادات لوحة ورتب التذاكر الأساسية -->
+                        <div class="bg-[#12141f] border border-white/5 p-6 rounded-2xl space-y-4 shadow-xl">
+                            <h4 class="text-xs font-black text-white border-b border-white/5 pb-3">إعدادات لوحة الدعم الفني</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-300 mb-2">رتبة طاقم الدعم الفني (Support Role)</label>
+                                    ${renderRoleSelect('ticket_role', settings.ticket_role || '')}
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-300 mb-2">روم إرسال لوحة التذاكر (Panel Channel)</label>
+                                    ${renderChannelSelect('ticket_panel_channel', settings.ticket_panel_channel || '')}
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-300 mb-2">عنوان لوحة التذاكر (Panel Title)</label>
+                                    <input type="text" name="ticket_panel_title" value="${settings.ticket_panel_title || '🎫 الدعم الفني والمساعدة'}" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-300 mb-2">قناة سجلات التذاكر (Transcripts Channel)</label>
+                                    ${renderChannelSelect('ticket_log_channel', settings.ticket_log_channel || settings.log_channel || '')}
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold text-gray-300 mb-2">رسالة الترحيب التلقائية داخل التذكرة (Ticket Welcome Message)</label>
+                                <textarea name="ticket_welcome_msg" rows="3" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl p-4 text-xs text-white outline-none leading-relaxed text-right">${settings.ticket_welcome_msg || 'مرحباً بك {user}! يرجى كتابة استفسارك أو مشكلتك وسيقوم فريق الدعم بالرد عليك في أقرب وقت 🌟'}</textarea>
+                            </div>
+                        </div>
+
+                        <!-- 4. جدول التذاكر الحية (Live Active Tickets) -->
+                        <div class="bg-[#12141f] border border-white/5 p-6 rounded-2xl space-y-4 shadow-xl">
+                            <div class="flex items-center justify-between border-b border-white/5 pb-3">
+                                <span class="text-xs font-mono text-gray-400 font-bold">${(guildTicketsList || []).length} تذكرة</span>
+                                <h4 class="text-xs font-black text-white">سجل التذاكر الأخيرة</h4>
+                            </div>
+
+                            <div class="space-y-2">
+                                ${(guildTicketsList && guildTicketsList.length > 0) ? guildTicketsList.slice(0, 10).map(t => `
+                                    <div class="bg-[#0b0d14] border border-white/5 p-3.5 rounded-xl flex items-center justify-between hover:border-purple-500/30 transition text-xs">
+                                        <span class="px-2 py-0.5 rounded text-[10px] font-bold ${t.status === 'open' ? 'bg-emerald-950/60 text-emerald-400 border border-emerald-800/30' : 'bg-rose-950/60 text-rose-400 border border-rose-800/30'}">${t.status === 'open' ? 'مفتوحة 🟢' : 'مغلقة 🔴'}</span>
+                                        <div class="text-right">
+                                            <span class="font-bold text-white block">صاحب التذكرة: <span class="font-mono text-purple-300">${t.user_id}</span></span>
+                                            <span class="text-[10px] text-gray-400">${t.category || 'عام'} • <span class="font-mono">${new Date(t.created_at * 1000).toLocaleDateString('ar-SA')}</span></span>
+                                        </div>
+                                    </div>
+                                `).join('') : `
+                                    <div class="py-8 text-center text-xs text-gray-500">
+                                        لا توجد تذاكر مسجلة حالياً في السيرفر 🎫
+                                    </div>
+                                `}
+                            </div>
+                        </div>
+
+                    </div>
+`;
+            } else if (section === 'autoroles') {
+formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl">
+
+                        <!-- Master Header Card (Exact to Image 1) -->
+                        <div class="bg-[#12141f] border border-white/5 p-6 rounded-2xl flex items-center justify-between shadow-xl">
+                            <label class="toggle">
+                                <input type="checkbox" name="autoroles_enabled" value="1" ${settings.autoroles_enabled !== 0 ? 'checked' : ''}>
+                                <span class="slider"></span>
+                            </label>
+                            <div class="flex items-center gap-3">
+                                <span class="text-xs font-black text-white">مفعل</span>
+                                <div class="w-10 h-10 rounded-xl bg-amber-600/20 text-amber-400 flex items-center justify-center text-lg border border-amber-500/30">
+                                    🛡️
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Card: رتب الأعضاء الجدد & رتبة البوتات الجديدة (Exact to Image 1) -->
+                        <div class="bg-[#12141f] border border-white/5 p-6 rounded-2xl space-y-6 shadow-xl">
+                            <!-- رتب الأعضاء الجدد -->
+                            <div class="space-y-2">
+                                <div class="flex items-center justify-end gap-1 text-xs font-bold text-gray-300">
+                                    <span>رتب الأعضاء الجدد</span>
+                                </div>
+                                ${renderRoleSelect('autorole_id', settings.autorole_id || settings.auto_role || '')}
+                                <p class="text-[10px] text-gray-500 text-right">الرتب التي تُعطى للأعضاء الجدد عند الانضمام</p>
+                            </div>
+
+                            <!-- رتبة البوتات الجديدة -->
+                            <div class="space-y-2 pt-4 border-t border-white/5">
+                                <div class="flex items-center justify-end gap-1 text-xs font-bold text-gray-300">
+                                    <span>رتبة البوتات الجديدة</span>
+                                </div>
+                                ${renderRoleSelect('autorole_bot_id', settings.autorole_bot_id || '')}
+                                <p class="text-[10px] text-gray-500 text-right">الرتبة التي تُعطى للبوتات عند إضافتها للسيرفر</p>
+                            </div>
+                        </div>
+
+                    </div>
+`;
+            } else if (section === 'levels') {
+formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl">
+
+                        <!-- Top Tab Switcher & Master Toggle (Exact to Images 1, 2, 3) -->
+                        <div class="flex items-center justify-between">
+                            <label class="toggle">
+                                <input type="checkbox" name="leveling_enabled" value="1" ${settings.leveling_enabled !== 0 ? 'checked' : ''}>
+                                <span class="slider"></span>
+                            </label>
+
+                            <!-- Navigation Tabs (Exact to Versa Tab Bar) -->
+                            <div class="flex items-center gap-2 bg-[#10121b] border border-white/5 p-1.5 rounded-2xl">
+                                <button type="button" onclick="switchLevelTab('settings')" id="btnTabLvlSettings" class="px-4 py-1.5 rounded-xl text-xs font-bold transition ${(!currentTab || currentTab === 'settings') ? 'bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-md' : 'text-gray-400 hover:text-white'} flex items-center gap-1">
+                                    <span>الإعدادات</span>
+                                    <span>⚙️</span>
+                                </button>
+                                <button type="button" onclick="switchLevelTab('text_roles')" id="btnTabLvlText" class="px-4 py-1.5 rounded-xl text-xs font-bold transition ${(currentTab === 'text_roles') ? 'bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-md' : 'text-gray-400 hover:text-white'} flex items-center gap-1">
+                                    <span>رتب كتابية</span>
+                                    <span>📜</span>
+                                </button>
+                                <button type="button" onclick="switchLevelTab('voice_roles')" id="btnTabLvlVoice" class="px-4 py-1.5 rounded-xl text-xs font-bold transition ${(currentTab === 'voice_roles') ? 'bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-md' : 'text-gray-400 hover:text-white'} flex items-center gap-1">
+                                    <span>رتب صوتية</span>
+                                    <span>🎵</span>
+                                </button>
+                                <button type="button" onclick="switchLevelTab('shared_roles')" id="btnTabLvlShared" class="px-4 py-1.5 rounded-xl text-xs font-bold transition ${(currentTab === 'shared_roles') ? 'bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-md' : 'text-gray-400 hover:text-white'} flex items-center gap-1">
+                                    <span>رتب مشتركة</span>
+                                    <span>✨</span>
+                                </button>
+                                <button type="button" onclick="switchLevelTab('leaderboard')" id="btnTabLvlLeaderboard" class="px-4 py-1.5 rounded-xl text-xs font-bold transition ${(currentTab === 'leaderboard') ? 'bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-md' : 'text-gray-400 hover:text-white'} flex items-center gap-1">
+                                    <span>المتصدرين</span>
+                                    <span>🏆</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- ========================================================= -->
+                        <!-- 1. تبويب الإعدادات العامة (Settings Tab) -->
+                        <!-- ========================================================= -->
+                        <div id="tabLvlSettings" class="space-y-6 ${(!currentTab || currentTab === 'settings') ? '' : 'hidden'}">
+                            <!-- بطاقة نظام XP -->
+                            <div class="bg-[#12141f] border border-white/5 p-6 rounded-2xl space-y-5 shadow-xl">
+                                <div class="flex items-center justify-end gap-2 text-white font-black text-sm border-b border-white/5 pb-3">
+                                    <span>نظام XP</span>
+                                    <span class="text-amber-400">✨</span>
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <!-- مستويات كتابية -->
+                                    <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between">
+                                        <label class="toggle">
+                                            <input type="checkbox" name="level_text_xp_enabled" value="1" ${settings.level_text_xp_enabled !== 0 ? 'checked' : ''}>
+                                            <span class="slider"></span>
+                                        </label>
+                                        <div class="flex items-center gap-2 text-xs font-bold text-white">
+                                            <span>مستويات كتابية</span>
+                                            <span>💬</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- مستويات صوتية -->
+                                    <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between">
+                                        <label class="toggle">
+                                            <input type="checkbox" name="level_voice_xp_enabled" value="1" ${settings.level_voice_xp_enabled !== 0 ? 'checked' : ''}>
+                                            <span class="slider"></span>
+                                        </label>
+                                        <div class="flex items-center gap-2 text-xs font-bold text-white">
+                                            <span>مستويات صوتية</span>
+                                            <span>🎵</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- فترة انتظار XP -->
+                                <div class="space-y-2">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center gap-2">
+                                            <span class="text-xs text-gray-400">ثانية</span>
+                                            <input type="number" name="level_cooldown_seconds" value="${settings.level_cooldown_seconds || 120}" class="w-20 bg-[#0b0d14] border border-white/5 rounded-xl px-3 py-1.5 text-xs text-white font-mono text-center outline-none">
+                                        </div>
+                                        <div class="text-right">
+                                            <h5 class="text-xs font-bold text-white">فترة انتظار XP</h5>
+                                            <p class="text-[10px] text-gray-500">الثواني بين كل رسالة تكسب XP</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- XP الصوت في الدقيقة -->
+                                <div class="space-y-2 pt-3 border-t border-white/5">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center gap-2">
+                                            <span class="text-xs text-gray-400">XP/دقيقة</span>
+                                            <input type="number" name="level_voice_xp_rate" value="${settings.level_voice_xp_rate || 3}" class="w-20 bg-[#0b0d14] border border-white/5 rounded-xl px-3 py-1.5 text-xs text-white font-mono text-center outline-none">
+                                        </div>
+                                        <div class="text-right">
+                                            <h5 class="text-xs font-bold text-white">XP الصوت في الدقيقة</h5>
+                                            <p class="text-[10px] text-gray-500">كمية XP الممنوحة لكل دقيقة في الصوت</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- بطاقة إعدادات صوتية -->
+                            <div class="bg-[#12141f] border border-white/5 p-6 rounded-2xl space-y-5 shadow-xl">
+                                <div class="flex items-center justify-end gap-2 text-white font-black text-sm border-b border-white/5 pb-3">
+                                    <span>إعدادات صوتية</span>
+                                    <span class="text-pink-400">🎵</span>
+                                </div>
+
+                                <div class="space-y-2">
+                                    <div class="flex items-center justify-between text-xs font-bold">
+                                        <span class="px-3 py-1 bg-orange-950/60 text-orange-400 border border-orange-800/40 rounded-xl font-mono text-sm" id="voiceMinMembersVal">${settings.level_voice_min_members || 2}</span>
+                                        <span class="text-white">الحد الأدنى للأعضاء في القناة</span>
+                                    </div>
+                                    <input type="range" name="level_voice_min_members" min="1" max="10" value="${settings.level_voice_min_members || 2}" oninput="document.getElementById('voiceMinMembersVal').innerText = this.value" class="w-full accent-orange-500 cursor-pointer">
+                                    <p class="text-[10px] text-gray-500 text-right">عدد الأعضاء المطلوب في القناة لبدء حساب XP</p>
+                                </div>
+
+                                <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between">
+                                    <label class="toggle">
+                                        <input type="checkbox" name="level_ignore_deafened" value="1" ${settings.level_ignore_deafened !== 0 ? 'checked' : ''}>
+                                        <span class="slider"></span>
+                                    </label>
+                                    <div class="text-right">
+                                        <h5 class="text-xs font-bold text-white">تجاهل الأعضاء المكتومين</h5>
+                                        <p class="text-[10px] text-gray-500">لن يحصل الأعضاء المكتومون على XP صوتي</p>
+                                    </div>
+                                </div>
+
+                                <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between">
+                                    <label class="toggle">
+                                        <input type="checkbox" name="level_ignore_muted" value="1" ${settings.level_ignore_muted !== 0 ? 'checked' : ''}>
+                                        <span class="slider"></span>
+                                    </label>
+                                    <div class="text-right">
+                                        <h5 class="text-xs font-bold text-white">تجاهل الأعضاء الصامتين</h5>
+                                        <p class="text-[10px] text-gray-500">لن يحصل الأعضاء الصامتون على XP صوتي</p>
+                                    </div>
+                                </div>
+
+                                <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between">
+                                    <label class="toggle">
+                                        <input type="checkbox" name="level_ignore_afk" value="1" ${settings.level_ignore_afk !== 0 ? 'checked' : ''}>
+                                        <span class="slider"></span>
+                                    </label>
+                                    <div class="text-right">
+                                        <h5 class="text-xs font-bold text-white">تجاهل قناة AFK</h5>
+                                        <p class="text-[10px] text-gray-500">لن يحصل الأعضاء في قناة AFK على XP</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- بطاقة إعدادات رفع المستوى -->
+                            <div class="bg-[#12141f] border border-white/5 p-6 rounded-2xl space-y-5 shadow-xl">
+                                <div class="flex items-center justify-end gap-2 text-white font-black text-sm border-b border-white/5 pb-3">
+                                    <span>إعدادات رفع المستوى</span>
+                                    <span class="text-indigo-400">🎉</span>
+                                </div>
+
+                                <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between">
+                                    <label class="toggle">
+                                        <input type="checkbox" name="level_up_msg_enabled" value="1" ${settings.level_up_msg_enabled !== 0 ? 'checked' : ''}>
+                                        <span class="slider"></span>
+                                    </label>
+                                    <div class="text-right">
+                                        <h5 class="text-xs font-bold text-white">رسائل رفع المستوى</h5>
+                                        <p class="text-[10px] text-gray-500">إرسال رسالة عند رفع المستوى</p>
+                                    </div>
+                                </div>
+
+                                <div class="space-y-2">
+                                    <label class="block text-xs font-bold text-gray-300">قناة إشعارات المستوى</label>
+                                    ${renderChannelSelect('level_channel', settings.level_channel || '')}
+                                </div>
+
+                                <div class="space-y-2">
+                                    <div class="flex items-center justify-between text-xs text-gray-400">
+                                        <div class="flex items-center gap-1">
+                                            <span class="text-[10px] font-mono bg-[#1c1f2e] text-orange-400 px-2 py-0.5 rounded-lg border border-orange-500/20">{server}</span>
+                                            <span class="text-[10px] font-mono bg-[#1c1f2e] text-orange-400 px-2 py-0.5 rounded-lg border border-orange-500/20">{xp}</span>
+                                            <span class="text-[10px] font-mono bg-[#1c1f2e] text-orange-400 px-2 py-0.5 rounded-lg border border-orange-500/20">{level}</span>
+                                            <span class="text-[10px] font-mono bg-[#1c1f2e] text-orange-400 px-2 py-0.5 rounded-lg border border-orange-500/20">{user}</span>
+                                        </div>
+                                        <span class="font-bold text-white">رسالة رفع المستوى (كتابي)</span>
+                                    </div>
+                                    <input type="text" name="level_message" value="${settings.level_message || '🎉 مبروك {user}! وصلت للمستوى **{level}**!'}" class="w-full bg-[#0b0d14] border border-white/5 focus:border-orange-500 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right">
+                                </div>
+
+                                <div class="space-y-2">
+                                    <label class="block text-xs font-bold text-white text-right">رسالة رفع المستوى (صوتي)</label>
+                                    <input type="text" name="level_voice_msg" value="${settings.level_voice_msg || '🎤 مبروك {user}! وصلت للمستوى الصوتي **{level}**!'}" class="w-full bg-[#0b0d14] border border-white/5 focus:border-orange-500 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right">
+                                </div>
+
+                                <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between">
+                                    <label class="toggle">
+                                        <input type="checkbox" name="level_dm_msg_enabled" value="1" ${settings.level_dm_msg_enabled ? 'checked' : ''}>
+                                        <span class="slider"></span>
+                                    </label>
+                                    <div class="text-right">
+                                        <h5 class="text-xs font-bold text-white">إرسال رسالة خاصة</h5>
+                                        <p class="text-[10px] text-gray-500">إرسال إشعار رفع المستوى برسالة خاصة في DM</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- بطاقة تكديس الرتب & الاستثناءات -->
+                            <div class="bg-[#12141f] border border-white/5 p-6 rounded-2xl space-y-5 shadow-xl">
+                                <div class="flex items-center justify-end gap-2 text-white font-black text-sm border-b border-white/5 pb-3">
+                                    <span>إعدادات الرتب والاستثناءات</span>
+                                    <span class="text-amber-400">👑</span>
+                                </div>
+
+                                <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between">
+                                    <label class="toggle">
+                                        <input type="checkbox" name="level_stack_roles" value="1" ${settings.level_stack_roles ? 'checked' : ''}>
+                                        <span class="slider"></span>
+                                    </label>
+                                    <div class="text-right">
+                                        <h5 class="text-xs font-bold text-white">تكديس الرتب</h5>
+                                        <p class="text-[10px] text-gray-500">الاحتفاظ بجميع رتب المستويات السابقة عند الترقية</p>
+                                    </div>
+                                </div>
+
+                                <div class="space-y-2 pt-3 border-t border-white/5">
+                                    <label class="block text-xs font-bold text-white">قنوات مستثناة</label>
+                                    ${renderChannelSelect('level_exempt_channels', settings.level_exempt_channels || '', true)}
+                                </div>
+
+                                <div class="space-y-2 pt-3 border-t border-white/5">
+                                    <label class="block text-xs font-bold text-white">رتب مستثناة</label>
+                                    ${renderRoleSelect('level_exempt_roles', settings.level_exempt_roles || '')}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ========================================================= -->
+                        <!-- 2. تبويب رتب المستويات الكتابية (Text Roles Tab) -->
+                        <!-- ========================================================= -->
+                        <div id="tabLvlText" class="space-y-6 ${(currentTab === 'text_roles') ? '' : 'hidden'}">
+                            <div class="bg-[#12141f] border border-white/5 p-6 rounded-2xl space-y-5 shadow-xl">
+                                <div class="flex items-center justify-between border-b border-white/5 pb-3">
+                                    <div class="flex items-center gap-2">
+                                        <button type="button" onclick="openAddLevelRoleModal('text')" class="px-5 py-2 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-lg shadow-orange-950/40">
+                                            <span>➕</span>
+                                            <span>إضافة رتبة</span>
+                                        </button>
+                                        <button type="button" onclick="location.reload()" class="px-3.5 py-2 bg-[#0b0d14] hover:bg-white/5 border border-white/5 text-gray-400 hover:text-white rounded-xl text-xs font-bold transition flex items-center gap-1">
+                                            <span>🔄</span>
+                                            <span>مزامنة</span>
+                                        </button>
+                                    </div>
+                                    <div class="text-right">
+                                        <h4 class="text-sm font-black text-white">رتب المستويات الكتابية</h4>
+                                        <p class="text-[10px] text-gray-500 mt-0.5">أضف رتب يحصل عليها الأعضاء عند الوصول لمستوى كتابي معين</p>
+                                    </div>
+                                </div>
+
+                                <div class="space-y-2">
+                                    ${(levelRewardsList && levelRewardsList.filter(r => r.reward_type === 'text' || !r.reward_type).length > 0) ? levelRewardsList.filter(r => r.reward_type === 'text' || !r.reward_type).map(r => `
+                                        <div class="bg-[#0b0d14] border border-white/5 p-3.5 rounded-xl flex items-center justify-between hover:border-orange-500/40 transition text-xs">
+                                            <button type="button" onclick="deleteLevelRole(${r.id || r.level})" class="px-3 py-1 bg-rose-600/20 hover:bg-rose-600/40 text-rose-300 border border-rose-500/30 rounded-lg text-xs font-bold transition">حذف 🗑️</button>
+                                            <div class="flex items-center gap-3">
+                                                <div class="text-right">
+                                                    <span class="font-bold text-white block">مستوى كتابي ${r.level}</span>
+                                                    <span class="text-[10px] text-orange-400 font-mono">الرتبة: @${(guildRoles.find(role => role.id === r.role_id)?.name) || r.role_id}</span>
+                                                </div>
+                                                <span class="w-8 h-8 rounded-lg bg-orange-600/20 text-orange-400 flex items-center justify-center font-bold">📜</span>
+                                            </div>
+                                        </div>
+                                    `).join('') : `
+                                        <div class="py-12 text-center space-y-3">
+                                            <div class="w-12 h-12 rounded-full bg-white/5 text-gray-400 flex items-center justify-center text-xl mx-auto">📜</div>
+                                            <h5 class="text-xs font-bold text-gray-300">لا توجد رتب مستويات</h5>
+                                            <p class="text-[10px] text-gray-500">أضف رتب لمكافأة الأعضاء النشطين</p>
+                                            <button type="button" onclick="openAddLevelRoleModal('text')" class="px-5 py-2 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-white rounded-xl text-xs font-black transition inline-flex items-center gap-1.5 shadow-lg shadow-orange-950/40">
+                                                <span>إضافة أول رتبة</span>
+                                            </button>
+                                        </div>
+                                    `}
+                                </div>
+
+                                <!-- بطاقة معادلة حساب XP -->
+                                <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl space-y-3">
+                                    <div class="flex items-center justify-end gap-1.5 text-xs font-bold text-gray-300">
+                                        <span>معادلة حساب XP</span>
+                                        <span class="text-orange-400">ℹ️</span>
+                                    </div>
+                                    <p class="text-[11px] text-gray-400 text-right font-mono">XP المطلوب للمستوى = (المستوى × 25)²</p>
+                                    <div class="flex items-center justify-center gap-2 pt-1">
+                                        <span class="px-3 py-1 bg-white/5 border border-white/5 rounded-lg text-[10px] font-mono text-gray-300">مستوى 20 = 250,000 XP</span>
+                                        <span class="px-3 py-1 bg-white/5 border border-white/5 rounded-lg text-[10px] font-mono text-gray-300">مستوى 10 = 62,500 XP</span>
+                                        <span class="px-3 py-1 bg-white/5 border border-white/5 rounded-lg text-[10px] font-mono text-gray-300">مستوى 5 = 15,625 XP</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ========================================================= -->
+                        <!-- 3. تبويب رتب المستويات الصوتية (Voice Roles Tab - Image 1) -->
+                        <!-- ========================================================= -->
+                        <div id="tabLvlVoice" class="space-y-6 ${(currentTab === 'voice_roles') ? '' : 'hidden'}">
+                            <div class="bg-[#12141f] border border-white/5 p-6 rounded-2xl space-y-5 shadow-xl">
+                                <div class="flex items-center justify-between border-b border-white/5 pb-3">
+                                    <div class="flex items-center gap-2">
+                                        <button type="button" onclick="openAddLevelRoleModal('voice')" class="px-5 py-2 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-lg shadow-orange-950/40">
+                                            <span>➕</span>
+                                            <span>إضافة رتبة</span>
+                                        </button>
+                                        <button type="button" onclick="location.reload()" class="px-3.5 py-2 bg-[#0b0d14] hover:bg-white/5 border border-white/5 text-gray-400 hover:text-white rounded-xl text-xs font-bold transition flex items-center gap-1">
+                                            <span>🔄</span>
+                                            <span>مزامنة</span>
+                                        </button>
+                                    </div>
+                                    <div class="text-right">
+                                        <h4 class="text-sm font-black text-white">رتب المستويات الصوتية</h4>
+                                        <p class="text-[10px] text-gray-500 mt-0.5">أضف رتب يحصل عليها الأعضاء عند الوصول لمستوى صوتي معين</p>
+                                    </div>
+                                </div>
+
+                                <div class="space-y-2">
+                                    ${(levelRewardsList && levelRewardsList.filter(r => r.reward_type === 'voice').length > 0) ? levelRewardsList.filter(r => r.reward_type === 'voice').map(r => `
+                                        <div class="bg-[#0b0d14] border border-white/5 p-3.5 rounded-xl flex items-center justify-between hover:border-pink-500/40 transition text-xs">
+                                            <button type="button" onclick="deleteLevelRole(${r.id || r.level})" class="px-3 py-1 bg-rose-600/20 hover:bg-rose-600/40 text-rose-300 border border-rose-500/30 rounded-lg text-xs font-bold transition">حذف 🗑️</button>
+                                            <div class="flex items-center gap-3">
+                                                <div class="text-right">
+                                                    <span class="font-bold text-white block">مستوى صوتي ${r.level}</span>
+                                                    <span class="text-[10px] text-pink-400 font-mono">الرتبة: @${(guildRoles.find(role => role.id === r.role_id)?.name) || r.role_id}</span>
+                                                </div>
+                                                <span class="w-8 h-8 rounded-lg bg-pink-600/20 text-pink-400 flex items-center justify-center font-bold">🎵</span>
+                                            </div>
+                                        </div>
+                                    `).join('') : `
+                                        <div class="py-12 text-center space-y-3">
+                                            <div class="w-12 h-12 rounded-full bg-pink-950/40 text-pink-400 flex items-center justify-center text-xl mx-auto border border-pink-500/20">🎵</div>
+                                            <h5 class="text-xs font-bold text-gray-300">لا توجد رتب مستويات</h5>
+                                            <p class="text-[10px] text-gray-500">أضف رتب لمكافأة الأعضاء النشطين</p>
+                                            <button type="button" onclick="openAddLevelRoleModal('voice')" class="px-5 py-2 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-white rounded-xl text-xs font-black transition inline-flex items-center gap-1.5 shadow-lg shadow-orange-950/40">
+                                                <span>إضافة أول رتبة</span>
+                                            </button>
+                                        </div>
+                                    `}
+                                </div>
+
+                                <!-- بطاقة معادلة حساب XP -->
+                                <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl space-y-3">
+                                    <div class="flex items-center justify-end gap-1.5 text-xs font-bold text-gray-300">
+                                        <span>معادلة حساب XP</span>
+                                        <span class="text-orange-400">ℹ️</span>
+                                    </div>
+                                    <p class="text-[11px] text-gray-400 text-right font-mono">XP المطلوب للمستوى = (المستوى × 25)²</p>
+                                    <div class="flex items-center justify-center gap-2 pt-1">
+                                        <span class="px-3 py-1 bg-white/5 border border-white/5 rounded-lg text-[10px] font-mono text-gray-300">مستوى 20 = 250,000 XP</span>
+                                        <span class="px-3 py-1 bg-white/5 border border-white/5 rounded-lg text-[10px] font-mono text-gray-300">مستوى 10 = 62,500 XP</span>
+                                        <span class="px-3 py-1 bg-white/5 border border-white/5 rounded-lg text-[10px] font-mono text-gray-300">مستوى 5 = 15,625 XP</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ========================================================= -->
+                        <!-- 4. تبويب رتب مشتركة / الشرط المزدوج (Shared Dual Roles - Image 2) -->
+                        <!-- ========================================================= -->
+                        <div id="tabLvlShared" class="space-y-6 ${(currentTab === 'shared_roles') ? '' : 'hidden'}">
+                            <div class="bg-[#12141f] border border-white/5 p-6 rounded-2xl space-y-5 shadow-xl">
+                                <div class="flex items-center justify-between border-b border-white/5 pb-3">
+                                    <div class="flex items-center gap-2">
+                                        <button type="button" onclick="openAddSharedRoleModal()" class="px-5 py-2 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-lg shadow-orange-950/40">
+                                            <span>➕</span>
+                                            <span>إضافة شرط</span>
+                                        </button>
+                                        <button type="button" onclick="location.reload()" class="px-3.5 py-2 bg-[#0b0d14] hover:bg-white/5 border border-white/5 text-gray-400 hover:text-white rounded-xl text-xs font-bold transition flex items-center gap-1">
+                                            <span>🔄</span>
+                                            <span>مزامنة</span>
+                                        </button>
+                                    </div>
+                                    <div class="text-right">
+                                        <h4 class="text-sm font-black text-white">رتب الشرط المزدوج</h4>
+                                        <p class="text-[10px] text-gray-500 mt-0.5">الرتبة تُمنح فقط عند تحقق شرطي الكتابة والصوت معاً</p>
+                                    </div>
+                                </div>
+
+                                <!-- بطاقة كيف تعمل الرتب المشتركة؟ (Exact to Image 2) -->
+                                <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl space-y-2 text-right">
+                                    <div class="flex items-center justify-end gap-1.5 text-xs font-bold text-amber-400">
+                                        <span>كيف تعمل الرتب المشتركة؟</span>
+                                        <span>ℹ️</span>
+                                    </div>
+                                    <p class="text-[11px] text-gray-300 leading-relaxed">
+                                        تُمنح الرتبة فقط عندما يحقق العضو كلا الشرطين في نفس الوقت — مستوى كتابي وصوتي يبلغان الحد المطلوب. إذا نقص أي شرط، تُسحب الرتبة تلقائياً.
+                                    </p>
+                                </div>
+
+                                <!-- مثال توضيحي (Exact to Image 2) -->
+                                <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl space-y-2">
+                                    <span class="text-[10px] text-gray-500 block text-right">مثال توضيحي:</span>
+                                    <div class="flex items-center justify-center gap-3">
+                                        <span class="px-3 py-1 bg-amber-950/60 text-amber-400 border border-amber-800/40 rounded-xl text-xs font-bold flex items-center gap-1.5">
+                                            <span>عضو نشيط</span>
+                                            <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+                                        </span>
+                                        <span class="text-gray-500 font-bold">&gt;</span>
+                                        <span class="px-3 py-1 bg-pink-950/60 text-pink-400 border border-pink-500/20 rounded-xl text-xs font-bold flex items-center gap-1">
+                                            <span>صوتي ≥ 5</span>
+                                            <span>🎵</span>
+                                        </span>
+                                        <span class="text-gray-500 font-bold">+</span>
+                                        <span class="px-3 py-1 bg-indigo-950/60 text-indigo-400 border border-indigo-500/20 rounded-xl text-xs font-bold flex items-center gap-1">
+                                            <span>كتابي ≥ 10</span>
+                                            <span>💬</span>
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div class="space-y-2">
+                                    ${(levelRewardsList && levelRewardsList.filter(r => r.reward_type === 'shared').length > 0) ? levelRewardsList.filter(r => r.reward_type === 'shared').map(r => `
+                                        <div class="bg-[#0b0d14] border border-white/5 p-3.5 rounded-xl flex items-center justify-between hover:border-amber-500/40 transition text-xs">
+                                            <button type="button" onclick="deleteLevelRole(${r.id || r.level})" class="px-3 py-1 bg-rose-600/20 hover:bg-rose-600/40 text-rose-300 border border-rose-500/30 rounded-lg text-xs font-bold transition">حذف 🗑️</button>
+                                            <div class="flex items-center gap-3">
+                                                <div class="text-right">
+                                                    <span class="font-bold text-white block">كتابي ≥ ${r.level} + صوتي ≥ ${r.voice_level || 0}</span>
+                                                    <span class="text-[10px] text-amber-400 font-mono">الرتبة: @${(guildRoles.find(role => role.id === r.role_id)?.name) || r.role_id}</span>
+                                                </div>
+                                                <span class="w-8 h-8 rounded-lg bg-amber-600/20 text-amber-400 flex items-center justify-center font-bold">✨</span>
+                                            </div>
+                                        </div>
+                                    `).join('') : `
+                                        <div class="py-12 text-center space-y-3">
+                                            <div class="w-12 h-12 rounded-full bg-amber-950/40 text-amber-400 flex items-center justify-center text-xl mx-auto border border-amber-500/20">✨</div>
+                                            <h5 class="text-xs font-bold text-gray-300">لا توجد رتب مشتركة</h5>
+                                            <p class="text-[10px] text-gray-500">أضف شرطاً مزدوجاً يمنح رتبة عند تحقق مستوى صوتي وكتابي معاً</p>
+                                            <button type="button" onclick="openAddSharedRoleModal()" class="px-5 py-2 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-white rounded-xl text-xs font-black transition inline-flex items-center gap-1.5 shadow-lg shadow-orange-950/40">
+                                                <span>إضافة أول شرط</span>
+                                            </button>
+                                        </div>
+                                    `}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ========================================================= -->
+                        <!-- 5. تبويب المتصدرين (Leaderboard Tab - Image 3) -->
+                        <!-- ========================================================= -->
+                        <div id="tabLvlLeaderboard" class="space-y-6 ${(currentTab === 'leaderboard') ? '' : 'hidden'}">
+                            <div class="flex items-center justify-between">
+                                <button type="button" onclick="location.reload()" class="px-4 py-2 bg-[#12141f] hover:bg-white/5 border border-white/5 text-gray-300 hover:text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5">
+                                    <span>🔄</span>
+                                    <span>تحديث</span>
+                                </button>
+                                <div class="text-right">
+                                    <h4 class="text-sm font-black text-white">لوحة المتصدرين</h4>
+                                    <p class="text-[10px] text-gray-500 mt-0.5">أكثر الأعضاء نشاطاً في السيرفر</p>
+                                </div>
+                            </div>
+
+                            <!-- Triple Stats Cards (Exact to Image 3: عضو نشط | إجمالي XP | أعلى مستوى) -->
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div class="bg-[#12141f] border border-white/5 p-5 rounded-2xl text-center space-y-1 shadow-lg">
+                                    <span class="text-2xl font-black text-white font-mono">${(guildLeaderboardUsers || []).length}</span>
+                                    <span class="text-xs font-bold text-gray-400 block">عضو نشط</span>
+                                </div>
+                                <div class="bg-[#12141f] border border-white/5 p-5 rounded-2xl text-center space-y-1 shadow-lg">
+                                    <span class="text-2xl font-black text-white font-mono">${(guildLeaderboardUsers || []).reduce((acc, u) => acc + (u.xp || 0), 0)}</span>
+                                    <span class="text-xs font-bold text-gray-400 block">إجمالي XP</span>
+                                </div>
+                                <div class="bg-[#12141f] border border-white/5 p-5 rounded-2xl text-center space-y-1 shadow-lg">
+                                    <span class="text-2xl font-black text-white font-mono">${(guildLeaderboardUsers && guildLeaderboardUsers[0]) ? guildLeaderboardUsers[0].level : 1}</span>
+                                    <span class="text-xs font-bold text-gray-400 block">أعلى مستوى</span>
+                                </div>
+                            </div>
+
+                            <!-- Leaderboard User Cards with Progress Bar (Exact to Image 3) -->
+                            <div class="bg-[#12141f] border border-white/5 p-6 rounded-2xl space-y-4 shadow-xl">
+                                ${(guildLeaderboardUsers && guildLeaderboardUsers.length > 0) ? guildLeaderboardUsers.map((u, idx) => `
+                                    <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-2xl flex items-center justify-between shadow-md">
+                                        <div class="flex items-center gap-3">
+                                            <span class="text-xs font-bold text-purple-400 font-mono">${u.xp || 0} <span class="text-[10px] text-gray-500">إجمالي XP</span></span>
+                                        </div>
+                                        
+                                        <div class="flex-1 max-w-md mx-6 hidden sm:block">
+                                            <div class="w-full bg-[#1c1f2e] h-1.5 rounded-full overflow-hidden">
+                                                <div class="bg-gradient-to-r from-purple-500 to-indigo-500 h-full rounded-full" style="width: ${Math.min(100, Math.max(10, ((u.xp || 0) % 1875) / 18.75))}%"></div>
+                                            </div>
+                                        </div>
+
+                                        <div class="flex items-center gap-3">
+                                            <span class="px-2 py-0.5 bg-indigo-950/60 text-indigo-300 border border-indigo-500/30 rounded-lg text-[10px] font-mono font-bold">Lv.${u.level || 1}</span>
+                                            <span class="font-bold text-white text-xs">${u.user_id}</span>
+                                            <div class="w-7 h-7 rounded-xl bg-amber-600/20 text-amber-400 flex items-center justify-center font-bold text-xs border border-amber-500/30 font-mono">
+                                                ${idx + 1}
+                                            </div>
+                                        </div>
+                                    </div>
+                                `).join('') : `
+                                    <div class="py-8 text-center text-xs text-gray-500">
+                                        لا توجد بيانات مسجلة في لوحة المتصدرين بعد.
+                                    </div>
+                                `}
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <script>
+                    function switchLevelTab(tab) {
+                        const tabs = ['settings', 'text_roles', 'voice_roles', 'shared_roles', 'leaderboard'];
+                        tabs.forEach(t => {
+                            const el = document.getElementById(t === 'settings' ? 'tabLvlSettings' : (t === 'text_roles' ? 'tabLvlText' : (t === 'voice_roles' ? 'tabLvlVoice' : (t === 'shared_roles' ? 'tabLvlShared' : 'tabLvlLeaderboard'))));
+                            const btn = document.getElementById(t === 'settings' ? 'btnTabLvlSettings' : (t === 'text_roles' ? 'btnTabLvlText' : (t === 'voice_roles' ? 'btnTabLvlVoice' : (t === 'shared_roles' ? 'btnTabLvlShared' : 'btnTabLvlLeaderboard'))));
+                            if (el) el.classList.toggle('hidden', t !== tab);
+                            if (btn) {
+                                btn.className = t === tab 
+                                    ? "px-4 py-1.5 rounded-xl text-xs font-bold transition bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-md flex items-center gap-1"
+                                    : "px-4 py-1.5 rounded-xl text-xs font-bold transition text-gray-400 hover:text-white flex items-center gap-1";
+                            }
+                        });
+                    }
+
+                    async function openAddLevelRoleModal(rewardType = 'text') {
+                        const typeLabel = rewardType === 'voice' ? 'الصوتي' : 'الكتابي';
+                        const level = prompt('أدخل رقم المستوى ' + typeLabel + ' المطلوب (مثال: 5 أو 10 أو 20):');
+                        if (!level || isNaN(level)) return;
+                        const roleId = prompt('أدخل ID الرتبة الممنوحة:');
+                        if (!roleId || !roleId.trim()) return;
+
+                        try {
+                            const res = await fetch('/api/guild/${guildId}/level-reward', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ level: parseInt(level), roleId: roleId.trim(), rewardType })
+                            });
+                            const data = await res.json();
+                            if (data.success) {
+                                alert('✅ تمت إضافة رتبة المستوى بنجاح!');
+                                location.reload();
+                            } else {
+                                alert('❌ خطأ: ' + (data.error || 'فشل الإضافة'));
+                            }
+                        } catch(e) {
+                            alert('حدث خطأ في الاتصال بالخادم');
+                        }
+                    }
+
+                    async function openAddSharedRoleModal() {
+                        const textLevel = prompt('أدخل الحد الأدنى للمستوى الكتابي (مثال: 10):');
+                        if (!textLevel || isNaN(textLevel)) return;
+                        const voiceLevel = prompt('أدخل الحد الأدنى للمستوى الصوتي (مثال: 5):');
+                        if (!voiceLevel || isNaN(voiceLevel)) return;
+                        const roleId = prompt('أدخل ID الرتبة الممنوحة عند تحقق الشرطين:');
+                        if (!roleId || !roleId.trim()) return;
+
+                        try {
+                            const res = await fetch('/api/guild/${guildId}/level-reward', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ level: parseInt(textLevel), voiceLevel: parseInt(voiceLevel), roleId: roleId.trim(), rewardType: 'shared' })
+                            });
+                            const data = await res.json();
+                            if (data.success) {
+                                alert('✅ تمت إضافة رتبة الشرط المزدوج بنجاح!');
+                                location.reload();
+                            } else {
+                                alert('❌ خطأ: ' + (data.error || 'فشل الإضافة'));
+                            }
+                        } catch(e) {
+                            alert('حدث خطأ في الاتصال بالخادم');
+                        }
+                    }
+
+                    async function deleteLevelRole(idOrLevel) {
+                        if (!confirm('هل أنت متأكد من حذف هذه الرتبة؟')) return;
+                        try {
+                            const res = await fetch('/api/guild/${guildId}/level-reward/' + idOrLevel, {
+                                method: 'DELETE'
+                            });
+                            const data = await res.json();
+                            if (data.success) {
+                                alert('✅ تم الحذف بنجاح!');
+                                location.reload();
+                            } else {
+                                alert('❌ فشل الحذف');
+                            }
+                        } catch(e) {
+                            alert('حدث خطأ في الاتصال');
+                        }
+                    }
+                    </script>
+`;
             } else if (section === 'embed') {
                 formFieldsHtml = `
                     <div class="space-y-6 text-right" dir="rtl">
@@ -3553,6 +4933,79 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                     el.classList.toggle('hidden');
                     if (arrow) arrow.classList.toggle('rotate-180');
                 }
+
+                async function toggleModule(gId, key, isEnabled) {
+                    try {
+                        await fetch('/api/guild/' + gId + '/settings', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ [key]: isEnabled ? 1 : 0 })
+                        });
+                        showSaveStatus();
+                    } catch (e) {
+                        console.error('Error updating module toggle:', e);
+                    }
+                }
+
+                function showSaveStatus() {
+                    const status = document.getElementById('saveStatus');
+                    if (status) {
+                        status.classList.remove('hidden');
+                        setTimeout(() => status.classList.add('hidden'), 4000);
+                    }
+                }
+
+                document.getElementById('settingsForm')?.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    const formData = new FormData(this);
+                    const payload = {};
+                    
+                    for (let [k, v] of formData.entries()) {
+                        if (payload[k]) {
+                            if (Array.isArray(payload[k])) {
+                                payload[k].push(v);
+                            } else {
+                                payload[k] = [payload[k], v];
+                            }
+                        } else {
+                            payload[k] = v;
+                        }
+                    }
+
+                    this.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+                        if (cb.name) {
+                            payload[cb.name] = cb.checked ? 1 : 0;
+                        }
+                    });
+
+                    try {
+                        const btn = this.querySelector('button[type="submit"]');
+                        if (btn) {
+                            btn.disabled = true;
+                            btn.innerHTML = '<span>⏳</span><span>جاري الحفظ...</span>';
+                        }
+
+                        const targetGuildId = window.location.pathname.split('/')[2];
+                        const res = await fetch('/api/guild/' + targetGuildId + '/settings', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+                        const data = await res.json();
+                        if (data.success) {
+                            showSaveStatus();
+                        } else {
+                            alert('❌ خطأ أثناء الحفظ: ' + (data.error || 'حدث خطأ غير متوقع'));
+                        }
+
+                        if (btn) {
+                            btn.disabled = false;
+                            btn.innerHTML = '<span>💾</span><span>حفظ التغييرات</span>';
+                        }
+                    } catch (err) {
+                        alert('حدث خطأ في الاتصال بالخادم');
+                    }
+                });
                 </script>
             </body>
             </html>
@@ -3665,6 +5118,63 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
             const { guildId, id } = req.params;
             if (database.deleteWarnPunishment) {
                 database.deleteWarnPunishment(id, guildId);
+            }
+            res.json({ success: true });
+        } catch (e) {
+            res.status(500).json({ success: false, error: e.message });
+        }
+    });
+
+    app.post('/api/guild/:guildId/autoresponder', express.json(), async (req, res) => {
+        try {
+            if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
+            const { guildId } = req.params;
+            const data = req.body;
+            if (!data.trigger_word && !data.triggerWord) return res.status(400).json({ success: false, error: 'Missing trigger' });
+            if (!data.reply_text && !data.replyText) return res.status(400).json({ success: false, error: 'Missing reply' });
+            if (database.addAutoResponder) {
+                database.addAutoResponder(guildId, data);
+            }
+            res.json({ success: true });
+        } catch (e) {
+            res.status(500).json({ success: false, error: e.message });
+        }
+    });
+
+    app.delete('/api/guild/:guildId/autoresponder/:id', async (req, res) => {
+        try {
+            if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
+            const { guildId, id } = req.params;
+            if (database.deleteAutoResponder) {
+                database.deleteAutoResponder(guildId, id);
+            }
+            res.json({ success: true });
+        } catch (e) {
+            res.status(500).json({ success: false, error: e.message });
+        }
+    });
+
+    app.post('/api/guild/:guildId/level-reward', express.json(), async (req, res) => {
+        try {
+            if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
+            const { guildId } = req.params;
+            const { level, roleId, rewardType, voiceLevel } = req.body;
+            if (!level || !roleId) return res.status(400).json({ success: false, error: 'Missing fields' });
+            if (database.addLevelReward) {
+                database.addLevelReward(guildId, level, roleId, rewardType || 'text', voiceLevel || 0);
+            }
+            res.json({ success: true });
+        } catch (e) {
+            res.status(500).json({ success: false, error: e.message });
+        }
+    });
+
+    app.delete('/api/guild/:guildId/level-reward/:level', async (req, res) => {
+        try {
+            if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
+            const { guildId, level } = req.params;
+            if (database.removeLevelReward) {
+                database.removeLevelReward(guildId, parseInt(level));
             }
             res.json({ success: true });
         } catch (e) {

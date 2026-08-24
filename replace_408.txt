@@ -310,4 +310,77 @@
                     el.classList.toggle('hidden');
                     if (arrow) arrow.classList.toggle('rotate-180');
                 }
+
+                async function toggleModule(gId, key, isEnabled) {
+                    try {
+                        await fetch('/api/guild/' + gId + '/settings', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ [key]: isEnabled ? 1 : 0 })
+                        });
+                        showSaveStatus();
+                    } catch (e) {
+                        console.error('Error updating module toggle:', e);
+                    }
+                }
+
+                function showSaveStatus() {
+                    const status = document.getElementById('saveStatus');
+                    if (status) {
+                        status.classList.remove('hidden');
+                        setTimeout(() => status.classList.add('hidden'), 4000);
+                    }
+                }
+
+                document.getElementById('settingsForm')?.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    const formData = new FormData(this);
+                    const payload = {};
+                    
+                    for (let [k, v] of formData.entries()) {
+                        if (payload[k]) {
+                            if (Array.isArray(payload[k])) {
+                                payload[k].push(v);
+                            } else {
+                                payload[k] = [payload[k], v];
+                            }
+                        } else {
+                            payload[k] = v;
+                        }
+                    }
+
+                    this.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+                        if (cb.name) {
+                            payload[cb.name] = cb.checked ? 1 : 0;
+                        }
+                    });
+
+                    try {
+                        const btn = this.querySelector('button[type="submit"]');
+                        if (btn) {
+                            btn.disabled = true;
+                            btn.innerHTML = '<span>⏳</span><span>جاري الحفظ...</span>';
+                        }
+
+                        const targetGuildId = window.location.pathname.split('/')[2];
+                        const res = await fetch('/api/guild/' + targetGuildId + '/settings', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+                        const data = await res.json();
+                        if (data.success) {
+                            showSaveStatus();
+                        } else {
+                            alert('❌ خطأ أثناء الحفظ: ' + (data.error || 'حدث خطأ غير متوقع'));
+                        }
+
+                        if (btn) {
+                            btn.disabled = false;
+                            btn.innerHTML = '<span>💾</span><span>حفظ التغييرات</span>';
+                        }
+                    } catch (err) {
+                        alert('حدث خطأ في الاتصال بالخادم');
+                    }
+                });
                 </script>

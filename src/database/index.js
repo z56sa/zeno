@@ -409,6 +409,41 @@ try {
   `);
 } catch(e) {}
 
+// إعدادات الرتب التلقائية واللفل المتقدمة (Autoroles & Leveling Settings)
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN autorole_bot_id TEXT;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN level_text_xp_enabled INTEGER DEFAULT 1;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN level_voice_xp_enabled INTEGER DEFAULT 1;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN level_cooldown_seconds INTEGER DEFAULT 120;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN level_voice_xp_rate INTEGER DEFAULT 3;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN level_voice_min_members INTEGER DEFAULT 2;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN level_ignore_deafened INTEGER DEFAULT 1;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN level_ignore_muted INTEGER DEFAULT 1;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN level_ignore_afk INTEGER DEFAULT 1;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN level_up_msg_enabled INTEGER DEFAULT 1;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN level_voice_msg TEXT DEFAULT 'مبروك {user}! وصلت للمستوى الصوتي **{level}**! 🎤';"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN level_dm_msg_enabled INTEGER DEFAULT 0;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN level_stack_roles INTEGER DEFAULT 0;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN level_exempt_channels TEXT DEFAULT '';"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN level_exempt_voice_channels TEXT DEFAULT '';"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN level_exempt_roles TEXT DEFAULT '';"); } catch(e) {}
+
+// ترقية جدول مكافآت اللفل لدعم الرتب الصوتية والمشتركة
+try { db.exec("ALTER TABLE level_rewards ADD COLUMN reward_type TEXT DEFAULT 'text';"); } catch(e) {}
+try { db.exec("ALTER TABLE level_rewards ADD COLUMN voice_level INTEGER DEFAULT 0;"); } catch(e) {}
+
+// ترقية جدول الرد التلقائي بكامل خيارات Versa
+try { db.exec("ALTER TABLE auto_responders ADD COLUMN match_mode TEXT DEFAULT 'contains';"); } catch(e) {}
+try { db.exec("ALTER TABLE auto_responders ADD COLUMN reply_type TEXT DEFAULT 'text';"); } catch(e) {}
+try { db.exec("ALTER TABLE auto_responders ADD COLUMN case_sensitive INTEGER DEFAULT 0;"); } catch(e) {}
+try { db.exec("ALTER TABLE auto_responders ADD COLUMN delete_trigger INTEGER DEFAULT 0;"); } catch(e) {}
+try { db.exec("ALTER TABLE auto_responders ADD COLUMN cooldown_seconds INTEGER DEFAULT 0;"); } catch(e) {}
+try { db.exec("ALTER TABLE auto_responders ADD COLUMN allowed_channels TEXT DEFAULT '';"); } catch(e) {}
+try { db.exec("ALTER TABLE auto_responders ADD COLUMN allowed_roles TEXT DEFAULT '';"); } catch(e) {}
+try { db.exec("ALTER TABLE auto_responders ADD COLUMN exempt_channels TEXT DEFAULT '';"); } catch(e) {}
+try { db.exec("ALTER TABLE auto_responders ADD COLUMN exempt_roles TEXT DEFAULT '';"); } catch(e) {}
+try { db.exec("ALTER TABLE auto_responders ADD COLUMN uses_count INTEGER DEFAULT 0;"); } catch(e) {}
+try { db.exec("ALTER TABLE auto_responders ADD COLUMN is_active INTEGER DEFAULT 1;"); } catch(e) {}
+
 console.log('[DB] ✅ SQLite database initialized successfully');
 
 // ==========================================
@@ -901,8 +936,33 @@ function deleteReactionRole(customId) {
 // ==========================================
 // Auto Responders
 // ==========================================
-function addAutoResponder(guildId, triggerWord, replyText) {
-  db.prepare('INSERT INTO auto_responders (guild_id, trigger_word, reply_text) VALUES (?, ?, ?)').run(guildId, triggerWord.toLowerCase().trim(), replyText);
+function addAutoResponder(guildId, data) {
+  if (typeof data === 'string') {
+    const triggerWord = data;
+    const replyText = arguments[2] || '';
+    return db.prepare('INSERT INTO auto_responders (guild_id, trigger_word, reply_text) VALUES (?, ?, ?)').run(guildId, triggerWord.trim(), replyText);
+  }
+  return db.prepare(`
+    INSERT INTO auto_responders (
+      guild_id, trigger_word, reply_text, match_mode, reply_type, 
+      case_sensitive, delete_trigger, cooldown_seconds, 
+      allowed_channels, allowed_roles, exempt_channels, exempt_roles, is_active
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `).run(
+    guildId,
+    data.trigger_word || data.triggerWord,
+    data.reply_text || data.replyText,
+    data.match_mode || data.matchMode || 'contains',
+    data.reply_type || data.replyType || 'text',
+    data.case_sensitive || data.caseSensitive ? 1 : 0,
+    data.delete_trigger || data.deleteTrigger ? 1 : 0,
+    data.cooldown_seconds || data.cooldownSeconds || 0,
+    data.allowed_channels || data.allowedChannels || '',
+    data.allowed_roles || data.allowedRoles || '',
+    data.exempt_channels || data.exemptChannels || '',
+    data.exempt_roles || data.exemptRoles || '',
+    data.is_active !== undefined ? (data.is_active ? 1 : 0) : 1
+  );
 }
 
 function getAutoResponders(guildId) {
@@ -913,23 +973,37 @@ function deleteAutoResponder(guildId, idOrTrigger) {
   if (typeof idOrTrigger === 'number' || !isNaN(idOrTrigger)) {
     db.prepare('DELETE FROM auto_responders WHERE guild_id = ? AND id = ?').run(guildId, Number(idOrTrigger));
   } else {
-    db.prepare('DELETE FROM auto_responders WHERE guild_id = ? AND trigger_word = ?').run(guildId, String(idOrTrigger).toLowerCase().trim());
+    db.prepare('DELETE FROM auto_responders WHERE guild_id = ? AND trigger_word = ?').run(guildId, String(idOrTrigger).trim());
   }
+}
+
+function incrementAutoResponderUse(id) {
+  db.prepare('UPDATE auto_responders SET uses_count = uses_count + 1 WHERE id = ?').run(id);
 }
 
 // ==========================================
 // Level Rewards
 // ==========================================
-function addLevelReward(guildId, level, roleId) {
-  db.prepare('INSERT OR REPLACE INTO level_rewards (guild_id, level, role_id) VALUES (?, ?, ?)').run(guildId, level, roleId);
+function addLevelReward(guildId, level, roleId, rewardType = 'text', voiceLevel = 0) {
+  db.prepare(`
+    INSERT INTO level_rewards (guild_id, level, role_id, reward_type, voice_level) 
+    VALUES (?, ?, ?, ?, ?)
+  `).run(guildId, level, roleId, rewardType, voiceLevel);
 }
 
-function getLevelRewards(guildId) {
-  return db.prepare('SELECT * FROM level_rewards WHERE guild_id = ? ORDER BY level ASC').all(guildId);
+function getLevelRewards(guildId, rewardType = null) {
+  if (rewardType) {
+    return db.prepare('SELECT * FROM level_rewards WHERE guild_id = ? AND reward_type = ? ORDER BY level ASC, voice_level ASC').all(guildId, rewardType);
+  }
+  return db.prepare('SELECT * FROM level_rewards WHERE guild_id = ? ORDER BY level ASC, voice_level ASC').all(guildId);
 }
 
-function removeLevelReward(guildId, level) {
-  db.prepare('DELETE FROM level_rewards WHERE guild_id = ? AND level = ?').run(guildId, level);
+function removeLevelReward(guildId, idOrLevel) {
+  if (typeof idOrLevel === 'number' || !isNaN(idOrLevel)) {
+    db.prepare('DELETE FROM level_rewards WHERE guild_id = ? AND (id = ? OR level = ?)').run(guildId, Number(idOrLevel), Number(idOrLevel));
+  } else {
+    db.prepare('DELETE FROM level_rewards WHERE guild_id = ? AND id = ?').run(guildId, idOrLevel);
+  }
 }
 
 // ==========================================

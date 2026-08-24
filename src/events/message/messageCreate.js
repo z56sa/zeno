@@ -379,14 +379,81 @@ module.exports = {
       }
     }
 
-    // --- 4. نظام الرد التلقائي (Auto Responder) ---
+    // --- 4. نظام الرد التلقائي المتقدم (Versa Advanced Auto Responder) ---
     const autoResponders = db.getAutoResponders(guildId);
     if (autoResponders && autoResponders.length > 0) {
-      const lowerContent = message.content.toLowerCase().trim();
-      const matches = autoResponders.filter(r => lowerContent === r.trigger_word || lowerContent.includes(r.trigger_word));
-      if (matches.length > 0) {
-        const chosen = matches[Math.floor(Math.random() * matches.length)];
-        message.reply({ content: chosen.reply_text }).catch(() => {});
+      const rawContent = message.content.trim();
+      const lowerContent = rawContent.toLowerCase();
+
+      for (const r of autoResponders) {
+        if (r.is_active === 0) continue;
+
+        // فحص القنوات والرتب المستثناة والمسموحة
+        if (r.exempt_channels && r.exempt_channels.split(',').includes(message.channel.id)) continue;
+        if (r.allowed_channels && !r.allowed_channels.split(',').includes(message.channel.id)) continue;
+        if (r.exempt_roles && message.member && r.exempt_roles.split(',').some(roleId => message.member.roles.cache.has(roleId))) continue;
+        if (r.allowed_roles && message.member && !r.allowed_roles.split(',').some(roleId => message.member.roles.cache.has(roleId))) continue;
+
+        const trig = r.case_sensitive ? r.trigger_word : r.trigger_word.toLowerCase();
+        const testContent = r.case_sensitive ? rawContent : lowerContent;
+        let isMatch = false;
+
+        const mode = r.match_mode || 'contains';
+        if (mode === 'exact') {
+          isMatch = (testContent === trig);
+        } else if (mode === 'starts') {
+          isMatch = testContent.startsWith(trig);
+        } else if (mode === 'ends') {
+          isMatch = testContent.endsWith(trig);
+        } else if (mode === 'regex') {
+          try {
+            const re = new RegExp(r.trigger_word, r.case_sensitive ? '' : 'i');
+            isMatch = re.test(rawContent);
+          } catch(e) {}
+        } else {
+          // 'contains' / يحتوي على
+          isMatch = testContent.includes(trig);
+        }
+
+        if (isMatch) {
+          // حذف رسالة المحفز إذا كان الخيار مفعل
+          if (r.delete_trigger) {
+            message.delete().catch(() => {});
+          }
+
+          // تجهيز المتغيرات
+          let replyContent = r.reply_text || '';
+          replyContent = replyContent
+            .replace(/\{user\}/gi, `<@${message.author.id}>`)
+            .replace(/\{username\}/gi, message.author.username)
+            .replace(/\{server\}/gi, message.guild.name)
+            .replace(/\{channel\}/gi, `<#${message.channel.id}>`)
+            .replace(/\{memberCount\}/gi, message.guild.memberCount.toString());
+
+          if (r.reply_type === 'reaction') {
+            // تفاعل إيموجي
+            try {
+              message.react(r.reply_text.trim()).catch(() => {});
+            } catch(e) {}
+          } else if (r.reply_type === 'embed') {
+            // رسالة إيمبد
+            const autoEmbed = new EmbedBuilder()
+              .setColor('#EF5700')
+              .setDescription(replyContent)
+              .setTimestamp();
+            message.channel.send({ embeds: [autoEmbed] }).catch(() => {});
+          } else {
+            // رد نصي عادي
+            message.reply({ content: replyContent }).catch(() => {
+              message.channel.send({ content: replyContent }).catch(() => {});
+            });
+          }
+
+          if (db.incrementAutoResponderUse) {
+            db.incrementAutoResponderUse(r.id);
+          }
+          break; // تم تنفيذ الرد المطابق
+        }
       }
     }
 
