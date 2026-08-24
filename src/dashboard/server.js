@@ -150,6 +150,13 @@ module.exports = function (app, client) {
             const xpNeeded = userLevel * 100;
             const xpProgress = Math.min(100, Math.floor((userXp % 100) / 100 * 100));
 
+            const serverRailHtml = guilds.map(g => `
+                <a href="/dashboard/${g.id}" title="${g.name}" class="group relative flex items-center justify-center">
+                    <img src="${g.icon ? `https://cdn.discordapp.com/icons/${g.id}/${g.icon}.png` : 'https://cdn.discordapp.com/embed/avatars/0.png'}" 
+                         class="w-11 h-11 rounded-2xl border border-transparent hover:border-purple-500/40 hover:rounded-xl object-cover transition-all shadow-md">
+                </a>
+            `).join('');
+
             const userDashboardGuildsHtml = guilds.map(g => `
                 <div class="bg-[#1c1f2e] border border-white/5 p-4 rounded-2xl flex items-center justify-between hover:border-yellow-500/30 transition group">
                     <a href="/dashboard/${g.id}" class="px-5 py-2.5 bg-gradient-to-r from-yellow-500 to-amber-600 hover:from-yellow-400 hover:to-amber-500 text-black font-black text-xs rounded-xl transition shadow-lg shadow-yellow-950/40 flex items-center gap-2">
