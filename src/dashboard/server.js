@@ -6546,8 +6546,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
     // Staff Activity API
     app.get('/api/guild/:guildId/staff-activity', (req, res) => {
         try {
-            const { getDb } = require('../database');
-            const db = getDb();
+            const db = rawDb;
             const period = req.query.period || 'all';
             const rows = db.prepare('SELECT * FROM staff_activity WHERE guild_id = ? ORDER BY points DESC, messages_count DESC').all(req.params.guildId);
             res.json({ data: rows });
@@ -6556,8 +6555,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
 
     app.get('/api/guild/:guildId/staff-goals', (req, res) => {
         try {
-            const { getDb } = require('../database');
-            const db = getDb();
+            const db = rawDb;
             const rows = db.prepare('SELECT * FROM staff_goals WHERE guild_id = ?').all(req.params.guildId);
             res.json({ data: rows });
         } catch(e) { res.json({ data: [] }); }
@@ -6565,8 +6563,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
 
     app.post('/api/guild/:guildId/staff-goals', (req, res) => {
         try {
-            const { getDb } = require('../database');
-            const db = getDb();
+            const db = rawDb;
             const { title, target_type, target_value, reward_points } = req.body;
             db.prepare('INSERT INTO staff_goals (guild_id, title, target_type, target_value, reward_points) VALUES (?, ?, ?, ?, ?)').run(req.params.guildId, title, target_type, target_value || 10, reward_points || 50);
             res.json({ success: true });
@@ -6575,8 +6572,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
 
     app.delete('/api/guild/:guildId/staff-goals/:id', (req, res) => {
         try {
-            const { getDb } = require('../database');
-            const db = getDb();
+            const db = rawDb;
             db.prepare('DELETE FROM staff_goals WHERE id = ? AND guild_id = ?').run(req.params.id, req.params.guildId);
             res.json({ success: true });
         } catch(e) { res.status(500).json({ error: e.message }); }
@@ -6584,8 +6580,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
 
     app.post('/api/guild/:guildId/reset-staff-stats', (req, res) => {
         try {
-            const { getDb } = require('../database');
-            const db = getDb();
+            const db = rawDb;
             db.prepare('DELETE FROM staff_activity WHERE guild_id = ?').run(req.params.guildId);
             res.json({ success: true });
         } catch(e) { res.status(500).json({ error: e.message }); }
@@ -6594,8 +6589,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
     // Applications API
     app.get('/api/guild/:guildId/applications', (req, res) => {
         try {
-            const { getDb } = require('../database');
-            const db = getDb();
+            const db = rawDb;
             const status = req.query.status;
             let query = 'SELECT s.*, a.title as app_title FROM application_submissions s LEFT JOIN applications a ON s.app_id = a.id WHERE s.guild_id = ?';
             const params = [req.params.guildId];
@@ -6614,8 +6608,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
 
     app.post('/api/guild/:guildId/applications/create', (req, res) => {
         try {
-            const { getDb } = require('../database');
-            const db = getDb();
+            const db = rawDb;
             const { title, description, questions, log_channel, accepted_role } = req.body;
             db.prepare('INSERT INTO applications (guild_id, title, description, questions, log_channel, accepted_role, status) VALUES (?, ?, ?, ?, ?, ?, "open")').run(req.params.guildId, title, description || '', JSON.stringify(questions || []), log_channel || null, accepted_role || null);
             res.json({ success: true });
@@ -6627,8 +6620,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
     app.post('/api/user/daily', (req, res) => {
         try {
             if (!req.session?.user) return res.status(401).json({ success: false, error: 'يجب تسجيل الدخول أولاً' });
-            const { getDb } = require('../database');
-            const db = getDb();
+            const db = rawDb;
             const userId = req.session.user.id;
             const now = Date.now();
             
@@ -6658,8 +6650,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
     app.post('/api/user/buy', express.json(), (req, res) => {
         try {
             if (!req.session?.user) return res.status(401).json({ success: false, error: 'يجب تسجيل الدخول أولاً' });
-            const { getDb } = require('../database');
-            const db = getDb();
+            const db = rawDb;
             const userId = req.session.user.id;
             const { type, name, price } = req.body;
 
@@ -6682,8 +6673,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
 
     app.post('/api/guild/:guildId/applications/:id/review', async (req, res) => {
         try {
-            const { getDb } = require('../database');
-            const db = getDb();
+            const db = rawDb;
             const { status } = req.body;
             db.prepare('UPDATE application_submissions SET status = ? WHERE id = ? AND guild_id = ?').run(status, req.params.id, req.params.guildId);
             
