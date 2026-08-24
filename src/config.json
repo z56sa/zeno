@@ -1,0 +1,18 @@
+{
+  "prefix": "#",
+  "botName": "ZENO",
+  "colors": {
+    "primary": "#7c3aed",
+    "secondary": "#5865F2",
+    "success": "#22c55e",
+    "danger": "#ef4444",
+    "warning": "#f59e0b",
+    "info": "#3b82f6",
+    "gold": "#eab308"
+  },
+  "footer": "ZENO Security & Management",
+  "embeds": {
+    "author": "ZENO System",
+    "footerText": "ZENO Bot • All Rights Reserved"
+  }
+}
