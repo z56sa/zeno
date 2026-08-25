@@ -6,11 +6,21 @@ const Database = require('better-sqlite3');
 const path = require('path');
 const fs = require('fs');
 
-// مجلد البيانات
-const dataDir = path.join(__dirname, '../../data');
-if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
+// مجلد البيانات (يدعم Persistent Volume في Railway أو أي استضافة عبر متغير البيئة DATA_DIR أو DATABASE_PATH)
+const customDbPath = process.env.DATABASE_PATH;
+let dbPath;
 
-const db = new Database(path.join(dataDir, 'zeno.db'));
+if (customDbPath) {
+  const dir = path.dirname(customDbPath);
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+  dbPath = customDbPath;
+} else {
+  const customDataDir = process.env.DATA_DIR || path.join(__dirname, '../../data');
+  if (!fs.existsSync(customDataDir)) fs.mkdirSync(customDataDir, { recursive: true });
+  dbPath = path.join(customDataDir, 'zeno.db');
+}
+
+const db = new Database(dbPath);
 
 // تحسين الأداء
 db.pragma('journal_mode = WAL');
