@@ -158,13 +158,13 @@ module.exports = function (app, client) {
             `).join('');
 
             const userDashboardGuildsHtml = guilds.map(g => `
-                <div class="bg-[#1c1f2e] border border-white/5 p-4 rounded-2xl flex items-center justify-between hover:border-yellow-500/30 transition group">
-                    <a href="/dashboard/${g.id}" class="px-5 py-2.5 bg-gradient-to-r from-yellow-500 to-amber-600 hover:from-yellow-400 hover:to-amber-500 text-black font-black text-xs rounded-xl transition shadow-lg shadow-yellow-950/40 flex items-center gap-2">
+                <div class="bg-[#1c1f2e] border border-white/5 p-4 rounded-2xl flex items-center justify-between hover:border-purple-500/40 transition group">
+                    <a href="/dashboard/${g.id}" class="px-5 py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs rounded-xl transition shadow-lg shadow-purple-950/40 flex items-center gap-2">
                         <span>⚙️ إدارة السيرفر</span>
                     </a>
                     <div class="flex items-center gap-3">
                         <div class="text-right">
-                            <h4 class="font-bold text-white text-sm group-hover:text-yellow-400 transition truncate max-w-[160px]">${g.name}</h4>
+                            <h4 class="font-bold text-white text-sm group-hover:text-purple-400 transition truncate max-w-[160px]">${g.name}</h4>
                             <span class="text-[10px] text-gray-500 font-mono">${g.id}</span>
                         </div>
                         <img src="${g.icon ? `https://cdn.discordapp.com/icons/${g.id}/${g.icon}.png` : 'https://cdn.discordapp.com/embed/avatars/0.png'}" class="w-12 h-12 rounded-2xl bg-[#0b0d14] object-cover ring-2 ring-white/5">
@@ -193,7 +193,7 @@ module.exports = function (app, client) {
             `).join('') || '<p class="text-xs text-gray-500 text-center py-4">لا توجد بيانات ذهب مسجلة بعد</p>';
 
             const dailyActionBoxHtml = canClaimDaily ? `
-                <button type="button" onclick="claimDailyReward()" id="claimDailyBtn" class="px-5 py-2 bg-gradient-to-r from-yellow-500 to-amber-600 hover:from-yellow-400 hover:to-amber-500 text-black font-black text-xs rounded-xl shadow-lg shadow-yellow-950/40 transition">
+                <button type="button" onclick="claimDailyReward()" id="claimDailyBtn" class="px-5 py-2 bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs rounded-xl shadow-lg shadow-purple-950/40 transition">
                     استلام الرصيد 🎁
                 </button>
             ` : `
@@ -316,6 +316,29 @@ module.exports = function (app, client) {
             }
         }
     };
+    </script>
+
+
+    <script>
+    // Live countdown timer for daily reward
+    setInterval(function() {
+        var timerEl = document.getElementById('liveDailyTimer');
+        if (!timerEl) return;
+        var nextTime = parseInt(timerEl.getAttribute('data-next'), 10);
+        if (!nextTime) return;
+        var diff = nextTime - Date.now();
+        if (diff <= 0) {
+            var box = document.getElementById('dailyActionBox');
+            if (box) {
+                box.innerHTML = '<button type="button" onclick="claimDailyReward()" id="claimDailyBtn" class="px-8 py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold text-sm rounded-2xl shadow-xl shadow-purple-950/50 hover:scale-105 transition-all cursor-pointer flex items-center gap-2 mx-auto"><span>🎁</span><span>استلام الرصيد</span></button>';
+            }
+            return;
+        }
+        var hours = Math.floor(diff / (1000 * 60 * 60));
+        var mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        var secs = Math.floor((diff % (1000 * 60)) / 1000);
+        timerEl.textContent = (hours < 10 ? '0' + hours : hours) + 'س ' + (mins < 10 ? '0' + mins : mins) + 'د ' + (secs < 10 ? '0' + secs : secs) + 'ث';
+    }, 1000);
     </script>
 
 </head>
@@ -6500,7 +6523,8 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                 return res.status(400).json({ success: false, error: 'لقد استلمت راتبك بالفعل، يرجى المحاولة لاحقاً بعد ' + remaining + ' دقيقة' });
             }
 
-            const reward = 500;
+            // Random reward between 500 and 1000 Gold
+            const reward = Math.floor(Math.random() * (1000 - 500 + 1)) + 500;
             const guilds = req.session.guilds || [];
             const primaryGuildId = guilds.length > 0 ? guilds[0].id : 'global';
 
