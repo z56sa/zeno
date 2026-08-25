@@ -549,68 +549,65 @@ const canvasUtil = {
   /**
    * إنشاء بطاقة لعبة أسرع كتابة (Fast Type Card)
    */
-  async createFastTypeCard(word, seconds = 15) {
+  async createFastTypeCard(word, seconds = 20) {
     const width = 800;
-    const height = 300;
+    const height = 260;
     const canvas = createCanvas(width, height);
     const ctx = canvas.getContext('2d');
 
-    // خلفية متدرجة حديثة
+    // 1. خلفية زجاجية متدرجة فخمة
     const bgGrad = ctx.createLinearGradient(0, 0, width, height);
-    bgGrad.addColorStop(0, '#0c0e17');
-    bgGrad.addColorStop(0.5, '#16192b');
-    bgGrad.addColorStop(1, '#0c0e17');
+    bgGrad.addColorStop(0, '#0a0a14');
+    bgGrad.addColorStop(0.5, '#18122B');
+    bgGrad.addColorStop(1, '#0a0a14');
     ctx.fillStyle = bgGrad;
-    ctx.roundRect(0, 0, width, height, 24);
+    ctx.beginPath();
+    ctx.roundRect(0, 0, width, height, 20);
     ctx.fill();
 
-    // إطار نيون أرجواني
-    ctx.strokeStyle = 'rgba(147, 51, 234, 0.4)';
-    ctx.lineWidth = 3;
-    ctx.roundRect(0, 0, width, height, 24);
+    // 2. إطار نيون أرجواني متوهج
+    ctx.strokeStyle = '#9333ea';
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    ctx.roundRect(0, 0, width, height, 20);
     ctx.stroke();
 
-    // دائرة تأثير ضوئي خلف الكلمة
-    const glowGrad = ctx.createRadialGradient(width / 2, height / 2 + 10, 20, width / 2, height / 2 + 10, 200);
-    glowGrad.addColorStop(0, 'rgba(147, 51, 234, 0.25)');
+    // 3. توهج خلف الكلمة
+    const glowGrad = ctx.createRadialGradient(width / 2, height / 2 + 10, 10, width / 2, height / 2 + 10, 260);
+    glowGrad.addColorStop(0, 'rgba(147, 51, 234, 0.35)');
     glowGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
     ctx.fillStyle = glowGrad;
     ctx.fillRect(0, 0, width, height);
 
-    // عنوان اللعبة
+    // 4. العنوان العلوي
     ctx.textAlign = 'center';
-    ctx.fillStyle = '#a855f7';
-    ctx.font = 'bold 22px MainFontBold, sans-serif';
-    ctx.fillText('⚡ تحدي أسرع كتابة | FAST TYPE', width / 2, 55);
+    ctx.fillStyle = '#c084fc';
+    ctx.font = 'bold 20px sans-serif';
+    ctx.fillText('⚡ تحدي أسرع كتابة | FAST TYPE ⚡', width / 2, 45);
 
-    // إرشادات
-    ctx.fillStyle = '#9ca3af';
-    ctx.font = '15px MainFont, sans-serif';
-    ctx.fillText(`اكتب الكلمة التالية في الشات بأسرع ما يمكنك خلال ${seconds} ثانية!`, width / 2, 90);
-
-    // صندوق الكلمة الزجاجي
-    const boxW = 560;
-    const boxH = 80;
+    // 5. صندوق الكلمة النيون
+    const boxW = 600;
+    const boxH = 90;
     const boxX = (width - boxW) / 2;
-    const boxY = 120;
+    const boxY = 70;
 
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.04)';
+    ctx.strokeStyle = 'rgba(192, 132, 252, 0.4)';
     ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.roundRect(boxX, boxY, boxW, boxH, 20);
+    ctx.roundRect(boxX, boxY, boxW, boxH, 16);
     ctx.fill();
     ctx.stroke();
 
-    // الكلمة المطلوبة
+    // 6. نص الكلمة داخل الصندوق
     ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 36px MainFontBold, sans-serif';
-    ctx.fillText(word, width / 2, boxY + 52);
+    ctx.font = 'bold 36px sans-serif';
+    ctx.fillText(word, width / 2, boxY + 58);
 
-    // تذييل
-    ctx.fillStyle = '#6b7280';
-    ctx.font = 'bold 13px MainFont, sans-serif';
-    ctx.fillText('🏆 أول شخص يكتبها بشكل صحيح يفوز بالنقاط!', width / 2, 250);
+    // 7. التذييل
+    ctx.fillStyle = '#34d399';
+    ctx.font = 'bold 15px sans-serif';
+    ctx.fillText(`⏱️ لديك ${seconds} ثانية — اكتب الكلمة في الشات الآن لتفوز بالجوائز!`, width / 2, 205);
 
     return canvas.toBuffer('image/png');
   },

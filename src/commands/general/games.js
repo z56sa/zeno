@@ -254,36 +254,46 @@ async function runTrivia(interaction) {
 }
 
 // ==========================================
-// 2. لعبة أسرع كتابة (Fast Type Challenge - New Engine)
+// 2. لعبة أسرع كتابة (Fast Type with Luxury Card & Live Reactions)
 // ==========================================
 async function runFastType(interaction) {
   const word = FAST_WORDS[Math.floor(Math.random() * FAST_WORDS.length)];
-  const reward = Math.floor(Math.random() * 60) + 50; // 50 - 110 Star Coins
-  const timeLimit = 25; // 25 ثانية
+  const reward = Math.floor(Math.random() * 60) + 50; // 50 - 110 coins
+  const timeLimit = 20;
+
+  let cardBuffer = null;
+  try {
+    if (canvasUtil.createFastTypeCard) {
+      cardBuffer = await canvasUtil.createFastTypeCard(word, timeLimit);
+    }
+  } catch (e) {}
 
   const embed = new EmbedBuilder()
     .setColor('#9333ea')
     .setTitle('⚡ تحدي أسرع كتابة | Fast Type Challenge')
     .setDescription(
-      `### 📝 الكلمة المطلوبة:\n` +
-      `# \`\`\`fix\n${word}\n\`\`\`\n` +
-      `⚡ **المطلوب:** اكتب الكلمة كما هي تماماً في الشات أدناه بأسرع ما يمكنك!\n\n` +
+      `اكتب الكلمة المعروضة في البطاقة أدناه في الشات بأسرع ما يمكنك!\n\n` +
       `⏱️ **الوقت المتاح:** \`${timeLimit} ثانية\`\n` +
-      `🎁 **مكافأة الفائز:** \`+${reward} ⭐ Star Coins\` + \`+25 XP\`\n` +
-      `💡 *البوت يتفاعل فوراً مع المحاولات الصحيحة ✅ والخاطئة ❌!*`
+      `🎁 **جائزة الفائز:** \`+${reward} ⭐ Star Coins\`\n` +
+      `💡 *البوت يتفاعل فوراً مع إجابتك (صحيحة ✅ أو خاطئة ❌)!*`
     )
-    .setFooter({ text: 'ZENO Fast Type • كن الأسرع واربح المكافأة!', iconURL: interaction.guild?.iconURL() || undefined })
+    .setFooter({ text: 'ZENO Games • أسرع شخص يكتبها يفوز!', iconURL: interaction.guild?.iconURL() || undefined })
     .setTimestamp();
 
-  // إرسال رسالة البداية
-  const startMsg = await interaction.reply({ embeds: [embed], fetchReply: true });
+  const files = [];
+  if (cardBuffer) {
+    const attachment = new AttachmentBuilder(cardBuffer, { name: 'fasttype.png' });
+    embed.setImage('attachment://fasttype.png');
+    files.push(attachment);
+  }
+
+  await interaction.reply({ embeds: [embed], files });
 
   const channel = interaction.channel;
   const targetClean = normalizeText(word);
   const startTime = Date.now();
   let finished = false;
 
-  // استخدام كوليكتور الرسائل الموثوق
   const collector = channel.createMessageCollector({
     filter: m => !m.author.bot,
     time: timeLimit * 1000
@@ -301,7 +311,7 @@ async function runFastType(interaction) {
 
       const timeTaken = ((Date.now() - startTime) / 1000).toFixed(2);
 
-      // تفاعل فوري على رسالة الفائز
+      // تفاعل فوري بالرياكشن
       msg.react('🎉').catch(() => {});
       msg.react('⚡').catch(() => {});
 
@@ -315,12 +325,12 @@ async function runFastType(interaction) {
 
       const winEmbed = new EmbedBuilder()
         .setColor('#10b981')
-        .setTitle('🏆 بطل السرعة — إجابة صحيحة خارقة!')
+        .setTitle('🏆 فائز بطل في تحدي أسرع كتابة!')
         .setDescription(
-          `👑 **الفائز بالمركز الأول:** <@${msg.author.id}> (${msg.author.username})\n` +
+          `👑 **الفائز:** <@${msg.author.id}> (${msg.author.username})\n` +
           `⏱️ **الوقت المستغرق:** \`${timeTaken} ثانية\` ⚡\n` +
           `📝 **الكلمة:** \`${word}\`\n\n` +
-          `💰 **الجائزة المضافة:** \`+${reward} ⭐ Star Coins\` و \`+25 XP\` لحسابك بنجاح!`
+          `💰 **المكافأة:** \`+${reward} ⭐ Star Coins\` تمت إضافتها لمحفظتك فوراً!`
         )
         .setThumbnail(msg.author.displayAvatarURL({ dynamic: true }))
         .setFooter({ text: 'تهانينا! سرعة استجابة مذهلة 👏' })
@@ -330,7 +340,7 @@ async function runFastType(interaction) {
         channel.send({ embeds: [winEmbed] }).catch(() => {});
       });
     } else {
-      // إشارة للمحاولة الخاطئة
+      // تفاعل مع المحاولة الخاطئة
       if (msg.content.trim().length >= 2) {
         msg.react('❌').catch(() => {});
       }
@@ -342,7 +352,7 @@ async function runFastType(interaction) {
       const timeoutEmbed = new EmbedBuilder()
         .setColor('#ef4444')
         .setTitle('⏰ انتهى وقت التحدي!')
-        .setDescription(`للأسف لم يقم أحد بكتابة الكلمة \`${word}\` في الوقت المحدد (${timeLimit} ثانية).\n\nحظاً أوفر في الجولة القادمة!`)
+        .setDescription(`لم يقم أحد بكتابة الكلمة الصحيحة \`${word}\` في الوقت المحدد (${timeLimit} ثانية).`)
         .setTimestamp();
 
       await channel.send({ embeds: [timeoutEmbed] }).catch(() => {});
