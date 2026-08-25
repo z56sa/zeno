@@ -97,6 +97,42 @@ module.exports = {
         }
       }
 
+      // 2.3 أزرار الألعاب والتسلية (Games & Fun Buttons)
+      if (interaction.isButton() && interaction.customId.startsWith('game_btn_')) {
+        const gameType = interaction.customId.replace('game_btn_', '');
+        if (gameType === 'dice') {
+          const roll = Math.floor(Math.random() * 6) + 1;
+          const diceEmojis = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
+          return interaction.reply({
+            content: `🎲 **رمي النرد:** لقد حصلت على الرقم **${roll}** ${diceEmojis[roll - 1]}!`,
+            ephemeral: false
+          });
+        }
+        if (gameType === 'coin') {
+          const coin = Math.random() < 0.5 ? '🪙 صورة (Face)' : '🪙 كتابة (Tail)';
+          return interaction.reply({
+            content: `🪙 **رمي العملة:** النتيجة هي **${coin}**!`,
+            ephemeral: false
+          });
+        }
+        if (gameType === 'rps') {
+          const choices = ['🪨 حجر', '📄 ورقة', '✂️ مقص'];
+          const userMove = choices[Math.floor(Math.random() * choices.length)];
+          const botMove = choices[Math.floor(Math.random() * choices.length)];
+          return interaction.reply({
+            content: `✂️ **حجر ورقة مقص:**\nأنت: ${userMove}\nالبوت: ${botMove}\n${userMove === botMove ? '🤝 تعادل!' : '🎉 جولة حماسية!'}`,
+            ephemeral: false
+          });
+        }
+        if (gameType === 'trivia' || gameType === 'fast') {
+          const gamesCmd = client.commands.get('games');
+          if (gamesCmd) {
+            interaction.options = { getSubcommand: () => gameType };
+            return gamesCmd.execute(interaction);
+          }
+        }
+      }
+
       // 2.4 نظام التحقق الأمني (Verification Button & Direct Role)
       if (interaction.isButton() && (interaction.customId === 'btn_start_verification' || interaction.customId === 'btn_quick_verify' || interaction.customId === 'verify_button' || interaction.customId === 'verify_member')) {
         const settings = db.getGuildSettings(interaction.guild.id);

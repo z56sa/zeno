@@ -5211,28 +5211,52 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                     }
                     </script>`;
             } else if (section === 'tempvoice') {
-formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl">
-                        <div class="bg-[#12141f] border border-white/5 p-6 rounded-2xl flex items-center justify-between shadow-xl">
+                const activeTempVoices = (rawDb ? rawDb.prepare('SELECT * FROM temp_voices WHERE guild_id = ?').all(guildId) : []) || [];
+
+                formFieldsHtml = `
+                    <div class="space-y-6 text-right" dir="rtl">
+                        <!-- Header Banner -->
+                        <div class="bg-gradient-to-r from-[#1a132e] via-[#12141f] to-[#1a132e] border border-purple-500/20 p-6 rounded-3xl flex items-center justify-between shadow-2xl">
                             <label class="toggle"><input type="checkbox" name="temp_voice_enabled" value="1" ${settings.temp_voice_enabled !== 0 ? 'checked' : ''}><span class="slider"></span></label>
                             <div class="flex items-center gap-3">
                                 <div class="text-right">
-                                    <h4 class="font-black text-white text-base">نظام الرومات الصوتية المؤقتة (Temporary Voice)</h4>
-                                    <p class="text-gray-400 text-xs mt-0.5">إنشاء غرف صوتية خاصة تلقائياً وحذفها عند خروج الأعضاء</p>
+                                    <h4 class="font-black text-white text-xl flex items-center gap-2 justify-end"><span>الرومات الصوتية المؤقتة (Temp Voice)</span><span>🎙️</span></h4>
+                                    <p class="text-gray-400 text-xs mt-0.5">إنشاء غرف صوتية خاصة تلقائياً عند دخول الأعضاء وحذفها فور خروجهم</p>
                                 </div>
-                                <div class="w-10 h-10 rounded-xl bg-purple-600/20 text-purple-400 flex items-center justify-center text-lg border border-purple-500/30">🕒</div>
+                                <div class="w-10 h-10 rounded-2xl bg-purple-600/20 text-purple-400 flex items-center justify-center text-xl border border-purple-500/30">🕒</div>
                             </div>
                         </div>
 
-                        <div class="bg-[#12141f] border border-white/5 p-6 rounded-2xl space-y-4 shadow-xl">
-                            <h4 class="text-xs font-black text-white border-b border-white/5 pb-3">إعدادات الروم الرئيسي والكاتيجوري</h4>
+                        <!-- Quick Stats -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            <div class="bg-[#12141f] border border-white/5 p-4 rounded-2xl text-center">
+                                <div class="text-2xl font-black text-purple-400 font-mono">${activeTempVoices.length}</div>
+                                <div class="text-xs text-gray-400 font-bold mt-1">الرومات المؤقتة النشطة حالياً</div>
+                            </div>
+                            <div class="bg-[#12141f] border border-white/5 p-4 rounded-2xl text-center">
+                                <div class="text-2xl font-black text-emerald-400 font-mono">${settings.temp_voice_channel ? 'مفعل ✓' : 'غير معطى'}</div>
+                                <div class="text-xs text-gray-400 font-bold mt-1">حالة روم الإنشاء (Join-to-Create)</div>
+                            </div>
+                            <div class="bg-[#12141f] border border-white/5 p-4 rounded-2xl text-center">
+                                <div class="text-2xl font-black text-white font-mono">${settings.temp_voice_user_limit || 'غير محدود'}</div>
+                                <div class="text-xs text-gray-400 font-bold mt-1">الحد الأقصى الافتراضي</div>
+                            </div>
+                        </div>
+
+                        <!-- Settings Form -->
+                        <div class="bg-[#12141f] border border-white/5 p-6 rounded-3xl space-y-4 shadow-xl">
+                            <h4 class="text-sm font-black text-white border-b border-white/5 pb-3 flex items-center gap-2 justify-end">
+                                <span>إعدادات الروم الرئيسي والكاتيجوري</span>
+                                <span>⚙️</span>
+                            </h4>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <label class="block text-xs font-bold text-gray-300 mb-2">روم الدخول الرئيسي (Join-to-Create Channel)</label>
-                                    <input type="text" name="temp_voice_channel" value="${settings.temp_voice_channel || ''}" placeholder="أيدي الروم الصوتي الرئيسي..." class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none font-mono text-right">
+                                    ${renderChannelSelect('temp_voice_channel', settings.temp_voice_channel || '')}
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-bold text-gray-300 mb-2">قسم الرومات (Category ID)</label>
-                                    <input type="text" name="temp_voice_category" value="${settings.temp_voice_category || ''}" placeholder="أيدي الكاتيجوري الذي ستنشأ تحته..." class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none font-mono text-right">
+                                    <label class="block text-xs font-bold text-gray-300 mb-2">قسم الرومات المنشأة (Category ID)</label>
+                                    <input type="text" name="temp_voice_category" value="${settings.temp_voice_category || ''}" placeholder="آيدي الكاتيجوري الذي ستنشأ تحته الرومات..." class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none font-mono text-right">
                                 </div>
                             </div>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
@@ -5245,6 +5269,24 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                                     <input type="number" name="temp_voice_user_limit" value="${settings.temp_voice_user_limit || 0}" placeholder="0 = غير محدود" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none font-mono text-right">
                                 </div>
                             </div>
+                        </div>
+
+                        <!-- Active Temp Channels Table -->
+                        <div class="bg-[#12141f] border border-white/5 p-6 rounded-3xl space-y-3 shadow-xl">
+                            <h4 class="text-sm font-black text-white flex items-center justify-between pb-3 border-b border-white/5">
+                                <span class="text-xs text-purple-400 font-bold">${activeTempVoices.length} روم نشط</span>
+                                <span class="flex items-center gap-2"><span>الرومات المؤقتة الفعالة الآن</span><span>🎙️</span></span>
+                            </h4>
+                            ${activeTempVoices.length === 0 ? `
+                                <p class="text-center py-6 text-gray-500 text-xs font-bold">لا توجد أي رومات صوتية مؤقتة مفتوحة حالياً بالسيرفر</p>
+                            ` : activeTempVoices.map(tv => `
+                                <div class="bg-[#0b0d14] p-3 rounded-2xl border border-white/5 flex items-center justify-between">
+                                    <span class="text-xs text-gray-500 font-mono">ID: ${tv.channel_id}</span>
+                                    <div class="text-right">
+                                        <span class="text-xs font-bold text-white block">صاحب الروم: <@${tv.owner_id}></span>
+                                    </div>
+                                </div>
+                            `).join('')}
                         </div>
                     </div>`;
             } else if (section === 'colors') {
@@ -5347,51 +5389,94 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                         </div>
                     </div>`;
             } else if (section === 'analytics' || section === 'stats') {
-formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl">
-                        <div class="bg-[#12141f] border border-white/5 p-6 rounded-2xl flex items-center justify-between shadow-xl">
-                            <div class="flex items-center gap-3">
-                                <div class="text-right">
-                                    <h4 class="font-black text-white text-base">الإحصائيات والتحليلات وعدادات الرومات</h4>
-                                    <p class="text-gray-400 text-xs mt-0.5">متابعة نمو السيرفر وربط عدادات الأعضاء الديناميكية في القنوات الصوتية</p>
-                                </div>
-                                <div class="w-10 h-10 rounded-xl bg-blue-600/20 text-blue-400 flex items-center justify-center text-lg border border-blue-500/30">📊</div>
+                const totalMembers = guild.memberCount || 0;
+                const textChCount = (guildTextChannels || []).length;
+                const voiceChCount = (guildVoiceChannels || []).length;
+                const rolesCount = (guildRoles || []).length;
+                const suggestionsCount = (guildSuggestionsList || []).length;
+
+                formFieldsHtml = `
+                    <div class="space-y-6 text-right" dir="rtl">
+                        <!-- Header -->
+                        <div class="bg-gradient-to-r from-[#1a132e] via-[#12141f] to-[#1a132e] border border-purple-500/20 p-6 rounded-3xl flex items-center justify-between shadow-2xl">
+                            <div class="flex items-center gap-2">
+                                <a href="/dashboard/${guildId}/stat-channels" class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold transition shadow">
+                                    إدارة قنوات العدادات 📡
+                                </a>
+                            </div>
+                            <div class="text-right">
+                                <h4 class="font-black text-white text-xl flex items-center gap-2 justify-end"><span>لوحة الإحصائيات والتحليلات المتقدمة</span><span>📊</span></h4>
+                                <p class="text-gray-400 text-xs mt-0.5">تحليل شامل لحركة السيرفر ونموه وتوزيع الأعضاء والقنوات</p>
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                            <div class="bg-[#12141f] border border-white/5 p-5 rounded-2xl text-center space-y-1 shadow-lg">
-                                <span class="text-2xl font-black text-white font-mono">${guild.memberCount || 0}</span>
+                        <!-- Top Metric Cards -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <div class="bg-[#12141f] border border-white/5 hover:border-purple-500/30 p-5 rounded-3xl text-center space-y-1 shadow-xl transition">
+                                <div class="w-10 h-10 rounded-2xl bg-purple-600/20 text-purple-400 flex items-center justify-center text-lg mx-auto mb-2">👥</div>
+                                <span class="text-3xl font-black text-white font-mono">${totalMembers}</span>
                                 <span class="text-xs font-bold text-gray-400 block">إجمالي الأعضاء</span>
                             </div>
-                            <div class="bg-[#12141f] border border-white/5 p-5 rounded-2xl text-center space-y-1 shadow-lg">
-                                <span class="text-2xl font-black text-emerald-400 font-mono">${(guildTextChannels || []).length}</span>
-                                <span class="text-xs font-bold text-gray-400 block">قناة نصية</span>
+                            <div class="bg-[#12141f] border border-white/5 hover:border-purple-500/30 p-5 rounded-3xl text-center space-y-1 shadow-xl transition">
+                                <div class="w-10 h-10 rounded-2xl bg-emerald-600/20 text-emerald-400 flex items-center justify-center text-lg mx-auto mb-2">💬</div>
+                                <span class="text-3xl font-black text-emerald-400 font-mono">${textChCount}</span>
+                                <span class="text-xs font-bold text-gray-400 block">القنوات النصية</span>
                             </div>
-                            <div class="bg-[#12141f] border border-white/5 p-5 rounded-2xl text-center space-y-1 shadow-lg">
-                                <span class="text-2xl font-black text-purple-400 font-mono">${(guildRoles || []).length}</span>
-                                <span class="text-xs font-bold text-gray-400 block">رتبة مسجلة</span>
+                            <div class="bg-[#12141f] border border-white/5 hover:border-purple-500/30 p-5 rounded-3xl text-center space-y-1 shadow-xl transition">
+                                <div class="w-10 h-10 rounded-2xl bg-blue-600/20 text-blue-400 flex items-center justify-center text-lg mx-auto mb-2">🔊</div>
+                                <span class="text-3xl font-black text-blue-400 font-mono">${voiceChCount}</span>
+                                <span class="text-xs font-bold text-gray-400 block">القنوات الصوتية</span>
                             </div>
-                            <div class="bg-[#12141f] border border-white/5 p-5 rounded-2xl text-center space-y-1 shadow-lg">
-                                <span class="text-2xl font-black text-amber-400 font-mono">${(guildSuggestionsList || []).length}</span>
-                                <span class="text-xs font-bold text-gray-400 block">اقتراح مسجل</span>
+                            <div class="bg-[#12141f] border border-white/5 hover:border-purple-500/30 p-5 rounded-3xl text-center space-y-1 shadow-xl transition">
+                                <div class="w-10 h-10 rounded-2xl bg-amber-600/20 text-amber-400 flex items-center justify-center text-lg mx-auto mb-2">🎖️</div>
+                                <span class="text-3xl font-black text-amber-400 font-mono">${rolesCount}</span>
+                                <span class="text-xs font-bold text-gray-400 block">الرتب المسجلة</span>
                             </div>
                         </div>
 
-                        <div class="bg-[#12141f] border border-white/5 p-6 rounded-2xl space-y-4 shadow-xl">
-                            <h4 class="text-xs font-black text-white border-b border-white/5 pb-3">ربط عدادات الأعضاء في القنوات الصوتية (Voice Counters)</h4>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-xs font-bold text-gray-300 mb-2">أيدي روم عداد الأعضاء (Members Voice ID)</label>
-                                    <input type="text" name="stat_members_channel" value="${settings.stat_members_channel || ''}" placeholder="أيدي الروم الصوتي..." class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none font-mono text-right">
+                        <!-- Server Health and Activity Indicators -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="bg-[#12141f] border border-white/5 p-6 rounded-3xl space-y-4 shadow-xl">
+                                <h4 class="text-sm font-black text-white border-b border-white/5 pb-3 flex items-center gap-2 justify-end">
+                                    <span>مؤشرات تفاعل السيرفر</span>
+                                    <span>⚡</span>
+                                </h4>
+                                <div class="space-y-3">
+                                    <div>
+                                        <div class="flex items-center justify-between text-xs mb-1">
+                                            <span class="text-purple-400 font-bold">${suggestionsCount} اقتراح</span>
+                                            <span class="text-gray-300 font-bold">الاقتراحات والشكاوى</span>
+                                        </div>
+                                        <div class="w-full bg-[#0b0d14] h-2 rounded-full overflow-hidden">
+                                            <div class="bg-purple-600 h-full rounded-full" style="width: ${Math.min(100, (suggestionsCount / 20) * 100)}%"></div>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div class="flex items-center justify-between text-xs mb-1">
+                                            <span class="text-emerald-400 font-bold">${textChCount + voiceChCount} قناة</span>
+                                            <span class="text-gray-300 font-bold">إجمالي قنوات السيرفر</span>
+                                        </div>
+                                        <div class="w-full bg-[#0b0d14] h-2 rounded-full overflow-hidden">
+                                            <div class="bg-emerald-500 h-full rounded-full" style="width: ${Math.min(100, ((textChCount + voiceChCount) / 50) * 100)}%"></div>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div>
-                                    <label class="block text-xs font-bold text-gray-300 mb-2">أيدي روم عداد البوتات (Bots Voice ID)</label>
-                                    <input type="text" name="stat_bots_channel" value="${settings.stat_bots_channel || ''}" placeholder="أيدي الروم الصوتي..." class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none font-mono text-right">
-                                </div>
+                            </div>
+
+                            <div class="bg-[#12141f] border border-white/5 p-6 rounded-3xl space-y-4 shadow-xl">
+                                <h4 class="text-sm font-black text-white border-b border-white/5 pb-3 flex items-center gap-2 justify-end">
+                                    <span>الربط السريع للعدادات</span>
+                                    <span>📡</span>
+                                </h4>
+                                <p class="text-xs text-gray-400 leading-relaxed">
+                                    يمكنك الآن تفعيل **9 أنواع مختلفة** من قنوات الإحصائيات (أعضاء، بشر، بوتات، متصلين، صوتية، رتب...) تتحدث تلقائياً كل 10 دقائق من قسم قنوات الإحصائيات.
+                                </p>
+                                <a href="/dashboard/${guildId}/stat-channels" class="block text-center py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold transition shadow-lg">
+                                    فتح مدير قنوات الإحصائيات (9 أنواع) 🚀
+                                </a>
                             </div>
                         </div>
                     </div>`;
-
             } else if (section === 'stat-channels') {
                 // Load current stat channels for this guild
                 let statChannelsRows = [];
@@ -6068,6 +6153,276 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
     </script>
 
 </div>`;
+            } else if (section === 'quran') {
+                formFieldsHtml = `
+                    <div class="space-y-6 text-right" dir="rtl">
+                        <!-- Header Banner -->
+                        <div class="bg-gradient-to-r from-[#1a132e] via-[#12141f] to-[#1a132e] border border-purple-500/20 p-6 rounded-3xl flex items-center justify-between shadow-2xl">
+                            <label class="toggle"><input type="checkbox" name="quran_enabled" value="1" checked><span class="slider"></span></label>
+                            <div class="flex items-center gap-3">
+                                <div class="text-right">
+                                    <h4 class="font-black text-white text-xl flex items-center gap-2 justify-end"><span>القرآن الكريم والإذاعات الإسلامية</span><span>🕌</span></h4>
+                                    <p class="text-gray-400 text-xs mt-0.5">تشغيل القرآن الكريم وإذاعات كبار القراء على مدار الساعة 24/7 في قنوات السيرفر الصوتية</p>
+                                </div>
+                                <div class="w-10 h-10 rounded-2xl bg-purple-600/20 text-purple-400 flex items-center justify-center text-xl border border-purple-500/30">📖</div>
+                            </div>
+                        </div>
+
+                        <!-- Direct Play Control Card -->
+                        <div class="bg-[#12141f] border border-white/5 p-6 rounded-3xl space-y-4 shadow-xl">
+                            <h4 class="text-sm font-black text-white border-b border-white/5 pb-3 flex items-center gap-2 justify-end">
+                                <span>تشغيل مباشر في القناة الصوتية</span>
+                                <span>▶️</span>
+                            </h4>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-300 mb-2">القناة الصوتية المستهدفة <span class="text-purple-400">*</span></label>
+                                    ${renderChannelSelect('quranVoiceChannel', '')}
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-300 mb-2">اختر القارئ أو الإذاعة <span class="text-purple-400">*</span></label>
+                                    <select id="quranStationSelect" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right">
+                                        <option value="cairo_radio">📻 إذاعة القرآن الكريم من القاهرة (مباشر 24/7)</option>
+                                        <option value="makkah_radio">📻 إذاعة القرآن الكريم من مكة المكرمة (مباشر 24/7)</option>
+                                        <option value="afasy">📖 الشيخ مشاري راشد العفاسي</option>
+                                        <option value="abdulbasit">📖 الشيخ عبدالباسط عبدالصمد (المجود)</option>
+                                        <option value="muaiqly">📖 الشيخ ماهر المعيقلي</option>
+                                        <option value="dosari">📖 الشيخ ياسر الدوسري</option>
+                                        <option value="ghamdi">📖 الشيخ سعد الغامدي</option>
+                                        <option value="sudais">📖 الشيخ عبدالرحمن السديس</option>
+                                        <option value="shuraim">📖 الشيخ سعود الشريم</option>
+                                        <option value="ajmy">📖 الشيخ أحمد العجمي</option>
+                                        <option value="shatri">📖 الشيخ أبو بكر الشاطري</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center justify-end gap-3 pt-2">
+                                <button type="button" onclick="stopQuranStream()" id="btnStopQuran" class="px-5 py-2.5 bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 border border-rose-800/40 rounded-xl text-xs font-bold transition flex items-center gap-1.5">
+                                    <span>⏹️ إيقاف البث</span>
+                                </button>
+                                <button type="button" onclick="playQuranStream()" id="btnPlayQuran" class="px-6 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold transition shadow-lg flex items-center gap-2">
+                                    <span>▶️ تشغيل الآن في الروم الصوتي</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Available Stations Grid -->
+                        <div class="space-y-3">
+                            <h4 class="text-sm font-black text-white">قائمة المحطات والتلاوات المتاحة (11 محطة):</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                <div class="bg-[#12141f] border border-white/5 p-4 rounded-2xl text-right">
+                                    <span class="text-xs font-black text-white block">إذاعة القاهرة 🇪🇬</span>
+                                    <span class="text-[10px] text-gray-400">بث مباشر متواصل على مدار الساعة</span>
+                                </div>
+                                <div class="bg-[#12141f] border border-white/5 p-4 rounded-2xl text-right">
+                                    <span class="text-xs font-black text-white block">إذاعة مكة المكرمة 🇸🇦</span>
+                                    <span class="text-[10px] text-gray-400">تلاوات الحرم المكي الشريف</span>
+                                </div>
+                                <div class="bg-[#12141f] border border-white/5 p-4 rounded-2xl text-right">
+                                    <span class="text-xs font-black text-white block">مشاري العفاسي 📖</span>
+                                    <span class="text-[10px] text-gray-400">المصحف المرتل كاملاً</span>
+                                </div>
+                                <div class="bg-[#12141f] border border-white/5 p-4 rounded-2xl text-right">
+                                    <span class="text-xs font-black text-white block">عبدالباسط عبدالصمد 📖</span>
+                                    <span class="text-[10px] text-gray-400">تلاوات نادرة ومجودة</span>
+                                </div>
+                                <div class="bg-[#12141f] border border-white/5 p-4 rounded-2xl text-right">
+                                    <span class="text-xs font-black text-white block">ماهر المعيقلي 📖</span>
+                                    <span class="text-[10px] text-gray-400">تلاوات عذبة وخاشعة</span>
+                                </div>
+                                <div class="bg-[#12141f] border border-white/5 p-4 rounded-2xl text-right">
+                                    <span class="text-xs font-black text-white block">ياسر الدوسري 📖</span>
+                                    <span class="text-[10px] text-gray-400">تلاوة ترتيل مؤثرة</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <script>
+                    async function playQuranStream() {
+                        const channelId = document.getElementById('quranVoiceChannel').value;
+                        const stationKey = document.getElementById('quranStationSelect').value;
+                        if (!channelId) return alert('يرجى اختيار القناة الصوتية أولاً');
+
+                        const btn = document.getElementById('btnPlayQuran');
+                        btn.disabled = true; btn.textContent = 'جارٍ الاتصال والتشغيل... ⏳';
+
+                        try {
+                            const r = await fetch('/api/guild/${guildId}/quran/play', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ channelId, stationKey })
+                            });
+                            const d = await r.json();
+                            if (d.success) alert('✅ تم بدء تشغيل إذاعة القرآن الكريم في القناة الصوتية بنجاح!');
+                            else alert('❌ خطأ: ' + (d.error || 'فشل التشغيل'));
+                        } catch(e) { alert('خطأ في الاتصال بالخادم'); }
+                        finally { btn.disabled = false; btn.textContent = '▶️ تشغيل الآن في الروم الصوتي'; }
+                    }
+
+                    async function stopQuranStream() {
+                        try {
+                            const r = await fetch('/api/guild/${guildId}/quran/stop', { method: 'POST' });
+                            const d = await r.json();
+                            if (d.success) alert('⏹️ تم إيقاف البث ومغادرة الروم الصوتي.');
+                            else alert('❌ خطأ: ' + (d.error || 'فشل'));
+                        } catch(e) { alert('خطأ في الاتصال'); }
+                    }
+                    </script>
+                `;
+            } else if (section === 'fun') {
+                formFieldsHtml = `
+                    <div class="space-y-6 text-right" dir="rtl">
+                        <!-- Header Banner -->
+                        <div class="bg-gradient-to-r from-[#1a132e] via-[#12141f] to-[#1a132e] border border-purple-500/20 p-6 rounded-3xl flex items-center justify-between shadow-2xl">
+                            <label class="toggle"><input type="checkbox" name="fun_enabled" value="1" checked><span class="slider"></span></label>
+                            <div class="flex items-center gap-3">
+                                <div class="text-right">
+                                    <h4 class="font-black text-white text-xl flex items-center gap-2 justify-end"><span>نظام التسلية والألعاب التفاعلية</span><span>🎮</span></h4>
+                                    <p class="text-gray-400 text-xs mt-0.5">ألعاب ديسكورد تفاعلية مع أزرار ومسابقات ذكاء وتحديات سرعة بين الأعضاء</p>
+                                </div>
+                                <div class="w-10 h-10 rounded-2xl bg-purple-600/20 text-purple-400 flex items-center justify-center text-xl border border-purple-500/30">🕹️</div>
+                            </div>
+                        </div>
+
+                        <!-- Direct Game Launcher Card -->
+                        <div class="bg-[#12141f] border border-white/5 p-6 rounded-3xl space-y-4 shadow-xl">
+                            <h4 class="text-sm font-black text-white border-b border-white/5 pb-3 flex items-center gap-2 justify-end">
+                                <span>إرسال لوحة الألعاب في قناة</span>
+                                <span>🚀</span>
+                            </h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-300 mb-2">القناة المستهدفة <span class="text-purple-400">*</span></label>
+                                    ${renderChannelSelect('funTargetChannel', '')}
+                                </div>
+                                <div class="flex items-end">
+                                    <button type="button" onclick="sendGamesPanelDirect()" id="btnSendGamesPanel" class="w-full py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs rounded-xl shadow-lg transition flex items-center justify-center gap-2">
+                                        <span>🚀 إرسال لوحة الألعاب التفاعلية الآن</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Games Feature Cards -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="bg-[#12141f] border border-white/5 p-5 rounded-3xl space-y-2 text-right">
+                                <div class="w-10 h-10 rounded-2xl bg-purple-600/20 text-purple-400 flex items-center justify-center text-xl mb-3">❓</div>
+                                <h5 class="text-sm font-black text-white">سؤال وجواب (Trivia)</h5>
+                                <p class="text-xs text-gray-400 leading-relaxed">أسئلة معلومات عامة وثقافية وإسلامية مع 4 أزرار خيارات ومؤقت زمني 20 ثانية.</p>
+                            </div>
+                            <div class="bg-[#12141f] border border-white/5 p-5 rounded-3xl space-y-2 text-right">
+                                <div class="w-10 h-10 rounded-2xl bg-emerald-600/20 text-emerald-400 flex items-center justify-center text-xl mb-3">⚡</div>
+                                <h5 class="text-sm font-black text-white">أسرع كتابة (Fast Type)</h5>
+                                <p class="text-xs text-gray-400 leading-relaxed">تحدي كتابة كلمات عربية سريعة، يحسب الوقت بدقة لأول فائز في الشات.</p>
+                            </div>
+                            <div class="bg-[#12141f] border border-white/5 p-5 rounded-3xl space-y-2 text-right">
+                                <div class="w-10 h-10 rounded-2xl bg-amber-600/20 text-amber-400 flex items-center justify-center text-xl mb-3">✂️</div>
+                                <h5 class="text-sm font-black text-white">حجر ورقة مقص (RPS)</h5>
+                                <p class="text-xs text-gray-400 leading-relaxed">لعبة حجر ورقة مقص كلاسيكية ضد البوت بنظام النقاط التفاعلي.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <script>
+                    async function sendGamesPanelDirect() {
+                        const channelId = document.getElementById('funTargetChannel').value;
+                        if (!channelId) return alert('يرجى اختيار القناة أولاً');
+
+                        const btn = document.getElementById('btnSendGamesPanel');
+                        btn.disabled = true; btn.textContent = 'جارٍ الإرسال...';
+
+                        try {
+                            const r = await fetch('/api/guild/${guildId}/games/send-panel', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ channelId })
+                            });
+                            const d = await r.json();
+                            if (d.success) alert('✅ تم إرسال لوحة الألعاب التفاعلية في القناة بنجاح!');
+                            else alert('❌ ' + (d.error || 'فشل الإرسال'));
+                        } catch(e) { alert('خطأ في الاتصال'); }
+                        finally { btn.disabled = false; btn.textContent = '🚀 إرسال لوحة الألعاب التفاعلية الآن'; }
+                    }
+                    </script>
+                `;
+            } else if (section === 'staff-activity') {
+                const staffLeaderboard = (database.getStaffLeaderboard ? database.getStaffLeaderboard(guildId) : []) || [];
+                const staffGoals = (database.getStaffGoals ? database.getStaffGoals(guildId) : []) || [];
+
+                formFieldsHtml = `
+                    <div class="space-y-6 text-right" dir="rtl">
+                        <!-- Header Banner -->
+                        <div class="bg-gradient-to-r from-[#1a132e] via-[#12141f] to-[#1a132e] border border-purple-500/20 p-6 rounded-3xl flex items-center justify-between shadow-2xl flex-wrap gap-3">
+                            <div class="flex items-center gap-2">
+                                <button type="button" onclick="resetAllStaffStats()" class="px-4 py-2 bg-rose-950/40 hover:bg-rose-900/60 border border-rose-800/40 text-rose-300 rounded-xl text-xs font-bold transition">
+                                    🔄 تصفير إحصائيات الأسبوع
+                                </button>
+                            </div>
+                            <div class="text-right">
+                                <h4 class="font-black text-white text-xl flex items-center gap-2 justify-end"><span>تتبع نشاط الإدارة والمشرفين (Staff Activity)</span><span>👮</span></h4>
+                                <p class="text-gray-400 text-xs mt-0.5">مراقبة دقيقة لرسائل المشرفين، ساعات تواجدهم في الرومات الصوتية، والإجراءات الإدارية المتخذة</p>
+                            </div>
+                        </div>
+
+                        <!-- Top Staff Leaderboard -->
+                        <div class="bg-[#12141f] border border-white/5 rounded-3xl p-6 shadow-xl space-y-4">
+                            <div class="flex items-center justify-between pb-3 border-b border-white/5">
+                                <span class="text-xs text-purple-400 font-bold">${staffLeaderboard.length} إداري مسجل</span>
+                                <h4 class="text-sm font-black text-white flex items-center gap-2"><span>لوحة صدارة المشرفين</span><span>🏆</span></h4>
+                            </div>
+
+                            ${staffLeaderboard.length === 0 ? `
+                                <p class="text-center py-8 text-gray-500 text-xs font-bold">لا يوجد نشاط مسجل للمشرفين حتى الآن</p>
+                            ` : `
+                                <div class="overflow-x-auto">
+                                    <table class="w-full text-right text-xs">
+                                        <thead>
+                                            <tr class="text-gray-400 border-b border-white/5">
+                                                <th class="pb-3 pr-2 font-bold">المشرف</th>
+                                                <th class="pb-3 text-center font-bold">الرسائل</th>
+                                                <th class="pb-3 text-center font-bold">الوقت الصوتي</th>
+                                                <th class="pb-3 text-center font-bold">إجراءات المود</th>
+                                                <th class="pb-3 text-center font-bold">نقاط التقييم</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-white/5">
+                                            ${staffLeaderboard.map((st, i) => {
+                                                const voiceHours = (st.voice_time / 3600).toFixed(1);
+                                                return `
+                                                <tr class="hover:bg-white/5 transition">
+                                                    <td class="py-3.5 pr-2 font-bold text-white flex items-center gap-2">
+                                                        <span class="w-6 h-6 rounded-lg bg-purple-600/20 text-purple-300 flex items-center justify-center font-mono text-[11px] font-black">${i + 1}</span>
+                                                        <span class="text-white"><@${st.user_id}></span>
+                                                    </td>
+                                                    <td class="py-3.5 text-center font-mono font-bold text-emerald-400">${st.messages_count || 0}</td>
+                                                    <td class="py-3.5 text-center font-mono font-bold text-blue-400">${voiceHours} ساعة</td>
+                                                    <td class="py-3.5 text-center font-mono font-bold text-amber-400">${st.actions_count || 0}</td>
+                                                    <td class="py-3.5 text-center font-mono font-black text-purple-400">${(st.messages_count || 0) + ((st.actions_count || 0) * 5) + Math.floor((st.voice_time || 0) / 60)}</td>
+                                                </tr>
+                                                `;
+                                            }).join('')}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            `}
+                        </div>
+                    </div>
+
+                    <script>
+                    async function resetAllStaffStats() {
+                        if (!confirm('هل أنت متأكد من تصفير جميع إحصائيات ونشاطات طاقم الإدارة؟')) return;
+                        try {
+                            const r = await fetch('/api/guild/${guildId}/staff/reset', { method: 'POST' });
+                            const d = await r.json();
+                            if (d.success) { alert('✅ تم تصفير إحصائيات النشاط بنجاح'); location.reload(); }
+                            else alert('❌ ' + (d.error || 'فشل'));
+                        } catch(e) { alert('خطأ في الاتصال'); }
+                    }
+                    </script>
+                `;
             } else if (section === 'applications') {
                 const appsList = database.getApplications(guildId) || [];
                 const pendingSubmissions = database.getPendingSubmissions(guildId) || [];
@@ -7898,6 +8253,101 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
             );
 
             await channel.send({ embeds: [panelEmbed], components: [row] });
+            res.json({ success: true });
+        } catch(e) {
+            res.status(500).json({ success: false, error: e.message });
+        }
+    });
+
+
+    // =============================================
+    // Quran Streaming API
+    // =============================================
+    app.post('/api/guild/:guildId/quran/play', express.json(), async (req, res) => {
+        try {
+            if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
+            const { guildId } = req.params;
+            const { channelId, stationKey } = req.body;
+
+            const channel = client.channels.cache.get(channelId) || await client.channels.fetch(channelId).catch(() => null);
+            if (!channel || !channel.isVoiceBased()) return res.status(404).json({ success: false, error: 'القناة الصوتية غير موجودة' });
+
+            const audioManager = require('../utils/audioPlayer');
+            const station = audioManager.quranStations[stationKey || 'cairo_radio'];
+            if (!station) return res.status(400).json({ success: false, error: 'محطة الراديو غير موجودة' });
+
+            await audioManager.playStream(channel, station.url, station.name);
+            res.json({ success: true, station: station.name });
+        } catch(e) {
+            res.status(500).json({ success: false, error: e.message });
+        }
+    });
+
+    app.post('/api/guild/:guildId/quran/stop', async (req, res) => {
+        try {
+            if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
+            const { guildId } = req.params;
+            const audioManager = require('../utils/audioPlayer');
+            audioManager.stop(guildId);
+            res.json({ success: true });
+        } catch(e) {
+            res.status(500).json({ success: false, error: e.message });
+        }
+    });
+
+    // =============================================
+    // Games / Fun Panel Direct Send API
+    // =============================================
+    app.post('/api/guild/:guildId/games/send-panel', express.json(), async (req, res) => {
+        try {
+            if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
+            const { guildId } = req.params;
+            const { channelId } = req.body;
+
+            const channel = client.channels.cache.get(channelId) || await client.channels.fetch(channelId).catch(() => null);
+            if (!channel || !channel.isTextBased()) return res.status(404).json({ success: false, error: 'القناة النصية غير موجودة' });
+
+            const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+            const embed = new EmbedBuilder()
+                .setColor('#9333ea')
+                .setTitle('🎮 مركز الألعاب والتسلية | ZENO Games')
+                .setDescription('اختر اللعبة التي تريد خوض التحدي بها الآن من خلال الأزرار التفاعلية أدناه:')
+                .addFields(
+                    { name: '❓ سؤال وجواب (Trivia)', value: 'اختبر معلوماتك العامة مع 4 خيارات تفاعلية', inline: true },
+                    { name: '⚡ أسرع كتابة (Fast Type)', value: 'كن أسرع شخص يكتب الكلمة المعروضة', inline: true },
+                    { name: '✂️ حجر ورقة مقص (RPS)', value: 'تحدَّ الذكاء الاصطناعي في جولة سريعة', inline: true },
+                    { name: '🎲 النرد الحظ', value: 'ارمِ النرد واكتشف رقم حظك اليوم', inline: true },
+                    { name: '🪙 ملك أو كتابة', value: 'اقلب العملة واختبر حظك', inline: true }
+                )
+                .setFooter({ text: 'ZENO Games • العب واستمتع مع أصدقائك' })
+                .setTimestamp();
+
+            const row1 = new ActionRowBuilder().addComponents(
+                new ButtonBuilder().setCustomId('game_btn_trivia').setLabel('سؤال وجواب ❓').setStyle(ButtonStyle.Primary),
+                new ButtonBuilder().setCustomId('game_btn_fast').setLabel('أسرع كتابة ⚡').setStyle(ButtonStyle.Success),
+                new ButtonBuilder().setCustomId('game_btn_rps').setLabel('حجر ورقة مقص ✂️').setStyle(ButtonStyle.Secondary)
+            );
+
+            const row2 = new ActionRowBuilder().addComponents(
+                new ButtonBuilder().setCustomId('game_btn_dice').setLabel('رمي النرد 🎲').setStyle(ButtonStyle.Secondary),
+                new ButtonBuilder().setCustomId('game_btn_coin').setLabel('رمي العملة 🪙').setStyle(ButtonStyle.Secondary)
+            );
+
+            await channel.send({ embeds: [embed], components: [row1, row2] });
+            res.json({ success: true });
+        } catch(e) {
+            res.status(500).json({ success: false, error: e.message });
+        }
+    });
+
+    // =============================================
+    // Staff Activity Reset API
+    // =============================================
+    app.post('/api/guild/:guildId/staff/reset', async (req, res) => {
+        try {
+            if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
+            const { guildId } = req.params;
+            if (database.resetStaffStats) database.resetStaffStats(guildId);
             res.json({ success: true });
         } catch(e) {
             res.status(500).json({ success: false, error: e.message });
