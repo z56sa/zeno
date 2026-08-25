@@ -39,10 +39,19 @@ module.exports = function (app, client) {
         res.redirect('/dashboard');
     });
 
+    // Helper to get OAuth redirect URI
+    function getOAuthRedirectUri(req) {
+        if (SecretManager.getSecret('DISCORD_REDIRECT_URI')) return SecretManager.getSecret('DISCORD_REDIRECT_URI');
+        if (process.env.DISCORD_REDIRECT_URI) return process.env.DISCORD_REDIRECT_URI;
+        const host = req.get('x-forwarded-host') || req.get('host') || 'localhost:3000';
+        const proto = req.get('x-forwarded-proto') || req.protocol || 'https';
+        return `${proto}://${host}/auth/discord/callback`;
+    }
+
     // 2. OAuth2
     app.get('/auth/discord', (req, res) => {
         const clientId = SecretManager.getSecret('DISCORD_CLIENT_ID') || process.env.DISCORD_CLIENT_ID;
-        const redirectUri = encodeURIComponent(SecretManager.getSecret('DISCORD_REDIRECT_URI') || process.env.DISCORD_REDIRECT_URI || 'https://zeno-production-56c5.up.railway.app/auth/discord/callback');
+        const redirectUri = encodeURIComponent(getOAuthRedirectUri(req));
         const authUrl = `https://discord.com/api/oauth2/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=identify%20guilds`;
         res.redirect(authUrl);
     });
@@ -54,11 +63,14 @@ module.exports = function (app, client) {
         try {
             const clientId = SecretManager.getSecret('DISCORD_CLIENT_ID') || process.env.DISCORD_CLIENT_ID;
             const clientSecret = SecretManager.getSecret('DISCORD_CLIENT_SECRET') || process.env.DISCORD_CLIENT_SECRET;
-            const redirectUri = SecretManager.getSecret('DISCORD_REDIRECT_URI') || process.env.DISCORD_REDIRECT_URI || 'https://zeno-production-56c5.up.railway.app/auth/discord/callback';
+            const redirectUri = getOAuthRedirectUri(req);
 
             const tokenRes = await fetch('https://discord.com/api/oauth2/token', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'User-Agent': 'DiscordBot (https://github.com, 1.0.0)'
+                },
                 body: new URLSearchParams({
                     client_id: clientId,
                     client_secret: clientSecret,
@@ -68,16 +80,33 @@ module.exports = function (app, client) {
                 })
             });
 
-            const tokenData = await tokenRes.json();
-            if (!tokenData.access_token) return res.redirect('/');
+            const rawText = await tokenRes.text();
+            let tokenData;
+            try {
+                tokenData = JSON.parse(rawText);
+            } catch (e) {
+                console.error('Discord OAuth Token Endpoint returned non-JSON response (Status:', tokenRes.status, '):', rawText.substring(0, 300));
+                return res.redirect('/');
+            }
+
+            if (!tokenData || !tokenData.access_token) {
+                console.error('Discord OAuth Token Exchange Failed:', tokenData);
+                return res.redirect('/');
+            }
 
             const userRes = await fetch('https://discord.com/api/users/@me', {
-                headers: { Authorization: `Bearer ${tokenData.access_token}` }
+                headers: {
+                    Authorization: `Bearer ${tokenData.access_token}`,
+                    'User-Agent': 'DiscordBot (https://github.com, 1.0.0)'
+                }
             });
             const userData = await userRes.json();
 
             const guildsRes = await fetch('https://discord.com/api/users/@me/guilds', {
-                headers: { Authorization: `Bearer ${tokenData.access_token}` }
+                headers: {
+                    Authorization: `Bearer ${tokenData.access_token}`,
+                    'User-Agent': 'DiscordBot (https://github.com, 1.0.0)'
+                }
             });
             const allGuilds = await guildsRes.json();
 
