@@ -6309,152 +6309,210 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                             </div>
                         </div>
 
-                        <!-- Games Feature Cards — All Commands -->
-                        <div class="bg-[#12141f] border border-white/5 p-5 rounded-3xl shadow-xl">
-                            <h4 class="text-sm font-black text-white border-b border-white/5 pb-3 mb-4 flex items-center gap-2 justify-end">
-                                <span>جميع ألعاب ونظام التسلية</span><span>🎮</span>
-                            </h4>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-
-                                <!-- Trivia -->
-                                <div class="bg-[#0b0d14] border border-purple-500/20 hover:border-purple-500/50 p-4 rounded-2xl text-right transition group">
-                                    <div class="flex items-center justify-between mb-3">
-                                        <div class="w-9 h-9 rounded-xl bg-purple-600/20 text-purple-400 flex items-center justify-center text-lg border border-purple-500/30">❓</div>
-                                        <span class="text-sm font-black text-white font-mono" dir="ltr">/trivia</span>
-                                    </div>
-                                    <p class="text-[11px] text-gray-400 leading-relaxed">سؤال وجواب بأسئلة ثقافية وإسلامية وتنافس فوري في الشات</p>
-                                    <div class="mt-3 flex justify-end">
-                                        <span class="text-[10px] bg-purple-950/60 text-purple-300 border border-purple-800/40 px-2 py-0.5 rounded-lg font-bold">معلومات عامة</span>
-                                    </div>
+                        <!-- Full Interactive Game Commands Management List (Toggles, Custom Aliases, Status) -->
+                        <div class="bg-[#12141f] border border-white/5 p-6 rounded-3xl space-y-4 shadow-xl">
+                            <div class="flex items-center justify-between border-b border-white/5 pb-4">
+                                <div class="flex items-center gap-2">
+                                    <span id="funSaveIndicator" class="text-xs font-bold text-emerald-400 bg-emerald-950/60 px-2.5 py-1 rounded-lg opacity-0 transition-opacity duration-300">✓ حُفظت الإعدادات</span>
+                                    <button type="button" onclick="toggleAllFunCmds(false)" class="px-3.5 py-1.5 bg-rose-950/40 hover:bg-rose-900/60 text-rose-400 border border-rose-800/40 rounded-xl text-xs font-bold transition flex items-center gap-1">
+                                        <span>✕</span><span>تعطيل الكل</span>
+                                    </button>
+                                    <button type="button" onclick="toggleAllFunCmds(true)" class="px-3.5 py-1.5 bg-emerald-950/40 hover:bg-emerald-900/60 text-emerald-400 border border-emerald-800/40 rounded-xl text-xs font-bold transition flex items-center gap-1">
+                                        <span>✓</span><span>تفعيل الكل</span>
+                                    </button>
                                 </div>
-
-                                <!-- Fast Type -->
-                                <div class="bg-[#0b0d14] border border-emerald-500/20 hover:border-emerald-500/50 p-4 rounded-2xl text-right transition group">
-                                    <div class="flex items-center justify-between mb-3">
-                                        <div class="w-9 h-9 rounded-xl bg-emerald-600/20 text-emerald-400 flex items-center justify-center text-lg border border-emerald-500/30">⚡</div>
-                                        <span class="text-sm font-black text-white font-mono" dir="ltr">/games fast</span>
-                                    </div>
-                                    <p class="text-[11px] text-gray-400 leading-relaxed">تحدي كتابة كلمات عربية بأسرع وقت، أول من يكتبها يفوز</p>
-                                    <div class="mt-3 flex justify-end">
-                                        <span class="text-[10px] bg-emerald-950/60 text-emerald-300 border border-emerald-800/40 px-2 py-0.5 rounded-lg font-bold">سرعة الكتابة</span>
-                                    </div>
-                                </div>
-
-                                <!-- RPS -->
-                                <div class="bg-[#0b0d14] border border-amber-500/20 hover:border-amber-500/50 p-4 rounded-2xl text-right transition group">
-                                    <div class="flex items-center justify-between mb-3">
-                                        <div class="w-9 h-9 rounded-xl bg-amber-600/20 text-amber-400 flex items-center justify-center text-lg border border-amber-500/30">✂️</div>
-                                        <span class="text-sm font-black text-white font-mono" dir="ltr">/games rps</span>
-                                    </div>
-                                    <p class="text-[11px] text-gray-400 leading-relaxed">حجر ورقة مقص كلاسيكية ضد البوت بنظام الأزرار التفاعلية</p>
-                                    <div class="mt-3 flex justify-end">
-                                        <span class="text-[10px] bg-amber-950/60 text-amber-300 border border-amber-800/40 px-2 py-0.5 rounded-lg font-bold">ضد البوت</span>
-                                    </div>
-                                </div>
-
-                                <!-- Chairs -->
-                                <div class="bg-[#0b0d14] border border-pink-500/20 hover:border-pink-500/50 p-4 rounded-2xl text-right transition group">
-                                    <div class="flex items-center justify-between mb-3">
-                                        <div class="w-9 h-9 rounded-xl bg-pink-600/20 text-pink-400 flex items-center justify-center text-lg border border-pink-500/30">🪑</div>
-                                        <span class="text-sm font-black text-white font-mono" dir="ltr">/chairs</span>
-                                    </div>
-                                    <p class="text-[11px] text-gray-400 leading-relaxed">الكراسي الموسيقية التفاعلية، يتنافس الأعضاء على الضغط أولاً</p>
-                                    <div class="mt-3 flex justify-end">
-                                        <span class="text-[10px] bg-pink-950/60 text-pink-300 border border-pink-800/40 px-2 py-0.5 rounded-lg font-bold">جماعية</span>
-                                    </div>
-                                </div>
-
-                                <!-- Coinflip -->
-                                <div class="bg-[#0b0d14] border border-yellow-500/20 hover:border-yellow-500/50 p-4 rounded-2xl text-right transition group">
-                                    <div class="flex items-center justify-between mb-3">
-                                        <div class="w-9 h-9 rounded-xl bg-yellow-600/20 text-yellow-400 flex items-center justify-center text-lg border border-yellow-500/30">🪙</div>
-                                        <span class="text-sm font-black text-white font-mono" dir="ltr">/coinflip</span>
-                                    </div>
-                                    <p class="text-[11px] text-gray-400 leading-relaxed">رمي العملة المعدنية، توقع صورة أو كتابة والنتيجة عشوائية</p>
-                                    <div class="mt-3 flex justify-end">
-                                        <span class="text-[10px] bg-yellow-950/60 text-yellow-300 border border-yellow-800/40 px-2 py-0.5 rounded-lg font-bold">حظ وعشوائية</span>
-                                    </div>
-                                </div>
-
-                                <!-- Fight -->
-                                <div class="bg-[#0b0d14] border border-red-500/20 hover:border-red-500/50 p-4 rounded-2xl text-right transition group">
-                                    <div class="flex items-center justify-between mb-3">
-                                        <div class="w-9 h-9 rounded-xl bg-red-600/20 text-red-400 flex items-center justify-center text-lg border border-red-500/30">⚔️</div>
-                                        <span class="text-sm font-black text-white font-mono" dir="ltr">/fight</span>
-                                    </div>
-                                    <p class="text-[11px] text-gray-400 leading-relaxed">تحدي معركة ضد عضو آخر، تُحدَّد النتيجة بضربات عشوائية</p>
-                                    <div class="mt-3 flex justify-end">
-                                        <span class="text-[10px] bg-red-950/60 text-red-300 border border-red-800/40 px-2 py-0.5 rounded-lg font-bold">تحدي بين أعضاء</span>
-                                    </div>
-                                </div>
-
-                                <!-- Hide & Seek -->
-                                <div class="bg-[#0b0d14] border border-teal-500/20 hover:border-teal-500/50 p-4 rounded-2xl text-right transition group">
-                                    <div class="flex items-center justify-between mb-3">
-                                        <div class="w-9 h-9 rounded-xl bg-teal-600/20 text-teal-400 flex items-center justify-center text-lg border border-teal-500/30">🙈</div>
-                                        <span class="text-sm font-black text-white font-mono" dir="ltr">/hideseek</span>
-                                    </div>
-                                    <p class="text-[11px] text-gray-400 leading-relaxed">لعبة الغميضة، يختبئ أحد الأعضاء والبقية يبحثون باستخدام أزرار</p>
-                                    <div class="mt-3 flex justify-end">
-                                        <span class="text-[10px] bg-teal-950/60 text-teal-300 border border-teal-800/40 px-2 py-0.5 rounded-lg font-bold">استراتيجية</span>
-                                    </div>
-                                </div>
-
-                                <!-- Mafia -->
-                                <div class="bg-[#0b0d14] border border-indigo-500/20 hover:border-indigo-500/50 p-4 rounded-2xl text-right transition group">
-                                    <div class="flex items-center justify-between mb-3">
-                                        <div class="w-9 h-9 rounded-xl bg-indigo-600/20 text-indigo-400 flex items-center justify-center text-lg border border-indigo-500/30">🎭</div>
-                                        <span class="text-sm font-black text-white font-mono" dir="ltr">/mafia</span>
-                                    </div>
-                                    <p class="text-[11px] text-gray-400 leading-relaxed">لعبة المافيا الجماعية، توزيع أدوار سرية وتصويت للكشف عن المافيا</p>
-                                    <div class="mt-3 flex justify-end">
-                                        <span class="text-[10px] bg-indigo-950/60 text-indigo-300 border border-indigo-800/40 px-2 py-0.5 rounded-lg font-bold">أدوار خفية</span>
-                                    </div>
-                                </div>
-
-                                <!-- Roulette -->
-                                <div class="bg-[#0b0d14] border border-rose-500/20 hover:border-rose-500/50 p-4 rounded-2xl text-right transition group">
-                                    <div class="flex items-center justify-between mb-3">
-                                        <div class="w-9 h-9 rounded-xl bg-rose-600/20 text-rose-400 flex items-center justify-center text-lg border border-rose-500/30">🎰</div>
-                                        <span class="text-sm font-black text-white font-mono" dir="ltr">/roulette</span>
-                                    </div>
-                                    <p class="text-[11px] text-gray-400 leading-relaxed">الروليت الروسي والمخاطرة التفاعلية بين الأعضاء</p>
-                                    <div class="mt-3 flex justify-end">
-                                        <span class="text-[10px] bg-rose-950/60 text-rose-300 border border-rose-800/40 px-2 py-0.5 rounded-lg font-bold">مخاطرة وإثارة</span>
-                                    </div>
-                                </div>
-
-                                <!-- Gamble / Casino -->
-                                <div class="bg-[#0b0d14] border border-orange-500/20 hover:border-orange-500/50 p-4 rounded-2xl text-right transition group">
-                                    <div class="flex items-center justify-between mb-3">
-                                        <div class="w-9 h-9 rounded-xl bg-orange-600/20 text-orange-400 flex items-center justify-center text-lg border border-orange-500/30">🎲</div>
-                                        <span class="text-sm font-black text-white font-mono" dir="ltr">/gamble</span>
-                                    </div>
-                                    <p class="text-[11px] text-gray-400 leading-relaxed">مراهنة الكازينو وعملات النجوم ومضاعفة الرصيد</p>
-                                    <div class="mt-3 flex justify-end">
-                                        <span class="text-[10px] bg-orange-950/60 text-orange-300 border border-orange-800/40 px-2 py-0.5 rounded-lg font-bold">كازينو ونجوم</span>
-                                    </div>
-                                </div>
-
-                            </div>
-                        </div>
-
-                        <!-- Games Command Quick-Reference -->
-                        <div class="bg-[#12141f] border border-white/5 p-5 rounded-3xl shadow-xl">
-                            <h4 class="text-sm font-black text-white border-b border-white/5 pb-3 mb-4 flex items-center gap-2 justify-end">
-                                <span>لوحة الألعاب المركزية</span><span>🕹️</span>
-                            </h4>
-                            <div class="bg-[#0b0d14] border border-purple-500/20 rounded-2xl p-4 flex items-center justify-between gap-4">
-                                <span class="text-xs text-gray-400">تجمع جميع الألعاب في رسالة واحدة مع أزرار تفاعلية</span>
-                                <div class="flex items-center gap-3 flex-shrink-0">
-                                    <span class="font-mono font-black text-purple-300 text-sm bg-purple-950/50 px-3 py-1 rounded-xl border border-purple-800/40" dir="ltr">/games panel</span>
-                                    <div class="w-8 h-8 rounded-xl bg-purple-600/20 text-purple-400 flex items-center justify-center text-base">🎮</div>
+                                <div class="text-right">
+                                    <h4 class="text-sm font-black text-white flex items-center gap-2 justify-end">
+                                        <span>إدارة وتخصيص أوامر الألعاب</span>
+                                        <span>🎮</span>
+                                    </h4>
+                                    <p class="text-gray-400 text-xs mt-0.5">تحكم في تشغيل/إيقاف وتعديل اختصارات وصلاحيات كل لعبة على حدة</p>
                                 </div>
                             </div>
+
+                            <!-- List of Fun Commands with On/Off and Custom Aliases modal -->
+                            <div id="funCmdsContainer" class="space-y-3 pt-2"></div>
                         </div>
                     </div>
 
+                    <!-- Custom Aliases Modal -->
+                    <div id="funAliasModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+                        <div class="bg-[#12141f] border border-purple-500/30 rounded-3xl max-w-md w-full p-6 space-y-4 shadow-2xl text-right" dir="rtl">
+                            <div class="flex items-center justify-between border-b border-white/5 pb-3">
+                                <button type="button" onclick="closeFunAliasModal()" class="text-gray-400 hover:text-white text-lg font-bold">✕</button>
+                                <div class="flex items-center gap-2">
+                                    <h5 class="text-white font-black text-sm">تخصيص واختصار الأمر</h5>
+                                    <span id="modalFunCmdIcon" class="text-base">🎮</span>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-300 mb-1">الأمر الأصلي</label>
+                                <input type="text" id="modalFunCmdName" readonly class="w-full bg-[#0b0d14] border border-white/5 rounded-xl px-3 py-2 text-xs text-purple-400 font-mono" dir="ltr">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-300 mb-1">الاسم أو الاختصار المخصص (Alias)</label>
+                                <input type="text" id="modalFunCmdAlias" placeholder="مثال: مسابقة, لعبة, قتال..." class="w-full bg-[#0b0d14] border border-white/10 focus:border-purple-500 rounded-xl px-3 py-2 text-xs text-white outline-none">
+                                <p class="text-[10px] text-gray-400 mt-1">يمكنك استخدام هذا الاختصار في الشات لاستدعاء اللعبة مباشرة</p>
+                            </div>
+                            <div class="flex items-center justify-end gap-2 pt-2 border-t border-white/5">
+                                <button type="button" onclick="closeFunAliasModal()" class="px-4 py-2 bg-white/5 hover:bg-white/10 text-gray-300 rounded-xl text-xs font-bold transition">إلغاء</button>
+                                <button type="button" onclick="saveFunAlias()" class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold transition shadow-lg">حفظ التغييرات</button>
+                            </div>
+                        </div>
+                    </div>
+                    </div>
+
                     <script>
+                    (function() {
+                        var funGamesList = [
+                            { name: '/trivia', desc: 'مسابقة سؤال وجواب بمعلومات عامة وإسلامية', icon: '❓', defaultAlias: 'مسابقة' },
+                            { name: '/games fast', desc: 'تحدي أسرع كتابة كلمات عربية في الشات', icon: '⚡', defaultAlias: 'سرعة' },
+                            { name: '/games rps', desc: 'حجر ورقة مقص ضد البوت بنظام النقاط', icon: '✂️', defaultAlias: 'مقص' },
+                            { name: '/chairs', desc: 'لعبة الكراسي الموسيقية الجماعية', icon: '🪑', defaultAlias: 'كراسي' },
+                            { name: '/coinflip', desc: 'رمي العملة وتوقع صورة أو كتابة', icon: '🪙', defaultAlias: 'عملة' },
+                            { name: '/fight', desc: 'تحدي معركة وقتال ضد عضو آخر', icon: '⚔️', defaultAlias: 'قتال' },
+                            { name: '/hideseek', desc: 'لعبة الغميضة والاختباء الجماعية', icon: '🙈', defaultAlias: 'غميضة' },
+                            { name: '/mafia', desc: 'لعبة المافيا والأدوار السرية والتصويت', icon: '🎭', defaultAlias: 'مافيا' },
+                            { name: '/roulette', desc: 'لعبة الروليت الروسي والمخاطرة', icon: '🎰', defaultAlias: 'روليت' },
+                            { name: '/gamble', desc: 'مراهنات الكازينو وعملات Star Coins', icon: '🎲', defaultAlias: 'كازينو' }
+                        ];
+
+                        var disabledCmds = {};
+                        var customAliases = {};
+                        var currentModalCmd = null;
+
+                        // Load initial disabled commands & aliases from settings
+                        try {
+                            var initialDisabled = ${JSON.stringify(settings.disabled_commands ? (typeof settings.disabled_commands === 'string' ? JSON.parse(settings.disabled_commands) : settings.disabled_commands) : [])};
+                            if (Array.isArray(initialDisabled)) {
+                                for (var i = 0; i < initialDisabled.length; i++) disabledCmds[initialDisabled[i]] = true;
+                            }
+                            var initialAliases = ${JSON.stringify(settings.custom_aliases ? (typeof settings.custom_aliases === 'string' ? JSON.parse(settings.custom_aliases) : settings.custom_aliases) : {})};
+                            if (initialAliases && typeof initialAliases === 'object') customAliases = initialAliases;
+                        } catch(e) {}
+
+                        function isEnabled(cmdName) { return !disabledCmds[cmdName]; }
+
+                        function renderFunCommands() {
+                            var container = document.getElementById('funCmdsContainer');
+                            if (!container) return;
+                            var html = '';
+                            for (var i = 0; i < funGamesList.length; i++) {
+                                var item = funGamesList[i];
+                                var en = isEnabled(item.name);
+                                var alias = customAliases[item.name] || '';
+                                
+                                html += '<div class="bg-[#0b0d14] border border-white/5 p-4 rounded-2xl flex items-center justify-between hover:border-purple-500/40 transition' + (en ? '' : ' opacity-50') + '" data-cmd="' + item.name + '">';
+                                
+                                // Controls: Toggle + Edit alias button
+                                html += '<div class="flex items-center gap-3">';
+                                html += '<label class="toggle"><input type="checkbox" data-fun-cmd="' + item.name + '"' + (en ? ' checked' : '') + '><span class="slider"></span></label>';
+                                html += '<button type="button" onclick="openFunAliasModal(\'' + item.name + '\', \'' + item.icon + '\')" title="تعديل الاختصار" class="px-3 py-1.5 bg-[#1a1d2d] hover:bg-purple-600/30 text-purple-300 border border-purple-500/30 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow">';
+                                html += '<span>⚙️</span><span>' + (alias ? 'اختصار: ' + alias : 'تخصيص الاختصار') + '</span>';
+                                html += '</button>';
+                                html += '</div>';
+
+                                // Info: Name + description + icon
+                                html += '<div class="flex items-center gap-3">';
+                                html += '<div class="text-right">';
+                                html += '<div class="flex items-center justify-end gap-2">';
+                                if (alias) html += '<span class="px-2 py-0.5 bg-purple-950/60 text-purple-300 border border-purple-800/40 rounded-lg text-[10px] font-bold">بديل: ' + alias + '</span>';
+                                html += '<span class="font-black text-white text-xs font-mono" dir="ltr">' + item.name + '</span>';
+                                html += '</div>';
+                                html += '<p class="text-[11px] text-gray-400 mt-0.5">' + item.desc + '</p>';
+                                html += '</div>';
+                                html += '<div class="w-10 h-10 rounded-2xl bg-purple-600/20 text-purple-400 flex items-center justify-center text-lg border border-purple-500/30 shadow-inner">' + item.icon + '</div>';
+                                html += '</div>';
+
+                                html += '</div>';
+                            }
+                            container.innerHTML = html;
+
+                            // Checkbox listener
+                            var checks = container.querySelectorAll('input[type="checkbox"][data-fun-cmd]');
+                            for (var j = 0; j < checks.length; j++) {
+                                (function(cb) {
+                                    cb.addEventListener('change', function() {
+                                        var cmdName = cb.getAttribute('data-fun-cmd');
+                                        disabledCmds[cmdName] = !cb.checked;
+                                        var card = cb.closest('div[data-cmd]');
+                                        if (card) {
+                                            if (cb.checked) card.classList.remove('opacity-50');
+                                            else card.classList.add('opacity-50');
+                                        }
+                                        saveFunSettings();
+                                    });
+                                })(checks[j]);
+                            }
+                        }
+
+                        function showFunSaved() {
+                            var el = document.getElementById('funSaveIndicator');
+                            if (el) {
+                                el.classList.remove('opacity-0');
+                                setTimeout(function() { el.classList.add('opacity-0'); }, 2000);
+                            }
+                        }
+
+                        function saveFunSettings() {
+                            try {
+                                var gId = window.location.pathname.split('/')[2];
+                                if (!gId) return;
+                                var disArr = Object.keys(disabledCmds).filter(function(k) { return disabledCmds[k]; });
+                                var xhr = new XMLHttpRequest();
+                                xhr.open('POST', '/api/guild/' + gId + '/settings', true);
+                                xhr.setRequestHeader('Content-Type', 'application/json');
+                                xhr.onload = function() {
+                                    try { if (JSON.parse(xhr.responseText).success) showFunSaved(); } catch(e) {}
+                                };
+                                xhr.send(JSON.stringify({
+                                    disabled_commands: JSON.stringify(disArr),
+                                    custom_aliases: JSON.stringify(customAliases)
+                                }));
+                            } catch(e) {}
+                        }
+
+                        window.toggleAllFunCmds = function(enable) {
+                            for (var i = 0; i < funGamesList.length; i++) {
+                                disabledCmds[funGamesList[i].name] = !enable;
+                            }
+                            saveFunSettings();
+                            renderFunCommands();
+                        };
+
+                        window.openFunAliasModal = function(cmdName, icon) {
+                            currentModalCmd = cmdName;
+                            var modal = document.getElementById('funAliasModal');
+                            var nameEl = document.getElementById('modalFunCmdName');
+                            var aliasEl = document.getElementById('modalFunCmdAlias');
+                            var iconEl = document.getElementById('modalFunCmdIcon');
+                            if (nameEl) nameEl.value = cmdName;
+                            if (aliasEl) aliasEl.value = customAliases[cmdName] || '';
+                            if (iconEl) iconEl.textContent = icon || '🎮';
+                            if (modal) modal.classList.remove('hidden');
+                        };
+
+                        window.closeFunAliasModal = function() {
+                            var modal = document.getElementById('funAliasModal');
+                            if (modal) modal.classList.add('hidden');
+                            currentModalCmd = null;
+                        };
+
+                        window.saveFunAlias = function() {
+                            if (!currentModalCmd) return;
+                            var aliasEl = document.getElementById('modalFunCmdAlias');
+                            var val = aliasEl ? aliasEl.value.trim() : '';
+                            if (val) customAliases[currentModalCmd] = val;
+                            else delete customAliases[currentModalCmd];
+                            saveFunSettings();
+                            closeFunAliasModal();
+                            renderFunCommands();
+                        };
+
+                        // Run on page load
+                        renderFunCommands();
+                    })();
+
                     async function sendGamesPanelDirect() {
                         const channelId = document.getElementById('funTargetChannel').value;
                         if (!channelId) return alert('يرجى اختيار القناة أولاً');
