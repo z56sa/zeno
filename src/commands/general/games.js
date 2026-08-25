@@ -1,8 +1,10 @@
 // ============================================================
 // FILE: src/commands/general/games.js
-// ألعاب وتسلية تفاعلية شاملة (لوحة أزرار وألعاب ذكاء وتحديات)
+// ألعاب وتسلية تفاعلية شاملة (لوحة أزرار وألعاب ذكاء وتحديات تفاعلية بالصور والجوائز)
 // ============================================================
-const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, AttachmentBuilder } = require('discord.js');
+const db = require('../../database');
+const canvasUtil = require('../../utils/canvas');
 
 const TRIVIA_QUESTIONS = [
   { q: "ما هي عاصمة أستراليا؟", options: ["سيدني", "كانبيرا", "ملبورن", "بيرث"], correct: 1 },
@@ -12,12 +14,20 @@ const TRIVIA_QUESTIONS = [
   { q: "ما هو العنصر الكيميائي الذي رمزه O؟", options: ["الذهب", "الحديد", "الأكسجين", "الفضة"], correct: 2 },
   { q: "في أي قارة تقع دولة البرازيل؟", options: ["آسيا", "أفريقيا", "أمريكا الجنوبية", "أوروبا"], correct: 2 },
   { q: "ما هي أطول آية في القرآن الكريم؟", options: ["آية الكرسي", "آية الدين", "آية النور", "آية الملك"], correct: 1 },
-  { q: "ما هي عاصمة اليابان؟", options: ["كيوتو", "طوكيو", "أوساكا", "هيروشيما"], correct: 1 }
+  { q: "ما هي عاصمة اليابان؟", options: ["كيوتو", "طوكيو", "أوساكا", "هيروشيما"], correct: 1 },
+  { q: "من هو مخترع المصباح الكهربائي؟", options: ["توماس إديسون", "نيكولا تسلا", "ألكسندر بيل", "آينشتاين"], correct: 0 },
+  { q: "ما هي أكبر صحراء حارة في العالم؟", options: ["صحراء غوبي", "الصحراء الكبرى", "صحراء كالاهاري", "الربع الخالي"], correct: 1 },
+  { q: "كم عدد عظام جسم الإنسان البالغ؟", options: ["206", "214", "198", "250"], correct: 0 },
+  { q: "ما هي عملة دولة اليابان؟", options: ["اليوان", "الوون", "الين", "الدولار"], correct: 2 },
+  { q: "ما هو أطول نهر في العالم؟", options: ["نهر الأمازون", "نهر النيل", "نهر المسيسيبي", "نهر الدانوب"], correct: 1 },
+  { q: "في أي عام هبط الإنسان على سطح القمر لأول مرة؟", options: ["1965", "1969", "1972", "1959"], correct: 1 }
 ];
 
 const FAST_WORDS = [
   "القسطنطينية", "الاستقلال", "التكنولوجيا", "الذكاء_الاصطناعي", "المملكة_العربية_السعودية",
-  "إمبراطورية", "ديسكورد_زينو", "برمجة_المستقبل", "الاستراتيجية", "الجمهورية"
+  "إمبراطورية", "ديسكورد_زينو", "برمجة_المستقبل", "الاستراتيجية", "الجمهورية",
+  "الأوتوقراطية", "اللوجستيات", "الإلكترونيات", "الكهرومغناطيسية", "البطليموس",
+  "الميكانيكا", "الأوراكل", "السيمفونية", "الأنثروبولوجيا", "الأيديولوجيا"
 ];
 
 module.exports = {
@@ -31,16 +41,16 @@ module.exports = {
       sub.setName('panel').setDescription('عرض لوحة الألعاب المباشرة مع أزرار تفاعلية')
     )
     .addSubcommand(sub =>
-      sub.setName('trivia').setDescription('لعبة سؤال وجواب مع خيارات')
+      sub.setName('trivia').setDescription('لعبة سؤال وجواب مع خيارات تفاعلية وجوائز')
     )
     .addSubcommand(sub =>
-      sub.setName('fast').setDescription('لعبة أسرع كتابة كلمة')
+      sub.setName('fast').setDescription('لعبة أسرع كتابة كلمة مع بطاقة مصممة')
     )
     .addSubcommand(sub =>
-      sub.setName('rps').setDescription('لعبة حجر ورقة مقص')
+      sub.setName('rps').setDescription('لعبة حجر ورقة مقص ضد البوت مع خيارات فورية')
         .addStringOption(opt =>
-          opt.setName('choice').setDescription('اختر حركتك')
-            .setRequired(true)
+          opt.setName('choice').setDescription('اختر حركتك (اختياري، إن لم تختر ستظهر لك أزرار)')
+            .setRequired(false)
             .addChoices(
               { name: '🪨 حجر (Rock)', value: 'rock' },
               { name: '📄 ورقة (Paper)', value: 'paper' },
@@ -50,21 +60,26 @@ module.exports = {
     ),
 
   async execute(interaction) {
-    const sub = interaction.options.getSubcommand();
+    const sub = interaction.options?.getSubcommand ? interaction.options.getSubcommand() : 'panel';
 
     if (sub === 'panel') {
       const embed = new EmbedBuilder()
         .setColor('#9333ea')
-        .setTitle('🎮 مركز الألعاب والتسلية | ZENO Games')
-        .setDescription('اختر اللعبة التي تريد خوض التحدي بها الآن من خلال الأزرار التفاعلية أدناه:')
-        .addFields(
-          { name: '❓ سؤال وجواب (Trivia)', value: 'اختبر معلوماتك العامة مع 4 خيارات تفاعلية', inline: true },
-          { name: '⚡ أسرع كتابة (Fast Type)', value: 'كن أسرع شخص يكتب الكلمة المعروضة', inline: true },
-          { name: '✂️ حجر ورقة مقص (RPS)', value: 'تحدَّ الذكاء الاصطناعي في جولة سريعة', inline: true },
-          { name: '🎲 النرد الحظ', value: 'ارمِ النرد واكتشف رقم حظك اليوم', inline: true },
-          { name: '🪙 ملك أو كتابة', value: 'اقلب العملة واختبر حظك', inline: true }
+        .setTitle('🎮 مركز الألعاب والتسلية التفاعلي | ZENO Games')
+        .setDescription(
+          `مرحباً بك في ساحة التحدي والتسلية! اختر اللعبة التي تفضلها من الأزرار التفاعلية أدناه وتنافس لجمع نقاط وعملات النجوم **Star Coins ⭐**:\n\n` +
+          `✨ **الألعاب المتاحة:**\n` +
+          `• ❓ **سؤال وجواب (Trivia):** 4 خيارات تفاعلية لاختبار سرعة بديهتك وثقافتك\n` +
+          `• ⚡ **أسرع كتابة (Fast Type):** بطاقة مصورة وأول من يكتب يفوز بالمكافأة\n` +
+          `• ✂️ **حجر ورقة مقص (RPS):** تحدَّ البوت بأزرار حية مع رهان ومكافآت\n` +
+          `• 🎲 **رمي النرد (Dice):** جرب حظك واحصل على نقاط فورية\n` +
+          `• 🪙 **رمي العملة (Coinflip):** اختر وجهك وراهن على الفوز`
         )
-        .setFooter({ text: 'ZENO Games • العب واستمتع مع أصدقائك' })
+        .addFields(
+          { name: '🏆 الجوائز', value: 'الفائزون يحصلون على عملات نقدية تضاف فورياً لمحفظتهم!', inline: true },
+          { name: '⚡ الاستجابة', value: 'تفاعل فوري مع إحصائيات وبطاقات جرافيكس', inline: true }
+        )
+        .setFooter({ text: 'ZENO Games • العب واستمتع مع أصدقائك بالسيرفر', iconURL: interaction.guild?.iconURL() || undefined })
         .setTimestamp();
 
       const row1 = new ActionRowBuilder().addComponents(
@@ -90,61 +105,57 @@ module.exports = {
     }
 
     if (sub === 'rps') {
-      const userChoice = interaction.options.getString('choice');
-      const choices = ['rock', 'paper', 'scissors'];
-      const botChoice = choices[Math.floor(Math.random() * choices.length)];
-
-      const choiceNames = { rock: '🪨 حجر', paper: '📄 ورقة', scissors: '✂️ مقص' };
-
-      let result = '';
-      let color = '#9333ea';
-
-      if (userChoice === botChoice) {
-        result = '🤝 **تعادل!** اخترتما نفس الحركة.';
-        color = '#eab308';
-      } else if (
-        (userChoice === 'rock' && botChoice === 'scissors') ||
-        (userChoice === 'paper' && botChoice === 'rock') ||
-        (userChoice === 'scissors' && botChoice === 'paper')
-      ) {
-        result = '🎉 **مبروك، لقد فزت على البوت!** 🏆';
-        color = '#10b981';
+      const userChoice = interaction.options?.getString ? interaction.options.getString('choice') : null;
+      if (userChoice) {
+        return handleRpsResult(interaction, userChoice);
       } else {
-        result = '🤖 **البوت فاز عليك هذه المرة!** حظاً أوفر في الجولة القادمة.';
-        color = '#ef4444';
+        return startInteractiveRps(interaction);
       }
-
-      const embed = new EmbedBuilder()
-        .setColor(color)
-        .setTitle('✂️ حجر - ورقة - مقص')
-        .setDescription(`👤 **اختيارك:** ${choiceNames[userChoice]}\n🤖 **اختيار البوت:** ${choiceNames[botChoice]}\n\n${result}`)
-        .setFooter({ text: interaction.user.username, iconURL: interaction.user.displayAvatarURL({ dynamic: true }) })
-        .setTimestamp();
-
-      return interaction.reply({ embeds: [embed] });
     }
   }
 };
 
+// ==========================================
+// 1. لعبة سؤال وجواب (Trivia Interactive)
+// ==========================================
 async function runTrivia(interaction) {
   const item = TRIVIA_QUESTIONS[Math.floor(Math.random() * TRIVIA_QUESTIONS.length)];
+  const reward = Math.floor(Math.random() * 50) + 30; // 30 - 80 coins
+
+  let cardBuffer = null;
+  try {
+    if (canvasUtil.createTriviaCard) {
+      cardBuffer = await canvasUtil.createTriviaCard(item.q, 20);
+    }
+  } catch(e) {}
 
   const embed = new EmbedBuilder()
     .setColor('#9333ea')
-    .setTitle('❓ سؤال وجواب | Trivia')
-    .setDescription(`### ${item.q}\n\nاختر الإجابة الصحيحة بالضغط على الزر المناسب خلال 20 ثانية:`)
-    .setFooter({ text: 'لديك 20 ثانية للإجابة' })
+    .setTitle('❓ سؤال وجواب | Trivia Quiz')
+    .setDescription(
+      `### 💡 ${item.q}\n\n` +
+      `اختر الإجابة الصحيحة بالضغط على الزر المناسب أدناه خلال **20 ثانية**:\n` +
+      `🎁 **مكافأة الإجابة الصحيحة:** \`+${reward} ⭐ Star Coins\``
+    )
+    .setFooter({ text: 'لديك 20 ثانية للإجابة | اضغط زر الإجابة الصحيحة' })
     .setTimestamp();
+
+  const files = [];
+  if (cardBuffer) {
+    const attachment = new AttachmentBuilder(cardBuffer, { name: 'trivia.png' });
+    embed.setImage('attachment://trivia.png');
+    files.push(attachment);
+  }
 
   const buttons = item.options.map((opt, i) =>
     new ButtonBuilder()
       .setCustomId(`trivia_ans_${i}`)
-      .setLabel(opt)
+      .setLabel(`${i + 1}. ${opt}`)
       .setStyle(ButtonStyle.Primary)
   );
 
   const row = new ActionRowBuilder().addComponents(buttons);
-  const replyMsg = await interaction.reply({ embeds: [embed], components: [row], fetchReply: true });
+  const replyMsg = await interaction.reply({ embeds: [embed], components: [row], files, fetchReply: true });
 
   const collector = replyMsg.createMessageComponentCollector({
     filter: i => i.user.id === interaction.user.id,
@@ -156,37 +167,100 @@ async function runTrivia(interaction) {
     const selected = parseInt(i.customId.replace('trivia_ans_', ''));
     const isCorrect = selected === item.correct;
 
+    if (isCorrect && interaction.guild) {
+      try { db.addCoins(i.user.id, interaction.guild.id, reward); } catch(e) {}
+    }
+
+    const disabledButtons = item.options.map((opt, idx) => {
+      const btn = new ButtonBuilder()
+        .setCustomId(`trivia_done_${idx}`)
+        .setLabel(`${idx + 1}. ${opt}`)
+        .setDisabled(true);
+
+      if (idx === item.correct) {
+        btn.setStyle(ButtonStyle.Success);
+      } else if (idx === selected && !isCorrect) {
+        btn.setStyle(ButtonStyle.Danger);
+      } else {
+        btn.setStyle(ButtonStyle.Secondary);
+      }
+      return btn;
+    });
+
+    const resultRow = new ActionRowBuilder().addComponents(disabledButtons);
+
     const resultEmbed = new EmbedBuilder()
       .setColor(isCorrect ? '#10b981' : '#ef4444')
-      .setTitle(isCorrect ? '✅ إجابة صحيحة! أحسنت' : '❌ إجابة خاطئة!')
-      .setDescription(`**السؤال:** ${item.q}\n**إجابتك:** ${item.options[selected]}\n**الإجابة الصحيحة:** ${item.options[item.correct]}`)
+      .setTitle(isCorrect ? '🎉 إجابة صحيحة وممتازة!' : '❌ للأسف، إجابة خاطئة!')
+      .setDescription(
+        `**السؤال:** ${item.q}\n\n` +
+        `👤 **إجابتك:** \`${item.options[selected]}\` ${isCorrect ? '✅' : '❌'}\n` +
+        `✨ **الإجابة الصحيحة:** \`${item.options[item.correct]}\` 🎯\n\n` +
+        (isCorrect ? `💰 **تمت إضافة المكافأة:** \`+${reward} ⭐\` إلى محفظتك!` : 'حظاً أوفر في الأسئلة القادمة!')
+      )
       .setFooter({ text: i.user.username, iconURL: i.user.displayAvatarURL({ dynamic: true }) })
       .setTimestamp();
 
-    await i.update({ embeds: [resultEmbed], components: [] });
+    await i.update({ embeds: [resultEmbed], components: [resultRow] });
   });
 
   collector.on('end', async (collected, reason) => {
     if (reason === 'time' && collected.size === 0) {
+      const timeoutButtons = item.options.map((opt, idx) =>
+        new ButtonBuilder()
+          .setCustomId(`trivia_timeout_${idx}`)
+          .setLabel(`${idx + 1}. ${opt}`)
+          .setStyle(idx === item.correct ? ButtonStyle.Success : ButtonStyle.Secondary)
+          .setDisabled(true)
+      );
+
       await interaction.editReply({
-        content: `⏰ **انتهى الوقت!** الإجابة الصحيحة كانت: **${item.options[item.correct]}**`,
-        components: []
+        embeds: [
+          new EmbedBuilder()
+            .setColor('#f59e0b')
+            .setTitle('⏰ انتهى وقت الإجابة!')
+            .setDescription(`**السؤال:** ${item.q}\n\n🎯 **الإجابة الصحيحة كانت:** \`${item.options[item.correct]}\``)
+            .setTimestamp()
+        ],
+        components: [new ActionRowBuilder().addComponents(timeoutButtons)]
       }).catch(() => {});
     }
   });
 }
 
+// ==========================================
+// 2. لعبة أسرع كتابة (Fast Type with Canvas)
+// ==========================================
 async function runFastType(interaction) {
   const word = FAST_WORDS[Math.floor(Math.random() * FAST_WORDS.length)];
+  const reward = Math.floor(Math.random() * 60) + 40; // 40 - 100 coins
+
+  let cardBuffer = null;
+  try {
+    if (canvasUtil.createFastTypeCard) {
+      cardBuffer = await canvasUtil.createFastTypeCard(word, 15);
+    }
+  } catch(e) {}
 
   const embed = new EmbedBuilder()
     .setColor('#9333ea')
-    .setTitle('⚡ أسرع كتابة | Fast Type')
-    .setDescription(`اكتب الكلمة التالية في الشات بأسرع ما يمكنك خلال 15 ثانية:\n\n# \`${word}\``)
-    .setFooter({ text: 'أول شخص يكتبها بشكل صحيح سيفوز!' })
+    .setTitle('⚡ تحدي أسرع كتابة | Fast Type Challenge')
+    .setDescription(
+      `اكتب الكلمة التالية في الشات بأسرع ما يمكنك خلال **15 ثانية**:\n\n` +
+      `# 📝 \`${word}\`\n\n` +
+      `🎁 **جائزة الفائز:** \`+${reward} ⭐ Star Coins\``
+    )
+    .setFooter({ text: 'أول شخص يكتب الكلمة بدقة في الشات يفوز!' })
     .setTimestamp();
 
-  await interaction.reply({ embeds: [embed] });
+  const files = [];
+  if (cardBuffer) {
+    const attachment = new AttachmentBuilder(cardBuffer, { name: 'fasttype.png' });
+    embed.setImage('attachment://fasttype.png');
+    files.push(attachment);
+  }
+
+  await interaction.reply({ embeds: [embed], files });
 
   const startTime = Date.now();
   const filter = m => m.content.trim() === word && !m.author.bot;
@@ -197,14 +271,140 @@ async function runFastType(interaction) {
     const winnerMsg = collected.first();
     const timeTaken = ((Date.now() - startTime) / 1000).toFixed(2);
 
+    if (interaction.guild && winnerMsg.author) {
+      try { db.addCoins(winnerMsg.author.id, interaction.guild.id, reward); } catch(e) {}
+    }
+
     const winEmbed = new EmbedBuilder()
       .setColor('#10b981')
-      .setTitle('🎉 فائز في أسرع كتابة!')
-      .setDescription(`👑 **الفائز:** ${winnerMsg.author}\n⏱️ **الوقت المستغرق:** \`${timeTaken} ثانية\`\n📝 **الكلمة:** \`${word}\``)
+      .setTitle('🎉 فائز بطل في تحدي السرعة!')
+      .setDescription(
+        `👑 **الفائز:** ${winnerMsg.author} (${winnerMsg.author.tag})\n` +
+        `⏱️ **الوقت القياسي:** \`${timeTaken} ثانية\` ⚡\n` +
+        `📝 **الكلمة:** \`${word}\`\n` +
+        `💰 **الجائزة الممنوحة:** \`+${reward} ⭐ Star Coins\` تمت إضافتها لرصيدك!`
+      )
+      .setThumbnail(winnerMsg.author.displayAvatarURL({ dynamic: true }))
       .setTimestamp();
 
     await channel.send({ embeds: [winEmbed] });
   } catch(e) {
-    await channel.send(`⏰ **انتهى الوقت!** لم يقم أحد بكتابة الكلمة \`${word}\` بالوقت المحدد.`);
+    const timeoutEmbed = new EmbedBuilder()
+      .setColor('#ef4444')
+      .setTitle('⏰ انتهى الوقت!')
+      .setDescription(`لم يقم أحد بكتابة الكلمة \`${word}\` في الوقت المحدد (15 ثانية).`)
+      .setTimestamp();
+    await channel.send({ embeds: [timeoutEmbed] });
   }
 }
+
+// ==========================================
+// 3. لعبة حجر ورقة مقص التفاعلية (Interactive RPS)
+// ==========================================
+async function startInteractiveRps(interaction) {
+  const embed = new EmbedBuilder()
+    .setColor('#9333ea')
+    .setTitle('✂️ حجر - ورقة - مقص التفاعلية | RPS')
+    .setDescription('اختر حركتك عبر الضغط على أحد الأزرار التفاعلية أدناه:')
+    .setFooter({ text: 'لديك 20 ثانية لاختيار حركتك' })
+    .setTimestamp();
+
+  const row = new ActionRowBuilder().addComponents(
+    new ButtonBuilder().setCustomId('rps_play_rock').setLabel('حجر 🪨').setStyle(ButtonStyle.Primary),
+    new ButtonBuilder().setCustomId('rps_play_paper').setLabel('ورقة 📄').setStyle(ButtonStyle.Success),
+    new ButtonBuilder().setCustomId('rps_play_scissors').setLabel('مقص ✂️').setStyle(ButtonStyle.Danger)
+  );
+
+  const replyMsg = await interaction.reply({ embeds: [embed], components: [row], fetchReply: true });
+
+  const collector = replyMsg.createMessageComponentCollector({
+    filter: i => i.user.id === interaction.user.id,
+    time: 20000,
+    max: 1
+  });
+
+  collector.on('collect', async i => {
+    const userChoice = i.customId.replace('rps_play_', '');
+    const choices = ['rock', 'paper', 'scissors'];
+    const botChoice = choices[Math.floor(Math.random() * choices.length)];
+
+    const choiceNames = { rock: '🪨 حجر', paper: '📄 ورقة', scissors: '✂️ مقص' };
+
+    let result = '';
+    let color = '#9333ea';
+    let reward = 0;
+
+    if (userChoice === botChoice) {
+      result = '🤝 **تعادل!** كلاهما اختار نفس الحركة.';
+      color = '#eab308';
+    } else if (
+      (userChoice === 'rock' && botChoice === 'scissors') ||
+      (userChoice === 'paper' && botChoice === 'rock') ||
+      (userChoice === 'scissors' && botChoice === 'paper')
+    ) {
+      reward = 25;
+      result = `🎉 **مبروك، لقد فزت على البوت بجدارة!** 🏆\n💰 **مكافأة الفوز:** \`+${reward} ⭐ Star Coins\``;
+      color = '#10b981';
+      if (interaction.guild) {
+        try { db.addCoins(i.user.id, interaction.guild.id, reward); } catch(e) {}
+      }
+    } else {
+      result = '🤖 **البوت فاز عليك هذه الجولة!** حظاً أوفر في المرة القادمة.';
+      color = '#ef4444';
+    }
+
+    const resultEmbed = new EmbedBuilder()
+      .setColor(color)
+      .setTitle('✂️ نتيجة جولة حجر - ورقة - مقص')
+      .setDescription(`👤 **اختيارك:** ${choiceNames[userChoice]}\n🤖 **اختيار البوت:** ${choiceNames[botChoice]}\n\n${result}`)
+      .setFooter({ text: i.user.username, iconURL: i.user.displayAvatarURL({ dynamic: true }) })
+      .setTimestamp();
+
+    await i.update({ embeds: [resultEmbed], components: [] });
+  });
+
+  collector.on('end', async (collected, reason) => {
+    if (reason === 'time' && collected.size === 0) {
+      await interaction.editReply({ content: '⏰ انتهى الوقت لاختيار حركتك.', components: [] }).catch(() => {});
+    }
+  });
+}
+
+function handleRpsResult(interaction, userChoice) {
+  const choices = ['rock', 'paper', 'scissors'];
+  const botChoice = choices[Math.floor(Math.random() * choices.length)];
+  const choiceNames = { rock: '🪨 حجر', paper: '📄 ورقة', scissors: '✂️ مقص' };
+
+  let result = '';
+  let color = '#9333ea';
+  let reward = 0;
+
+  if (userChoice === botChoice) {
+    result = '🤝 **تعادل!** كلاهما اختار نفس الحركة.';
+    color = '#eab308';
+  } else if (
+    (userChoice === 'rock' && botChoice === 'scissors') ||
+    (userChoice === 'paper' && botChoice === 'rock') ||
+    (userChoice === 'scissors' && botChoice === 'paper')
+  ) {
+    reward = 25;
+    result = `🎉 **مبروك، لقد فزت على البوت!** 🏆\n💰 **المكافأة:** \`+${reward} ⭐ Star Coins\``;
+    color = '#10b981';
+    if (interaction.guild) {
+      try { db.addCoins(interaction.user.id, interaction.guild.id, reward); } catch(e) {}
+    }
+  } else {
+    result = '🤖 **البوت فاز عليك هذه الجولة!** حظاً أوفر.';
+    color = '#ef4444';
+  }
+
+  const embed = new EmbedBuilder()
+    .setColor(color)
+    .setTitle('✂️ حجر - ورقة - مقص')
+    .setDescription(`👤 **اختيارك:** ${choiceNames[userChoice]}\n🤖 **اختيار البوت:** ${choiceNames[botChoice]}\n\n${result}`)
+    .setFooter({ text: interaction.user.username, iconURL: interaction.user.displayAvatarURL({ dynamic: true }) })
+    .setTimestamp();
+
+  return interaction.reply({ embeds: [embed] });
+}
+

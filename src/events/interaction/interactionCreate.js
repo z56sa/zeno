@@ -100,30 +100,59 @@ module.exports = {
       // 2.3 أزرار الألعاب والتسلية (Games & Fun Buttons)
       if (interaction.isButton() && interaction.customId.startsWith('game_btn_')) {
         const gameType = interaction.customId.replace('game_btn_', '');
+
         if (gameType === 'dice') {
           const roll = Math.floor(Math.random() * 6) + 1;
           const diceEmojis = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
-          return interaction.reply({
-            content: `🎲 **رمي النرد:** لقد حصلت على الرقم **${roll}** ${diceEmojis[roll - 1]}!`,
-            ephemeral: false
-          });
+          const reward = roll >= 4 ? roll * 10 : 0;
+          if (reward > 0 && interaction.guild) {
+            try { db.addCoins(interaction.user.id, interaction.guild.id, reward); } catch(e) {}
+          }
+
+          const diceEmbed = new EmbedBuilder()
+            .setColor(roll >= 4 ? '#10b981' : '#9333ea')
+            .setTitle('🎲 نتيجة رمي النرد التفاعلي!')
+            .setDescription(
+              `👤 **اللاعب:** <@${interaction.user.id}>\n\n` +
+              `# ${diceEmojis[roll - 1]} **الرقم: ${roll}**\n\n` +
+              (reward > 0 ? `🎉 **ضربة حظ رائعة!** حصلت على مكافأة \`+${reward} ⭐ Star Coins\`!` : '🎲 حظاً موفقاً في الرمية القادمة!')
+            )
+            .setFooter({ text: interaction.user.username, iconURL: interaction.user.displayAvatarURL({ dynamic: true }) })
+            .setTimestamp();
+
+          return interaction.reply({ embeds: [diceEmbed], ephemeral: false });
         }
+
         if (gameType === 'coin') {
-          const coin = Math.random() < 0.5 ? '🪙 صورة (Face)' : '🪙 كتابة (Tail)';
-          return interaction.reply({
-            content: `🪙 **رمي العملة:** النتيجة هي **${coin}**!`,
-            ephemeral: false
-          });
+          const isHeads = Math.random() < 0.5;
+          const coinText = isHeads ? '👑 ملك / وجه (Heads)' : '🦅 كتابة / ذيل (Tails)';
+          const reward = 15;
+          if (interaction.guild) {
+            try { db.addCoins(interaction.user.id, interaction.guild.id, reward); } catch(e) {}
+          }
+
+          const coinEmbed = new EmbedBuilder()
+            .setColor('#eab308')
+            .setTitle('🪙 نتيجة رمي العملة!')
+            .setDescription(
+              `👤 **اللاعب:** <@${interaction.user.id}>\n\n` +
+              `# 🪙 **${coinText}**\n\n` +
+              `💰 **حصلت على:** \`+${reward} ⭐ Star Coins\` لمشاركتك في التسلية!`
+            )
+            .setFooter({ text: interaction.user.username, iconURL: interaction.user.displayAvatarURL({ dynamic: true }) })
+            .setTimestamp();
+
+          return interaction.reply({ embeds: [coinEmbed], ephemeral: false });
         }
+
         if (gameType === 'rps') {
-          const choices = ['🪨 حجر', '📄 ورقة', '✂️ مقص'];
-          const userMove = choices[Math.floor(Math.random() * choices.length)];
-          const botMove = choices[Math.floor(Math.random() * choices.length)];
-          return interaction.reply({
-            content: `✂️ **حجر ورقة مقص:**\nأنت: ${userMove}\nالبوت: ${botMove}\n${userMove === botMove ? '🤝 تعادل!' : '🎉 جولة حماسية!'}`,
-            ephemeral: false
-          });
+          const gamesCmd = client.commands.get('games');
+          if (gamesCmd) {
+            interaction.options = { getSubcommand: () => 'rps', getString: () => null };
+            return gamesCmd.execute(interaction);
+          }
         }
+
         if (gameType === 'trivia' || gameType === 'fast') {
           const gamesCmd = client.commands.get('games');
           if (gamesCmd) {

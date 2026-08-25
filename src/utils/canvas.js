@@ -544,6 +544,132 @@ const canvasUtil = {
     ctx.stroke();
 
     return canvas.toBuffer('image/png');
+  },
+
+  /**
+   * إنشاء بطاقة لعبة أسرع كتابة (Fast Type Card)
+   */
+  async createFastTypeCard(word, seconds = 15) {
+    const width = 800;
+    const height = 300;
+    const canvas = createCanvas(width, height);
+    const ctx = canvas.getContext('2d');
+
+    // خلفية متدرجة حديثة
+    const bgGrad = ctx.createLinearGradient(0, 0, width, height);
+    bgGrad.addColorStop(0, '#0c0e17');
+    bgGrad.addColorStop(0.5, '#16192b');
+    bgGrad.addColorStop(1, '#0c0e17');
+    ctx.fillStyle = bgGrad;
+    ctx.roundRect(0, 0, width, height, 24);
+    ctx.fill();
+
+    // إطار نيون أرجواني
+    ctx.strokeStyle = 'rgba(147, 51, 234, 0.4)';
+    ctx.lineWidth = 3;
+    ctx.roundRect(0, 0, width, height, 24);
+    ctx.stroke();
+
+    // دائرة تأثير ضوئي خلف الكلمة
+    const glowGrad = ctx.createRadialGradient(width / 2, height / 2 + 10, 20, width / 2, height / 2 + 10, 200);
+    glowGrad.addColorStop(0, 'rgba(147, 51, 234, 0.25)');
+    glowGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+    ctx.fillStyle = glowGrad;
+    ctx.fillRect(0, 0, width, height);
+
+    // عنوان اللعبة
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#a855f7';
+    ctx.font = 'bold 22px MainFontBold, sans-serif';
+    ctx.fillText('⚡ تحدي أسرع كتابة | FAST TYPE', width / 2, 55);
+
+    // إرشادات
+    ctx.fillStyle = '#9ca3af';
+    ctx.font = '15px MainFont, sans-serif';
+    ctx.fillText(`اكتب الكلمة التالية في الشات بأسرع ما يمكنك خلال ${seconds} ثانية!`, width / 2, 90);
+
+    // صندوق الكلمة الزجاجي
+    const boxW = 560;
+    const boxH = 80;
+    const boxX = (width - boxW) / 2;
+    const boxY = 120;
+
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.roundRect(boxX, boxY, boxW, boxH, 20);
+    ctx.fill();
+    ctx.stroke();
+
+    // الكلمة المطلوبة
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 36px MainFontBold, sans-serif';
+    ctx.fillText(word, width / 2, boxY + 52);
+
+    // تذييل
+    ctx.fillStyle = '#6b7280';
+    ctx.font = 'bold 13px MainFont, sans-serif';
+    ctx.fillText('🏆 أول شخص يكتبها بشكل صحيح يفوز بالنقاط!', width / 2, 250);
+
+    return canvas.toBuffer('image/png');
+  },
+
+  /**
+   * إنشاء بطاقة سؤال وجواب (Trivia Card)
+   */
+  async createTriviaCard(question, seconds = 20) {
+    const width = 800;
+    const height = 280;
+    const canvas = createCanvas(width, height);
+    const ctx = canvas.getContext('2d');
+
+    // خلفية
+    const bgGrad = ctx.createLinearGradient(0, 0, width, height);
+    bgGrad.addColorStop(0, '#0c0e17');
+    bgGrad.addColorStop(0.5, '#1e1633');
+    bgGrad.addColorStop(1, '#0c0e17');
+    ctx.fillStyle = bgGrad;
+    ctx.roundRect(0, 0, width, height, 24);
+    ctx.fill();
+
+    // إطار نيون
+    ctx.strokeStyle = 'rgba(99, 102, 241, 0.4)';
+    ctx.lineWidth = 3;
+    ctx.roundRect(0, 0, width, height, 24);
+    ctx.stroke();
+
+    // عنوان
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#818cf8';
+    ctx.font = 'bold 22px MainFontBold, sans-serif';
+    ctx.fillText('❓ سؤال وجواب | TRIVIA QUIZ', width / 2, 55);
+
+    // صندوق السؤال
+    const boxW = 680;
+    const boxH = 90;
+    const boxX = (width - boxW) / 2;
+    const boxY = 85;
+
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.roundRect(boxX, boxY, boxW, boxH, 20);
+    ctx.fill();
+    ctx.stroke();
+
+    // نص السؤال
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 26px MainFontBold, sans-serif';
+    ctx.fillText(question, width / 2, boxY + 54);
+
+    // الإرشادات
+    ctx.fillStyle = '#34d399';
+    ctx.font = 'bold 15px MainFont, sans-serif';
+    ctx.fillText(`⏱️ اضغط على زر الإجابة الصحيحة بالأسفل خلال ${seconds} ثانية`, width / 2, 225);
+
+    return canvas.toBuffer('image/png');
   }
 };
 
