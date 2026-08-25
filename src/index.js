@@ -114,7 +114,7 @@ const autoBroadcaster = new AutoBroadcaster(client);
 const StatChannelsService = require('./services/statChannels');
 const statChannelsService = new StatChannelsService(client);
 
-client.once('ready', () => {
+client.once('clientReady', () => {
     autoBroadcaster.start();
     statChannelsService.start();
 });

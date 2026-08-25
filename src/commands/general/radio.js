@@ -8,14 +8,22 @@ module.exports = {
     data: new SlashCommandBuilder()
         .setName("radio")
         .setDescription("تشغيل راديو إسلامي أو قرآن كريم في القناة الصوتية")
-        .addStringOption(opt => opt.setName("station").setDescription("المحطة الإذاعية").setRequired(false)
-            .addChoices(
-                { name: "🕌 قرآن كريم - مكة", value: "quran_makkah" },
-                { name: "📖 إذاعة القرآن - مصر", value: "quran_egypt" },
-                { name: "☀️ راديو السنة النبوية", value: "sunnah" },
-                { name: "🌙 إذاعة المدينة المنورة", value: "madinah" },
-                { name: "📚 قرآن التفسير والعلوم", value: "quran_tafseer" }
-            ))
+        .addSubcommand(sub =>
+            sub.setName("play")
+                .setDescription("تشغيل محطة إذاعية أو قرآن كريم")
+                .addStringOption(opt =>
+                    opt.setName("station")
+                        .setDescription("المحطة الإذاعية")
+                        .setRequired(false)
+                        .addChoices(
+                            { name: "🕌 قرآن كريم - مكة", value: "quran_makkah" },
+                            { name: "📖 إذاعة القرآن - مصر", value: "quran_egypt" },
+                            { name: "☀️ راديو السنة النبوية", value: "sunnah" },
+                            { name: "🌙 إذاعة المدينة المنورة", value: "madinah" },
+                            { name: "📚 قرآن التفسير والعلوم", value: "quran_tafseer" }
+                        )
+                )
+        )
         .addSubcommand(sub => sub.setName("stop").setDescription("إيقاف البث الحالي"))
         .addSubcommand(sub => sub.setName("list").setDescription("عرض قائمة المحطات")),
 
