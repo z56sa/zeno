@@ -159,6 +159,26 @@ module.exports = {
             return gamesCmd.execute(interaction);
           }
         }
+
+        // الألعاب الجماعية (Group Games)
+        if (['roulette', 'chairs', 'hideseek', 'mafia'].includes(gameType)) {
+          const cmd = client.commands.get(gameType);
+          if (cmd) {
+            interaction.options = {
+              getInteger: () => 0,
+              getUser: () => null,
+              getString: () => null
+            };
+            return cmd.execute(interaction);
+          }
+        }
+
+        if (gameType === 'fight') {
+          return interaction.reply({
+            content: '⚔️ **لبدء تحدي قتال مع عضو:** استخدم الأمر `/fight opponent:@العضو bet:50` لمواجهة شخص حقيقي ووضع الرهان!',
+            ephemeral: true
+          });
+        }
       }
 
       // 2.3.1 رمي العملة — اختيار الوجه (Heads/Tails)

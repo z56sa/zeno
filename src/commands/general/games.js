@@ -73,19 +73,25 @@ module.exports = {
     if (sub === 'panel') {
       const embed = new EmbedBuilder()
         .setColor('#9333ea')
-        .setTitle('🎮 مركز الألعاب والتسلية التفاعلي | ZENO Games')
+        .setTitle('🎮 مركز الألعاب والتسلية الشامل | ZENO Games')
         .setDescription(
-          `مرحباً بك في ساحة التحدي والتسلية! اختر اللعبة التي تفضلها من الأزرار التفاعلية أدناه وتنافس لجمع نقاط وعملات النجوم **Star Coins ⭐**:\n\n` +
-          `✨ **الألعاب المتاحة:**\n` +
-          `• ❓ **سؤال وجواب (Trivia):** 4 خيارات تفاعلية لاختبار سرعة بديهتك وثقافتك\n` +
-          `• ⚡ **أسرع كتابة (Fast Type):** بطاقة مصورة وأول من يكتب يفوز بالمكافأة\n` +
-          `• ✂️ **حجر ورقة مقص (RPS):** تحدَّ البوت بأزرار حية مع رهان ومكافآت\n` +
-          `• 🎲 **رمي النرد (Dice):** جرب حظك واحصل على نقاط فورية\n` +
-          `• 🪙 **رمي العملة (Coinflip):** اختر وجهك وراهن على الفوز`
+          `**اختر اللعبة من الأزرار التفاعلية أدناه وتنافس لجمع نقاط وعملات النجوم ⭐!**\n\n` +
+          `🎯 **الألعاب الفردية والسريعة:**\n` +
+          `• ❓ **سؤال وجواب (Trivia):** 4 خيارات تفاعلية مع كشف الإجابة فوراً\n` +
+          `• ⚡ **أسرع كتابة (Fast Type):** بطاقة مصورة وتحدي سرعة في الشات\n` +
+          `• ✂️ **حجر ورقة مقص (RPS):** تحدَّ البوت بأزرار تفاعلية فورية\n` +
+          `• 🎲 **رمي النرد (Dice):** ارمِ النرد واربح جوائز حظ مضاعفة\n` +
+          `• 🪙 **رمي العملة (Coinflip):** اختر (ملك 👑 أو كتابة 🦅) وضاعف نقاطك\n\n` +
+          `👥 **الألعاب الجماعية والتحديات:**\n` +
+          `• 🎰 **روليت الحظ:** غرفة تفاعلية ومواجهة حماسية\n` +
+          `• ⚔️ **قتال التحدي:** راهن وتحدَّ أي عضو في السيرفر\n` +
+          `• 🔫 **مافيا الغموض:** أدوار سرية وخداع مع أصدقائك\n` +
+          `• 🪑 **كراسي موسيقية:** سرعة بديهة واستبعاد حتى الفائز الأخير\n` +
+          `• 🙈 **لعبة الغميضة:** اختبئ وابحث عن الآخرين`
         )
         .addFields(
-          { name: '🏆 الجوائز', value: 'الفائزون يحصلون على عملات نقدية تضاف فورياً لمحفظتهم!', inline: true },
-          { name: '⚡ الاستجابة', value: 'تفاعل فوري مع إحصائيات وبطاقات جرافيكس', inline: true }
+          { name: '🏆 الجوائز', value: 'الفائزون يحصلون على عملات نقدية تضاف لمحفظتهم فوراً!', inline: true },
+          { name: '⚡ الاستجابة', value: 'أزرار حية وتفاعل فوري بدون تأخير', inline: true }
         )
         .setFooter({ text: 'ZENO Games • العب واستمتع مع أصدقائك بالسيرفر', iconURL: interaction.guild?.iconURL() || undefined })
         .setTimestamp();
@@ -93,12 +99,17 @@ module.exports = {
       const row1 = new ActionRowBuilder().addComponents(
         new ButtonBuilder().setCustomId('game_btn_trivia').setLabel('سؤال وجواب ❓').setStyle(ButtonStyle.Primary),
         new ButtonBuilder().setCustomId('game_btn_fast').setLabel('أسرع كتابة ⚡').setStyle(ButtonStyle.Success),
-        new ButtonBuilder().setCustomId('game_btn_rps').setLabel('حجر ورقة مقص ✂️').setStyle(ButtonStyle.Secondary)
+        new ButtonBuilder().setCustomId('game_btn_rps').setLabel('حجر ورقة مقص ✂️').setStyle(ButtonStyle.Secondary),
+        new ButtonBuilder().setCustomId('game_btn_dice').setLabel('رمي النرد 🎲').setStyle(ButtonStyle.Secondary),
+        new ButtonBuilder().setCustomId('game_btn_coin').setLabel('رمي العملة 🪙').setStyle(ButtonStyle.Secondary)
       );
 
       const row2 = new ActionRowBuilder().addComponents(
-        new ButtonBuilder().setCustomId('game_btn_dice').setLabel('رمي النرد 🎲').setStyle(ButtonStyle.Secondary),
-        new ButtonBuilder().setCustomId('game_btn_coin').setLabel('رمي العملة 🪙').setStyle(ButtonStyle.Secondary)
+        new ButtonBuilder().setCustomId('game_btn_roulette').setLabel('روليت 🎰').setStyle(ButtonStyle.Danger),
+        new ButtonBuilder().setCustomId('game_btn_fight').setLabel('قتال ⚔️').setStyle(ButtonStyle.Danger),
+        new ButtonBuilder().setCustomId('game_btn_mafia').setLabel('مافيا 🔫').setStyle(ButtonStyle.Danger),
+        new ButtonBuilder().setCustomId('game_btn_chairs').setLabel('كراسي 🪑').setStyle(ButtonStyle.Primary),
+        new ButtonBuilder().setCustomId('game_btn_hideseek').setLabel('غميضة 🙈').setStyle(ButtonStyle.Primary)
       );
 
       return interaction.reply({ embeds: [embed], components: [row1, row2] });
