@@ -193,13 +193,16 @@ module.exports = function (app, client) {
             `).join('') || '<p class="text-xs text-gray-500 text-center py-4">لا توجد بيانات ذهب مسجلة بعد</p>';
 
             const dailyActionBoxHtml = canClaimDaily ? `
-                <button type="button" onclick="claimDailyReward()" id="claimDailyBtn" class="px-5 py-2 bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs rounded-xl shadow-lg shadow-purple-950/40 transition">
-                    استلام الرصيد 🎁
+                <button type="button" onclick="window.claimDailyReward()" id="claimDailyBtn" class="px-10 py-3.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-black text-sm rounded-2xl shadow-xl shadow-purple-950/60 hover:scale-105 transition-all cursor-pointer flex items-center gap-2 mx-auto">
+                    <span class="text-lg">🎁</span>
+                    <span>استلام الرصيد اليومي</span>
                 </button>
             ` : `
-                <span class="text-[10px] text-gray-400 font-bold bg-[#0b0d14] border border-white/5 px-3 py-1.5 rounded-xl font-mono">
-                    ⏳ متاح بعد: ${nextDailyHours}س ${nextDailyMinutes}د
-                </span>
+                <div class="inline-flex items-center gap-2.5 text-xs font-black text-purple-300 bg-purple-950/50 border border-purple-800/40 px-6 py-3 rounded-2xl shadow-xl shadow-purple-950/40">
+                    <span class="text-sm">⏳</span>
+                    <span>متاح بعد: </span>
+                    <span id="liveDailyTimer" class="font-mono text-purple-200 tracking-wider text-sm font-black" data-target="${now + nextDailyIn}">${nextDailyHours}س ${nextDailyMinutes}د</span>
+                </div>
             `;
 
             res.send(`
@@ -285,6 +288,27 @@ module.exports = function (app, client) {
         }
     };
 
+    
+    // Live ticking countdown for daily reward
+    setInterval(function() {
+        var timerEl = document.getElementById('liveDailyTimer');
+        if (!timerEl) return;
+        var target = parseInt(timerEl.getAttribute('data-target'), 10);
+        if (!target) return;
+        var diff = target - Date.now();
+        if (diff <= 0) {
+            var box = document.getElementById('dailyActionBox');
+            if (box) {
+                box.innerHTML = '<button type="button" onclick="window.claimDailyReward()" id="claimDailyBtn" class="px-10 py-3.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-black text-sm rounded-2xl shadow-xl shadow-purple-950/60 hover:scale-105 transition-all cursor-pointer flex items-center gap-2 mx-auto"><span class="text-lg">🎁</span><span>استلام الرصيد اليومي</span></button>';
+            }
+            return;
+        }
+        var h = Math.floor(diff / (1000 * 60 * 60));
+        var m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        var sec = Math.floor((diff % (1000 * 60)) / 1000);
+        timerEl.textContent = (h < 10 ? '0' + h : h) + 'س ' + (m < 10 ? '0' + m : m) + 'د ' + (sec < 10 ? '0' + sec : sec) + 'ث';
+    }, 1000);
+    
     window.buyItem = async function(type, name, price, btn) {
         if (!confirm('هل أنت متأكد من شراء وتفعيل "' + name + '" مقابل ' + price.toLocaleString() + ' 🪙؟')) return;
         if (btn) {
