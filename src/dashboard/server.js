@@ -39,11 +39,6 @@ module.exports = function (app, client) {
     app.get('/', (req, res) => {
         try {
             const user = req.session?.user || null;
-            let userCoins = 0;
-            if (user) {
-                const userRow = rawDb.prepare('SELECT SUM(coins) as coins FROM users WHERE user_id = ?').get(user.id);
-                userCoins = userRow?.coins || 0;
-            }
             const fs = require('fs');
             const path = require('path');
             let html = fs.readFileSync(path.join(__dirname, 'public/index.html'), 'utf8');
@@ -51,26 +46,25 @@ module.exports = function (app, client) {
             if (user) {
                 const userAvatar = user.avatar ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png` : 'https://cdn.discordapp.com/embed/avatars/0.png';
                 const loggedInBtn = `
-                    <a href="/dashboard" class="flex items-center gap-3 bg-[#12121a] border border-[#232334] px-4 py-2 rounded-xl hover:border-purple-500/50 transition">
-                        <img src="${userAvatar}" alt="${user.username}" class="w-8 h-8 rounded-full object-cover border border-purple-500/40">
-                        <div class="flex flex-col text-right">
-                            <span class="text-xs font-bold text-white">${user.username}</span>
-                            <span class="text-[10px] text-amber-400 font-extrabold">${userCoins.toLocaleString()} 🪙</span>
-                        </div>
+                    <a href="/dashboard" class="flex items-center gap-3 bg-[#151722] hover:bg-[#1c1f2e] border border-white/10 px-4 py-2 rounded-2xl transition">
+                        <img src="${userAvatar}" alt="${user.username}" class="w-8 h-8 rounded-xl object-cover ring-2 ring-[#5865F2]/50">
+                        <span class="text-xs font-bold text-white">${user.username}</span>
                     </a>
                 `;
-                html = html.replace(/<% if \(user\) \{ %>[\s\S]*?<% \} else \{ %>[\s\S]*?<% \} %>/, loggedInBtn);
+                html = html.replace(/<% if \(user\) \{ %>[\s\S]*?<% \} %>/, loggedInBtn);
             } else {
                 const loginBtn = `
-                    <a href="/auth/discord" class="px-5 py-2.5 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-xs font-bold transition shadow-lg shadow-purple-600/30">
+                    <a href="/auth/discord" class="px-6 py-2.5 probot-btn-primary rounded-xl text-xs font-black shadow-lg">
                         تسجيل الدخول
                     </a>
                 `;
-                html = html.replace(/<% if \(user\) \{ %>[\s\S]*?<% \} else \{ %>[\s\S]*?<% \} %>/, loginBtn);
+                html = html.replace(/<% if \(user\) \{ %>[\s\S]*?<% \} %>/, loginBtn);
             }
+            res.setHeader('Content-Type', 'text/html; charset=utf-8');
             res.send(html);
         } catch(e) {
-            res.redirect('/dashboard');
+            console.error('Error loading landing page:', e);
+            res.send("<h1>ZENO BOT</h1><a href='/dashboard'>Go to Dashboard</a>");
         }
     });
 
