@@ -14,5 +14,12 @@
   "embeds": {
     "author": "ZENO System",
     "footerText": "ZENO Bot • All Rights Reserved"
+  },
+  "economy": {
+    "xpCooldownMs": 60000,
+    "xpPerMessage": 5,
+    "coinsPerMessage": 2,
+    "dailyCoins": 200,
+    "weeklyCoins": 1000
   }
 }

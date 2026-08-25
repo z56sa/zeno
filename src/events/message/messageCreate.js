@@ -315,8 +315,9 @@ module.exports = {
     if (settings.leveling_enabled !== 0) {
       const userDb = db.getUser(userId, guildId);
       const now = Date.now();
-      if (now - userDb.last_message_xp >= config.economy.xpCooldownMs) {
-        const baseXP = Math.floor(Math.random() * 10) + config.economy.xpPerMessage;
+      const economy = config.economy || { xpCooldownMs: 60000, xpPerMessage: 5 };
+      if (now - userDb.last_message_xp >= economy.xpCooldownMs) {
+        const baseXP = Math.floor(Math.random() * 10) + economy.xpPerMessage;
         const multiplier = settings.level_multiplier || 1;
         const xpGained = baseXP * multiplier;
 
