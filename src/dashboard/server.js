@@ -6309,29 +6309,81 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                             </div>
                         </div>
 
-                        <!-- Full Interactive Game Commands Management List (Toggles, Custom Aliases, Status) -->
+                        <!-- Interactive Game Commands Management List -->
                         <div class="bg-[#12141f] border border-white/5 p-6 rounded-3xl space-y-4 shadow-xl">
                             <div class="flex items-center justify-between border-b border-white/5 pb-4">
                                 <div class="flex items-center gap-2">
                                     <span id="funSaveIndicator" class="text-xs font-bold text-emerald-400 bg-emerald-950/60 px-2.5 py-1 rounded-lg opacity-0 transition-opacity duration-300">✓ حُفظت الإعدادات</span>
-                                    <button type="button" onclick="toggleAllFunCmds(false)" class="px-3.5 py-1.5 bg-rose-950/40 hover:bg-rose-900/60 text-rose-400 border border-rose-800/40 rounded-xl text-xs font-bold transition flex items-center gap-1">
+                                    <button type="button" onclick="toggleAllFunCmds(false)" class="px-3.5 py-1.5 bg-rose-950/40 hover:bg-rose-900/60 text-rose-400 border border-rose-800/40 rounded-xl text-xs font-bold transition flex items-center gap-1 cursor-pointer">
                                         <span>✕</span><span>تعطيل الكل</span>
                                     </button>
-                                    <button type="button" onclick="toggleAllFunCmds(true)" class="px-3.5 py-1.5 bg-emerald-950/40 hover:bg-emerald-900/60 text-emerald-400 border border-emerald-800/40 rounded-xl text-xs font-bold transition flex items-center gap-1">
+                                    <button type="button" onclick="toggleAllFunCmds(true)" class="px-3.5 py-1.5 bg-emerald-950/40 hover:bg-emerald-900/60 text-emerald-400 border border-emerald-800/40 rounded-xl text-xs font-bold transition flex items-center gap-1 cursor-pointer">
                                         <span>✓</span><span>تفعيل الكل</span>
                                     </button>
                                 </div>
                                 <div class="text-right">
                                     <h4 class="text-sm font-black text-white flex items-center gap-2 justify-end">
-                                        <span>إدارة وتخصيص أوامر الألعاب</span>
+                                        <span>إدارة وتخصيص أوامر الألعاب والتسلية</span>
                                         <span>🎮</span>
                                     </h4>
                                     <p class="text-gray-400 text-xs mt-0.5">تحكم في تشغيل/إيقاف وتعديل اختصارات وصلاحيات كل لعبة على حدة</p>
                                 </div>
                             </div>
 
-                            <!-- List of Fun Commands with On/Off and Custom Aliases modal -->
-                            <div id="funCmdsContainer" class="space-y-3 pt-2"></div>
+                            <!-- List of Fun Commands -->
+                            <div id="funCmdsContainer" class="space-y-3 pt-2">
+                                ${(() => {
+                                    const funGamesList = [
+                                        { name: '/trivia', desc: 'مسابقة سؤال وجواب بمعلومات عامة وإسلامية', icon: '❓' },
+                                        { name: '/games fast', desc: 'تحدي أسرع كتابة كلمات عربية في الشات', icon: '⚡' },
+                                        { name: '/games rps', desc: 'حجر ورقة مقص ضد البوت بنظام النقاط', icon: '✂️' },
+                                        { name: '/chairs', desc: 'لعبة الكراسي الموسيقية الجماعية', icon: '🪑' },
+                                        { name: '/coinflip', desc: 'رمي العملة وتوقع صورة أو كتابة', icon: '🪙' },
+                                        { name: '/fight', desc: 'تحدي معركة وقتال ضد عضو آخر', icon: '⚔️' },
+                                        { name: '/hideseek', desc: 'لعبة الغميضة والاختباء الجماعية', icon: '🙈' },
+                                        { name: '/mafia', desc: 'لعبة المافيا والأدوار السرية والتصويت', icon: '🎭' },
+                                        { name: '/roulette', desc: 'لعبة الروليت الروسي والمخاطرة', icon: '🎰' },
+                                        { name: '/gamble', desc: 'مراهنات الكازينو وعملات Star Coins', icon: '🎲' }
+                                    ];
+
+                                    let disabledCmds = [];
+                                    try {
+                                        disabledCmds = settings.disabled_commands ? (typeof settings.disabled_commands === 'string' ? JSON.parse(settings.disabled_commands) : settings.disabled_commands) : [];
+                                    } catch(e) { disabledCmds = []; }
+                                    if (!Array.isArray(disabledCmds)) disabledCmds = [];
+
+                                    let customAliases = {};
+                                    try {
+                                        customAliases = settings.custom_aliases ? (typeof settings.custom_aliases === 'string' ? JSON.parse(settings.custom_aliases) : settings.custom_aliases) : {};
+                                    } catch(e) { customAliases = {}; }
+                                    if (!customAliases || typeof customAliases !== 'object') customAliases = {};
+
+                                    return funGamesList.map(item => {
+                                        const isEn = !disabledCmds.includes(item.name);
+                                        const alias = customAliases[item.name] || '';
+                                        return `
+                                        <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-2xl flex items-center justify-between hover:border-purple-500/40 transition ${isEn ? '' : 'opacity-50'}" data-cmd="${item.name}">
+                                            <div class="flex items-center gap-3">
+                                                <label class="toggle"><input type="checkbox" data-fun-cmd="${item.name}" ${isEn ? 'checked' : ''} onchange="toggleSingleFunCmd('${item.name}', this.checked)"><span class="slider"></span></label>
+                                                <button type="button" onclick="openFunAliasModal('${item.name}', '${item.icon}')" class="px-3 py-1.5 bg-[#1a1d2d] hover:bg-purple-600/30 text-purple-300 border border-purple-500/30 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow cursor-pointer">
+                                                    <span>⚙️</span><span id="aliasBadge_${item.name.replace(/[^a-zA-Z0-9]/g, '_')}">${alias ? 'اختصار: ' + alias : 'تخصيص الاختصار'}</span>
+                                                </button>
+                                            </div>
+                                            <div class="flex items-center gap-3">
+                                                <div class="text-right">
+                                                    <div class="flex items-center justify-end gap-2">
+                                                        <span id="aliasTag_${item.name.replace(/[^a-zA-Z0-9]/g, '_')}" class="${alias ? '' : 'hidden '}px-2 py-0.5 bg-purple-950/60 text-purple-300 border border-purple-800/40 rounded-lg text-[10px] font-bold">بديل: ${alias}</span>
+                                                        <span class="font-black text-white text-xs font-mono" dir="ltr">${item.name}</span>
+                                                    </div>
+                                                    <p class="text-[11px] text-gray-400 mt-0.5">${item.desc}</p>
+                                                </div>
+                                                <div class="w-10 h-10 rounded-2xl bg-purple-600/20 text-purple-400 flex items-center justify-center text-lg border border-purple-500/30 shadow-inner">${item.icon}</div>
+                                            </div>
+                                        </div>
+                                        `;
+                                    }).join('');
+                                })()}
+                            </div>
                         </div>
                     </div>
 
@@ -6360,158 +6412,111 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                             </div>
                         </div>
                     </div>
-                    </div>
 
                     <script>
-                    (function() {
-                        var funGamesList = [
-                            { name: '/trivia', desc: 'مسابقة سؤال وجواب بمعلومات عامة وإسلامية', icon: '❓', defaultAlias: 'مسابقة' },
-                            { name: '/games fast', desc: 'تحدي أسرع كتابة كلمات عربية في الشات', icon: '⚡', defaultAlias: 'سرعة' },
-                            { name: '/games rps', desc: 'حجر ورقة مقص ضد البوت بنظام النقاط', icon: '✂️', defaultAlias: 'مقص' },
-                            { name: '/chairs', desc: 'لعبة الكراسي الموسيقية الجماعية', icon: '🪑', defaultAlias: 'كراسي' },
-                            { name: '/coinflip', desc: 'رمي العملة وتوقع صورة أو كتابة', icon: '🪙', defaultAlias: 'عملة' },
-                            { name: '/fight', desc: 'تحدي معركة وقتال ضد عضو آخر', icon: '⚔️', defaultAlias: 'قتال' },
-                            { name: '/hideseek', desc: 'لعبة الغميضة والاختباء الجماعية', icon: '🙈', defaultAlias: 'غميضة' },
-                            { name: '/mafia', desc: 'لعبة المافيا والأدوار السرية والتصويت', icon: '🎭', defaultAlias: 'مافيا' },
-                            { name: '/roulette', desc: 'لعبة الروليت الروسي والمخاطرة', icon: '🎰', defaultAlias: 'روليت' },
-                            { name: '/gamble', desc: 'مراهنات الكازينو وعملات Star Coins', icon: '🎲', defaultAlias: 'كازينو' }
-                        ];
+                    var funDisabledCmds = {};
+                    var funCustomAliases = {};
+                    var currentModalCmd = null;
 
-                        var disabledCmds = {};
-                        var customAliases = {};
-                        var currentModalCmd = null;
+                    try {
+                        var dArr = ${JSON.stringify(settings.disabled_commands ? (typeof settings.disabled_commands === 'string' ? JSON.parse(settings.disabled_commands) : settings.disabled_commands) : [])};
+                        if (Array.isArray(dArr)) { for (var i = 0; i < dArr.length; i++) funDisabledCmds[dArr[i]] = true; }
+                        var aObj = ${JSON.stringify(settings.custom_aliases ? (typeof settings.custom_aliases === 'string' ? JSON.parse(settings.custom_aliases) : settings.custom_aliases) : {})};
+                        if (aObj && typeof aObj === 'object') funCustomAliases = aObj;
+                    } catch(e) {}
 
-                        // Load initial disabled commands & aliases from settings
+                    function showFunSaved() {
+                        var el = document.getElementById('funSaveIndicator');
+                        if (el) {
+                            el.classList.remove('opacity-0');
+                            setTimeout(function() { el.classList.add('opacity-0'); }, 2000);
+                        }
+                    }
+
+                    function saveFunSettingsState() {
                         try {
-                            var initialDisabled = ${JSON.stringify(settings.disabled_commands ? (typeof settings.disabled_commands === 'string' ? JSON.parse(settings.disabled_commands) : settings.disabled_commands) : [])};
-                            if (Array.isArray(initialDisabled)) {
-                                for (var i = 0; i < initialDisabled.length; i++) disabledCmds[initialDisabled[i]] = true;
-                            }
-                            var initialAliases = ${JSON.stringify(settings.custom_aliases ? (typeof settings.custom_aliases === 'string' ? JSON.parse(settings.custom_aliases) : settings.custom_aliases) : {})};
-                            if (initialAliases && typeof initialAliases === 'object') customAliases = initialAliases;
+                            var gId = window.location.pathname.split('/')[2];
+                            if (!gId) return;
+                            var disArr = Object.keys(funDisabledCmds).filter(function(k) { return funDisabledCmds[k]; });
+                            var xhr = new XMLHttpRequest();
+                            xhr.open('POST', '/api/guild/' + gId + '/settings', true);
+                            xhr.setRequestHeader('Content-Type', 'application/json');
+                            xhr.onload = function() {
+                                try { if (JSON.parse(xhr.responseText).success) showFunSaved(); } catch(e) {}
+                            };
+                            xhr.send(JSON.stringify({
+                                disabled_commands: JSON.stringify(disArr),
+                                custom_aliases: JSON.stringify(funCustomAliases)
+                            }));
                         } catch(e) {}
+                    }
 
-                        function isEnabled(cmdName) { return !disabledCmds[cmdName]; }
+                    window.toggleSingleFunCmd = function(cmdName, enabled) {
+                        funDisabledCmds[cmdName] = !enabled;
+                        var card = document.querySelector('div[data-cmd="' + cmdName + '"]');
+                        if (card) {
+                            if (enabled) card.classList.remove('opacity-50');
+                            else card.classList.add('opacity-50');
+                        }
+                        saveFunSettingsState();
+                    };
 
-                        function renderFunCommands() {
-                            var container = document.getElementById('funCmdsContainer');
-                            if (!container) return;
-                            var html = '';
-                            for (var i = 0; i < funGamesList.length; i++) {
-                                var item = funGamesList[i];
-                                var en = isEnabled(item.name);
-                                var alias = customAliases[item.name] || '';
-                                
-                                html += '<div class="bg-[#0b0d14] border border-white/5 p-4 rounded-2xl flex items-center justify-between hover:border-purple-500/40 transition' + (en ? '' : ' opacity-50') + '" data-cmd="' + item.name + '">';
-                                
-                                // Controls: Toggle + Edit alias button
-                                html += '<div class="flex items-center gap-3">';
-                                html += '<label class="toggle"><input type="checkbox" data-fun-cmd="' + item.name + '"' + (en ? ' checked' : '') + '><span class="slider"></span></label>';
-                                html += '<button type="button" onclick="openFunAliasModal(\'' + item.name + '\', \'' + item.icon + '\')" title="تعديل الاختصار" class="px-3 py-1.5 bg-[#1a1d2d] hover:bg-purple-600/30 text-purple-300 border border-purple-500/30 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow">';
-                                html += '<span>⚙️</span><span>' + (alias ? 'اختصار: ' + alias : 'تخصيص الاختصار') + '</span>';
-                                html += '</button>';
-                                html += '</div>';
+                    window.toggleAllFunCmds = function(enable) {
+                        var cards = document.querySelectorAll('div[data-cmd]');
+                        for (var i = 0; i < cards.length; i++) {
+                            var c = cards[i];
+                            var name = c.getAttribute('data-cmd');
+                            if (!name) continue;
+                            funDisabledCmds[name] = !enable;
+                            var input = c.querySelector('input[type="checkbox"]');
+                            if (input) input.checked = enable;
+                            if (enable) c.classList.remove('opacity-50');
+                            else c.classList.add('opacity-50');
+                        }
+                        saveFunSettingsState();
+                    };
 
-                                // Info: Name + description + icon
-                                html += '<div class="flex items-center gap-3">';
-                                html += '<div class="text-right">';
-                                html += '<div class="flex items-center justify-end gap-2">';
-                                if (alias) html += '<span class="px-2 py-0.5 bg-purple-950/60 text-purple-300 border border-purple-800/40 rounded-lg text-[10px] font-bold">بديل: ' + alias + '</span>';
-                                html += '<span class="font-black text-white text-xs font-mono" dir="ltr">' + item.name + '</span>';
-                                html += '</div>';
-                                html += '<p class="text-[11px] text-gray-400 mt-0.5">' + item.desc + '</p>';
-                                html += '</div>';
-                                html += '<div class="w-10 h-10 rounded-2xl bg-purple-600/20 text-purple-400 flex items-center justify-center text-lg border border-purple-500/30 shadow-inner">' + item.icon + '</div>';
-                                html += '</div>';
+                    window.openFunAliasModal = function(cmdName, icon) {
+                        currentModalCmd = cmdName;
+                        var modal = document.getElementById('funAliasModal');
+                        var nameEl = document.getElementById('modalFunCmdName');
+                        var aliasEl = document.getElementById('modalFunCmdAlias');
+                        var iconEl = document.getElementById('modalFunCmdIcon');
+                        if (nameEl) nameEl.value = cmdName;
+                        if (aliasEl) aliasEl.value = funCustomAliases[cmdName] || '';
+                        if (iconEl) iconEl.textContent = icon || '🎮';
+                        if (modal) modal.classList.remove('hidden');
+                    };
 
-                                html += '</div>';
-                            }
-                            container.innerHTML = html;
+                    window.closeFunAliasModal = function() {
+                        var modal = document.getElementById('funAliasModal');
+                        if (modal) modal.classList.add('hidden');
+                        currentModalCmd = null;
+                    };
 
-                            // Checkbox listener
-                            var checks = container.querySelectorAll('input[type="checkbox"][data-fun-cmd]');
-                            for (var j = 0; j < checks.length; j++) {
-                                (function(cb) {
-                                    cb.addEventListener('change', function() {
-                                        var cmdName = cb.getAttribute('data-fun-cmd');
-                                        disabledCmds[cmdName] = !cb.checked;
-                                        var card = cb.closest('div[data-cmd]');
-                                        if (card) {
-                                            if (cb.checked) card.classList.remove('opacity-50');
-                                            else card.classList.add('opacity-50');
-                                        }
-                                        saveFunSettings();
-                                    });
-                                })(checks[j]);
+                    window.saveFunAlias = function() {
+                        if (!currentModalCmd) return;
+                        var aliasEl = document.getElementById('modalFunCmdAlias');
+                        var val = aliasEl ? aliasEl.value.trim() : '';
+                        if (val) funCustomAliases[currentModalCmd] = val;
+                        else delete funCustomAliases[currentModalCmd];
+
+                        var safeKey = currentModalCmd.replace(/[^a-zA-Z0-9]/g, '_');
+                        var badgeEl = document.getElementById('aliasBadge_' + safeKey);
+                        var tagEl = document.getElementById('aliasTag_' + safeKey);
+                        if (badgeEl) badgeEl.textContent = val ? 'اختصار: ' + val : 'تخصيص الاختصار';
+                        if (tagEl) {
+                            if (val) {
+                                tagEl.textContent = 'بديل: ' + val;
+                                tagEl.classList.remove('hidden');
+                            } else {
+                                tagEl.classList.add('hidden');
                             }
                         }
 
-                        function showFunSaved() {
-                            var el = document.getElementById('funSaveIndicator');
-                            if (el) {
-                                el.classList.remove('opacity-0');
-                                setTimeout(function() { el.classList.add('opacity-0'); }, 2000);
-                            }
-                        }
-
-                        function saveFunSettings() {
-                            try {
-                                var gId = window.location.pathname.split('/')[2];
-                                if (!gId) return;
-                                var disArr = Object.keys(disabledCmds).filter(function(k) { return disabledCmds[k]; });
-                                var xhr = new XMLHttpRequest();
-                                xhr.open('POST', '/api/guild/' + gId + '/settings', true);
-                                xhr.setRequestHeader('Content-Type', 'application/json');
-                                xhr.onload = function() {
-                                    try { if (JSON.parse(xhr.responseText).success) showFunSaved(); } catch(e) {}
-                                };
-                                xhr.send(JSON.stringify({
-                                    disabled_commands: JSON.stringify(disArr),
-                                    custom_aliases: JSON.stringify(customAliases)
-                                }));
-                            } catch(e) {}
-                        }
-
-                        window.toggleAllFunCmds = function(enable) {
-                            for (var i = 0; i < funGamesList.length; i++) {
-                                disabledCmds[funGamesList[i].name] = !enable;
-                            }
-                            saveFunSettings();
-                            renderFunCommands();
-                        };
-
-                        window.openFunAliasModal = function(cmdName, icon) {
-                            currentModalCmd = cmdName;
-                            var modal = document.getElementById('funAliasModal');
-                            var nameEl = document.getElementById('modalFunCmdName');
-                            var aliasEl = document.getElementById('modalFunCmdAlias');
-                            var iconEl = document.getElementById('modalFunCmdIcon');
-                            if (nameEl) nameEl.value = cmdName;
-                            if (aliasEl) aliasEl.value = customAliases[cmdName] || '';
-                            if (iconEl) iconEl.textContent = icon || '🎮';
-                            if (modal) modal.classList.remove('hidden');
-                        };
-
-                        window.closeFunAliasModal = function() {
-                            var modal = document.getElementById('funAliasModal');
-                            if (modal) modal.classList.add('hidden');
-                            currentModalCmd = null;
-                        };
-
-                        window.saveFunAlias = function() {
-                            if (!currentModalCmd) return;
-                            var aliasEl = document.getElementById('modalFunCmdAlias');
-                            var val = aliasEl ? aliasEl.value.trim() : '';
-                            if (val) customAliases[currentModalCmd] = val;
-                            else delete customAliases[currentModalCmd];
-                            saveFunSettings();
-                            closeFunAliasModal();
-                            renderFunCommands();
-                        };
-
-                        // Run on page load
-                        renderFunCommands();
-                    })();
+                        saveFunSettingsState();
+                        closeFunAliasModal();
+                    };
 
                     async function sendGamesPanelDirect() {
                         const channelId = document.getElementById('funTargetChannel').value;
