@@ -258,24 +258,13 @@ async function runTrivia(interaction) {
 // ==========================================
 async function runFastType(interaction) {
   const word = FAST_WORDS[Math.floor(Math.random() * FAST_WORDS.length)];
-  const reward = Math.floor(Math.random() * 60) + 50; // 50 - 110 coins
+  const reward = Math.floor(Math.random() * 60) + 50;
   const timeLimit = 20;
 
-  // جلب القناة أولاً لضمان توفرها (مهم جداً عند الاستدعاء من زر)
-  let channel = interaction.channel;
-  if (!channel || channel.partial) {
-    try {
-      channel = await interaction.client.channels.fetch(interaction.channelId);
-    } catch (e) {
-      console.error('[FastType] فشل في جلب القناة:', e);
-      return;
-    }
-  }
-
-  if (!channel || !channel.createMessageCollector) {
-    console.error('[FastType] القناة لا تدعم createMessageCollector');
-    return;
-  }
+  // جلب القناة والـ client
+  const client = interaction.client;
+  let channelId = interaction.channelId;
+  let guildId = interaction.guildId;
 
   const embed = new EmbedBuilder()
     .setColor('#9333ea')
@@ -291,7 +280,7 @@ async function runFastType(interaction) {
     .setFooter({ text: 'ZENO Games • أسرع شخص يكتبها يفوز!', iconURL: interaction.guild?.iconURL() || undefined })
     .setTimestamp();
 
-  // إرسال الرسالة - دعم slash command والزر معاً
+  // إرسال رسالة اللعبة
   try {
     if (interaction.replied || interaction.deferred) {
       await interaction.followUp({ embeds: [embed] });
@@ -299,46 +288,46 @@ async function runFastType(interaction) {
       await interaction.reply({ embeds: [embed] });
     }
   } catch (e) {
-    await channel.send({ embeds: [embed] }).catch(() => {});
+    try {
+      const ch = client.channels.cache.get(channelId);
+      if (ch) await ch.send({ embeds: [embed] });
+    } catch (_) {}
   }
 
   const targetClean = normalizeText(word);
   const startTime = Date.now();
   let finished = false;
 
-  const collector = channel.createMessageCollector({
-    filter: m => !m.author.bot,
-    time: timeLimit * 1000
-  });
-
-  collector.on('collect', async (msg) => {
+  // استخدام client.on مباشرةً بدلاً من createMessageCollector لضمان الاستقبال
+  const listener = async (msg) => {
     if (finished) return;
+    if (msg.author.bot) return;
+    if (msg.channelId !== channelId) return;
+    if (msg.guildId !== guildId) return;
 
     const rawUser = msg.content.trim();
+    if (rawUser.length < 2) return;
+
     const userText = normalizeText(rawUser);
-
-    // فحص التطابق التام أو التطابق التقريبي
     const isExact = userText === targetClean;
-    const isContained = userText.includes(targetClean) || targetClean.includes(userText);
-    const isLengthClose = Math.abs(userText.length - targetClean.length) <= 3;
+    const isClose = (userText.includes(targetClean) || targetClean.includes(userText)) &&
+                    Math.abs(userText.length - targetClean.length) <= 2 &&
+                    userText.length >= 3;
 
-    if (isExact || (isContained && isLengthClose && userText.length >= 3)) {
+    if (isExact || isClose) {
       finished = true;
-      collector.stop('winner');
+      client.off('messageCreate', listener);
+      clearTimeout(timer);
 
       const timeTaken = ((Date.now() - startTime) / 1000).toFixed(2);
 
-      // تفاعل فوري بالرياكشن
       msg.react('🎉').catch(() => {});
       msg.react('⚡').catch(() => {});
 
-      // توزيع الجوائز فوراً
-      if (interaction.guild && msg.author) {
-        try {
-          db.addCoins(msg.author.id, interaction.guild.id, reward);
-          if (db.addXp) db.addXp(msg.author.id, interaction.guild.id, 25);
-        } catch (e) {}
-      }
+      try {
+        db.addCoins(msg.author.id, guildId, reward);
+        if (db.addXp) db.addXp(msg.author.id, guildId, 25);
+      } catch (e) {}
 
       const winEmbed = new EmbedBuilder()
         .setColor('#10b981')
@@ -353,28 +342,33 @@ async function runFastType(interaction) {
         .setFooter({ text: 'تهانينا! سرعة استجابة مذهلة 👏' })
         .setTimestamp();
 
-      return msg.reply({ embeds: [winEmbed] }).catch(() => {
-        channel.send({ embeds: [winEmbed] }).catch(() => {});
+      msg.reply({ embeds: [winEmbed] }).catch(() => {
+        msg.channel.send({ embeds: [winEmbed] }).catch(() => {});
       });
     } else {
-      // تفاعل مع المحاولة الخاطئة
-      if (rawUser.length >= 2) {
-        msg.react('❌').catch(() => {});
-      }
+      msg.react('❌').catch(() => {});
     }
-  });
+  };
 
-  collector.on('end', async (collected, reason) => {
-    if (reason !== 'winner' && !finished) {
-      const timeoutEmbed = new EmbedBuilder()
-        .setColor('#ef4444')
-        .setTitle('⏰ انتهى وقت التحدي!')
-        .setDescription(`لم يقم أحد بكتابة الكلمة الصحيحة \`${word}\` في الوقت المحدد (${timeLimit} ثانية).`)
-        .setTimestamp();
+  client.on('messageCreate', listener);
 
-      await channel.send({ embeds: [timeoutEmbed] }).catch(() => {});
-    }
-  });
+  // تايمر انتهاء الوقت
+  const timer = setTimeout(async () => {
+    if (finished) return;
+    finished = true;
+    client.off('messageCreate', listener);
+
+    const ch = client.channels.cache.get(channelId);
+    if (!ch) return;
+
+    const timeoutEmbed = new EmbedBuilder()
+      .setColor('#ef4444')
+      .setTitle('⏰ انتهى وقت التحدي!')
+      .setDescription(`لم يقم أحد بكتابة الكلمة الصحيحة \`${word}\` في الوقت المحدد (${timeLimit} ثانية).`)
+      .setTimestamp();
+
+    ch.send({ embeds: [timeoutEmbed] }).catch(() => {});
+  }, timeLimit * 1000);
 }
 
 // ==========================================
