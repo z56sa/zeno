@@ -325,9 +325,6 @@ async function runFastType(interaction) {
 
       const timeTaken = ((Date.now() - startTime) / 1000).toFixed(2);
 
-      msg.react('🎉').catch(() => {});
-      msg.react('⚡').catch(() => {});
-
       try {
         db.addCoins(msg.author.id, guildId, reward);
         if (db.addXp) db.addXp(msg.author.id, guildId, 25);
