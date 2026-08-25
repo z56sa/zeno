@@ -9251,27 +9251,43 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
             const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
             const embed = new EmbedBuilder()
                 .setColor('#9333ea')
-                .setTitle('🎮 مركز الألعاب والتسلية | ZENO Games')
-                .setDescription('اختر اللعبة التي تريد خوض التحدي بها الآن من خلال الأزرار التفاعلية أدناه:')
-                .addFields(
-                    { name: '❓ سؤال وجواب (Trivia)', value: 'اختبر معلوماتك العامة مع 4 خيارات تفاعلية', inline: true },
-                    { name: '⚡ أسرع كتابة (Fast Type)', value: 'كن أسرع شخص يكتب الكلمة المعروضة', inline: true },
-                    { name: '✂️ حجر ورقة مقص (RPS)', value: 'تحدَّ الذكاء الاصطناعي في جولة سريعة', inline: true },
-                    { name: '🎲 النرد الحظ', value: 'ارمِ النرد واكتشف رقم حظك اليوم', inline: true },
-                    { name: '🪙 ملك أو كتابة', value: 'اقلب العملة واختبر حظك', inline: true }
+                .setTitle('🎮 مركز الألعاب والتسلية الشامل | ZENO Games')
+                .setDescription(
+                    `**اختر اللعبة من الأزرار التفاعلية أدناه وتنافس لجمع نقاط وعملات النجوم ⭐!**\n\n` +
+                    `🎯 **الألعاب الفردية والسريعة:**\n` +
+                    `• ❓ **سؤال وجواب (Trivia):** 4 خيارات تفاعلية مع كشف الإجابة فوراً\n` +
+                    `• ⚡ **أسرع كتابة (Fast Type):** بطاقة مصورة وتحدي سرعة في الشات\n` +
+                    `• ✂️ **حجر ورقة مقص (RPS):** تحدَّ البوت بأزرار تفاعلية فورية\n` +
+                    `• 🎲 **رمي النرد (Dice):** ارمِ النرد واربح جوائز حظ مضاعفة\n` +
+                    `• 🪙 **رمي العملة (Coinflip):** اختر (ملك 👑 أو كتابة 🦅) وضاعف نقاطك\n\n` +
+                    `👥 **الألعاب الجماعية والتحديات:**\n` +
+                    `• 🎰 **روليت الحظ:** غرفة تفاعلية ومواجهة حماسية\n` +
+                    `• ⚔️ **قتال التحدي:** راهن وتحدَّ أي عضو في السيرفر\n` +
+                    `• 🔫 **مافيا الغموض:** أدوار سرية وخداع مع أصدقائك\n` +
+                    `• 🪑 **كراسي موسيقية:** سرعة بديهة واستبعاد حتى الفائز الأخير\n` +
+                    `• 🙈 **لعبة الغميضة:** اختبئ وابحث عن الآخرين`
                 )
-                .setFooter({ text: 'ZENO Games • العب واستمتع مع أصدقائك' })
+                .addFields(
+                    { name: '🏆 الجوائز', value: 'الفائزون يحصلون على عملات نقدية تضاف لمحفظتهم فوراً!', inline: true },
+                    { name: '⚡ الاستجابة', value: 'أزرار حية وتفاعل فوري بدون تأخير', inline: true }
+                )
+                .setFooter({ text: 'ZENO Games • العب واستمتع مع أصدقائك بالسيرفر', iconURL: channel.guild?.iconURL() || undefined })
                 .setTimestamp();
 
             const row1 = new ActionRowBuilder().addComponents(
                 new ButtonBuilder().setCustomId('game_btn_trivia').setLabel('سؤال وجواب ❓').setStyle(ButtonStyle.Primary),
                 new ButtonBuilder().setCustomId('game_btn_fast').setLabel('أسرع كتابة ⚡').setStyle(ButtonStyle.Success),
-                new ButtonBuilder().setCustomId('game_btn_rps').setLabel('حجر ورقة مقص ✂️').setStyle(ButtonStyle.Secondary)
+                new ButtonBuilder().setCustomId('game_btn_rps').setLabel('حجر ورقة مقص ✂️').setStyle(ButtonStyle.Secondary),
+                new ButtonBuilder().setCustomId('game_btn_dice').setLabel('رمي النرد 🎲').setStyle(ButtonStyle.Secondary),
+                new ButtonBuilder().setCustomId('game_btn_coin').setLabel('رمي العملة 🪙').setStyle(ButtonStyle.Secondary)
             );
 
             const row2 = new ActionRowBuilder().addComponents(
-                new ButtonBuilder().setCustomId('game_btn_dice').setLabel('رمي النرد 🎲').setStyle(ButtonStyle.Secondary),
-                new ButtonBuilder().setCustomId('game_btn_coin').setLabel('رمي العملة 🪙').setStyle(ButtonStyle.Secondary)
+                new ButtonBuilder().setCustomId('game_btn_roulette').setLabel('روليت 🎰').setStyle(ButtonStyle.Danger),
+                new ButtonBuilder().setCustomId('game_btn_fight').setLabel('قتال ⚔️').setStyle(ButtonStyle.Danger),
+                new ButtonBuilder().setCustomId('game_btn_mafia').setLabel('مافيا 🔫').setStyle(ButtonStyle.Danger),
+                new ButtonBuilder().setCustomId('game_btn_chairs').setLabel('كراسي 🪑').setStyle(ButtonStyle.Primary),
+                new ButtonBuilder().setCustomId('game_btn_hideseek').setLabel('غميضة 🙈').setStyle(ButtonStyle.Primary)
             );
 
             await channel.send({ embeds: [embed], components: [row1, row2] });

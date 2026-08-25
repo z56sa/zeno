@@ -248,16 +248,16 @@ async function runTrivia(interaction) {
 }
 
 // ==========================================
-// 2. لعبة أسرع كتابة (Fast Type with Canvas)
+// 2. لعبة أسرع كتابة (Fast Type with Canvas & Live Reactions)
 // ==========================================
 async function runFastType(interaction) {
   const word = FAST_WORDS[Math.floor(Math.random() * FAST_WORDS.length)];
-  const reward = Math.floor(Math.random() * 60) + 40; // 40 - 100 coins
+  const reward = Math.floor(Math.random() * 60) + 50; // 50 - 110 coins
 
   let cardBuffer = null;
   try {
     if (canvasUtil.createFastTypeCard) {
-      cardBuffer = await canvasUtil.createFastTypeCard(word, 15);
+      cardBuffer = await canvasUtil.createFastTypeCard(word, 20);
     }
   } catch(e) {}
 
@@ -265,9 +265,10 @@ async function runFastType(interaction) {
     .setColor('#9333ea')
     .setTitle('⚡ تحدي أسرع كتابة | Fast Type Challenge')
     .setDescription(
-      `اكتب الكلمة التالية في الشات بأسرع ما يمكنك خلال **15 ثانية**:\n\n` +
+      `اكتب الكلمة التالية في الشات بأسرع ما يمكنك خلال **20 ثانية**:\n\n` +
       `# 📝 \`${word}\`\n\n` +
-      `🎁 **جائزة الفائز:** \`+${reward} ⭐ Star Coins\``
+      `🎁 **جائزة الفائز:** \`+${reward} ⭐ Star Coins\`\n` +
+      `💡 *البوت يتفاعل فورياً مع كل محاولة (صحيحة ✅ أو خاطئة ❌)!*`
     )
     .setFooter({ text: 'أول شخص يكتب الكلمة بدقة في الشات يفوز!' })
     .setTimestamp();
@@ -279,43 +280,74 @@ async function runFastType(interaction) {
     files.push(attachment);
   }
 
-  await interaction.reply({ embeds: [embed], files });
+  const mainMsg = await interaction.reply({ embeds: [embed], files, fetchReply: true });
 
   const startTime = Date.now();
-  const normalizedWord = normalizeText(word);
-  const filter = m => normalizeText(m.content) === normalizedWord && !m.author.bot;
+  const targetNormalized = normalizeText(word);
   const channel = interaction.channel;
 
-  try {
-    const collected = await channel.awaitMessages({ filter, max: 1, time: 15000, errors: ['time'] });
-    const winnerMsg = collected.first();
-    const timeTaken = ((Date.now() - startTime) / 1000).toFixed(2);
+  let hasWinner = false;
 
-    if (interaction.guild && winnerMsg.author) {
-      try { db.addCoins(winnerMsg.author.id, interaction.guild.id, reward); } catch(e) {}
+  const collector = channel.createMessageCollector({
+    filter: m => !m.author.bot,
+    time: 20000
+  });
+
+  collector.on('collect', async m => {
+    if (hasWinner) return;
+
+    const userTextNormalized = normalizeText(m.content);
+
+    // فحص التطابق التام أو التطابق مع تجاهل الهمزات والتنوين والمسافات
+    if (userTextNormalized === targetNormalized) {
+      hasWinner = true;
+      collector.stop('won');
+
+      const timeTaken = ((Date.now() - startTime) / 1000).toFixed(2);
+
+      // تفاعل فوري بإيموجي الاحتفال
+      try { await m.react('🎉'); await m.react('⚡'); } catch(e) {}
+
+      // إضافة المكافأة
+      if (interaction.guild && m.author) {
+        try {
+          db.addCoins(m.author.id, interaction.guild.id, reward);
+          if (db.addXp) db.addXp(m.author.id, interaction.guild.id, 25);
+        } catch(e) {}
+      }
+
+      const winEmbed = new EmbedBuilder()
+        .setColor('#10b981')
+        .setTitle('🏆 فائز في تحدي أسرع كتابة!')
+        .setDescription(
+          `👑 **الفائز:** <@${m.author.id}> (${m.author.username})\n` +
+          `⏱️ **الوقت القياسي:** \`${timeTaken} ثانية\` ⚡\n` +
+          `📝 **الكلمة المطلوبة:** \`${word}\`\n` +
+          `💰 **المكافأة:** \`+${reward} ⭐ Star Coins\` تمت إضافتها لمحفظتك فوراً!`
+        )
+        .setThumbnail(m.author.displayAvatarURL({ dynamic: true }))
+        .setFooter({ text: 'تهانينا! سرعة استجابة مذهلة 👏' })
+        .setTimestamp();
+
+      return channel.send({ embeds: [winEmbed] });
+    } else {
+      // تفاعل فوري مع الخطأ إذا كانت المحاولة قريبة أو كتب شيئاً أثناء المسابقة
+      if (m.content.trim().length >= 2) {
+        try { await m.react('❌'); } catch(e) {}
+      }
     }
+  });
 
-    const winEmbed = new EmbedBuilder()
-      .setColor('#10b981')
-      .setTitle('🎉 فائز بطل في تحدي السرعة!')
-      .setDescription(
-        `👑 **الفائز:** ${winnerMsg.author} (${winnerMsg.author.tag})\n` +
-        `⏱️ **الوقت القياسي:** \`${timeTaken} ثانية\` ⚡\n` +
-        `📝 **الكلمة:** \`${word}\`\n` +
-        `💰 **الجائزة الممنوحة:** \`+${reward} ⭐ Star Coins\` تمت إضافتها لرصيدك!`
-      )
-      .setThumbnail(winnerMsg.author.displayAvatarURL({ dynamic: true }))
-      .setTimestamp();
-
-    await channel.send({ embeds: [winEmbed] });
-  } catch(e) {
-    const timeoutEmbed = new EmbedBuilder()
-      .setColor('#ef4444')
-      .setTitle('⏰ انتهى الوقت!')
-      .setDescription(`لم يقم أحد بكتابة الكلمة \`${word}\` في الوقت المحدد (15 ثانية).`)
-      .setTimestamp();
-    await channel.send({ embeds: [timeoutEmbed] });
-  }
+  collector.on('end', async (collected, reason) => {
+    if (reason !== 'won' && !hasWinner) {
+      const timeoutEmbed = new EmbedBuilder()
+        .setColor('#ef4444')
+        .setTitle('⏰ انتهى الوقت!')
+        .setDescription(`لم يقم أحد بكتابة الكلمة الصحيحة \`${word}\` في الوقت المحدد (20 ثانية).`)
+        .setTimestamp();
+      await channel.send({ embeds: [timeoutEmbed] }).catch(() => {});
+    }
+  });
 }
 
 // ==========================================
