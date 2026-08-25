@@ -5355,42 +5355,719 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                         </div>
                     </div>`;
             } else if (section === 'logs') {
-formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl">
-                        <div class="bg-[#12141f] border border-white/5 p-6 rounded-2xl flex items-center justify-between shadow-xl">
-                            <label class="toggle"><input type="checkbox" name="logs_enabled" value="1" ${settings.logs_enabled !== 0 ? 'checked' : ''}><span class="slider"></span></label>
+                const logsConfig = (function() {
+                    try {
+                        return settings.logs_config ? (typeof settings.logs_config === 'string' ? JSON.parse(settings.logs_config) : settings.logs_config) : {};
+                    } catch(e) { return {}; }
+                })();
+
+                formFieldsHtml = `
+                    <div class="space-y-6 text-right" dir="rtl">
+
+                        <!-- 1. Header Bar -->
+                        <div class="bg-gradient-to-r from-[#1a132e] via-[#12141f] to-[#1a132e] border border-purple-500/20 p-6 rounded-3xl flex items-center justify-between shadow-2xl flex-wrap gap-4">
                             <div class="flex items-center gap-3">
+                                <span id="logsSaveIndicator" class="text-xs font-bold text-emerald-400 bg-emerald-950/60 px-3 py-1.5 rounded-xl opacity-0 transition-opacity duration-300">✓ حُفظت الإعدادات</span>
+                                <label class="toggle">
+                                    <input type="checkbox" id="logsMasterToggle" name="logs_enabled" value="1" ${settings.logs_enabled !== 0 ? 'checked' : ''} onchange="saveLogsSetting('logs_enabled', this.checked)">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            <div class="flex items-center gap-4">
                                 <div class="text-right">
-                                    <h4 class="font-black text-white text-base">سجلات السيرفر الشاملة (Server Audit Logs)</h4>
-                                    <p class="text-gray-400 text-xs mt-0.5">تسجيل فوري ودقيق لجميع الأحداث مع الفاعل والتفاصيل</p>
+                                    <h4 class="font-black text-white text-xl flex items-center gap-2 justify-end">
+                                        <span>السجلات</span>
+                                        <span>📜</span>
+                                    </h4>
+                                    <p class="text-gray-400 text-xs mt-0.5">تتبع جميع الأحداث في السيرفر مع الفاعل والتفاصيل فورياً</p>
                                 </div>
-                                <div class="w-10 h-10 rounded-xl bg-amber-600/20 text-amber-400 flex items-center justify-center text-lg border border-amber-500/30">📜</div>
+                                <div class="w-12 h-12 rounded-2xl bg-purple-600/20 text-purple-400 flex items-center justify-center text-2xl border border-purple-500/30 shadow-inner">
+                                    🛡️
+                                </div>
                             </div>
                         </div>
 
-                        <div class="bg-[#12141f] border border-white/5 p-6 rounded-2xl space-y-4 shadow-xl">
-                            <h4 class="text-xs font-black text-white border-b border-white/5 pb-3">قنوات السجلات المتخصصة</h4>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-xs font-bold text-gray-300 mb-2">سجلات الرسائل (حذف وتعديل)</label>
-                                    ${renderChannelSelect('log_channel_messages', settings.log_channel_messages || settings.log_channel || '')}
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-bold text-gray-300 mb-2">سجلات الأعضاء (انضمام ومغادرة)</label>
-                                    ${renderChannelSelect('log_channel_members', settings.log_channel_members || settings.log_channel || '')}
-                                </div>
-                            </div>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-                                <div>
-                                    <label class="block text-xs font-bold text-gray-300 mb-2">سجلات الرومات الصوتية (دخول وخروج)</label>
-                                    ${renderChannelSelect('log_channel_voice', settings.log_channel_voice || settings.log_channel || '')}
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-bold text-gray-300 mb-2">سجلات الإدارة والعقوبات (Mod Logs)</label>
-                                    ${renderChannelSelect('log_channel_moderation', settings.log_channel_moderation || settings.log_channel || '')}
-                                </div>
+                        <!-- Top Stats Badges -->
+                        <div class="flex items-center justify-between gap-3 flex-wrap">
+                            <div class="flex items-center gap-2">
+                                <span class="px-3 py-1.5 bg-[#12141f] border border-white/5 text-gray-300 rounded-xl text-xs font-bold flex items-center gap-1.5">
+                                    <span class="w-2 h-2 rounded-full bg-purple-400"></span>
+                                    <span id="statChannelsUsed">0</span>
+                                    <span>القنوات المستخدمة</span>
+                                </span>
+                                <span class="px-3 py-1.5 bg-[#12141f] border border-white/5 text-gray-300 rounded-xl text-xs font-bold flex items-center gap-1.5">
+                                    <span>⚡</span>
+                                    <span>13 الأقسام</span>
+                                </span>
+                                <span class="px-3 py-1.5 bg-emerald-950/40 text-emerald-400 border border-emerald-800/30 rounded-xl text-xs font-bold flex items-center gap-1.5">
+                                    <span>✓</span>
+                                    <span id="statEnabledLogs">0</span>
+                                    <span>السجلات المفعلة</span>
+                                </span>
+                                <span class="px-3 py-1.5 bg-purple-950/40 text-purple-300 border border-purple-800/30 rounded-xl text-xs font-bold flex items-center gap-1.5 font-mono">
+                                    <span>🎯</span>
+                                    <span>105 إجمالي السجلات</span>
+                                </span>
                             </div>
                         </div>
-                    </div>`;
+
+                        <!-- 2. Auto Channel Setup Wizard Cards -->
+                        <div class="bg-[#12141f] border border-white/5 p-6 rounded-3xl space-y-4 shadow-xl">
+                            <div class="flex items-center justify-between border-b border-white/5 pb-3">
+                                <span class="text-xs text-gray-400">إنشاء قنوات السجلات تلقائياً لجميع الأقسام بضغطة واحدة</span>
+                                <h4 class="text-sm font-black text-white flex items-center gap-2">
+                                    <span>إعداد تلقائي للقنوات</span>
+                                    <span>⚙️</span>
+                                </h4>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-1">
+                                <!-- إنشـاء قنوات عادية -->
+                                <button type="button" onclick="autoSetupLogsChannels('grouped')" class="bg-[#0b0d14] border border-white/5 hover:border-purple-500/50 p-4 rounded-2xl text-right transition group cursor-pointer space-y-2">
+                                    <div class="flex items-center justify-between">
+                                        <div class="w-8 h-8 rounded-xl bg-purple-600/20 text-purple-400 flex items-center justify-center text-sm border border-purple-500/30">📌</div>
+                                        <span class="text-xs font-black text-white group-hover:text-purple-300 transition">إنشاء قنوات عادية</span>
+                                    </div>
+                                    <p class="text-[11px] text-gray-400 leading-relaxed">قناة واحدة لكل قسم (أعضاء، رسائل، أدوار...) — مناسب لأغلب السيرفرات</p>
+                                </button>
+
+                                <!-- إنشـاء قنوات مفصلة -->
+                                <button type="button" onclick="autoSetupLogsChannels('detailed')" class="bg-[#0b0d14] border border-white/5 hover:border-indigo-500/50 p-4 rounded-2xl text-right transition group cursor-pointer space-y-2">
+                                    <div class="flex items-center justify-between">
+                                        <div class="w-8 h-8 rounded-xl bg-indigo-600/20 text-indigo-400 flex items-center justify-center text-sm border border-indigo-500/30">📑</div>
+                                        <span class="text-xs font-black text-white group-hover:text-indigo-300 transition">إنشاء قنوات مفصلة</span>
+                                    </div>
+                                    <p class="text-[11px] text-gray-400 leading-relaxed">قناة منفصلة لكل نوع سجل — للسيرفرات الكبيرة التي تحتاج تنظيم دقيق</p>
+                                </button>
+
+                                <!-- حذف قنوات السجلات -->
+                                <button type="button" onclick="deleteLogsChannels()" class="bg-[#0b0d14] border border-white/5 hover:border-rose-500/50 p-4 rounded-2xl text-right transition group cursor-pointer space-y-2">
+                                    <div class="flex items-center justify-between">
+                                        <div class="w-8 h-8 rounded-xl bg-rose-600/20 text-rose-400 flex items-center justify-center text-sm border border-rose-500/30">🗑️</div>
+                                        <span class="text-xs font-black text-white group-hover:text-rose-300 transition">حذف قنوات السجلات</span>
+                                    </div>
+                                    <p class="text-[11px] text-gray-400 leading-relaxed">حذف كاتيجوري ZENO Server Logs وجميع القنوات بداخله وتعطيل السجلات</p>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- 3. Search & Filter Bar -->
+                        <div class="flex items-center justify-between gap-4">
+                            <div class="flex items-center gap-1.5 bg-[#12141f] border border-white/5 p-1 rounded-2xl">
+                                <button type="button" id="btnLogFilterDisabled" onclick="filterLogsByStatus('disabled')" class="px-3.5 py-1.5 rounded-xl text-xs font-bold text-gray-400 hover:text-white transition cursor-pointer">المعطلة</button>
+                                <button type="button" id="btnLogFilterEnabled" onclick="filterLogsByStatus('enabled')" class="px-3.5 py-1.5 rounded-xl text-xs font-bold text-gray-400 hover:text-white transition cursor-pointer">المفعلة</button>
+                                <button type="button" id="btnLogFilterAll" onclick="filterLogsByStatus('all')" class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-purple-600 text-white transition shadow cursor-pointer">الكل</button>
+                            </div>
+                            <div class="flex-1 relative">
+                                <input type="text" id="logSearchInput" placeholder="...ابحث عن سجل" oninput="searchLogsItems()" class="w-full bg-[#12141f] border border-white/5 focus:border-purple-500 rounded-2xl px-4 py-2.5 text-xs text-white outline-none text-right pr-10">
+                                <span class="absolute right-3.5 top-2.5 text-gray-400 text-sm">🔍</span>
+                            </div>
+                        </div>
+
+                        <!-- 4. Main Two-Column View: Categories Sidebar + Active Category Content -->
+                        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+
+                            <!-- Sidebar: 13 Categories -->
+                            <div class="lg:col-span-1 space-y-1 bg-[#12141f] border border-white/5 p-3 rounded-3xl shadow-xl h-fit">
+                                <div class="flex items-center justify-end gap-1.5 text-xs font-black text-white px-2 py-2 border-b border-white/5 mb-1">
+                                    <span>الأقسام</span>
+                                    <span>📁</span>
+                                </div>
+                                <div id="logsCategoriesList" class="space-y-1"></div>
+                            </div>
+
+                            <!-- Right Display Area: Active Category Header + Section Default Channel/Color + Logs Grid -->
+                            <div class="lg:col-span-3 space-y-4">
+
+                                <!-- Active Category Title & Global Toggles -->
+                                <div class="bg-[#12141f] border border-white/5 p-5 rounded-3xl flex items-center justify-between shadow-xl flex-wrap gap-3">
+                                    <div class="flex items-center gap-2">
+                                        <button type="button" onclick="toggleActiveCategoryLogs(false)" class="px-3.5 py-1.5 bg-rose-950/40 hover:bg-rose-900/60 text-rose-400 border border-rose-800/40 rounded-xl text-xs font-bold transition flex items-center gap-1 cursor-pointer">
+                                            <span>✕</span><span>تعطيل الكل</span>
+                                        </button>
+                                        <button type="button" onclick="toggleActiveCategoryLogs(true)" class="px-3.5 py-1.5 bg-emerald-950/40 hover:bg-emerald-900/60 text-emerald-400 border border-emerald-800/40 rounded-xl text-xs font-bold transition flex items-center gap-1 cursor-pointer">
+                                            <span>✓</span><span>تفعيل الكل</span>
+                                        </button>
+                                    </div>
+                                    <div class="flex items-center gap-3">
+                                        <div class="text-right">
+                                            <h4 id="activeCatTitle" class="font-black text-white text-base">الأعضاء</h4>
+                                            <p id="activeCatCount" class="text-gray-400 text-xs mt-0.5">17 سجل</p>
+                                        </div>
+                                        <div id="activeCatIcon" class="w-10 h-10 rounded-2xl bg-purple-600/20 text-purple-400 flex items-center justify-center text-xl border border-purple-500/30">
+                                            🎯
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Active Category Fast Preset: Channel + Color + Apply to all -->
+                                <div class="bg-[#12141f] border border-white/5 p-5 rounded-3xl space-y-4 shadow-xl">
+                                    <div class="flex items-center justify-between border-b border-white/5 pb-3">
+                                        <span class="text-[11px] text-gray-400">طبق نفس الإعدادات على جميع السجلات المفعلة بالقسم</span>
+                                        <h5 class="text-xs font-black text-white flex items-center gap-1.5">
+                                            <span>إعدادات القسم</span>
+                                            <span>⚙️</span>
+                                        </h5>
+                                    </div>
+
+                                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
+                                        <!-- Color Picker -->
+                                        <div>
+                                            <label class="block text-[11px] font-bold text-gray-300 mb-1.5 text-right">اللون الافتراضي 🎨</label>
+                                            <div class="flex items-center gap-2 bg-[#0b0d14] border border-white/5 p-1.5 rounded-xl">
+                                                <input type="text" id="catColorHex" value="#5865F2" class="w-full bg-transparent text-xs text-white font-mono outline-none text-center" dir="ltr" onchange="updateCatColorPreview(this.value)">
+                                                <input type="color" id="catColorPicker" value="#5865F2" class="w-7 h-7 rounded-lg cursor-pointer bg-transparent border-0" onchange="document.getElementById('catColorHex').value = this.value">
+                                            </div>
+                                        </div>
+
+                                        <!-- Channel Select -->
+                                        <div class="sm:col-span-2">
+                                            <label class="block text-[11px] font-bold text-gray-300 mb-1.5 text-right">القناة الافتراضية 📢</label>
+                                            ${renderChannelSelect('catDefaultChannel', '')}
+                                        </div>
+                                    </div>
+
+                                    <button type="button" onclick="applyCatSettingsToAll()" class="w-full py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-black rounded-xl shadow-lg transition flex items-center justify-center gap-2 cursor-pointer">
+                                        <span>✨ تطبيق على جميع السجلات المفعلة</span>
+                                    </button>
+                                </div>
+
+                                <!-- Logs Cards 2-Column Grid -->
+                                <div id="logsCardsGrid" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
+
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Individual Log Edit Modal -->
+                    <div id="editLogModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+                        <div class="bg-[#12141f] border border-purple-500/30 rounded-3xl max-w-md w-full p-6 space-y-4 shadow-2xl text-right" dir="rtl">
+                            <div class="flex items-center justify-between border-b border-white/5 pb-3">
+                                <button type="button" onclick="closeEditLogModal()" class="text-gray-400 hover:text-white text-lg font-bold">✕</button>
+                                <div class="flex items-center gap-2">
+                                    <h5 class="text-white font-black text-sm" id="modalLogTitle">تخصيص السجل</h5>
+                                    <span id="modalLogIcon" class="text-base">📜</span>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold text-gray-300 mb-1">القناة المخصصة لهذا السجل</label>
+                                ${renderChannelSelect('modalLogChannel', '')}
+                                <p class="text-[10px] text-gray-400 mt-1">اتركها فارغة لاستخدام القناة الافتراضية للقسم</p>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold text-gray-300 mb-1">لون الإيمبد (Hex Color)</label>
+                                <div class="flex items-center gap-2 bg-[#0b0d14] border border-white/5 p-2 rounded-xl">
+                                    <input type="text" id="modalLogColorHex" value="#5865F2" class="w-full bg-transparent text-xs text-white font-mono outline-none text-center" dir="ltr" onchange="document.getElementById('modalLogColorPicker').value = this.value">
+                                    <input type="color" id="modalLogColorPicker" value="#5865F2" class="w-7 h-7 rounded-lg cursor-pointer bg-transparent border-0" onchange="document.getElementById('modalLogColorHex').value = this.value">
+                                </div>
+                            </div>
+
+                            <div class="flex items-center justify-end gap-2 pt-2 border-t border-white/5">
+                                <button type="button" onclick="closeEditLogModal()" class="px-4 py-2 bg-white/5 hover:bg-white/10 text-gray-300 rounded-xl text-xs font-bold transition">إلغاء</button>
+                                <button type="button" onclick="saveModalLogConfig()" class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold transition shadow-lg">حفظ التغييرات</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <script>
+                    (function() {
+                        // 105 Comprehensive Log Events across 13 Categories
+                        var LOG_CATEGORIES = {
+                            members: {
+                                title: 'الأعضاء', icon: '🎯', desc: 'أحداث دخول وخروج وحظر وعقوبات الأعضاء', defaultColor: '#5865F2',
+                                items: [
+                                    { id: 'member_join', title: 'دخول عضو', desc: 'عند انضمام عضو جديد للسيرفر', icon: '⬇️', badge: 'دخول' },
+                                    { id: 'member_leave', title: 'خروج عضو', desc: 'عند مغادرة عضو للسيرفر', icon: '⬆️', badge: 'مغادرة' },
+                                    { id: 'member_ban', title: 'حظر عضو', desc: 'عند حظر عضو من السيرفر', icon: '🪓', badge: 'باند' },
+                                    { id: 'member_unban', title: 'فك حظر عضو', desc: 'عند فك حظر عضو', icon: '🔓', badge: 'فك باند' },
+                                    { id: 'member_kick', title: 'طرد عضو', desc: 'عند طرد عضو من السيرفر', icon: '👢', badge: 'طرد' },
+                                    { id: 'member_prison', title: 'سجن عضو', desc: 'عند سجن عضو', icon: '🔒', badge: 'سجن' },
+                                    { id: 'member_unprison', title: 'إخراج من السجن', desc: 'عند إخراج عضو من السجن', icon: '🔓', badge: 'فك سجن' },
+                                    { id: 'member_timeout', title: 'عزل عضو', desc: 'عند عزل عضو (Timeout)', icon: '⏳', badge: 'تايم أوت' },
+                                    { id: 'member_untimeout', title: 'إزالة العزل', desc: 'عند إزالة العزل عن عضو', icon: '➕', badge: 'فك تايم أوت' },
+                                    { id: 'member_mute', title: 'إسكات كتابي', desc: 'عند إعطاء ميوت كتابي لعضو', icon: '🔇', badge: 'ميوت' },
+                                    { id: 'member_unmute', title: 'إلغاء إسكات كتابي', desc: 'عند إلغاء الميوت الكتابي', icon: '🔊', badge: 'فك ميوت' },
+                                    { id: 'member_nick_change', title: 'تغيير الاسم المستعار', desc: 'عند تغيير اللقب', icon: '✏️', badge: 'لقب' },
+                                    { id: 'member_avatar_change', title: 'تغيير الصورة', desc: 'عند تغيير صورة البروفايل', icon: '🖼️', badge: 'صورة' },
+                                    { id: 'member_username_change', title: 'تغيير اسم المستخدم', desc: 'عند تغيير اليوزرنيم', icon: '👤', badge: 'يوزر' },
+                                    { id: 'member_boost_add', title: 'بوست السيرفر', desc: 'عند بوست السيرفر', icon: '💎', badge: 'بوست' },
+                                    { id: 'member_boost_remove', title: 'إزالة البوست', desc: 'عند إزالة البوست', icon: '🗑️', badge: 'إزالة بوست' },
+                                    { id: 'member_suspicious', title: 'حساب مشبوه', desc: 'عند إسناد رتبة لحساب جديد بسبب عمر الحساب', icon: '🚨', badge: 'حماية' }
+                                ]
+                            },
+                            roles: {
+                                title: 'الرتب', icon: '🎖️', desc: 'أحداث إنشاء وتعديل وحذف وإعطاء الرتب', defaultColor: '#9333ea',
+                                items: [
+                                    { id: 'role_create', title: 'إنشاء رتبة', desc: 'عند إنشاء رتبة جديدة', icon: '➕', badge: 'إنشاء' },
+                                    { id: 'role_delete', title: 'حذف رتبة', desc: 'عند حذف رتبة', icon: '🗑️', badge: 'حذف' },
+                                    { id: 'role_update', title: 'تعديل رتبة', desc: 'عند تعديل رتبة', icon: '✏️', badge: 'تعديل' },
+                                    { id: 'role_give_member', title: 'إضافة رتبة لعضو', desc: 'عند إعطاء رتبة لعضو', icon: '🎁', badge: 'إعطاء' },
+                                    { id: 'role_remove_member', title: 'إزالة رتبة من عضو', desc: 'عند إزالة رتبة من عضو', icon: '❌', badge: 'سحب' },
+                                    { id: 'role_custom_manage', title: 'رتبة خاصة', desc: 'تعديل/حذف رتبة خاصة (نفس أمر rlog)', icon: '👑', badge: 'خاصة' }
+                                ]
+                            },
+                            channels: {
+                                title: 'القنوات', icon: '📌', desc: 'أحداث إنشاء وتعديل وحذف القنوات والثريدات', defaultColor: '#3b82f6',
+                                items: [
+                                    { id: 'channel_create', title: 'إنشاء قناة', desc: 'عند إنشاء قناة جديدة', icon: '➕', badge: 'إنشاء' },
+                                    { id: 'channel_delete', title: 'حذف قناة', desc: 'عند حذف قناة', icon: '🗑️', badge: 'حذف' },
+                                    { id: 'channel_update', title: 'تعديل قناة', desc: 'عند تعديل إعدادات قناة', icon: '✏️', badge: 'تعديل' },
+                                    { id: 'channel_perms_update', title: 'تعديل صلاحيات قناة', desc: 'عند تعديل صلاحيات قناة', icon: '🔒', badge: 'صلاحيات' },
+                                    { id: 'thread_create', title: 'إنشاء ثريد', desc: 'عند إنشاء ثريد جديد', icon: '💬', badge: 'ثريد' },
+                                    { id: 'thread_delete', title: 'حذف ثريد', desc: 'عند حذف ثريد', icon: '🗑️', badge: 'حذف ثريد' },
+                                    { id: 'thread_update', title: 'تعديل ثريد', desc: 'عند تعديل ثريد', icon: '✏️', badge: 'تعديل ثريد' }
+                                ]
+                            },
+                            messages: {
+                                title: 'الرسائل', icon: '💬', desc: 'أحداث حذف وتعديل وتثبيت ومسح الرسائل', defaultColor: '#10b981',
+                                items: [
+                                    { id: 'msg_delete', title: 'حذف رسالة', desc: 'عند حذف رسالة في أي روم', icon: '🗑️', badge: 'حذف' },
+                                    { id: 'msg_update', title: 'تعديل رسالة', desc: 'عند تعديل محتوى رسالة', icon: '✏️', badge: 'تعديل' },
+                                    { id: 'msg_purge', title: 'مسح جماعي للرسائل', desc: 'عند استخدام أوامر Clear', icon: '🧹', badge: 'مسح' },
+                                    { id: 'msg_pin', title: 'تثبيت رسالة', desc: 'عند تثبيت رسالة في الروم', icon: '📌', badge: 'تثبيت' },
+                                    { id: 'msg_unpin', title: 'إلغاء تثبيت رسالة', desc: 'عند إلغاء تثبيت رسالة', icon: '📍', badge: 'إلغاء تثبيت' },
+                                    { id: 'msg_reaction_remove_all', title: 'مسح التفاعلات', desc: 'عند مسح كل الإيموجيات من رسالة', icon: '😃', badge: 'تفاعلات' },
+                                    { id: 'msg_ghost_ping', title: 'منشن وهمي (Ghost Ping)', desc: 'عند منشن عضو وحذف الرسالة فوراً', icon: '👻', badge: 'جوست بنق' },
+                                    { id: 'msg_automod_block', title: 'منع رسالة بالرقابة', desc: 'عند حظر رسالة عبر الفلاتر', icon: '🤖', badge: 'أوتومود' },
+                                    { id: 'msg_link_detected', title: 'رابط محظور', desc: 'عند كشف رابط غير مصرح', icon: '🔗', badge: 'روابط' }
+                                ]
+                            },
+                            voice: {
+                                title: 'الصوت', icon: '🎙️', desc: 'أحداث دخول وخروج وكتم وانتقال القنوات الصوتية', defaultColor: '#ec4899',
+                                items: [
+                                    { id: 'vc_join', title: 'دخول روم صوتي', desc: 'عند دخول عضو لقناة صوتية', icon: '🔊', badge: 'دخول صوت' },
+                                    { id: 'vc_leave', title: 'خروج من روم صوتي', desc: 'عند خروج عضو من الصوت', icon: '🔈', badge: 'خروج صوت' },
+                                    { id: 'vc_switch', title: 'انتقال بين رومات صوتية', desc: 'عند تبديل العضو للروم', icon: '🔀', badge: 'انتقال' },
+                                    { id: 'vc_mute_server', title: 'كتم سيرفر (Server Mute)', desc: 'عند كتم عضو إدارياً بالصوت', icon: '🔇', badge: 'كتم صوت' },
+                                    { id: 'vc_unmute_server', title: 'فك كتم سيرفر', desc: 'عند فك الكتم الإداري', icon: '📢', badge: 'فك كتم' },
+                                    { id: 'vc_deafen_server', title: 'تصميم سيرفر (Server Deafen)', desc: 'عند تصميمه إدارياً', icon: '🔕', badge: 'تصميم' },
+                                    { id: 'vc_undeafen_server', title: 'فك تصميم سيرفر', desc: 'عند فك التصميم الإداري', icon: '🔔', badge: 'فك تصميم' },
+                                    { id: 'vc_stream_start', title: 'بدء بث شاشة (Stream)', desc: 'عند بدء بث الشاشة بالصوت', icon: '📺', badge: 'بث' },
+                                    { id: 'vc_stream_stop', title: 'إيقاف بث شاشة', desc: 'عند إنهاء البث', icon: '⏹️', badge: 'إيقاف بث' },
+                                    { id: 'vc_video_start', title: 'تشغيل كاميرا', desc: 'عند تشغيل الكاميرا', icon: '📹', badge: 'كاميرا' },
+                                    { id: 'vc_video_stop', title: 'إيقاف كاميرا', desc: 'عند إيقاف الكاميرا', icon: '🚫', badge: 'إيقاف كاميرا' },
+                                    { id: 'vc_temp_create', title: 'إنشاء روم مؤقت', desc: 'عند توليد روم صوتي مؤقت تلقائياً', icon: '⏳', badge: 'روم مؤقت' },
+                                    { id: 'vc_temp_delete', title: 'حذف روم مؤقت', desc: 'عند حذف الروم المؤقت الفارغ', icon: '🗑️', badge: 'حذف مؤقت' },
+                                    { id: 'vc_temp_lock', title: 'قفل روم مؤقت', desc: 'عند قفل الروم المؤقت', icon: '🔒', badge: 'قفل' },
+                                    { id: 'vc_temp_unlock', title: 'فتح روم مؤقت', desc: 'عند فتح الروم المؤقت', icon: '🔓', badge: 'فتح' },
+                                    { id: 'vc_move_member', title: 'سحب عضو صوتي', desc: 'عند سحب عضو من روم لآخر بواسطة إداري', icon: '🔀', badge: 'سحب' }
+                                ]
+                            },
+                            moderation: {
+                                title: 'الإشراف', icon: '🛡️', desc: 'أحداث الإجراءات والتحذيرات والداونات', defaultColor: '#ef4444',
+                                items: [
+                                    { id: 'mod_warn_add', title: 'إضافة تحذير', desc: 'عند تحذير عضو من قبل مشرف', icon: '⚠️', badge: 'تحذير' },
+                                    { id: 'mod_warn_remove', title: 'حذف تحذير', desc: 'عند حذف تحذير عضو', icon: '🗑️', badge: 'حذف تحذير' },
+                                    { id: 'mod_down_add', title: 'داون إداري (Down)', desc: 'عند تنزيل رتب مشرف مؤقتاً', icon: '📉', badge: 'داون' },
+                                    { id: 'mod_down_remove', title: 'فك داون إداري', desc: 'عند استرجاع رتب المشرف', icon: '📈', badge: 'فك داون' },
+                                    { id: 'mod_blacklist_add', title: 'بلاك لست (Blacklist)', desc: 'عند حظر عضو دائم من كل الأوامر', icon: '⛔', badge: 'بلاك لست' },
+                                    { id: 'mod_blacklist_remove', title: 'فك بلاك لست', desc: 'عند إزالة البلاك لست', icon: '✅', badge: 'فك بلاك لست' }
+                                ]
+                            },
+                            server: {
+                                title: 'السيرفر', icon: '⚙️', desc: 'أحداث تعديل اسم وأيقونة وبنر وإعدادات السيرفر', defaultColor: '#f59e0b',
+                                items: [
+                                    { id: 'server_name_change', title: 'تغيير اسم السيرفر', desc: 'عند تعديل اسم السيرفر', icon: '🏠', badge: 'اسم' },
+                                    { id: 'server_icon_change', title: 'تغيير أيقونة السيرفر', desc: 'عند تغيير صورة السيرفر', icon: '🖼️', badge: 'أيقونة' },
+                                    { id: 'server_banner_change', title: 'تغيير بنر السيرفر', desc: 'عند تغيير بنر السيرفر', icon: '🎨', badge: 'بنر' },
+                                    { id: 'server_vanity_change', title: 'تغيير رابط Vanity URL', desc: 'عند تعديل رابط السيرفر المخصص', icon: '🌐', badge: 'رابط' },
+                                    { id: 'server_afk_change', title: 'تغيير روم AFK', desc: 'عند تعديل روم الخمول', icon: '💤', badge: 'AFK' },
+                                    { id: 'server_verification_level', title: 'تعديل مستوى الأمان', desc: 'عند تغيير Verification Level', icon: '🛡️', badge: 'أمان' },
+                                    { id: 'server_lockdown_all', title: 'إغلاق شامل (Lockdown)', desc: 'عند تفعيل الإغلاق العام للسيرفر', icon: '🔒', badge: 'إغلاق' }
+                                ]
+                            },
+                            invites: {
+                                title: 'الدعوات', icon: '🔗', desc: 'أحداث إنشاء وحذف واستخدام روابط الدعوة', defaultColor: '#06b6d4',
+                                items: [
+                                    { id: 'invite_create', title: 'إنشاء دعوة', desc: 'عند إنشاء رابط دعوة جديد', icon: '➕', badge: 'إنشاء' },
+                                    { id: 'invite_delete', title: 'حذف دعوة', desc: 'عند حذف أو انتهاء رابط دعوة', icon: '🗑️', badge: 'حذف' },
+                                    { id: 'invite_used', title: 'استخدام دعوة', desc: 'تسجيل العضو الذي استخدم الرابط ومن دعاه', icon: '👥', badge: 'استخدام' }
+                                ]
+                            },
+                            emojis: {
+                                title: 'الإيموجي والستيكرز', icon: '😃', desc: 'أحداث إضافة وتعديل وحذف الإيموجيات والستيكرات', defaultColor: '#8b5cf6',
+                                items: [
+                                    { id: 'emoji_create', title: 'إضافة إيموجي', desc: 'عند رفع إيموجي جديد للسيرفر', icon: '✨', badge: 'إيموجي' },
+                                    { id: 'emoji_delete', title: 'حذف إيموجي', desc: 'عند حذف إيموجي من السيرفر', icon: '🗑️', badge: 'حذف إيموجي' },
+                                    { id: 'emoji_update', title: 'تعديل إيموجي', desc: 'عند تغيير اسم إيموجي', icon: '✏️', badge: 'تعديل إيموجي' },
+                                    { id: 'sticker_create', title: 'إضافة ستيكر', desc: 'عند رفع ستيكر جديد', icon: '🏷️', badge: 'ستيكر' },
+                                    { id: 'sticker_delete', title: 'حذف ستيكر', desc: 'عند حذف ستيكر', icon: '🗑️', badge: 'حذف ستيكر' },
+                                    { id: 'sticker_update', title: 'تعديل ستيكر', desc: 'عند تعديل اسم أو وصف ستيكر', icon: '✏️', badge: 'تعديل ستيكر' }
+                                ]
+                            },
+                            events: {
+                                title: 'الأحداث', icon: '📅', desc: 'أحداث إنشاء ومجدولة وبدء الأحداث المباشرة بالسيرفر', defaultColor: '#14b8a6',
+                                items: [
+                                    { id: 'event_create', title: 'إنشاء حدث (Scheduled Event)', desc: 'عند جدولة حدث جديد', icon: '📅', badge: 'حدث' },
+                                    { id: 'event_delete', title: 'إلغاء حدث', desc: 'عند حذف أو إلغاء حدث مجدول', icon: '❌', badge: 'إلغاء' },
+                                    { id: 'event_update', title: 'تعديل حدث', desc: 'عند تعديل موعد أو تفاصيل حدث', icon: '✏️', badge: 'تعديل' },
+                                    { id: 'event_start', title: 'بدء حدث مباشر', desc: 'عند بدء الفعالية المجدولة', icon: '▶️', badge: 'بدء' },
+                                    { id: 'event_end', title: 'انتهاء حدث', desc: 'عند اكتمال الحدث المجدول', icon: '⏹️', badge: 'انتهاء' },
+                                    { id: 'event_user_interested', title: 'تسجيل اهتمام بالحدث', desc: 'عند تسجيل عضو اهتمامه بحضور الفعالية', icon: '🙋', badge: 'اهتمام' },
+                                    { id: 'event_user_uninterested', title: 'إلغاء اهتمام بالحدث', desc: 'عند إلغاء العضو اهتمامه بالفعالية', icon: '🙅', badge: 'إلغاء اهتمام' }
+                                ]
+                            },
+                            integrations: {
+                                title: 'التكاملات', icon: '🔌', desc: 'أحداث الويب هوك وتطبيقات البوتات والربط', defaultColor: '#6366f1',
+                                items: [
+                                    { id: 'webhook_create', title: 'إنشاء Webhook', desc: 'عند إنشاء ويب هوك جديد بالقناة', icon: '🔗', badge: 'ويب هوك' },
+                                    { id: 'webhook_delete', title: 'حذف Webhook', desc: 'عند حذف ويب هوك', icon: '🗑️', badge: 'حذف هوك' },
+                                    { id: 'webhook_update', title: 'تعديل Webhook', desc: 'عند تعديل اسم أو روم الويب هوك', icon: '✏️', badge: 'تعديل هوك' },
+                                    { id: 'bot_add', title: 'إضافة بوت جديد', desc: 'عند دخول بوت جديد للسيرفر ومن قام بدعوته', icon: '🤖', badge: 'بوت جديد' },
+                                    { id: 'bot_remove', title: 'طرد بوت', desc: 'عند طرد أو إزالة بوت من السيرفر', icon: '👢', badge: 'طرد بوت' },
+                                    { id: 'integration_create', title: 'ربط تكامل جديد', desc: 'عند ربط Twitch أو YouTube أو خدمة خارجية', icon: '🔌', badge: 'تكامل' },
+                                    { id: 'integration_delete', title: 'إلغاء تكامل', desc: 'عند إزالة تكامل خارجي', icon: '❌', badge: 'إلغاء تكامل' },
+                                    { id: 'integration_update', title: 'تعديل تكامل', desc: 'عند تعديل تكامل خارجي', icon: '✏️', badge: 'تعديل تكامل' }
+                                ]
+                            },
+                            automod: {
+                                title: 'الرقابة التلقائية', icon: '🤖', desc: 'أحداث قواعد وفلاتر وحظر AutoMod', defaultColor: '#f43f5e',
+                                items: [
+                                    { id: 'automod_rule_create', title: 'إنشاء قاعدة AutoMod', desc: 'عند إنشاء فلتر حماية جديد', icon: '➕', badge: 'قاعدة' },
+                                    { id: 'automod_rule_delete', title: 'حذف قاعدة AutoMod', desc: 'عند حذف فلتر حماية', icon: '🗑️', badge: 'حذف قاعدة' },
+                                    { id: 'automod_rule_update', title: 'تعديل قاعدة AutoMod', desc: 'عند تعديل كلمات أو شروط الفلتر', icon: '✏️', badge: 'تعديل قاعدة' },
+                                    { id: 'automod_block_msg', title: 'حظر رسالة تلقائياً', desc: 'عند منع رسالة لاحتوائها على سب أو رابط', icon: '🚫', badge: 'حظر رسالة' },
+                                    { id: 'automod_timeout_user', title: 'عزل تلقائي للمخالف', desc: 'عند إعطاء تايم أوت تلقائي لمكرر السبام', icon: '⏳', badge: 'عزل تلقائي' },
+                                    { id: 'automod_alert_trigger', title: 'تنبيه انتهاك قاعدة', desc: 'عند رصد انتهاك لقواعد الرقابة', icon: '🚨', badge: 'تنبيه' },
+                                    { id: 'automod_quarantine', title: 'حظر مؤقت للغزو', desc: 'عند تفعيل الحجر الصحي لمكافحة الغزو', icon: '🛡️', badge: 'حجر صحي' }
+                                ]
+                            },
+                            stage: {
+                                title: 'المنصة (Stage)', icon: '📢', desc: 'أحداث الرومات التفاعلية والمنصة والمتحدثين', defaultColor: '#84cc16',
+                                items: [
+                                    { id: 'stage_create', title: 'بدء جلسة منصة (Stage)', desc: 'عند بدء فعالية المنصة الصوتية', icon: '🎙️', badge: 'بدء منصة' },
+                                    { id: 'stage_end', title: 'إنهاء جلسة المنصة', desc: 'عند إغلاق منصة Stage', icon: '⏹️', badge: 'إنهاء منصة' },
+                                    { id: 'stage_update', title: 'تعديل موضوع المنصة', desc: 'عند تغيير عنوان أو وصف المنصة', icon: '✏️', badge: 'تعديل عنوان' },
+                                    { id: 'stage_speaker_add', title: 'انضمام متحدث للمنصة', desc: 'عند صعود عضو للمتحدثين', icon: '🗣️', badge: 'متحدث' },
+                                    { id: 'stage_speaker_remove', title: 'نزول متحدث للجمهور', desc: 'عند عودة المتحدث للجمهور', icon: '👥', badge: 'جمهور' },
+                                    { id: 'stage_hand_raise', title: 'رفع اليد لطلب التحدث', desc: 'عند رفع العضو يده بالمنصة', icon: '✋', badge: 'طلب تحدث' }
+                                ]
+                            }
+                        };
+
+                        var currentCategory = 'members';
+                        var currentFilter = 'all';
+                        var currentEditModalLogId = null;
+
+                        // State loaded from DB
+                        var logsState = (function() {
+                            try {
+                                var s = ${JSON.stringify(settings.logs_config ? (typeof settings.logs_config === 'string' ? JSON.parse(settings.logs_config) : settings.logs_config) : {})};
+                                return (s && typeof s === 'object') ? s : {};
+                            } catch(e) { return {}; }
+                        })();
+
+                        function isLogEnabled(logId) {
+                            if (logsState[logId] && logsState[logId].enabled !== undefined) {
+                                return logsState[logId].enabled === true || logsState[logId].enabled === 1 || logsState[logId].enabled === '1';
+                            }
+                            return false;
+                        }
+
+                        function renderCategoriesSidebar() {
+                            var container = document.getElementById('logsCategoriesList');
+                            if (!container) return;
+                            var html = '';
+                            var catKeys = Object.keys(LOG_CATEGORIES);
+
+                            for (var i = 0; i < catKeys.length; i++) {
+                                var k = catKeys[i];
+                                var cat = LOG_CATEGORIES[k];
+                                var isSel = k === currentCategory;
+
+                                var totalItems = cat.items.length;
+                                var enabledItems = 0;
+                                for (var j = 0; j < cat.items.length; j++) {
+                                    if (isLogEnabled(cat.items[j].id)) enabledItems++;
+                                }
+
+                                var badgeClass = enabledItems === 0
+                                    ? 'px-2 py-0.5 bg-rose-950/60 text-rose-400 rounded-lg text-[10px] font-mono'
+                                    : (enabledItems === totalItems
+                                        ? 'px-2 py-0.5 bg-emerald-950/60 text-emerald-400 rounded-lg text-[10px] font-mono'
+                                        : 'px-2 py-0.5 bg-purple-950/60 text-purple-300 rounded-lg text-[10px] font-mono');
+
+                                html += '<button type="button" onclick="switchLogsCategory(\'' + k + '\')" class="w-full flex items-center justify-between px-3 py-2.5 rounded-2xl text-xs font-bold transition cursor-pointer ' + (isSel ? 'bg-purple-600 text-white shadow-lg' : 'text-gray-400 hover:text-white hover:bg-white/5') + '">';
+                                html += '<span class="' + badgeClass + '">' + enabledItems + '/' + totalItems + '</span>';
+                                html += '<span class="flex items-center gap-2"><span>' + cat.title + '</span><span>' + cat.icon + '</span></span>';
+                                html += '</button>';
+                            }
+                            container.innerHTML = html;
+                            updateGlobalStats();
+                        }
+
+                        function renderLogsGrid() {
+                            var container = document.getElementById('logsCardsGrid');
+                            if (!container) return;
+
+                            var cat = LOG_CATEGORIES[currentCategory] || LOG_CATEGORIES.members;
+                            document.getElementById('activeCatTitle').textContent = cat.title;
+                            document.getElementById('activeCatIcon').textContent = cat.icon;
+                            document.getElementById('activeCatCount').textContent = cat.items.length + ' سجل';
+
+                            var searchVal = (document.getElementById('logSearchInput')?.value || '').toLowerCase().trim();
+
+                            var filtered = cat.items.filter(function(item) {
+                                var en = isLogEnabled(item.id);
+                                if (currentFilter === 'enabled' && !en) return false;
+                                if (currentFilter === 'disabled' && en) return false;
+                                if (searchVal && item.title.toLowerCase().indexOf(searchVal) === -1 && item.desc.toLowerCase().indexOf(searchVal) === -1) return false;
+                                return true;
+                            });
+
+                            if (!filtered.length) {
+                                container.innerHTML = '<div class="col-span-full py-12 bg-[#0b0d14] border border-white/5 rounded-3xl text-center text-xs text-gray-500 font-bold">لا توجد سجلات مطابقة للبحث أو الفلتر 🔍</div>';
+                                return;
+                            }
+
+                            var html = '';
+                            for (var i = 0; i < filtered.length; i++) {
+                                var item = filtered[i];
+                                var en = isLogEnabled(item.id);
+                                var customCfg = logsState[item.id] || {};
+                                var customChan = customCfg.channel_id || '';
+                                var customColor = customCfg.color || cat.defaultColor || '#5865F2';
+
+                                html += '<div class="bg-[#0b0d14] border border-white/5 hover:border-purple-500/40 p-4 rounded-2xl flex items-center justify-between transition ' + (en ? '' : 'opacity-40') + '" data-log-id="' + item.id + '">';
+
+                                // Left: Toggle + Edit Options Button
+                                html += '<div class="flex items-center gap-2.5">';
+                                html += '<label class="toggle"><input type="checkbox" data-log-checkbox="' + item.id + '" ' + (en ? 'checked' : '') + ' onchange="toggleSingleLogEvent(\'' + item.id + '\', this.checked)"><span class="slider"></span></label>';
+                                html += '<button type="button" onclick="openEditLogModal(\'' + item.id + '\', \'' + item.title + '\', \'' + item.icon + '\')" title="تخصيص القناة واللون" class="w-8 h-8 rounded-xl bg-[#1a1d2d] hover:bg-purple-600/30 text-purple-300 border border-purple-500/30 flex items-center justify-center text-xs font-bold transition shadow cursor-pointer">⚙️</button>';
+                                html += '</div>';
+
+                                // Right: Title + description + Icon & Color Dot
+                                html += '<div class="flex items-center gap-3">';
+                                html += '<div class="text-right">';
+                                html += '<div class="flex items-center justify-end gap-2">';
+                                if (customChan) html += '<span class="px-2 py-0.5 bg-blue-950/60 text-blue-300 border border-blue-800/40 rounded-lg text-[9px] font-bold">قناة مخصصة</span>';
+                                html += '<span class="font-black text-white text-xs">' + item.title + '</span>';
+                                html += '<span class="w-2.5 h-2.5 rounded-full" style="background-color:' + customColor + '" title="لون الإيمبد"></span>';
+                                html += '</div>';
+                                html += '<p class="text-[10px] text-gray-400 mt-0.5">' + item.desc + '</p>';
+                                html += '</div>';
+                                html += '<div class="w-9 h-9 rounded-xl bg-purple-600/10 text-purple-300 flex items-center justify-center text-base border border-purple-500/20 shadow-inner flex-shrink-0">' + item.icon + '</div>';
+                                html += '</div>';
+
+                                html += '</div>';
+                            }
+                            container.innerHTML = html;
+                        }
+
+                        function updateGlobalStats() {
+                            var total = 0, enabled = 0, channelsSet = new Set();
+                            var catKeys = Object.keys(LOG_CATEGORIES);
+                            for (var i = 0; i < catKeys.length; i++) {
+                                var items = LOG_CATEGORIES[catKeys[i]].items;
+                                total += items.length;
+                                for (var j = 0; j < items.length; j++) {
+                                    var id = items[j].id;
+                                    if (isLogEnabled(id)) enabled++;
+                                    if (logsState[id] && logsState[id].channel_id) channelsSet.add(logsState[id].channel_id);
+                                }
+                            }
+                            var e1 = document.getElementById('statEnabledLogs');
+                            var e2 = document.getElementById('statChannelsUsed');
+                            if (e1) e1.textContent = enabled;
+                            if (e2) e2.textContent = channelsSet.size;
+                        }
+
+                        function showSavedBanner() {
+                            var el = document.getElementById('logsSaveIndicator');
+                            if (el) {
+                                el.classList.remove('opacity-0');
+                                setTimeout(function() { el.classList.add('opacity-0'); }, 2000);
+                            }
+                        }
+
+                        function saveLogsConfigToServer() {
+                            try {
+                                var gId = window.location.pathname.split('/')[2];
+                                if (!gId) return;
+                                var xhr = new XMLHttpRequest();
+                                xhr.open('POST', '/api/guild/' + gId + '/settings', true);
+                                xhr.setRequestHeader('Content-Type', 'application/json');
+                                xhr.onload = function() {
+                                    try { if (JSON.parse(xhr.responseText).success) showSavedBanner(); } catch(e) {}
+                                };
+                                xhr.send(JSON.stringify({
+                                    logs_config: JSON.stringify(logsState)
+                                }));
+                            } catch(e) {}
+                        }
+
+                        window.saveLogsSetting = function(key, val) {
+                            try {
+                                var gId = window.location.pathname.split('/')[2];
+                                if (!gId) return;
+                                var body = {};
+                                body[key] = val ? 1 : 0;
+                                var xhr = new XMLHttpRequest();
+                                xhr.open('POST', '/api/guild/' + gId + '/settings', true);
+                                xhr.setRequestHeader('Content-Type', 'application/json');
+                                xhr.onload = function() {
+                                    try { if (JSON.parse(xhr.responseText).success) showSavedBanner(); } catch(e) {}
+                                };
+                                xhr.send(JSON.stringify(body));
+                            } catch(e) {}
+                        };
+
+                        window.switchLogsCategory = function(catKey) {
+                            currentCategory = catKey;
+                            renderCategoriesSidebar();
+                            renderLogsGrid();
+                        };
+
+                        window.filterLogsByStatus = function(status) {
+                            currentFilter = status;
+                            document.getElementById('btnLogFilterAll').className = status === 'all' ? "px-3.5 py-1.5 rounded-xl text-xs font-bold bg-purple-600 text-white transition shadow cursor-pointer" : "px-3.5 py-1.5 rounded-xl text-xs font-bold text-gray-400 hover:text-white transition cursor-pointer";
+                            document.getElementById('btnLogFilterEnabled').className = status === 'enabled' ? "px-3.5 py-1.5 rounded-xl text-xs font-bold bg-purple-600 text-white transition shadow cursor-pointer" : "px-3.5 py-1.5 rounded-xl text-xs font-bold text-gray-400 hover:text-white transition cursor-pointer";
+                            document.getElementById('btnLogFilterDisabled').className = status === 'disabled' ? "px-3.5 py-1.5 rounded-xl text-xs font-bold bg-purple-600 text-white transition shadow cursor-pointer" : "px-3.5 py-1.5 rounded-xl text-xs font-bold text-gray-400 hover:text-white transition cursor-pointer";
+                            renderLogsGrid();
+                        };
+
+                        window.searchLogsItems = function() {
+                            renderLogsGrid();
+                        };
+
+                        window.toggleSingleLogEvent = function(logId, enable) {
+                            if (!logsState[logId]) logsState[logId] = {};
+                            logsState[logId].enabled = enable;
+                            var card = document.querySelector('div[data-log-id="' + logId + '"]');
+                            if (card) {
+                                if (enable) card.classList.remove('opacity-40');
+                                else card.classList.add('opacity-40');
+                            }
+                            renderCategoriesSidebar();
+                            saveLogsConfigToServer();
+                        };
+
+                        window.toggleActiveCategoryLogs = function(enable) {
+                            var cat = LOG_CATEGORIES[currentCategory];
+                            if (!cat) return;
+                            for (var i = 0; i < cat.items.length; i++) {
+                                var id = cat.items[i].id;
+                                if (!logsState[id]) logsState[id] = {};
+                                logsState[id].enabled = enable;
+                            }
+                            renderCategoriesSidebar();
+                            renderLogsGrid();
+                            saveLogsConfigToServer();
+                        };
+
+                        window.applyCatSettingsToAll = function() {
+                            var cat = LOG_CATEGORIES[currentCategory];
+                            if (!cat) return;
+                            var color = document.getElementById('catColorHex')?.value || '#5865F2';
+                            var chan = document.getElementById('catDefaultChannel')?.value || '';
+
+                            for (var i = 0; i < cat.items.length; i++) {
+                                var id = cat.items[i].id;
+                                if (!logsState[id]) logsState[id] = {};
+                                if (color) logsState[id].color = color;
+                                if (chan) logsState[id].channel_id = chan;
+                            }
+                            alert('✅ تم تطبيق القناة واللون الافتراضي على جميع سجلات قسم (' + cat.title + ') بنجاح!');
+                            renderCategoriesSidebar();
+                            renderLogsGrid();
+                            saveLogsConfigToServer();
+                        };
+
+                        window.openEditLogModal = function(logId, title, icon) {
+                            currentEditModalLogId = logId;
+                            var modal = document.getElementById('editLogModal');
+                            var titleEl = document.getElementById('modalLogTitle');
+                            var iconEl = document.getElementById('modalLogIcon');
+                            var chanEl = document.getElementById('modalLogChannel');
+                            var colorHex = document.getElementById('modalLogColorHex');
+                            var colorPicker = document.getElementById('modalLogColorPicker');
+
+                            if (titleEl) titleEl.textContent = title || 'تخصيص السجل';
+                            if (iconEl) iconEl.textContent = icon || '📜';
+
+                            var cfg = logsState[logId] || {};
+                            if (chanEl) chanEl.value = cfg.channel_id || '';
+                            var col = cfg.color || '#5865F2';
+                            if (colorHex) colorHex.value = col;
+                            if (colorPicker) colorPicker.value = col;
+
+                            if (modal) modal.classList.remove('hidden');
+                        };
+
+                        window.closeEditLogModal = function() {
+                            var modal = document.getElementById('editLogModal');
+                            if (modal) modal.classList.add('hidden');
+                            currentEditModalLogId = null;
+                        };
+
+                        window.saveModalLogConfig = function() {
+                            if (!currentEditModalLogId) return;
+                            var chanEl = document.getElementById('modalLogChannel');
+                            var colorHex = document.getElementById('modalLogColorHex');
+
+                            if (!logsState[currentEditModalLogId]) logsState[currentEditModalLogId] = { enabled: true };
+                            logsState[currentEditModalLogId].channel_id = chanEl ? chanEl.value : '';
+                            logsState[currentEditModalLogId].color = colorHex ? colorHex.value : '#5865F2';
+
+                            saveLogsConfigToServer();
+                            closeEditLogModal();
+                            renderCategoriesSidebar();
+                            renderLogsGrid();
+                        };
+
+                        window.autoSetupLogsChannels = async function(mode) {
+                            const modeTitle = mode === 'grouped' ? 'القنوات العادية (قسم لكل قناة)' : 'القنوات المفصلة (قناة لكل نوع سجل)';
+                            if (!confirm('هل تريد إنشاء قنوات السجلات تلقائياً بالسيرفر بنظام: ' + modeTitle + '؟')) return;
+
+                            try {
+                                const gId = window.location.pathname.split('/')[2];
+                                const res = await fetch('/api/guild/' + gId + '/logs/auto-setup', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ mode })
+                                });
+                                const d = await res.json();
+                                if (d.success) {
+                                    alert('✅ تم إنشاء وتوزيع قنوات السجلات بنجاح في السيرفر!');
+                                    location.reload();
+                                } else {
+                                    alert('❌ ' + (d.error || 'فشل إنشاء القنوات'));
+                                }
+                            } catch(e) {
+                                alert('حدث خطأ في الاتصال بالخادم');
+                            }
+                        };
+
+                        window.deleteLogsChannels = async function() {
+                            if (!confirm('⚠️ تحذير: هل أنت متأكد من حذف كاتيجوري سجلات ZENO وجميع القنوات بداخله نهائياً؟')) return;
+
+                            try {
+                                const gId = window.location.pathname.split('/')[2];
+                                const res = await fetch('/api/guild/' + gId + '/logs/delete-channels', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' }
+                                });
+                                const d = await res.json();
+                                if (d.success) {
+                                    alert('✅ تم حذف قنوات السجلات بنجاح');
+                                    location.reload();
+                                } else {
+                                    alert('❌ ' + (d.error || 'فشل الحذف'));
+                                }
+                            } catch(e) {
+                                alert('حدث خطأ في الاتصال');
+                            }
+                        };
+
+                        // Initial render
+                        renderCategoriesSidebar();
+                        renderLogsGrid();
+                    })();
+                    </script>
+                `;
             } else if (section === 'analytics' || section === 'stats') {
                 const totalMembers = guild.memberCount || 0;
                 const textChCount = (guildTextChannels || []).length;
