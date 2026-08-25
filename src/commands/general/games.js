@@ -24,11 +24,19 @@ const TRIVIA_QUESTIONS = [
 ];
 
 const FAST_WORDS = [
-  "القسطنطينية", "الاستقلال", "التكنولوجيا", "الذكاء_الاصطناعي", "المملكة_العربية_السعودية",
-  "إمبراطورية", "ديسكورد_زينو", "برمجة_المستقبل", "الاستراتيجية", "الجمهورية",
+  "القسطنطينية", "الاستقلال", "التكنولوجيا", "الذكاء الاصطناعي", "المملكة العربية السعودية",
+  "إمبراطورية", "ديسكورد زينو", "برمجة المستقبل", "الاستراتيجية", "الجمهورية",
   "الأوتوقراطية", "اللوجستيات", "الإلكترونيات", "الكهرومغناطيسية", "البطليموس",
   "الميكانيكا", "الأوراكل", "السيمفونية", "الأنثروبولوجيا", "الأيديولوجيا"
 ];
+
+// دالة مساعدة لتطبيع النص للمقارنة
+function normalizeText(text) {
+  return text.trim()
+    .replace(/\s+/g, ' ')          // توحيد المسافات
+    .replace(/[\u064B-\u065F]/g, '') // إزالة التشكيل
+    .replace(/_/g, ' ');            // استبدال الشرطة بمسافة
+}
 
 module.exports = {
   name: 'games',
@@ -263,7 +271,8 @@ async function runFastType(interaction) {
   await interaction.reply({ embeds: [embed], files });
 
   const startTime = Date.now();
-  const filter = m => m.content.trim() === word && !m.author.bot;
+  const normalizedWord = normalizeText(word);
+  const filter = m => normalizeText(m.content) === normalizedWord && !m.author.bot;
   const channel = interaction.channel;
 
   try {

@@ -124,25 +124,24 @@ module.exports = {
         }
 
         if (gameType === 'coin') {
-          const isHeads = Math.random() < 0.5;
-          const coinText = isHeads ? '👑 ملك / وجه (Heads)' : '🦅 كتابة / ذيل (Tails)';
-          const reward = 15;
-          if (interaction.guild) {
-            try { db.addCoins(interaction.user.id, interaction.guild.id, reward); } catch(e) {}
-          }
-
-          const coinEmbed = new EmbedBuilder()
+          // عرض أزرار الاختيار أولاً
+          const pickEmbed = new EmbedBuilder()
             .setColor('#eab308')
-            .setTitle('🪙 نتيجة رمي العملة!')
+            .setTitle('🪙 رمي العملة — اختر جهتك!')
             .setDescription(
-              `👤 **اللاعب:** <@${interaction.user.id}>\n\n` +
-              `# 🪙 **${coinText}**\n\n` +
-              `💰 **حصلت على:** \`+${reward} ⭐ Star Coins\` لمشاركتك في التسلية!`
+              `👤 <@${interaction.user.id}> اختر وجه العملة الذي تراهن عليه:\n\n` +
+              `👑 **ملك (Heads)** — الوجه الملكي\n` +
+              `🦅 **كتابة (Tails)** — الوجه الآخر`
             )
-            .setFooter({ text: interaction.user.username, iconURL: interaction.user.displayAvatarURL({ dynamic: true }) })
+            .setFooter({ text: 'لديك 30 ثانية لاختيار وجهك' })
             .setTimestamp();
 
-          return interaction.reply({ embeds: [coinEmbed], ephemeral: false });
+          const pickRow = new ActionRowBuilder().addComponents(
+            new ButtonBuilder().setCustomId('coin_choice_heads').setLabel('👑 ملك (Heads)').setStyle(ButtonStyle.Primary),
+            new ButtonBuilder().setCustomId('coin_choice_tails').setLabel('🦅 كتابة (Tails)').setStyle(ButtonStyle.Success)
+          );
+
+          return interaction.reply({ embeds: [pickEmbed], components: [pickRow], ephemeral: false });
         }
 
         if (gameType === 'rps') {
@@ -160,6 +159,43 @@ module.exports = {
             return gamesCmd.execute(interaction);
           }
         }
+      }
+
+      // 2.3.1 رمي العملة — اختيار الوجه (Heads/Tails)
+      if (interaction.isButton() && (interaction.customId === 'coin_choice_heads' || interaction.customId === 'coin_choice_tails')) {
+        const userPick = interaction.customId === 'coin_choice_heads' ? 'heads' : 'tails';
+        const landedHeads = Math.random() < 0.5;
+        const landed = landedHeads ? 'heads' : 'tails';
+
+        const won = userPick === landed;
+        const reward = won ? 30 : 0;
+
+        const pickText = userPick === 'heads' ? '👑 ملك (Heads)' : '🦅 كتابة (Tails)';
+        const landedText = landedHeads ? '👑 ملك (Heads)' : '🦅 كتابة (Tails)';
+
+        if (won && interaction.guild) {
+          try { db.addCoins(interaction.user.id, interaction.guild.id, reward); } catch(e) {}
+        }
+
+        const resultEmbed = new EmbedBuilder()
+          .setColor(won ? '#10b981' : '#ef4444')
+          .setTitle(won ? '🎉 أحسنت — حدسك صحيح! فزت!' : '😔 للأسف — خطأ في التخمين!')
+          .setDescription(
+            `👤 **اللاعب:** <@${interaction.user.id}>\n\n` +
+            `🎯 **اختيارك:** ${pickText}\n` +
+            `🪙 **نتيجة العملة:** ${landedText}\n\n` +
+            (won
+              ? `🏆 **ربحت!** تمت إضافة \`+${reward} ⭐ Star Coins\` لرصيدك!`
+              : `💸 لم تصب التخمين هذه المرة. حاول مرة أخرى!`)
+          )
+          .setFooter({ text: interaction.user.username, iconURL: interaction.user.displayAvatarURL({ dynamic: true }) })
+          .setTimestamp();
+
+        const replayRow = new ActionRowBuilder().addComponents(
+          new ButtonBuilder().setCustomId('game_btn_coin').setLabel('🔄 إعادة الرمي').setStyle(ButtonStyle.Secondary)
+        );
+
+        return interaction.update({ embeds: [resultEmbed], components: [replayRow] });
       }
 
       // 2.4 نظام التحقق الأمني (Verification Button & Direct Role)
