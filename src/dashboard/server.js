@@ -5737,12 +5737,12 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                             stage: {
                                 title: 'المنصة', icon: '📢', desc: 'أحداث الرومات التفاعلية والمنصة والمتحدثين', defaultColor: '#5865F2',
                                 items: [
-                                    { id: 'stage_create', title: 'بدء منصة', desc: 'عند بدء فعالية المنصة الصوتية', icon: '🎙️', isSpecial: false },
-                                    { id: 'stage_end', title: 'إنهاء منصة', desc: 'عند إغلاق منصة Stage', icon: '⏹️', isSpecial: false },
-                                    { id: 'stage_update', title: 'تعديل منصة', desc: 'عند تغيير عنوان أو وصف المنصة', icon: '✏️', isSpecial: false },
-                                    { id: 'stage_speaker_add', title: 'انضمام متحدث للمنصة', desc: 'عند صعود عضو للمتحدثين', icon: '🗣️', isSpecial: false },
-                                    { id: 'stage_speaker_remove', title: 'نزول متحدث للجمهور', desc: 'عند عودة المتحدث للجمهور', icon: '👥', isSpecial: false },
-                                    { id: 'stage_hand_raise', title: 'طلب التحدث', desc: 'عند رفع العضو يده بالمنصة', icon: '✋', isSpecial: false }
+                                    { id: 'stage_create', title: 'إنشاء منصة', desc: 'عند إنشاء منصة صوتية', icon: '➕', isSpecial: true },
+                                    { id: 'stage_delete', title: 'حذف منصة', desc: 'عند حذف منصة', icon: '🗑️', isSpecial: true },
+                                    { id: 'stage_update', title: 'تعديل منصة', desc: 'عند تعديل منصة', icon: '✏️', isSpecial: true },
+                                    { id: 'stage_speaker_add', title: 'إضافة متحدث', desc: 'عند إضافة متحدث للمنصة', icon: 'ℹ️', isSpecial: true },
+                                    { id: 'stage_speaker_remove', title: 'إزالة متحدث', desc: 'عند إزالة متحدث', icon: '⬆️', isSpecial: true },
+                                    { id: 'stage_hand_raise', title: 'طلب التحدث', desc: 'عند طلب عضو التحدث', icon: '⬇️', isSpecial: true }
                                 ]
                             }
                         };
