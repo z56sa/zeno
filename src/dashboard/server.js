@@ -2747,7 +2747,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                                     <input type="text" id="antiModSearchUser" placeholder="ابحث عن عضو لإضافته..." class="w-full bg-[#0b0d14] border border-white/5 focus:border-amber-500 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right placeholder-gray-500">
                                 </div>
                                 <div class="flex items-center gap-3">
-                                    <button type="button" onclick="addWhitelistUser('antimod')" class="px-6 py-2.5 bg-amber-600 hover:bg-amber-500 text-white rounded-xl text-xs font-black transition flex items-center gap-1.5 shadow-lg shadow-amber-950/40">
+                                    <button type="button" onclick="addWhitelistUser('antimod')" class="px-6 py-2.5 bg-amber-600 hover:bg-amber-500 text-white rounded-xl text-xs font-black transition flex items-center gap-1.5 shadow-lg shadow-purple-950/40">
                                         <span>إضافة</span>
                                     </button>
                                     <input type="text" id="antiModUserId" placeholder="أدخل User ID لإضافته إلى Anti Mod" class="flex-1 bg-[#0b0d14] border border-white/5 focus:border-amber-500 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right font-mono placeholder-gray-500" onkeydown="if(event.key==='Enter') addWhitelistUser('antimod')">
@@ -3308,7 +3308,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
 
                         <!-- 1. Master Header Card (Exact to Image 1) -->
                         <div class="bg-[#12141f] border border-white/5 p-6 rounded-2xl flex items-center justify-between shadow-xl">
-                            <button type="button" onclick="openAddAutoresponderModal()" class="px-6 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-amber-400 hover:to-orange-500 text-white rounded-xl text-xs font-black transition flex items-center gap-1.5 shadow-lg shadow-orange-950/40">
+                            <button type="button" onclick="openAddAutoresponderModal()" class="px-6 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-amber-400 hover:to-orange-500 text-white rounded-xl text-xs font-black transition flex items-center gap-1.5 shadow-lg shadow-purple-950/40">
                                 <span>➕</span>
                                 <span>إضافة رد تلقائي</span>
                             </button>
@@ -3373,7 +3373,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                                         <h5 class="text-sm font-black text-white">لا توجد ردود تلقائية</h5>
                                         <p class="text-xs text-gray-400">أضف ردود تلقائية للرد على كلمات أو عبارات محددة</p>
                                     </div>
-                                    <button type="button" onclick="openAddAutoresponderModal()" class="px-6 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-amber-400 hover:to-orange-500 text-white rounded-xl text-xs font-black transition inline-flex items-center gap-2 shadow-lg shadow-orange-950/40">
+                                    <button type="button" onclick="openAddAutoresponderModal()" class="px-6 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-amber-400 hover:to-orange-500 text-white rounded-xl text-xs font-black transition inline-flex items-center gap-2 shadow-lg shadow-purple-950/40">
                                         <span>إضافة أول رد تلقائي</span>
                                     </button>
                                 </div>
@@ -3501,7 +3501,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
 
                                 <!-- Modal Footer Buttons -->
                                 <div class="flex items-center justify-between pt-4 border-t border-white/5 flex-row-reverse">
-                                    <button type="button" onclick="submitNewAutoresponder()" class="px-8 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-amber-400 hover:to-orange-500 text-white rounded-xl text-xs font-black transition shadow-lg shadow-orange-950/40">
+                                    <button type="button" onclick="submitNewAutoresponder()" class="px-8 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-amber-400 hover:to-orange-500 text-white rounded-xl text-xs font-black transition shadow-lg shadow-purple-950/40">
                                         إضافة رد تلقائي
                                     </button>
                                     <button type="button" onclick="closeAddAutoresponderModal()" class="px-6 py-2.5 bg-[#0b0d14] hover:bg-white/5 border border-white/5 text-gray-400 hover:text-white rounded-xl text-xs font-bold transition">
@@ -3988,7 +3988,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                             <div class="bg-[#12141f] border border-white/5 p-6 rounded-2xl space-y-5 shadow-xl">
                                 <div class="flex items-center justify-between border-b border-white/5 pb-3">
                                     <div class="flex items-center gap-2">
-                                        <button type="button" onclick="openAddLevelRoleModal('text')" class="px-5 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-amber-400 hover:to-orange-500 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-lg shadow-orange-950/40">
+                                        <button type="button" onclick="openAddLevelRoleModal('text')" class="px-5 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-amber-400 hover:to-orange-500 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-lg shadow-purple-950/40">
                                             <span>➕</span>
                                             <span>إضافة رتبة</span>
                                         </button>
@@ -4020,7 +4020,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                                             <div class="w-12 h-12 rounded-full bg-white/5 text-gray-400 flex items-center justify-center text-xl mx-auto">📜</div>
                                             <h5 class="text-xs font-bold text-gray-300">لا توجد رتب مستويات</h5>
                                             <p class="text-[10px] text-gray-500">أضف رتب لمكافأة الأعضاء النشطين</p>
-                                            <button type="button" onclick="openAddLevelRoleModal('text')" class="px-5 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-amber-400 hover:to-orange-500 text-white rounded-xl text-xs font-black transition inline-flex items-center gap-1.5 shadow-lg shadow-orange-950/40">
+                                            <button type="button" onclick="openAddLevelRoleModal('text')" class="px-5 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-amber-400 hover:to-orange-500 text-white rounded-xl text-xs font-black transition inline-flex items-center gap-1.5 shadow-lg shadow-purple-950/40">
                                                 <span>إضافة أول رتبة</span>
                                             </button>
                                         </div>
@@ -4050,7 +4050,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                             <div class="bg-[#12141f] border border-white/5 p-6 rounded-2xl space-y-5 shadow-xl">
                                 <div class="flex items-center justify-between border-b border-white/5 pb-3">
                                     <div class="flex items-center gap-2">
-                                        <button type="button" onclick="openAddLevelRoleModal('voice')" class="px-5 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-amber-400 hover:to-orange-500 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-lg shadow-orange-950/40">
+                                        <button type="button" onclick="openAddLevelRoleModal('voice')" class="px-5 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-amber-400 hover:to-orange-500 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-lg shadow-purple-950/40">
                                             <span>➕</span>
                                             <span>إضافة رتبة</span>
                                         </button>
@@ -4082,7 +4082,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                                             <div class="w-12 h-12 rounded-full bg-pink-950/40 text-pink-400 flex items-center justify-center text-xl mx-auto border border-pink-500/20">🎵</div>
                                             <h5 class="text-xs font-bold text-gray-300">لا توجد رتب مستويات</h5>
                                             <p class="text-[10px] text-gray-500">أضف رتب لمكافأة الأعضاء النشطين</p>
-                                            <button type="button" onclick="openAddLevelRoleModal('voice')" class="px-5 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-amber-400 hover:to-orange-500 text-white rounded-xl text-xs font-black transition inline-flex items-center gap-1.5 shadow-lg shadow-orange-950/40">
+                                            <button type="button" onclick="openAddLevelRoleModal('voice')" class="px-5 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-amber-400 hover:to-orange-500 text-white rounded-xl text-xs font-black transition inline-flex items-center gap-1.5 shadow-lg shadow-purple-950/40">
                                                 <span>إضافة أول رتبة</span>
                                             </button>
                                         </div>
@@ -4112,7 +4112,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                             <div class="bg-[#12141f] border border-white/5 p-6 rounded-2xl space-y-5 shadow-xl">
                                 <div class="flex items-center justify-between border-b border-white/5 pb-3">
                                     <div class="flex items-center gap-2">
-                                        <button type="button" onclick="openAddSharedRoleModal()" class="px-5 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-amber-400 hover:to-orange-500 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-lg shadow-orange-950/40">
+                                        <button type="button" onclick="openAddSharedRoleModal()" class="px-5 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-amber-400 hover:to-orange-500 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-lg shadow-purple-950/40">
                                             <span>➕</span>
                                             <span>إضافة شرط</span>
                                         </button>
@@ -4176,7 +4176,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                                             <div class="w-12 h-12 rounded-full bg-amber-950/40 text-amber-400 flex items-center justify-center text-xl mx-auto border border-amber-500/20">✨</div>
                                             <h5 class="text-xs font-bold text-gray-300">لا توجد رتب مشتركة</h5>
                                             <p class="text-[10px] text-gray-500">أضف شرطاً مزدوجاً يمنح رتبة عند تحقق مستوى صوتي وكتابي معاً</p>
-                                            <button type="button" onclick="openAddSharedRoleModal()" class="px-5 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-amber-400 hover:to-orange-500 text-white rounded-xl text-xs font-black transition inline-flex items-center gap-1.5 shadow-lg shadow-orange-950/40">
+                                            <button type="button" onclick="openAddSharedRoleModal()" class="px-5 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-amber-400 hover:to-orange-500 text-white rounded-xl text-xs font-black transition inline-flex items-center gap-1.5 shadow-lg shadow-purple-950/40">
                                                 <span>إضافة أول شرط</span>
                                             </button>
                                         </div>
@@ -4501,7 +4501,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
 
                         <!-- 1. Master Header Card (Exact to Image 1: نظام القيف اواي & Action Button) -->
                         <div class="bg-[#12141f] border border-white/5 p-6 rounded-2xl flex items-center justify-between shadow-xl">
-                            <button type="button" onclick="openCreateGiveawayModal()" class="px-6 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-amber-400 hover:to-orange-500 text-white rounded-xl text-xs font-black transition flex items-center gap-1.5 shadow-lg shadow-orange-950/40">
+                            <button type="button" onclick="openCreateGiveawayModal()" class="px-6 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-amber-400 hover:to-orange-500 text-white rounded-xl text-xs font-black transition flex items-center gap-1.5 shadow-lg shadow-purple-950/40">
                                 <span>➕</span>
                                 <span>إنشاء قيف اواي</span>
                             </button>
@@ -4579,7 +4579,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                                             <h5 class="text-sm font-black text-white">لا توجد قيف اواي بعد</h5>
                                             <p class="text-xs text-gray-400">ابدأ بإنشاء أول قيف اواي لسيرفرك!</p>
                                         </div>
-                                        <button type="button" onclick="openCreateGiveawayModal()" class="px-6 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-amber-400 hover:to-orange-500 text-white rounded-xl text-xs font-black transition inline-flex items-center gap-2 shadow-lg shadow-orange-950/40">
+                                        <button type="button" onclick="openCreateGiveawayModal()" class="px-6 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-amber-400 hover:to-orange-500 text-white rounded-xl text-xs font-black transition inline-flex items-center gap-2 shadow-lg shadow-purple-950/40">
                                             <span>إنشاء قيف اواي</span>
                                         </button>
                                     </div>
@@ -4725,7 +4725,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
 
                                 <!-- Modal Footer Buttons -->
                                 <div class="flex items-center justify-between pt-4 border-t border-white/5 flex-row-reverse">
-                                    <button type="button" onclick="submitCreateGiveaway()" class="px-8 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-amber-400 hover:to-orange-500 text-white rounded-xl text-xs font-black transition shadow-lg shadow-orange-950/40">
+                                    <button type="button" onclick="submitCreateGiveaway()" class="px-8 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-amber-400 hover:to-orange-500 text-white rounded-xl text-xs font-black transition shadow-lg shadow-purple-950/40">
                                         + إنشاء قيف اواي
                                     </button>
                                     <button type="button" onclick="closeCreateGiveawayModal()" class="px-6 py-2.5 bg-[#0b0d14] hover:bg-white/5 border border-white/5 text-gray-400 hover:text-white rounded-xl text-xs font-bold transition">
@@ -5926,6 +5926,148 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                         }
                     }
                     </script>`;
+
+            } else if (section === 'backup') {
+                // Load backups from DB
+                let backupsList = [];
+                try {
+                    rawDb.exec(`CREATE TABLE IF NOT EXISTS guild_backups (
+                        id TEXT PRIMARY KEY,
+                        guild_id TEXT NOT NULL,
+                        created_by TEXT NOT NULL,
+                        label TEXT DEFAULT '',
+                        channels_count INTEGER DEFAULT 0,
+                        roles_count INTEGER DEFAULT 0,
+                        settings_snapshot TEXT,
+                        channels_snapshot TEXT,
+                        roles_snapshot TEXT,
+                        created_at INTEGER DEFAULT (strftime('%s','now'))
+                    )`);
+                    backupsList = rawDb.prepare('SELECT id, guild_id, created_by, label, channels_count, roles_count, created_at FROM guild_backups WHERE guild_id = ? ORDER BY created_at DESC LIMIT 10').all(guildId);
+                } catch(e) {}
+
+                const backupRowsHtml = backupsList.length === 0 ? `
+                    <div class="py-16 text-center space-y-3">
+                        <div class="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center text-3xl mx-auto opacity-40">💾</div>
+                        <p class="text-gray-400 text-sm font-bold">لا توجد نسخ احتياطية بعد</p>
+                        <p class="text-gray-600 text-xs">سيتم إنشاء نسخة للقائمة عند تفعيل الحماية</p>
+                    </div>
+                ` : backupsList.map(b => {
+                    const date = new Date(b.created_at * 1000);
+                    const dateStr = date.toLocaleDateString('ar-SA', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+                    return `
+                    <div class="bg-[#12141f] border border-white/5 hover:border-purple-500/30 rounded-2xl p-4 flex items-center justify-between gap-4 transition">
+                        <div class="flex items-center gap-2">
+                            <button onclick="if(confirm('هل أنت متأكد من استعادة هذه النسخة الاحتياطية؟ سيتم إضافة العناصر المفقودة فقط.')) restoreBackup('${b.id}')" class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold shadow transition">استعادة</button>
+                            <button onclick="if(confirm('حذف هذه النسخة الاحتياطية؟')) deleteBackup('${b.id}')" class="px-3 py-2 bg-rose-900/40 hover:bg-rose-700/50 text-rose-300 rounded-xl text-xs font-bold border border-rose-800/30 transition">🗑️</button>
+                        </div>
+                        <div class="flex-1 text-right">
+                            <div class="font-bold text-white text-sm">${b.label || ('نسخة ' + dateStr)}</div>
+                            <div class="text-[11px] text-gray-400 mt-0.5 flex items-center justify-end gap-3">
+                                <span>📝 ${b.channels_count} قناة</span>
+                                <span>🏷️ ${b.roles_count} رتبة</span>
+                                <span class="text-gray-600 font-mono">${dateStr}</span>
+                            </div>
+                        </div>
+                        <div class="w-10 h-10 rounded-xl bg-purple-600/20 border border-purple-500/30 text-purple-400 flex items-center justify-center text-lg">💾</div>
+                    </div>
+                    `;
+                }).join('');
+
+formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
+
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-[#1a132e] via-[#12141f] to-[#1a132e] border border-purple-500/20 p-6 rounded-3xl flex items-center justify-between shadow-2xl">
+        <div class="flex items-center gap-3">
+            <button onclick="createBackupNow()" class="px-5 py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs rounded-xl shadow-lg transition">
+                إنشاء نسخة الآن 💾
+            </button>
+        </div>
+        <div class="text-right">
+            <h3 class="font-black text-white text-xl">الحماية / النسخ الاحتياطية</h3>
+            <p class="text-gray-400 text-xs mt-0.5">احتفظ بنسخة من قنوات ورتب سيرفرك وأعدها بضغطة زر</p>
+        </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="grid grid-cols-3 gap-3">
+        <div class="bg-[#12141f] border border-white/5 p-4 rounded-2xl text-center">
+            <div class="text-2xl font-black text-white">${backupsList.length}</div>
+            <div class="text-xs text-gray-400 font-bold mt-1">النسخ المتاحة</div>
+        </div>
+        <div class="bg-[#12141f] border border-white/5 p-4 rounded-2xl text-center">
+            <div class="text-2xl font-black text-purple-400">30</div>
+            <div class="text-xs text-gray-400 font-bold mt-1">يوم احتفاظ</div>
+        </div>
+        <div class="bg-[#12141f] border border-white/5 p-4 rounded-2xl text-center">
+            <div class="text-2xl font-black text-emerald-400">10</div>
+            <div class="text-xs text-gray-400 font-bold mt-1">أقصى نسخة</div>
+        </div>
+    </div>
+
+    <!-- Backups List -->
+    <div class="bg-[#12141f] border border-white/5 rounded-3xl p-6 shadow-xl space-y-3">
+        <div class="flex items-center justify-between pb-3 border-b border-white/5">
+            <span class="text-xs text-purple-400 font-bold">${backupsList.length} نسخة</span>
+            <h4 class="text-sm font-black text-white">📋 النسخ المتاحة</h4>
+        </div>
+        ${backupRowsHtml}
+    </div>
+
+    <!-- Info Box -->
+    <div class="bg-indigo-950/30 border border-indigo-800/30 rounded-2xl p-4 space-y-2">
+        <div class="flex items-center justify-end gap-2">
+            <h5 class="text-sm font-black text-indigo-300">معلومات مهمة</h5>
+            <span class="text-indigo-400">ℹ️</span>
+        </div>
+        <ul class="space-y-1.5 text-right">
+            <li class="text-xs text-gray-400 flex items-center justify-end gap-2"><span>يتم الاحتفاظ بالنسخ لمدة 30 يوم ثم تحذف تلقائياً</span><span class="text-indigo-400">•</span></li>
+            <li class="text-xs text-gray-400 flex items-center justify-end gap-2"><span>الاستعادة لا تحذف القنوات/الرتب الحالية، بل تضيف المفقودة فقط</span><span class="text-indigo-400">•</span></li>
+            <li class="text-xs text-gray-400 flex items-center justify-end gap-2"><span>فقط مالك السيرفر والأعضاء الموثوقين يمكنهم استخدام أمر الاستعادة</span><span class="text-indigo-400">•</span></li>
+        </ul>
+    </div>
+
+    <script>
+    async function createBackupNow() {
+        const label = prompt('أدخل اسماً للنسخة (اختياري):', '');
+        if (label === null) return;
+        const btn = event.target;
+        const orig = btn.textContent;
+        btn.disabled = true; btn.textContent = 'جارٍ الإنشاء... ⏳';
+        try {
+            const r = await fetch('/api/guild/${guildId}/backup/create', {
+                method: 'POST',
+                headers: {'Content-Type':'application/json'},
+                body: JSON.stringify({ label })
+            });
+            const d = await r.json();
+            if (d.success) { alert('✅ تم إنشاء النسخة الاحتياطية بنجاح!\n📝 ' + d.channels_count + ' قناة، 🏷️ ' + d.roles_count + ' رتبة'); location.reload(); }
+            else alert('❌ ' + (d.error || 'فشل الإنشاء'));
+        } catch(e) { alert('❌ خطأ في الاتصال'); }
+        btn.disabled = false; btn.textContent = orig;
+    }
+    async function restoreBackup(id) {
+        const btn = event.target;
+        btn.disabled = true; btn.textContent = 'جارٍ الاستعادة... ⏳';
+        try {
+            const r = await fetch('/api/guild/${guildId}/backup/' + id + '/restore', { method: 'POST' });
+            const d = await r.json();
+            if (d.success) alert('✅ تمت الاستعادة بنجاح!\n' + (d.message || ''));
+            else alert('❌ ' + (d.error || 'فشل'));
+        } catch(e) { alert('❌ خطأ'); }
+        btn.disabled = false; btn.textContent = 'استعادة';
+    }
+    async function deleteBackup(id) {
+        try {
+            const r = await fetch('/api/guild/${guildId}/backup/' + id + '/delete', { method: 'POST' });
+            const d = await r.json();
+            if (d.success) location.reload();
+            else alert('❌ ' + (d.error || 'فشل الحذف'));
+        } catch(e) { alert('❌ خطأ'); }
+    }
+    </script>
+
+</div>`;
             } else if (section === 'embed') {
                 formFieldsHtml = `
                     <div class="space-y-6 text-right" dir="rtl">
@@ -6702,6 +6844,167 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
     });
 
     
+
+
+    // =============================================
+    // Backup System API
+    // =============================================
+    app.post('/api/guild/:guildId/backup/create', express.json(), async (req, res) => {
+        try {
+            if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
+            const { guildId } = req.params;
+            const { label } = req.body;
+
+            rawDb.exec(`CREATE TABLE IF NOT EXISTS guild_backups (
+                id TEXT PRIMARY KEY,
+                guild_id TEXT NOT NULL,
+                created_by TEXT NOT NULL,
+                label TEXT DEFAULT '',
+                channels_count INTEGER DEFAULT 0,
+                roles_count INTEGER DEFAULT 0,
+                settings_snapshot TEXT,
+                channels_snapshot TEXT,
+                roles_snapshot TEXT,
+                created_at INTEGER DEFAULT (strftime('%s','now'))
+            )`);
+
+            const guild = client?.guilds?.cache?.get(guildId);
+            if (!guild) return res.status(404).json({ success: false, error: 'السيرفر غير موجود أو البوت غير متصل' });
+
+            // Snapshot channels
+            const channelsSnapshot = guild.channels.cache.map(ch => ({
+                id: ch.id, name: ch.name, type: ch.type,
+                parentId: ch.parentId, position: ch.position,
+                topic: ch.topic || null, nsfw: ch.nsfw || false,
+                bitrate: ch.bitrate || null, userLimit: ch.userLimit || null,
+            }));
+
+            // Snapshot roles
+            const rolesSnapshot = guild.roles.cache
+                .filter(r => !r.managed && r.id !== guildId)
+                .map(r => ({
+                    id: r.id, name: r.name, color: r.hexColor,
+                    hoist: r.hoist, mentionable: r.mentionable,
+                    permissions: r.permissions.bitfield.toString(),
+                    position: r.position,
+                }));
+
+            // Snapshot settings
+            let settingsSnapshot = {};
+            try { settingsSnapshot = database.getGuildSettings(guildId); } catch(e) {}
+
+            const backupId = 'bk_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
+            rawDb.prepare(
+                'INSERT INTO guild_backups (id, guild_id, created_by, label, channels_count, roles_count, settings_snapshot, channels_snapshot, roles_snapshot) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
+            ).run(
+                backupId, guildId, req.session.user.id,
+                label || '',
+                channelsSnapshot.length, rolesSnapshot.length,
+                JSON.stringify(settingsSnapshot),
+                JSON.stringify(channelsSnapshot),
+                JSON.stringify(rolesSnapshot)
+            );
+
+            // Auto-delete backups older than 30 days or exceeding 10 total
+            try {
+                const thirtyDaysAgo = Math.floor(Date.now() / 1000) - (30 * 24 * 60 * 60);
+                rawDb.prepare('DELETE FROM guild_backups WHERE guild_id = ? AND created_at < ?').run(guildId, thirtyDaysAgo);
+                const allBackups = rawDb.prepare('SELECT id FROM guild_backups WHERE guild_id = ? ORDER BY created_at DESC').all(guildId);
+                if (allBackups.length > 10) {
+                    const toDelete = allBackups.slice(10).map(b => b.id);
+                    for (const id of toDelete) rawDb.prepare('DELETE FROM guild_backups WHERE id = ?').run(id);
+                }
+            } catch(e) {}
+
+            res.json({ success: true, id: backupId, channels_count: channelsSnapshot.length, roles_count: rolesSnapshot.length });
+        } catch(e) {
+            res.status(500).json({ success: false, error: e.message });
+        }
+    });
+
+    app.post('/api/guild/:guildId/backup/:backupId/restore', async (req, res) => {
+        try {
+            if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
+            const { guildId, backupId } = req.params;
+
+            const backup = rawDb.prepare('SELECT * FROM guild_backups WHERE id = ? AND guild_id = ?').get(backupId, guildId);
+            if (!backup) return res.status(404).json({ success: false, error: 'النسخة الاحتياطية غير موجودة' });
+
+            const guild = client?.guilds?.cache?.get(guildId);
+            if (!guild) return res.status(404).json({ success: false, error: 'السيرفر غير متصل' });
+
+            let rolesRestored = 0, channelsRestored = 0;
+
+            // Restore missing roles
+            try {
+                const savedRoles = JSON.parse(backup.roles_snapshot || '[]');
+                const existingRoleNames = new Set(guild.roles.cache.map(r => r.name.toLowerCase()));
+                for (const role of savedRoles) {
+                    if (!existingRoleNames.has(role.name.toLowerCase())) {
+                        try {
+                            await guild.roles.create({
+                                name: role.name,
+                                color: role.color,
+                                hoist: role.hoist,
+                                mentionable: role.mentionable,
+                                permissions: BigInt(role.permissions),
+                                reason: 'ZENO Backup Restore'
+                            });
+                            rolesRestored++;
+                        } catch(e) {}
+                    }
+                }
+            } catch(e) {}
+
+            // Restore missing channels
+            try {
+                const savedChannels = JSON.parse(backup.channels_snapshot || '[]');
+                const existingChannelNames = new Set(guild.channels.cache.map(c => c.name.toLowerCase()));
+                for (const ch of savedChannels) {
+                    if (!existingChannelNames.has(ch.name.toLowerCase())) {
+                        try {
+                            await guild.channels.create({
+                                name: ch.name,
+                                type: ch.type,
+                                topic: ch.topic,
+                                nsfw: ch.nsfw,
+                                bitrate: ch.bitrate,
+                                userLimit: ch.userLimit,
+                                reason: 'ZENO Backup Restore'
+                            });
+                            channelsRestored++;
+                        } catch(e) {}
+                    }
+                }
+            } catch(e) {}
+
+            res.json({ success: true, message: `تمت الاستعادة: ${rolesRestored} رتبة و${channelsRestored} قناة تمت إضافتها` });
+        } catch(e) {
+            res.status(500).json({ success: false, error: e.message });
+        }
+    });
+
+    app.post('/api/guild/:guildId/backup/:backupId/delete', (req, res) => {
+        try {
+            if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
+            const { guildId, backupId } = req.params;
+            rawDb.prepare('DELETE FROM guild_backups WHERE id = ? AND guild_id = ?').run(backupId, guildId);
+            res.json({ success: true });
+        } catch(e) {
+            res.status(500).json({ success: false, error: e.message });
+        }
+    });
+
+    app.get('/api/guild/:guildId/backups', (req, res) => {
+        try {
+            if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
+            const { guildId } = req.params;
+            const rows = rawDb.prepare('SELECT id, guild_id, created_by, label, channels_count, roles_count, created_at FROM guild_backups WHERE guild_id = ? ORDER BY created_at DESC').all(guildId);
+            res.json({ success: true, data: rows });
+        } catch(e) {
+            res.status(500).json({ success: false, error: e.message });
+        }
+    });
 
     // =============================================
     // Stat Channels API
