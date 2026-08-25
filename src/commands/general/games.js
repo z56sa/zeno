@@ -286,74 +286,83 @@ async function runFastType(interaction) {
     files.push(attachment);
   }
 
-  const mainMsg = await interaction.reply({ embeds: [embed], files, fetchReply: true });
+  await interaction.reply({ embeds: [embed], files });
 
-  const startTime = Date.now();
+  const client = interaction.client;
+  const channelId = interaction.channelId;
   const targetNormalized = normalizeText(word);
-  const channel = interaction.channel;
+  const startTime = Date.now();
 
-  let hasWinner = false;
+  let isFinished = false;
 
-  const collector = channel.createMessageCollector({
-    filter: m => !m.author.bot,
-    time: 20000
-  });
+  const onMessage = async (msg) => {
+    if (isFinished) return;
+    if (msg.channelId !== channelId || msg.author.bot) return;
 
-  collector.on('collect', async m => {
-    if (hasWinner) return;
+    const userTextNormalized = normalizeText(msg.content);
 
-    const userTextNormalized = normalizeText(m.content);
+    // فحص التطابق أو الاحتواء
+    const isExactMatch = userTextNormalized === targetNormalized;
+    const isContained = userTextNormalized.includes(targetNormalized) && userTextNormalized.length <= targetNormalized.length + 4;
 
-    // فحص التطابق التام أو التطابق مع تجاهل الهمزات والتنوين والمسافات
-    if (userTextNormalized === targetNormalized) {
-      hasWinner = true;
-      collector.stop('won');
+    if (isExactMatch || isContained) {
+      isFinished = true;
+      client.removeListener('messageCreate', onMessage);
+      clearTimeout(timer);
 
       const timeTaken = ((Date.now() - startTime) / 1000).toFixed(2);
 
-      // تفاعل فوري بإيموجي الاحتفال
-      try { await m.react('🎉'); await m.react('⚡'); } catch(e) {}
+      // تفاعل فوري بالرياكشن
+      msg.react('🎉').catch(() => {});
+      msg.react('⚡').catch(() => {});
 
-      // إضافة المكافأة
-      if (interaction.guild && m.author) {
+      // إضافة المكافأة والنقاط
+      if (interaction.guild && msg.author) {
         try {
-          db.addCoins(m.author.id, interaction.guild.id, reward);
-          if (db.addXp) db.addXp(m.author.id, interaction.guild.id, 25);
+          db.addCoins(msg.author.id, interaction.guild.id, reward);
+          if (db.addXp) db.addXp(msg.author.id, interaction.guild.id, 25);
         } catch(e) {}
       }
 
       const winEmbed = new EmbedBuilder()
         .setColor('#10b981')
-        .setTitle('🏆 فائز في تحدي أسرع كتابة!')
+        .setTitle('🏆 فائز بطل في تحدي أسرع كتابة!')
         .setDescription(
-          `👑 **الفائز:** <@${m.author.id}> (${m.author.username})\n` +
+          `👑 **الفائز:** <@${msg.author.id}> (${msg.author.username})\n` +
           `⏱️ **الوقت القياسي:** \`${timeTaken} ثانية\` ⚡\n` +
           `📝 **الكلمة المطلوبة:** \`${word}\`\n` +
           `💰 **المكافأة:** \`+${reward} ⭐ Star Coins\` تمت إضافتها لمحفظتك فوراً!`
         )
-        .setThumbnail(m.author.displayAvatarURL({ dynamic: true }))
+        .setThumbnail(msg.author.displayAvatarURL({ dynamic: true }))
         .setFooter({ text: 'تهانينا! سرعة استجابة مذهلة 👏' })
         .setTimestamp();
 
-      return channel.send({ embeds: [winEmbed] });
+      return msg.reply({ embeds: [winEmbed] }).catch(() => {
+        interaction.channel.send({ embeds: [winEmbed] }).catch(() => {});
+      });
     } else {
-      // تفاعل فوري مع الخطأ إذا كانت المحاولة قريبة أو كتب شيئاً أثناء المسابقة
-      if (m.content.trim().length >= 2) {
-        try { await m.react('❌'); } catch(e) {}
+      // تفاعل مع المحاولات الخاطئة
+      if (msg.content.trim().length >= 2) {
+        msg.react('❌').catch(() => {});
       }
     }
-  });
+  };
 
-  collector.on('end', async (collected, reason) => {
-    if (reason !== 'won' && !hasWinner) {
-      const timeoutEmbed = new EmbedBuilder()
-        .setColor('#ef4444')
-        .setTitle('⏰ انتهى الوقت!')
-        .setDescription(`لم يقم أحد بكتابة الكلمة الصحيحة \`${word}\` في الوقت المحدد (20 ثانية).`)
-        .setTimestamp();
-      await channel.send({ embeds: [timeoutEmbed] }).catch(() => {});
-    }
-  });
+  client.on('messageCreate', onMessage);
+
+  const timer = setTimeout(async () => {
+    if (isFinished) return;
+    isFinished = true;
+    client.removeListener('messageCreate', onMessage);
+
+    const timeoutEmbed = new EmbedBuilder()
+      .setColor('#ef4444')
+      .setTitle('⏰ انتهى الوقت!')
+      .setDescription(`لم يقم أحد بكتابة الكلمة الصحيحة \`${word}\` في الوقت المحدد (20 ثانية).`)
+      .setTimestamp();
+
+    await interaction.channel.send({ embeds: [timeoutEmbed] }).catch(() => {});
+  }, 20000);
 }
 
 // ==========================================
