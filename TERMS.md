@@ -23,7 +23,8 @@ We reserve the right to restrict or terminate access to the bot or web dashboard
 
 ### 5. Support & Contact
 If you have questions about these Terms, please join our official support server:
-* **Discord Support Server:** [https://discord.gg/cD6VxqjGyp](https://discord.gg/cD6VxqjGyp)
+* **Discord Support Server:** [https://discord.gg/zduGPYv7pE](https://discord.gg/zduGPYv7pE)
+* **Website:** [https://zenobot.com](https://zenobot.com)
 
 ---
 
@@ -32,4 +33,10 @@ If you have questions about these Terms, please join our official support server
 باستخدامك أو إضافة بوت **ZENO** إلى سيرفرك في ديسكورد، فإنك توافق على الالتزام بالشروط التالية:
 1. **الاستخدام المصرح به:** يُمنع استغلال الثغرات أو إرسال طلبات عشوائية (Spam) أو مخالفة شروط ديسكورد الرسمية.
 2. **المسؤولية:** يُقدم البوت "كما هو" ولا نتحمل مسؤولية سوء استخدام الصلاحيات من قبل مشرفي السيرفر.
-3. **الدعم الفني:** لأي استفسارات يرجى زيارة سيرفر الدعم: https://discord.gg/cD6VxqjGyp
+3. **الدعم الفني:** لأي استفسارات يرجى زيارة سيرفر الدعم: https://discord.gg/zduGPYv7pE
+
+## 7. الدعم الفني والاستفسارات
+1. **النزاعات والشكاوى:** يمكن رفع أي شكوى مباشرة لفريق الدعم الفني.
+2. **الاستفسارات:** يسعدنا مساعدتك في أي وقت على مدار الساعة.
+3. **الدعم الفني:** لأي استفسارات يرجى زيارة سيرفر الدعم: https://discord.gg/zduGPYv7pE
+4. **تاريخ آخر تحديث:** 2026-08-22.

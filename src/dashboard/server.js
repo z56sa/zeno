@@ -400,7 +400,7 @@ module.exports = function (app, client) {
                     <div class="flex items-center gap-4">
                         <a href="/logout" class="text-xs text-rose-400 hover:text-rose-300 font-bold transition">تسجيل الخروج</a>
                         <span class="text-gray-700">|</span>
-                        <a href="https://discord.gg/uxqQDtbVMz" target="_blank" class="text-xs text-gray-400 hover:text-gray-200 transition">الدعم الفني</a>
+                        <a href="https://discord.gg/zduGPYv7pE" target="_blank" class="text-xs text-gray-400 hover:text-gray-200 transition">الدعم الفني</a>
                     </div>
                     <div class="flex items-center gap-3">
                         <div class="text-right">
@@ -8151,7 +8151,7 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                     <div class="flex items-center gap-4">
                         <a href="/dashboard" class="text-xs text-purple-400 font-bold hover:text-purple-300 transition">الرجوع للوحة التحكم</a>
                         <span class="text-gray-700">|</span>
-                        <a href="https://discord.gg/uxqQDtbVMz" target="_blank" class="text-xs text-gray-400 hover:text-gray-200 transition">الدعم الفني</a>
+                        <a href="https://discord.gg/zduGPYv7pE" target="_blank" class="text-xs text-gray-400 hover:text-gray-200 transition">الدعم الفني</a>
                     </div>
                     <div class="flex items-center gap-2">
                         <span class="font-black text-sm text-white tracking-wide">ZENO</span>

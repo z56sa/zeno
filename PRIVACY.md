@@ -21,7 +21,8 @@ All data is stored securely in an encrypted local database. Access is strictly l
 
 ### 4. Data Deletion
 Server owners can request complete data reset and deletion by removing the bot from their guild or contacting our support team:
-* **Discord Support Server:** [https://discord.gg/cD6VxqjGyp](https://discord.gg/cD6VxqjGyp)
+* **Discord Support Server:** [https://discord.gg/zduGPYv7pE](https://discord.gg/zduGPYv7pE)
+* **Website:** [https://zenobot.com](https://zenobot.com)
 
 ---
 
@@ -30,4 +31,9 @@ Server owners can request complete data reset and deletion by removing the bot f
 نحن في **ZENO** نلتزم بحماية خصوصية بياناتك:
 1. **البيانات المجمعة:** معرّفات ديسكورد العامة (User ID, Guild ID) لحفظ الرصيد، اللفلات، وإعدادات السيرفر.
 2. **ما لا نجمعه:** لا نقرأ ولا نخزن الرسائل الخاصة أو المحادثات إطلاقاً.
-3. **حذف البيانات:** يمكنك طلب حذف بيانات سيرفرك في أي وقت عبر سيرفر الدعم الفني: https://discord.gg/cD6VxqjGyp
+
+## 7. الاتصال بنا وإدارة البيانات
+1. **الوصول للبيانات:** يحق لمالك السيرفر طلب تقرير أو مراجعة بالبيانات المحفوظة لسيرفره.
+2. **تعديل الإعدادات:** يمكن تعديل كافة الإعدادات والبيانات فورياً عبر لوحة التحكم (Dashboard).
+3. **حذف البيانات:** يمكنك طلب حذف بيانات سيرفرك في أي وقت عبر سيرفر الدعم الفني: https://discord.gg/zduGPYv7pE
+4. **تحديث السياسة:** قد يتم تحديث هذه السياسة دورياً لمواكبة التحديثات والميزات الجديدة للبوت. يتم إشعار المستخدمين بالتغييرات الجوهرية.
