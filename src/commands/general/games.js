@@ -349,7 +349,6 @@ async function runFastType(interaction) {
     } else {
       // ❌ إجابة خاطئة — طرد اللاعب وإرسال رسالة في الشات
       eliminatedPlayers.add(msg.author.id);
-      msg.react('❌').catch(() => {});
 
       const wrongEmbed = new EmbedBuilder()
         .setColor('#ef4444')
