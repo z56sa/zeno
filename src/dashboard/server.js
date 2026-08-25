@@ -6071,65 +6071,386 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
             } else if (section === 'embed') {
                 formFieldsHtml = `
                     <div class="space-y-6 text-right" dir="rtl">
-                        <div class="bg-[#1c1f2e] border border-white/5 p-6 rounded-2xl flex items-center justify-between">
-                            <label class="toggle"><input type="checkbox" checked><span class="slider"></span></label>
-                            <div>
-                                <h3 class="font-black text-white text-xl flex items-center gap-2 justify-end"><span>صانع رسائل الإيمبد المتقدم</span><span>📄</span></h3>
-                                <p class="text-gray-400 text-xs mt-1">صمم وأرسل رسائل إيمبد منسقة واحترافية مباشرة إلى أي قناة في سيرفرك</p>
+                        <!-- Top Action Bar -->
+                        <div class="flex items-center justify-between gap-3 flex-wrap">
+                            <div class="flex items-center gap-2">
+                                <button type="button" onclick="sendEmbedDirect()" id="btnSendEmbed" class="px-5 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold transition shadow-lg flex items-center gap-2">
+                                    <span>🚀 إرسال</span>
+                                </button>
+                                <button type="button" onclick="saveEmbedDraft()" class="px-4 py-2.5 bg-[#151724] hover:bg-[#1c1f2e] border border-white/10 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5">
+                                    <span>💾 حفظ</span>
+                                </button>
+                                <button type="button" onclick="clearEmbedFields()" class="px-4 py-2.5 bg-rose-900/30 hover:bg-rose-800/40 border border-rose-800/30 text-rose-300 rounded-xl text-xs font-bold transition flex items-center gap-1.5">
+                                    <span>🗑️ مسح</span>
+                                </button>
+                            </div>
+
+                            <div class="flex items-center gap-3">
+                                <div class="text-right">
+                                    <h3 class="font-black text-white text-xl flex items-center gap-2 justify-end"><span>رسائل الإيمبد</span><span>📄</span></h3>
+                                    <p class="text-gray-400 text-xs">صمم وأرسل رسائل إيمبد منسقة واحترافية لقنواتك</p>
+                                </div>
+                                <div class="w-10 h-10 rounded-2xl bg-purple-600/20 border border-purple-500/30 text-purple-400 flex items-center justify-center text-xl">📄</div>
                             </div>
                         </div>
 
-                        <div id="embBuilderCard" class="bg-[#1c1f2e] border border-white/5 p-6 rounded-2xl space-y-4">
-                            <h4 class="font-bold text-white text-sm border-b border-white/5 pb-3 flex items-center gap-2 justify-end">
-                                <span>محرر رسائل الإيمبد التفاعلي (Interactive Embed Builder)</span>
-                                <span>📄</span>
-                            </h4>
+                        <!-- Mode tabs -->
+                        <div class="flex items-center justify-end gap-2 bg-[#12141f] p-1.5 rounded-2xl border border-white/5 w-fit ml-auto">
+                            <button type="button" class="px-4 py-1.5 bg-purple-600 text-white font-bold text-xs rounded-xl shadow">محرر</button>
+                            <button type="button" onclick="alert('المحرر المرئي مفعل')" class="px-4 py-1.5 text-gray-400 hover:text-white font-bold text-xs rounded-xl transition">مستند</button>
+                            <button type="button" onclick="document.getElementById('livePreviewCard').scrollIntoView({behavior:'smooth'})" class="px-4 py-1.5 text-gray-400 hover:text-white font-bold text-xs rounded-xl transition">معاينة</button>
+                        </div>
 
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-xs font-bold text-gray-300 mb-2">القناة المستهدفة <span class="text-purple-400">*</span></label>
-                                    ${renderChannelSelect('embedChannel', '')}
+                        <!-- Target Channel -->
+                        <div class="bg-[#12141f] border border-white/5 p-5 rounded-2xl space-y-2">
+                            <label class="block text-xs font-bold text-gray-300">أرسل إلى القناة <span class="text-purple-400">*</span></label>
+                            ${renderChannelSelect('embedChannel', '')}
+                        </div>
+
+                        <!-- Embed Color Palette -->
+                        <div class="bg-[#12141f] border border-white/5 p-5 rounded-2xl space-y-3">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <input type="text" id="embHexInput" value="#9333ea" oninput="setCustomHex(this.value)" class="w-24 bg-[#0b0d14] border border-white/10 rounded-xl px-3 py-1.5 text-xs text-white text-center font-mono focus:border-purple-500 outline-none uppercase">
+                                    <input type="color" id="embColor" value="#9333ea" oninput="onColorPickerChange(this.value)" class="w-9 h-9 rounded-xl border border-white/10 bg-[#0b0d14] cursor-pointer p-0.5">
                                 </div>
-                                <div>
-                                    <label class="block text-xs font-bold text-gray-300 mb-2">لون الإيمبد</label>
-                                    <input type="color" id="embColor" value="#9333ea" oninput="updateEmbedPreview()" class="w-full h-11 bg-[#0b0d14] border border-white/5 rounded-xl cursor-pointer p-1">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-xs font-bold text-white">لون الإيمبد</span>
+                                    <span class="text-purple-400 text-sm">🎨</span>
                                 </div>
                             </div>
 
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <!-- Color Swatches -->
+                            <div class="flex items-center justify-end gap-2 flex-wrap pt-2 border-t border-white/5">
+                                <button type="button" onclick="selectColor('#10b981')" class="w-7 h-7 rounded-full bg-[#10b981] hover:scale-110 transition border border-white/20 shadow"></button>
+                                <button type="button" onclick="selectColor('#06b6d4')" class="w-7 h-7 rounded-full bg-[#06b6d4] hover:scale-110 transition border border-white/20 shadow"></button>
+                                <button type="button" onclick="selectColor('#3b82f6')" class="w-7 h-7 rounded-full bg-[#3b82f6] hover:scale-110 transition border border-white/20 shadow"></button>
+                                <button type="button" onclick="selectColor('#8b5cf6')" class="w-7 h-7 rounded-full bg-[#8b5cf6] hover:scale-110 transition border border-white/20 shadow"></button>
+                                <button type="button" onclick="selectColor('#9333ea')" class="w-7 h-7 rounded-full bg-[#9333ea] hover:scale-110 transition border-2 border-white shadow-lg ring-2 ring-purple-500/50"></button>
+                                <button type="button" onclick="selectColor('#f97316')" class="w-7 h-7 rounded-full bg-[#f97316] hover:scale-110 transition border border-white/20 shadow"></button>
+                                <button type="button" onclick="selectColor('#ef4444')" class="w-7 h-7 rounded-full bg-[#ef4444] hover:scale-110 transition border border-white/20 shadow"></button>
+                                <button type="button" onclick="selectColor('#ec4899')" class="w-7 h-7 rounded-full bg-[#ec4899] hover:scale-110 transition border border-white/20 shadow"></button>
+                                <button type="button" onclick="selectColor('#eab308')" class="w-7 h-7 rounded-full bg-[#eab308] hover:scale-110 transition border border-white/20 shadow"></button>
+                                <button type="button" onclick="selectColor('#14b8a6')" class="w-7 h-7 rounded-full bg-[#14b8a6] hover:scale-110 transition border border-white/20 shadow"></button>
+                                <button type="button" onclick="selectColor('#5865F2')" class="w-7 h-7 rounded-full bg-[#5865F2] hover:scale-110 transition border border-white/20 shadow"></button>
+                            </div>
+                        </div>
+
+                        <!-- Main Visual Editor Form -->
+                        <div class="bg-[#12141f] border border-white/5 p-6 rounded-3xl space-y-4">
+                            <div class="flex items-center justify-between pb-3 border-b border-white/5">
+                                <span class="text-[11px] text-gray-500 font-mono">Embed Builder</span>
+                                <h4 class="text-sm font-black text-white flex items-center gap-2"><span>محتوى الإيمبد</span><span>📝</span></h4>
+                            </div>
+
+                            <!-- Author row -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                                 <div>
-                                    <label class="block text-xs font-bold text-gray-300 mb-2">اسم الكاتب (Author Name)</label>
-                                    <input type="text" id="embAuthor" placeholder="مثال: ZENO Announcement" oninput="updateEmbedPreview()" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right">
+                                    <label class="block text-[11px] font-bold text-gray-400 mb-1">أيقونة الكاتب (Author Icon URL)</label>
+                                    <input type="url" id="embAuthorIcon" placeholder="https://..." oninput="updateEmbedPreview()" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-3 py-2.5 text-xs text-white outline-none text-left font-mono">
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-bold text-gray-300 mb-2">عنوان الإيمبد (Title)</label>
-                                    <input type="text" id="embTitle" placeholder="عنوان الرسالة الرئيسي..." oninput="updateEmbedPreview()" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right font-bold">
+                                    <label class="block text-[11px] font-bold text-gray-400 mb-1">اسم الكاتب (Author Name)</label>
+                                    <input type="text" id="embAuthor" placeholder="مثال: ZENO Announcement" oninput="updateEmbedPreview()" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-3 py-2.5 text-xs text-white outline-none text-right">
                                 </div>
                             </div>
 
+                            <!-- Title & Title URL -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-[11px] font-bold text-gray-400 mb-1">رابط العنوان (Title URL - اختياري)</label>
+                                    <input type="url" id="embTitleUrl" placeholder="https://..." oninput="updateEmbedPreview()" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-3 py-2.5 text-xs text-white outline-none text-left font-mono">
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-bold text-gray-400 mb-1">عنوان الإيمبد (Title)</label>
+                                    <input type="text" id="embTitle" placeholder="عنوان الرسالة الرئيسي..." oninput="updateEmbedPreview()" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-3 py-2.5 text-xs text-white outline-none text-right font-bold">
+                                </div>
+                            </div>
+
+                            <!-- Description -->
                             <div>
-                                <label class="block text-xs font-bold text-gray-300 mb-2">محتوى ونص الإيمبد (Description) <span class="text-purple-400">*</span></label>
-                                <textarea id="embDesc" rows="4" placeholder="اكتب محتوى الرسالة وتنسيقها هنا..." oninput="updateEmbedPreview()" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right leading-relaxed"></textarea>
+                                <label class="block text-[11px] font-bold text-gray-400 mb-1">الوصف والمحتوى (Description) <span class="text-purple-400">*</span></label>
+                                <textarea id="embDesc" rows="4" placeholder="اكتب محتوى الرسالة هنا... يدعم Markdown مثل **عريض** و *مائل*" oninput="updateEmbedPreview()" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-3 py-2.5 text-xs text-white outline-none text-right leading-relaxed"></textarea>
                             </div>
 
-                            <div class="pt-4 flex justify-end">
-                                <button type="button" onclick="sendEmbedDirect()" id="btnSendEmbed" class="px-8 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold transition shadow-lg flex items-center gap-2">
-                                    <span>🚀 إرسال الإيمبد إلى ديسكورد الآن</span>
-                                </button>
+                            <!-- Image & Thumbnail URLs -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-[11px] font-bold text-gray-400 mb-1">الصورة المصغرة (Thumbnail URL)</label>
+                                    <input type="url" id="embThumbnail" placeholder="https://... (أعلى اليمين)" oninput="updateEmbedPreview()" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-3 py-2.5 text-xs text-white outline-none text-left font-mono">
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-bold text-gray-400 mb-1">الصورة الكبيرة (Main Image URL)</label>
+                                    <input type="url" id="embImage" placeholder="https://... (أسفل الإيمبد)" oninput="updateEmbedPreview()" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-3 py-2.5 text-xs text-white outline-none text-left font-mono">
+                                </div>
+                            </div>
+
+                            <!-- Custom Fields list -->
+                            <div class="space-y-3 pt-2">
+                                <div class="flex items-center justify-between">
+                                    <button type="button" onclick="addEmbedField()" class="px-3 py-1.5 bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/30 text-purple-300 rounded-xl text-xs font-bold transition flex items-center gap-1">
+                                        <span>+ إضافة حقل (Field)</span>
+                                    </button>
+                                    <span class="text-xs font-bold text-gray-300">الحقول الإضافية (Fields)</span>
+                                </div>
+                                <div id="fieldsContainer" class="space-y-2.5"></div>
+                            </div>
+                        </div>
+
+                        <!-- Footer & Timestamp -->
+                        <div class="bg-[#12141f] border border-white/5 p-6 rounded-3xl space-y-4">
+                            <div class="flex items-center justify-between pb-3 border-b border-white/5">
+                                <div class="flex items-center gap-3">
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" id="embTimestampToggle" checked onchange="updateEmbedPreview()" class="sr-only peer">
+                                        <div class="w-11 h-6 bg-gray-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                                    </label>
+                                    <span class="text-xs font-bold text-gray-300">إظهار الوقت (Timestamp)</span>
+                                </div>
+                                <h4 class="text-sm font-black text-white flex items-center gap-2"><span>التذييل والوقت (Footer)</span><span>⏰</span></h4>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-[11px] font-bold text-gray-400 mb-1">أيقونة التذييل (Footer Icon URL)</label>
+                                    <input type="url" id="embFooterIcon" placeholder="https://..." oninput="updateEmbedPreview()" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-3 py-2.5 text-xs text-white outline-none text-left font-mono">
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-bold text-gray-400 mb-1">نص التذييل (Footer Text)</label>
+                                    <input type="text" id="embFooter" placeholder="مثال: ZENO Bot • اليوم" oninput="updateEmbedPreview()" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-3 py-2.5 text-xs text-white outline-none text-right">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Live Discord Preview Box -->
+                        <div id="livePreviewCard" class="bg-[#12141f] border border-purple-500/20 p-6 rounded-3xl space-y-3 shadow-2xl">
+                            <div class="flex items-center justify-between pb-3 border-b border-white/5">
+                                <span class="text-[10px] bg-purple-600/20 text-purple-300 px-2 py-0.5 rounded-full font-bold border border-purple-500/30">معاينة مباشرة</span>
+                                <h4 class="text-sm font-black text-white flex items-center gap-2"><span>شكل الرسالة في ديسكورد</span><span>👁️</span></h4>
+                            </div>
+
+                            <div class="bg-[#2b2d31] p-4 rounded-xl max-w-2xl ml-auto border-r-4 shadow-md transition-all" id="previewEmbedBox" style="border-right-color: #9333ea;">
+                                <div id="prevAuthorRow" class="hidden items-center justify-end gap-2 mb-2">
+                                    <span id="prevAuthorText" class="text-xs font-bold text-white"></span>
+                                    <img id="prevAuthorImg" class="w-5 h-5 rounded-full object-cover hidden" src="" alt="">
+                                </div>
+                                <div id="prevTitle" class="text-sm font-black text-white mb-1.5 hover:underline cursor-pointer"></div>
+                                <div id="prevDesc" class="text-xs text-gray-300 whitespace-pre-wrap leading-relaxed"></div>
+                                <div id="prevFieldsGrid" class="grid grid-cols-2 gap-2 mt-3 hidden"></div>
+                                <div id="prevImageRow" class="mt-3 hidden">
+                                    <img id="prevMainImg" class="rounded-lg max-h-60 w-full object-cover" src="" alt="">
+                                </div>
+                                <div id="prevFooterRow" class="mt-3 pt-2 border-t border-white/5 flex items-center justify-end gap-2 text-[10px] text-gray-400">
+                                    <span id="prevTimestamp" class="text-gray-500"></span>
+                                    <span id="prevFooterDot" class="hidden">•</span>
+                                    <span id="prevFooterText"></span>
+                                    <img id="prevFooterImg" class="w-4 h-4 rounded-full object-cover hidden" src="" alt="">
+                                </div>
                             </div>
                         </div>
                     </div>
 
                     <script>
-                    async function sendEmbedDirect() {
-                        const channelId = document.getElementById('embedChannel').value;
+                    let embedFields = [];
+
+                    function selectColor(hex) {
+                        document.getElementById('embColor').value = hex;
+                        document.getElementById('embHexInput').value = hex.toUpperCase();
+                        updateEmbedPreview();
+                    }
+
+                    function onColorPickerChange(hex) {
+                        document.getElementById('embHexInput').value = hex.toUpperCase();
+                        updateEmbedPreview();
+                    }
+
+                    function setCustomHex(hex) {
+                        if (/^#[0-9A-F]{6}$/i.test(hex)) {
+                            document.getElementById('embColor').value = hex;
+                            updateEmbedPreview();
+                        }
+                    }
+
+                    function addEmbedField() {
+                        const id = 'f_' + Date.now();
+                        embedFields.push({ id: id, name: '', value: '', inline: false });
+                        renderFieldsEditor();
+                        updateEmbedPreview();
+                    }
+
+                    function removeEmbedField(id) {
+                        embedFields = embedFields.filter(f => f.id !== id);
+                        renderFieldsEditor();
+                        updateEmbedPreview();
+                    }
+
+                    function updateFieldData(id, key, val) {
+                        const field = embedFields.find(f => f.id === id);
+                        if (field) {
+                            field[key] = val;
+                            updateEmbedPreview();
+                        }
+                    }
+
+                    function renderFieldsEditor() {
+                        const c = document.getElementById('fieldsContainer');
+                        if (embedFields.length === 0) {
+                            c.innerHTML = '<p class="text-[11px] text-gray-500 text-center py-2">لا توجد حقول إضافية حالياً</p>';
+                            return;
+                        }
+                        let html = '';
+                        for (let i = 0; i < embedFields.length; i++) {
+                            const f = embedFields[i];
+                            html += '<div class="bg-[#0b0d14] border border-white/5 p-3 rounded-2xl space-y-2">' +
+                                '<div class="flex items-center justify-between">' +
+                                '<div class="flex items-center gap-2">' +
+                                '<label class="text-[10px] text-gray-400 flex items-center gap-1 cursor-pointer">' +
+                                '<input type="checkbox" ' + (f.inline ? 'checked' : '') + ' onchange="updateFieldData(\'' + f.id + '\', \'inline\', this.checked)" class="rounded bg-[#151724] border-white/10 text-purple-600 focus:ring-0">' +
+                                '<span>جنباً لجنب (Inline)</span>' +
+                                '</label>' +
+                                '<button type="button" onclick="removeEmbedField(\'' + f.id + '\')" class="text-rose-400 hover:text-rose-300 text-xs px-2 py-0.5 rounded bg-rose-950/40">✕ حذف</button>' +
+                                '</div>' +
+                                '<span class="text-xs font-bold text-gray-300">الحقل #' + (i + 1) + '</span>' +
+                                '</div>' +
+                                '<div class="grid grid-cols-1 md:grid-cols-2 gap-2">' +
+                                '<input type="text" placeholder="عنوان الحقل..." value="' + (f.name || '') + '" oninput="updateFieldData(\'' + f.id + '\', \'name\', this.value)" class="w-full bg-[#12141f] border border-white/5 rounded-xl px-3 py-1.5 text-xs text-white text-right outline-none font-bold">' +
+                                '<input type="text" placeholder="قيمة ومحتوى الحقل..." value="' + (f.value || '') + '" oninput="updateFieldData(\'' + f.id + '\', \'value\', this.value)" class="w-full bg-[#12141f] border border-white/5 rounded-xl px-3 py-1.5 text-xs text-white text-right outline-none">' +
+                                '</div>' +
+                                '</div>';
+                        }
+                        c.innerHTML = html;
+                    }
+
+                    function updateEmbedPreview() {
+                        const color = document.getElementById('embColor').value || '#9333ea';
+                        const author = document.getElementById('embAuthor').value.trim();
+                        const authorIcon = document.getElementById('embAuthorIcon').value.trim();
                         const title = document.getElementById('embTitle').value.trim();
                         const desc = document.getElementById('embDesc').value.trim();
-                        const author = document.getElementById('embAuthor').value.trim();
-                        const color = document.getElementById('embColor').value;
+                        const image = document.getElementById('embImage').value.trim();
+                        const thumbnail = document.getElementById('embThumbnail').value.trim();
+                        const footer = document.getElementById('embFooter').value.trim();
+                        const footerIcon = document.getElementById('embFooterIcon').value.trim();
+                        const showTimestamp = document.getElementById('embTimestampToggle').checked;
 
-                        if (!channelId) return alert('يرجى اختيار القناة المستهدفة أولاً!');
-                        if (!desc && !title) return alert('يرجى كتابة عنوان أو محتوى للرسالة!');
+                        document.getElementById('previewEmbedBox').style.borderRightColor = color;
+
+                        const prevAuthorRow = document.getElementById('prevAuthorRow');
+                        const prevAuthorText = document.getElementById('prevAuthorText');
+                        const prevAuthorImg = document.getElementById('prevAuthorImg');
+                        if (author) {
+                            prevAuthorRow.classList.remove('hidden');
+                            prevAuthorRow.classList.add('flex');
+                            prevAuthorText.textContent = author;
+                            if (authorIcon) {
+                                prevAuthorImg.src = authorIcon;
+                                prevAuthorImg.classList.remove('hidden');
+                            } else {
+                                prevAuthorImg.classList.add('hidden');
+                            }
+                        } else {
+                            prevAuthorRow.classList.add('hidden');
+                            prevAuthorRow.classList.remove('flex');
+                        }
+
+                        const prevTitle = document.getElementById('prevTitle');
+                        prevTitle.textContent = title || '';
+                        prevTitle.style.display = title ? 'block' : 'none';
+
+                        const prevDesc = document.getElementById('prevDesc');
+                        prevDesc.textContent = desc || 'محتوى الإيمبد سيظهر هنا بالمعاينة المباشرة...';
+
+                        const prevFieldsGrid = document.getElementById('prevFieldsGrid');
+                        const validFields = embedFields.filter(f => f.name || f.value);
+                        if (validFields.length > 0) {
+                            prevFieldsGrid.classList.remove('hidden');
+                            let fieldsHtml = '';
+                            for (let f of validFields) {
+                                fieldsHtml += '<div class="' + (f.inline ? 'col-span-1' : 'col-span-2') + ' bg-black/20 p-2 rounded-lg text-right">' +
+                                    '<div class="text-[11px] font-bold text-gray-300">' + (f.name || 'حقل') + '</div>' +
+                                    '<div class="text-[11px] text-gray-400">' + (f.value || '...') + '</div>' +
+                                    '</div>';
+                            }
+                            prevFieldsGrid.innerHTML = fieldsHtml;
+                        } else {
+                            prevFieldsGrid.classList.add('hidden');
+                        }
+
+                        const prevImageRow = document.getElementById('prevImageRow');
+                        const prevMainImg = document.getElementById('prevMainImg');
+                        if (image) {
+                            prevMainImg.src = image;
+                            prevImageRow.classList.remove('hidden');
+                        } else {
+                            prevImageRow.classList.add('hidden');
+                        }
+
+                        const prevFooterText = document.getElementById('prevFooterText');
+                        const prevFooterImg = document.getElementById('prevFooterImg');
+                        const prevTimestamp = document.getElementById('prevTimestamp');
+                        const prevFooterDot = document.getElementById('prevFooterDot');
+
+                        prevFooterText.textContent = footer || '';
+                        if (footerIcon && footer) {
+                            prevFooterImg.src = footerIcon;
+                            prevFooterImg.classList.remove('hidden');
+                        } else {
+                            prevFooterImg.classList.add('hidden');
+                        }
+
+                        if (showTimestamp) {
+                            prevTimestamp.textContent = 'اليوم في ' + new Date().toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' });
+                            prevFooterDot.classList.toggle('hidden', !footer);
+                        } else {
+                            prevTimestamp.textContent = '';
+                            prevFooterDot.classList.add('hidden');
+                        }
+                    }
+
+                    function clearEmbedFields() {
+                        if (!confirm('هل تريد مسح جميع الحقول وإعادة الضبط؟')) return;
+                        document.getElementById('embTitle').value = '';
+                        document.getElementById('embDesc').value = '';
+                        document.getElementById('embAuthor').value = '';
+                        document.getElementById('embAuthorIcon').value = '';
+                        document.getElementById('embTitleUrl').value = '';
+                        document.getElementById('embImage').value = '';
+                        document.getElementById('embThumbnail').value = '';
+                        document.getElementById('embFooter').value = '';
+                        document.getElementById('embFooterIcon').value = '';
+                        embedFields = [];
+                        renderFieldsEditor();
+                        selectColor('#9333ea');
+                    }
+
+                    function saveEmbedDraft() {
+                        const payload = getEmbedPayload();
+                        localStorage.setItem('zeno_embed_draft_' + '${guildId}', JSON.stringify(payload));
+                        alert('💾 تم حفظ المسودة محلياً في المتصفح!');
+                    }
+
+                    function getEmbedPayload() {
+                        return {
+                            channelId: document.getElementById('embedChannel').value,
+                            color: document.getElementById('embColor').value,
+                            title: document.getElementById('embTitle').value.trim(),
+                            titleUrl: document.getElementById('embTitleUrl').value.trim(),
+                            desc: document.getElementById('embDesc').value.trim(),
+                            author: document.getElementById('embAuthor').value.trim(),
+                            authorIcon: document.getElementById('embAuthorIcon').value.trim(),
+                            image: document.getElementById('embImage').value.trim(),
+                            thumbnail: document.getElementById('embThumbnail').value.trim(),
+                            footer: document.getElementById('embFooter').value.trim(),
+                            footerIcon: document.getElementById('embFooterIcon').value.trim(),
+                            timestamp: document.getElementById('embTimestampToggle').checked,
+                            fields: embedFields.filter(f => f.name || f.value)
+                        };
+                    }
+
+                    async function sendEmbedDirect() {
+                        const payload = getEmbedPayload();
+                        if (!payload.channelId) return alert('يرجى اختيار القناة المستهدفة أولاً!');
+                        if (!payload.desc && !payload.title) return alert('يرجى كتابة عنوان أو محتوى للرسالة!');
 
                         const btn = document.getElementById('btnSendEmbed');
                         btn.disabled = true;
@@ -6139,7 +6460,7 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                             const res = await fetch('/api/guild/${guildId}/send-embed', {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ channelId, title, desc, author, color })
+                                body: JSON.stringify(payload)
                             });
                             const data = await res.json();
                             if (data.success) {
@@ -6151,9 +6472,34 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                             alert('حدث خطأ أثناء الاتصال بالخادم');
                         } finally {
                             btn.disabled = false;
-                            btn.innerHTML = '<span>🚀 إرسال الإيمبد إلى ديسكورد الآن</span>';
+                            btn.innerHTML = '<span>🚀 إرسال</span>';
                         }
                     }
+
+                    window.addEventListener('DOMContentLoaded', () => {
+                        renderFieldsEditor();
+                        try {
+                            const saved = localStorage.getItem('zeno_embed_draft_' + '${guildId}');
+                            if (saved) {
+                                const d = JSON.parse(saved);
+                                if (d.title) document.getElementById('embTitle').value = d.title;
+                                if (d.desc) document.getElementById('embDesc').value = d.desc;
+                                if (d.author) document.getElementById('embAuthor').value = d.author;
+                                if (d.authorIcon) document.getElementById('embAuthorIcon').value = d.authorIcon;
+                                if (d.titleUrl) document.getElementById('embTitleUrl').value = d.titleUrl;
+                                if (d.image) document.getElementById('embImage').value = d.image;
+                                if (d.thumbnail) document.getElementById('embThumbnail').value = d.thumbnail;
+                                if (d.footer) document.getElementById('embFooter').value = d.footer;
+                                if (d.footerIcon) document.getElementById('embFooterIcon').value = d.footerIcon;
+                                if (d.color) selectColor(d.color);
+                                if (Array.isArray(d.fields)) {
+                                    embedFields = d.fields;
+                                    renderFieldsEditor();
+                                }
+                            }
+                        } catch(e) {}
+                        updateEmbedPreview();
+                    });
                     </script>
                 `;
             } else {
@@ -7140,7 +7486,7 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
         try {
             if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
             const { guildId } = req.params;
-            const { channelId, title, desc, author, color } = req.body;
+            const { channelId, title, titleUrl, desc, author, authorIcon, color, image, thumbnail, footer, footerIcon, timestamp, fields } = req.body;
             const channel = client.channels.cache.get(channelId) || await client.channels.fetch(channelId).catch(() => null);
             if (!channel || !channel.isTextBased()) {
                 return res.status(404).json({ success: false, error: 'لم يتم العثور على القناة أو البوت ليس لديه صلاحيات فيها' });
@@ -7148,9 +7494,20 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
             const { EmbedBuilder } = require('discord.js');
             const emb = new EmbedBuilder().setColor(color || '#9333ea');
             if (title) emb.setTitle(title);
+            if (titleUrl) emb.setURL(titleUrl);
             if (desc) emb.setDescription(desc);
-            if (author) emb.setAuthor({ name: author });
-            emb.setTimestamp();
+            if (author) emb.setAuthor({ name: author, iconURL: authorIcon || undefined });
+            if (thumbnail) emb.setThumbnail(thumbnail);
+            if (image) emb.setImage(image);
+            if (footer) emb.setFooter({ text: footer, iconURL: footerIcon || undefined });
+            if (timestamp !== false) emb.setTimestamp();
+            if (Array.isArray(fields) && fields.length > 0) {
+                for (const f of fields) {
+                    if (f.name && f.value) {
+                        emb.addFields({ name: f.name, value: f.value, inline: !!f.inline });
+                    }
+                }
+            }
             await channel.send({ embeds: [emb] });
             res.json({ success: true });
         } catch (e) {
