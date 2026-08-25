@@ -5574,7 +5574,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
 
                     <script>
                     (function() {
-                                                // 105 Comprehensive Log Events across 13 Categories (Identical to Screenshots)
+                                                                        // 105 Comprehensive Log Events across 13 Categories (100% Exact to Screenshots)
                         var LOG_CATEGORIES = {
                             members: {
                                 title: 'الأعضاء', icon: '🎯', desc: 'أحداث دخول وخروج وحظر وعقوبات الأعضاء', defaultColor: '#5865F2',
@@ -5599,7 +5599,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                                 ]
                             },
                             roles: {
-                                title: 'الرتب', icon: '🎖️', desc: 'أحداث إنشاء وتعديل وحذف وإعطاء الرتب', defaultColor: '#9333ea',
+                                title: 'الرتب', icon: '🎖️', desc: 'أحداث إنشاء وتعديل وحذف وإعطاء الرتب', defaultColor: '#5865F2',
                                 items: [
                                     { id: 'role_create', title: 'إنشاء رتبة', desc: 'عند إنشاء رتبة جديدة', icon: '➕', isSpecial: false },
                                     { id: 'role_delete', title: 'حذف رتبة', desc: 'عند حذف رتبة', icon: '🗑️', isSpecial: false },
@@ -5610,7 +5610,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                                 ]
                             },
                             channels: {
-                                title: 'القنوات', icon: '📌', desc: 'أحداث إنشاء وتعديل وحذف القنوات والثريدات', defaultColor: '#3b82f6',
+                                title: 'القنوات', icon: '📌', desc: 'أحداث إنشاء وتعديل وحذف القنوات والثريدات', defaultColor: '#5865F2',
                                 items: [
                                     { id: 'channel_create', title: 'إنشاء قناة', desc: 'عند إنشاء قناة جديدة', icon: '➕', isSpecial: false },
                                     { id: 'channel_delete', title: 'حذف قناة', desc: 'عند حذف قناة', icon: '🗑️', isSpecial: false },
@@ -5682,57 +5682,56 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                             invites: {
                                 title: 'الدعوات', icon: '🔗', desc: 'أحداث إنشاء وحذف واستخدام روابط الدعوة', defaultColor: '#5865F2',
                                 items: [
-                                    { id: 'invite_create', title: 'إنشاء دعوة', desc: 'عند إنشاء رابط دعوة جديد', icon: '➕', isSpecial: false },
-                                    { id: 'invite_delete', title: 'حذف دعوة', desc: 'عند حذف أو انتهاء رابط دعوة', icon: '🗑️', isSpecial: false },
-                                    { id: 'invite_used', title: 'استخدام دعوة', desc: 'تسجيل العضو الذي استخدم الرابط ومن دعاه', icon: '👥', isSpecial: false }
+                                    { id: 'invite_create', title: 'إنشاء دعوة', desc: 'عند إنشاء رابط دعوة', icon: '➕', isSpecial: false },
+                                    { id: 'invite_delete', title: 'حذف دعوة', desc: 'عند حذف رابط دعوة', icon: '🗑️', isSpecial: false },
+                                    { id: 'invite_used', title: 'استخدام دعوة', desc: 'عند استخدام رابط دعوة', icon: '🖼️', isSpecial: false }
                                 ]
                             },
                             emojis: {
                                 title: 'الإيموجي والستيكرز', icon: '😃', desc: 'أحداث إضافة وتعديل وحذف الإيموجيات والستيكرات', defaultColor: '#5865F2',
                                 items: [
-                                    { id: 'emoji_create', title: 'إضافة إيموجي', desc: 'عند رفع إيموجي جديد للسيرفر', icon: '✨', isSpecial: false },
-                                    { id: 'emoji_delete', title: 'حذف إيموجي', desc: 'عند حذف إيموجي من السيرفر', icon: '🗑️', isSpecial: false },
-                                    { id: 'emoji_update', title: 'تعديل إيموجي', desc: 'عند تغيير اسم إيموجي', icon: '✏️', isSpecial: false },
-                                    { id: 'sticker_create', title: 'إضافة ستيكر', desc: 'عند رفع ستيكر جديد', icon: '🏷️', isSpecial: false },
-                                    { id: 'sticker_delete', title: 'حذف ستيكر', desc: 'عند حذف ستيكر', icon: '🗑️', isSpecial: false },
-                                    { id: 'sticker_update', title: 'تعديل ستيكر', desc: 'عند تعديل اسم أو وصف ستيكر', icon: '✏️', isSpecial: false }
+                                    { id: 'emoji_create', title: 'إضافة إيموجي', desc: 'عند إضافة إيموجي جديد', icon: '➕', isSpecial: true },
+                                    { id: 'emoji_delete', title: 'حذف إيموجي', desc: 'عند حذف إيموجي', icon: '🗑️', isSpecial: true },
+                                    { id: 'emoji_update', title: 'تعديل إيموجي', desc: 'عند تعديل إيموجي', icon: '✏️', isSpecial: true },
+                                    { id: 'sticker_create', title: 'إضافة ستيكر', desc: 'عند إضافة ستيكر جديد', icon: '🖼️', isSpecial: true },
+                                    { id: 'sticker_delete', title: 'حذف ستيكر', desc: 'عند حذف ستيكر', icon: '🗑️', isSpecial: true },
+                                    { id: 'sticker_update', title: 'تعديل ستيكر', desc: 'عند تعديل ستيكر', icon: '✏️', isSpecial: true }
                                 ]
                             },
                             events: {
                                 title: 'الأحداث', icon: '📅', desc: 'أحداث إنشاء ومجدولة وبدء الأحداث المباشرة بالسيرفر', defaultColor: '#5865F2',
                                 items: [
-                                    { id: 'event_create', title: 'إنشاء حدث', desc: 'عند جدولة حدث جديد', icon: '📅', isSpecial: false },
-                                    { id: 'event_delete', title: 'إلغاء حدث', desc: 'عند حذف أو إلغاء حدث مجدول', icon: '❌', isSpecial: false },
-                                    { id: 'event_update', title: 'تعديل حدث', desc: 'عند تعديل موعد أو تفاصيل حدث', icon: '✏️', isSpecial: false },
-                                    { id: 'event_start', title: 'بدء حدث', desc: 'عند بدء الفعالية المجدولة', icon: '▶️', isSpecial: false },
-                                    { id: 'event_end', title: 'انتهاء حدث', desc: 'عند اكتمال الحدث المجدول', icon: '⏹️', isSpecial: false },
-                                    { id: 'event_user_interested', title: 'تسجيل اهتمام بالحدث', desc: 'عند تسجيل عضو اهتمامه بحضور الفعالية', icon: '🙋', isSpecial: false },
-                                    { id: 'event_user_uninterested', title: 'إلغاء اهتمام بالحدث', desc: 'عند إلغاء العضو اهتمامه بالفعالية', icon: '🙅', isSpecial: false }
+                                    { id: 'event_create', title: 'إنشاء حدث', desc: 'عند إنشاء حدث مجدول', icon: '➕', isSpecial: true },
+                                    { id: 'event_delete', title: 'حذف حدث', desc: 'عند حذف حدث', icon: '🗑️', isSpecial: true },
+                                    { id: 'event_update', title: 'تعديل حدث', desc: 'عند تعديل حدث', icon: '✏️', isSpecial: true },
+                                    { id: 'event_start', title: 'بدء حدث', desc: 'عند بدء حدث', icon: '⬇️', isSpecial: true },
+                                    { id: 'event_end', title: 'انتهاء حدث', desc: 'عند انتهاء حدث', icon: '⬆️', isSpecial: true },
+                                    { id: 'event_user_interested', title: 'اشتراك في حدث', desc: 'عند اشتراك عضو في حدث', icon: '⬇️', isSpecial: true }
                                 ]
                             },
                             integrations: {
-                                title: 'التكاملات', icon: '🔌', desc: 'أحداث الويب هوك وتطبيقات البوتات والربط', defaultColor: '#5865F2',
+                                title: 'التكاملات', icon: '🔌', desc: 'أحداث التكاملات والويب هوك والبوتات', defaultColor: '#5865F2',
                                 items: [
-                                    { id: 'webhook_create', title: 'إنشاء Webhook', desc: 'عند إنشاء ويب هوك جديد بالقناة', icon: '🔗', isSpecial: false },
-                                    { id: 'webhook_delete', title: 'حذف Webhook', desc: 'عند حذف ويب هوك', icon: '🗑️', isSpecial: false },
-                                    { id: 'webhook_update', title: 'تعديل Webhook', desc: 'عند تعديل اسم أو روم الويب هوك', icon: '✏️', isSpecial: false },
-                                    { id: 'bot_add', title: 'إضافة بوت جديد', desc: 'عند دخول بوت جديد للسيرفر ومن قام بدعوته', icon: '🤖', isSpecial: false },
-                                    { id: 'bot_remove', title: 'طرد بوت', desc: 'عند طرد أو إزالة بوت من السيرفر', icon: '👢', isSpecial: false },
-                                    { id: 'integration_create', title: 'ربط تكامل جديد', desc: 'عند ربط Twitch أو YouTube أو خدمة خارجية', icon: '🔌', isSpecial: false },
-                                    { id: 'integration_delete', title: 'إلغاء تكامل', desc: 'عند إزالة تكامل خارجي', icon: '❌', isSpecial: false },
-                                    { id: 'integration_update', title: 'تعديل تكامل', desc: 'عند تعديل تكامل خارجي', icon: '✏️', isSpecial: false }
+                                    { id: 'integration_create', title: 'إضافة تكامل', desc: 'عند إضافة تكامل جديد', icon: '➕', isSpecial: false },
+                                    { id: 'integration_delete', title: 'حذف تكامل', desc: 'عند حذف تكامل', icon: '🗑️', isSpecial: false },
+                                    { id: 'integration_update', title: 'تعديل تكامل', desc: 'عند تعديل تكامل', icon: '✏️', isSpecial: false },
+                                    { id: 'webhook_create', title: 'إنشاء ويب هوك', desc: 'عند إنشاء ويب هوك', icon: 'ℹ️', isSpecial: false },
+                                    { id: 'webhook_delete', title: 'حذف ويب هوك', desc: 'عند حذف ويب هوك', icon: '🗑️', isSpecial: false },
+                                    { id: 'webhook_update', title: 'تعديل ويب هوك', desc: 'عند تعديل ويب هوك', icon: '✏️', isSpecial: false },
+                                    { id: 'bot_add', title: 'إضافة بوت', desc: 'عند إضافة بوت للسيرفر', icon: 'ℹ️', isSpecial: false },
+                                    { id: 'bot_remove', title: 'إزالة بوت', desc: 'عند إزالة بوت من السيرفر', icon: '🗑️', isSpecial: false }
                                 ]
                             },
                             automod: {
-                                title: 'الأوتو مود', icon: '🤖', desc: 'أحداث قواعد وفلاتر وحظر AutoMod', defaultColor: '#5865F2',
+                                title: 'الأوتو مود', icon: '🤖', desc: 'أحداث وقواعد الأوتو مود وحظر المحتوى والسبام', defaultColor: '#5865F2',
                                 items: [
-                                    { id: 'automod_rule_create', title: 'إنشاء قاعدة أوتو مود', desc: 'عند إنشاء فلتر حماية جديد', icon: '➕', isSpecial: false },
-                                    { id: 'automod_rule_delete', title: 'حذف قاعدة أوتو مود', desc: 'عند حذف فلتر حماية', icon: '🗑️', isSpecial: false },
-                                    { id: 'automod_rule_update', title: 'تعديل قاعدة أوتو مود', desc: 'عند تعديل كلمات أو شروط الفلتر', icon: '✏️', isSpecial: false },
-                                    { id: 'automod_block_msg', title: 'حظر رسالة تلقائياً', desc: 'عند منع رسالة لاحتوائها على سب أو رابط', icon: '🚫', isSpecial: false },
-                                    { id: 'automod_timeout_user', title: 'عزل تلقائي للمخالف', desc: 'عند إعطاء تايم أوت تلقائي لمكرر السبام', icon: '⏳', isSpecial: false },
-                                    { id: 'automod_alert_trigger', title: 'تنبيه انتهاك قاعدة', desc: 'عند رصد انتهاك لقواعد الرقابة', icon: '🚨', isSpecial: false },
-                                    { id: 'automod_quarantine', title: 'حظر مؤقت للغزو', desc: 'عند تفعيل الحجر الصحي لمكافحة الغزو', icon: '🛡️', isSpecial: false }
+                                    { id: 'automod_rule_create', title: 'إنشاء قاعدة', desc: 'عند إنشاء قاعدة أوتو مود', icon: '➕', isSpecial: false },
+                                    { id: 'automod_rule_delete', title: 'حذف قاعدة', desc: 'عند حذف قاعدة أوتو مود', icon: '🗑️', isSpecial: false },
+                                    { id: 'automod_rule_update', title: 'تعديل قاعدة', desc: 'عند تعديل قاعدة أوتو مود', icon: '✏️', isSpecial: false },
+                                    { id: 'automod_action_trigger', title: 'إجراء أوتو مود', desc: 'عند تنفيذ إجراء أوتو مود', icon: 'ℹ️', isSpecial: false },
+                                    { id: 'automod_content_block', title: 'حظر محتوى', desc: 'عند حظر محتوى تلقائياً', icon: '🗑️', isSpecial: false },
+                                    { id: 'automod_timeout', title: 'عزل تلقائي', desc: 'عند عزل عضو تلقائياً', icon: '🔒', isSpecial: false },
+                                    { id: 'automod_spam_detect', title: 'رقابة السبام', desc: 'عند اكتشاف سبام أو رسائل مكررة أو نص متكرر', icon: 'ℹ️', isSpecial: false }
                                 ]
                             },
                             stage: {
