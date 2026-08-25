@@ -772,6 +772,9 @@ module.exports = {
       // ==========================================
       // 10. نظام التقديمات (Applications System Handlers)
       // ==========================================
+      // ==========================================
+      // 10. نظام التقديمات والتوظيف (Applications System Handlers)
+      // ==========================================
       // فتح نموذج التقديم عبر اختيار من القائمة أو ضغطة زر
       if ((interaction.isStringSelectMenu() && interaction.customId === 'select_apply_form') || (interaction.isButton() && interaction.customId.startsWith('btn_apply_'))) {
         const appId = interaction.isStringSelectMenu() ? interaction.values[0] : interaction.customId.replace('btn_apply_', '');
@@ -785,7 +788,7 @@ module.exports = {
         try {
           questions = typeof app.questions === 'string' ? JSON.parse(app.questions) : app.questions;
         } catch (e) {
-          questions = ['ما هو سبب تقديمك؟', 'ما هي خبراتك السابقة؟'];
+          questions = [{ text: 'ما هو سبب تقديمك؟', type: 'paragraph' }];
         }
 
         const modal = new ModalBuilder()
@@ -793,10 +796,13 @@ module.exports = {
           .setTitle(`📝 ${app.title.slice(0, 40)}`);
 
         questions.slice(0, 5).forEach((q, idx) => {
+          const qText = typeof q === 'object' ? (q.text || `السؤال ${idx + 1}`) : String(q);
+          const isShort = typeof q === 'object' && q.type === 'short';
+
           const input = new TextInputBuilder()
             .setCustomId(`q_${idx}`)
-            .setLabel(q.slice(0, 45))
-            .setStyle(TextInputStyle.Paragraph)
+            .setLabel(qText.slice(0, 45))
+            .setStyle(isShort ? TextInputStyle.Short : TextInputStyle.Paragraph)
             .setRequired(true)
             .setMaxLength(1000);
           modal.addComponents(new ActionRowBuilder().addComponents(input));
@@ -824,8 +830,9 @@ module.exports = {
 
         const answers = [];
         questions.slice(0, 5).forEach((q, idx) => {
+          const qText = typeof q === 'object' ? (q.text || `السؤال ${idx + 1}`) : String(q);
           const ans = interaction.fields.getTextInputValue(`q_${idx}`) || 'لا توجد إجابة';
-          answers.push({ question: q, answer: ans });
+          answers.push({ question: qText, answer: ans });
         });
 
         const submission = db.createSubmission(interaction.guild.id, app.id, interaction.user.id, answers);
@@ -836,7 +843,7 @@ module.exports = {
           const logChan = interaction.guild.channels.cache.get(logChannelId);
           if (logChan) {
             const reviewEmbed = new EmbedBuilder()
-              .setColor(config.colors.primary)
+              .setColor('#9333ea')
               .setTitle(`📋 طلب تقديم جديد: ${app.title} (#${submission.id})`)
               .setDescription(`👤 **مقدم الطلب:** ${interaction.user} (\`${interaction.user.tag}\`)\n🆔 **الآيدي:** \`${interaction.user.id}\`\n📅 **تاريخ التقديم:** <t:${submission.submitted_at}:F>`)
               .setThumbnail(interaction.user.displayAvatarURL({ dynamic: true }))
@@ -853,12 +860,16 @@ module.exports = {
             const actionRow = new ActionRowBuilder().addComponents(
               new ButtonBuilder()
                 .setCustomId(`btn_app_accept_${submission.id}`)
-                .setLabel('✅ قبول الطلب')
+                .setLabel('قبول ✅')
                 .setStyle(ButtonStyle.Success),
               new ButtonBuilder()
                 .setCustomId(`btn_app_reject_${submission.id}`)
-                .setLabel('❌ رفض الطلب')
-                .setStyle(ButtonStyle.Danger)
+                .setLabel('رفض ❌')
+                .setStyle(ButtonStyle.Danger),
+              new ButtonBuilder()
+                .setCustomId(`btn_app_review_${submission.id}`)
+                .setLabel('مراجعة 🔍')
+                .setStyle(ButtonStyle.Secondary)
             );
 
             await logChan.send({ embeds: [reviewEmbed], components: [actionRow] }).catch(() => { });
@@ -870,21 +881,52 @@ module.exports = {
         });
       }
 
-      // قبول طلب التقديم (Accept Application)
-      if (interaction.isButton() && interaction.customId.startsWith('btn_app_accept_')) {
-        if (!interaction.member.permissions.has(PermissionFlagsBits.ManageGuild) && !interaction.member.permissions.has(PermissionFlagsBits.ManageRoles)) {
-          return interaction.reply({ content: '❌ ليس لديك صلاحية لمراجعة وقبول التقديمات.', ephemeral: true });
+      // مراجعة طلب التقديم (Under Review)
+      if (interaction.isButton() && interaction.customId.startsWith('btn_app_review_')) {
+        const subId = interaction.customId.replace('btn_app_review_', '');
+        const submission = db.getSubmission(subId);
+
+        if (!submission) {
+          return interaction.reply({ content: '❌ لم يتم العثور على بيانات هذا الطلب.', ephemeral: true });
         }
 
-        await interaction.deferUpdate().catch(() => { });
+        const app = db.getApplication(submission.app_id);
+        const reviewerRole = app?.reviewer_role;
+        const hasPerm = interaction.member.permissions.has(PermissionFlagsBits.ManageGuild) || 
+                        (reviewerRole && interaction.member.roles.cache.has(reviewerRole));
+
+        if (!hasPerm) {
+          return interaction.reply({ content: '❌ ليس لديك صلاحية لمراجعة هذا الطلب.', ephemeral: true });
+        }
+
+        const oldEmbed = interaction.message.embeds[0];
+        const updatedEmbed = EmbedBuilder.from(oldEmbed)
+          .setColor('#eab308')
+          .setTitle(oldEmbed.title.replace(/\[.*\]/, '').trim() + ' [قيد المراجعة 🔍]')
+          .addFields({ name: '🔍 قيد المراجعة بواسطة', value: `${interaction.user} (<t:${Math.floor(Date.now() / 1000)}:R>)`, inline: false });
+
+        return interaction.update({ embeds: [updatedEmbed] });
+      }
+
+      // قبول طلب التقديم (Accept Application)
+      if (interaction.isButton() && interaction.customId.startsWith('btn_app_accept_')) {
         const subId = interaction.customId.replace('btn_app_accept_', '');
         const submission = db.getSubmission(subId);
 
         if (!submission || submission.status !== 'pending') {
-          return interaction.followUp({ content: '⚠️ هذا الطلب تمت مراجعته مسبقاً!', ephemeral: true });
+          return interaction.reply({ content: '⚠️ هذا الطلب تمت مراجعته مسبقاً!', ephemeral: true });
         }
 
         const app = db.getApplication(submission.app_id);
+        const reviewerRole = app?.reviewer_role;
+        const hasPerm = interaction.member.permissions.has(PermissionFlagsBits.ManageGuild) || 
+                        (reviewerRole && interaction.member.roles.cache.has(reviewerRole));
+
+        if (!hasPerm) {
+          return interaction.reply({ content: '❌ ليس لديك صلاحية لمراجعة وقبول التقديمات.', ephemeral: true });
+        }
+
+        await interaction.deferUpdate().catch(() => { });
         db.updateSubmissionStatus(subId, 'accepted', interaction.user.id);
         db.addApplicationPoint(interaction.guild.id, interaction.user.id);
 
@@ -902,10 +944,10 @@ module.exports = {
         if (applicantUser) {
           applicantUser.send({
             embeds: [new EmbedBuilder()
-              .setColor(config.colors.success)
+              .setColor('#10b981')
               .setTitle('🎉 تهانينا! تم قبول طلب تقديمك')
-              .setDescription(`تمت الموافقة على طلب تقديمك على **${app ? app.title : 'الرتبة'}** في سيرفر **${interaction.guild.name}**.\nنتمنى لك كل التوفيق! 🌟`)
-              .setFooter({ text: interaction.guild.name, iconURL: interaction.guild.iconURL({ dynamic: true }) })
+              .setDescription(`تمت الموافقة على طلب تقديمك على **${app ? app.title : 'الرتبة'}** في سيرفر **${interaction.guild.name}**.\nنتمنى لك كل التوفيق والتميز! 🌟`)
+              .setFooter({ text: interaction.guild.name, iconURL: interaction.guild.iconURL({ dynamic: true }) || undefined })
               .setTimestamp()
             ]
           }).catch(() => { });
@@ -913,52 +955,101 @@ module.exports = {
 
         const oldEmbed = interaction.message.embeds[0];
         const updatedEmbed = EmbedBuilder.from(oldEmbed)
-          .setColor(config.colors.success)
-          .setTitle(oldEmbed.title + ' [مقبول ✅]')
+          .setColor('#10b981')
+          .setTitle(oldEmbed.title.replace(/\[.*\]/, '').trim() + ' [مقبول ✅]')
           .addFields({ name: '✨ تم القبول بواسطة', value: `${interaction.user} (<t:${Math.floor(Date.now() / 1000)}:R>)`, inline: false });
 
         return interaction.editReply({ embeds: [updatedEmbed], components: [] });
       }
 
-      // رفض طلب التقديم (Reject Application)
+      // فتح نافذة سبب الرفض (Reject Application Modal)
       if (interaction.isButton() && interaction.customId.startsWith('btn_app_reject_')) {
-        if (!interaction.member.permissions.has(PermissionFlagsBits.ManageGuild) && !interaction.member.permissions.has(PermissionFlagsBits.ManageRoles)) {
-          return interaction.reply({ content: '❌ ليس لديك صلاحية لمراجعة ورفض التقديمات.', ephemeral: true });
-        }
-
-        await interaction.deferUpdate().catch(() => { });
         const subId = interaction.customId.replace('btn_app_reject_', '');
         const submission = db.getSubmission(subId);
 
         if (!submission || submission.status !== 'pending') {
-          return interaction.followUp({ content: '⚠️ هذا الطلب تمت مراجعته مسبقاً!', ephemeral: true });
+          return interaction.reply({ content: '⚠️ هذا الطلب تمت مراجعته مسبقاً!', ephemeral: true });
         }
 
         const app = db.getApplication(submission.app_id);
+        const reviewerRole = app?.reviewer_role;
+        const hasPerm = interaction.member.permissions.has(PermissionFlagsBits.ManageGuild) || 
+                        (reviewerRole && interaction.member.roles.cache.has(reviewerRole));
+
+        if (!hasPerm) {
+          return interaction.reply({ content: '❌ ليس لديك صلاحية لمراجعة ورفض التقديمات.', ephemeral: true });
+        }
+
+        const modal = new ModalBuilder()
+          .setCustomId(`modal_reject_reason_${subId}`)
+          .setTitle('سبب رفض الطلب 📝');
+
+        const reasonInput = new TextInputBuilder()
+          .setCustomId('reject_reason')
+          .setLabel('اكتب سبب الرفض لإرساله للعضو')
+          .setStyle(TextInputStyle.Paragraph)
+          .setPlaceholder('مثال: عدم استيفاء الشروط المطلوبة حالياً...')
+          .setRequired(false)
+          .setMaxLength(500);
+
+        modal.addComponents(new ActionRowBuilder().addComponents(reasonInput));
+        return interaction.showModal(modal);
+      }
+
+      // معالجة سبب الرفض وإرساله للعضو
+      if (interaction.isModalSubmit() && interaction.customId.startsWith('modal_reject_reason_')) {
+        await interaction.deferReply({ ephemeral: true }).catch(() => { });
+        const subId = interaction.customId.replace('modal_reject_reason_', '');
+        const submission = db.getSubmission(subId);
+
+        if (!submission || submission.status !== 'pending') {
+          return interaction.editReply({ content: '⚠️ هذا الطلب تمت مراجعته مسبقاً!' });
+        }
+
+        const reason = interaction.fields.getTextInputValue('reject_reason') || 'لم يتم تحديد سبب إضافي';
+        const app = db.getApplication(submission.app_id);
+
         db.updateSubmissionStatus(subId, 'rejected', interaction.user.id);
         db.addApplicationPoint(interaction.guild.id, interaction.user.id);
 
-        // إشعار العضو بالخاص
+        // إشعار العضو بالخاص مع السبب
         const applicantUser = client.users.cache.get(submission.user_id) || await client.users.fetch(submission.user_id).catch(() => null);
         if (applicantUser) {
           applicantUser.send({
             embeds: [new EmbedBuilder()
-              .setColor(config.colors.danger)
-              .setTitle('❌ نعتذر منك! لم يتم قبول طلب تقديمك')
-              .setDescription(`نأسف لإبلاغك بأنه لم يتم قبول طلب تقديمك على **${app ? app.title : 'الرتبة'}** في سيرفر **${interaction.guild.name}** حالياً.\nشكراً جزيلاً لاهتمامك ووقتك!`)
-              .setFooter({ text: interaction.guild.name, iconURL: interaction.guild.iconURL({ dynamic: true }) })
+              .setColor('#ef4444')
+              .setTitle('❌ نعتذر منك! تم رفض طلب التقديم')
+              .setDescription(`نأسف لإبلاغك بأنه لم يتم قبول طلب تقديمك على **${app ? app.title : 'الرتبة'}** في سيرفر **${interaction.guild.name}**.\n\n📌 **سبب الرفض:**\n\`\`\`${reason}\`\`\`\nشكراً جزيلاً لاهتمامك ووقتك!`)
+              .setFooter({ text: interaction.guild.name, iconURL: interaction.guild.iconURL({ dynamic: true }) || undefined })
               .setTimestamp()
             ]
           }).catch(() => { });
         }
 
-        const oldEmbed = interaction.message.embeds[0];
-        const updatedEmbed = EmbedBuilder.from(oldEmbed)
-          .setColor(config.colors.danger)
-          .setTitle(oldEmbed.title + ' [مرفوض ❌]')
-          .addFields({ name: '🚫 تم الرفض بواسطة', value: `${interaction.user} (<t:${Math.floor(Date.now() / 1000)}:R>)`, inline: false });
+        // تحديث رسالة المشرفين
+        const logChannelId = app?.log_channel || db.getGuildSettings(interaction.guild.id)?.log_channel;
+        if (logChannelId) {
+          const logChan = interaction.guild.channels.cache.get(logChannelId);
+          if (logChan) {
+            try {
+              const msgs = await logChan.messages.fetch({ limit: 30 });
+              const targetMsg = msgs.find(m => m.embeds[0] && m.embeds[0].title && m.embeds[0].title.includes(`(#${submission.id})`));
+              if (targetMsg) {
+                const oldEmbed = targetMsg.embeds[0];
+                const updatedEmbed = EmbedBuilder.from(oldEmbed)
+                  .setColor('#ef4444')
+                  .setTitle(oldEmbed.title.replace(/\[.*\]/, '').trim() + ' [مرفوض ❌]')
+                  .addFields(
+                    { name: '🚫 تم الرفض بواسطة', value: `${interaction.user} (<t:${Math.floor(Date.now() / 1000)}:R>)`, inline: true },
+                    { name: '📝 سبب الرفض', value: `\`\`\`${reason}\`\`\``, inline: false }
+                  );
+                await targetMsg.edit({ embeds: [updatedEmbed], components: [] });
+              }
+            } catch(e) {}
+          }
+        }
 
-        return interaction.editReply({ embeds: [updatedEmbed], components: [] });
+        return interaction.editReply({ content: `✅ تم رفض الطلب بنجاح وإرسال السبب للعضو في الخاص.` });
       }
     } catch (err) {
       logger.error('خطأ في interactionCreate:', err);

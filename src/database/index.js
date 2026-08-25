@@ -512,6 +512,11 @@ try {
   `);
 } catch(e) {}
 
+// تحديث جدول التقديمات (Applications reviewer_role migration)
+try {
+  db.exec(`ALTER TABLE applications ADD COLUMN reviewer_role TEXT;`);
+} catch(e) {}
+
 console.log('[DB] ✅ SQLite database initialized successfully');
 
 
@@ -920,13 +925,23 @@ function deleteTempVoice(channelId) {
 // ==========================================
 // Applications (نظام التقديمات)
 // ==========================================
-function createApplication(guildId, title, description, questions, logChannel, acceptedRole) {
+function createApplication(guildId, title, description, questions, logChannel, acceptedRole, reviewerRole = null) {
   const qStr = typeof questions === 'string' ? questions : JSON.stringify(questions);
   const result = db.prepare(`
-    INSERT INTO applications (guild_id, title, description, questions, log_channel, accepted_role)
-    VALUES (?, ?, ?, ?, ?, ?)
-  `).run(guildId, title, description, qStr, logChannel, acceptedRole);
+    INSERT INTO applications (guild_id, title, description, questions, log_channel, accepted_role, reviewer_role)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
+  `).run(guildId, title, description, qStr, logChannel, acceptedRole, reviewerRole);
   return db.prepare('SELECT * FROM applications WHERE id = ?').get(result.lastInsertRowid);
+}
+
+function updateApplication(id, title, description, questions, logChannel, acceptedRole, reviewerRole = null, status = 'open') {
+  const qStr = typeof questions === 'string' ? questions : JSON.stringify(questions);
+  db.prepare(`
+    UPDATE applications
+    SET title = ?, description = ?, questions = ?, log_channel = ?, accepted_role = ?, reviewer_role = ?, status = ?
+    WHERE id = ?
+  `).run(title, description, qStr, logChannel, acceptedRole, reviewerRole, status, id);
+  return db.prepare('SELECT * FROM applications WHERE id = ?').get(id);
 }
 
 function getApplications(guildId) {
@@ -1486,6 +1501,7 @@ module.exports = {
   addStar,
   getStars,
   createApplication,
+  updateApplication,
   getApplications,
   getApplication,
   deleteApplication,

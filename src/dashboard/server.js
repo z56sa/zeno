@@ -6068,6 +6068,349 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
     </script>
 
 </div>`;
+            } else if (section === 'applications') {
+                const appsList = database.getApplications(guildId) || [];
+                const pendingSubmissions = database.getPendingSubmissions(guildId) || [];
+
+                const appsCardsHtml = appsList.length === 0 ? `
+                    <div class="py-12 text-center space-y-3 bg-[#12141f] border border-white/5 rounded-3xl">
+                        <div class="w-16 h-16 rounded-2xl bg-purple-600/10 text-purple-400 flex items-center justify-center text-3xl mx-auto border border-purple-500/20">📝</div>
+                        <h4 class="text-white font-bold text-sm">لا توجد نماذج تقديم حالياً</h4>
+                        <p class="text-gray-400 text-xs">اضغط على زر "إنشاء نموذج جديد" بالأعلى لإنشاء أول استمارة تقديم</p>
+                    </div>
+                ` : appsList.map(a => {
+                    let questions = [];
+                    try { questions = typeof a.questions === 'string' ? JSON.parse(a.questions) : a.questions; } catch(e) { questions = []; }
+                    const logChanName = botGuild?.channels?.cache?.get(a.log_channel)?.name || 'غير محددة';
+                    const roleName = botGuild?.roles?.cache?.get(a.accepted_role)?.name || 'بدون رتبة تلقائية';
+                    const reviewerRoleName = botGuild?.roles?.cache?.get(a.reviewer_role)?.name || 'الإدارة (Manage Server)';
+
+                    return `
+                    <div class="bg-[#12141f] border border-white/5 hover:border-purple-500/30 rounded-3xl p-6 transition space-y-4 shadow-xl">
+                        <div class="flex items-center justify-between flex-wrap gap-3 pb-3 border-b border-white/5">
+                            <div class="flex items-center gap-2">
+                                <button type="button" onclick="sendAppPanel('${a.id}')" class="px-3.5 py-1.5 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow">
+                                    <span>🚀 إرسال البانل في قناة</span>
+                                </button>
+                                <button type="button" onclick="editAppForm('${a.id}')" class="px-3 py-1.5 bg-[#1a1d2d] hover:bg-[#23273c] text-purple-300 border border-purple-500/30 rounded-xl text-xs font-bold transition">
+                                    ✏️ تعديل
+                                </button>
+                                <button type="button" onclick="deleteAppForm('${a.id}')" class="px-3 py-1.5 bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 border border-rose-800/40 rounded-xl text-xs font-bold transition">
+                                    🗑️ حذف
+                                </button>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <div class="text-right">
+                                    <h4 class="font-black text-white text-base">${a.title}</h4>
+                                    <p class="text-gray-400 text-xs mt-0.5">${a.description || 'بدون وصف'}</p>
+                                </div>
+                                <div class="w-10 h-10 rounded-2xl bg-purple-600/20 text-purple-400 flex items-center justify-center text-xl border border-purple-500/30">📝</div>
+                            </div>
+                        </div>
+
+                        <!-- Meta Info Grid -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-right">
+                            <div class="bg-[#0b0d14] p-3 rounded-2xl border border-white/5">
+                                <span class="text-[10px] text-gray-500 block font-bold">قناة استقبال الطلبات</span>
+                                <span class="text-xs font-black text-purple-300">#${logChanName}</span>
+                            </div>
+                            <div class="bg-[#0b0d14] p-3 rounded-2xl border border-white/5">
+                                <span class="text-[10px] text-gray-500 block font-bold">رتبة المقبولين التلقائية</span>
+                                <span class="text-xs font-black text-emerald-400">@${roleName}</span>
+                            </div>
+                            <div class="bg-[#0b0d14] p-3 rounded-2xl border border-white/5">
+                                <span class="text-[10px] text-gray-500 block font-bold">رتبة مسؤولي المراجعة</span>
+                                <span class="text-xs font-black text-amber-400">@${reviewerRoleName}</span>
+                            </div>
+                        </div>
+
+                        <!-- Questions List preview -->
+                        <div class="space-y-1.5 pt-1">
+                            <span class="text-[11px] font-bold text-gray-400 block text-right">الأسئلة المعينة (${questions.length}/5):</span>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                ${questions.map((q, idx) => {
+                                    const qText = typeof q === 'object' ? q.text : q;
+                                    const qType = typeof q === 'object' && q.type === 'short' ? 'إجابة قصيرة' : 'فقرة';
+                                    return `
+                                    <div class="bg-[#0b0d14]/70 p-2.5 rounded-xl border border-white/5 text-right flex items-center justify-between">
+                                        <span class="text-[10px] bg-purple-950/60 text-purple-300 px-2 py-0.5 rounded-lg border border-purple-800/30">${qType}</span>
+                                        <span class="text-xs text-gray-300 font-bold truncate max-w-[200px]">${idx + 1}. ${qText}</span>
+                                    </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                        </div>
+                    </div>
+                    `;
+                }).join('');
+
+                formFieldsHtml = `
+                    <div class="space-y-6 text-right" dir="rtl">
+                        <!-- Top Header Banner -->
+                        <div class="bg-gradient-to-r from-[#1a132e] via-[#12141f] to-[#1a132e] border border-purple-500/20 p-6 rounded-3xl flex items-center justify-between shadow-2xl flex-wrap gap-4">
+                            <div class="flex items-center gap-3">
+                                <button type="button" onclick="openCreateAppModal()" class="px-5 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs rounded-xl shadow-lg transition flex items-center gap-2">
+                                    <span>+ إنشاء نموذج جديد</span>
+                                </button>
+                            </div>
+                            <div class="text-right">
+                                <h3 class="font-black text-white text-xl flex items-center gap-2 justify-end"><span>نظام التقديمات والتوظيف</span><span>📝</span></h3>
+                                <p class="text-gray-400 text-xs mt-0.5">أنشئ نماذج تقديم مخصصة، حدد الأسئلة، واستقبل الطلبات في قناة مخصصة مع إمكانية القبول والرفض التفاعلية</p>
+                            </div>
+                        </div>
+
+                        <!-- Quick Stats -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            <div class="bg-[#12141f] border border-white/5 p-4 rounded-2xl text-center">
+                                <div class="text-2xl font-black text-white">${appsList.length}</div>
+                                <div class="text-xs text-gray-400 font-bold mt-1">إجمالي النماذج</div>
+                            </div>
+                            <div class="bg-[#12141f] border border-white/5 p-4 rounded-2xl text-center">
+                                <div class="text-2xl font-black text-purple-400">${pendingSubmissions.length}</div>
+                                <div class="text-xs text-gray-400 font-bold mt-1">طلبات بانتظار المراجعة</div>
+                            </div>
+                            <div class="bg-[#12141f] border border-white/5 p-4 rounded-2xl text-center">
+                                <div class="text-2xl font-black text-emerald-400">${appsList.filter(a => a.status === 'open').length}</div>
+                                <div class="text-xs text-gray-400 font-bold mt-1">النماذج المفتوحة</div>
+                            </div>
+                        </div>
+
+                        <!-- Application Forms List -->
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs text-purple-400 font-bold">${appsList.length} نموذج نشط</span>
+                                <h4 class="text-sm font-black text-white">📋 نماذج التقديم الحالية</h4>
+                            </div>
+                            ${appsCardsHtml}
+                        </div>
+
+                        <!-- Create/Edit Form Modal Overlay -->
+                        <div id="appModalOverlay" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+                            <div class="bg-[#12141f] border border-purple-500/30 rounded-3xl w-full max-w-2xl p-6 space-y-5 shadow-2xl max-h-[90vh] overflow-y-auto text-right" dir="rtl">
+                                <div class="flex items-center justify-between pb-3 border-b border-white/5">
+                                    <button type="button" onclick="closeAppModal()" class="w-8 h-8 rounded-xl bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white flex items-center justify-center text-sm font-bold">✕</button>
+                                    <h4 id="appModalTitle" class="text-base font-black text-white">إنشاء نموذج تقديم جديد 📝</h4>
+                                </div>
+
+                                <input type="hidden" id="modalAppId" value="">
+
+                                <div class="space-y-3">
+                                    <div>
+                                        <label class="block text-xs font-bold text-gray-300 mb-1">اسم النموذج (العنوان) <span class="text-purple-400">*</span></label>
+                                        <input type="text" id="appTitleInput" placeholder="مثال: تقديم الإدارة / تقديم الدعم الفني" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right font-bold">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold text-gray-300 mb-1">وصف النموذج (اختياري)</label>
+                                        <input type="text" id="appDescInput" placeholder="شرح مختصر عن المنصب أو الشروط المطلوبة..." class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right">
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                    <div>
+                                        <label class="block text-xs font-bold text-gray-300 mb-1">قناة استقبال الطلبات <span class="text-purple-400">*</span></label>
+                                        ${renderChannelSelect('appLogChannel', '')}
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold text-gray-300 mb-1">رتبة القبول التلقائي</label>
+                                        ${renderRoleSelect('appAcceptedRole', '')}
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold text-gray-300 mb-1">رتبة مسؤولي المراجعة</label>
+                                        ${renderRoleSelect('appReviewerRole', '')}
+                                    </div>
+                                </div>
+
+                                <!-- Questions Builder (Up to 5) -->
+                                <div class="space-y-3 pt-2">
+                                    <div class="flex items-center justify-between">
+                                        <button type="button" onclick="addQuestionField()" id="btnAddQ" class="px-3 py-1.5 bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/30 text-purple-300 rounded-xl text-xs font-bold transition">
+                                            + إضافة سؤال (حتى 5)
+                                        </button>
+                                        <span class="text-xs font-bold text-white">أسئلة نموذج التقديم (Discord Modal)</span>
+                                    </div>
+                                    <div id="modalQuestionsContainer" class="space-y-2.5"></div>
+                                </div>
+
+                                <div class="flex items-center justify-end gap-3 pt-3 border-t border-white/5">
+                                    <button type="button" onclick="closeAppModal()" class="px-4 py-2 bg-white/5 hover:bg-white/10 text-gray-400 rounded-xl text-xs font-bold transition">إلغاء</button>
+                                    <button type="button" onclick="saveAppForm()" id="btnSaveApp" class="px-6 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold transition shadow-lg">حفظ النموذج 💾</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <script>
+                    let currentQuestions = [];
+                    const allAppsData = ${JSON.stringify(appsList)};
+
+                    function openCreateAppModal() {
+                        document.getElementById('modalAppId').value = '';
+                        document.getElementById('appModalTitle').textContent = 'إنشاء نموذج تقديم جديد 📝';
+                        document.getElementById('appTitleInput').value = '';
+                        document.getElementById('appDescInput').value = '';
+                        document.getElementById('appLogChannel').value = '';
+                        document.getElementById('appAcceptedRole').value = '';
+                        document.getElementById('appReviewerRole').value = '';
+                        currentQuestions = [
+                            { text: 'ما هو عمرك وتواجدك اليومي؟', type: 'short' },
+                            { text: 'ما هي خبراتك السابقة في الإدارة أو المجال؟', type: 'paragraph' },
+                            { text: 'لماذا ترغب بالانضمام إلى طاقم العمل؟', type: 'paragraph' }
+                        ];
+                        renderModalQuestions();
+                        document.getElementById('appModalOverlay').classList.remove('hidden');
+                    }
+
+                    function editAppForm(id) {
+                        const app = allAppsData.find(a => String(a.id) === String(id));
+                        if (!app) return alert('النموذج غير موجود');
+
+                        document.getElementById('modalAppId').value = app.id;
+                        document.getElementById('appModalTitle').textContent = 'تعديل نموذج: ' + app.title;
+                        document.getElementById('appTitleInput').value = app.title;
+                        document.getElementById('appDescInput').value = app.description || '';
+                        document.getElementById('appLogChannel').value = app.log_channel || '';
+                        document.getElementById('appAcceptedRole').value = app.accepted_role || '';
+                        document.getElementById('appReviewerRole').value = app.reviewer_role || '';
+
+                        try {
+                            const parsed = typeof app.questions === 'string' ? JSON.parse(app.questions) : app.questions;
+                            currentQuestions = parsed.map(q => typeof q === 'object' ? q : { text: String(q), type: 'paragraph' });
+                        } catch(e) {
+                            currentQuestions = [{ text: 'السؤال الأول', type: 'paragraph' }];
+                        }
+
+                        renderModalQuestions();
+                        document.getElementById('appModalOverlay').classList.remove('hidden');
+                    }
+
+                    function closeAppModal() {
+                        document.getElementById('appModalOverlay').classList.add('hidden');
+                    }
+
+                    function addQuestionField() {
+                        if (currentQuestions.length >= 5) return alert('أقصى حد لأسئلة النافذة في ديسكورد هو 5 أسئلة');
+                        currentQuestions.push({ text: '', type: 'paragraph' });
+                        renderModalQuestions();
+                    }
+
+                    function removeQuestionField(idx) {
+                        currentQuestions.splice(idx, 1);
+                        renderModalQuestions();
+                    }
+
+                    function updateQuestionText(idx, val) {
+                        if (currentQuestions[idx]) currentQuestions[idx].text = val;
+                    }
+
+                    function updateQuestionType(idx, val) {
+                        if (currentQuestions[idx]) currentQuestions[idx].type = val;
+                    }
+
+                    function renderModalQuestions() {
+                        const container = document.getElementById('modalQuestionsContainer');
+                        if (currentQuestions.length === 0) {
+                            container.innerHTML = '<p class="text-xs text-gray-500 text-center py-2">لا توجد أسئلة مضافة. اضغط على "+ إضافة سؤال"</p>';
+                            return;
+                        }
+
+                        let html = '';
+                        for (let i = 0; i < currentQuestions.length; i++) {
+                            const q = currentQuestions[i];
+                            html += '<div class="bg-[#0b0d14] border border-white/5 p-3 rounded-2xl space-y-2">' +
+                                '<div class="flex items-center justify-between">' +
+                                '<div class="flex items-center gap-2">' +
+                                '<select onchange="updateQuestionType(' + i + ', this.value)" class="bg-[#12141f] border border-white/5 text-purple-300 text-[11px] font-bold rounded-xl px-2.5 py-1 outline-none">' +
+                                '<option value="paragraph" ' + (q.type === 'paragraph' ? 'selected' : '') + '>فقرة طويلة (Paragraph)</option>' +
+                                '<option value="short" ' + (q.type === 'short' ? 'selected' : '') + '>إجابة قصيرة (Short Answer)</option>' +
+                                '</select>' +
+                                '<button type="button" onclick="removeQuestionField(' + i + ')" class="text-rose-400 hover:text-rose-300 text-xs px-2 py-0.5 rounded bg-rose-950/40">✕ حذف</button>' +
+                                '</div>' +
+                                '<span class="text-xs font-bold text-gray-300">السؤال #' + (i + 1) + '</span>' +
+                                '</div>' +
+                                '<input type="text" placeholder="اكتب نص السؤال هنا..." value="' + (q.text || '') + '" oninput="updateQuestionText(' + i + ', this.value)" class="w-full bg-[#12141f] border border-white/5 focus:border-purple-600 rounded-xl px-3 py-2 text-xs text-white text-right outline-none">' +
+                                '</div>';
+                        }
+                        container.innerHTML = html;
+                    }
+
+                    async function saveAppForm() {
+                        const id = document.getElementById('modalAppId').value;
+                        const title = document.getElementById('appTitleInput').value.trim();
+                        const desc = document.getElementById('appDescInput').value.trim();
+                        const logChannel = document.getElementById('appLogChannel').value;
+                        const acceptedRole = document.getElementById('appAcceptedRole').value;
+                        const reviewerRole = document.getElementById('appReviewerRole').value;
+
+                        if (!title) return alert('يرجى إدخال عنوان النموذج');
+                        if (!logChannel) return alert('يرجى اختيار قناة استقبال الطلبات');
+                        const validQuestions = currentQuestions.filter(q => q.text.trim());
+                        if (validQuestions.length === 0) return alert('يرجى كتابة سؤال واحد على الأقل للنموذج');
+
+                        const btn = document.getElementById('btnSaveApp');
+                        btn.disabled = true; btn.textContent = 'جارٍ الحفظ...';
+
+                        try {
+                            const endpoint = id ? ('/api/guild/${guildId}/applications/' + id + '/update') : '/api/guild/${guildId}/applications/create';
+                            const r = await fetch(endpoint, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    title, description: desc,
+                                    log_channel: logChannel,
+                                    accepted_role: acceptedRole,
+                                    reviewer_role: reviewerRole,
+                                    questions: validQuestions
+                                })
+                            });
+                            const d = await r.json();
+                            if (d.success) {
+                                alert('✅ تم حفظ نموذج التقديم بنجاح!');
+                                location.reload();
+                            } else {
+                                alert('❌ خطأ: ' + (d.error || 'فشل الحفظ'));
+                            }
+                        } catch(e) {
+                            alert('حدث خطأ في الاتصال بالخادم');
+                        } finally {
+                            btn.disabled = false; btn.textContent = 'حفظ النموذج 💾';
+                        }
+                    }
+
+                    async function deleteAppForm(id) {
+                        if (!confirm('هل أنت متأكد من حذف نموذج التقديم هذا؟ سيتم حذف جميع الأسئلة المرتبطة به.')) return;
+                        try {
+                            const r = await fetch('/api/guild/${guildId}/applications/' + id + '/delete', { method: 'POST' });
+                            const d = await r.json();
+                            if (d.success) {
+                                alert('✅ تم حذف النموذج بنجاح');
+                                location.reload();
+                            } else {
+                                alert('❌ خطأ: ' + (d.error || 'فشل الحذف'));
+                            }
+                        } catch(e) {
+                            alert('حدث خطأ في الاتصال');
+                        }
+                    }
+
+                    async function sendAppPanel(id) {
+                        const channelId = prompt('أدخل آيدي أو اسم القناة لإرسال رسالة التقديم فيها (اتركه فارغاً للإرسال في قناة الاستقبال):', '');
+                        if (channelId === null) return;
+
+                        try {
+                            const r = await fetch('/api/guild/${guildId}/applications/' + id + '/send-panel', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ channelId })
+                            });
+                            const d = await r.json();
+                            if (d.success) alert('✅ تم إرسال رسالة وزر التقديم في القناة بنجاح!');
+                            else alert('❌ ' + (d.error || 'فشل الإرسال'));
+                        } catch(e) {
+                            alert('خطأ في الاتصال');
+                        }
+                    }
+                    </script>
+                `;
             } else if (section === 'embed') {
                 formFieldsHtml = `
                     <div class="space-y-6 text-right" dir="rtl">
@@ -7476,6 +7819,85 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
             const primaryGuildId = guilds.length > 0 ? guilds[0].id : 'global';
 
             rawDb.prepare('UPDATE users SET coins = MAX(0, coins - ?), wallpaper = ? WHERE user_id = ? AND guild_id = ?').run(price, name, userId, primaryGuildId);
+            res.json({ success: true });
+        } catch(e) {
+            res.status(500).json({ success: false, error: e.message });
+        }
+    });
+
+
+    // =============================================
+    // Applications & Hiring System API
+    // =============================================
+    app.post('/api/guild/:guildId/applications/create', express.json(), async (req, res) => {
+        try {
+            if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
+            const { guildId } = req.params;
+            const { title, description, log_channel, accepted_role, reviewer_role, questions } = req.body;
+
+            if (!title) return res.status(400).json({ success: false, error: 'عنوان النموذج مطلوب' });
+            if (!log_channel) return res.status(400).json({ success: false, error: 'قناة استقبال الطلبات مطلوبة' });
+
+            const newApp = database.createApplication(guildId, title, description, questions || [], log_channel, accepted_role, reviewer_role);
+            res.json({ success: true, app: newApp });
+        } catch(e) {
+            res.status(500).json({ success: false, error: e.message });
+        }
+    });
+
+    app.post('/api/guild/:guildId/applications/:appId/update', express.json(), async (req, res) => {
+        try {
+            if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
+            const { appId } = req.params;
+            const { title, description, log_channel, accepted_role, reviewer_role, questions, status } = req.body;
+
+            const updated = database.updateApplication(appId, title, description, questions || [], log_channel, accepted_role, reviewer_role, status || 'open');
+            res.json({ success: true, app: updated });
+        } catch(e) {
+            res.status(500).json({ success: false, error: e.message });
+        }
+    });
+
+    app.post('/api/guild/:guildId/applications/:appId/delete', async (req, res) => {
+        try {
+            if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
+            const { appId } = req.params;
+            database.deleteApplication(appId);
+            res.json({ success: true });
+        } catch(e) {
+            res.status(500).json({ success: false, error: e.message });
+        }
+    });
+
+    app.post('/api/guild/:guildId/applications/:appId/send-panel', express.json(), async (req, res) => {
+        try {
+            if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
+            const { guildId, appId } = req.params;
+            let { channelId } = req.body;
+
+            const appData = database.getApplication(appId);
+            if (!appData) return res.status(404).json({ success: false, error: 'النموذج غير موجود' });
+
+            if (!channelId) channelId = appData.log_channel;
+            const channel = client.channels.cache.get(channelId) || await client.channels.fetch(channelId).catch(() => null);
+            if (!channel || !channel.isTextBased()) return res.status(404).json({ success: false, error: 'لم يتم العثور على القناة المحددة' });
+
+            const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+            const panelEmbed = new EmbedBuilder()
+                .setColor('#9333ea')
+                .setTitle(`📝 تقديم: ${appData.title}`)
+                .setDescription(appData.description || 'اضغط على الزر بالأسفل لتعبئة استمارة التقديم والالتحاق بطاقم العمل.')
+                .setFooter({ text: channel.guild.name, iconURL: channel.guild.iconURL({ dynamic: true }) || undefined })
+                .setTimestamp();
+
+            const row = new ActionRowBuilder().addComponents(
+                new ButtonBuilder()
+                    .setCustomId(`btn_apply_${appData.id}`)
+                    .setLabel('تقديم الآن 📝')
+                    .setStyle(ButtonStyle.Primary)
+            );
+
+            await channel.send({ embeds: [panelEmbed], components: [row] });
             res.json({ success: true });
         } catch(e) {
             res.status(500).json({ success: false, error: e.message });
