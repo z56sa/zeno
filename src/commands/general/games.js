@@ -261,6 +261,22 @@ async function runFastType(interaction) {
   const reward = Math.floor(Math.random() * 60) + 50; // 50 - 110 coins
   const timeLimit = 20;
 
+  // جلب القناة أولاً لضمان توفرها (مهم جداً عند الاستدعاء من زر)
+  let channel = interaction.channel;
+  if (!channel || channel.partial) {
+    try {
+      channel = await interaction.client.channels.fetch(interaction.channelId);
+    } catch (e) {
+      console.error('[FastType] فشل في جلب القناة:', e);
+      return;
+    }
+  }
+
+  if (!channel || !channel.createMessageCollector) {
+    console.error('[FastType] القناة لا تدعم createMessageCollector');
+    return;
+  }
+
   const embed = new EmbedBuilder()
     .setColor('#9333ea')
     .setTitle('⚡ تحدي أسرع كتابة | Fast Type Challenge')
@@ -275,9 +291,17 @@ async function runFastType(interaction) {
     .setFooter({ text: 'ZENO Games • أسرع شخص يكتبها يفوز!', iconURL: interaction.guild?.iconURL() || undefined })
     .setTimestamp();
 
-  await interaction.reply({ embeds: [embed] });
+  // إرسال الرسالة - دعم slash command والزر معاً
+  try {
+    if (interaction.replied || interaction.deferred) {
+      await interaction.followUp({ embeds: [embed] });
+    } else {
+      await interaction.reply({ embeds: [embed] });
+    }
+  } catch (e) {
+    await channel.send({ embeds: [embed] }).catch(() => {});
+  }
 
-  const channel = interaction.channel;
   const targetClean = normalizeText(word);
   const startTime = Date.now();
   let finished = false;
