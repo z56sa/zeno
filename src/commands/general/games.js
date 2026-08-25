@@ -297,6 +297,7 @@ async function runFastType(interaction) {
   const targetClean = normalizeText(word);
   const startTime = Date.now();
   let finished = false;
+  const eliminatedPlayers = new Set(); // قائمة المطرودين من اللعبة
 
   // استخدام client.on مباشرةً بدلاً من createMessageCollector لضمان الاستقبال
   const listener = async (msg) => {
@@ -307,6 +308,9 @@ async function runFastType(interaction) {
 
     const rawUser = msg.content.trim();
     if (rawUser.length < 2) return;
+
+    // تجاهل المطرودين من اللعبة
+    if (eliminatedPlayers.has(msg.author.id)) return;
 
     const userText = normalizeText(rawUser);
     const isExact = userText === targetClean;
@@ -346,7 +350,18 @@ async function runFastType(interaction) {
         msg.channel.send({ embeds: [winEmbed] }).catch(() => {});
       });
     } else {
+      // ❌ إجابة خاطئة — طرد اللاعب وإرسال رسالة في الشات
+      eliminatedPlayers.add(msg.author.id);
       msg.react('❌').catch(() => {});
+
+      const wrongEmbed = new EmbedBuilder()
+        .setColor('#ef4444')
+        .setDescription(
+          `❌ <@${msg.author.id}> كتبت كلمة خاطئة وخرجت من التحدي!\n` +
+          `📝 الكلمة المطلوبة لا تزال مخفية... حظاً لبقية اللاعبين! 🕵️`
+        );
+
+      msg.channel.send({ embeds: [wrongEmbed] }).catch(() => {});
     }
   };
 
