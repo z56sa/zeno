@@ -5451,6 +5451,46 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                             </div>
                         </div>
 
+                        <!-- 2.5 Logs Bot Commands Reference (أوامر السجلات في البوت) -->
+                        <div class="bg-[#12141f] border border-white/5 p-6 rounded-3xl space-y-4 shadow-xl">
+                            <div class="flex items-center justify-between border-b border-white/5 pb-3">
+                                <span class="text-xs text-gray-400">أوامر إدارة السجلات المتاحة داخل الديسكورد عبر البوت</span>
+                                <h4 class="text-sm font-black text-white flex items-center gap-2">
+                                    <span>أوامر السجلات</span>
+                                    <span>⌨️</span>
+                                </h4>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
+                                ${[
+                                    { cmd: '/logs setup', args: 'mode:<عادية|مفصلة>', desc: 'إنشاء قنوات السجلات تلقائياً بالسيرفر', icon: '⚙️', admin: true },
+                                    { cmd: '/logs channel', args: 'category:<قسم> channel:<روم>', desc: 'تحديد القناة الافتراضية لقسم سجلات', icon: '📢', admin: true },
+                                    { cmd: '/logs enable', args: 'category:<قسم>', desc: 'تفعيل جميع سجلات قسم معين', icon: '✅', admin: true },
+                                    { cmd: '/logs disable', args: 'category:<قسم>', desc: 'تعطيل جميع سجلات قسم معين', icon: '❌', admin: true },
+                                    { cmd: '/logs toggle', args: 'state:<on|off>', desc: 'تفعيل أو تعطيل السجلات بالكامل', icon: '🎛️', admin: true },
+                                    { cmd: '/logs list', args: '', desc: 'عرض إعدادات وحالة سجلات السيرفر', icon: '📋', admin: true },
+                                    { cmd: '/logs test', args: 'category:<قسم>', desc: 'إرسال سجل تجريبي للتأكد من العمل', icon: '🧪', admin: true },
+                                    { cmd: '/logs delete-channels', args: '', desc: 'حذف كاتيجوري السجلات وقنواتها وتعطيل النظام', icon: '🗑️', admin: true }
+                                ].map(c => `
+                                <div class="bg-[#0b0d14] border border-white/5 hover:border-purple-500/40 p-3.5 rounded-2xl flex items-center justify-between transition">
+                                    <span class="px-2 py-0.5 bg-purple-950/60 text-purple-300 border border-purple-800/40 rounded-lg text-[9px] font-bold">أدمن ⛔</span>
+                                    <div class="flex items-center gap-3">
+                                        <div class="text-right">
+                                            <div class="flex items-center justify-end gap-2 flex-wrap">
+                                                <span class="font-black text-white text-xs font-mono" dir="ltr">${c.cmd}</span>
+                                                ${c.args ? `<span class="text-[9px] text-gray-500 font-mono" dir="ltr">${c.args}</span>` : ''}
+                                            </div>
+                                            <p class="text-[10px] text-gray-400 mt-0.5">${c.desc}</p>
+                                        </div>
+                                        <div class="w-9 h-9 rounded-xl bg-white/5 text-gray-300 flex items-center justify-center text-base border border-white/5 shadow-inner flex-shrink-0">${c.icon}</div>
+                                    </div>
+                                </div>`).join('')}
+                            </div>
+                            <div class="flex items-center justify-between bg-[#0b0d14] border border-white/5 px-4 py-3 rounded-2xl">
+                                <span class="text-[10px] text-gray-500">بروفكس: <span class="font-mono text-purple-300" dir="ltr">#logs / #سجلات / #لوق</span></span>
+                                <span class="text-xs font-black text-white flex items-center gap-1.5"><span>8 أوامر</span><span>📜</span></span>
+                            </div>
+                        </div>
+
                         <!-- 3. Search & Filter Bar -->
                         <div class="flex items-center justify-between gap-4">
                             <div class="flex items-center gap-1.5 bg-[#12141f] border border-white/5 p-1 rounded-2xl">
@@ -8988,6 +9028,50 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
             await svc.forceUpdateGuild(guildId);
             res.json({ success: true, message: 'تم تحديث قنوات الإحصائيات الآن!' });
         } catch(e) {
+            res.status(500).json({ success: false, error: e.message });
+        }
+    });
+
+    // ===================== Logs System API (سجلات السيرفر الشاملة 📜) =====================
+    const { PermissionFlagsBits } = require('discord.js');
+    const logsCommand = require('../commands/admin/logs');
+
+    // إنشاء قنوات السجلات تلقائياً (grouped = قناة لكل قسم / detailed = قناة لكل نوع سجل)
+    app.post('/api/guild/:guildId/logs/auto-setup', express.json(), async (req, res) => {
+        try {
+            if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
+            const { guildId } = req.params;
+            const mode = req.body?.mode === 'detailed' ? 'detailed' : 'grouped';
+
+            const guild = client?.guilds?.cache?.get(guildId);
+            if (!guild) return res.status(404).json({ success: false, error: 'البوت غير موجود في هذا السيرفر' });
+
+            const botMember = guild.members.me || await guild.members.fetchMe().catch(() => null);
+            if (!botMember?.permissions?.has(PermissionFlagsBits.ManageChannels)) {
+                return res.status(400).json({ success: false, error: 'البوت لا يملك صلاحية إدارة القنوات' });
+            }
+
+            const created = await logsCommand._runSetup(guild, mode);
+            res.json({ success: true, created: created.length });
+        } catch (e) {
+            console.error('[LOGS API] auto-setup error:', e);
+            res.status(500).json({ success: false, error: e.message });
+        }
+    });
+
+    // حذف كاتيجوري سجلات ZENO وجميع القنوات بداخلها وتعطيل السجلات
+    app.post('/api/guild/:guildId/logs/delete-channels', express.json(), async (req, res) => {
+        try {
+            if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
+            const { guildId } = req.params;
+
+            const guild = client?.guilds?.cache?.get(guildId);
+            if (!guild) return res.status(404).json({ success: false, error: 'البوت غير موجود في هذا السيرفر' });
+
+            const deleted = await logsCommand._deleteLogsChannels(guild);
+            res.json({ success: true, deleted });
+        } catch (e) {
+            console.error('[LOGS API] delete-channels error:', e);
             res.status(500).json({ success: false, error: e.message });
         }
     });

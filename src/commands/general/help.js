@@ -159,7 +159,7 @@ module.exports = {
       } else if (value === 'admin') {
         const automod = this.getMention(client, 'automod');
         const welcome = this.getMention(client, 'set-welcome');
-        const logs = this.getMention(client, 'set-logs');
+        const logs = this.getMention(client, 'logs');
         const autorole = this.getMention(client, 'set-autorole');
         const protection = this.getMention(client, 'set-protection');
         const antinuke = this.getMention(client, 'set-antinuke');
@@ -177,7 +177,7 @@ module.exports = {
             `• ${antinuke} - نظام الحماية المتقدمة Anti-Nuke لحماية الرتب والقنوات والطرد الجماعي`,
             `• ${verification} - إعداد ونشر لوحة تفعيل وتحقق الأعضاء التفاعلية بالزر`,
             `• ${tempvoice} - تعيين روم الرومات الصوتية المؤقتة (Join to Create)`,
-            `• ${logs} - تحديد روم سجلات ولوق السيرفر الشاملة (Audit Logs)`,
+            `• ${logs} - نظام سجلات السيرفر الشاملة (إعداد قنوات تلقائي، تفعيل/تعطيل الأقسام، عرض الحالة، وسجل تجريبي — 105 سجل بـ 13 قسم)`,
             `• ${autorole} - تحديد الرتبة التلقائية للأعضاء الجدد والبوتات`,
             `• ${autoresponder} - إضافة وتعديل الردود التلقائية المتعددة على الكلمات المفتاحية`,
             `• ${rr} - إنشاء رسائل الرتب التفاعلية بأزرار ديسكورد`,

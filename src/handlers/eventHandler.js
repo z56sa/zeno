@@ -35,25 +35,22 @@ module.exports = (client) => {
         for (const file of eventFiles) {
             const filePath = path.join(folderPath, file);
             try {
-                // We require the event module to check its existence and structure
-                const event = require(filePath);
-                
-                if (!event.execute || typeof event.execute !== 'function') {
-                    console.error(`[LOAD ERROR] File ${file} is missing the required 'execute' method.`);
-                    continue;
-                }
+                const eventModule = require(filePath);
+                const events = Array.isArray(eventModule) ? eventModule : [eventModule];
 
-                // IMPORTANT SECURITY NOTE: 
-                // Any module loaded here (e.g., GuildMemberAdd, MessageCreate) that uses API keys 
-                // or connects to external services MUST now retrieve those credentials via SecretManager.getSecret('KEY_NAME').
-                // This ensures centralized management of all secrets used by event handlers.
+                for (const event of events) {
+                    if (!event || !event.name || !event.execute || typeof event.execute !== 'function') {
+                        console.error(`[LOAD ERROR] File ${file} has an event missing required 'name' or 'execute' method.`);
+                        continue;
+                    }
 
-                if (event.once) {
-                    client.once(event.name, (...args) => event.execute(...args, client));
-                } else {
-                    client.on(event.name, (...args) => event.execute(...args, client));
+                    if (event.once) {
+                        client.once(event.name, (...args) => event.execute(...args, client));
+                    } else {
+                        client.on(event.name, (...args) => event.execute(...args, client));
+                    }
+                    eventsCount++;
                 }
-                eventsCount++;
             } catch (e) {
                 console.error(`[LOAD ERROR] Failed to load or register event file ${file}:`, e);
             }
