@@ -290,10 +290,15 @@ async function runFastType(interaction) {
   collector.on('collect', async (msg) => {
     if (finished) return;
 
-    const userText = normalizeText(msg.content);
+    const rawUser = msg.content.trim();
+    const userText = normalizeText(rawUser);
 
-    // مطابقة تامة أو جزء مطابق
-    if (userText === targetClean || userText.includes(targetClean)) {
+    // فحص التطابق التام أو التطابق التقريبي
+    const isExact = userText === targetClean;
+    const isContained = userText.includes(targetClean) || targetClean.includes(userText);
+    const isLengthClose = Math.abs(userText.length - targetClean.length) <= 3;
+
+    if (isExact || (isContained && isLengthClose && userText.length >= 3)) {
       finished = true;
       collector.stop('winner');
 
@@ -329,7 +334,7 @@ async function runFastType(interaction) {
       });
     } else {
       // تفاعل مع المحاولة الخاطئة
-      if (msg.content.trim().length >= 2) {
+      if (rawUser.length >= 2) {
         msg.react('❌').catch(() => {});
       }
     }
