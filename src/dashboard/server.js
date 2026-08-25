@@ -6309,22 +6309,135 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                             </div>
                         </div>
 
-                        <!-- Games Feature Cards -->
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div class="bg-[#12141f] border border-white/5 p-5 rounded-3xl space-y-2 text-right">
-                                <div class="w-10 h-10 rounded-2xl bg-purple-600/20 text-purple-400 flex items-center justify-center text-xl mb-3">❓</div>
-                                <h5 class="text-sm font-black text-white">سؤال وجواب (Trivia)</h5>
-                                <p class="text-xs text-gray-400 leading-relaxed">أسئلة معلومات عامة وثقافية وإسلامية مع 4 أزرار خيارات ومؤقت زمني 20 ثانية.</p>
+                        <!-- Games Feature Cards — All Commands -->
+                        <div class="bg-[#12141f] border border-white/5 p-5 rounded-3xl shadow-xl">
+                            <h4 class="text-sm font-black text-white border-b border-white/5 pb-3 mb-4 flex items-center gap-2 justify-end">
+                                <span>جميع ألعاب ونظام التسلية</span><span>🎮</span>
+                            </h4>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+
+                                <!-- Trivia -->
+                                <div class="bg-[#0b0d14] border border-purple-500/20 hover:border-purple-500/50 p-4 rounded-2xl text-right transition group">
+                                    <div class="flex items-center justify-end gap-2 mb-3">
+                                        <span class="text-sm font-black text-white">/trivia</span>
+                                        <div class="w-9 h-9 rounded-xl bg-purple-600/20 text-purple-400 flex items-center justify-center text-lg border border-purple-500/30">❓</div>
+                                    </div>
+                                    <p class="text-[11px] text-gray-400 leading-relaxed">سؤال وجواب بأسئلة ثقافية وإسلامية مع 4 خيارات ومؤقت 20 ثانية</p>
+                                    <div class="mt-3 flex justify-end">
+                                        <span class="text-[10px] bg-purple-950/60 text-purple-300 border border-purple-800/40 px-2 py-0.5 rounded-lg font-bold">معلومات عامة</span>
+                                    </div>
+                                </div>
+
+                                <!-- Fast Type -->
+                                <div class="bg-[#0b0d14] border border-emerald-500/20 hover:border-emerald-500/50 p-4 rounded-2xl text-right transition group">
+                                    <div class="flex items-center justify-end gap-2 mb-3">
+                                        <span class="text-sm font-black text-white">/games fast</span>
+                                        <div class="w-9 h-9 rounded-xl bg-emerald-600/20 text-emerald-400 flex items-center justify-center text-lg border border-emerald-500/30">⚡</div>
+                                    </div>
+                                    <p class="text-[11px] text-gray-400 leading-relaxed">تحدي كتابة كلمات عربية بأسرع وقت، أول من يكتبها يفوز</p>
+                                    <div class="mt-3 flex justify-end">
+                                        <span class="text-[10px] bg-emerald-950/60 text-emerald-300 border border-emerald-800/40 px-2 py-0.5 rounded-lg font-bold">سرعة الكتابة</span>
+                                    </div>
+                                </div>
+
+                                <!-- RPS -->
+                                <div class="bg-[#0b0d14] border border-amber-500/20 hover:border-amber-500/50 p-4 rounded-2xl text-right transition group">
+                                    <div class="flex items-center justify-end gap-2 mb-3">
+                                        <span class="text-sm font-black text-white">/games rps</span>
+                                        <div class="w-9 h-9 rounded-xl bg-amber-600/20 text-amber-400 flex items-center justify-center text-lg border border-amber-500/30">✂️</div>
+                                    </div>
+                                    <p class="text-[11px] text-gray-400 leading-relaxed">حجر ورقة مقص كلاسيكية ضد البوت بنظام الأزرار التفاعلية</p>
+                                    <div class="mt-3 flex justify-end">
+                                        <span class="text-[10px] bg-amber-950/60 text-amber-300 border border-amber-800/40 px-2 py-0.5 rounded-lg font-bold">ضد البوت</span>
+                                    </div>
+                                </div>
+
+                                <!-- Chairs -->
+                                <div class="bg-[#0b0d14] border border-pink-500/20 hover:border-pink-500/50 p-4 rounded-2xl text-right transition group">
+                                    <div class="flex items-center justify-end gap-2 mb-3">
+                                        <span class="text-sm font-black text-white">/chairs</span>
+                                        <div class="w-9 h-9 rounded-xl bg-pink-600/20 text-pink-400 flex items-center justify-center text-lg border border-pink-500/30">🪑</div>
+                                    </div>
+                                    <p class="text-[11px] text-gray-400 leading-relaxed">الكراسي الموسيقية التفاعلية، يتنافس الأعضاء على الضغط أولاً</p>
+                                    <div class="mt-3 flex justify-end">
+                                        <span class="text-[10px] bg-pink-950/60 text-pink-300 border border-pink-800/40 px-2 py-0.5 rounded-lg font-bold">جماعية</span>
+                                    </div>
+                                </div>
+
+                                <!-- Coinflip -->
+                                <div class="bg-[#0b0d14] border border-yellow-500/20 hover:border-yellow-500/50 p-4 rounded-2xl text-right transition group">
+                                    <div class="flex items-center justify-end gap-2 mb-3">
+                                        <span class="text-sm font-black text-white">/coinflip</span>
+                                        <div class="w-9 h-9 rounded-xl bg-yellow-600/20 text-yellow-400 flex items-center justify-center text-lg border border-yellow-500/30">🪙</div>
+                                    </div>
+                                    <p class="text-[11px] text-gray-400 leading-relaxed">رمي العملة المعدنية، توقع صورة أو كتابة والنتيجة عشوائية</p>
+                                    <div class="mt-3 flex justify-end">
+                                        <span class="text-[10px] bg-yellow-950/60 text-yellow-300 border border-yellow-800/40 px-2 py-0.5 rounded-lg font-bold">حظ وعشوائية</span>
+                                    </div>
+                                </div>
+
+                                <!-- Fight -->
+                                <div class="bg-[#0b0d14] border border-red-500/20 hover:border-red-500/50 p-4 rounded-2xl text-right transition group">
+                                    <div class="flex items-center justify-end gap-2 mb-3">
+                                        <span class="text-sm font-black text-white">/fight</span>
+                                        <div class="w-9 h-9 rounded-xl bg-red-600/20 text-red-400 flex items-center justify-center text-lg border border-red-500/30">⚔️</div>
+                                    </div>
+                                    <p class="text-[11px] text-gray-400 leading-relaxed">تحدي معركة ضد عضو آخر، تُحدَّد النتيجة بضربات عشوائية</p>
+                                    <div class="mt-3 flex justify-end">
+                                        <span class="text-[10px] bg-red-950/60 text-red-300 border border-red-800/40 px-2 py-0.5 rounded-lg font-bold">تحدي بين أعضاء</span>
+                                    </div>
+                                </div>
+
+                                <!-- Hide & Seek -->
+                                <div class="bg-[#0b0d14] border border-teal-500/20 hover:border-teal-500/50 p-4 rounded-2xl text-right transition group">
+                                    <div class="flex items-center justify-end gap-2 mb-3">
+                                        <span class="text-sm font-black text-white">/hideseek</span>
+                                        <div class="w-9 h-9 rounded-xl bg-teal-600/20 text-teal-400 flex items-center justify-center text-lg border border-teal-500/30">🙈</div>
+                                    </div>
+                                    <p class="text-[11px] text-gray-400 leading-relaxed">لعبة الغميضة، يختبئ أحد الأعضاء والبقية يبحثون باستخدام أزرار</p>
+                                    <div class="mt-3 flex justify-end">
+                                        <span class="text-[10px] bg-teal-950/60 text-teal-300 border border-teal-800/40 px-2 py-0.5 rounded-lg font-bold">استراتيجية</span>
+                                    </div>
+                                </div>
+
+                                <!-- Mafia -->
+                                <div class="bg-[#0b0d14] border border-indigo-500/20 hover:border-indigo-500/50 p-4 rounded-2xl text-right transition group">
+                                    <div class="flex items-center justify-end gap-2 mb-3">
+                                        <span class="text-sm font-black text-white">/mafia</span>
+                                        <div class="w-9 h-9 rounded-xl bg-indigo-600/20 text-indigo-400 flex items-center justify-center text-lg border border-indigo-500/30">🎭</div>
+                                    </div>
+                                    <p class="text-[11px] text-gray-400 leading-relaxed">لعبة المافيا الجماعية، توزيع أدوار سرية وتصويت للكشف عن المافيا</p>
+                                    <div class="mt-3 flex justify-end">
+                                        <span class="text-[10px] bg-indigo-950/60 text-indigo-300 border border-indigo-800/40 px-2 py-0.5 rounded-lg font-bold">أدوار خفية</span>
+                                    </div>
+                                </div>
+
+                                <!-- Roulette -->
+                                <div class="bg-[#0b0d14] border border-orange-500/20 hover:border-orange-500/50 p-4 rounded-2xl text-right transition group sm:col-span-2 lg:col-span-4">
+                                    <div class="flex items-center justify-end gap-2 mb-3">
+                                        <span class="text-sm font-black text-white">/roulette</span>
+                                        <div class="w-9 h-9 rounded-xl bg-orange-600/20 text-orange-400 flex items-center justify-center text-lg border border-orange-500/30">🎰</div>
+                                    </div>
+                                    <p class="text-[11px] text-gray-400 leading-relaxed">الروليت الروسي، اختبر حظك مع الأعضاء في لعبة المخاطرة والإثارة التفاعلية</p>
+                                    <div class="mt-3 flex justify-end">
+                                        <span class="text-[10px] bg-orange-950/60 text-orange-300 border border-orange-800/40 px-2 py-0.5 rounded-lg font-bold">مخاطرة وإثارة</span>
+                                    </div>
+                                </div>
+
                             </div>
-                            <div class="bg-[#12141f] border border-white/5 p-5 rounded-3xl space-y-2 text-right">
-                                <div class="w-10 h-10 rounded-2xl bg-emerald-600/20 text-emerald-400 flex items-center justify-center text-xl mb-3">⚡</div>
-                                <h5 class="text-sm font-black text-white">أسرع كتابة (Fast Type)</h5>
-                                <p class="text-xs text-gray-400 leading-relaxed">تحدي كتابة كلمات عربية سريعة، يحسب الوقت بدقة لأول فائز في الشات.</p>
-                            </div>
-                            <div class="bg-[#12141f] border border-white/5 p-5 rounded-3xl space-y-2 text-right">
-                                <div class="w-10 h-10 rounded-2xl bg-amber-600/20 text-amber-400 flex items-center justify-center text-xl mb-3">✂️</div>
-                                <h5 class="text-sm font-black text-white">حجر ورقة مقص (RPS)</h5>
-                                <p class="text-xs text-gray-400 leading-relaxed">لعبة حجر ورقة مقص كلاسيكية ضد البوت بنظام النقاط التفاعلي.</p>
+                        </div>
+
+                        <!-- Games Command Quick-Reference -->
+                        <div class="bg-[#12141f] border border-white/5 p-5 rounded-3xl shadow-xl">
+                            <h4 class="text-sm font-black text-white border-b border-white/5 pb-3 mb-4 flex items-center gap-2 justify-end">
+                                <span>لوحة الألعاب المركزية</span><span>🕹️</span>
+                            </h4>
+                            <div class="bg-[#0b0d14] border border-purple-500/20 rounded-2xl p-4 flex items-center justify-between gap-4">
+                                <span class="text-xs text-gray-400">تجمع جميع الألعاب في رسالة واحدة مع أزرار تفاعلية</span>
+                                <div class="flex items-center gap-3 flex-shrink-0">
+                                    <span class="font-mono font-black text-purple-300 text-sm bg-purple-950/50 px-3 py-1 rounded-xl border border-purple-800/40">/games panel</span>
+                                    <div class="w-8 h-8 rounded-xl bg-purple-600/20 text-purple-400 flex items-center justify-center text-base">🎮</div>
+                                </div>
                             </div>
                         </div>
                     </div>
