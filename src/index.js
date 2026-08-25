@@ -109,9 +109,18 @@ mountDashboard(app, client);
 // Auto-Broadcaster Service (Zero-Downtime - يقرأ الإعدادات من DB مباشرة)
 const AutoBroadcaster = require('./services/autoBroadcaster');
 const autoBroadcaster = new AutoBroadcaster(client);
+
+// Stat Channels Service - يحدث قنوات الإحصائيات كل 10 دقائق
+const StatChannelsService = require('./services/statChannels');
+const statChannelsService = new StatChannelsService(client);
+
 client.once('ready', () => {
     autoBroadcaster.start();
+    statChannelsService.start();
 });
+
+// Export for dashboard API use
+module.exports.statChannelsService = statChannelsService;
 
 
 // API Route for Stats (Keep this stateless)

@@ -1207,6 +1207,10 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                                             <span class="text-sm">📊</span>
                                         </div>
                                     </a>
+                                    <a href="/dashboard/${guildId}/stat-channels" class="flex items-center justify-between px-3 py-2 rounded-xl ${section === 'stat-channels' ? 'bg-purple-600 text-white font-bold shadow-md' : 'text-gray-300 hover:text-white hover:bg-[#151724]'} transition group">
+                                        <span class="text-[9px] font-bold text-emerald-400 bg-emerald-950/60 px-1.5 py-0.5 rounded">جديد</span>
+                                        <span class="flex items-center gap-2"><span>قنوات الإحصائيات</span><span class="text-gray-400 group-hover:text-purple-400">📈</span></span>
+                                    </a>
                                 </div>
                             </div>
                         </div>
@@ -5387,6 +5391,172 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                             </div>
                         </div>
                     </div>`;
+
+            } else if (section === 'stat-channels') {
+                // Load current stat channels for this guild
+                let statChannelsRows = [];
+                try {
+                    rawDb.exec(`CREATE TABLE IF NOT EXISTS stat_channels (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        guild_id TEXT NOT NULL,
+                        channel_id TEXT NOT NULL,
+                        stat_type TEXT NOT NULL,
+                        custom_prefix TEXT DEFAULT '',
+                        enabled INTEGER DEFAULT 1,
+                        UNIQUE(guild_id, channel_id)
+                    )`);
+                    statChannelsRows = rawDb.prepare('SELECT * FROM stat_channels WHERE guild_id = ?').all(guildId);
+                } catch(e) {}
+
+                const STAT_TYPES_DEF = {
+                    total_members:  { label: 'إجمالي الأعضاء', icon: '👥', desc: 'عدد جميع الأعضاء في السيرفر' },
+                    humans:         { label: 'البشر', icon: '👤', desc: 'عدد الأعضاء البشريين فقط' },
+                    bots:           { label: 'البوتات', icon: '🤖', desc: 'عدد البوتات في السيرفر' },
+                    online:         { label: 'الأعضاء الأونلاين', icon: '🟢', desc: 'عدد الأعضاء المتصلين حالياً' },
+                    voice:          { label: 'المتصلين صوتياً', icon: '🎙️', desc: 'عدد الأعضاء في القنوات الصوتية' },
+                    text_channels:  { label: 'القنوات النصية', icon: '#️⃣', desc: 'عدد القنوات النصية' },
+                    voice_channels: { label: 'القنوات الصوتية', icon: '🔊', desc: 'عدد القنوات الصوتية' },
+                    total_channels: { label: 'عدد القنوات الكلي', icon: '📂', desc: 'إجمالي عدد جميع القنوات' },
+                    roles:          { label: 'الرتب الكلية', icon: '🏷️', desc: 'عدد الرتب في السيرفر' },
+                };
+
+                const configuredMap = {};
+                for (const row of statChannelsRows) {
+                    configuredMap[row.stat_type] = row;
+                }
+
+                const statRowsHtml = Object.entries(STAT_TYPES_DEF).map(([type, def]) => {
+                    const configured = configuredMap[type];
+                    const hasChannel = !!configured;
+                    return `
+                    <div class="bg-[#12141f] border ${hasChannel ? 'border-purple-500/40' : 'border-white/5'} rounded-2xl p-4 flex items-center justify-between gap-4 hover:border-purple-500/30 transition" id="stat-row-${type}">
+                        <div class="flex items-center gap-3">
+                            ${hasChannel ? `
+                            <form method="POST" action="/api/guild/${guildId}/stat-channels/${configured.id}/delete" class="inline">
+                                <button type="submit" class="px-3 py-2 bg-rose-900/40 hover:bg-rose-700/50 text-rose-300 rounded-xl text-xs font-bold border border-rose-800/30 transition" title="حذف هذه القناة">🗑️</button>
+                            </form>
+                            ` : `
+                            <button onclick="openAddStatChannel('${type}', '${def.label}')" class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold shadow transition">إنشاء</button>
+                            `}
+                        </div>
+                        <div class="flex-1 text-right">
+                            <div class="flex items-center justify-end gap-2">
+                                <span class="text-sm font-black text-white">${def.label}</span>
+                                <div class="w-8 h-8 rounded-xl bg-purple-600/20 border border-purple-500/30 text-base flex items-center justify-center">${def.icon}</div>
+                            </div>
+                            <p class="text-[11px] text-gray-400 mt-0.5">${def.desc}</p>
+                            ${hasChannel ? `<p class="text-[10px] text-purple-400 font-mono mt-1">📡 مربوطة بـ: <code class="bg-purple-950/40 px-1.5 py-0.5 rounded">${configured.channel_id}</code></p>` : ''}
+                        </div>
+                    </div>
+                    `;
+                }).join('');
+
+formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
+
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-[#1a132e] via-[#12141f] to-[#1a132e] border border-purple-500/20 p-6 rounded-3xl flex items-center justify-between shadow-2xl">
+        <div class="flex items-center gap-3">
+            <div class="text-left">
+                <div class="text-xs text-purple-400 font-bold font-mono">يتحدث كل 10 دقائق</div>
+            </div>
+            <div class="w-12 h-12 rounded-2xl bg-purple-600/20 text-purple-400 border border-purple-500/30 flex items-center justify-center text-2xl shadow-lg">📈</div>
+        </div>
+        <div class="text-right">
+            <h3 class="font-black text-white text-xl">قنوات الإحصائيات</h3>
+            <p class="text-gray-400 text-xs mt-0.5">اعرض إحصائيات سيرفرك في قنوات صوتية مقفلة في الشريط الجانبي.</p>
+            <p class="text-gray-500 text-[10px] mt-0.5">⚠️ تأكد أن البوت لديه صلاحية إدارة القنوات (Manage Channels)</p>
+        </div>
+    </div>
+
+    <!-- Stats Counter -->
+    <div class="grid grid-cols-3 gap-3">
+        <div class="bg-[#12141f] border border-white/5 p-4 rounded-2xl text-center">
+            <div class="text-2xl font-black text-white">${statChannelsRows.length}</div>
+            <div class="text-xs text-gray-400 font-bold mt-1">قناة مُفعّلة</div>
+        </div>
+        <div class="bg-[#12141f] border border-white/5 p-4 rounded-2xl text-center">
+            <div class="text-2xl font-black text-purple-400">${Object.keys(STAT_TYPES_DEF).length}</div>
+            <div class="text-xs text-gray-400 font-bold mt-1">نوع متاح</div>
+        </div>
+        <div class="bg-[#12141f] border border-white/5 p-4 rounded-2xl text-center">
+            <div class="text-2xl font-black text-emerald-400">10</div>
+            <div class="text-xs text-gray-400 font-bold mt-1">دقيقة للتحديث</div>
+        </div>
+    </div>
+
+    <!-- Stat Channels List -->
+    <div class="bg-[#12141f] border border-white/5 rounded-3xl p-6 shadow-xl space-y-3">
+        <div class="flex items-center justify-between pb-3 border-b border-white/5">
+            <span class="text-xs text-purple-400 font-bold">${statChannelsRows.length}/9 قنوات</span>
+            <h4 class="text-sm font-black text-white">العدادات الأساسية</h4>
+        </div>
+        ${statRowsHtml}
+    </div>
+
+    <!-- Add Modal -->
+    <div id="addStatChannelModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
+        <div class="bg-[#10121b] border border-purple-500/30 rounded-3xl p-8 max-w-md w-full mx-4 shadow-2xl space-y-5">
+            <div class="text-center">
+                <h3 class="text-lg font-black text-white" id="addStatModalTitle">إنشاء قناة إحصائية</h3>
+                <p class="text-gray-400 text-xs mt-1">سيقوم البوت بتحديث اسم هذه القناة تلقائياً كل 10 دقائق</p>
+            </div>
+            <form id="addStatChannelForm" class="space-y-4 text-right">
+                <input type="hidden" id="addStatType" name="stat_type">
+                <div>
+                    <label class="text-xs font-bold text-gray-300 block mb-1.5">أيدي (ID) القناة الصوتية</label>
+                    <input type="text" name="channel_id" id="addStatChannelId" placeholder="مثال: 123456789012345678" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none font-mono text-right" required>
+                    <p class="text-[10px] text-gray-500 mt-1">انسخ ID القناة الصوتية من ديسكورد (كليك يمين → نسخ المعرف)</p>
+                </div>
+                <div>
+                    <label class="text-xs font-bold text-gray-300 block mb-1.5">نص مخصص للبادئة (اختياري)</label>
+                    <input type="text" name="custom_prefix" id="addStatPrefix" placeholder="مثال: 👥 الأعضاء" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right">
+                    <p class="text-[10px] text-gray-500 mt-1">إذا تركته فارغاً سيستخدم البوت النص الافتراضي</p>
+                </div>
+                <div class="flex gap-3 pt-2">
+                    <button type="button" onclick="closeAddStatChannel()" class="flex-1 py-2.5 bg-white/5 hover:bg-white/10 text-gray-300 rounded-xl text-xs font-bold transition">إلغاء</button>
+                    <button type="submit" class="flex-1 py-2.5 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold shadow transition">حفظ وإنشاء</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+    function openAddStatChannel(type, label) {
+        document.getElementById('addStatType').value = type;
+        document.getElementById('addStatModalTitle').textContent = 'إنشاء قناة: ' + label;
+        document.getElementById('addStatChannelModal').classList.remove('hidden');
+    }
+    function closeAddStatChannel() {
+        document.getElementById('addStatChannelModal').classList.add('hidden');
+    }
+    document.getElementById('addStatChannelForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const data = {
+            stat_type: document.getElementById('addStatType').value,
+            channel_id: document.getElementById('addStatChannelId').value.trim(),
+            custom_prefix: document.getElementById('addStatPrefix').value.trim()
+        };
+        if (!data.channel_id) return alert('أدخل أيدي القناة أولاً');
+        try {
+            const res = await fetch('/api/guild/${guildId}/stat-channels', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            const json = await res.json();
+            if (json.success) {
+                alert('✅ تم إضافة قناة الإحصائيات! سيتم تحديثها خلال دقائق.');
+                location.reload();
+            } else {
+                alert('❌ ' + (json.error || 'حدث خطأ'));
+            }
+        } catch(err) {
+            alert('❌ خطأ في الاتصال');
+        }
+    });
+    </script>
+
+</div>`;
             } else if (section === 'appearance') {
 formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl">
                         
@@ -6532,6 +6702,84 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
     });
 
     
+
+    // =============================================
+    // Stat Channels API
+    // =============================================
+    app.post('/api/guild/:guildId/stat-channels', express.json(), (req, res) => {
+        try {
+            if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
+            const { guildId } = req.params;
+            const { stat_type, channel_id, custom_prefix } = req.body;
+
+            if (!stat_type || !channel_id) return res.status(400).json({ success: false, error: 'stat_type and channel_id are required' });
+
+            const VALID_TYPES = ['total_members','humans','bots','online','voice','text_channels','voice_channels','total_channels','roles'];
+            if (!VALID_TYPES.includes(stat_type)) return res.status(400).json({ success: false, error: 'Invalid stat_type' });
+
+            rawDb.exec(`CREATE TABLE IF NOT EXISTS stat_channels (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                guild_id TEXT NOT NULL,
+                channel_id TEXT NOT NULL,
+                stat_type TEXT NOT NULL,
+                custom_prefix TEXT DEFAULT '',
+                enabled INTEGER DEFAULT 1,
+                UNIQUE(guild_id, channel_id)
+            )`);
+
+            rawDb.prepare('INSERT OR REPLACE INTO stat_channels (guild_id, channel_id, stat_type, custom_prefix, enabled) VALUES (?, ?, ?, ?, 1)')
+                .run(guildId, channel_id.trim(), stat_type, custom_prefix || '');
+
+            // Trigger immediate update
+            try {
+                const StatChannelsService = require('./services/statChannels');
+                // Force update by running the service tick
+                const tempSvc = new StatChannelsService(client);
+                tempSvc._updateChannel({ guild_id: guildId, channel_id: channel_id.trim(), stat_type, custom_prefix: custom_prefix || '', enabled: 1 }).catch(() => {});
+            } catch(e) {}
+
+            res.json({ success: true });
+        } catch(e) {
+            res.status(500).json({ success: false, error: e.message });
+        }
+    });
+
+    app.post('/api/guild/:guildId/stat-channels/:id/delete', (req, res) => {
+        try {
+            if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
+            const { guildId, id } = req.params;
+            rawDb.prepare('DELETE FROM stat_channels WHERE id = ? AND guild_id = ?').run(id, guildId);
+            // Redirect back to stat-channels page
+            res.redirect('/dashboard/' + guildId + '/stat-channels');
+        } catch(e) {
+            res.status(500).send('Error: ' + e.message);
+        }
+    });
+
+    app.get('/api/guild/:guildId/stat-channels', (req, res) => {
+        try {
+            if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
+            const { guildId } = req.params;
+            const rows = rawDb.prepare('SELECT * FROM stat_channels WHERE guild_id = ?').all(guildId);
+            res.json({ success: true, data: rows });
+        } catch(e) {
+            res.status(500).json({ success: false, error: e.message });
+        }
+    });
+
+    app.post('/api/guild/:guildId/stat-channels/update-now', async (req, res) => {
+        try {
+            if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
+            const { guildId } = req.params;
+            const StatChannelsService = require('./services/statChannels');
+            const svc = new StatChannelsService(client);
+            await svc.forceUpdateGuild(guildId);
+            res.json({ success: true, message: 'تم تحديث قنوات الإحصائيات الآن!' });
+        } catch(e) {
+            res.status(500).json({ success: false, error: e.message });
+        }
+    });
+
     // User Economy API
     app.post('/api/user/daily', (req, res) => {
         try {

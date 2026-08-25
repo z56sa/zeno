@@ -497,7 +497,23 @@ try {
   `);
 } catch(e) {}
 
+// قنوات الإحصائيات (Stat Channels System)
+try {
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS stat_channels (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      guild_id TEXT NOT NULL,
+      channel_id TEXT NOT NULL,
+      stat_type TEXT NOT NULL,
+      custom_prefix TEXT DEFAULT '',
+      enabled INTEGER DEFAULT 1,
+      UNIQUE(guild_id, channel_id)
+    );
+  `);
+} catch(e) {}
+
 console.log('[DB] ✅ SQLite database initialized successfully');
+
 
 // ==========================================
 // Guild Settings
