@@ -41,7 +41,21 @@ module.exports = function (app, client) {
             const user = req.session?.user || null;
             const fs = require('fs');
             const path = require('path');
-            let html = fs.readFileSync(path.join(__dirname, 'public/index.html'), 'utf8');
+            // Try multiple paths to support both local and Railway deployments
+            const possiblePaths = [
+                path.join(__dirname, 'public/index.html'),
+                path.join(__dirname, '../dashboard/public/index.html'),
+                path.join(process.cwd(), 'src/dashboard/public/index.html'),
+                path.join(process.cwd(), 'dashboard/public/index.html'),
+            ];
+            let html = null;
+            for (const p of possiblePaths) {
+                if (fs.existsSync(p)) {
+                    html = fs.readFileSync(p, 'utf8');
+                    break;
+                }
+            }
+            if (!html) throw new Error('index.html not found in any expected path');
 
             if (user) {
                 const userAvatar = user.avatar ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png` : 'https://cdn.discordapp.com/embed/avatars/0.png';
