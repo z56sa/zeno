@@ -35,9 +35,43 @@ module.exports = function (app, client) {
         }
     }));
 
-    // 1. الصفحة الرئيسية
+    // 1. الصفحة الرئيسية (ProBot Landing Page Style)
     app.get('/', (req, res) => {
-        res.redirect('/dashboard');
+        try {
+            const user = req.session?.user || null;
+            let userCoins = 0;
+            if (user) {
+                const userRow = rawDb.prepare('SELECT SUM(coins) as coins FROM users WHERE user_id = ?').get(user.id);
+                userCoins = userRow?.coins || 0;
+            }
+            const fs = require('fs');
+            const path = require('path');
+            let html = fs.readFileSync(path.join(__dirname, 'public/index.html'), 'utf8');
+
+            if (user) {
+                const userAvatar = user.avatar ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png` : 'https://cdn.discordapp.com/embed/avatars/0.png';
+                const loggedInBtn = `
+                    <a href="/dashboard" class="flex items-center gap-3 bg-[#12121a] border border-[#232334] px-4 py-2 rounded-xl hover:border-purple-500/50 transition">
+                        <img src="${userAvatar}" alt="${user.username}" class="w-8 h-8 rounded-full object-cover border border-purple-500/40">
+                        <div class="flex flex-col text-right">
+                            <span class="text-xs font-bold text-white">${user.username}</span>
+                            <span class="text-[10px] text-amber-400 font-extrabold">${userCoins.toLocaleString()} 🪙</span>
+                        </div>
+                    </a>
+                `;
+                html = html.replace(/<% if \(user\) \{ %>[\s\S]*?<% \} else \{ %>[\s\S]*?<% \} %>/, loggedInBtn);
+            } else {
+                const loginBtn = `
+                    <a href="/auth/discord" class="px-5 py-2.5 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-xs font-bold transition shadow-lg shadow-purple-600/30">
+                        تسجيل الدخول
+                    </a>
+                `;
+                html = html.replace(/<% if \(user\) \{ %>[\s\S]*?<% \} else \{ %>[\s\S]*?<% \} %>/, loginBtn);
+            }
+            res.send(html);
+        } catch(e) {
+            res.redirect('/dashboard');
+        }
     });
 
     // Helper to get OAuth redirect URI
