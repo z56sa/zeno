@@ -6318,11 +6318,11 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
 
                                 <!-- Trivia -->
                                 <div class="bg-[#0b0d14] border border-purple-500/20 hover:border-purple-500/50 p-4 rounded-2xl text-right transition group">
-                                    <div class="flex items-center justify-end gap-2 mb-3">
-                                        <span class="text-sm font-black text-white">/trivia</span>
+                                    <div class="flex items-center justify-between mb-3">
                                         <div class="w-9 h-9 rounded-xl bg-purple-600/20 text-purple-400 flex items-center justify-center text-lg border border-purple-500/30">❓</div>
+                                        <span class="text-sm font-black text-white font-mono" dir="ltr">/trivia</span>
                                     </div>
-                                    <p class="text-[11px] text-gray-400 leading-relaxed">سؤال وجواب بأسئلة ثقافية وإسلامية مع 4 خيارات ومؤقت 20 ثانية</p>
+                                    <p class="text-[11px] text-gray-400 leading-relaxed">سؤال وجواب بأسئلة ثقافية وإسلامية وتنافس فوري في الشات</p>
                                     <div class="mt-3 flex justify-end">
                                         <span class="text-[10px] bg-purple-950/60 text-purple-300 border border-purple-800/40 px-2 py-0.5 rounded-lg font-bold">معلومات عامة</span>
                                     </div>
@@ -6330,9 +6330,9 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
 
                                 <!-- Fast Type -->
                                 <div class="bg-[#0b0d14] border border-emerald-500/20 hover:border-emerald-500/50 p-4 rounded-2xl text-right transition group">
-                                    <div class="flex items-center justify-end gap-2 mb-3">
-                                        <span class="text-sm font-black text-white">/games fast</span>
+                                    <div class="flex items-center justify-between mb-3">
                                         <div class="w-9 h-9 rounded-xl bg-emerald-600/20 text-emerald-400 flex items-center justify-center text-lg border border-emerald-500/30">⚡</div>
+                                        <span class="text-sm font-black text-white font-mono" dir="ltr">/games fast</span>
                                     </div>
                                     <p class="text-[11px] text-gray-400 leading-relaxed">تحدي كتابة كلمات عربية بأسرع وقت، أول من يكتبها يفوز</p>
                                     <div class="mt-3 flex justify-end">
@@ -6342,9 +6342,9 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
 
                                 <!-- RPS -->
                                 <div class="bg-[#0b0d14] border border-amber-500/20 hover:border-amber-500/50 p-4 rounded-2xl text-right transition group">
-                                    <div class="flex items-center justify-end gap-2 mb-3">
-                                        <span class="text-sm font-black text-white">/games rps</span>
+                                    <div class="flex items-center justify-between mb-3">
                                         <div class="w-9 h-9 rounded-xl bg-amber-600/20 text-amber-400 flex items-center justify-center text-lg border border-amber-500/30">✂️</div>
+                                        <span class="text-sm font-black text-white font-mono" dir="ltr">/games rps</span>
                                     </div>
                                     <p class="text-[11px] text-gray-400 leading-relaxed">حجر ورقة مقص كلاسيكية ضد البوت بنظام الأزرار التفاعلية</p>
                                     <div class="mt-3 flex justify-end">
@@ -6354,9 +6354,9 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
 
                                 <!-- Chairs -->
                                 <div class="bg-[#0b0d14] border border-pink-500/20 hover:border-pink-500/50 p-4 rounded-2xl text-right transition group">
-                                    <div class="flex items-center justify-end gap-2 mb-3">
-                                        <span class="text-sm font-black text-white">/chairs</span>
+                                    <div class="flex items-center justify-between mb-3">
                                         <div class="w-9 h-9 rounded-xl bg-pink-600/20 text-pink-400 flex items-center justify-center text-lg border border-pink-500/30">🪑</div>
+                                        <span class="text-sm font-black text-white font-mono" dir="ltr">/chairs</span>
                                     </div>
                                     <p class="text-[11px] text-gray-400 leading-relaxed">الكراسي الموسيقية التفاعلية، يتنافس الأعضاء على الضغط أولاً</p>
                                     <div class="mt-3 flex justify-end">
@@ -6366,9 +6366,9 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
 
                                 <!-- Coinflip -->
                                 <div class="bg-[#0b0d14] border border-yellow-500/20 hover:border-yellow-500/50 p-4 rounded-2xl text-right transition group">
-                                    <div class="flex items-center justify-end gap-2 mb-3">
-                                        <span class="text-sm font-black text-white">/coinflip</span>
+                                    <div class="flex items-center justify-between mb-3">
                                         <div class="w-9 h-9 rounded-xl bg-yellow-600/20 text-yellow-400 flex items-center justify-center text-lg border border-yellow-500/30">🪙</div>
+                                        <span class="text-sm font-black text-white font-mono" dir="ltr">/coinflip</span>
                                     </div>
                                     <p class="text-[11px] text-gray-400 leading-relaxed">رمي العملة المعدنية، توقع صورة أو كتابة والنتيجة عشوائية</p>
                                     <div class="mt-3 flex justify-end">
@@ -6378,9 +6378,9 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
 
                                 <!-- Fight -->
                                 <div class="bg-[#0b0d14] border border-red-500/20 hover:border-red-500/50 p-4 rounded-2xl text-right transition group">
-                                    <div class="flex items-center justify-end gap-2 mb-3">
-                                        <span class="text-sm font-black text-white">/fight</span>
+                                    <div class="flex items-center justify-between mb-3">
                                         <div class="w-9 h-9 rounded-xl bg-red-600/20 text-red-400 flex items-center justify-center text-lg border border-red-500/30">⚔️</div>
+                                        <span class="text-sm font-black text-white font-mono" dir="ltr">/fight</span>
                                     </div>
                                     <p class="text-[11px] text-gray-400 leading-relaxed">تحدي معركة ضد عضو آخر، تُحدَّد النتيجة بضربات عشوائية</p>
                                     <div class="mt-3 flex justify-end">
@@ -6390,9 +6390,9 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
 
                                 <!-- Hide & Seek -->
                                 <div class="bg-[#0b0d14] border border-teal-500/20 hover:border-teal-500/50 p-4 rounded-2xl text-right transition group">
-                                    <div class="flex items-center justify-end gap-2 mb-3">
-                                        <span class="text-sm font-black text-white">/hideseek</span>
+                                    <div class="flex items-center justify-between mb-3">
                                         <div class="w-9 h-9 rounded-xl bg-teal-600/20 text-teal-400 flex items-center justify-center text-lg border border-teal-500/30">🙈</div>
+                                        <span class="text-sm font-black text-white font-mono" dir="ltr">/hideseek</span>
                                     </div>
                                     <p class="text-[11px] text-gray-400 leading-relaxed">لعبة الغميضة، يختبئ أحد الأعضاء والبقية يبحثون باستخدام أزرار</p>
                                     <div class="mt-3 flex justify-end">
@@ -6402,9 +6402,9 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
 
                                 <!-- Mafia -->
                                 <div class="bg-[#0b0d14] border border-indigo-500/20 hover:border-indigo-500/50 p-4 rounded-2xl text-right transition group">
-                                    <div class="flex items-center justify-end gap-2 mb-3">
-                                        <span class="text-sm font-black text-white">/mafia</span>
+                                    <div class="flex items-center justify-between mb-3">
                                         <div class="w-9 h-9 rounded-xl bg-indigo-600/20 text-indigo-400 flex items-center justify-center text-lg border border-indigo-500/30">🎭</div>
+                                        <span class="text-sm font-black text-white font-mono" dir="ltr">/mafia</span>
                                     </div>
                                     <p class="text-[11px] text-gray-400 leading-relaxed">لعبة المافيا الجماعية، توزيع أدوار سرية وتصويت للكشف عن المافيا</p>
                                     <div class="mt-3 flex justify-end">
@@ -6413,14 +6413,26 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                                 </div>
 
                                 <!-- Roulette -->
-                                <div class="bg-[#0b0d14] border border-orange-500/20 hover:border-orange-500/50 p-4 rounded-2xl text-right transition group sm:col-span-2 lg:col-span-4">
-                                    <div class="flex items-center justify-end gap-2 mb-3">
-                                        <span class="text-sm font-black text-white">/roulette</span>
-                                        <div class="w-9 h-9 rounded-xl bg-orange-600/20 text-orange-400 flex items-center justify-center text-lg border border-orange-500/30">🎰</div>
+                                <div class="bg-[#0b0d14] border border-rose-500/20 hover:border-rose-500/50 p-4 rounded-2xl text-right transition group">
+                                    <div class="flex items-center justify-between mb-3">
+                                        <div class="w-9 h-9 rounded-xl bg-rose-600/20 text-rose-400 flex items-center justify-center text-lg border border-rose-500/30">🎰</div>
+                                        <span class="text-sm font-black text-white font-mono" dir="ltr">/roulette</span>
                                     </div>
-                                    <p class="text-[11px] text-gray-400 leading-relaxed">الروليت الروسي، اختبر حظك مع الأعضاء في لعبة المخاطرة والإثارة التفاعلية</p>
+                                    <p class="text-[11px] text-gray-400 leading-relaxed">الروليت الروسي والمخاطرة التفاعلية بين الأعضاء</p>
                                     <div class="mt-3 flex justify-end">
-                                        <span class="text-[10px] bg-orange-950/60 text-orange-300 border border-orange-800/40 px-2 py-0.5 rounded-lg font-bold">مخاطرة وإثارة</span>
+                                        <span class="text-[10px] bg-rose-950/60 text-rose-300 border border-rose-800/40 px-2 py-0.5 rounded-lg font-bold">مخاطرة وإثارة</span>
+                                    </div>
+                                </div>
+
+                                <!-- Gamble / Casino -->
+                                <div class="bg-[#0b0d14] border border-orange-500/20 hover:border-orange-500/50 p-4 rounded-2xl text-right transition group">
+                                    <div class="flex items-center justify-between mb-3">
+                                        <div class="w-9 h-9 rounded-xl bg-orange-600/20 text-orange-400 flex items-center justify-center text-lg border border-orange-500/30">🎲</div>
+                                        <span class="text-sm font-black text-white font-mono" dir="ltr">/gamble</span>
+                                    </div>
+                                    <p class="text-[11px] text-gray-400 leading-relaxed">مراهنة الكازينو وعملات النجوم ومضاعفة الرصيد</p>
+                                    <div class="mt-3 flex justify-end">
+                                        <span class="text-[10px] bg-orange-950/60 text-orange-300 border border-orange-800/40 px-2 py-0.5 rounded-lg font-bold">كازينو ونجوم</span>
                                     </div>
                                 </div>
 
@@ -6435,7 +6447,7 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                             <div class="bg-[#0b0d14] border border-purple-500/20 rounded-2xl p-4 flex items-center justify-between gap-4">
                                 <span class="text-xs text-gray-400">تجمع جميع الألعاب في رسالة واحدة مع أزرار تفاعلية</span>
                                 <div class="flex items-center gap-3 flex-shrink-0">
-                                    <span class="font-mono font-black text-purple-300 text-sm bg-purple-950/50 px-3 py-1 rounded-xl border border-purple-800/40">/games panel</span>
+                                    <span class="font-mono font-black text-purple-300 text-sm bg-purple-950/50 px-3 py-1 rounded-xl border border-purple-800/40" dir="ltr">/games panel</span>
                                     <div class="w-8 h-8 rounded-xl bg-purple-600/20 text-purple-400 flex items-center justify-center text-base">🎮</div>
                                 </div>
                             </div>
