@@ -5850,8 +5850,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                                 html += '</div>';
                                 html += '<div class="w-9 h-9 rounded-xl bg-white/5 text-gray-300 flex items-center justify-center text-base border border-white/5 shadow-inner flex-shrink-0">' + item.icon + '</div>';
                                 html += '</div>';
-
-                                html += '</div>';
+                            }
                             container.innerHTML = html;
                         }
 
