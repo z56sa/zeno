@@ -254,40 +254,28 @@ async function runTrivia(interaction) {
 }
 
 // ==========================================
-// 2. لعبة أسرع كتابة (Fast Type with Luxury Card & Live Reactions)
+// 2. لعبة أسرع كتابة (Fast Type Challenge - Direct Embed Text)
 // ==========================================
 async function runFastType(interaction) {
   const word = FAST_WORDS[Math.floor(Math.random() * FAST_WORDS.length)];
   const reward = Math.floor(Math.random() * 60) + 50; // 50 - 110 coins
   const timeLimit = 20;
 
-  let cardBuffer = null;
-  try {
-    if (canvasUtil.createFastTypeCard) {
-      cardBuffer = await canvasUtil.createFastTypeCard(word, timeLimit);
-    }
-  } catch (e) {}
-
   const embed = new EmbedBuilder()
     .setColor('#9333ea')
     .setTitle('⚡ تحدي أسرع كتابة | Fast Type Challenge')
     .setDescription(
-      `اكتب الكلمة المعروضة في البطاقة أدناه في الشات بأسرع ما يمكنك!\n\n` +
+      `### ✍️ الكلمة المطلوبة:\n` +
+      `# ❯❯ \`${word}\` ❮❮\n\n` +
+      `⚡ اكتب الكلمة كما هي تماماً في الشات أدناه بأسرع ما يمكنك!\n\n` +
       `⏱️ **الوقت المتاح:** \`${timeLimit} ثانية\`\n` +
-      `🎁 **جائزة الفائز:** \`+${reward} ⭐ Star Coins\`\n` +
+      `🎁 **جائزة الفائز:** \`+${reward} ⭐ Star Coins\` + \`+25 XP\`\n` +
       `💡 *البوت يتفاعل فوراً مع إجابتك (صحيحة ✅ أو خاطئة ❌)!*`
     )
     .setFooter({ text: 'ZENO Games • أسرع شخص يكتبها يفوز!', iconURL: interaction.guild?.iconURL() || undefined })
     .setTimestamp();
 
-  const files = [];
-  if (cardBuffer) {
-    const attachment = new AttachmentBuilder(cardBuffer, { name: 'fasttype.png' });
-    embed.setImage('attachment://fasttype.png');
-    files.push(attachment);
-  }
-
-  await interaction.reply({ embeds: [embed], files });
+  await interaction.reply({ embeds: [embed] });
 
   const channel = interaction.channel;
   const targetClean = normalizeText(word);
