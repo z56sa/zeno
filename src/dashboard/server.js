@@ -5842,7 +5842,6 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                                 html += '<div class="flex items-center gap-3">';
                                 html += '<div class="text-right">';
                                 html += '<div class="flex items-center justify-end gap-2">';
-                                if (item.isSpecial) html += '<span class="px-2 py-0.5 bg-amber-950/80 text-amber-400 border border-amber-500/30 rounded-lg text-[9px] font-bold flex items-center gap-1"><span>بوتات خاصة فقط</span><span>🔒</span></span>';
                                 if (customChan) html += '<span class="px-2 py-0.5 bg-blue-950/60 text-blue-300 border border-blue-800/40 rounded-lg text-[9px] font-bold">قناة مخصصة</span>';
                                 html += '<span class="font-black text-white text-xs">' + item.title + '</span>';
                                 html += '<span class="w-2.5 h-2.5 rounded-full" style="background-color:' + customColor + '" title="لون الإيمبد"></span>';
