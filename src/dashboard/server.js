@@ -9,6 +9,7 @@ const SqliteStore = require('better-sqlite3-session-store')(session);
 const database = require('../database');
 const rawDb = database.db;
 const SecretManager = require('../utils/secretManager');
+const identityWallpapers = require('../data/identityWallpapers.json');
 
 module.exports = function (app, client) {
     const sessionStore = new SqliteStore({ client: rawDb });
@@ -234,6 +235,31 @@ module.exports = function (app, client) {
                 </div>
             `;
 
+            // توليد بطاقات متجر خلفيات الهوية (105 صورة حقيقية مصنفة)
+            const categories = [...new Set(identityWallpapers.map(w => w.category))];
+            const identityWallpapersHtml = identityWallpapers.map(w => {
+                const isSelected = userWallpaper === w.url || userWallpaper === w.name;
+                return `
+                <div class="wallpaper-item bg-[#10121b] border ${isSelected ? 'border-purple-500 ring-2 ring-purple-500/40' : 'border-white/5 hover:border-purple-500/30'} rounded-2xl overflow-hidden shadow-lg transition-all flex flex-col justify-between group" data-category="${w.category}">
+                    <div class="relative h-32 overflow-hidden bg-black">
+                        <img src="${w.url}" alt="${w.name}" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                        <div class="absolute inset-0 bg-gradient-to-t from-[#10121b] via-transparent to-black/20"></div>
+                        <span class="absolute top-2 right-2 bg-black/60 backdrop-blur-md text-[10px] font-bold text-purple-300 px-2 py-0.5 rounded-md border border-white/10">${w.category}</span>
+                        ${isSelected ? '<span class="absolute top-2 left-2 bg-emerald-500 text-white text-[10px] font-black px-2 py-0.5 rounded-md shadow-md">✓ مفعّل حالياً</span>' : ''}
+                    </div>
+                    <div class="p-3.5 flex flex-col justify-between flex-1 text-right gap-2.5">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-mono font-bold text-amber-300">🪙 ${w.price.toLocaleString()}</span>
+                            <h4 class="text-xs font-bold text-white truncate max-w-[140px]">${w.name}</h4>
+                        </div>
+                        <button onclick="buyItem('identity', '${w.url}', ${w.price}, this)" class="w-full py-2 bg-gradient-to-r ${isSelected ? 'from-emerald-600 to-teal-600 cursor-default' : 'from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500'} text-white rounded-xl text-xs font-bold transition shadow-md flex items-center justify-center gap-1.5">
+                            ${isSelected ? '<span>مجهزة على بطاقتك 🪪</span>' : `<span>شراء وتجهيز (${w.price.toLocaleString()} 🪙)</span>`}
+                        </button>
+                    </div>
+                </div>
+                `;
+            }).join('');
+
             res.send(`
             <!DOCTYPE html>
             <html lang="ar" dir="rtl" class="dark">
@@ -266,6 +292,26 @@ module.exports = function (app, client) {
         if (!el) return;
         el.classList.toggle('hidden');
         if (arrow) arrow.classList.toggle('rotate-180');
+    };
+
+    window.filterWallpapers = function(cat, btn) {
+        const items = document.querySelectorAll('.wallpaper-item');
+        items.forEach(el => {
+            if (cat === 'all' || el.getAttribute('data-category') === cat) {
+                el.style.display = 'flex';
+            } else {
+                el.style.display = 'none';
+            }
+        });
+        const filterBtns = document.querySelectorAll('.cat-filter-btn');
+        filterBtns.forEach(b => {
+            b.classList.remove('bg-purple-600', 'text-white');
+            b.classList.add('bg-white/5', 'text-gray-400');
+        });
+        if (btn) {
+            btn.classList.add('bg-purple-600', 'text-white');
+            btn.classList.remove('bg-white/5', 'text-gray-400');
+        }
     };
 
     window.switchTab = function(tabId, btn) {
@@ -518,7 +564,7 @@ module.exports = function (app, client) {
                                     <!-- 1. الملف الشخصي (Main Profile Card) -->
                                     <div class="bg-[#10121b] border border-white/5 rounded-3xl p-5 shadow-xl space-y-4">
                                         <div class="flex items-center justify-between border-b border-white/5 pb-3">
-                                            <button onclick="switchTab('tabWallpapers')" class="px-3 py-1.5 bg-purple-600/20 hover:bg-purple-600/30 text-purple-300 border border-purple-500/30 rounded-xl text-xs font-bold transition flex items-center gap-1.5">
+                                            <button onclick="switchTab('tabIdentity')" class="px-3 py-1.5 bg-purple-600/20 hover:bg-purple-600/30 text-purple-300 border border-purple-500/30 rounded-xl text-xs font-bold transition flex items-center gap-1.5">
                                                 <span>✏️</span>
                                                 <span>تعديل البطاقة</span>
                                             </button>
@@ -629,112 +675,35 @@ module.exports = function (app, client) {
 
                         </div>
 
-                        <!-- Tab 2: متجر خلفيات البروفايل (Wallpapers Shop) -->
-                        <div id="tabWallpapers" class="tab-content hidden space-y-6">
-                            <div class="probot-card border border-white/5 rounded-3xl p-6 shadow-xl">
-                                <div class="flex items-center justify-between pb-4 mb-4 border-b border-white/5">
-                                    <span class="text-xs text-amber-400 font-bold">رصيدك: <span class="user-coins-val">${userCoins.toLocaleString()}</span> 🪙 الذهب</span>
-                                    <h3 class="text-sm font-black text-white text-right">متجر خلفيات الملف الشخصي 🖼️</h3>
-                                </div>
-                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                                    
-                                    <div class="bg-[#1c1f2e] border border-white/5 rounded-2xl overflow-hidden shadow-lg group">
-                                        <div class="h-28 bg-gradient-to-r from-purple-900 via-indigo-950 to-purple-950 flex items-center justify-center text-3xl">🌌</div>
-                                        <div class="p-4 text-right">
-                                            <h4 class="text-xs font-bold text-white">Galaxy Neon</h4>
-                                            <p class="text-[10px] text-gray-400 mt-0.5">خلفية النجوم والنيون الأرجواني</p>
-                                            <div class="mt-3 flex items-center justify-between">
-                                                <button onclick="buyItem('wallpaper', 'Galaxy Neon', 5000, this)" class="px-4 py-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-xs font-bold shadow-md hover:from-purple-500 hover:to-indigo-500 transition">شراء وتجهيز</button>
-                                                <span class="text-xs font-mono text-amber-300 font-bold">5,000 🪙</span>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="bg-[#1c1f2e] border border-white/5 rounded-2xl overflow-hidden shadow-lg group">
-                                        <div class="h-28 bg-gradient-to-r from-emerald-950 via-slate-900 to-teal-950 flex items-center justify-center text-3xl">🌲</div>
-                                        <div class="p-4 text-right">
-                                            <h4 class="text-xs font-bold text-white">Emerald Forest</h4>
-                                            <p class="text-[10px] text-gray-400 mt-0.5">خلفية الطبيعة والزمرد الفخم</p>
-                                            <div class="mt-3 flex items-center justify-between">
-                                                <button onclick="buyItem('wallpaper', 'Emerald Forest', 7500, this)" class="px-4 py-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-xs font-bold shadow-md hover:from-purple-500 hover:to-indigo-500 transition">شراء وتجهيز</button>
-                                                <span class="text-xs font-mono text-amber-300 font-bold">7,500 🪙</span>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="bg-[#1c1f2e] border border-white/5 rounded-2xl overflow-hidden shadow-lg group">
-                                        <div class="h-28 bg-gradient-to-r from-rose-950 via-zinc-900 to-amber-950 flex items-center justify-center text-3xl">🔥</div>
-                                        <div class="p-4 text-right">
-                                            <h4 class="text-xs font-bold text-white">Cyberpunk Gold</h4>
-                                            <p class="text-[10px] text-gray-400 mt-0.5">خلفية اللهب والذهب الخالص</p>
-                                            <div class="mt-3 flex items-center justify-between">
-                                                <button onclick="buyItem('wallpaper', 'Cyberpunk Gold', 12000, this)" class="px-4 py-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-xs font-bold shadow-md hover:from-purple-500 hover:to-indigo-500 transition">شراء وتجهيز</button>
-                                                <span class="text-xs font-mono text-amber-300 font-bold">12,000 🪙</span>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Tab 3: شارات البروفايل (Badges Shop) -->
-                        <div id="tabBadges" class="tab-content hidden space-y-6">
-                            <div class="probot-card border border-white/5 rounded-3xl p-6 shadow-xl">
-                                <div class="flex items-center justify-between pb-4 mb-4 border-b border-white/5">
-                                    <span class="text-xs text-amber-400 font-bold">رصيدك: <span class="user-coins-val">${userCoins.toLocaleString()}</span> 🪙 الذهب</span>
-                                    <h3 class="text-sm font-black text-white text-right">متجر شارات وأوسمة الملف الشخصي 🎖️</h3>
-                                </div>
-                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                                    <div class="bg-[#1c1f2e] border border-white/5 p-4 rounded-2xl text-center space-y-2">
-                                        <span class="text-3xl block">👑</span>
-                                        <h4 class="text-xs font-bold text-white">تاج الأساطير</h4>
-                                        <p class="text-[10px] text-gray-400">شارة ملكية ذهبية</p>
-                                        <button onclick="buyItem('badge', 'Crown Badge', 10000, this)" class="w-full py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-xs font-bold transition shadow-md">شراء (10,000 🪙)</button>
-                                    </div>
-                                    <div class="bg-[#1c1f2e] border border-white/5 p-4 rounded-2xl text-center space-y-2">
-                                        <span class="text-3xl block">💎</span>
-                                        <h4 class="text-xs font-bold text-white">الماسة اللامعة</h4>
-                                        <p class="text-[10px] text-gray-400">شارة النقاء والتميز</p>
-                                        <button onclick="buyItem('badge', 'Diamond Badge', 15000, this)" class="w-full py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-xs font-bold transition shadow-md">شراء (15,000 🪙)</button>
-                                    </div>
-                                    <div class="bg-[#1c1f2e] border border-white/5 p-4 rounded-2xl text-center space-y-2">
-                                        <span class="text-3xl block">⚡</span>
-                                        <h4 class="text-xs font-bold text-white">صاعقة النيون</h4>
-                                        <p class="text-[10px] text-gray-400">شارة السرعة والقوة</p>
-                                        <button onclick="buyItem('badge', 'Lightning Badge', 8000, this)" class="w-full py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-xs font-bold transition shadow-md">شراء (8,000 🪙)</button>
-                                    </div>
-                                    <div class="bg-[#1c1f2e] border border-white/5 p-4 rounded-2xl text-center space-y-2">
-                                        <span class="text-3xl block">🔥</span>
-                                        <h4 class="text-xs font-bold text-white">لهب العزيمة</h4>
-                                        <p class="text-[10px] text-gray-400">شارة النشاط والحماس</p>
-                                        <button onclick="buyItem('badge', 'Fire Badge', 7000, this)" class="w-full py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-xs font-bold transition shadow-md">شراء (7,000 🪙)</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Tab 4: خلفيات بطاقة الهوية (Identity Shop) -->
+                        <!-- Tab 2: متجر خلفيات بطاقة الهوية (105+ خلفيات واقعية فخمة) -->
                         <div id="tabIdentity" class="tab-content hidden space-y-6">
-                            <div class="probot-card border border-white/5 rounded-3xl p-6 shadow-xl text-right">
-                                <h3 class="text-sm font-black text-white mb-2">خلفيات بطاقة الهوية 🪪</h3>
-                                <p class="text-gray-400 text-xs mb-6">خصص تصميم بطاقة الهوية التي تظهر في الديسكورد عند كتابة أمر <span class="text-purple-400 font-mono">/id</span> أو <span class="text-purple-400 font-mono">/profile</span>.</p>
-                                
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div class="bg-[#1c1f2e] border border-white/5 p-4 rounded-2xl flex items-center justify-between">
-                                        <button onclick="buyItem('identity', 'Dark Minimalist', 3000, this)" class="px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-xs font-bold">تفعيل (3,000 🪙)</button>
-                                        <div>
-                                            <h4 class="text-xs font-bold text-white">Dark Minimalist</h4>
-                                            <p class="text-[10px] text-gray-400">تصميم أسود داكن كلاسيكي فخم</p>
-                                        </div>
+                            <div class="probot-card border border-white/5 rounded-3xl p-6 shadow-xl space-y-6">
+                                <div class="flex flex-col md:flex-row items-center justify-between pb-4 border-b border-white/5 gap-4">
+                                    <div class="flex items-center gap-3">
+                                        <span class="text-xs text-amber-400 font-bold bg-amber-500/10 border border-amber-500/20 px-3.5 py-1.5 rounded-xl">
+                                            رصيدك: <span class="user-coins-val font-mono">${userCoins.toLocaleString()}</span> 🪙 الذهب
+                                        </span>
                                     </div>
-                                    <div class="bg-[#1c1f2e] border border-white/5 p-4 rounded-2xl flex items-center justify-between">
-                                        <button onclick="buyItem('identity', 'Purple Glow Pro', 4500, this)" class="px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-xs font-bold">تفعيل (4,500 🪙)</button>
-                                        <div>
-                                            <h4 class="text-xs font-bold text-white">Purple Glow Pro</h4>
-                                            <p class="text-[10px] text-gray-400">توهج بنفسجي متدرج ملكي</p>
-                                        </div>
+                                    <div class="text-right">
+                                        <h3 class="text-base font-black text-white flex items-center justify-end gap-2">
+                                            <span>متجر خلفيات بطاقة الهوية (105+ خلفية واقعية)</span>
+                                            <span>🪪</span>
+                                        </h3>
+                                        <p class="text-xs text-gray-400 mt-1">اختر من بين أجمل وأفخم الصور الطبيعية، الفلكية، المدن والسيارات لتظهر على بطاقتك في ديسكورد (<code class="text-purple-400 font-mono">/profile</code> و <code class="text-purple-400 font-mono">/id</code>).</p>
                                     </div>
+                                </div>
+
+                                <!-- تصنيفات الخلفيات Filter Tabs -->
+                                <div class="flex items-center justify-end gap-2 flex-wrap text-xs font-bold">
+                                    <button onclick="filterWallpapers('all', this)" class="cat-filter-btn px-4 py-2 rounded-xl bg-purple-600 text-white transition shadow-md">الكل (105)</button>
+                                    ${categories.map(cat => `
+                                        <button onclick="filterWallpapers('${cat}', this)" class="cat-filter-btn px-4 py-2 rounded-xl bg-white/5 text-gray-400 hover:text-white hover:bg-white/10 transition">${cat}</button>
+                                    `).join('')}
+                                </div>
+
+                                <!-- شبكة الخلفيات Grid -->
+                                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-h-[850px] overflow-y-auto pr-1 custom-scrollbar">
+                                    ${identityWallpapersHtml}
                                 </div>
                             </div>
                         </div>
@@ -840,17 +809,9 @@ module.exports = function (app, client) {
                                     <span class="flex items-center gap-1.5"><span>متجر القولد</span></span>
                                 </button>
                                 <div id="user_grp_shop" class="space-y-1">
-                                    <button onclick="switchTab('tabWallpapers', this)" class="nav-btn px-3 py-2 rounded-xl text-gray-300 hover:text-white hover:bg-[#151724] font-medium flex items-center justify-between transition w-full">
-                                        <span></span>
-                                        <span class="flex items-center gap-2"><span>خلفيات الملف الشخصي</span><span class="text-gray-400">🖼️</span></span>
-                                    </button>
                                     <button onclick="switchTab('tabIdentity', this)" class="nav-btn px-3 py-2 rounded-xl text-gray-300 hover:text-white hover:bg-[#151724] font-medium flex items-center justify-between transition w-full">
                                         <span></span>
-                                        <span class="flex items-center gap-2"><span>خلفيات بطاقة الهوية</span><span class="text-gray-400">🪪</span></span>
-                                    </button>
-                                    <button onclick="switchTab('tabBadges', this)" class="nav-btn px-3 py-2 rounded-xl text-gray-300 hover:text-white hover:bg-[#151724] font-medium flex items-center justify-between transition w-full">
-                                        <span></span>
-                                        <span class="flex items-center gap-2"><span>شارات وأوسمة</span><span class="text-gray-400">🎖️</span></span>
+                                        <span class="flex items-center gap-2"><span>خلفيات بطاقة الهوية (105+)</span><span class="text-purple-400">🪪</span></span>
                                     </button>
                                 </div>
                             </div>
@@ -9114,7 +9075,10 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
             const guilds = req.session.guilds || [];
             const primaryGuildId = guilds.length > 0 ? guilds[0].id : 'global';
 
-            rawDb.prepare('UPDATE users SET coins = MAX(0, coins - ?), wallpaper = ? WHERE user_id = ? AND guild_id = ?').run(price, name, userId, primaryGuildId);
+            rawDb.prepare('INSERT OR IGNORE INTO users (user_id, guild_id, coins) VALUES (?, ?, 0)').run(userId, primaryGuildId);
+            rawDb.prepare('UPDATE users SET coins = MAX(0, coins - ?) WHERE user_id = ? AND guild_id = ?').run(price, userId, primaryGuildId);
+            rawDb.prepare('UPDATE users SET wallpaper = ? WHERE user_id = ?').run(name, userId);
+            
             res.json({ success: true });
         } catch(e) {
             res.status(500).json({ success: false, error: e.message });
