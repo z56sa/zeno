@@ -36,7 +36,7 @@ module.exports = function (app, client) {
     }));
 
     // 1. الصفحة الرئيسية وشاشة البداية (ProBot Black & Purple Landing Page)
-    app.get('/', (req, res) => {
+    app.get(['/', '/dashboard'], (req, res) => {
         try {
             const html = `<!DOCTYPE html>
 <html lang="ar" dir="rtl" class="dark">
@@ -242,8 +242,8 @@ module.exports = function (app, client) {
     });
 
 
-    // 3. User Dashboard & Main Routes (وصول مباشر بدون Authorize)
-    app.get(['/dashboard', '/dashboard/manage'], (req, res) => {
+    // 3. User Dashboard & Main Routes (لوحة التحكم الداخلية للسيرفرات)
+    app.get('/dashboard/manage', (req, res) => {
         try {
             // استخدام بيانات المستخدم الحالية أو حساب إدارة افتراضي مباشر
             let user = req.session?.user || null;
