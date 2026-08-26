@@ -36,27 +36,8 @@ module.exports = function (app, client) {
     }));
 
     // 1. الصفحة الرئيسية وشاشة البداية (ProBot Black & Purple Landing Page)
-    app.get(['/', '/dashboard'], (req, res) => {
+    app.get('/', (req, res) => {
         try {
-            const user = req.session?.user || null;
-            let authButtonHtml = '';
-
-            if (user) {
-                const userAvatar = user.avatar ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png` : 'https://cdn.discordapp.com/embed/avatars/0.png';
-                authButtonHtml = `
-                    <a href="/dashboard/manage" class="flex items-center gap-3 bg-[#151722] hover:bg-[#1c1f2e] border border-purple-500/30 px-4 py-2 rounded-2xl transition">
-                        <img src="${userAvatar}" alt="${user.username}" class="w-8 h-8 rounded-xl object-cover ring-2 ring-purple-500/50">
-                        <span class="text-xs font-bold text-white">${user.username}</span>
-                    </a>
-                `;
-            } else {
-                authButtonHtml = `
-                    <a href="/auth/discord" class="px-6 py-2.5 zeno-btn-primary rounded-xl text-xs font-black shadow-lg">
-                        تسجيل الدخول
-                    </a>
-                `;
-            }
-
             const html = `<!DOCTYPE html>
 <html lang="ar" dir="rtl" class="dark">
 <head>
@@ -128,9 +109,11 @@ module.exports = function (app, client) {
             <a href="#features" class="hover:text-purple-400 transition">المميزات</a>
         </nav>
 
-        <!-- User / Login Right in RTL -->
+        <!-- Direct Dashboard Button -->
         <div class="flex items-center gap-4">
-            ${authButtonHtml}
+            <a href="/dashboard/manage" class="px-6 py-2.5 zeno-btn-primary rounded-xl text-xs font-black shadow-lg">
+                لوحة التحكم
+            </a>
         </div>
     </header>
 
@@ -175,99 +158,14 @@ module.exports = function (app, client) {
             res.send(html);
         } catch(e) {
             console.error('Error loading landing page:', e);
-            res.send("<h1>ZENO BOT</h1><a href='/dashboard'>Go to Dashboard</a>");
+            res.redirect('/dashboard/manage');
         }
     });
 
-    // Helper to get OAuth redirect URI
-    function getOAuthRedirectUri(req) {
-        if (SecretManager.getSecret('DISCORD_REDIRECT_URI')) return SecretManager.getSecret('DISCORD_REDIRECT_URI');
-        if (process.env.DISCORD_REDIRECT_URI) return process.env.DISCORD_REDIRECT_URI;
-        const host = req.get('x-forwarded-host') || req.get('host') || 'localhost:3000';
-        const proto = req.get('x-forwarded-proto') || req.protocol || 'https';
-        return `${proto}://${host}/auth/discord/callback`;
-    }
-
-    // 2. OAuth2
-    app.get('/auth/discord', (req, res) => {
-        // إذا كان المستخدم مسجل دخوله مسبقاً، نوجهه فوراً للداشبورد دون إعادة طلب Authorize
-        if (req.session?.user) {
-            return res.redirect('/dashboard/manage');
-        }
-
-        const clientId = SecretManager.getSecret('DISCORD_CLIENT_ID') || process.env.DISCORD_CLIENT_ID;
-        const redirectUri = encodeURIComponent(getOAuthRedirectUri(req));
-        const authUrl = `https://discord.com/api/oauth2/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=identify%20guilds`;
-        res.redirect(authUrl);
-    });
-
-    app.get('/auth/discord/callback', async (req, res) => {
-        const code = req.query.code;
-        if (!code) return res.redirect('/');
-
-        try {
-            const clientId = SecretManager.getSecret('DISCORD_CLIENT_ID') || process.env.DISCORD_CLIENT_ID;
-            const clientSecret = SecretManager.getSecret('DISCORD_CLIENT_SECRET') || process.env.DISCORD_CLIENT_SECRET;
-            const redirectUri = getOAuthRedirectUri(req);
-
-            const tokenRes = await fetch('https://discord.com/api/oauth2/token', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                    'User-Agent': 'DiscordBot (https://github.com, 1.0.0)'
-                },
-                body: new URLSearchParams({
-                    client_id: clientId,
-                    client_secret: clientSecret,
-                    grant_type: 'authorization_code',
-                    code,
-                    redirect_uri: redirectUri
-                })
-            });
-
-            const rawText = await tokenRes.text();
-            let tokenData;
-            try {
-                tokenData = JSON.parse(rawText);
-            } catch (e) {
-                console.error('Discord OAuth Token Endpoint returned non-JSON response (Status:', tokenRes.status, '):', rawText.substring(0, 300));
-                return res.redirect('/');
-            }
-
-            if (!tokenData || !tokenData.access_token) {
-                console.error('Discord OAuth Token Exchange Failed:', tokenData);
-                return res.redirect('/');
-            }
-
-            const userRes = await fetch('https://discord.com/api/users/@me', {
-                headers: {
-                    Authorization: `Bearer ${tokenData.access_token}`,
-                    'User-Agent': 'DiscordBot (https://github.com, 1.0.0)'
-                }
-            });
-            const userData = await userRes.json();
-
-            const guildsRes = await fetch('https://discord.com/api/users/@me/guilds', {
-                headers: {
-                    Authorization: `Bearer ${tokenData.access_token}`,
-                    'User-Agent': 'DiscordBot (https://github.com, 1.0.0)'
-                }
-            });
-            const allGuilds = await guildsRes.json();
-
-            req.session.user = userData;
-            req.session.guilds = Array.isArray(allGuilds) ? allGuilds.filter(g => (g.permissions & 0x8) === 0x8 || (g.permissions & 0x20) === 0x20) : [];
-
-            req.session.save(() => res.redirect('/dashboard/manage'));
-        } catch (error) {
-            console.error('OAuth error:', error);
-            res.redirect('/');
-        }
-    });
-
-    app.get('/logout', (req, res) => {
-        req.session.destroy(() => res.redirect('/'));
-    });
+    // 2. Direct Auth Redirections (توجيه مباشر دون الحاجة لـ OAuth2)
+    app.get('/auth/discord', (req, res) => res.redirect('/dashboard/manage'));
+    app.get('/auth/discord/callback', (req, res) => res.redirect('/dashboard/manage'));
+    app.get('/logout', (req, res) => res.redirect('/'));
 
     // ========================================================
     // 💡 ECONOMY API ENDPOINTS (Live Persistent Dashboard API)
@@ -344,12 +242,32 @@ module.exports = function (app, client) {
     });
 
 
-    // 3. User Dashboard & Main Routes
-    app.get('/dashboard/manage', (req, res) => {
+    // 3. User Dashboard & Main Routes (وصول مباشر بدون Authorize)
+    app.get(['/dashboard', '/dashboard/manage'], (req, res) => {
         try {
-            if (!req.session?.user) return res.redirect('/auth/discord');
-            const user = req.session.user;
-            const guilds = req.session.guilds || [];
+            // استخدام بيانات المستخدم الحالية أو حساب إدارة افتراضي مباشر
+            let user = req.session?.user || null;
+            if (!user) {
+                user = {
+                    id: client?.user?.id || '1506005273893146775',
+                    username: 'المسؤول',
+                    avatar: client?.user?.avatar || null
+                };
+            }
+
+            // جلب سيرفرات البوت مباشرة لتمكين إدارتها فوراً
+            let guilds = req.session?.guilds || [];
+            if (!guilds || guilds.length === 0) {
+                if (client?.guilds?.cache) {
+                    guilds = client.guilds.cache.map(g => ({
+                        id: g.id,
+                        name: g.name,
+                        icon: g.icon,
+                        permissions: 8
+                    }));
+                }
+            }
+
             const userAvatar = user.avatar ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png` : 'https://cdn.discordapp.com/embed/avatars/0.png';
 
             let userCoins = 0, userLevel = 1, userStars = 0, userXp = 0, userLastDaily = 0, userWallpaper = 'default';
@@ -1067,14 +985,17 @@ module.exports = function (app, client) {
         }
     });
 
-    // 4. Guild Dashboard & Sub-pages
+    // 4. Guild Dashboard & Sub-pages (وصول مباشر لكافة إعدادات السيرفر)
     app.get('/dashboard/:guildId/:section?', (req, res) => {
         try {
-            if (!req.session?.user) return res.redirect('/auth/discord');
             const guildId = req.params.guildId;
             const section = req.params.section || 'overview';
-            const guilds = req.session.guilds || [];
-            const user = req.session.user;
+            const user = req.session?.user || {
+                id: client?.user?.id || '1506005273893146775',
+                username: 'المسؤول',
+                avatar: client?.user?.avatar || null
+            };
+            const guilds = req.session?.guilds || [];
 
             let guild = guilds.find(g => g.id === guildId);
             if (!guild && client?.guilds?.cache) {
