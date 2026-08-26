@@ -22,7 +22,7 @@ module.exports = function (app, client) {
         sessionSecret = 'ZENO_TICKETS_SUPER_SECRET';
     }
 
-    app.use(express.static(require('path').join(__dirname, 'public')));
+    app.use(express.static(require('path').join(__dirname, 'public'), { index: false }));
     app.use(session({
         store: sessionStore,
         secret: sessionSecret,
