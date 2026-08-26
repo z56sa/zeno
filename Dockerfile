@@ -1,23 +1,33 @@
-# Use an official Node runtime as the base image
-FROM node:20-alpine
+# Use stable Debian-slim Node 20 runtime (supports Canvas and Better-Sqlite3 out of the box)
+FROM node:20-slim
 
-# Set the working directory in the container
+# Install system dependencies required for native packages & font rendering
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python3 \
+    make \
+    g++ \
+    build-essential \
+    libcairo2-dev \
+    libpango1.0-dev \
+    libjpeg-dev \
+    libgif-dev \
+    librsvg2-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set working directory
 WORKDIR /usr/src/app
 
-# Copy package.json and lock files first to leverage Docker's caching layer
+# Copy package files
 COPY package*.json ./
 
-# Install build dependencies for native modules (better-sqlite3, etc.)
-RUN apk add --no-cache python3 make g++ gcc libc6-compat
-
-# Install all necessary dependencies for production
+# Install dependencies
 RUN npm install --omit=dev
 
-# Copy the rest of the application source code
+# Copy source files
 COPY . .
 
-# Expose the port the bot will run on (standard practice, even if not used by node.js directly)
+# Expose server port
 EXPOSE 3000
 
-# Define the command to run when the container starts up
+# Start command
 CMD [ "node", "src/index.js" ]
