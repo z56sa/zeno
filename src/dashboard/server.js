@@ -703,10 +703,6 @@ module.exports = function (app, client) {
                                     <!-- 1. الملف الشخصي (Main Profile Card) -->
                                     <div class="bg-[#10121b] border border-white/5 rounded-3xl p-5 shadow-xl space-y-4">
                                         <div class="flex items-center justify-between border-b border-white/5 pb-3">
-                                            <button onclick="switchTab('tabIdentity')" class="px-3 py-1.5 bg-purple-600/20 hover:bg-purple-600/30 text-purple-300 border border-purple-500/30 rounded-xl text-xs font-bold transition flex items-center gap-1.5">
-                                                <span>✏️</span>
-                                                <span>تعديل البطاقة</span>
-                                            </button>
                                             <h4 class="text-xs font-black text-white">الملف الشخصي</h4>
                                         </div>
 
@@ -765,10 +761,6 @@ module.exports = function (app, client) {
                                     <!-- 2. بطاقة الهوية (Identity / Voice & Invites Card) -->
                                     <div class="bg-[#10121b] border border-white/5 rounded-3xl p-5 shadow-xl space-y-4">
                                         <div class="flex items-center justify-between border-b border-white/5 pb-3">
-                                            <button onclick="switchTab('tabIdentity')" class="px-3 py-1.5 bg-purple-600/20 hover:bg-purple-600/30 text-purple-300 border border-purple-500/30 rounded-xl text-xs font-bold transition flex items-center gap-1.5">
-                                                <span>✏️</span>
-                                                <span>تعديل البطاقة</span>
-                                            </button>
                                             <h4 class="text-xs font-black text-white">بطاقة الهوية</h4>
                                         </div>
 
@@ -814,38 +806,6 @@ module.exports = function (app, client) {
 
                         </div>
 
-                        <!-- Tab 2: متجر خلفيات بطاقة الهوية (105+ خلفيات واقعية فخمة) -->
-                        <div id="tabIdentity" class="tab-content hidden space-y-6">
-                            <div class="probot-card border border-white/5 rounded-3xl p-6 shadow-xl space-y-6">
-                                <div class="flex flex-col md:flex-row items-center justify-between pb-4 border-b border-white/5 gap-4">
-                                    <div class="flex items-center gap-3">
-                                        <span class="text-xs text-amber-400 font-bold bg-amber-500/10 border border-amber-500/20 px-3.5 py-1.5 rounded-xl">
-                                            رصيدك: <span class="user-coins-val font-mono">${userCoins.toLocaleString()}</span> 🪙 الذهب
-                                        </span>
-                                    </div>
-                                    <div class="text-right">
-                                        <h3 class="text-base font-black text-white flex items-center justify-end gap-2">
-                                            <span>متجر خلفيات بطاقة الهوية (105+ خلفية واقعية)</span>
-                                            <span>🪪</span>
-                                        </h3>
-                                        <p class="text-xs text-gray-400 mt-1">اختر من بين أجمل وأفخم الصور الطبيعية، الفلكية، المدن والسيارات لتظهر على بطاقتك في ديسكورد (<code class="text-purple-400 font-mono">/profile</code> و <code class="text-purple-400 font-mono">/id</code>).</p>
-                                    </div>
-                                </div>
-
-                                <!-- تصنيفات الخلفيات Filter Tabs -->
-                                <div class="flex items-center justify-end gap-2 flex-wrap text-xs font-bold">
-                                    <button onclick="filterWallpapers('all', this)" class="cat-filter-btn px-4 py-2 rounded-xl bg-purple-600 text-white transition shadow-md">الكل (105)</button>
-                                    ${categories.map(cat => `
-                                        <button onclick="filterWallpapers('${cat}', this)" class="cat-filter-btn px-4 py-2 rounded-xl bg-white/5 text-gray-400 hover:text-white hover:bg-white/10 transition">${cat}</button>
-                                    `).join('')}
-                                </div>
-
-                                <!-- شبكة الخلفيات Grid -->
-                                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-h-[850px] overflow-y-auto pr-1 custom-scrollbar">
-                                    ${identityWallpapersHtml}
-                                </div>
-                            </div>
-                        </div>
 
                         <!-- Tab 5: لوحة المتصدرين (Leaderboards) -->
                         <div id="tabLeaderboard" class="tab-content hidden space-y-6">
@@ -941,19 +901,6 @@ module.exports = function (app, client) {
                                 </div>
                             </div>
 
-                            <!-- متجر القولد (Shop) -->
-                            <div class="space-y-1">
-                                <button type="button" onclick="toggleNavGroup('user_grp_shop')" class="w-full flex items-center justify-between text-gray-400 hover:text-white px-2 py-1 font-bold text-[11px] transition">
-                                    <svg id="arrow_user_grp_shop" class="w-3.5 h-3.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                                    <span class="flex items-center gap-1.5"><span>متجر القولد</span></span>
-                                </button>
-                                <div id="user_grp_shop" class="space-y-1">
-                                    <button onclick="switchTab('tabIdentity', this)" class="nav-btn px-3 py-2 rounded-xl text-gray-300 hover:text-white hover:bg-[#151724] font-medium flex items-center justify-between transition w-full">
-                                        <span></span>
-                                        <span class="flex items-center gap-2"><span>خلفيات بطاقة الهوية (105+)</span><span class="text-purple-400">🪪</span></span>
-                                    </button>
-                                </div>
-                            </div>
 
                             <!-- لوحة المتصدرين (Leaderboards) -->
                             <div class="space-y-1">
