@@ -35,45 +35,142 @@ module.exports = function (app, client) {
         }
     }));
 
-    // 1. الصفحة الرئيسية (ProBot Landing Page Style)
+    // 1. الصفحة الرئيسية (ProBot Landing Page Style - Direct Inlined HTML)
     app.get('/', (req, res) => {
         try {
             const user = req.session?.user || null;
-            const fs = require('fs');
-            const path = require('path');
-            // Try multiple paths to support both local and Railway deployments
-            const possiblePaths = [
-                path.join(__dirname, 'public/index.html'),
-                path.join(__dirname, '../dashboard/public/index.html'),
-                path.join(process.cwd(), 'src/dashboard/public/index.html'),
-                path.join(process.cwd(), 'dashboard/public/index.html'),
-            ];
-            let html = null;
-            for (const p of possiblePaths) {
-                if (fs.existsSync(p)) {
-                    html = fs.readFileSync(p, 'utf8');
-                    break;
-                }
-            }
-            if (!html) throw new Error('index.html not found in any expected path');
+            let authButtonHtml = '';
 
             if (user) {
                 const userAvatar = user.avatar ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png` : 'https://cdn.discordapp.com/embed/avatars/0.png';
-                const loggedInBtn = `
-                    <a href="/dashboard" class="flex items-center gap-3 bg-[#151722] hover:bg-[#1c1f2e] border border-white/10 px-4 py-2 rounded-2xl transition">
-                        <img src="${userAvatar}" alt="${user.username}" class="w-8 h-8 rounded-xl object-cover ring-2 ring-[#5865F2]/50">
+                authButtonHtml = `
+                    <a href="/dashboard" class="flex items-center gap-3 bg-[#151722] hover:bg-[#1c1f2e] border border-purple-500/30 px-4 py-2 rounded-2xl transition">
+                        <img src="${userAvatar}" alt="${user.username}" class="w-8 h-8 rounded-xl object-cover ring-2 ring-purple-500/50">
                         <span class="text-xs font-bold text-white">${user.username}</span>
                     </a>
                 `;
-                html = html.replace('<!-- AUTH_BUTTON -->', loggedInBtn);
             } else {
-                const loginBtn = `
-                    <a href="/auth/discord" class="px-6 py-2.5 probot-btn-primary rounded-xl text-xs font-black shadow-lg">
+                authButtonHtml = `
+                    <a href="/auth/discord" class="px-6 py-2.5 zeno-btn-primary rounded-xl text-xs font-black shadow-lg">
                         تسجيل الدخول
                     </a>
                 `;
-                html = html.replace('<!-- AUTH_BUTTON -->', loginBtn);
             }
+
+            const html = `<!DOCTYPE html>
+<html lang="ar" dir="rtl" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZENO - البوت العربي الأول في ديسكورد</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            background-color: #06070a !important;
+            color: #ffffff !important;
+            font-family: 'Cairo', sans-serif !important;
+            margin: 0;
+            padding: 0;
+        }
+        .purple-glow-bg {
+            background: radial-gradient(circle at 50% 18%, rgba(147, 51, 234, 0.15), transparent 60%);
+        }
+        .zeno-badge {
+            background: rgba(147, 51, 234, 0.12);
+            border: 1px solid rgba(147, 51, 234, 0.35);
+            color: #c084fc;
+        }
+        .zeno-btn-primary {
+            background: linear-gradient(135deg, #9333ea, #7e22ce);
+            color: white;
+            transition: all 0.25s ease;
+            box-shadow: 0 4px 20px rgba(147, 51, 234, 0.35);
+        }
+        .zeno-btn-primary:hover {
+            background: linear-gradient(135deg, #a855f7, #9333ea);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(147, 51, 234, 0.55);
+        }
+        .zeno-btn-secondary {
+            background-color: #0f111a;
+            border: 1px solid rgba(147, 51, 234, 0.25);
+            color: #ffffff;
+            transition: all 0.25s ease;
+        }
+        .zeno-btn-secondary:hover {
+            background-color: #171a26;
+            border-color: rgba(168, 85, 247, 0.5);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between bg-[#06070a] purple-glow-bg">
+    <!-- Navbar Header (بنفسجي وأسود ملكي) -->
+    <header class="h-20 bg-[#06070a]/90 backdrop-blur-md border-b border-purple-900/20 px-8 flex items-center justify-between sticky top-0 z-50">
+        <!-- Logo Left in RTL (ZENO Brand) -->
+        <a href="/" class="flex items-center gap-3 group">
+            <div class="w-10 h-10 rounded-2xl bg-purple-600/20 border border-purple-500/40 flex items-center justify-center text-xl font-black text-purple-400 shadow-lg shadow-purple-600/20 group-hover:scale-105 transition-transform">
+                🔮
+            </div>
+            <span class="text-2xl font-black tracking-tight text-white">ZENO</span>
+        </a>
+
+        <!-- Center Navigation (بدون بريميوم) -->
+        <nav class="hidden md:flex items-center gap-8 text-sm font-bold text-gray-400">
+            <a href="https://discord.gg/zduGPYv7pE" target="_blank" class="hover:text-purple-400 transition">سيرفر الدعم</a>
+            <div class="flex items-center gap-1 hover:text-purple-400 cursor-pointer transition">
+                <span>المصادر</span>
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+            </div>
+            <a href="#features" class="hover:text-purple-400 transition">المميزات</a>
+        </nav>
+
+        <!-- User / Login Right in RTL -->
+        <div class="flex items-center gap-4">
+            ${authButtonHtml}
+        </div>
+    </header>
+
+    <!-- Hero Main Section (بنفسجي وأسود أنيق بدون بريميوم) -->
+    <main class="max-w-4xl mx-auto px-6 py-24 text-center flex-1 flex flex-col items-center justify-center select-none">
+        <!-- Feature Badge -->
+        <div class="zeno-badge px-5 py-1.5 rounded-full text-xs font-black mb-8 tracking-wide shadow-sm flex items-center gap-2">
+            <span>✨</span>
+            <span>جديد: نظام التذاكر والتحكم المتطور</span>
+        </div>
+
+        <!-- Main Title -->
+        <h1 class="text-4xl sm:text-6xl md:text-7xl font-black text-white leading-tight mb-8 tracking-tight">
+            اصنع خادم ديسكورد<br>
+            <span class="bg-gradient-to-r from-purple-400 via-fuchsia-300 to-indigo-300 bg-clip-text text-transparent">احترافي!</span>
+        </h1>
+
+        <!-- Subtitle Description -->
+        <p class="text-gray-400 text-sm md:text-base leading-relaxed max-w-2xl mb-12 font-semibold">
+            بوت متعدد الأغراض قابل للتخصيص جداً حيث يوفر لك تخصيص صورة كرسالة ترحيبية وسجلات متعمقة وأوامر اجتماعية وإشراف وأكثر ...
+        </p>
+
+        <!-- Action Buttons -->
+        <div class="flex flex-wrap items-center justify-center gap-4 w-full max-w-md">
+            <a href="https://discord.com/api/oauth2/authorize?client_id=1506005273893146775&permissions=8&scope=bot%20applications.commands" target="_blank" class="flex-1 min-w-[180px] py-4 zeno-btn-primary font-black rounded-2xl text-sm text-center shadow-xl">
+                إضافة البوت في Discord
+            </a>
+            <a href="/dashboard" class="flex-1 min-w-[150px] py-4 zeno-btn-secondary font-black rounded-2xl text-sm text-center">
+                لوحة التحكم
+            </a>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-purple-900/20 bg-[#040508] py-6 text-center text-gray-500 text-xs font-semibold">
+        جميع الحقوق محفوظة © ZENO BOT 2026 - <a href="https://discord.gg/zduGPYv7pE" target="_blank" class="text-purple-400 hover:underline transition">سيرفر الدعم</a>
+    </footer>
+</body>
+</html>`;
+
             res.setHeader('Content-Type', 'text/html; charset=utf-8');
             res.send(html);
         } catch(e) {
