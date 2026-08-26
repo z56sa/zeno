@@ -100,7 +100,7 @@ if (!token) {
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static('public'));
+// Note: static files served directly from src/dashboard/public via server.js
 
 
 const mountDashboard = require('./dashboard/server');
