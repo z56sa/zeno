@@ -21,6 +21,9 @@ RUN npm ci --omit=dev || npm install --omit=dev
 
 COPY . .
 
+# إنشاء مجلد البيانات مسبقاً لضمان عمل Railway Volume بشكل صحيح
+RUN mkdir -p /usr/src/app/data && chmod 777 /usr/src/app/data
+
 EXPOSE 3000
 
 CMD ["node", "src/index.js"]
