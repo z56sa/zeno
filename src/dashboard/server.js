@@ -65,14 +65,14 @@ module.exports = function (app, client) {
                         <span class="text-xs font-bold text-white">${user.username}</span>
                     </a>
                 `;
-                html = html.replace(/<% if \(user\) \{ %>[\s\S]*?<% \} %>/, loggedInBtn);
+                html = html.replace('<!-- AUTH_BUTTON -->', loggedInBtn);
             } else {
                 const loginBtn = `
                     <a href="/auth/discord" class="px-6 py-2.5 probot-btn-primary rounded-xl text-xs font-black shadow-lg">
                         تسجيل الدخول
                     </a>
                 `;
-                html = html.replace(/<% if \(user\) \{ %>[\s\S]*?<% \} %>/, loginBtn);
+                html = html.replace('<!-- AUTH_BUTTON -->', loginBtn);
             }
             res.setHeader('Content-Type', 'text/html; charset=utf-8');
             res.send(html);
