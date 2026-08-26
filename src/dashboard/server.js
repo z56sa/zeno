@@ -253,7 +253,7 @@ module.exports = function (app, client) {
             req.session.user = userData;
             req.session.guilds = Array.isArray(allGuilds) ? allGuilds.filter(g => (g.permissions & 0x8) === 0x8 || (g.permissions & 0x20) === 0x20) : [];
 
-            req.session.save(() => res.redirect('/'));
+            req.session.save(() => res.redirect('/dashboard/manage'));
         } catch (error) {
             console.error('OAuth error:', error);
             res.redirect('/');
