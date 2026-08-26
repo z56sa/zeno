@@ -35,8 +35,8 @@ module.exports = function (app, client) {
         }
     }));
 
-    // 1. الصفحة الرئيسية (ProBot Landing Page Style - Direct Inlined HTML)
-    app.get('/', (req, res) => {
+    // 1. الصفحة الرئيسية وشاشة البداية (ProBot Black & Purple Landing Page)
+    app.get(['/', '/dashboard'], (req, res) => {
         try {
             const user = req.session?.user || null;
             let authButtonHtml = '';
@@ -44,7 +44,7 @@ module.exports = function (app, client) {
             if (user) {
                 const userAvatar = user.avatar ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png` : 'https://cdn.discordapp.com/embed/avatars/0.png';
                 authButtonHtml = `
-                    <a href="/dashboard" class="flex items-center gap-3 bg-[#151722] hover:bg-[#1c1f2e] border border-purple-500/30 px-4 py-2 rounded-2xl transition">
+                    <a href="/dashboard/manage" class="flex items-center gap-3 bg-[#151722] hover:bg-[#1c1f2e] border border-purple-500/30 px-4 py-2 rounded-2xl transition">
                         <img src="${userAvatar}" alt="${user.username}" class="w-8 h-8 rounded-xl object-cover ring-2 ring-purple-500/50">
                         <span class="text-xs font-bold text-white">${user.username}</span>
                     </a>
@@ -158,7 +158,7 @@ module.exports = function (app, client) {
             <a href="https://discord.com/api/oauth2/authorize?client_id=1506005273893146775&permissions=8&scope=bot%20applications.commands" target="_blank" class="flex-1 min-w-[180px] py-4 zeno-btn-primary font-black rounded-2xl text-sm text-center shadow-xl">
                 إضافة البوت في Discord
             </a>
-            <a href="/dashboard" class="flex-1 min-w-[150px] py-4 zeno-btn-secondary font-black rounded-2xl text-sm text-center">
+            <a href="/dashboard/manage" class="flex-1 min-w-[150px] py-4 zeno-btn-secondary font-black rounded-2xl text-sm text-center">
                 لوحة التحكم
             </a>
         </div>
@@ -264,8 +264,8 @@ module.exports = function (app, client) {
         req.session.destroy(() => res.redirect('/'));
     });
 
-    // 3. User Dashboard
-    app.get('/dashboard', (req, res) => {
+    // 3. User Dashboard & Main Routes
+    app.get('/dashboard/manage', (req, res) => {
         try {
             if (!req.session?.user) return res.redirect('/auth/discord');
             const user = req.session.user;
