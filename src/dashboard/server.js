@@ -96,7 +96,7 @@ module.exports = function (app, client) {
             <div class="w-10 h-10 rounded-2xl bg-purple-600/20 border border-purple-500/40 flex items-center justify-center text-xl font-black text-purple-400 shadow-lg shadow-purple-600/20 group-hover:scale-105 transition-transform">
                 🔮
             </div>
-            <span class="text-2xl font-black tracking-tight text-white">ZENO</span>
+            <span class="text-2xl font-black tracking-tight text-white">ZENO BOT</span>
         </a>
 
         <!-- Center Navigation (بدون بريميوم) -->
