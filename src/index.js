@@ -98,6 +98,7 @@ if (!token) {
 // Dashboard + Web Server Setup (Web Interface Layer)
 // =============================================================================
 
+app.set('trust proxy', 1);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 // Note: static files served directly from src/dashboard/public via server.js

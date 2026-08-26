@@ -190,6 +190,11 @@ module.exports = function (app, client) {
 
     // 2. OAuth2
     app.get('/auth/discord', (req, res) => {
+        // إذا كان المستخدم مسجل دخوله مسبقاً، نوجهه فوراً للداشبورد دون إعادة طلب Authorize
+        if (req.session?.user) {
+            return res.redirect('/dashboard/manage');
+        }
+
         const clientId = SecretManager.getSecret('DISCORD_CLIENT_ID') || process.env.DISCORD_CLIENT_ID;
         const redirectUri = encodeURIComponent(getOAuthRedirectUri(req));
         const authUrl = `https://discord.com/api/oauth2/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=identify%20guilds`;
