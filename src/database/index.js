@@ -22,9 +22,34 @@ if (customDbPath) {
 
 const db = new Database(dbPath);
 
-// تحسين الأداء
+// تحسين الأمان واستقرار حفظ البيانات لضمان عدم ضياع العملات أو البيانات عند إطفاء البوت
 db.pragma('journal_mode = WAL');
+db.pragma('synchronous = FULL');
+db.pragma('wal_autocheckpoint = 100');
 db.pragma('foreign_keys = ON');
+
+// حفظ نسخة احتياطية فورية تلقائية كل 5 دقائق
+setInterval(() => {
+  try {
+    const backupDir = path.join(path.dirname(dbPath), 'backups');
+    if (!fs.existsSync(backupDir)) fs.mkdirSync(backupDir, { recursive: true });
+    const backupFile = path.join(backupDir, 'zeno_auto_backup.db');
+    db.backup(backupFile).catch(err => console.error('[DB-BACKUP] Error:', err.message));
+  } catch (e) {}
+}, 5 * 60 * 1000);
+
+// حفظ البيانات فوراً عند إيقاف تشغيل البوت أو إعادة تشغيل السيرفر
+function safeExit() {
+  try {
+    console.log('[DB] 💾 Flushing and closing database safely...');
+    db.pragma('wal_checkpoint(TRUNCATE)');
+    db.close();
+  } catch (e) {}
+  process.exit(0);
+}
+
+process.on('SIGINT', safeExit);
+process.on('SIGTERM', safeExit);
 
 // ==========================================
 // إنشاء الجداول
