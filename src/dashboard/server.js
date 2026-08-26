@@ -264,6 +264,81 @@ module.exports = function (app, client) {
         req.session.destroy(() => res.redirect('/'));
     });
 
+    // ========================================================
+    // 💡 ECONOMY API ENDPOINTS (Live Persistent Dashboard API)
+    // ========================================================
+    
+    // 1. Get Guild Economy Leaderboard
+    app.get('/api/guilds/:guildId/economy/leaderboard', (req, res) => {
+        try {
+            const { guildId } = req.params;
+            const limit = Math.min(parseInt(req.query.limit) || 10, 100);
+            const leaderboard = db.getCoinsLeaderboard(guildId, limit);
+            res.json({ success: true, leaderboard });
+        } catch (err) {
+            res.status(500).json({ success: false, error: err.message });
+        }
+    });
+
+    // 2. Get User Balance
+    app.get('/api/guilds/:guildId/economy/users/:userId', (req, res) => {
+        try {
+            const { guildId, userId } = req.params;
+            const user = db.getUser(userId, guildId);
+            res.json({
+                success: true,
+                user: {
+                    userId: user.user_id,
+                    guildId: user.guild_id,
+                    balance: user.coins || 0,
+                    level: user.level || 1,
+                    xp: user.xp || 0,
+                    lastDaily: user.last_daily || 0
+                }
+            });
+        } catch (err) {
+            res.status(500).json({ success: false, error: err.message });
+        }
+    });
+
+    // 3. Admin Manage User Balance (Add / Remove / Set) with instant persistent write
+    app.post('/api/guilds/:guildId/economy/manage', (req, res) => {
+        try {
+            if (!req.session?.user) {
+                return res.status(401).json({ success: false, error: 'يجب تسجيل الدخول أولاً' });
+            }
+
+            const { guildId } = req.params;
+            const { targetUserId, action, amount } = req.body;
+            const val = parseInt(amount, 10);
+
+            if (!targetUserId || isNaN(val) || val < 0) {
+                return res.status(400).json({ success: false, error: 'بيانات غير صالحة' });
+            }
+
+            let newBalance = 0;
+            if (action === 'set') {
+                newBalance = db.setCoins(targetUserId, guildId, val);
+            } else if (action === 'add') {
+                newBalance = db.addCoins(targetUserId, guildId, val);
+            } else if (action === 'remove') {
+                newBalance = db.removeCoins(targetUserId, guildId, val);
+            } else {
+                return res.status(400).json({ success: false, error: 'إجراء غير معروف' });
+            }
+
+            res.json({
+                success: true,
+                message: 'تم تحديث الرصيد وحفظه فوراً في قاعدة البيانات',
+                targetUserId,
+                newBalance
+            });
+        } catch (err) {
+            res.status(500).json({ success: false, error: err.message });
+        }
+    });
+
+
     // 3. User Dashboard & Main Routes
     app.get('/dashboard/manage', (req, res) => {
         try {

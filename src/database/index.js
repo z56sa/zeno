@@ -639,17 +639,42 @@ function addXp(userId, guildId, amount) {
 function addCoins(userId, guildId, amount) {
   getUser(userId, guildId);
   db.prepare('UPDATE users SET coins = coins + ? WHERE user_id = ? AND guild_id = ?').run(amount, userId, guildId);
+  const u = getUser(userId, guildId);
+  return u.coins || 0;
 }
 
 function removeCoins(userId, guildId, amount) {
   getUser(userId, guildId);
   db.prepare('UPDATE users SET coins = MAX(0, coins - ?) WHERE user_id = ? AND guild_id = ?').run(amount, userId, guildId);
+  const u = getUser(userId, guildId);
+  return u.coins || 0;
 }
 
 function setCoins(userId, guildId, amount) {
   getUser(userId, guildId);
-  db.prepare('UPDATE users SET coins = ? WHERE user_id = ? AND guild_id = ?').run(amount, userId, guildId);
+  db.prepare('UPDATE users SET coins = ? WHERE user_id = ? AND guild_id = ?').run(Math.max(0, amount), userId, guildId);
+  const u = getUser(userId, guildId);
+  return u.coins || 0;
 }
+
+const transferCoins = db.transaction((guildId, senderId, receiverId, amount) => {
+  const sender = getUser(senderId, guildId);
+  const currentCoins = sender.coins || 0;
+  if (currentCoins < amount) {
+    throw new Error('INSUFFICIENT_FUNDS');
+  }
+
+  db.prepare('UPDATE users SET coins = coins - ? WHERE user_id = ? AND guild_id = ?').run(amount, senderId, guildId);
+  getUser(receiverId, guildId);
+  db.prepare('UPDATE users SET coins = coins + ? WHERE user_id = ? AND guild_id = ?').run(amount, receiverId, guildId);
+
+  const newSender = getUser(senderId, guildId);
+  const newReceiver = getUser(receiverId, guildId);
+  return {
+    senderBalance: newSender.coins || 0,
+    receiverBalance: newReceiver.coins || 0
+  };
+});
 
 function getLastDaily(userId) {
   const row = db.prepare('SELECT MAX(last_daily) as last_daily FROM users WHERE user_id = ?').get(userId);
@@ -1644,6 +1669,15 @@ module.exports = {
   getTopXp: getLeaderboard,
   getTopCredits: getCoinsLeaderboard,
   addCredits: addCoins,
+  getUser,
+  addCoins,
+  removeCoins,
+  setCoins,
+  transferCoins,
+  getLastDaily,
+  setLastDaily,
+  getCoinsLeaderboard,
+  getLeaderboard,
   getUserRank: (userId, guildId) => {
     const user = getUser(userId, guildId);
     return { xp: user.xp || 0, level: user.level || 1, rank: 1 };
