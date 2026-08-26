@@ -7,7 +7,10 @@ WORKDIR /usr/src/app
 # Copy package.json and lock files first to leverage Docker's caching layer
 COPY package*.json ./
 
-# Install all necessary dependencies for production (This step is crucial)
+# Install build dependencies for native modules (better-sqlite3, etc.)
+RUN apk add --no-cache python3 make g++ gcc libc6-compat
+
+# Install all necessary dependencies for production
 RUN npm install --omit=dev
 
 # Copy the rest of the application source code
