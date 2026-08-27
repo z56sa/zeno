@@ -21,9 +21,9 @@ module.exports = {
 
   async execute(interaction) {
     if (!interaction.member.permissions.has(PermissionFlagsBits.ManageMessages))
-      return interaction.reply({ content: '❌ ليس لديك صلاحية حذف الرسائل.', ephemeral: true });
+      return interaction.reply({ content: '❌ ليس لديك صلاحية حذف الرسائل.', flags: 64 });
 
-    await interaction.deferReply({ ephemeral: true }).catch(() => {});
+    await interaction.deferReply({ flags: 64 }).catch(() => {});
 
     const amount = interaction.options.getInteger('amount');
     const targetUser = interaction.options.getUser('target');

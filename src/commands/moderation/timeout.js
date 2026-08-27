@@ -21,9 +21,9 @@ module.exports = {
 
   async execute(interaction) {
     if (!interaction.member.permissions.has(PermissionFlagsBits.ModerateMembers))
-      return interaction.reply({ content: '❌ ليس لديك صلاحية.', ephemeral: true });
+      return interaction.reply({ content: '❌ ليس لديك صلاحية.', flags: 64 });
 
-    await interaction.deferReply({ ephemeral: true }).catch(() => {});
+    await interaction.deferReply({ flags: 64 }).catch(() => {});
     const sub = interaction.options.getSubcommand();
     const targetUser = interaction.options.getUser('target');
     const member = await interaction.guild.members.fetch(targetUser.id).catch(() => null);

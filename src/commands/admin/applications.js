@@ -54,7 +54,7 @@ module.exports = {
     if (subCmd === 'pending') {
       const pendingList = db.getPendingSubmissions(guildId);
       if (!pendingList || pendingList.length === 0) {
-        return interaction.reply({ content: '✅ لا توجد أي تقديمات معلقة قيد الانتظار حالياً.', ephemeral: true });
+        return interaction.reply({ content: '✅ لا توجد أي تقديمات معلقة قيد الانتظار حالياً.', flags: 64 });
       }
 
       const embed = new EmbedBuilder()
@@ -72,7 +72,7 @@ module.exports = {
         });
       });
 
-      return interaction.reply({ embeds: [embed], ephemeral: true });
+      return interaction.reply({ embeds: [embed], flags: 64 });
     }
 
     // 2. إدارة النقاط (applications points)

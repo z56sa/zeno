@@ -39,7 +39,7 @@ module.exports = {
 
   async execute(interaction) {
     if (!interaction.member.permissions.has(PermissionFlagsBits.Administrator)) {
-      return interaction.reply({ content: '❌ لا تملك صلاحية الأدمن.', ephemeral: true });
+      return interaction.reply({ content: '❌ لا تملك صلاحية الأدمن.', flags: 64 });
     }
 
     const channel = interaction.options.getChannel('channel');
@@ -67,6 +67,6 @@ module.exports = {
     const sentMessage = await channel.send({ embeds: [embed], components: [row] });
     db.addReactionRole(interaction.guild.id, sentMessage.id, role.id, customId, buttonLabel, '🎭');
 
-    await interaction.reply({ content: `✅ تم إنشاء رسالة الرتب التفاعلية بنجاح في <#${channel.id}>!`, ephemeral: true });
+    await interaction.reply({ content: `✅ تم إنشاء رسالة الرتب التفاعلية بنجاح في <#${channel.id}>!`, flags: 64 });
   }
 };

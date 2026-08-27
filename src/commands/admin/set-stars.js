@@ -24,7 +24,7 @@ module.exports = {
 
   async execute(interaction) {
     if (!interaction.member.permissions.has(PermissionFlagsBits.Administrator)) {
-      return interaction.reply({ content: '❌ هذا الأمر مخصص للإدارة فقط!', ephemeral: true });
+      return interaction.reply({ content: '❌ هذا الأمر مخصص للإدارة فقط!', flags: 64 });
     }
 
     const targetUser = interaction.options.getUser('user');
@@ -39,7 +39,7 @@ module.exports = {
     } else {
       amount = parseInt(amountInput);
       if (isNaN(amount) || amount < 0) {
-        return interaction.reply({ content: '❌ يرجى إدخال رقم صحيح أو كتابة `infinite` لرصيد لانهائي!', ephemeral: true });
+        return interaction.reply({ content: '❌ يرجى إدخال رقم صحيح أو كتابة `infinite` لرصيد لانهائي!', flags: 64 });
       }
     }
 

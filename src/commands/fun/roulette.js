@@ -105,7 +105,7 @@ async function runRound(channel, players, round) {
     }, 30000);
     const collector = pickMsg.createMessageComponentCollector({ componentType: ComponentType.Button, time: 31000 });
     collector.on('collect', async (btn) => {
-      if (btn.user.id !== winner.id) return btn.reply({ content: '❌ فقط الفائز يستطيع الاختيار!', ephemeral: true });
+      if (btn.user.id !== winner.id) return btn.reply({ content: '❌ فقط الفائز يستطيع الاختيار!', flags: 64 });
       if (btn.customId === 'rlt_withdraw' && !resolved) {
         resolved = true; clearTimeout(timeout); collector.stop('withdraw');
         await btn.deferUpdate(); await pickMsg.edit({ components: [] }).catch(() => {});
@@ -122,7 +122,7 @@ async function runRound(channel, players, round) {
       if (btn.customId.startsWith('rlt_pick_') && !resolved) {
         const pickedId = btn.customId.replace('rlt_pick_', '');
         const picked = players.find(p => p.id === pickedId);
-        if (!picked) return btn.reply({ content: '❌ لاعب غير موجود!', ephemeral: true });
+        if (!picked) return btn.reply({ content: '❌ لاعب غير موجود!', flags: 64 });
         resolved = true; clearTimeout(timeout); collector.stop('picked');
         await btn.deferUpdate(); await pickMsg.edit({ components: [] }).catch(() => {});
         await channel.send({ content: `💥 <@${winner.id}> طرد <@${picked.id}> من اللعبة!\n🌐 سيتم بدء الجولة القادمة في بضع ثواني...` });
@@ -156,26 +156,26 @@ module.exports = {
   data: new SlashCommandBuilder().setName('roulette').setDescription('لعبة الروليت بعجلة دوران! 🎰'),
 
   async execute(interaction) {
-    if (activeGames.has(interaction.channelId)) return interaction.reply({ content: '⚠️ يوجد لعبة روليت جارية!', ephemeral: true });
+    if (activeGames.has(interaction.channelId)) return interaction.reply({ content: '⚠️ يوجد لعبة روليت جارية!', flags: 64 });
     const players = [{ id: interaction.user.id, name: interaction.member?.displayName || interaction.user.username }];
     activeGames.set(interaction.channelId, true);
     const buildEmbed = () => new EmbedBuilder().setColor('#9B59B6').setTitle('🎰 لعبة الروليت!').setDescription(`**${players[0].name}** فتح غرفة الروليت!\n\n🎯 اضغط **انضم** للمشاركة\n\n👥 **اللاعبون (${players.length}):**\n` + players.map((p,i)=>`\`${i+1}\` ${p.name}`).join('\n')).setFooter({ text: 'تنتهي الدعوة بعد 60 ثانية أو عند ضغط ابدأ' }).setTimestamp();
     const row = new ActionRowBuilder().addComponents(new ButtonBuilder().setCustomId('rlt_join').setLabel('🎰 انضم للعبة').setStyle(ButtonStyle.Primary), new ButtonBuilder().setCustomId('rlt_start').setLabel('▶️ ابدأ اللعبة').setStyle(ButtonStyle.Success), new ButtonBuilder().setCustomId('rlt_cancel').setLabel('❌ إلغاء').setStyle(ButtonStyle.Danger));
-    const msg = await interaction.reply({ embeds: [buildEmbed()], components: [row], fetchReply: true });
+    const msg = await interaction.reply({ embeds: [buildEmbed()], components: [row], withResponse: true });
     const collector = msg.createMessageComponentCollector({ componentType: ComponentType.Button, time: 60000 });
     collector.on('collect', async (btn) => {
       if (btn.customId === 'rlt_join') {
-        if (players.find(p=>p.id===btn.user.id)) return btn.reply({ content: '⚠️ أنت بالفعل في اللعبة!', ephemeral: true });
+        if (players.find(p=>p.id===btn.user.id)) return btn.reply({ content: '⚠️ أنت بالفعل في اللعبة!', flags: 64 });
         players.push({ id: btn.user.id, name: btn.member?.displayName || btn.user.username });
-        await msg.edit({ embeds: [buildEmbed()] }); await btn.reply({ content: `✅ انضممت! (${players.length} لاعبون)`, ephemeral: true });
+        await msg.edit({ embeds: [buildEmbed()] }); await btn.reply({ content: `✅ انضممت! (${players.length} لاعبون)`, flags: 64 });
       }
       if (btn.customId === 'rlt_start') {
-        if (btn.user.id !== interaction.user.id) return btn.reply({ content: '❌ فقط صاحب الغرفة!', ephemeral: true });
-        if (players.length < 2) return btn.reply({ content: '❌ يجب لاعبَيْن على الأقل!', ephemeral: true });
+        if (btn.user.id !== interaction.user.id) return btn.reply({ content: '❌ فقط صاحب الغرفة!', flags: 64 });
+        if (players.length < 2) return btn.reply({ content: '❌ يجب لاعبَيْن على الأقل!', flags: 64 });
         await btn.deferUpdate(); collector.stop('start');
       }
       if (btn.customId === 'rlt_cancel') {
-        if (btn.user.id !== interaction.user.id) return btn.reply({ content: '❌ فقط صاحب الغرفة!', ephemeral: true });
+        if (btn.user.id !== interaction.user.id) return btn.reply({ content: '❌ فقط صاحب الغرفة!', flags: 64 });
         await btn.deferUpdate(); collector.stop('cancel');
       }
     });
@@ -199,17 +199,17 @@ module.exports = {
     const collector = msg.createMessageComponentCollector({ componentType: ComponentType.Button, time: 60000 });
     collector.on('collect', async (btn) => {
       if (btn.customId === 'rlt_join_p') {
-        if (players.find(p=>p.id===btn.user.id)) return btn.reply({ content: '⚠️ أنت بالفعل في اللعبة!', ephemeral: true });
+        if (players.find(p=>p.id===btn.user.id)) return btn.reply({ content: '⚠️ أنت بالفعل في اللعبة!', flags: 64 });
         players.push({ id: btn.user.id, name: btn.member?.displayName || btn.user.username });
-        await msg.edit({ embeds: [buildEmbed()] }); await btn.reply({ content: `✅ انضممت! (${players.length} لاعبون)`, ephemeral: true });
+        await msg.edit({ embeds: [buildEmbed()] }); await btn.reply({ content: `✅ انضممت! (${players.length} لاعبون)`, flags: 64 });
       }
       if (btn.customId === 'rlt_start_p') {
-        if (btn.user.id !== message.author.id) return btn.reply({ content: '❌ فقط صاحب الغرفة!', ephemeral: true });
-        if (players.length < 2) return btn.reply({ content: '❌ يجب لاعبَيْن على الأقل!', ephemeral: true });
+        if (btn.user.id !== message.author.id) return btn.reply({ content: '❌ فقط صاحب الغرفة!', flags: 64 });
+        if (players.length < 2) return btn.reply({ content: '❌ يجب لاعبَيْن على الأقل!', flags: 64 });
         await btn.deferUpdate(); collector.stop('start');
       }
       if (btn.customId === 'rlt_cancel_p') {
-        if (btn.user.id !== message.author.id) return btn.reply({ content: '❌ فقط صاحب الغرفة!', ephemeral: true });
+        if (btn.user.id !== message.author.id) return btn.reply({ content: '❌ فقط صاحب الغرفة!', flags: 64 });
         await btn.deferUpdate(); collector.stop('cancel');
       }
     });

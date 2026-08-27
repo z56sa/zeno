@@ -32,14 +32,14 @@ module.exports = {
     const lastGamble = COOLDOWNS.get(user.id) || 0;
     if (now - lastGamble < GAMBLE_COOLDOWN) {
       const secs = Math.ceil((GAMBLE_COOLDOWN - (now - lastGamble)) / 1000);
-      return reply({ content: `⏰ انتظر **${secs}** ثانية قبل المراهنة مجدداً.`, ephemeral: true });
+      return reply({ content: `⏰ انتظر **${secs}** ثانية قبل المراهنة مجدداً.`, flags: 64 });
     }
 
     const userData = db.getUser(user.id, guildId);
     const balance = userData.coins || userData.credits || 0;
 
     if (balance < amount)
-      return reply({ content: `❌ رصيدك غير كافٍ! لديك فقط **${balance.toLocaleString()}** ⭐`, ephemeral: true });
+      return reply({ content: `❌ رصيدك غير كافٍ! لديك فقط **${balance.toLocaleString()}** ⭐`, flags: 64 });
 
     COOLDOWNS.set(user.id, now);
 

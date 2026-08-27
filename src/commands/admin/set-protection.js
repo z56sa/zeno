@@ -55,7 +55,7 @@ module.exports = {
 
   async execute(interaction) {
     if (!interaction.member.permissions.has(PermissionFlagsBits.Administrator)) {
-      return interaction.reply({ content: '❌ لا تملك صلاحية الأدمن.', ephemeral: true });
+      return interaction.reply({ content: '❌ لا تملك صلاحية الأدمن.', flags: 64 });
     }
 
     const antiLink = interaction.options.getBoolean('anti_link');

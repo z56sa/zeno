@@ -13,7 +13,7 @@ module.exports = {
     const embed = this.getMainEmbed();
     const row = this.getSelectMenu();
 
-    const response = await interaction.reply({ embeds: [embed], components: [row], fetchReply: true });
+    const response = await interaction.reply({ embeds: [embed], components: [row], withResponse: true });
     this.handleMenu(response, interaction.user.id, client);
   },
 

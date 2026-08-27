@@ -50,7 +50,7 @@ module.exports = {
   async execute(interaction, client) {
     const ticket = db.getTicket(interaction.channel.id);
     if (!ticket) {
-      return interaction.reply({ content: '❌ هذا الأمر يعمل فقط داخل قنوات التذاكر.', ephemeral: true });
+      return interaction.reply({ content: '❌ هذا الأمر يعمل فقط داخل قنوات التذاكر.', flags: 64 });
     }
 
     const sub = interaction.options.getSubcommand();
@@ -127,9 +127,9 @@ module.exports = {
       }, 5000);
 
     } else if (sub === 'claim') {
-      if (!isStaff) return interaction.reply({ content: '❌ هذا الأمر مخصص لطاقم الدعم الفني فقط.', ephemeral: true });
+      if (!isStaff) return interaction.reply({ content: '❌ هذا الأمر مخصص لطاقم الدعم الفني فقط.', flags: 64 });
       if (ticket.claimed_by) {
-        return interaction.reply({ content: `⚠️ هذه التذكرة مستلمة بالفعل بواسطة: <@${ticket.claimed_by}>`, ephemeral: true });
+        return interaction.reply({ content: `⚠️ هذه التذكرة مستلمة بالفعل بواسطة: <@${ticket.claimed_by}>`, flags: 64 });
       }
 
       db.claimTicket(interaction.channel.id, interaction.user.id);
@@ -145,16 +145,16 @@ module.exports = {
       });
 
     } else if (sub === 'unclaim') {
-      if (!isStaff) return interaction.reply({ content: '❌ هذا الأمر مخصص لطاقم الدعم الفني فقط.', ephemeral: true });
+      if (!isStaff) return interaction.reply({ content: '❌ هذا الأمر مخصص لطاقم الدعم الفني فقط.', flags: 64 });
       if (!ticket.claimed_by) {
-        return interaction.reply({ content: '⚠️ هذه التذكرة ليست مستلمة من أحد حالياً.', ephemeral: true });
+        return interaction.reply({ content: '⚠️ هذه التذكرة ليست مستلمة من أحد حالياً.', flags: 64 });
       }
 
       db.unclaimTicket(interaction.channel.id);
       return interaction.reply({ content: `↩️ قام ${interaction.user} بإلغاء استلام التذكرة، وأصبحت متاحة للجميع.` });
 
     } else if (sub === 'transfer') {
-      if (!isStaff) return interaction.reply({ content: '❌ هذا الأمر مخصص لطاقم الدعم الفني فقط.', ephemeral: true });
+      if (!isStaff) return interaction.reply({ content: '❌ هذا الأمر مخصص لطاقم الدعم الفني فقط.', flags: 64 });
       const targetUser = interaction.options.getUser('staff');
 
       db.transferTicket(interaction.channel.id, targetUser.id);
@@ -181,7 +181,7 @@ module.exports = {
       });
 
     } else if (sub === 'add') {
-      await interaction.deferReply({ ephemeral: true }).catch(() => { });
+      await interaction.deferReply({ flags: 64 }).catch(() => { });
       const user = interaction.options.getUser('user');
       await interaction.channel.permissionOverwrites.edit(user.id, {
         ViewChannel: true,
@@ -191,7 +191,7 @@ module.exports = {
       });
       await interaction.editReply(`✅ تمت إضافة ${user} إلى التذكرة.`);
     } else if (sub === 'remove') {
-      await interaction.deferReply({ ephemeral: true }).catch(() => { });
+      await interaction.deferReply({ flags: 64 }).catch(() => { });
       const user = interaction.options.getUser('user');
       await interaction.channel.permissionOverwrites.delete(user.id);
       await interaction.editReply(`✅ تمت إزالة ${user} من التذكرة.`);

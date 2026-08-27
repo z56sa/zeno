@@ -44,7 +44,7 @@ module.exports = {
 
   async execute(interaction) {
     if (!interaction.member.permissions.has(PermissionFlagsBits.Administrator)) {
-      return interaction.reply({ content: '❌ هذا الأمر مخصص لإدارة السيرفر فقط.', ephemeral: true });
+      return interaction.reply({ content: '❌ هذا الأمر مخصص لإدارة السيرفر فقط.', flags: 64 });
     }
 
     const channel = interaction.options.getChannel('channel');
@@ -87,13 +87,13 @@ module.exports = {
       await channel.send({ embeds: [embed], components: [row] });
       await interaction.reply({
         content: `✅ تم إعداد وتفعيل نظام التحقق بنجاح وإرسال البانر إلى القناة <#${channel.id}>!\n🎯 الرتبة المفعلة: **${verifiedRole.name}**\n⚙️ نوع الفحص: **${type === 'captcha' ? 'كود كابتشا رقمي' : 'زر فوري'}**`,
-        ephemeral: true
+        flags: 64
       });
     } catch (err) {
       console.error('فشل إرسال رسالة التحقق:', err);
       await interaction.reply({
         content: `❌ حدث خطأ أثناء إرسال البانر إلى القناة. تأكد من أن البوت يملك صلاحيات إرسال الرسائل وتضمين الروابط في <#${channel.id}>.`,
-        ephemeral: true
+        flags: 64
       });
     }
   },

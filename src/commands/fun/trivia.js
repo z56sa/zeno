@@ -48,7 +48,7 @@ module.exports = {
 
   async execute(interaction) {
     if (activeGames.has(interaction.channelId)) {
-      return interaction.reply({ content: '⚠️ يوجد مسابقة جارية في هذه القناة!', ephemeral: true });
+      return interaction.reply({ content: '⚠️ يوجد مسابقة جارية في هذه القناة!', flags: 64 });
     }
 
     const players = new Set([interaction.user.id]);
@@ -75,26 +75,26 @@ module.exports = {
       new ButtonBuilder().setCustomId('trv_cancel').setLabel('❌ إلغاء').setStyle(ButtonStyle.Danger)
     );
 
-    const msg = await interaction.reply({ embeds: [buildLobbyEmbed()], components: [lobbyRow], fetchReply: true });
+    const msg = await interaction.reply({ embeds: [buildLobbyEmbed()], components: [lobbyRow], withResponse: true });
 
     const lobbyCollector = msg.createMessageComponentCollector({ componentType: ComponentType.Button, time: 60000 });
 
     lobbyCollector.on('collect', async (btn) => {
       if (btn.customId === 'trv_join') {
-        if (players.has(btn.user.id)) return btn.reply({ content: '⚠️ أنت بالفعل في المسابقة!', ephemeral: true });
+        if (players.has(btn.user.id)) return btn.reply({ content: '⚠️ أنت بالفعل في المسابقة!', flags: 64 });
         players.add(btn.user.id);
         await msg.edit({ embeds: [buildLobbyEmbed()] });
-        await btn.reply({ content: `✅ انضممت للمسابقة! عدد المشتركين: **${players.size}**`, ephemeral: true });
+        await btn.reply({ content: `✅ انضممت للمسابقة! عدد المشتركين: **${players.size}**`, flags: 64 });
       }
 
       if (btn.customId === 'trv_start') {
-        if (btn.user.id !== interaction.user.id) return btn.reply({ content: '❌ فقط صاحب الغرفة يستطيع البدء!', ephemeral: true });
+        if (btn.user.id !== interaction.user.id) return btn.reply({ content: '❌ فقط صاحب الغرفة يستطيع البدء!', flags: 64 });
         await btn.deferUpdate();
         lobbyCollector.stop('start');
       }
 
       if (btn.customId === 'trv_cancel') {
-        if (btn.user.id !== interaction.user.id) return btn.reply({ content: '❌ فقط صاحب الغرفة!', ephemeral: true });
+        if (btn.user.id !== interaction.user.id) return btn.reply({ content: '❌ فقط صاحب الغرفة!', flags: 64 });
         await btn.deferUpdate();
         lobbyCollector.stop('cancel');
       }
@@ -229,18 +229,18 @@ module.exports = {
 
     lobbyCollector.on('collect', async (btn) => {
       if (btn.customId === 'trv_join_p') {
-        if (players.has(btn.user.id)) return btn.reply({ content: '⚠️ أنت بالفعل في المسابقة!', ephemeral: true });
+        if (players.has(btn.user.id)) return btn.reply({ content: '⚠️ أنت بالفعل في المسابقة!', flags: 64 });
         players.add(btn.user.id);
         await msg.edit({ embeds: [buildLobbyEmbed()] });
-        await btn.reply({ content: `✅ انضممت! عدد المشتركين: **${players.size}**`, ephemeral: true });
+        await btn.reply({ content: `✅ انضممت! عدد المشتركين: **${players.size}**`, flags: 64 });
       }
       if (btn.customId === 'trv_start_p') {
-        if (btn.user.id !== message.author.id) return btn.reply({ content: '❌ فقط صاحب الغرفة!', ephemeral: true });
+        if (btn.user.id !== message.author.id) return btn.reply({ content: '❌ فقط صاحب الغرفة!', flags: 64 });
         await btn.deferUpdate();
         lobbyCollector.stop('start');
       }
       if (btn.customId === 'trv_cancel_p') {
-        if (btn.user.id !== message.author.id) return btn.reply({ content: '❌ فقط صاحب الغرفة!', ephemeral: true });
+        if (btn.user.id !== message.author.id) return btn.reply({ content: '❌ فقط صاحب الغرفة!', flags: 64 });
         await btn.deferUpdate();
         lobbyCollector.stop('cancel');
       }

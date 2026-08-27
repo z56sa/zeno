@@ -22,7 +22,7 @@ module.exports = {
     if (!bannerURL) {
       return interaction.reply({
         content: `❌ المستخدم **${user.username}** لا يملك بنر مخصص.`,
-        ephemeral: true
+        flags: 64
       });
     }
 

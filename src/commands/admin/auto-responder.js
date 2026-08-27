@@ -28,7 +28,7 @@ module.exports = {
 
   async execute(interaction) {
     if (!interaction.member.permissions.has(PermissionFlagsBits.ManageGuild)) {
-      return interaction.reply({ content: '❌ لا تملك صلاحية إدارة السيرفر.', ephemeral: true });
+      return interaction.reply({ content: '❌ لا تملك صلاحية إدارة السيرفر.', flags: 64 });
     }
 
     const sub = interaction.options.getSubcommand();
@@ -53,7 +53,7 @@ module.exports = {
     } else if (sub === 'list') {
       const list = db.getAutoResponders(guildId);
       if (!list || list.length === 0) {
-        return interaction.reply({ content: '❌ لا توجد أي ردود تلقائية مضافة في هذا السيرفر بعد.', ephemeral: true });
+        return interaction.reply({ content: '❌ لا توجد أي ردود تلقائية مضافة في هذا السيرفر بعد.', flags: 64 });
       }
 
       const embed = new EmbedBuilder()
@@ -73,7 +73,7 @@ module.exports = {
       if (result.changes > 0) {
         await interaction.reply({ content: `✅ تم حذف الرد التلقائي رقم **#${id}** بنجاح.` });
       } else {
-        await interaction.reply({ content: `❌ لم يتم العثور على رد تلقائي يحمل الرقم **#${id}**.`, ephemeral: true });
+        await interaction.reply({ content: `❌ لم يتم العثور على رد تلقائي يحمل الرقم **#${id}**.`, flags: 64 });
       }
     }
   }

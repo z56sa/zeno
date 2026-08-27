@@ -43,7 +43,7 @@ module.exports = {
 
   async execute(interaction) {
     if (!interaction.member.permissions.has(PermissionFlagsBits.ManageMessages)) {
-      return interaction.reply({ content: '❌ لا تملك صلاحية إدارة الرسائل.', ephemeral: true });
+      return interaction.reply({ content: '❌ لا تملك صلاحية إدارة الرسائل.', flags: 64 });
     }
 
     const channel = interaction.options.getChannel('channel');
@@ -68,6 +68,6 @@ module.exports = {
     if (thumbnail) embed.setThumbnail(thumbnail);
 
     await channel.send({ embeds: [embed] });
-    await interaction.reply({ content: `✅ تم إرسال رسالة الـ Embed بنجاح في القناة: <#${channel.id}>`, ephemeral: true });
+    await interaction.reply({ content: `✅ تم إرسال رسالة الـ Embed بنجاح في القناة: <#${channel.id}>`, flags: 64 });
   }
 };

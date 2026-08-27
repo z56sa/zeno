@@ -18,7 +18,7 @@ module.exports = {
 
   async execute(interaction) {
     if (!interaction.member.permissions.has(PermissionFlagsBits.Administrator)) {
-      return interaction.reply({ content: '❌ هذا الأمر مخصص لمالك وإداريي السيرفر فقط.', ephemeral: true });
+      return interaction.reply({ content: '❌ هذا الأمر مخصص لمالك وإداريي السيرفر فقط.', flags: 64 });
     }
 
     const enabled = interaction.options.getBoolean('enabled');

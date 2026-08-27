@@ -11,7 +11,7 @@ module.exports = {
 
   async execute(interaction) {
     if (!interaction.member.permissions.has(PermissionFlagsBits.ManageChannels)) {
-      return interaction.reply({ content: '❌ لا تملك صلاحية إدارة القنوات.', ephemeral: true });
+      return interaction.reply({ content: '❌ لا تملك صلاحية إدارة القنوات.', flags: 64 });
     }
 
     await interaction.deferReply().catch(() => { });

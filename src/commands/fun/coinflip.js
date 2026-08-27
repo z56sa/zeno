@@ -41,29 +41,29 @@ module.exports = {
     const lastUsed = COOLDOWNS.get(interaction.user.id) || 0;
     if (now - lastUsed < 5000) {
       const remaining = Math.ceil((5000 - (now - lastUsed)) / 1000);
-      return interaction.reply({ content: `⏳ انتظر **${remaining}** ثانية قبل الرمي مجدداً!`, ephemeral: true });
+      return interaction.reply({ content: `⏳ انتظر **${remaining}** ثانية قبل الرمي مجدداً!`, flags: 64 });
     }
 
     // تحقق من الرصيد
     const userData = db.getUser(interaction.user.id, interaction.guild.id);
     const balance = userData.coins || 0;
     if (balance < bet) {
-      return interaction.reply({ content: `❌ رصيدك غير كافٍ! لديك \`${balance.toLocaleString()}\` ⭐`, ephemeral: true });
+      return interaction.reply({ content: `❌ رصيدك غير كافٍ! لديك \`${balance.toLocaleString()}\` ⭐`, flags: 64 });
     }
 
     // إذا كان هناك خصم بشري
     if (opponent) {
       if (opponent.id === interaction.user.id) {
-        return interaction.reply({ content: '❌ لا تستطيع تحدي نفسك!', ephemeral: true });
+        return interaction.reply({ content: '❌ لا تستطيع تحدي نفسك!', flags: 64 });
       }
       if (opponent.bot) {
-        return interaction.reply({ content: '❌ لا يمكن تحدي البوت في وضع التحدي!', ephemeral: true });
+        return interaction.reply({ content: '❌ لا يمكن تحدي البوت في وضع التحدي!', flags: 64 });
       }
 
       const oppData = db.getUser(opponent.id, interaction.guild.id);
       const oppBalance = oppData.coins || 0;
       if (oppBalance < bet) {
-        return interaction.reply({ content: `❌ رصيد **${opponent.username}** غير كافٍ للمبارزة! لديه \`${oppBalance.toLocaleString()}\` ⭐`, ephemeral: true });
+        return interaction.reply({ content: `❌ رصيد **${opponent.username}** غير كافٍ للمبارزة! لديه \`${oppBalance.toLocaleString()}\` ⭐`, flags: 64 });
       }
 
       // وجه الخصم هو عكس وجه المتحدي
@@ -88,7 +88,7 @@ module.exports = {
         new ButtonBuilder().setCustomId('cf_decline').setLabel('❌ رفض').setStyle(ButtonStyle.Danger)
       );
 
-      const msg = await interaction.reply({ content: `<@${opponent.id}>`, embeds: [challengeEmbed], components: [row], fetchReply: true });
+      const msg = await interaction.reply({ content: `<@${opponent.id}>`, embeds: [challengeEmbed], components: [row], withResponse: true });
 
       const collector = msg.createMessageComponentCollector({
         filter: i => i.user.id === opponent.id,

@@ -40,14 +40,14 @@ module.exports = {
     // 1. إرسال بانل التقديم في قناة محددة
     if (subCmd === "send_panel") {
       if (!interaction.member.permissions.has(PermissionFlagsBits.ManageGuild)) {
-        return interaction.reply({ content: "❌ ليس لديك صلاحية لإرسال لوحة التقديمات.", ephemeral: true });
+        return interaction.reply({ content: "❌ ليس لديك صلاحية لإرسال لوحة التقديمات.", flags: 64 });
       }
 
       const targetChannel = interaction.options.getChannel("channel") || interaction.channel;
       const apps = database.getApplications(guildId).filter(a => a.status === 'open');
 
       if (!apps || apps.length === 0) {
-        return interaction.reply({ content: "❌ لا توجد نماذج تقديم مفتوحة حالياً. يمكنك إنشاء نموذج جديد من الداشبورد.", ephemeral: true });
+        return interaction.reply({ content: "❌ لا توجد نماذج تقديم مفتوحة حالياً. يمكنك إنشاء نموذج جديد من الداشبورد.", flags: 64 });
       }
 
       const panelEmbed = new EmbedBuilder()
@@ -82,7 +82,7 @@ module.exports = {
         await targetChannel.send({ embeds: [panelEmbed], components: [row] });
       }
 
-      return interaction.reply({ content: `✅ تم إرسال بانل التقديم بنجاح في القناة ${targetChannel}!`, ephemeral: true });
+      return interaction.reply({ content: `✅ تم إرسال بانل التقديم بنجاح في القناة ${targetChannel}!`, flags: 64 });
     }
 
     // 2. التقديم المباشر للعضو (/apply form)
@@ -92,7 +92,7 @@ module.exports = {
     } catch(e) {}
 
     if (!openApps.length) {
-      return interaction.reply({ content: "❌ لا توجد فرص توظيف مفتوحة في هذا السيرفر حالياً.", ephemeral: true });
+      return interaction.reply({ content: "❌ لا توجد فرص توظيف مفتوحة في هذا السيرفر حالياً.", flags: 64 });
     }
 
     if (openApps.length === 1) {
@@ -114,7 +114,7 @@ module.exports = {
       );
 
     const row = new ActionRowBuilder().addComponents(selectMenu);
-    return interaction.reply({ content: "📋 **الرجاء اختيار استمارة التقديم المطلوبة:**", components: [row], ephemeral: true });
+    return interaction.reply({ content: "📋 **الرجاء اختيار استمارة التقديم المطلوبة:**", components: [row], flags: 64 });
   }
 };
 

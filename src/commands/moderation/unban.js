@@ -14,7 +14,7 @@ module.exports = {
 
   async execute(interaction) {
     if (!interaction.member.permissions.has(PermissionFlagsBits.BanMembers)) {
-      return interaction.reply({ content: '❌ لا تملك صلاحية إلغاء حظر الأعضاء.', ephemeral: true });
+      return interaction.reply({ content: '❌ لا تملك صلاحية إلغاء حظر الأعضاء.', flags: 64 });
     }
 
     const userId = interaction.options.getString('userid');
@@ -30,7 +30,7 @@ module.exports = {
 
       await interaction.reply({ embeds: [embed] });
     } catch {
-      await interaction.reply({ content: '❌ لم يتم العثور على حظر لهذا الأيدي أو الأيدي غير صحيح.', ephemeral: true });
+      await interaction.reply({ content: '❌ لم يتم العثور على حظر لهذا الأيدي أو الأيدي غير صحيح.', flags: 64 });
     }
   },
 

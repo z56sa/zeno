@@ -85,7 +85,7 @@ module.exports = {
     if (sub === 'leaderboard') {
       const list = db.getStaffLeaderboard(guildId, 10);
       if (list.length === 0) {
-        return interaction.reply({ content: '📭 لا توجد بيانات نشاط مسجلة للستاف بعد.', ephemeral: true });
+        return interaction.reply({ content: '📭 لا توجد بيانات نشاط مسجلة للستاف بعد.', flags: 64 });
       }
 
       const medals = ['🥇', '🥈', '🥉', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟'];
@@ -108,7 +108,7 @@ module.exports = {
       const limit = interaction.options.getInteger('limit') || 10;
       const logs = db.getStaffActionLogs(guildId, limit);
       if (logs.length === 0) {
-        return interaction.reply({ content: '📭 لا توجد سجلات إجراءات إدارية بعد.', ephemeral: true });
+        return interaction.reply({ content: '📭 لا توجد سجلات إجراءات إدارية بعد.', flags: 64 });
       }
 
       const actionIcons = {
@@ -163,7 +163,7 @@ module.exports = {
 
     if (sub === 'reset') {
       if (!interaction.member.permissions.has(PermissionFlagsBits.Administrator)) {
-        return interaction.reply({ content: '❌ هذا الأمر مخصص لمالك ومسؤولي السيرفر فقط.', ephemeral: true });
+        return interaction.reply({ content: '❌ هذا الأمر مخصص لمالك ومسؤولي السيرفر فقط.', flags: 64 });
       }
 
       const targetUser = interaction.options.getUser('user');

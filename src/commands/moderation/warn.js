@@ -24,7 +24,7 @@ module.exports = {
 
   async execute(interaction) {
     if (!interaction.member.permissions.has(PermissionFlagsBits.ModerateMembers))
-      return interaction.reply({ content: '❌ ليس لديك صلاحية.', ephemeral: true });
+      return interaction.reply({ content: '❌ ليس لديك صلاحية.', flags: 64 });
 
     const sub = interaction.options.getSubcommand();
     const targetUser = interaction.options.getUser('target');
@@ -86,7 +86,7 @@ module.exports = {
     } else if (sub === 'list') {
       const warns = db.getWarnings(interaction.guild.id, targetUser.id);
       if (!warns.length)
-        return interaction.reply({ content: `✅ لا توجد تحذيرات لـ **${targetUser.tag}**.`, ephemeral: true });
+        return interaction.reply({ content: `✅ لا توجد تحذيرات لـ **${targetUser.tag}**.`, flags: 64 });
 
       const embed = new EmbedBuilder()
         .setColor('#f39c12')
@@ -104,7 +104,7 @@ module.exports = {
     } else if (sub === 'remove') {
       const warnId = interaction.options.getInteger('warn_id');
       const warns = db.getWarnings(interaction.guild.id, targetUser.id);
-      if (!warns[warnId - 1]) return interaction.reply({ content: '❌ رقم التحذير غير موجود.', ephemeral: true });
+      if (!warns[warnId - 1]) return interaction.reply({ content: '❌ رقم التحذير غير موجود.', flags: 64 });
       db.db.prepare('DELETE FROM warnings WHERE id = ?').run(warns[warnId - 1].id);
       await interaction.reply({ content: `✅ تم حذف التحذير #${warnId} لـ **${targetUser.tag}**.` });
 

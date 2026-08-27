@@ -10,7 +10,7 @@ module.exports = {
     .setDescription('إيقاف الصوت ومغادرة الروم الصوتي'),
 
   async execute(interaction) {
-    await interaction.deferReply({ ephemeral: true }).catch(() => { });
+    await interaction.deferReply({ flags: 64 }).catch(() => { });
 
     const stopped = audioManager.stop(interaction.guild.id);
     if (stopped) {

@@ -83,7 +83,7 @@ module.exports = {
 
     } else if (sub === 'add') {
       if (!interaction.member.permissions.has(PermissionFlagsBits.ManageGuild) && !interaction.member.permissions.has(PermissionFlagsBits.Administrator)) {
-        return interaction.reply({ content: '❌ هذا الأمر مخصص لإدارة السيرفر فقط (Manage Guild).', ephemeral: true });
+        return interaction.reply({ content: '❌ هذا الأمر مخصص لإدارة السيرفر فقط (Manage Guild).', flags: 64 });
       }
 
       const targetUser = interaction.options.getUser('user');
@@ -102,7 +102,7 @@ module.exports = {
 
     } else if (sub === 'reset') {
       if (!interaction.member.permissions.has(PermissionFlagsBits.Administrator)) {
-        return interaction.reply({ content: '❌ يتطلب صلاحية Administrator لتصفير الدعوات.', ephemeral: true });
+        return interaction.reply({ content: '❌ يتطلب صلاحية Administrator لتصفير الدعوات.', flags: 64 });
       }
 
       const targetUser = interaction.options.getUser('user');

@@ -66,7 +66,7 @@ module.exports = {
         .setStyle(ButtonStyle.Secondary)
     );
 
-    const message = await interaction.reply({ embeds: [buildEmbed()], components: [row], fetchReply: true });
+    const message = await interaction.reply({ embeds: [buildEmbed()], components: [row], withResponse: true });
 
     const collector = message.createMessageComponentCollector({ time: 24 * 60 * 60 * 1000 });
 

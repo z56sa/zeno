@@ -180,7 +180,7 @@ async function runTrivia(interaction) {
   );
 
   const row = new ActionRowBuilder().addComponents(buttons);
-  const replyMsg = await interaction.reply({ embeds: [embed], components: [row], files, fetchReply: true });
+  const replyMsg = await interaction.reply({ embeds: [embed], components: [row], files, withResponse: true });
 
   const collector = replyMsg.createMessageComponentCollector({
     filter: i => i.user.id === interaction.user.id,
@@ -399,7 +399,7 @@ async function startInteractiveRps(interaction) {
     new ButtonBuilder().setCustomId('rps_play_scissors').setLabel('مقص ✂️').setStyle(ButtonStyle.Danger)
   );
 
-  const replyMsg = await interaction.reply({ embeds: [embed], components: [row], fetchReply: true });
+  const replyMsg = await interaction.reply({ embeds: [embed], components: [row], withResponse: true });
 
   const collector = replyMsg.createMessageComponentCollector({
     filter: i => i.user.id === interaction.user.id,

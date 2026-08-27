@@ -286,7 +286,7 @@ module.exports = {
 
   async execute(interaction) {
     if (!interaction.member.permissions.has(PermissionFlagsBits.Administrator)) {
-      return interaction.reply({ content: '❌ لا تملك صلاحية الأدمن.', ephemeral: true });
+      return interaction.reply({ content: '❌ لا تملك صلاحية الأدمن.', flags: 64 });
     }
 
     const sub = interaction.options.getSubcommand();
@@ -361,7 +361,7 @@ module.exports = {
         await interaction.reply({ embeds: [buildStatusEmbed(guild, logsConfig, settings)] });
 
       } else if (sub === 'test') {
-        await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ flags: 64 });
         const category = interaction.options.getString('category');
         const cat = LOG_CATEGORIES[category];
         const settings = db.getGuildSettings(guildId) || {};
@@ -384,7 +384,7 @@ module.exports = {
         await interaction.editReply({ embeds: [embed] });
 
       } else if (sub === 'delete-channels') {
-        await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ flags: 64 });
         const deleted = await deleteLogsChannels(guild);
 
         const embed = new EmbedBuilder()
@@ -396,7 +396,7 @@ module.exports = {
       }
     } catch (err) {
       console.error('Logs command error:', err);
-      const reply = { content: '❌ حدث خطأ أثناء تنفيذ الأمر: ' + err.message, ephemeral: true };
+      const reply = { content: '❌ حدث خطأ أثناء تنفيذ الأمر: ' + err.message, flags: 64 };
       if (interaction.deferred) await interaction.editReply(reply).catch(() => {});
       else await interaction.reply(reply).catch(() => {});
     }

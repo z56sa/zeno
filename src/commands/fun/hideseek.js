@@ -13,7 +13,7 @@ module.exports = {
 
   async execute(interaction) {
     if (activeGames.has(interaction.channelId)) {
-      return interaction.reply({ content: '⚠️ يوجد لعبة غميضة جارية في هذه القناة!', ephemeral: true });
+      return interaction.reply({ content: '⚠️ يوجد لعبة غميضة جارية في هذه القناة!', flags: 64 });
     }
 
     const players = new Set();
@@ -36,20 +36,20 @@ module.exports = {
       new ButtonBuilder().setCustomId('hs_start').setLabel('▶️ ابدأ').setStyle(ButtonStyle.Success)
     );
 
-    const msg = await interaction.reply({ embeds: [embed], components: [row], fetchReply: true });
+    const msg = await interaction.reply({ embeds: [embed], components: [row], withResponse: true });
 
     const collector = msg.createMessageComponentCollector({ componentType: ComponentType.Button, time: 30000 });
 
     collector.on('collect', async (btn) => {
       if (btn.customId === 'hs_join') {
-        if (players.has(btn.user.id)) return btn.reply({ content: '⚠️ أنت بالفعل في اللعبة!', ephemeral: true });
+        if (players.has(btn.user.id)) return btn.reply({ content: '⚠️ أنت بالفعل في اللعبة!', flags: 64 });
         players.add(btn.user.id);
         const list = [...players].map(id => `<@${id}>`).join(', ');
         await msg.edit({ embeds: [EmbedBuilder.from(embed).setDescription(`**${interaction.user.username}** بدأ لعبة الغميضة!\n\n👥 **اللاعبون (${players.size}):** ${list}`)] });
-        await btn.reply({ content: `✅ انضممت! عدد اللاعبين: **${players.size}**`, ephemeral: true });
+        await btn.reply({ content: `✅ انضممت! عدد اللاعبين: **${players.size}**`, flags: 64 });
       }
       if (btn.customId === 'hs_start' && btn.user.id === interaction.user.id) {
-        if (players.size < 2) return btn.reply({ content: '❌ يجب وجود لاعبَيْن على الأقل!', ephemeral: true });
+        if (players.size < 2) return btn.reply({ content: '❌ يجب وجود لاعبَيْن على الأقل!', flags: 64 });
         collector.stop('manual');
       }
     });
@@ -109,14 +109,14 @@ module.exports = {
 
     collector.on('collect', async (btn) => {
       if (btn.customId === 'hs_join_p') {
-        if (players.has(btn.user.id)) return btn.reply({ content: '⚠️ أنت بالفعل في اللعبة!', ephemeral: true });
+        if (players.has(btn.user.id)) return btn.reply({ content: '⚠️ أنت بالفعل في اللعبة!', flags: 64 });
         players.add(btn.user.id);
         const list = [...players].map(id => `<@${id}>`).join(', ');
         await msg.edit({ embeds: [EmbedBuilder.from(embed).setDescription(`👥 **اللاعبون (${players.size}):** ${list}`)] });
-        await btn.reply({ content: `✅ انضممت! عدد اللاعبين: **${players.size}**`, ephemeral: true });
+        await btn.reply({ content: `✅ انضممت! عدد اللاعبين: **${players.size}**`, flags: 64 });
       }
       if (btn.customId === 'hs_start_p' && btn.user.id === message.author.id) {
-        if (players.size < 2) return btn.reply({ content: '❌ يجب لاعبَيْن على الأقل!', ephemeral: true });
+        if (players.size < 2) return btn.reply({ content: '❌ يجب لاعبَيْن على الأقل!', flags: 64 });
         collector.stop('manual');
       }
     });

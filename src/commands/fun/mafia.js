@@ -32,7 +32,7 @@ module.exports = {
 
   async execute(interaction) {
     if (activeGames.has(interaction.channelId)) {
-      return interaction.reply({ content: '⚠️ يوجد لعبة مافيا جارية في هذه القناة!', ephemeral: true });
+      return interaction.reply({ content: '⚠️ يوجد لعبة مافيا جارية في هذه القناة!', flags: 64 });
     }
 
     const players = new Map(); // userId -> role
@@ -59,13 +59,13 @@ module.exports = {
       new ButtonBuilder().setCustomId('mafia_start').setLabel('▶️ ابدأ اللعبة').setStyle(ButtonStyle.Success)
     );
 
-    const msg = await interaction.reply({ embeds: [embed], components: [row], fetchReply: true });
+    const msg = await interaction.reply({ embeds: [embed], components: [row], withResponse: true });
 
     const collector = msg.createMessageComponentCollector({ componentType: ComponentType.Button, time: 60000 });
 
     collector.on('collect', async (btn) => {
       if (btn.customId === 'mafia_join') {
-        if (players.has(btn.user.id)) return btn.reply({ content: '⚠️ أنت بالفعل في اللعبة!', ephemeral: true });
+        if (players.has(btn.user.id)) return btn.reply({ content: '⚠️ أنت بالفعل في اللعبة!', flags: 64 });
         players.set(btn.user.id, null);
         const list = [...players.keys()].map(id => `<@${id}>`).join(', ');
         const updatedEmbed = EmbedBuilder.from(embed).setDescription(
@@ -74,11 +74,11 @@ module.exports = {
           `⚠️ يجب وجود **4 لاعبين** على الأقل!`
         );
         await msg.edit({ embeds: [updatedEmbed] });
-        await btn.reply({ content: `✅ انضممت للعبة المافيا! عدد اللاعبين: **${players.size}**`, ephemeral: true });
+        await btn.reply({ content: `✅ انضممت للعبة المافيا! عدد اللاعبين: **${players.size}**`, flags: 64 });
       }
 
       if (btn.customId === 'mafia_start' && btn.user.id === interaction.user.id) {
-        if (players.size < 4) return btn.reply({ content: '❌ يجب وجود **4 لاعبين** على الأقل لبدء لعبة المافيا!', ephemeral: true });
+        if (players.size < 4) return btn.reply({ content: '❌ يجب وجود **4 لاعبين** على الأقل لبدء لعبة المافيا!', flags: 64 });
         collector.stop('manual');
       }
     });
@@ -171,14 +171,14 @@ module.exports = {
 
     collector.on('collect', async (btn) => {
       if (btn.customId === 'mafia_join_p') {
-        if (players.has(btn.user.id)) return btn.reply({ content: '⚠️ أنت بالفعل في اللعبة!', ephemeral: true });
+        if (players.has(btn.user.id)) return btn.reply({ content: '⚠️ أنت بالفعل في اللعبة!', flags: 64 });
         players.set(btn.user.id, null);
         const list = [...players.keys()].map(id => `<@${id}>`).join(', ');
         await msg.edit({ embeds: [EmbedBuilder.from(embed).setDescription(`👥 **اللاعبون (${players.size}):** ${list}\n⚠️ يجب 4 لاعبين على الأقل!`)] });
-        await btn.reply({ content: `✅ انضممت! عدد اللاعبين: **${players.size}**`, ephemeral: true });
+        await btn.reply({ content: `✅ انضممت! عدد اللاعبين: **${players.size}**`, flags: 64 });
       }
       if (btn.customId === 'mafia_start_p' && btn.user.id === message.author.id) {
-        if (players.size < 4) return btn.reply({ content: '❌ يجب 4 لاعبين على الأقل!', ephemeral: true });
+        if (players.size < 4) return btn.reply({ content: '❌ يجب 4 لاعبين على الأقل!', flags: 64 });
         collector.stop('manual');
       }
     });

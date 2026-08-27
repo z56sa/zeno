@@ -15,9 +15,9 @@ module.exports = {
 
   async execute(interaction) {
     if (!interaction.member.permissions.has(PermissionFlagsBits.KickMembers))
-      return interaction.reply({ content: '❌ ليس لديك صلاحية طرد الأعضاء.', ephemeral: true });
+      return interaction.reply({ content: '❌ ليس لديك صلاحية طرد الأعضاء.', flags: 64 });
 
-    await interaction.deferReply({ ephemeral: true }).catch(() => {});
+    await interaction.deferReply({ flags: 64 }).catch(() => {});
 
     const targetUser = interaction.options.getUser('target');
     const reason = interaction.options.getString('reason') || 'لم يُذكر سبب';

@@ -18,7 +18,7 @@ module.exports = {
 
   async execute(interaction) {
     // 1. الاستجابة الفورية لمنع انتهاء المهلة (3 ثواني)
-    await interaction.deferReply({ ephemeral: true });
+    await interaction.deferReply({ flags: 64 });
 
     if (!interaction.member.permissions.has(PermissionFlagsBits.Administrator)) {
       return interaction.editReply({ content: '❌ لا تملك صلاحية الأدمن.' });

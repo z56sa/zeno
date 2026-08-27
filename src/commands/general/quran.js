@@ -27,7 +27,7 @@ module.exports = {
   async execute(interaction) {
     const memberVoice = interaction.member.voice.channel;
     if (!memberVoice) {
-      return interaction.reply({ content: '❌ يجب أن تكون متواجداً في روم صوتي لتشغيل القرآن الكريم.', ephemeral: true });
+      return interaction.reply({ content: '❌ يجب أن تكون متواجداً في روم صوتي لتشغيل القرآن الكريم.', flags: 64 });
     }
 
     const reciterKey = interaction.options.getString('reciter');
@@ -69,7 +69,7 @@ module.exports = {
       .setDescription('اختر الإذاعة أو القارئ من القائمة المنسدلة أدناه لتشغيل التلاوة في الروم الصوتي:')
       .setTimestamp();
 
-    const response = await interaction.reply({ embeds: [embed], components: [selectMenu], fetchReply: true });
+    const response = await interaction.reply({ embeds: [embed], components: [selectMenu], withResponse: true });
 
     const collector = response.createMessageComponentCollector({
       filter: (i) => i.customId === 'quran_select_menu' && i.user.id === interaction.user.id,

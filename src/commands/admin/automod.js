@@ -84,7 +84,7 @@ module.exports = {
 
       return interaction.reply({
         content: `✅ **تم تحديث فلتر الكلمات المحظورة بنجاح!**\nالحالة: ${enable ? '🟢 مفعل' : '🔴 معطل'}${words ? `\nالكلمات: \`${words}\`` : ''}${action ? `\nالإجراء: \`${action}\`` : ''}`,
-        ephemeral: true
+        flags: 64
       });
     }
 
@@ -97,7 +97,7 @@ module.exports = {
 
       return interaction.reply({
         content: `✅ **تم تحديث منع المنشن الجماعي!**\nالحالة: ${enable ? '🟢 مفعل' : '🔴 معطل'}\nالحد: **${limit || settings.max_mentions || 4} منشن**`,
-        ephemeral: true
+        flags: 64
       });
     }
 
@@ -106,7 +106,7 @@ module.exports = {
       db.updateGuildSetting(guildId, 'anti_caps', enable ? 1 : 0);
       return interaction.reply({
         content: `✅ **تم ${enable ? 'تفعيل 🟢' : 'تعطيل 🔴'} منع الحروف الكبيرة (Caps Lock)!**`,
-        ephemeral: true
+        flags: 64
       });
     }
 
@@ -119,7 +119,7 @@ module.exports = {
 
       return interaction.reply({
         content: `✅ **تم تحديث منع سبام الإيموجيات!**\nالحالة: ${enable ? '🟢 مفعل' : '🔴 معطل'}\nالحد: **${limit || settings.max_emojis || 5} إيموجي**`,
-        ephemeral: true
+        flags: 64
       });
     }
 
@@ -132,7 +132,7 @@ module.exports = {
 
       return interaction.reply({
         content: `✅ **تم تحديث منع سبام الأسطر!**\nالحالة: ${enable ? '🟢 مفعل' : '🔴 معطل'}\nالحد: **${limit || settings.max_lines || 8} أسطر**`,
-        ephemeral: true
+        flags: 64
       });
     }
 
@@ -145,7 +145,7 @@ module.exports = {
 
       return interaction.reply({
         content: `✅ **تم تحديث الاستثناءات:**\n${role ? `👑 الرتبة المستثناة: <@&${role.id}>\n` : ''}${channel ? `💬 الروم المستثنى: <#${channel.id}>` : ''}`,
-        ephemeral: true
+        flags: 64
       });
     }
   },

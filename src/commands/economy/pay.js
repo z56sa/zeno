@@ -27,10 +27,10 @@ module.exports = {
     const guildId = interaction.guild.id;
 
     if (recipient.id === sender.id) {
-      return interaction.reply({ content: '❌ لا يمكنك تحويل العملات لنفسك!', ephemeral: true });
+      return interaction.reply({ content: '❌ لا يمكنك تحويل العملات لنفسك!', flags: 64 });
     }
     if (recipient.bot) {
-      return interaction.reply({ content: '❌ لا يمكنك تحويل العملات للبوتات!', ephemeral: true });
+      return interaction.reply({ content: '❌ لا يمكنك تحويل العملات للبوتات!', flags: 64 });
     }
 
     try {
@@ -53,10 +53,10 @@ module.exports = {
         const senderData = db.getUser(sender.id, guildId);
         return interaction.reply({
           content: `❌ رصيدك غير كافي! رصيدك الحالي هو **${(senderData.coins || 0).toLocaleString()}** Gold 🪙`,
-          ephemeral: true
+          flags: 64
         });
       }
-      return interaction.reply({ content: '⚠️ حدث خطأ أثناء تنفيذ الحوالة المالية.', ephemeral: true });
+      return interaction.reply({ content: '⚠️ حدث خطأ أثناء تنفيذ الحوالة المالية.', flags: 64 });
     }
   },
 

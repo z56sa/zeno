@@ -37,7 +37,7 @@ module.exports = {
 
   async execute(interaction, client) {
     if (!interaction.member.permissions.has(PermissionFlagsBits.ManageGuild)) {
-      return interaction.reply({ content: '❌ لا تملك صلاحية إدارة السيرفر (Manage Server).', ephemeral: true });
+      return interaction.reply({ content: '❌ لا تملك صلاحية إدارة السيرفر (Manage Server).', flags: 64 });
     }
 
     const sub = interaction.options.getSubcommand();
@@ -54,7 +54,7 @@ module.exports = {
 
       const durationMs = ms(durationStr);
       if (!durationMs || durationMs < 5000) {
-        return interaction.reply({ content: '❌ المدة المحددة غير صحيحة. استخدم صيغة مثل: `10m`, `1h`, `2d`.', ephemeral: true });
+        return interaction.reply({ content: '❌ المدة المحددة غير صحيحة. استخدم صيغة مثل: `10m`, `1h`, `2d`.', flags: 64 });
       }
 
       const endsAt = Date.now() + durationMs;
@@ -107,7 +107,7 @@ module.exports = {
         extraRole ? extraRole.id : null
       );
 
-      await interaction.reply({ content: `✅ **تم إطلاق القيف أواي بنجاح في:** <#${channel.id}>`, ephemeral: true });
+      await interaction.reply({ content: `✅ **تم إطلاق القيف أواي بنجاح في:** <#${channel.id}>`, flags: 64 });
 
       // تشغيل المؤقت
       setTimeout(() => {
@@ -119,11 +119,11 @@ module.exports = {
       const giveaway = db.getGiveaway(messageId);
 
       if (!giveaway || giveaway.ended) {
-        return interaction.reply({ content: '❌ هذا القيف أواي غير موجود أو انتهى مسبقاً.', ephemeral: true });
+        return interaction.reply({ content: '❌ هذا القيف أواي غير موجود أو انتهى مسبقاً.', flags: 64 });
       }
 
       await this.finishGiveaway(messageId, client);
-      await interaction.reply({ content: '✅ تم إنهاء القيف أواي واختيار الفائزين بنجاح.', ephemeral: true });
+      await interaction.reply({ content: '✅ تم إنهاء القيف أواي واختيار الفائزين بنجاح.', flags: 64 });
 
     } else if (sub === 'reroll') {
       const messageId = interaction.options.getString('message_id');
@@ -131,7 +131,7 @@ module.exports = {
       const giveaway = db.getGiveaway(messageId);
 
       if (!giveaway) {
-        return interaction.reply({ content: '❌ لم يتم العثور على القيف أواي المطلوب.', ephemeral: true });
+        return interaction.reply({ content: '❌ لم يتم العثور على القيف أواي المطلوب.', flags: 64 });
       }
 
       const count = customWinnersCount || giveaway.winners_count || 1;
@@ -139,7 +139,7 @@ module.exports = {
       const channel = client.channels.cache.get(giveaway.channel_id);
 
       if (!winners || winners.length === 0) {
-        return interaction.reply({ content: '❌ لا يوجد مشتركون مؤهلون متاحون لإعادة السحب.', ephemeral: true });
+        return interaction.reply({ content: '❌ لا يوجد مشتركون مؤهلون متاحون لإعادة السحب.', flags: 64 });
       }
 
       const winnersText = winners.map(w => `<@${w}>`).join(', ');
@@ -148,7 +148,7 @@ module.exports = {
           content: `🎲 **إعادة السحب (Reroll)!**\n🎉 الفائز الجديد بالجائزة **${giveaway.prize}** هو: ${winnersText}! 🥳\nمبارك لك! تواصل مع <@${giveaway.hosted_by}> لاستلام جائزتك.`
         });
       }
-      await interaction.reply({ content: `✅ تم إعادة السحب واختيار الفائز: ${winnersText}`, ephemeral: true });
+      await interaction.reply({ content: `✅ تم إعادة السحب واختيار الفائز: ${winnersText}`, flags: 64 });
     }
   },
 

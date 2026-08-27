@@ -55,10 +55,10 @@ module.exports = {
     const amount = isAll ? (sub === 'deposit' ? wallet : bank) : parseInt(amountArg);
 
     if (isNaN(amount) || amount <= 0)
-      return reply({ content: '❌ أدخل مبلغاً صحيحاً أو اكتب `all`.', ephemeral: true });
+      return reply({ content: '❌ أدخل مبلغاً صحيحاً أو اكتب `all`.', flags: 64 });
 
     if (sub === 'deposit') {
-      if (wallet < amount) return reply({ content: `❌ ليس في محفظتك كافٍ! لديك \`${wallet.toLocaleString()}\` ⭐`, ephemeral: true });
+      if (wallet < amount) return reply({ content: `❌ ليس في محفظتك كافٍ! لديك \`${wallet.toLocaleString()}\` ⭐`, flags: 64 });
       db.removeCoins(user.id, guildId, amount);
       db.db.prepare('UPDATE users SET bank_balance = bank_balance + ? WHERE user_id = ? AND guild_id = ?').run(amount, user.id, guildId);
       const embed = new EmbedBuilder().setColor('#27ae60')
@@ -71,7 +71,7 @@ module.exports = {
       return reply({ embeds: [embed] });
 
     } else if (sub === 'withdraw') {
-      if (bank < amount) return reply({ content: `❌ ليس في بنكك كافٍ! لديك \`${bank.toLocaleString()}\` ⭐ في البنك.`, ephemeral: true });
+      if (bank < amount) return reply({ content: `❌ ليس في بنكك كافٍ! لديك \`${bank.toLocaleString()}\` ⭐ في البنك.`, flags: 64 });
       db.db.prepare('UPDATE users SET bank_balance = bank_balance - ? WHERE user_id = ? AND guild_id = ?').run(amount, user.id, guildId);
       db.addCoins(user.id, guildId, amount);
       const embed = new EmbedBuilder().setColor('#e67e22')

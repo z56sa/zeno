@@ -59,13 +59,13 @@ module.exports = {
 
   async execute(interaction, client) {
     if (!interaction.member.permissions.has(PermissionFlagsBits.ManageGuild)) {
-      return interaction.reply({ content: '❌ يتطلب صلاحية إدارة السيرفر (Manage Guild).', ephemeral: true });
+      return interaction.reply({ content: '❌ يتطلب صلاحية إدارة السيرفر (Manage Guild).', flags: 64 });
     }
 
     const sub = interaction.options.getSubcommand();
 
     if (sub === 'send') {
-      await interaction.deferReply({ ephemeral: true }).catch(() => {});
+      await interaction.deferReply({ flags: 64 }).catch(() => {});
       const ch1 = interaction.options.getChannel('channel');
       const ch2 = interaction.options.getChannel('channel2');
       const ch3 = interaction.options.getChannel('channel3');
@@ -98,7 +98,7 @@ module.exports = {
 
       const durationMs = ms(delayStr);
       if (!durationMs || durationMs < 10000) {
-        return interaction.reply({ content: '❌ المدة غير صحيحة. استخدم صيغة مثل: `30m`, `2h`, `1d`.', ephemeral: true });
+        return interaction.reply({ content: '❌ المدة غير صحيحة. استخدم صيغة مثل: `30m`, `2h`, `1d`.', flags: 64 });
       }
 
       const scheduledTime = Date.now() + durationMs;
@@ -120,7 +120,7 @@ module.exports = {
       const timestampSec = Math.floor(scheduledTime / 1000);
       return interaction.reply({
         content: `⏰ **تمت جدولة الإعلان بنجاح (ID: #${created.id})!**\nسيتم النشر في <#${channel.id}> <t:${timestampSec}:R> (<t:${timestampSec}:F>).`,
-        ephemeral: true
+        flags: 64
       });
 
     } else if (sub === 'recurring') {
@@ -147,13 +147,13 @@ module.exports = {
 
       return interaction.reply({
         content: `🔁 **تم تفعيل المذيع الآلي بنجاح (ID: #${created.id})!**\nسيتم النشر في <#${channel.id}> تلقائياً كل **${intervalMinutes} دقيقة**.`,
-        ephemeral: true
+        flags: 64
       });
 
     } else if (sub === 'list') {
       const list = db.getGuildBroadcasts(interaction.guild.id);
       if (!list || list.length === 0) {
-        return interaction.reply({ content: '📢 لا توجد أي إعلانات مجدولة أو متكررة في هذا السيرفر.', ephemeral: true });
+        return interaction.reply({ content: '📢 لا توجد أي إعلانات مجدولة أو متكررة في هذا السيرفر.', flags: 64 });
       }
 
       const rows = list.map(b => {
@@ -169,17 +169,17 @@ module.exports = {
         .setDescription(rows)
         .setFooter({ text: 'لحذف إعلان استخدم: /broadcast delete [id]' });
 
-      return interaction.reply({ embeds: [embed], ephemeral: true });
+      return interaction.reply({ embeds: [embed], flags: 64 });
 
     } else if (sub === 'delete') {
       const id = interaction.options.getInteger('id');
       const item = db.getBroadcast(id);
       if (!item || item.guild_id !== interaction.guild.id) {
-        return interaction.reply({ content: `❌ لم يتم العثور على الإعلان رقم #${id}.`, ephemeral: true });
+        return interaction.reply({ content: `❌ لم يتم العثور على الإعلان رقم #${id}.`, flags: 64 });
       }
 
       db.deleteBroadcast(id, interaction.guild.id);
-      return interaction.reply({ content: `✅ تم حذف الإعلان رقم #${id} بنجاح.`, ephemeral: true });
+      return interaction.reply({ content: `✅ تم حذف الإعلان رقم #${id} بنجاح.`, flags: 64 });
     }
   }
 };

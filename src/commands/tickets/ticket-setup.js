@@ -61,7 +61,7 @@ module.exports = {
 
   async execute(interaction) {
     if (!interaction.member.permissions.has(PermissionFlagsBits.Administrator)) {
-      return interaction.reply({ content: '❌ لا تملك صلاحية الأدمن لتنفيذ هذا الأمر.', ephemeral: true });
+      return interaction.reply({ content: '❌ لا تملك صلاحية الأدمن لتنفيذ هذا الأمر.', flags: 64 });
     }
 
     const channel = interaction.options.getChannel('channel');
@@ -150,6 +150,6 @@ module.exports = {
       logs_channel: logsChannel ? logsChannel.id : null
     });
 
-    await interaction.reply({ content: `✅ تم إرسال لوحة التذاكر المخصصة بنجاح في القناة: <#${channel.id}>`, ephemeral: true });
+    await interaction.reply({ content: `✅ تم إرسال لوحة التذاكر المخصصة بنجاح في القناة: <#${channel.id}>`, flags: 64 });
   }
 };

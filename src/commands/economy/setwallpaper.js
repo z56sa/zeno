@@ -17,7 +17,7 @@ module.exports = {
   async execute(interaction) {
     const url = interaction.options.getString('url').trim();
     if (!url.startsWith('http://') && !url.startsWith('https://')) {
-      return interaction.reply({ content: '❌ يرجى إدخال رابط صورة صالح يبدأ بـ `https://`', ephemeral: true });
+      return interaction.reply({ content: '❌ يرجى إدخال رابط صورة صالح يبدأ بـ `https://`', flags: 64 });
     }
 
     db.setWallpaper(interaction.user.id, interaction.guild.id, url);

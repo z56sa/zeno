@@ -32,18 +32,18 @@ module.exports = {
 
         if (sub === "stop") {
             const stopped = await radioService.stop(interaction.guild.id);
-            return interaction.reply({ content: stopped ? "⏹️ تم إيقاف البث." : "❌ لا يوجد بث نشط حالياً.", ephemeral: true });
+            return interaction.reply({ content: stopped ? "⏹️ تم إيقاف البث." : "❌ لا يوجد بث نشط حالياً.", flags: 64 });
         }
 
         if (sub === "list") {
             const stations = radioService.getStations();
             const list = Object.entries(stations).map(([k, s]) => `${s.emoji} **${s.name}**`).join("\n");
-            return interaction.reply({ content: `📻 **المحطات المتاحة:**\n${list}`, ephemeral: true });
+            return interaction.reply({ content: `📻 **المحطات المتاحة:**\n${list}`, flags: 64 });
         }
 
         const member = interaction.member;
         const voiceChannel = member.voice.channel;
-        if (!voiceChannel) return interaction.reply({ content: "❌ يجب أن تكون في قناة صوتية أولاً!", ephemeral: true });
+        if (!voiceChannel) return interaction.reply({ content: "❌ يجب أن تكون في قناة صوتية أولاً!", flags: 64 });
 
         await interaction.deferReply();
         const stationKey = interaction.options.getString("station") || "quran_makkah";

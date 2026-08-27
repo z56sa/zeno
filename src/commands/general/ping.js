@@ -10,7 +10,7 @@ module.exports = {
     .setDescription('عرض سرعة استجابة البوت (Ping)'),
 
   async execute(interaction, client) {
-    const sent = await interaction.reply({ content: 'جاري القياس...', fetchReply: true });
+    const sent = await interaction.reply({ content: 'جاري القياس...', withResponse: true });
     const latency = sent.createdTimestamp - interaction.createdTimestamp;
     const apiLatency = Math.round(client.ws.ping);
 

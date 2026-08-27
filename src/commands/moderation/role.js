@@ -25,7 +25,7 @@ module.exports = {
 
   async execute(interaction) {
     if (!interaction.member.permissions.has(PermissionFlagsBits.ManageRoles))
-      return interaction.reply({ content: '❌ ليس لديك صلاحية إدارة الأدوار.', ephemeral: true });
+      return interaction.reply({ content: '❌ ليس لديك صلاحية إدارة الأدوار.', flags: 64 });
 
     await interaction.deferReply({ ephemeral: false }).catch(() => {});
     const sub = interaction.options.getSubcommand();
