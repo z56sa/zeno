@@ -43,7 +43,10 @@ module.exports = function (app, client) {
     // 2. Direct Auth Redirections (توجيه مباشر دون الحاجة لـ OAuth2)
     app.get('/auth/discord', (req, res) => res.redirect('/dashboard/manage'));
     app.get('/auth/discord/callback', (req, res) => res.redirect('/dashboard/manage'));
-    app.get('/logout', (req, res) => res.redirect('/'));
+    app.get('/logout', (req, res) => {
+        req.session?.destroy?.(() => {});
+        return res.sendFile(require('path').join(__dirname, 'public', 'index.html'));
+    });
 
     // ========================================================
     // 💡 ECONOMY API ENDPOINTS (Live Persistent Dashboard API)
