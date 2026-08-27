@@ -11,6 +11,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libjpeg-dev \
     libgif-dev \
     librsvg2-dev \
+    libfontconfig1-dev \
+    fonts-liberation \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /usr/src/app
