@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZENO BOT - النظام الأقوى للتذاكر والتقديمات والحماية</title>
+    <title>ZENO BOT - اصنع خادم ديسكورد احترافي</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     <style>
@@ -17,7 +17,7 @@
             padding: 0;
         }
         .purple-glow-bg {
-            background: radial-gradient(circle at 50% 15%, rgba(147, 51, 234, 0.18), transparent 70%);
+            background: radial-gradient(circle at 50% 20%, rgba(147, 51, 234, 0.16), transparent 65%);
         }
         .zeno-badge {
             background: rgba(147, 51, 234, 0.12);
@@ -47,26 +47,15 @@
             transform: translateY(-2px);
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
         }
-        .feature-card {
-            background: rgba(16, 18, 27, 0.7);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            transition: all 0.3s ease;
-        }
-        .feature-card:hover {
-            border-color: rgba(147, 51, 234, 0.4);
-            transform: translateY(-4px);
-            box-shadow: 0 10px 30px rgba(147, 51, 234, 0.15);
-        }
     </style>
 </head>
 
 <body class="min-h-screen flex flex-col justify-between bg-[#06070a] purple-glow-bg select-none">
 
-    <!-- Header Navbar -->
+    <!-- Header Navbar (ZENO Brand & Dark Purple ProBot Style) -->
     <header class="h-20 bg-[#06070a]/90 backdrop-blur-md border-b border-purple-900/20 px-6 sm:px-12 flex items-center justify-between sticky top-0 z-50">
         
-        <!-- Logo Left in RTL -->
+        <!-- Logo Left in RTL (ZENO Brand) -->
         <a href="/" class="flex items-center gap-3 group">
             <div class="w-10 h-10 rounded-2xl bg-purple-600/20 border border-purple-500/40 flex items-center justify-center text-xl font-black text-purple-400 shadow-lg shadow-purple-600/20 group-hover:scale-105 transition-transform">
                 🔮
@@ -74,11 +63,14 @@
             <span class="text-2xl font-black tracking-tight text-white">ZENO BOT</span>
         </a>
 
-        <!-- Center Links -->
+        <!-- Center Links (بدون بريميوم نهائياً) -->
         <nav class="hidden md:flex items-center gap-8 text-sm font-bold text-gray-400">
             <a href="https://discord.gg/zduGPYv7pE" target="_blank" class="hover:text-purple-400 transition">سيرفر الدعم</a>
-            <a href="#features" class="hover:text-purple-400 transition">الأنظمة والمميزات</a>
-            <a href="/dashboard/manage" class="hover:text-purple-400 transition">إدارة التذاكر والتقديمات</a>
+            <div class="flex items-center gap-1 hover:text-purple-400 cursor-pointer transition">
+                <span>المصادر</span>
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+            </div>
+            <a href="#features" class="hover:text-purple-400 transition">المميزات</a>
         </nav>
 
         <!-- Direct Dashboard CTA Button -->
@@ -90,27 +82,27 @@
     </header>
 
     <!-- Main Hero Landing Section -->
-    <main class="max-w-5xl mx-auto px-6 py-16 text-center flex-1 flex flex-col items-center justify-center">
+    <main class="max-w-4xl mx-auto px-6 py-20 text-center flex-1 flex flex-col items-center justify-center">
         
-        <!-- Feature Badge -->
+        <!-- Feature Badge (جديد: نظام التذاكر) -->
         <div class="zeno-badge px-5 py-1.5 rounded-full text-xs font-black mb-8 tracking-wide shadow-sm flex items-center gap-2">
-            <span>🛡️</span>
-            <span>نظام متكامل: تذاكر دعم احترافية • تقديمات وإداريين • حماية ضد التخريب</span>
+            <span>✨</span>
+            <span>جديد: نظام التذاكر والتحكم المتطور</span>
         </div>
 
         <!-- Main Heading -->
         <h1 class="text-4xl sm:text-6xl md:text-7xl font-black text-white leading-tight mb-8 tracking-tight">
-            نظام التذاكر والتقديمات<br>
-            <span class="bg-gradient-to-r from-purple-400 via-fuchsia-300 to-indigo-300 bg-clip-text text-transparent">والحماية الشاملة!</span>
+            اصنع خادم ديسكورد<br>
+            <span class="bg-gradient-to-r from-purple-400 via-fuchsia-300 to-indigo-300 bg-clip-text text-transparent">احترافي!</span>
         </h1>
 
         <!-- Subtitle Description -->
         <p class="text-gray-400 text-sm md:text-base leading-relaxed max-w-2xl mb-12 font-semibold">
-            بوت ZENO مخصص لإدارة الدعم الفني عبر نظام التذاكر المتطور، استقبال ومراجعة التقديمات الإدارية بنقاط التقييم، وحماية خادمك من التخريب وسحب الرتب والاختراق.
+            بوت متعدد الأغراض قابل للتخصيص جداً حيث يوفر لك تخصيص صورة كرسالة ترحيبية وسجلات متعمقة وأوامر اجتماعية وإشراف وأكثر ...
         </p>
 
         <!-- Two Action Buttons -->
-        <div class="flex flex-wrap items-center justify-center gap-4 w-full max-w-md mb-16">
+        <div class="flex flex-wrap items-center justify-center gap-4 w-full max-w-md">
             <!-- 1. إضافة البوت في Discord -->
             <a href="https://discord.com/api/oauth2/authorize?client_id=1506005273893146775&permissions=8&scope=bot%20applications.commands" target="_blank" class="flex-1 min-w-[180px] py-4 zeno-btn-primary font-black rounded-2xl text-sm text-center shadow-xl flex items-center justify-center gap-2">
                 <span>➕</span>
@@ -120,53 +112,15 @@
             <!-- 2. الدخول المباشر إلى لوحة التحكم -->
             <a href="/dashboard/manage" class="flex-1 min-w-[150px] py-4 zeno-btn-secondary font-black rounded-2xl text-sm text-center flex items-center justify-center gap-2">
                 <span>⚙️</span>
-                <span>لوحة التحكم المباشرة</span>
+                <span>لوحة التحكم</span>
             </a>
-        </div>
-
-        <!-- 3 Core Pillars -->
-        <div id="features" class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full text-right">
-            
-            <!-- Pillar 1: Tickets -->
-            <div class="feature-card p-6 rounded-3xl space-y-3">
-                <div class="w-12 h-12 rounded-2xl bg-purple-600/20 text-purple-400 flex items-center justify-center text-2xl border border-purple-500/30">
-                    🎫
-                </div>
-                <h3 class="text-lg font-black text-white">نظام التذاكر (Tickets)</h3>
-                <p class="text-xs text-gray-400 leading-relaxed font-semibold">
-                    أزرار وقوائم منسدلة لفتح التذاكر، تعيين رتب الدعم الفني، حفظ نسخ الترانزكريبت HTML، وأزرار التحكم والإغلاق والادارة داخل التذكرة.
-                </p>
-            </div>
-
-            <!-- Pillar 2: Applications -->
-            <div class="feature-card p-6 rounded-3xl space-y-3">
-                <div class="w-12 h-12 rounded-2xl bg-fuchsia-600/20 text-fuchsia-400 flex items-center justify-center text-2xl border border-fuchsia-500/30">
-                    📝
-                </div>
-                <h3 class="text-lg font-black text-white">نظام التقديمات (Apply)</h3>
-                <p class="text-xs text-gray-400 leading-relaxed font-semibold">
-                    نماذج تقديم تفاعلية، إرسال إشعارات للإدارة للموافقة أو الرفض بضغطة زر، ونظام نقاط تقييم المراجعين والإداريين.
-                </p>
-            </div>
-
-            <!-- Pillar 3: Protection -->
-            <div class="feature-card p-6 rounded-3xl space-y-3">
-                <div class="w-12 h-12 rounded-2xl bg-indigo-600/20 text-indigo-400 flex items-center justify-center text-2xl border border-indigo-500/30">
-                    🛡️
-                </div>
-                <h3 class="text-lg font-black text-white">جدار الحماية والمودريشن</h3>
-                <p class="text-xs text-gray-400 leading-relaxed font-semibold">
-                    مكافحة التخريب (Anti-Nuke)، القائمة البيضاء (Whitelist)، مراقبة الروابط والسبام، وسجلات الأمان الشاملة.
-                </p>
-            </div>
-
         </div>
 
     </main>
 
     <!-- Footer -->
     <footer class="border-t border-purple-900/20 bg-[#040508] py-6 text-center text-gray-500 text-xs font-semibold">
-        جميع الحقوق محفوظة © ZENO BOT 2026 - نظام التذاكر والتقديمات والحماية
+        جميع الحقوق محفوظة © ZENO BOT 2026 - <a href="https://discord.gg/zduGPYv7pE" target="_blank" class="text-purple-400 hover:underline transition">سيرفر الدعم الفني</a>
     </footer>
 
 </body>
