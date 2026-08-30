@@ -19,7 +19,7 @@ class AudioPlayerManager {
     async play(interaction, query) {
         const channel = interaction.member?.voice?.channel;
         if (!channel) {
-            return interaction.reply({ content: '❌ يجب أن تكون في روم صوتي تشغيل موسيقى!', ephemeral: true });
+            return interaction.reply({ content: '❌ يجب أن تكون في روم صوتي تشغيل موسيقى!', flags: 64 });
         }
 
         const guildId = interaction.guild.id;
@@ -41,7 +41,7 @@ class AudioPlayerManager {
                 // البحث في يوتيوب في حال لم يكن رابطاً مباشراً
                 const searched = await playdl.search(query, { limit: 1 });
                 if (!searched || searched.length === 0) {
-                    return interaction.reply({ content: '❌ لم يتم العثور على نتائج مطابقة لبحثك!', ephemeral: true });
+                    return interaction.reply({ content: '❌ لم يتم العثور على نتائج مطابقة لبحثك!', flags: 64 });
                 }
                 streamInfo = {
                     title: searched[0].title,
@@ -53,7 +53,7 @@ class AudioPlayerManager {
             }
         } catch (err) {
             console.error('خطأ في جلب بيانات الصوت:', err);
-            return interaction.reply({ content: '❌ حدث خطأ أثناء محاولة جلب المقطع الصوتي.', ephemeral: true });
+            return interaction.reply({ content: '❌ حدث خطأ أثناء محاولة جلب المقطع الصوتي.', flags: 64 });
         }
 
         // إذا لم يكن هناك طابور تشغيل لهذا السيرفر، أنشئ واحداً جديداً
@@ -91,7 +91,7 @@ class AudioPlayerManager {
             } catch (err) {
                 console.error('فشل الاتصال بالروم الصوتي:', err);
                 queues.delete(guildId);
-                return interaction.reply({ content: '❌ فشل الاتصال بالروم الصوتي.', ephemeral: true });
+                return interaction.reply({ content: '❌ فشل الاتصال بالروم الصوتي.', flags: 64 });
             }
         } else {
             // السيرفر يعمل مسبقاً، أضف الأغنية للطابور
@@ -153,7 +153,7 @@ class AudioPlayerManager {
     skip(interaction) {
         const serverQueue = queues.get(interaction.guild.id);
         if (!serverQueue || !serverQueue.current) {
-            return interaction.reply({ content: '❌ لا توجد مقاطع تعمل حالياً لتخطيها!', ephemeral: true });
+            return interaction.reply({ content: '❌ لا توجد مقاطع تعمل حالياً لتخطيها!', flags: 64 });
         }
         serverQueue.player.stop();
         return interaction.reply({ content: '⏭️ تم تخطي المقطع الحالي بنجاح.' });
@@ -167,7 +167,7 @@ class AudioPlayerManager {
         const serverQueue = queues.get(guildId);
         if (!serverQueue) {
             if (typeof interaction === 'object' && interaction.reply) {
-                return interaction.reply({ content: '❌ البوت ليس متصلاً بأي روم صوتي!', ephemeral: true });
+                return interaction.reply({ content: '❌ البوت ليس متصلاً بأي روم صوتي!', flags: 64 });
             }
             return false;
         }

@@ -70,7 +70,7 @@ module.exports = async (client) => {
     if (client.user?.id) {
       registerCommands(client.user.id);
     } else {
-      client.once('ready', () => {
+      client.once('clientReady', () => {
         const id = client.user?.id || (process.env.CLIENT_ID || '').trim();
         registerCommands(id);
       });
