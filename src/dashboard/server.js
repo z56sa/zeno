@@ -489,42 +489,36 @@ module.exports = function (app, client) {
                                 <span class="text-purple-400">🎛️</span>
                             </div>
 
-                            <!-- Top Stats 4-Grid (Novax Exact Order & Icons: الذهب / السمعة / التصنيف / المستوى) -->
-                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <!-- Top Stats 3-Grid: نظام التذاكر / نظام التقديمات / نظام الحماية -->
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 
-                                <!-- 1. الذهب (Golds / Gold) -->
-                                <div class="bg-[#10121b] border border-white/5 hover:border-purple-500/30 rounded-2xl p-4 flex items-center justify-between shadow-lg transition">
-                                    <div class="w-10 h-10 rounded-xl bg-purple-600/10 text-amber-400 flex items-center justify-center text-xl font-bold shadow-inner">🪙</div>
+                                <!-- 1. نظام التذاكر -->
+                                <div class="bg-[#10121b] border border-white/5 hover:border-purple-500/30 rounded-2xl p-5 flex items-center justify-between shadow-lg transition">
+                                    <div class="w-12 h-12 rounded-xl bg-purple-600/10 text-purple-400 flex items-center justify-center text-2xl font-bold border border-purple-500/20">🎫</div>
                                     <div class="text-right">
-                                        <span class="text-xs font-bold text-gray-400">الذهب</span>
-                                        <h3 id="userCoinsDisplay" class="text-xl font-black text-white mt-0.5">${userCoins.toLocaleString()}</h3>
+                                        <span class="text-xs font-bold text-gray-400">نظام التذاكر</span>
+                                        <h3 class="text-lg font-black text-white mt-1">الدعم الفني</h3>
+                                        <span class="text-[10px] text-emerald-400 font-bold block mt-0.5">● جاهز ونشط</span>
                                     </div>
                                 </div>
 
-                                <!-- 2. السمعة (Reputation) -->
-                                <div class="bg-[#10121b] border border-white/5 hover:border-purple-500/30 rounded-2xl p-4 flex items-center justify-between shadow-lg transition">
-                                    <div class="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center text-xl shadow-inner">👍</div>
+                                <!-- 2. نظام التقديمات -->
+                                <div class="bg-[#10121b] border border-white/5 hover:border-fuchsia-500/30 rounded-2xl p-5 flex items-center justify-between shadow-lg transition">
+                                    <div class="w-12 h-12 rounded-xl bg-fuchsia-500/10 text-fuchsia-400 flex items-center justify-center text-2xl border border-fuchsia-500/20">📝</div>
                                     <div class="text-right">
-                                        <span class="text-xs font-bold text-gray-400">السمعة</span>
-                                        <h3 class="text-xl font-black text-white mt-0.5">${userStars}</h3>
+                                        <span class="text-xs font-bold text-gray-400">نظام التقديمات</span>
+                                        <h3 class="text-lg font-black text-white mt-1">التوظيف والإدارة</h3>
+                                        <span class="text-[10px] text-emerald-400 font-bold block mt-0.5">● نماذج تفاعلية</span>
                                     </div>
                                 </div>
 
-                                <!-- 3. التصنيف (Rank) -->
-                                <div class="bg-[#10121b] border border-white/5 hover:border-purple-500/30 rounded-2xl p-4 flex items-center justify-between shadow-lg transition">
-                                    <div class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-xl shadow-inner">🏆</div>
+                                <!-- 3. جدار الحماية -->
+                                <div class="bg-[#10121b] border border-white/5 hover:border-indigo-500/30 rounded-2xl p-5 flex items-center justify-between shadow-lg transition">
+                                    <div class="w-12 h-12 rounded-xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center text-2xl border border-indigo-500/20">🛡️</div>
                                     <div class="text-right">
-                                        <span class="text-xs font-bold text-gray-400">التصنيف</span>
-                                        <h3 class="text-xl font-black text-white mt-0.5">#${userRankXp}</h3>
-                                    </div>
-                                </div>
-
-                                <!-- 4. المستوى (Level) -->
-                                <div class="bg-[#10121b] border border-white/5 hover:border-purple-500/30 rounded-2xl p-4 flex items-center justify-between shadow-lg transition">
-                                    <div class="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center text-xl shadow-inner">📈</div>
-                                    <div class="text-right">
-                                        <span class="text-xs font-bold text-gray-400">المستوى</span>
-                                        <h3 class="text-xl font-black text-white mt-0.5">${userLevel}</h3>
+                                        <span class="text-xs font-bold text-gray-400">جدار الحماية</span>
+                                        <h3 class="text-lg font-black text-white mt-1">Anti-Nuke</h3>
+                                        <span class="text-[10px] text-emerald-400 font-bold block mt-0.5">● حماية السيرفرات</span>
                                     </div>
                                 </div>
 
@@ -541,146 +535,35 @@ module.exports = function (app, client) {
                                 </div>
                             </div>
 
-                            <!-- آخر معاملات الذهب (Recent Gold Transactions - Novax Exact Style) -->
-                            <div class="bg-[#10121b] border border-white/5 rounded-3xl p-6 shadow-xl space-y-4 text-right">
-                                <div class="flex items-center justify-between border-b border-white/5 pb-3">
-                                    <span class="text-xs text-gray-400">سجل التحويلات والمكافآت</span>
-                                    <h3 class="text-sm font-black text-white flex items-center gap-2"><span>آخر 5 معاملات الذهب</span><span>🪙</span></h3>
-                                </div>
-
-                                <div class="overflow-x-auto">
-                                    <div class="bg-gradient-to-r from-emerald-950/30 via-[#151724] to-[#151724] border border-emerald-500/30 rounded-2xl p-4 flex items-center justify-between shadow-lg">
-                                        <div class="flex items-center gap-2 text-emerald-400 font-bold font-mono text-sm">
-                                            <span>↗️ ${userCoins.toLocaleString()}</span>
-                                            <span class="text-xs text-gray-400 font-normal">الرصيد</span>
-                                        </div>
-                                        <div class="text-emerald-400 font-mono font-bold text-sm">
-                                            +500
-                                            <span class="text-[10px] text-gray-400 block font-normal">المبلغ</span>
-                                        </div>
-                                        <div class="text-gray-300 text-xs text-center">
-                                            <span>اليوم</span>
-                                            <span class="text-[10px] text-gray-400 block">تاريخ</span>
-                                        </div>
-                                        <div class="flex items-center gap-2.5 text-right">
-                                            <div>
-                                                <h5 class="text-xs font-bold text-white leading-tight">المكافأة اليومية (Daily)</h5>
-                                                <span class="text-[10px] text-gray-400 font-mono">ZENO Bot System</span>
-                                            </div>
-                                            <div class="w-8 h-8 rounded-xl bg-purple-600/20 text-purple-400 flex items-center justify-center text-sm font-bold border border-purple-500/30">🎁</div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- قسم الملف الشخصي وبطاقة الهوية (Profile Card & Identity Card - Novax Exact Style) -->
-                            <div class="space-y-4 text-right">
-                                <h3 class="text-sm font-black text-white flex items-center justify-end gap-2"><span>الملف الشخصي</span><span>👤</span></h3>
+                            <!-- تفاصيل الأنظمة الأساسية (Quick Feature Guide) -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-right">
                                 
-                                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                                    
-                                    <!-- 1. الملف الشخصي (Main Profile Card) -->
-                                    <div class="bg-[#10121b] border border-white/5 rounded-3xl p-5 shadow-xl space-y-4">
-                                        <div class="flex items-center justify-between border-b border-white/5 pb-3">
-                                            <h4 class="text-xs font-black text-white">الملف الشخصي</h4>
-                                        </div>
-
-                                        <!-- The Graphic Discord Card (Purple Nebula Design) -->
-                                        <div class="relative rounded-2xl overflow-hidden bg-gradient-to-br from-purple-950 via-[#18112e] to-[#0d071a] border border-purple-500/30 p-5 shadow-2xl space-y-4">
-                                            <!-- Top Header in Card -->
-                                            <div class="flex items-center justify-between">
-                                                <span class="px-2.5 py-1 bg-purple-900/60 border border-purple-500/40 text-purple-200 text-[10px] font-bold rounded-lg">+0 REP</span>
-                                                <div class="flex items-center gap-3">
-                                                    <div class="text-right">
-                                                        <h4 class="text-sm font-black text-white leading-tight">@${user.username}</h4>
-                                                    </div>
-                                                    <img src="${userAvatar}" class="w-12 h-12 rounded-2xl object-cover ring-2 ring-purple-500/60 shadow-lg shadow-black/40">
-                                                </div>
-                                            </div>
-
-                                            <!-- About Me Box -->
-                                            <div class="bg-black/30 border border-white/5 rounded-xl p-3 text-right">
-                                                <span class="text-[9px] font-bold text-gray-400 block mb-0.5">ABOUT ME</span>
-                                                <p class="text-xs text-gray-200">مرحباً بك في لوحة تحكم ZENO Bot!</p>
-                                            </div>
-
-                                            <!-- Stats & Gold in Card -->
-                                            <div class="grid grid-cols-2 gap-3 text-right">
-                                                <div class="bg-black/30 border border-white/5 rounded-xl p-3 space-y-1 text-xs">
-                                                    <span class="text-[9px] font-bold text-gray-400 block">STATISTICS</span>
-                                                    <div class="text-[11px] text-gray-300 flex items-center justify-between">
-                                                        <span class="font-bold text-purple-300">${userLevel}</span>
-                                                        <span>⚡ LEVEL:</span>
-                                                    </div>
-                                                    <div class="text-[11px] text-gray-300 flex items-center justify-between">
-                                                        <span class="font-bold text-emerald-400">#${userRankXp}</span>
-                                                        <span>🏆 RANK:</span>
-                                                    </div>
-                                                    <div class="text-[11px] text-gray-300 flex items-center justify-between">
-                                                        <span class="font-bold text-gray-200 font-mono">${userXp} XP</span>
-                                                        <span>✨ XP:</span>
-                                                    </div>
-                                                </div>
-
-                                                <div class="bg-black/30 border border-white/5 rounded-xl p-3 space-y-2 text-right">
-                                                    <span class="text-[9px] font-bold text-gray-400 block">GOLDS</span>
-                                                    <div class="flex items-center justify-end gap-1.5 text-amber-400 font-black text-sm">
-                                                        <span>${userCoins.toLocaleString()}</span>
-                                                        <span class="text-base">🪙</span>
-                                                    </div>
-                                                    <span class="text-[9px] font-bold text-gray-400 block pt-1">BADGES</span>
-                                                    <div class="flex items-center justify-end gap-1 text-base">
-                                                        <span>👑</span><span>💎</span><span>🔥</span><span>⚡</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
+                                <div class="bg-[#10121b] border border-white/5 rounded-3xl p-6 shadow-xl space-y-3">
+                                    <div class="flex items-center justify-end gap-2 text-white font-black text-sm">
+                                        <span>نظام التذاكر المتطور</span>
+                                        <span class="text-purple-400">🎫</span>
                                     </div>
-
-                                    <!-- 2. بطاقة الهوية (Identity / Voice & Invites Card) -->
-                                    <div class="bg-[#10121b] border border-white/5 rounded-3xl p-5 shadow-xl space-y-4">
-                                        <div class="flex items-center justify-between border-b border-white/5 pb-3">
-                                            <h4 class="text-xs font-black text-white">بطاقة الهوية</h4>
-                                        </div>
-
-                                        <!-- The Graphic Identity Card -->
-                                        <div class="relative rounded-2xl overflow-hidden bg-gradient-to-br from-indigo-950 via-[#101426] to-[#090b14] border border-indigo-500/30 p-5 shadow-2xl space-y-4">
-                                            <div class="flex items-center justify-between">
-                                                <div class="text-left text-xs font-bold text-indigo-300 bg-indigo-950/60 border border-indigo-800/40 px-3 py-1 rounded-xl">
-                                                    <span>INVITES: 0</span>
-                                                </div>
-                                                <div class="flex items-center gap-3">
-                                                    <div class="text-right">
-                                                        <h4 class="text-sm font-black text-white leading-tight">@${user.username}</h4>
-                                                        <span class="text-[10px] text-gray-400">ID CARD</span>
-                                                    </div>
-                                                    <img src="${userAvatar}" class="w-12 h-12 rounded-2xl object-cover ring-2 ring-indigo-500/60 shadow-lg shadow-black/40">
-                                                </div>
-                                            </div>
-
-                                            <div class="grid grid-cols-2 gap-3 text-right">
-                                                <div class="bg-black/30 border border-white/5 rounded-xl p-3 space-y-1">
-                                                    <div class="flex items-center justify-between text-xs text-indigo-400 font-bold mb-1">
-                                                        <span>TOP #1</span>
-                                                        <span>💬 TEXT</span>
-                                                    </div>
-                                                    <div class="text-[10px] text-gray-300">TOTAL XP: <span class="font-mono text-white">${userXp}</span></div>
-                                                    <div class="text-[10px] text-gray-300">STREAK: <span class="font-mono text-emerald-400">Active</span></div>
-                                                </div>
-
-                                                <div class="bg-black/30 border border-white/5 rounded-xl p-3 space-y-1">
-                                                    <div class="flex items-center justify-between text-xs text-purple-400 font-bold mb-1">
-                                                        <span>TOP #1</span>
-                                                        <span>🎙️ VOICE</span>
-                                                    </div>
-                                                    <div class="text-[10px] text-gray-300">VOICE TIME: <span class="font-mono text-white">Online</span></div>
-                                                    <div class="text-[10px] text-gray-300">STREAK: <span class="font-mono text-emerald-400">Level ${userLevel}</span></div>
-                                                </div>
-                                            </div>
-                                        </div>
+                                    <p class="text-xs text-gray-400 leading-relaxed font-semibold">
+                                        يتيح لك إنشاء بنل تذاكر تفاعلي بأزرار مخصصة، تحديد رتب الدعم الفني، وإنشاء تذاكر خاصة لكل عضو مع حفظ سجل المحادثة بالكامل.
+                                    </p>
+                                    <div class="pt-2">
+                                        <span class="text-[11px] text-purple-400 font-bold bg-purple-950/50 px-3 py-1 rounded-lg">إدارة السيرفر ← التذاكر</span>
                                     </div>
-
                                 </div>
+
+                                <div class="bg-[#10121b] border border-white/5 rounded-3xl p-6 shadow-xl space-y-3">
+                                    <div class="flex items-center justify-end gap-2 text-white font-black text-sm">
+                                        <span>نظام التقديمات والتوظيف</span>
+                                        <span class="text-fuchsia-400">📝</span>
+                                    </div>
+                                    <p class="text-xs text-gray-400 leading-relaxed font-semibold">
+                                        استقبل طلبات الانضمام للإدارة، مراجعة الإجابات، قبول ورفض المتقدمين مع إعطاء الرتب تلقائياً ونظام نقاط تقييم المراجعين.
+                                    </p>
+                                    <div class="pt-2">
+                                        <span class="text-[11px] text-fuchsia-400 font-bold bg-fuchsia-950/50 px-3 py-1 rounded-lg">الإجراءات الآلية ← التقديمات</span>
+                                    </div>
+                                </div>
+
                             </div>
 
                         </div>
@@ -781,40 +664,12 @@ module.exports = function (app, client) {
                             </div>
 
 
-                            <!-- لوحة المتصدرين (Leaderboards) -->
+                            <!-- الحساب -->
                             <div class="space-y-1">
-                                <button type="button" onclick="toggleNavGroup('user_grp_leaderboard')" class="w-full flex items-center justify-between text-gray-400 hover:text-white px-2 py-1 font-bold text-[11px] transition">
-                                    <svg id="arrow_user_grp_leaderboard" class="w-3.5 h-3.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                                    <span class="flex items-center gap-1.5"><span>لوحة المتصدرين</span></span>
-                                </button>
-                                <div id="user_grp_leaderboard" class="space-y-1">
-                                    <button onclick="switchTab('tabCoinsLeaderboard', this)" class="nav-btn px-3 py-2 rounded-xl text-gray-300 hover:text-white hover:bg-[#151724] font-medium flex items-center justify-between transition w-full">
-                                        <span></span>
-                                        <span class="flex items-center gap-2"><span>أغنى الأثرياء</span><span class="text-gray-400">🪙</span></span>
-                                    </button>
-                                    <button onclick="switchTab('tabLeaderboard', this)" class="nav-btn px-3 py-2 rounded-xl text-gray-300 hover:text-white hover:bg-[#151724] font-medium flex items-center justify-between transition w-full">
-                                        <span></span>
-                                        <span class="flex items-center gap-2"><span>أعلى نقاط السمعة & XP</span><span class="text-gray-400">🏆</span></span>
-                                    </button>
-                                </div>
-                            </div>
-
-                            <!-- أخرى (Other) -->
-                            <div class="space-y-1">
-                                <button type="button" onclick="toggleNavGroup('user_grp_other')" class="w-full flex items-center justify-between text-gray-400 hover:text-white px-2 py-1 font-bold text-[11px] transition">
-                                    <svg id="arrow_user_grp_other" class="w-3.5 h-3.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                                    <span class="flex items-center gap-1.5"><span>أخرى</span></span>
-                                </button>
-                                <div id="user_grp_other" class="space-y-1">
-                                    <button onclick="switchTab('tabDaily', this)" class="nav-btn px-3 py-2 rounded-xl text-gray-300 hover:text-white hover:bg-[#151724] font-medium flex items-center justify-between transition w-full">
-                                        <span></span>
-                                        <span class="flex items-center gap-2"><span>الراتب اليومي</span><span class="text-gray-400">🎁</span></span>
-                                    </button>
-                                    <a href="/logout" class="flex items-center justify-between px-3 py-2 rounded-xl text-rose-400 hover:text-rose-300 hover:bg-rose-950/20 font-medium transition w-full">
-                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
-                                        <span class="flex items-center gap-2"><span>تسجيل الخروج</span><span>🚪</span></span>
-                                    </a>
-                                </div>
+                                <a href="/logout" class="flex items-center justify-between px-3 py-2 rounded-xl text-rose-400 hover:text-rose-300 hover:bg-rose-950/20 font-medium transition w-full">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                                    <span class="flex items-center gap-2"><span>تسجيل الخروج</span><span>🚪</span></span>
+                                </a>
                             </div>
 
                         </div>
@@ -8342,24 +8197,7 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                                 </div>
                             </div>
 
-                            <!-- الترفيه والتفاعل -->
-                            <div class="space-y-1">
-                                <button type="button" onclick="toggleNavGroup('grp_sub_fun')" class="w-full flex items-center justify-between text-gray-400 hover:text-white px-2 py-1 font-bold text-[11px] transition">
-                                    <svg id="arrow_grp_sub_fun" class="w-3.5 h-3.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                                    <span class="flex items-center gap-1.5"><span>الترفيه والتفاعل</span></span>
-                                </button>
-                                <div id="grp_sub_fun" class="space-y-1">
-                                    <a href="/dashboard/${guildId}/fun" class="flex items-center justify-between px-3 py-2 rounded-xl ${section === 'fun' ? 'bg-purple-600 text-white font-bold shadow-md' : 'text-gray-300 hover:text-white hover:bg-[#151724]'} transition group">
-                                        <span class="w-4 h-4 rounded-full border border-emerald-500/60 bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-[9px] font-black">✓</span>
-                                        <span class="flex items-center gap-2"><span>تسلية</span><span class="text-gray-400 group-hover:text-purple-400">🎮</span></span>
-                                    </a>
-                                    <a href="/dashboard/${guildId}/quran" class="flex items-center justify-between px-3 py-2 rounded-xl ${section === 'quran' ? 'bg-purple-600 text-white font-bold shadow-md' : 'text-gray-300 hover:text-white hover:bg-[#151724]'} transition group">
-                                        <span class="w-4 h-4 rounded-full border border-emerald-500/60 bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-[9px] font-black">✓</span>
-                                        <span class="flex items-center gap-2"><span>القرآن & الراديو</span><span class="text-gray-400 group-hover:text-purple-400">📻</span></span>
-                                    </a>
-                                    
-                                </div>
-                            </div>
+
 
                         </div>
 
