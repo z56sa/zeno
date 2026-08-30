@@ -7270,8 +7270,8 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                     <div class="bg-[#12141f] border border-white/5 hover:border-purple-500/30 rounded-3xl p-6 transition space-y-4 shadow-xl">
                         <div class="flex items-center justify-between flex-wrap gap-3 pb-3 border-b border-white/5">
                             <div class="flex items-center gap-2">
-                                <button type="button" onclick="sendAppPanel('${a.id}')" class="px-3.5 py-1.5 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow">
-                                    <span>🚀 إرسال البانل في قناة</span>
+                                <button type="button" onclick="sendAppPanel('${a.id}', this)" class="px-3.5 py-1.5 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow">
+                                    <span>🚀 إرسال البانل في القناة</span>
                                 </button>
                                 <button type="button" onclick="editAppForm('${a.id}')" class="px-3 py-1.5 bg-[#1a1d2d] hover:bg-[#23273c] text-purple-300 border border-purple-500/30 rounded-xl text-xs font-bold transition">
                                     ✏️ تعديل
@@ -7573,21 +7573,45 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                         }
                     }
 
-                    async function sendAppPanel(id) {
-                        const channelId = prompt('أدخل آيدي أو اسم القناة لإرسال رسالة التقديم فيها (اتركه فارغاً للإرسال في قناة الاستقبال):', '');
-                        if (channelId === null) return;
-
+                    async function sendAppPanel(id, btn) {
+                        if (btn) {
+                            btn.disabled = true;
+                            btn.innerHTML = 'جاري الإرسال... ⏳';
+                        }
                         try {
                             const r = await fetch('/api/guild/${guildId}/applications/' + id + '/send-panel', {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ channelId })
+                                body: JSON.stringify({})
                             });
                             const d = await r.json();
-                            if (d.success) alert('✅ تم إرسال رسالة وزر التقديم في القناة بنجاح!');
-                            else alert('❌ ' + (d.error || 'فشل الإرسال'));
+                            if (d.success) {
+                                if (btn) {
+                                    btn.innerHTML = 'تم الإرسال للقناة بنجاح! ✅';
+                                    btn.classList.remove('bg-purple-600', 'hover:bg-purple-500');
+                                    btn.classList.add('bg-emerald-600');
+                                    setTimeout(() => {
+                                        btn.innerHTML = 'إرسال البنل في شات 🚀';
+                                        btn.classList.remove('bg-emerald-600');
+                                        btn.classList.add('bg-purple-600', 'hover:bg-purple-500');
+                                        btn.disabled = false;
+                                    }, 3000);
+                                } else {
+                                    alert('✅ تم إرسال رسالة وزر التقديم في القناة بنجاح فوراً!');
+                                }
+                            } else {
+                                alert('❌ ' + (d.error || 'فشل الإرسال، تأكد من صحة القناة في النموذج'));
+                                if (btn) {
+                                    btn.innerHTML = 'إرسال البنل في شات 🚀';
+                                    btn.disabled = false;
+                                }
+                            }
                         } catch(e) {
-                            alert('خطأ في الاتصال');
+                            alert('خطأ في الاتصال بالسيرفر');
+                            if (btn) {
+                                btn.innerHTML = 'إرسال البنل في شات 🚀';
+                                btn.disabled = false;
+                            }
                         }
                     }
                     </script>
