@@ -44,10 +44,11 @@ module.exports = (client) => {
                         continue;
                     }
 
+                    const eventName = event.name === 'ready' ? 'clientReady' : event.name;
                     if (event.once) {
-                        client.once(event.name, (...args) => event.execute(...args, client));
+                        client.once(eventName, (...args) => event.execute(...args, client));
                     } else {
-                        client.on(event.name, (...args) => event.execute(...args, client));
+                        client.on(eventName, (...args) => event.execute(...args, client));
                     }
                     eventsCount++;
                 }
