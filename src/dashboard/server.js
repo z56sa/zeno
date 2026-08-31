@@ -7175,58 +7175,115 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                     </script>
                 `;
             } else if (section === 'staff-activity') {
-                const staffLeaderboard = (database.getStaffLeaderboard ? database.getStaffLeaderboard(guildId) : []) || [];
-                const staffGoals = (database.getStaffGoals ? database.getStaffGoals(guildId) : []) || [];
+                const staffList = (() => {
+                    try {
+                        return rawDb.prepare(`
+                            SELECT user_id, tickets_closed, mod_actions, bans_count, kicks_count,
+                                   mutes_count, warns_count, messages_count, voice_seconds,
+                                   (tickets_closed*10 + warns_count*3 + bans_count*5 + kicks_count*4 + 
+                                    (voice_seconds/60) + messages_count) as total_points
+                            FROM staff_activity WHERE guild_id = ?
+                            ORDER BY total_points DESC LIMIT 50
+                        `).all(guildId);
+                    } catch(e) { return []; }
+                })();
+
+                const totalStaffActions = staffList.reduce((s,x) => s + (x.mod_actions || 0), 0);
+                const totalStaffTickets = staffList.reduce((s,x) => s + (x.tickets_closed || 0), 0);
+                const topPoints = staffList[0]?.total_points || 0;
 
                 formFieldsHtml = `
                     <div class="space-y-6 text-right" dir="rtl">
                         <!-- Header Banner -->
                         <div class="bg-gradient-to-r from-[#1a132e] via-[#12141f] to-[#1a132e] border border-purple-500/20 p-6 rounded-3xl flex items-center justify-between shadow-2xl flex-wrap gap-3">
                             <div class="flex items-center gap-2">
-                                <button type="button" onclick="resetAllStaffStats()" class="px-4 py-2 bg-rose-950/40 hover:bg-rose-900/60 border border-rose-800/40 text-rose-300 rounded-xl text-xs font-bold transition">
+                                <button type="button" onclick="resetAllStaffStats()" class="px-4 py-2 bg-rose-950/40 hover:bg-rose-900/60 border border-rose-800/40 text-rose-300 rounded-xl text-xs font-bold transition cursor-pointer">
                                     🔄 تصفير إحصائيات الأسبوع
+                                </button>
+                                <button type="button" onclick="location.reload()" class="px-4 py-2 bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/30 text-purple-300 rounded-xl text-xs font-bold transition cursor-pointer">
+                                    ↻ تحديث
                                 </button>
                             </div>
                             <div class="text-right">
-                                <h4 class="font-black text-white text-xl flex items-center gap-2 justify-end"><span>تتبع نشاط الإدارة والمشرفين (Staff Activity)</span><span>👮</span></h4>
-                                <p class="text-gray-400 text-xs mt-0.5">مراقبة دقيقة لرسائل المشرفين، ساعات تواجدهم في الرومات الصوتية، والإجراءات الإدارية المتخذة</p>
+                                <h4 class="font-black text-white text-xl flex items-center gap-2 justify-end"><span>تتبع نشاط الإدارة والمشرفين</span><span>👮</span></h4>
+                                <p class="text-gray-400 text-xs mt-0.5">لوحة إحصائيات شاملة لكل مشرف — التذاكر، الإشراف، الصوت، الرسائل والنقاط</p>
                             </div>
                         </div>
 
-                        <!-- Top Staff Leaderboard -->
+                        <!-- Stats Overview Cards -->
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div class="bg-[#12141f] border border-purple-500/20 p-5 rounded-2xl text-right">
+                                <div class="text-2xl font-black text-purple-400">${staffList.length}</div>
+                                <div class="text-xs text-gray-400 font-bold mt-1">إداريين نشطين</div>
+                            </div>
+                            <div class="bg-[#12141f] border border-amber-500/20 p-5 rounded-2xl text-right">
+                                <div class="text-2xl font-black text-amber-400">${totalStaffActions}</div>
+                                <div class="text-xs text-gray-400 font-bold mt-1">إجراءات إدارية</div>
+                            </div>
+                            <div class="bg-[#12141f] border border-emerald-500/20 p-5 rounded-2xl text-right">
+                                <div class="text-2xl font-black text-emerald-400">${totalStaffTickets}</div>
+                                <div class="text-xs text-gray-400 font-bold mt-1">تذاكر مغلقة</div>
+                            </div>
+                            <div class="bg-[#12141f] border border-blue-500/20 p-5 rounded-2xl text-right">
+                                <div class="text-2xl font-black text-blue-400">${topPoints}</div>
+                                <div class="text-xs text-gray-400 font-bold mt-1">أعلى نقاط فردية</div>
+                            </div>
+                        </div>
+
+                        <!-- Staff Leaderboard Table -->
                         <div class="bg-[#12141f] border border-white/5 rounded-3xl p-6 shadow-xl space-y-4">
                             <div class="flex items-center justify-between pb-3 border-b border-white/5">
-                                <span class="text-xs text-purple-400 font-bold">${staffLeaderboard.length} إداري مسجل</span>
+                                <span class="text-xs text-purple-400 font-bold">${staffList.length} إداري مسجل</span>
                                 <h4 class="text-sm font-black text-white flex items-center gap-2"><span>لوحة صدارة المشرفين</span><span>🏆</span></h4>
                             </div>
 
-                            ${staffLeaderboard.length === 0 ? `
-                                <p class="text-center py-8 text-gray-500 text-xs font-bold">لا يوجد نشاط مسجل للمشرفين حتى الآن</p>
+                            ${staffList.length === 0 ? `
+                                <div class="py-12 text-center space-y-3">
+                                    <div class="text-5xl">👮</div>
+                                    <p class="text-gray-400 text-sm font-bold">لا يوجد نشاط مسجل للمشرفين حتى الآن</p>
+                                    <p class="text-gray-500 text-xs">يتم تسجيل إجراءات المشرفين تلقائياً عند تنفيذ أوامر الإشراف والتذاكر</p>
+                                </div>
                             ` : `
                                 <div class="overflow-x-auto">
-                                    <table class="w-full text-right text-xs">
+                                    <table class="w-full text-right text-xs min-w-[650px]">
                                         <thead>
-                                            <tr class="text-gray-400 border-b border-white/5">
-                                                <th class="pb-3 pr-2 font-bold">المشرف</th>
-                                                <th class="pb-3 text-center font-bold">الرسائل</th>
-                                                <th class="pb-3 text-center font-bold">الوقت الصوتي</th>
-                                                <th class="pb-3 text-center font-bold">إجراءات المود</th>
-                                                <th class="pb-3 text-center font-bold">نقاط التقييم</th>
+                                            <tr class="text-gray-500 border-b border-white/5">
+                                                <th class="pb-3 pr-3 font-bold">#</th>
+                                                <th class="pb-3 font-bold">المشرف</th>
+                                                <th class="pb-3 text-center font-bold">🎫 تذاكر</th>
+                                                <th class="pb-3 text-center font-bold">⚠️ تحذيرات</th>
+                                                <th class="pb-3 text-center font-bold">🔨 باند</th>
+                                                <th class="pb-3 text-center font-bold">👢 كيك</th>
+                                                <th class="pb-3 text-center font-bold">🔇 ميوت</th>
+                                                <th class="pb-3 text-center font-bold">💬 رسائل</th>
+                                                <th class="pb-3 text-center font-bold">🎤 صوتي</th>
+                                                <th class="pb-3 text-center font-bold text-purple-400">⭐ نقاط</th>
                                             </tr>
                                         </thead>
                                         <tbody class="divide-y divide-white/5">
-                                            ${staffLeaderboard.map((st, i) => {
-                                                const voiceHours = (st.voice_time / 3600).toFixed(1);
+                                            ${staffList.map((st, i) => {
+                                                const voiceH = Math.floor((st.voice_seconds || 0) / 3600);
+                                                const voiceM = Math.floor(((st.voice_seconds || 0) % 3600) / 60);
+                                                const memberObj = botGuild?.members?.cache?.get(st.user_id);
+                                                const displayName = memberObj ? memberObj.user.tag : st.user_id;
+                                                const badge = i === 0 ? 'bg-amber-500/20 text-amber-300 border-amber-500/40' : i === 1 ? 'bg-gray-300/20 text-gray-300 border-gray-400/30' : i === 2 ? 'bg-orange-700/20 text-orange-400 border-orange-600/30' : 'bg-purple-600/20 text-purple-300 border-purple-500/30';
                                                 return `
                                                 <tr class="hover:bg-white/5 transition">
-                                                    <td class="py-3.5 pr-2 font-bold text-white flex items-center gap-2">
-                                                        <span class="w-6 h-6 rounded-lg bg-purple-600/20 text-purple-300 flex items-center justify-center font-mono text-[11px] font-black">${i + 1}</span>
-                                                        <span class="text-white"><@${st.user_id}></span>
+                                                    <td class="py-3.5 pr-3"><span class="w-7 h-7 rounded-lg border ${badge} flex items-center justify-center font-mono text-[11px] font-black">${i + 1}</span></td>
+                                                    <td class="py-3.5 font-bold text-white font-mono text-[11px]">
+                                                        <div class="flex items-center gap-2">
+                                                            <div class="w-6 h-6 rounded-full bg-purple-900/50 flex items-center justify-center text-[10px]">👤</div>
+                                                            <span>${displayName}</span>
+                                                        </div>
                                                     </td>
-                                                    <td class="py-3.5 text-center font-mono font-bold text-emerald-400">${st.messages_count || 0}</td>
-                                                    <td class="py-3.5 text-center font-mono font-bold text-blue-400">${voiceHours} ساعة</td>
-                                                    <td class="py-3.5 text-center font-mono font-bold text-amber-400">${st.actions_count || 0}</td>
-                                                    <td class="py-3.5 text-center font-mono font-black text-purple-400">${(st.messages_count || 0) + ((st.actions_count || 0) * 5) + Math.floor((st.voice_time || 0) / 60)}</td>
+                                                    <td class="py-3.5 text-center font-mono font-bold text-emerald-400">${st.tickets_closed || 0}</td>
+                                                    <td class="py-3.5 text-center font-mono font-bold text-amber-400">${st.warns_count || 0}</td>
+                                                    <td class="py-3.5 text-center font-mono font-bold text-red-400">${st.bans_count || 0}</td>
+                                                    <td class="py-3.5 text-center font-mono font-bold text-orange-400">${st.kicks_count || 0}</td>
+                                                    <td class="py-3.5 text-center font-mono font-bold text-blue-400">${st.mutes_count || 0}</td>
+                                                    <td class="py-3.5 text-center font-mono text-gray-300">${(st.messages_count || 0).toLocaleString()}</td>
+                                                    <td class="py-3.5 text-center font-mono text-blue-300">${voiceH}س ${voiceM}د</td>
+                                                    <td class="py-3.5 text-center font-mono font-black text-purple-400 text-sm">${Number(st.total_points || 0).toLocaleString()}</td>
                                                 </tr>
                                                 `;
                                             }).join('')}
@@ -7239,13 +7296,13 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
 
                     <script>
                     async function resetAllStaffStats() {
-                        if (!confirm('هل أنت متأكد من تصفير جميع إحصائيات ونشاطات طاقم الإدارة؟')) return;
+                        if (!confirm('هل أنت متأكد من تصفير جميع إحصائيات طاقم الإدارة؟ لا يمكن التراجع عن هذا الإجراء.')) return;
                         try {
                             const r = await fetch('/api/guild/${guildId}/staff/reset', { method: 'POST' });
                             const d = await r.json();
                             if (d.success) { alert('✅ تم تصفير إحصائيات النشاط بنجاح'); location.reload(); }
                             else alert('❌ ' + (d.error || 'فشل'));
-                        } catch(e) { alert('خطأ في الاتصال'); }
+                        } catch(e) { alert('خطأ في الاتصال بالسيرفر'); }
                     }
                     </script>
                 `;
