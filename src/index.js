@@ -34,6 +34,40 @@ client.commands = new Collection();
 client.prefixCommands = new Collection();
 client.aliases = new Collection();
 
+// Intercept interaction responses globally to guarantee no library or handler triggers the ephemeral deprecation warning
+const { BaseInteraction, MessageFlags } = require('discord.js');
+const patchInteractionMethod = (proto, methodName) => {
+    const original = proto[methodName];
+    if (!original) return;
+    proto[methodName] = function (options, ...rest) {
+        if (options && typeof options === 'object') {
+            if ('ephemeral' in options) {
+                if (options.ephemeral) {
+                    options.flags = (options.flags || 0) | (MessageFlags?.Ephemeral || 64);
+                }
+                delete options.ephemeral;
+            }
+            if ('fetchReply' in options) {
+                options.withResponse = options.fetchReply;
+                delete options.fetchReply;
+            }
+        }
+        return original.call(this, options, ...rest);
+    };
+};
+
+try {
+    const CommandInteraction = require('discord.js').CommandInteraction?.prototype;
+    const MessageComponentInteraction = require('discord.js').MessageComponentInteraction?.prototype;
+    const ModalSubmitInteraction = require('discord.js').ModalSubmitInteraction?.prototype;
+    const BaseInteractionProto = BaseInteraction?.prototype;
+
+    [CommandInteraction, MessageComponentInteraction, ModalSubmitInteraction, BaseInteractionProto].forEach(proto => {
+        if (!proto) return;
+        ['reply', 'deferReply', 'followUp'].forEach(m => patchInteractionMethod(proto, m));
+    });
+} catch (e) {}
+
 
 // =============================================================================
 // Initialization Sequence (The Core Logic)
