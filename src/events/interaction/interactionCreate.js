@@ -120,7 +120,7 @@ module.exports = {
             .setFooter({ text: interaction.user.username, iconURL: interaction.user.displayAvatarURL({ dynamic: true }) })
             .setTimestamp();
 
-          return interaction.reply({ embeds: [diceEmbed], ephemeral: false });
+          return interaction.reply({ embeds: [diceEmbed] });
         }
 
         if (gameType === 'coin') {
@@ -141,7 +141,7 @@ module.exports = {
             new ButtonBuilder().setCustomId('coin_choice_tails').setLabel('🦅 كتابة (Tails)').setStyle(ButtonStyle.Success)
           );
 
-          return interaction.reply({ embeds: [pickEmbed], components: [pickRow], ephemeral: false });
+          return interaction.reply({ embeds: [pickEmbed], components: [pickRow] });
         }
 
         if (gameType === 'rps') {

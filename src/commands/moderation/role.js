@@ -27,7 +27,7 @@ module.exports = {
     if (!interaction.member.permissions.has(PermissionFlagsBits.ManageRoles))
       return interaction.reply({ content: '❌ ليس لديك صلاحية إدارة الأدوار.', flags: 64 });
 
-    await interaction.deferReply({ ephemeral: false }).catch(() => {});
+    await interaction.deferReply().catch(() => {});
     const sub = interaction.options.getSubcommand();
     const targetUser = interaction.options.getUser('target');
     const role = interaction.options.getRole('role');
