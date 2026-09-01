@@ -32,7 +32,6 @@ module.exports = {
       .setDescription('مرحباً بك في قائمة المساعدة الشاملة! يمكنك الضغط على أي أمر لتنفيذه مباشرة أو اختيار الفئة من القائمة المنسدلة بالأسفل:')
       .addFields(
         { name: '🛡️ الإشراف والرقابة (Moderation)', value: 'أوامر إدارة وحماية السيرفر (Ban, Kick, Timeout, Warn, Clear, Lock...)' },
-        { name: '🎮 الألعاب والتسلية (Fun & Games)', value: 'ألعاب تفاعلية ومنافسات (Roulette, Fight, Trivia, Coinflip, Mafia, Chairs...)' },
         { name: '⭐ الاقتصاد والنجوم (Economy & Star)', value: 'نظام النجوم Star، البنك، الوظائف، المراهنات، البروفايل والمتصدرين.' },
         { name: '🎫 نظام التذاكر (Tickets)', value: 'لوحات الدعم الفني، إدارة التذاكر وحفظ الترانسكريبت.' },
         { name: '⚙️ الإعدادات والإدارة (Settings & Admin)', value: 'الترحيب، الرقابة التلقائية (AutoMod)، الرتب التلقائية، التحقق والحماية.' },
@@ -49,7 +48,6 @@ module.exports = {
         .setPlaceholder('اختر الفئة لاستعراض أوامرها بالتفصيل...')
         .addOptions([
           { label: '🛡️ الإشراف والرقابة', value: 'mod', description: 'أوامر الطرد، الحظر، التحذيرات، الإسكات وقفل القنوات' },
-          { label: '🎮 الألعاب والتسلية', value: 'fun', description: 'ألعاب الروليت، القتال، المسابقات، المافيا والكراسي' },
           { label: '⭐ الاقتصاد والنجوم', value: 'eco', description: 'أوامر النجوم Star، البنك، العمل، الكازينو وبطاقة البروفايل' },
           { label: '🎫 نظام التذاكر', value: 'ticket', description: 'أوامر إنشاء وإعداد وإدارة تذاكر الدعم الفني' },
           { label: '⚙️ إعدادات وحماية السيرفر', value: 'admin', description: 'إعداد الترحيب، اللوق، الرقابة، التحقق والحماية Anti-Nuke' },
@@ -102,25 +100,6 @@ module.exports = {
             `• ${show} - إظهار القناة للأعضاء`,
             `• ${role} - إعطاء أو سحب الرتب الدائمة والمؤقتة (Temprole) حتى 5 أعضاء`,
             `• ${slowmode} - تفعيل أو تعطيل الوضع البطيء للقناة أو لكل القنوات`
-          ].join('\n\n'));
-      } else if (value === 'fun') {
-        const roulette = this.getMention(client, 'roulette');
-        const fight = this.getMention(client, 'fight');
-        const trivia = this.getMention(client, 'trivia');
-        const coinflip = this.getMention(client, 'coinflip');
-        const mafia = this.getMention(client, 'mafia');
-        const chairs = this.getMention(client, 'chairs');
-        const hideseek = this.getMention(client, 'hideseek');
-
-        categoryEmbed.setTitle('🎮 أوامر الألعاب والتسلية (Fun & Games)')
-          .setDescription([
-            `• ${roulette} - لعبة روليت الكازينو الأوروبي والمراهنة على النجوم والألوان والأرقام`,
-            `• ${fight} - تحدي مبارزة وقتال PvP تفاعلي بنقاط صحة HP بين الأعضاء`,
-            `• ${trivia} - مسابقات وأسئلة إسلامية وثقافية مع مؤقت 30 ثانية وجوائز نجوم`,
-            `• ${coinflip} - رمي العملة ملك أو كتابة مع نظام المراهنات والمضاعفات`,
-            `• ${mafia} - لعبة المافيا والغموض بين الأعضاء في الشات لاكتشاف القاتل`,
-            `• ${chairs} - لعبة الكراسي الموسيقية التفاعلية مع أزرار السرعة`,
-            `• ${hideseek} - لعبة الغميضة الكلاسيكية والبحث عن الأعضاء المختبئين`
           ].join('\n\n'));
       } else if (value === 'eco') {
         const star = this.getMention(client, 'star');
