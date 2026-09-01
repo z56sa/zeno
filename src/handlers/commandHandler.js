@@ -67,13 +67,18 @@ module.exports = async (client) => {
       }
     };
 
-    if (client.user?.id) {
+    if (client.isReady() && client.user?.id) {
       registerCommands(client.user.id);
     } else {
       client.once('clientReady', () => {
         const id = client.user?.id || (process.env.CLIENT_ID || '').trim();
         registerCommands(id);
       });
+      // Fallback if CLIENT_ID is present in env
+      const envId = (process.env.CLIENT_ID || '').trim();
+      if (envId) {
+        registerCommands(envId);
+      }
     }
   }
 };
