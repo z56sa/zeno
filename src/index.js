@@ -30,6 +30,18 @@ const client = new Client({
     partials: [Partials.Channel, Partials.Message, Partials.Reaction],
 });
 
+// Intercept client.on and client.once globally so any library or handler using 'ready' is converted to 'clientReady'
+const originalClientOn = Client.prototype.on;
+const originalClientOnce = Client.prototype.once;
+Client.prototype.on = function(event, ...args) {
+    const ev = event === 'ready' ? 'clientReady' : event;
+    return originalClientOn.call(this, ev, ...args);
+};
+Client.prototype.once = function(event, ...args) {
+    const ev = event === 'ready' ? 'clientReady' : event;
+    return originalClientOnce.call(this, ev, ...args);
+};
+
 client.commands = new Collection();
 client.prefixCommands = new Collection();
 client.aliases = new Collection();
