@@ -807,7 +807,9 @@ module.exports = {
         const openTimeFormatted = formatFullDateTime(createdDateObj);
         const closeTimeFormatted = formatFullDateTime(closedDateObj);
 
-        // إرسال اللوق لقناة السجلات (Exact layout of Image 1)
+        const closeReasonText = (reason && reason.trim() !== 'لم يتم تقديم سبب' && reason.trim() !== 'No reason provided') ? reason : 'No reason provided';
+
+        // إرسال اللوق لقناة السجلات (Exact 1:1 match to Wicks screenshot)
         const logChannelId = settings.ticket_log_channel || settings.log_channel;
         if (logChannelId) {
           try {
@@ -819,23 +821,23 @@ module.exports = {
                   name: interaction.guild.name,
                   iconURL: interaction.guild.iconURL({ dynamic: true }) || undefined
                 })
-                .setTitle('تم إغلاق التذكرة')
+                .setTitle('Ticket Closed')
                 .addFields(
-                  { name: 'تم الفتح بواسطة', value: ticketData?.user_id ? `<@${ticketData.user_id}>` : 'غير معروف', inline: true },
-                  { name: 'تم المطالبة بواسطة', value: staffClaimerId ? `<@${staffClaimerId}>` : 'لا أحد', inline: true },
-                  { name: 'تم الإغلاق بواسطة', value: `<@${interaction.user.id}>`, inline: true },
-                  { name: 'وقت الفتح', value: openTimeFormatted, inline: true },
-                  { name: 'وقت الإغلاق', value: closeTimeFormatted, inline: true },
+                  { name: 'Opened By', value: ticketData?.user_id ? `<@${ticketData.user_id}>` : 'Unknown', inline: true },
+                  { name: 'Claimed By', value: staffClaimerId ? `<@${staffClaimerId}>` : 'No one', inline: true },
+                  { name: 'Closed By', value: `<@${interaction.user.id}>`, inline: true },
+                  { name: 'Open Time', value: openTimeFormatted, inline: true },
+                  { name: 'Close Time', value: closeTimeFormatted, inline: true },
                   { name: '\u200B', value: '\u200B', inline: true },
-                  { name: 'سبب الإغلاق', value: `\`\`\`\n${reason}\n\`\`\``, inline: false }
+                  { name: 'Close Reason', value: `\`\`\`fix\n${closeReasonText}\n\`\`\``, inline: false }
                 )
                 .setThumbnail('https://cdn.discordapp.com/emojis/1215354964654559282.png'); // Document icon
 
               const viewTranscriptBtnRow = new ActionRowBuilder().addComponents(
                 new ButtonBuilder()
                   .setCustomId(`view_transcript_${interaction.channel.id}`)
-                  .setLabel('عرض التذكرة')
-                  .setEmoji('🔗')
+                  .setLabel('View Ticket')
+                  .setEmoji('↗️')
                   .setStyle(ButtonStyle.Secondary)
               );
 
