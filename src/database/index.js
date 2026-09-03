@@ -400,6 +400,11 @@ try { db.exec("ALTER TABLE guild_settings ADD COLUMN ticket_panel_desc TEXT;"); 
 try { db.exec("ALTER TABLE guild_settings ADD COLUMN ticket_role TEXT;"); } catch(e) {}
 try { db.exec("ALTER TABLE guild_settings ADD COLUMN ticket_rating_enabled INTEGER DEFAULT 1;"); } catch(e) {}
 
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN ticket_panel_banner TEXT;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN ticket_welcome_image TEXT;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN ticket_counter INTEGER DEFAULT 0;"); } catch(e) {}
+
+try { db.exec("ALTER TABLE tickets ADD COLUMN ticket_number INTEGER DEFAULT 1;"); } catch(e) {}
 try { db.exec("ALTER TABLE tickets ADD COLUMN claimed_by TEXT;"); } catch(e) {}
 try { db.exec("ALTER TABLE tickets ADD COLUMN claimed_at INTEGER;"); } catch(e) {}
 try { db.exec("ALTER TABLE tickets ADD COLUMN closed_by TEXT;"); } catch(e) {}
@@ -727,7 +732,14 @@ function clearWarnings(guildId, userId) {
 // Tickets (نظام التذاكر المتقدم)
 // ==========================================
 function createTicket(guildId, channelId, userId, category = 'General') {
-  db.prepare('INSERT OR IGNORE INTO tickets (guild_id, channel_id, user_id, category, status) VALUES (?, ?, ?, ?, ?)').run(guildId, channelId, userId, category, 'open');
+  let ticketNumber = 1;
+  try {
+    const settings = db.prepare('SELECT ticket_counter FROM guild_settings WHERE guild_id = ?').get(guildId);
+    ticketNumber = (settings?.ticket_counter || 0) + 1;
+    db.prepare('UPDATE guild_settings SET ticket_counter = ? WHERE guild_id = ?').run(ticketNumber, guildId);
+  } catch (e) {}
+
+  db.prepare('INSERT OR IGNORE INTO tickets (guild_id, channel_id, user_id, category, status, ticket_number) VALUES (?, ?, ?, ?, ?, ?)').run(guildId, channelId, userId, category, 'open', ticketNumber);
   return db.prepare('SELECT * FROM tickets WHERE channel_id = ?').get(channelId);
 }
 

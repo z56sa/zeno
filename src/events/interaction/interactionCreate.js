@@ -1,4 +1,4 @@
-const { ChannelType, PermissionFlagsBits, ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, ModalBuilder, TextInputBuilder, TextInputStyle, AttachmentBuilder } = require('discord.js');
+const { ChannelType, PermissionFlagsBits, ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, ModalBuilder, TextInputBuilder, TextInputStyle, AttachmentBuilder, StringSelectMenuBuilder, UserSelectMenuBuilder } = require('discord.js');
 const db = require('../../database');
 const embedUtil = require('../../utils/embed');
 const logger = require('../../utils/logger');
@@ -356,8 +356,8 @@ module.exports = {
         await interaction.deferReply({ flags: 64 }).catch(() => { });
 
         let panelId = null;
-        let selectedCategoryType = 'support';
-        let categoryLabel = 'الدعم الفني';
+        let selectedCategoryType = 'General';
+        let categoryLabel = 'Ticket';
 
         if (interaction.isButton() && interaction.customId.startsWith('ticket_open_')) {
           panelId = interaction.customId.replace('ticket_open_', '');
@@ -367,7 +367,7 @@ module.exports = {
 
           const selectedOption = interaction.component?.options?.find(o => o.value === selectedCategoryType);
           if (selectedOption) {
-            categoryLabel = (selectedOption.emoji ? selectedOption.emoji.name + ' ' : '') + selectedOption.label;
+            categoryLabel = selectedOption.label || selectedCategoryType;
           } else {
             categoryLabel = selectedCategoryType;
           }
@@ -387,7 +387,8 @@ module.exports = {
         const cleanCategory = selectedCategoryType.replace(/[^a-zA-Z0-9\u0621-\u064A]/g, '-').slice(0, 15);
         const existingTicket = interaction.guild.channels.cache.find(
           c => c.name === `ticket-${interaction.user.username.toLowerCase()}` ||
-            c.name === `ticket-${cleanCategory}-${interaction.user.username.toLowerCase()}`
+            c.name === `ticket-${cleanCategory}-${interaction.user.username.toLowerCase()}` ||
+            c.name.startsWith(`ticket-`) && c.name.endsWith(interaction.user.id.slice(-4))
         );
 
         if (existingTicket) {
@@ -398,11 +399,15 @@ module.exports = {
 
         const supportRoleId = catConfig?.role || panel?.support_role || settings.support_role || settings.ticket_role;
         const categoryId = catConfig?.category || panel?.category_id || settings.ticket_category;
-        const rawNaming = catConfig?.naming || panel?.naming_scheme || 'ticket-{username}';
-        const channelName = rawNaming
-          .replace(/{username}/g, interaction.user.username.toLowerCase())
-          .replace(/{type}/g, cleanCategory)
-          .replace(/{id}/g, interaction.user.id.slice(-4));
+
+        // Auto-increment ticket counter
+        let ticketNum = 1;
+        try {
+          ticketNum = (settings.ticket_counter || 0) + 1;
+          db.setGuildSetting(interaction.guild.id, 'ticket_counter', ticketNum);
+        } catch (e) {}
+
+        const channelName = `ticket-${ticketNum}`;
 
         const permissionOverwrites = [
           {
@@ -415,7 +420,8 @@ module.exports = {
               PermissionFlagsBits.ViewChannel,
               PermissionFlagsBits.SendMessages,
               PermissionFlagsBits.AttachFiles,
-              PermissionFlagsBits.ReadMessageHistory
+              PermissionFlagsBits.ReadMessageHistory,
+              PermissionFlagsBits.EmbedLinks
             ]
           },
           {
@@ -423,7 +429,10 @@ module.exports = {
             allow: [
               PermissionFlagsBits.ViewChannel,
               PermissionFlagsBits.SendMessages,
-              PermissionFlagsBits.ManageChannels
+              PermissionFlagsBits.ManageChannels,
+              PermissionFlagsBits.ManageMessages,
+              PermissionFlagsBits.EmbedLinks,
+              PermissionFlagsBits.AttachFiles
             ]
           }
         ];
@@ -435,7 +444,8 @@ module.exports = {
               PermissionFlagsBits.ViewChannel,
               PermissionFlagsBits.SendMessages,
               PermissionFlagsBits.AttachFiles,
-              PermissionFlagsBits.ReadMessageHistory
+              PermissionFlagsBits.ReadMessageHistory,
+              PermissionFlagsBits.EmbedLinks
             ]
           });
         }
@@ -447,47 +457,227 @@ module.exports = {
           permissionOverwrites
         });
 
-        db.createTicket(ticketChannel.id, interaction.guild.id, interaction.user.id, selectedCategoryType);
+        db.createTicket(interaction.guild.id, ticketChannel.id, interaction.user.id, selectedCategoryType);
 
-        let welcomeDescription = catConfig?.welcome || panel?.welcome_msg || settings.ticket_welcome_msg || 'مرحباً بك {user}!\nيرجى كتابة استفسارك أو مشكلتك بالتفصيل وسيقوم فريق الدعم بالرد عليك قريباً.';
-        welcomeDescription = welcomeDescription.replace(/{user}|\[user\]/g, `<@${interaction.user.id}>`).replace(/\[userName\]/g, interaction.user.username).replace(/\[server\]/g, interaction.guild.name);
-
-        const ticketEmbed = new EmbedBuilder()
-          .setColor(config.colors.ticket || '#9333ea')
-          .setTitle(`🎫 ${panel?.title || 'تذكرة الدعم الفني'} | ${categoryLabel}`)
-          .setDescription(welcomeDescription)
-          .addFields(
-            { name: '👤 صاحب التذكرة', value: `<@${interaction.user.id}>`, inline: true },
-            { name: '📂 القسم', value: `\`${categoryLabel}\``, inline: true },
-            { name: '⏰ تاريخ الفتح', value: `<t:${Math.floor(Date.now() / 1000)}:R>`, inline: true }
-          )
-          .setFooter({ text: 'استخدم الأزرار أدناه لإدارة التذكرة' });
-
-        const ticketControlRow = new ActionRowBuilder().addComponents(
-          new ButtonBuilder()
-            .setCustomId('claim_ticket')
-            .setLabel('استلام التذكرة')
-            .setEmoji('🙋‍♂️')
-            .setStyle(ButtonStyle.Success),
-          new ButtonBuilder()
-            .setCustomId('close_ticket')
-            .setLabel('إغلاق التذكرة')
-            .setEmoji('🔒')
-            .setStyle(ButtonStyle.Danger)
-        );
-
-        await ticketChannel.send({
-          content: `${interaction.user} ${supportRoleId ? `<@&${supportRoleId}>` : ''}`,
-          embeds: [ticketEmbed],
-          components: [ticketControlRow]
+        // Date string formatted like "Thursday, September 3, 2026 7:07 PM"
+        const now = new Date();
+        const formattedDate = now.toLocaleDateString('en-US', {
+          weekday: 'long',
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        }) + '\n' + now.toLocaleTimeString('en-US', {
+          hour: 'numeric',
+          minute: '2-digit',
+          hour12: true
         });
 
+        // Head Admin / Support display tag
+        const adminTag = supportRoleId ? `<@&${supportRoleId}>` : 'None';
+
+        // Welcome Embed - Exact match to Image 3
+        const welcomeEmbed = new EmbedBuilder()
+          .setColor('#06070a')
+          .addFields(
+            { name: '[ 👤 ] : Ticket\nOwner', value: `<@${interaction.user.id}>`, inline: true },
+            { name: '[ 🛡️ ] : Ticket\nAdmins', value: adminTag, inline: true },
+            { name: '[ 📅 ] : Ticket Date', value: formattedDate, inline: false },
+            { name: '[ 🔢 ] : Ticket\nNumber', value: `\`\`\`${ticketNum}\`\`\``, inline: true },
+            { name: '[ ❓ ] : Ticket\nSection', value: `\`\`\`${categoryLabel}\`\`\``, inline: true }
+          );
+
+        // Set thumbnail (User Avatar or Server Icon)
+        welcomeEmbed.setThumbnail(interaction.user.displayAvatarURL({ dynamic: true, size: 256 }));
+
+        // Check if server or panel has a welcome image
+        const welcomeImg = panel?.welcome_image || settings.ticket_welcome_image;
+        if (welcomeImg) {
+          welcomeEmbed.setImage(welcomeImg);
+        }
+
+        const ticketButtonsRow = new ActionRowBuilder().addComponents(
+          new ButtonBuilder()
+            .setCustomId('ticket_options_menu_btn')
+            .setLabel('Ticket Options')
+            .setEmoji('🗃️')
+            .setStyle(ButtonStyle.Secondary),
+          new ButtonBuilder()
+            .setCustomId('claim_ticket')
+            .setLabel('Claim')
+            .setEmoji('💼')
+            .setStyle(ButtonStyle.Secondary)
+        );
+
+        const mentionContent = `${interaction.user} ${supportRoleId ? `| <@&${supportRoleId}>` : ''}`;
+
+        const pinnedMsg = await ticketChannel.send({
+          content: mentionContent,
+          embeds: [welcomeEmbed],
+          components: [ticketButtonsRow]
+        });
+
+        // Auto-pin message (Image 3: Wicks pinned a message to this channel)
+        try {
+          await pinnedMsg.pin();
+        } catch (e) {}
+
+        // Ephemeral reply (Image 4: Ticket created: # 🎫 • 4)
         return interaction.editReply({
-          content: `✅ تم فتح تذكرتك بنجاح في: <#${ticketChannel.id}>`
+          content: `Ticket created: <#${ticketChannel.id}>`
         });
       }
 
-      // 4. استلام التذكرة (Claim Ticket)
+      // ==========================================
+      // 4. خيارات التذكرة (Ticket Options Dropdown - Image 5)
+      // ==========================================
+      if (interaction.isButton() && interaction.customId === 'ticket_options_menu_btn') {
+        const selectMenu = new StringSelectMenuBuilder()
+          .setCustomId('ticket_actions_select')
+          .setPlaceholder('Choose a Ticket Action')
+          .addOptions([
+            {
+              label: 'Close with Reason',
+              description: 'Close the ticket with reason',
+              value: 'action_close_reason',
+              emoji: '🔒'
+            },
+            {
+              label: 'Add User to Ticket',
+              description: 'Add a user to the ticket',
+              value: 'action_add_user',
+              emoji: '👥'
+            },
+            {
+              label: 'Member PM Reminder',
+              description: 'Send a PM reminder to the ticket creator',
+              value: 'action_pm_reminder',
+              emoji: '✉️'
+            },
+            {
+              label: 'Request Ticket Copy',
+              description: 'Request a copy of the ticket',
+              value: 'action_request_copy',
+              emoji: '📄'
+            }
+          ]);
+
+        const actionRow = new ActionRowBuilder().addComponents(selectMenu);
+
+        return interaction.reply({
+          components: [actionRow],
+          flags: 64
+        });
+      }
+
+      // 4.1 التعامل مع اختيار خيار من قائمة خيارات التذكرة (Dropdown Actions)
+      if (interaction.isStringSelectMenu() && interaction.customId === 'ticket_actions_select') {
+        const action = interaction.values[0];
+        const ticketData = db.getTicket(interaction.channel.id);
+
+        if (!ticketData) {
+          return interaction.reply({ content: '❌ لا يمكن تنفيذ الإجراء: هذه القناة ليست تذكرة نشطة.', flags: 64 });
+        }
+
+        // A. Close with Reason
+        if (action === 'action_close_reason') {
+          const modal = new ModalBuilder()
+            .setCustomId('modal_close_ticket_reason')
+            .setTitle('Close Ticket with Reason');
+
+          const reasonInput = new TextInputBuilder()
+            .setCustomId('ticket_close_reason_input')
+            .setLabel('سبب الإغلاق / Reason for closing:')
+            .setStyle(TextInputStyle.Paragraph)
+            .setPlaceholder('اكتب سبب إغلاق التذكرة (اختياري)...')
+            .setRequired(false)
+            .setMaxLength(500);
+
+          modal.addComponents(new ActionRowBuilder().addComponents(reasonInput));
+          return interaction.showModal(modal);
+        }
+
+        // B. Add User to Ticket
+        if (action === 'action_add_user') {
+          const userSelect = new UserSelectMenuBuilder()
+            .setCustomId('ticket_user_add_select')
+            .setPlaceholder('اختر العضو لإضافته إلى التذكرة...')
+            .setMinValues(1)
+            .setMaxValues(1);
+
+          return interaction.reply({
+            content: '👤 **اختر العضو الذي ترغب في إضافته إلى هذه التذكرة:**',
+            components: [new ActionRowBuilder().addComponents(userSelect)],
+            flags: 64
+          });
+        }
+
+        // C. Member PM Reminder
+        if (action === 'action_pm_reminder') {
+          await interaction.deferReply({ flags: 64 });
+          try {
+            const ticketOwner = await client.users.fetch(ticketData.user_id).catch(() => null);
+            if (!ticketOwner) {
+              return interaction.editReply({ content: '❌ تعذر العثور على صاحب التذكرة.' });
+            }
+
+            const reminderEmbed = new EmbedBuilder()
+              .setColor('#06070a')
+              .setTitle('🔔 تذكير بخصوص تذكرتك المفتوحة')
+              .setDescription(`مرحباً **${ticketOwner.username}**!\nفريق الدعم الفني في سيرفر **${interaction.guild.name}** بانتظار ردك في التذكرة: <#${interaction.channel.id}>`)
+              .setTimestamp();
+
+            await ticketOwner.send({ embeds: [reminderEmbed] });
+            await interaction.channel.send({ content: `✉️ تم إرسال تذكير في الخاص إلى صاحب التذكرة: <@${ticketData.user_id}>` });
+            return interaction.editReply({ content: '✅ تم إرسال التذكير في الخاص بنجاح!' });
+          } catch (e) {
+            return interaction.editReply({ content: '❌ تعذر إرسال التذكير في الخاص (قد يكون خاص العضو مقفلاً).' });
+          }
+        }
+
+        // D. Request Ticket Copy (Transcript directly to user)
+        if (action === 'action_request_copy') {
+          await interaction.deferReply({ flags: 64 });
+          try {
+            const { generateHtmlTranscript } = require('../../utils/transcript');
+            const transcriptResult = await generateHtmlTranscript(interaction.channel);
+            if (transcriptResult?.attachment) {
+              await interaction.user.send({
+                content: `📄 **نسخة من سجل التذكرة:** \`#${interaction.channel.name}\` في سيرفر **${interaction.guild.name}**`,
+                files: [transcriptResult.attachment]
+              }).catch(() => {});
+              return interaction.editReply({ content: '✅ تم إرسال نسخة من سجل التذكرة (Transcript HTML) إلى رسائلك الخاصة!' });
+            } else {
+              return interaction.editReply({ content: '❌ تعذر استخراج سجل التذكرة.' });
+            }
+          } catch (e) {
+            return interaction.editReply({ content: '❌ حدث خطأ أثناء تجهيز نسخة السجل.' });
+          }
+        }
+      }
+
+      // 4.2 إضافة مستخدم بعد اختياره من UserSelect
+      if (interaction.isUserSelectMenu() && interaction.customId === 'ticket_user_add_select') {
+        const targetUserId = interaction.values[0];
+        await interaction.deferReply({ flags: 64 });
+
+        try {
+          await interaction.channel.permissionOverwrites.edit(targetUserId, {
+            ViewChannel: true,
+            SendMessages: true,
+            AttachFiles: true,
+            ReadMessageHistory: true,
+            EmbedLinks: true
+          });
+          await interaction.channel.send({ content: `➕ تمت إضافة <@${targetUserId}> إلى هذه التذكرة بواسطة ${interaction.user}.` });
+          return interaction.editReply({ content: `✅ تمت إضافة <@${targetUserId}> بنجاح إلى التذكرة.` });
+        } catch (e) {
+          return interaction.editReply({ content: '❌ فشل تعديل صلاحيات القناة لإضافة العضو.' });
+        }
+      }
+
+      // ==========================================
+      // 5. استلام التذكرة (Claim Ticket)
+      // ==========================================
       if (interaction.isButton() && interaction.customId === 'claim_ticket') {
         const ticketData = db.getTicket(interaction.channel.id);
         const settings = db.getGuildSettings(interaction.guild.id);
@@ -496,6 +686,11 @@ module.exports = {
         const isStaff = interaction.member.permissions.has(PermissionFlagsBits.ManageChannels) ||
           interaction.member.permissions.has(PermissionFlagsBits.Administrator) ||
           (supportRoleId && interaction.member.roles.cache.has(supportRoleId));
+
+        // منع صاحب التذكرة من استلام تذكرته بنفسه (Image 5: "You cannot claim your own ticket.")
+        if (ticketData?.user_id === interaction.user.id && !interaction.member.permissions.has(PermissionFlagsBits.Administrator)) {
+          return interaction.reply({ content: 'You cannot claim your own ticket.', flags: 64 });
+        }
 
         if (!isStaff) {
           return interaction.reply({ content: '❌ هذا الزر مخصص لطاقم الدعم الفني والإدارة فقط.', flags: 64 });
@@ -515,29 +710,29 @@ module.exports = {
           ReadMessageHistory: true
         }).catch(() => {});
 
-        const unclaimRow = new ActionRowBuilder().addComponents(
+        const updatedButtonsRow = new ActionRowBuilder().addComponents(
           new ButtonBuilder()
-            .setCustomId('unclaim_ticket')
-            .setLabel('إلغاء الاستلام')
-            .setEmoji('↩️')
+            .setCustomId('ticket_options_menu_btn')
+            .setLabel('Ticket Options')
+            .setEmoji('🗃️')
             .setStyle(ButtonStyle.Secondary),
           new ButtonBuilder()
-            .setCustomId('close_ticket')
-            .setLabel('إغلاق التذكرة')
-            .setEmoji('🔒')
-            .setStyle(ButtonStyle.Danger)
+            .setCustomId('unclaim_ticket')
+            .setLabel('Unclaim')
+            .setEmoji('↩️')
+            .setStyle(ButtonStyle.Secondary)
         );
 
         const claimEmbed = new EmbedBuilder()
           .setColor('#10b981')
-          .setDescription(`🙋‍♂️ **قام المسؤول ${interaction.user} باستلام التذكرة وسيتابع معك الآن.**`)
+          .setDescription(`💼 **تم استلام التذكرة بواسطة ${interaction.user} وسيتابع معك الآن.**`)
           .setTimestamp();
 
         await interaction.reply({ embeds: [claimEmbed] });
-        return interaction.message.edit({ components: [unclaimRow] }).catch(() => {});
+        return interaction.message.edit({ components: [updatedButtonsRow] }).catch(() => {});
       }
 
-      // 4.5 إلغاء استلام التذكرة (Unclaim Ticket)
+      // 5.5 إلغاء استلام التذكرة (Unclaim Ticket)
       if (interaction.isButton() && interaction.customId === 'unclaim_ticket') {
         const ticketData = db.getTicket(interaction.channel.id);
         const isClaimerOrAdmin = ticketData?.claimed_by === interaction.user.id || interaction.member.permissions.has(PermissionFlagsBits.Administrator);
@@ -550,57 +745,37 @@ module.exports = {
 
         const claimRow = new ActionRowBuilder().addComponents(
           new ButtonBuilder()
+            .setCustomId('ticket_options_menu_btn')
+            .setLabel('Ticket Options')
+            .setEmoji('🗃️')
+            .setStyle(ButtonStyle.Secondary),
+          new ButtonBuilder()
             .setCustomId('claim_ticket')
-            .setLabel('استلام التذكرة')
-            .setEmoji('🙋‍♂️')
-            .setStyle(ButtonStyle.Success),
-          new ButtonBuilder()
-            .setCustomId('close_ticket')
-            .setLabel('إغلاق التذكرة')
-            .setEmoji('🔒')
-            .setStyle(ButtonStyle.Danger)
-        );
-
-        await interaction.reply({ content: `↩️ قام ${interaction.user} بإلغاء استلام التذكرة، وأصبحت متاحة لبقية فريق الدعم.` });
-        return interaction.message.edit({ components: [claimRow] }).catch(() => {});
-      }
-
-      // 4.6 إغلاق التذكرة وطلب التأكيد
-      if (interaction.isButton() && interaction.customId === 'close_ticket') {
-        const confirmRow = new ActionRowBuilder().addComponents(
-          new ButtonBuilder()
-            .setCustomId('confirm_close_ticket')
-            .setLabel('تأكيد الإغلاق وحفظ السجل')
-            .setEmoji('🔒')
-            .setStyle(ButtonStyle.Danger),
-          new ButtonBuilder()
-            .setCustomId('cancel_close_ticket')
-            .setLabel('إلغاء')
+            .setLabel('Claim')
+            .setEmoji('💼')
             .setStyle(ButtonStyle.Secondary)
         );
 
-        return interaction.reply({
-          content: '⚠️ **هل أنت متأكد من رغبتك في إغلاق هذه التذكرة؟**\n(سيتم إنشاء نسخة Transcript HTML وحفظها في السجلات وإرسالها للمستخدم مع استبيان التقييم)',
-          components: [confirmRow],
-          flags: 64
-        });
+        await interaction.reply({ content: `↩️ قام ${interaction.user} بإلغاء استلام التذكرة، وأصبحت متاحة لفريق الدعم.` });
+        return interaction.message.edit({ components: [claimRow] }).catch(() => {});
       }
 
-      // 5. تأكيد إغلاق وحذف التذكرة وتوليد سجل Transcript HTML احترافي
-      if (interaction.isButton() && interaction.customId === 'confirm_close_ticket') {
-        await interaction.deferReply().catch(() => { });
+      // ==========================================
+      // 6. إغلاق التذكرة واللوق الاحترافي (Close with Reason & Log Embed - Image 1)
+      // ==========================================
+      if (interaction.isModalSubmit() && interaction.customId === 'modal_close_ticket_reason') {
+        await interaction.deferReply().catch(() => {});
+        const reason = interaction.fields.getTextInputValue('ticket_close_reason_input') || 'لم يتم تقديم سبب';
         const ticketData = db.getTicket(interaction.channel.id);
         const settings = db.getGuildSettings(interaction.guild.id);
-        const staffClaimerId = ticketData?.claimed_by || interaction.user.id;
+        const staffClaimerId = ticketData?.claimed_by || null;
 
-        db.closeTicket(interaction.channel.id, interaction.user.id, 'تم الإغلاق عبر الزر');
+        db.closeTicket(interaction.channel.id, interaction.user.id, reason);
 
-        // 👮 Staff Activity: تسجيل إغلاق التذكرة للستاف
+        // تسجيل نشاط الإدارة
         if (db.recordStaffAction) {
-          db.recordStaffAction(interaction.guild.id, interaction.user.id, 'ticket_close', ticketData ? ticketData.user_id : null, 'إغلاق تذكرة');
+          db.recordStaffAction(interaction.guild.id, interaction.user.id, 'ticket_close', ticketData ? ticketData.user_id : null, reason);
         }
-
-        await interaction.editReply({ content: '🔒 **جاري توليد سجل Transcript التفاعلي وسيتم حذف الروم خلال 5 ثوانٍ...**' });
 
         // توليد Transcript HTML
         let transcriptResult = null;
@@ -608,31 +783,64 @@ module.exports = {
           const { generateHtmlTranscript } = require('../../utils/transcript');
           transcriptResult = await generateHtmlTranscript(interaction.channel);
           if (transcriptResult) {
-            db.saveTranscript(interaction.guild.id, interaction.channel.id, ticketData?.user_id || 'unknown', interaction.user.id, 'إغلاق تذكرة', transcriptResult.html);
+            db.saveTranscript(interaction.guild.id, interaction.channel.id, ticketData?.user_id || 'unknown', interaction.user.id, reason, transcriptResult.html);
           }
-        } catch (tErr) {
-          console.error('فشل في توليد Transcript HTML:', tErr);
-        }
+        } catch (tErr) {}
 
-        // إرسال الترانسكريبت لقناة السجلات (Log Channel)
+        // Format dates exactly as shown in Image 1
+        const createdDateObj = ticketData?.created_at ? new Date(ticketData.created_at * 1000) : new Date();
+        const closedDateObj = new Date();
+
+        const formatFullDateTime = (d) => {
+          return d.toLocaleDateString('en-US', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+          }) + '\n' + d.toLocaleTimeString('en-US', {
+            hour: 'numeric',
+            minute: '2-digit',
+            hour12: true
+          });
+        };
+
+        const openTimeFormatted = formatFullDateTime(createdDateObj);
+        const closeTimeFormatted = formatFullDateTime(closedDateObj);
+
+        // إرسال اللوق لقناة السجلات (Exact layout of Image 1)
         const logChannelId = settings.ticket_log_channel || settings.log_channel;
         if (logChannelId) {
           try {
             const logChannel = interaction.guild.channels.cache.get(logChannelId) || await interaction.guild.channels.fetch(logChannelId).catch(() => null);
             if (logChannel && logChannel.isTextBased()) {
-              const closeEmbed = new EmbedBuilder()
-                .setColor(config.colors.danger || '#ef4444')
-                .setTitle('🔒 تم إغلاق تذكرة وحفظ السجل التفاعلي')
+              const closeLogEmbed = new EmbedBuilder()
+                .setColor('#06070a')
+                .setAuthor({
+                  name: interaction.guild.name,
+                  iconURL: interaction.guild.iconURL({ dynamic: true }) || undefined
+                })
+                .setTitle('تم إغلاق التذكرة')
                 .addFields(
-                  { name: '🎫 اسم الروم', value: `\`${interaction.channel.name}\``, inline: true },
-                  { name: '👤 صاحب التذكرة', value: ticketData ? `<@${ticketData.user_id}>` : 'غير معروف', inline: true },
-                  { name: '👮 أغلقت بواسطة', value: `${interaction.user} (\`${interaction.user.tag}\`)`, inline: true },
-                  { name: '🙋‍♂️ مسؤول الاستلام', value: ticketData?.claimed_by ? `<@${ticketData.claimed_by}>` : 'لم يتم الاستلام', inline: true }
+                  { name: 'تم الفتح بواسطة', value: ticketData?.user_id ? `<@${ticketData.user_id}>` : 'غير معروف', inline: true },
+                  { name: 'تم المطالبة بواسطة', value: staffClaimerId ? `<@${staffClaimerId}>` : 'لا أحد', inline: true },
+                  { name: 'تم الإغلاق بواسطة', value: `<@${interaction.user.id}>`, inline: true },
+                  { name: 'وقت الفتح', value: openTimeFormatted, inline: true },
+                  { name: 'وقت الإغلاق', value: closeTimeFormatted, inline: true },
+                  { name: '\u200B', value: '\u200B', inline: true },
+                  { name: 'سبب الإغلاق', value: `\`\`\`\n${reason}\n\`\`\``, inline: false }
                 )
-                .setTimestamp();
+                .setThumbnail('https://cdn.discordapp.com/emojis/1215354964654559282.png'); // Document icon
+
+              const viewTranscriptBtnRow = new ActionRowBuilder().addComponents(
+                new ButtonBuilder()
+                  .setCustomId(`view_transcript_${interaction.channel.id}`)
+                  .setLabel('عرض التذكرة')
+                  .setEmoji('🔗')
+                  .setStyle(ButtonStyle.Secondary)
+              );
 
               const files = transcriptResult?.attachment ? [transcriptResult.attachment] : [];
-              await logChannel.send({ embeds: [closeEmbed], files }).catch(() => {});
+              await logChannel.send({ embeds: [closeLogEmbed], components: [viewTranscriptBtnRow], files }).catch(() => {});
             }
           } catch (logErr) {}
         }
@@ -643,18 +851,18 @@ module.exports = {
             const ticketOwner = await client.users.fetch(ticketData.user_id).catch(() => null);
             if (ticketOwner) {
               const ratingEmbed = new EmbedBuilder()
-                .setColor(config.colors.primary || '#9333ea')
+                .setColor('#06070a')
                 .setTitle('⭐ تقييم تجربة الدعم الفني')
-                .setDescription(`مرحباً **${ticketOwner.username}**!\nتم إغلاق تذكرتك في سيرفر **${interaction.guild.name}**.\n\nتجد مرفقاً سجل التذكرة الكامل (Transcript HTML).\nيرجى تقييم مستوى الخدمة ومساعدة فريق الدعم بالضغط على النجوم أدناه:`)
+                .setDescription(`مرحباً **${ticketOwner.username}**!\nتم إغلاق تذكرتك في سيرفر **${interaction.guild.name}**.\nسبب الإغلاق: \`${reason}\`\n\nتجد مرفقاً سجل التذكرة الكامل (Transcript HTML).\nيرجى تقييم مستوى الخدمة ومساعدة فريق الدعم بالضغط على النجوم أدناه:`)
                 .setFooter({ text: 'تقييمك يساعدنا على تحسين وتطوير الخدمة دائماً!' })
                 .setTimestamp();
 
               const ratingRow = new ActionRowBuilder().addComponents(
-                new ButtonBuilder().setCustomId(`rate_ticket_1_${interaction.channel.id}_${staffClaimerId}_${interaction.guild.id}`).setLabel('⭐ 1').setStyle(ButtonStyle.Secondary),
-                new ButtonBuilder().setCustomId(`rate_ticket_2_${interaction.channel.id}_${staffClaimerId}_${interaction.guild.id}`).setLabel('⭐ 2').setStyle(ButtonStyle.Secondary),
-                new ButtonBuilder().setCustomId(`rate_ticket_3_${interaction.channel.id}_${staffClaimerId}_${interaction.guild.id}`).setLabel('⭐ 3').setStyle(ButtonStyle.Secondary),
-                new ButtonBuilder().setCustomId(`rate_ticket_4_${interaction.channel.id}_${staffClaimerId}_${interaction.guild.id}`).setLabel('⭐ 4').setStyle(ButtonStyle.Primary),
-                new ButtonBuilder().setCustomId(`rate_ticket_5_${interaction.channel.id}_${staffClaimerId}_${interaction.guild.id}`).setLabel('⭐ 5 ممتاز').setStyle(ButtonStyle.Success)
+                new ButtonBuilder().setCustomId(`rate_ticket_1_${interaction.channel.id}_${staffClaimerId || '0'}_${interaction.guild.id}`).setLabel('⭐ 1').setStyle(ButtonStyle.Secondary),
+                new ButtonBuilder().setCustomId(`rate_ticket_2_${interaction.channel.id}_${staffClaimerId || '0'}_${interaction.guild.id}`).setLabel('⭐ 2').setStyle(ButtonStyle.Secondary),
+                new ButtonBuilder().setCustomId(`rate_ticket_3_${interaction.channel.id}_${staffClaimerId || '0'}_${interaction.guild.id}`).setLabel('⭐ 3').setStyle(ButtonStyle.Secondary),
+                new ButtonBuilder().setCustomId(`rate_ticket_4_${interaction.channel.id}_${staffClaimerId || '0'}_${interaction.guild.id}`).setLabel('⭐ 4').setStyle(ButtonStyle.Primary),
+                new ButtonBuilder().setCustomId(`rate_ticket_5_${interaction.channel.id}_${staffClaimerId || '0'}_${interaction.guild.id}`).setLabel('⭐ 5 ممتاز').setStyle(ButtonStyle.Success)
               );
 
               const userFiles = transcriptResult?.attachment ? [transcriptResult.attachment] : [];
@@ -663,21 +871,32 @@ module.exports = {
           } catch (e) {}
         }
 
+        await interaction.editReply({ content: '🔒 **تم إغلاق التذكرة بنجاح وجاري حذف القناة...**' });
+
         setTimeout(async () => {
           try {
             db.deleteTicket(interaction.channel.id);
             await interaction.channel.delete().catch(() => {});
           } catch (err) {}
-        }, 5000);
+        }, 3000);
         return;
       }
 
-      // 6. إلغاء الإغلاق
-      if (interaction.isButton() && interaction.customId === 'cancel_close_ticket') {
-        return interaction.update({
-          content: '✅ تم إلغاء عملية الإغلاق واستئناف التذكرة.',
-          components: []
-        });
+      // زر عرض التذكرة من اللوق
+      if (interaction.isButton() && interaction.customId.startsWith('view_transcript_')) {
+        const ticketChannelId = interaction.customId.replace('view_transcript_', '');
+        const trans = db.getTranscript(ticketChannelId);
+        if (trans && trans.html_content) {
+          const buffer = Buffer.from(trans.html_content, 'utf-8');
+          const attachment = new AttachmentBuilder(buffer, { name: `transcript-${ticketChannelId}.html` });
+          return interaction.reply({
+            content: '📄 **سجل التذكرة الكامل (Transcript HTML):**',
+            files: [attachment],
+            flags: 64
+          });
+        } else {
+          return interaction.reply({ content: '❌ لم يتم العثور على ملف السجل المحفوظ.', flags: 64 });
+        }
       }
 
       // 7. زر التحقق وتوثيق الحساب (Verification System)

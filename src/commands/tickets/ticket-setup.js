@@ -56,7 +56,8 @@ module.exports = {
     .addStringOption(opt => opt.setName('cat3_emoji').setDescription('إيموجي القسم الثالث').setRequired(false))
     .addStringOption(opt => opt.setName('cat4_name').setDescription('اسم القسم الرابع (افتراضي: التقديم والإدارة)').setRequired(false))
     .addStringOption(opt => opt.setName('cat4_desc').setDescription('وصف القسم الرابع').setRequired(false))
-    .addStringOption(opt => opt.setName('cat4_emoji').setDescription('إيموجي القسم الرابع').setRequired(false))
+    .addStringOption(opt => opt.setName('banner_url').setDescription('رابط صورة بانر لوحة التذاكر (Image Banner)').setRequired(false))
+    .addStringOption(opt => opt.setName('welcome_image').setDescription('رابط صورة البانر داخل التذكرة المفتوحة').setRequired(false))
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
 
   async execute(interaction) {
@@ -93,14 +94,21 @@ module.exports = {
     const cat4Desc = interaction.options.getString('cat4_desc') || 'للتقديم على رتبة أو طلب شراكة';
     const cat4Emoji = interaction.options.getString('cat4_emoji') || '👑';
 
+    const bannerUrl = interaction.options.getString('banner_url');
+    const welcomeImage = interaction.options.getString('welcome_image');
+
     const panelId = `panel_${interaction.guild.id}_${Date.now()}`;
 
     const embed = new EmbedBuilder()
-      .setColor(config.colors.ticket)
+      .setColor(config.colors.ticket || '#06070a')
       .setTitle(title)
       .setDescription(description.replace(/\\n/g, '\n'))
       .setFooter({ text: interaction.guild.name, iconURL: interaction.guild.iconURL({ dynamic: true }) })
       .setTimestamp();
+
+    if (bannerUrl) {
+      embed.setImage(bannerUrl);
+    }
 
     let components = [];
 
@@ -109,7 +117,7 @@ module.exports = {
         { label: cat1Name, value: `cat_1`, description: cat1Desc.slice(0, 99), emoji: cat1Emoji },
         { label: cat2Name, value: `cat_2`, description: cat2Desc.slice(0, 99), emoji: cat2Emoji },
         { label: cat3Name, value: `cat_3`, description: cat3Desc.slice(0, 99), emoji: cat3Emoji },
-        { label: cat4Name, value: `cat_4`, description: cat4Desc.slice(0, 99), emoji: cat4Emoji }
+        { label: cat4Name, value: `cat_4`, description: cat4Desc.slice(0, 99), emoji: '👑' }
       ];
 
       const selectMenu = new ActionRowBuilder().addComponents(
@@ -147,7 +155,9 @@ module.exports = {
       support_role: supportRole ? supportRole.id : null,
       category_id: category ? category.id : null,
       naming_scheme: namingScheme,
-      logs_channel: logsChannel ? logsChannel.id : null
+      logs_channel: logsChannel ? logsChannel.id : null,
+      banner_url: bannerUrl || null,
+      welcome_image: welcomeImage || null
     });
 
     await interaction.reply({ content: `✅ تم إرسال لوحة التذاكر المخصصة بنجاح في القناة: <#${channel.id}>`, flags: 64 });
