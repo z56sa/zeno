@@ -1274,6 +1274,103 @@ module.exports = {
 
         return interaction.editReply({ content: `✅ تم رفض الطلب بنجاح وإرسال السبب للعضو في الخاص.` });
       }
+
+      // ==========================================
+      // 11. نظام تسجيل حضور وانصراف الإدارة (Staff Shift Login / Logout)
+      // ==========================================
+      if (interaction.isButton() && (interaction.customId === 'staff_login_btn' || interaction.customId === 'staff_logout_btn')) {
+        await interaction.deferReply({ flags: 64 }).catch(() => {});
+        const settings = db.getGuildSettings(interaction.guild.id);
+        const staffRoleId = settings.staff_role;
+
+        // التحقق من امتلاك العضو لرتبة الإدارة المحددة أو صلاحية الإدارة
+        const isStaff = staffRoleId 
+          ? (interaction.member.roles.cache.has(staffRoleId) || interaction.member.permissions.has(PermissionFlagsBits.Administrator))
+          : interaction.member.permissions.has(PermissionFlagsBits.ManageGuild);
+
+        if (!isStaff) {
+          return interaction.editReply({
+            content: staffRoleId 
+              ? `❌ هذا الزر مخصص لطاقم الإدارة فقط! تحتاج لرتبة <@&${staffRoleId}> لاستخدامه.`
+              : '❌ لم يتم تحديد رتبة الإدارة المخولة بعد، أو أنك لا تملك صلاحيات كافية.'
+          });
+        }
+
+        const logChannelId = settings.staff_log_channel || settings.log_channel;
+        const logChannel = logChannelId 
+          ? (interaction.guild.channels.cache.get(logChannelId) || await interaction.guild.channels.fetch(logChannelId).catch(() => null))
+          : null;
+
+        // تسجيل الدخول (Login)
+        if (interaction.customId === 'staff_login_btn') {
+          const result = db.startStaffShift(interaction.guild.id, interaction.user.id);
+          if (!result.success && result.error === 'already_active') {
+            const startedAt = result.shift?.start_time || Math.floor(Date.now() / 1000);
+            return interaction.editReply({
+              content: `⚠️ أنت مسجل دخول بالفعل وفي الخدمة حالياً منذ <t:${startedAt}:R>!`
+            });
+          }
+
+          const nowUnix = Math.floor(Date.now() / 1000);
+          const loginEmbed = new EmbedBuilder()
+            .setColor('#10b981')
+            .setTitle('🟢 تسجيل دخول إداري جديد (Shift Started)')
+            .setThumbnail(interaction.user.displayAvatarURL({ dynamic: true }))
+            .addFields(
+              { name: '👤 الإداري', value: `${interaction.user} (\`${interaction.user.tag}\`)`, inline: true },
+              { name: '🆔 الأيدي', value: `\`${interaction.user.id}\``, inline: true },
+              { name: '⏰ وقت البداية', value: `<t:${nowUnix}:F>\n(<t:${nowUnix}:R>)`, inline: false }
+            )
+            .setFooter({ text: interaction.guild.name, iconURL: interaction.guild.iconURL({ dynamic: true }) || undefined })
+            .setTimestamp();
+
+          if (logChannel && logChannel.isTextBased()) {
+            await logChannel.send({ embeds: [loginEmbed] }).catch(() => {});
+          }
+
+          return interaction.editReply({
+            content: `✅ **تم تسجيل بداية دوامك بنجاح!**\nالوقت: <t:${nowUnix}:T>. بالتوفيق في خدمة الأعضاء 🫡`
+          });
+        }
+
+        // تسجيل الخروج (Logout)
+        if (interaction.customId === 'staff_logout_btn') {
+          const result = db.endStaffShift(interaction.guild.id, interaction.user.id, 'user');
+          if (!result.success && result.error === 'not_active') {
+            return interaction.editReply({
+              content: '❌ أنت لست مسجلاً في الخدمة حالياً! اضغط على زر **تسجيل الدخول** لبدء دوامك أولاً.'
+            });
+          }
+
+          const durationHours = Math.floor(result.duration / 3600);
+          const durationMins = Math.floor((result.duration % 3600) / 60);
+          const durationSecs = result.duration % 60;
+          const durationStr = `${durationHours > 0 ? `${durationHours} ساعة و ` : ''}${durationMins} دقيقة و ${durationSecs} ثانية`;
+
+          const logoutEmbed = new EmbedBuilder()
+            .setColor('#ef4444')
+            .setTitle('🔴 تسجيل خروج إداري (Shift Ended)')
+            .setThumbnail(interaction.user.displayAvatarURL({ dynamic: true }))
+            .addFields(
+              { name: '👤 الإداري', value: `${interaction.user} (\`${interaction.user.tag}\`)`, inline: true },
+              { name: '⏱️ مدة التواجد', value: `\`${durationStr}\``, inline: true },
+              { name: '⭐ النقاط المكتسبة', value: `+${result.pointsEarned} نقطة`, inline: true },
+              { name: '⏰ البداية', value: `<t:${result.startTime}:T>`, inline: true },
+              { name: '⏰ النهاية', value: `<t:${result.endTime}:T>`, inline: true },
+              { name: '📌 نوع الخروج', value: 'يدوي (بواسطة الإداري)', inline: true }
+            )
+            .setFooter({ text: interaction.guild.name, iconURL: interaction.guild.iconURL({ dynamic: true }) || undefined })
+            .setTimestamp();
+
+          if (logChannel && logChannel.isTextBased()) {
+            await logChannel.send({ embeds: [logoutEmbed] }).catch(() => {});
+          }
+
+          return interaction.editReply({
+            content: `🛑 **تم تسجيل خروجك بنجاح!**\n⏱️ إجمالي مدة خدمتك اليوم: **${durationStr}**\n⭐ نقاط إضافية: **+${result.pointsEarned}** نقطة.\nشكراً لجهودك وعملك المتميز! 👏`
+          });
+        }
+      }
     } catch (err) {
       logger.error('خطأ في interactionCreate:', err);
     }

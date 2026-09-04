@@ -230,7 +230,32 @@ db.exec(`
     streak_days INTEGER DEFAULT 0,
     last_active_day TEXT,
     points INTEGER DEFAULT 0,
+    shift_seconds INTEGER DEFAULT 0,
+    total_shifts INTEGER DEFAULT 0,
     PRIMARY KEY (guild_id, user_id)
+  );
+
+  CREATE TABLE IF NOT EXISTS staff_shifts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    guild_id TEXT NOT NULL,
+    user_id TEXT NOT NULL,
+    start_time INTEGER NOT NULL,
+    status TEXT DEFAULT 'active', -- 'active', 'ended', 'auto_logged_out'
+    end_time INTEGER,
+    duration_seconds INTEGER DEFAULT 0,
+    ended_by TEXT DEFAULT 'user', -- 'user', 'auto_afk', 'auto_offline', 'admin'
+    UNIQUE(guild_id, user_id, status)
+  );
+
+  CREATE TABLE IF NOT EXISTS staff_shift_logs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    guild_id TEXT NOT NULL,
+    user_id TEXT NOT NULL,
+    start_time INTEGER NOT NULL,
+    end_time INTEGER NOT NULL,
+    duration_seconds INTEGER NOT NULL,
+    ended_by TEXT DEFAULT 'user',
+    created_at INTEGER DEFAULT (strftime('%s','now'))
   );
 
   CREATE TABLE IF NOT EXISTS staff_actions (
@@ -367,6 +392,12 @@ db.exec(`
 try { db.exec("ALTER TABLE guild_settings ADD COLUMN staff_activity_enabled INTEGER DEFAULT 1;"); } catch(e) {}
 try { db.exec("ALTER TABLE guild_settings ADD COLUMN staff_role TEXT;"); } catch(e) {}
 try { db.exec("ALTER TABLE guild_settings ADD COLUMN staff_log_channel TEXT;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN staff_login_channel TEXT;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN staff_banner_url TEXT;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN staff_banner_enabled INTEGER DEFAULT 1;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN staff_auto_logout INTEGER DEFAULT 1;"); } catch(e) {}
+try { db.exec("ALTER TABLE staff_activity ADD COLUMN shift_seconds INTEGER DEFAULT 0;"); } catch(e) {}
+try { db.exec("ALTER TABLE staff_activity ADD COLUMN total_shifts INTEGER DEFAULT 0;"); } catch(e) {}
 try { db.exec("ALTER TABLE guild_settings ADD COLUMN boost_enabled INTEGER DEFAULT 1;"); } catch(e) {}
 try { db.exec("ALTER TABLE guild_settings ADD COLUMN boost_channel TEXT;"); } catch(e) {}
 try { db.exec("ALTER TABLE guild_settings ADD COLUMN boost_message TEXT;"); } catch(e) {}
@@ -1405,9 +1436,134 @@ function deleteStaffGoal(id, guildId) {
 
 function resetStaffStats(guildId, userId = null) {
   if (userId) {
-    return db.prepare('UPDATE staff_activity SET tickets_closed = 0, mod_actions = 0, bans_count = 0, kicks_count = 0, mutes_count = 0, warns_count = 0, messages_count = 0, voice_seconds = 0, streak_days = 0, points = 0 WHERE guild_id = ? AND user_id = ?').run(guildId, userId);
+    return db.prepare('UPDATE staff_activity SET tickets_closed = 0, mod_actions = 0, bans_count = 0, kicks_count = 0, mutes_count = 0, warns_count = 0, messages_count = 0, voice_seconds = 0, streak_days = 0, points = 0, shift_seconds = 0, total_shifts = 0 WHERE guild_id = ? AND user_id = ?').run(guildId, userId);
   }
-  return db.prepare('UPDATE staff_activity SET tickets_closed = 0, mod_actions = 0, bans_count = 0, kicks_count = 0, mutes_count = 0, warns_count = 0, messages_count = 0, voice_seconds = 0, streak_days = 0, points = 0 WHERE guild_id = ?').run(guildId);
+  return db.prepare('UPDATE staff_activity SET tickets_closed = 0, mod_actions = 0, bans_count = 0, kicks_count = 0, mutes_count = 0, warns_count = 0, messages_count = 0, voice_seconds = 0, streak_days = 0, points = 0, shift_seconds = 0, total_shifts = 0 WHERE guild_id = ?').run(guildId);
+}
+
+// 🕒 Staff Shifts & Attendance (تسجيل الحضور والانصراف والساعات)
+function startStaffShift(guildId, userId) {
+  try {
+    getStaffMember(guildId, userId);
+    const existing = db.prepare("SELECT * FROM staff_shifts WHERE guild_id = ? AND user_id = ? AND status = 'active'").get(guildId, userId);
+    if (existing) return { success: false, error: 'already_active', shift: existing };
+
+    const now = Math.floor(Date.now() / 1000);
+    const res = db.prepare("INSERT INTO staff_shifts (guild_id, user_id, start_time, status) VALUES (?, ?, ?, 'active')").run(guildId, userId, now);
+    const shift = db.prepare("SELECT * FROM staff_shifts WHERE id = ?").get(res.lastInsertRowid);
+    return { success: true, shift };
+  } catch (err) {
+    console.error('[DB] startStaffShift error:', err);
+    return { success: false, error: err.message };
+  }
+}
+
+function endStaffShift(guildId, userId, endedBy = 'user') {
+  try {
+    const shift = db.prepare("SELECT * FROM staff_shifts WHERE guild_id = ? AND user_id = ? AND status = 'active'").get(guildId, userId);
+    if (!shift) return { success: false, error: 'not_active' };
+
+    const now = Math.floor(Date.now() / 1000);
+    const duration = Math.max(1, now - shift.start_time);
+
+    // إنهاء الشفت وحفظه في السجل
+    db.prepare("DELETE FROM staff_shifts WHERE id = ?").run(shift.id);
+    db.prepare(`
+      INSERT INTO staff_shift_logs (guild_id, user_id, start_time, end_time, duration_seconds, ended_by)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `).run(guildId, userId, shift.start_time, now, duration, endedBy);
+
+    // احتساب النقاط بناءً على الساعات (نقطة لكل 10 دقائق عمل)
+    const pointsEarned = Math.max(1, Math.floor(duration / 600));
+
+    // تحديث إحصائيات الإداري
+    getStaffMember(guildId, userId);
+    updateStaffActivityStreak(guildId, userId);
+    db.prepare(`
+      UPDATE staff_activity 
+      SET shift_seconds = shift_seconds + ?, total_shifts = total_shifts + 1, points = points + ?
+      WHERE guild_id = ? AND user_id = ?
+    `).run(duration, pointsEarned, guildId, userId);
+
+    return {
+      success: true,
+      duration,
+      pointsEarned,
+      startTime: shift.start_time,
+      endTime: now,
+      endedBy
+    };
+  } catch (err) {
+    console.error('[DB] endStaffShift error:', err);
+    return { success: false, error: err.message };
+  }
+}
+
+function getActiveStaffShift(guildId, userId) {
+  try {
+    return db.prepare("SELECT * FROM staff_shifts WHERE guild_id = ? AND user_id = ? AND status = 'active'").get(guildId, userId);
+  } catch (e) {
+    return null;
+  }
+}
+
+function getAllActiveShifts(guildId = null) {
+  try {
+    if (guildId) {
+      return db.prepare("SELECT * FROM staff_shifts WHERE guild_id = ? AND status = 'active'").all(guildId);
+    }
+    return db.prepare("SELECT * FROM staff_shifts WHERE status = 'active'").all();
+  } catch (e) {
+    return [];
+  }
+}
+
+function getStaffHoursLeaderboard(guildId, limit = 25) {
+  try {
+    return db.prepare(`
+      SELECT user_id, shift_seconds, total_shifts, points,
+             ROUND(CAST(shift_seconds AS REAL) / 3600, 2) as total_hours
+      FROM staff_activity
+      WHERE guild_id = ?
+      ORDER BY shift_seconds DESC, total_shifts DESC
+      LIMIT ?
+    `).all(guildId, limit);
+  } catch (e) {
+    return [];
+  }
+}
+
+function getStaffPointsLeaderboard(guildId, limit = 25) {
+  try {
+    return db.prepare(`
+      SELECT user_id, points, shift_seconds, total_shifts, tickets_closed, mod_actions,
+             ROUND(CAST(shift_seconds AS REAL) / 3600, 2) as total_hours
+      FROM staff_activity
+      WHERE guild_id = ?
+      ORDER BY points DESC, shift_seconds DESC
+      LIMIT ?
+    `).all(guildId, limit);
+  } catch (e) {
+    return [];
+  }
+}
+
+function setStaffPoints(guildId, userId, points) {
+  try {
+    getStaffMember(guildId, userId);
+    return db.prepare("UPDATE staff_activity SET points = ? WHERE guild_id = ? AND user_id = ?").run(points, guildId, userId);
+  } catch (e) {
+    return null;
+  }
+}
+
+function addStaffPoints(guildId, userId, points) {
+  try {
+    getStaffMember(guildId, userId);
+    return db.prepare("UPDATE staff_activity SET points = points + ? WHERE guild_id = ? AND user_id = ?").run(points, guildId, userId);
+  } catch (e) {
+    return null;
+  }
 }
 
 // ==========================================
@@ -1601,6 +1757,14 @@ module.exports = {
   addStaffGoal,
   deleteStaffGoal,
   resetStaffStats,
+  startStaffShift,
+  endStaffShift,
+  getActiveStaffShift,
+  getAllActiveShifts,
+  getStaffHoursLeaderboard,
+  getStaffPointsLeaderboard,
+  setStaffPoints,
+  addStaffPoints,
   // 🛡️ Protection Whitelist & Logs Exports
   getProtectionWhitelist,
   addProtectionWhitelist,

@@ -6926,53 +6926,135 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                         return rawDb.prepare(`
                             SELECT user_id, tickets_closed, mod_actions, bans_count, kicks_count,
                                    mutes_count, warns_count, messages_count, voice_seconds,
+                                   shift_seconds, total_shifts, points,
                                    (tickets_closed*10 + warns_count*3 + bans_count*5 + kicks_count*4 + 
-                                    (voice_seconds/60) + messages_count) as total_points
+                                    (voice_seconds/60) + messages_count + points) as total_points
                             FROM staff_activity WHERE guild_id = ?
-                            ORDER BY total_points DESC LIMIT 50
+                            ORDER BY shift_seconds DESC, total_points DESC LIMIT 50
                         `).all(guildId);
                     } catch(e) { return []; }
                 })();
 
-                const totalStaffActions = staffList.reduce((s,x) => s + (x.mod_actions || 0), 0);
-                const totalStaffTickets = staffList.reduce((s,x) => s + (x.tickets_closed || 0), 0);
-                const topPoints = staffList[0]?.total_points || 0;
+                const activeShifts = (() => {
+                    try {
+                        return rawDb.prepare("SELECT * FROM staff_shifts WHERE guild_id = ? AND status = 'active'").all(guildId);
+                    } catch(e) { return []; }
+                })();
+
+                const totalShiftSeconds = staffList.reduce((s, x) => s + (x.shift_seconds || 0), 0);
+                const totalShiftHours = (totalShiftSeconds / 3600).toFixed(1);
+                const totalStaffActions = staffList.reduce((s, x) => s + (x.mod_actions || 0), 0);
+                const totalStaffTickets = staffList.reduce((s, x) => s + (x.tickets_closed || 0), 0);
+                const topPoints = staffList.reduce((m, x) => Math.max(m, x.points || 0), 0);
 
                 formFieldsHtml = `
                     <div class="space-y-6 text-right" dir="rtl">
                         <!-- Header Banner -->
                         <div class="bg-gradient-to-r from-[#1a132e] via-[#12141f] to-[#1a132e] border border-purple-500/20 p-6 rounded-3xl flex items-center justify-between shadow-2xl flex-wrap gap-3">
                             <div class="flex items-center gap-2">
+                                <button type="button" onclick="sendStaffPanelDirect()" class="px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-xl text-xs font-black transition shadow-lg shadow-emerald-950/40 flex items-center gap-1.5 cursor-pointer">
+                                    <span>🚀 إرسال لوحة الحضور (Login/Logout)</span>
+                                </button>
                                 <button type="button" onclick="resetAllStaffStats()" class="px-4 py-2 bg-rose-950/40 hover:bg-rose-900/60 border border-rose-800/40 text-rose-300 rounded-xl text-xs font-bold transition cursor-pointer">
-                                    🔄 تصفير إحصائيات الأسبوع
+                                    🔄 تصفير الإحصائيات
                                 </button>
                                 <button type="button" onclick="location.reload()" class="px-4 py-2 bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/30 text-purple-300 rounded-xl text-xs font-bold transition cursor-pointer">
                                     ↻ تحديث
                                 </button>
                             </div>
                             <div class="text-right">
-                                <h4 class="font-black text-white text-xl flex items-center gap-2 justify-end"><span>تتبع نشاط الإدارة والمشرفين</span><span>👮</span></h4>
-                                <p class="text-gray-400 text-xs mt-0.5">لوحة إحصائيات شاملة لكل مشرف — التذاكر، الإشراف، الصوت، الرسائل والنقاط</p>
+                                <h4 class="font-black text-white text-xl flex items-center gap-2 justify-end"><span>نظام وإحصائيات طاقم الإدارة</span><span>👮</span></h4>
+                                <p class="text-gray-400 text-xs mt-0.5">متابعة دقيقة لساعات العمل والشفتات، تسجيل الحضور والانصراف، تقييم الأداء، وتوزيع النقاط</p>
                             </div>
                         </div>
 
+                        <!-- Shift Control & Settings Form Card -->
+                        <div class="bg-[#12141f] border border-white/5 p-6 rounded-3xl space-y-4 shadow-xl">
+                            <div class="flex items-center justify-between pb-3 border-b border-white/5">
+                                <span class="text-xs text-purple-400 font-bold">إعدادات الحضور والانصراف</span>
+                                <h4 class="text-sm font-black text-white flex items-center gap-2"><span>ضبط قنوات ورتبة الإدارة</span><span>⚙️</span></h4>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-300 mb-1">رتبة الإدارة المخولة بالتسجيل <span class="text-purple-400">*</span></label>
+                                    ${renderRoleSelect('staff_role', settings.staff_role)}
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-300 mb-1">قناة لوحة تسجيل الحضور والانصراف</label>
+                                    ${renderChannelSelect('staff_login_channel', settings.staff_login_channel)}
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-300 mb-1">قناة إرسال سجلات الحضور (Logs)</label>
+                                    ${renderChannelSelect('staff_log_channel', settings.staff_log_channel)}
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-300 mb-1">رابط بانر لوحة الحضور (اختياري)</label>
+                                    <input type="text" name="staff_banner_url" value="${settings.staff_banner_url || ''}" placeholder="https://..." class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-left font-mono">
+                                </div>
+                                <div class="flex items-center justify-between bg-[#0b0d14] border border-white/5 p-3.5 rounded-2xl">
+                                    <label class="toggle">
+                                        <input type="checkbox" name="staff_auto_logout" value="1" ${settings.staff_auto_logout !== 0 ? 'checked' : ''} onchange="saveProtectionSetting('staff_auto_logout', this.checked)">
+                                        <span class="slider"></span>
+                                    </label>
+                                    <div class="text-right">
+                                        <h5 class="text-xs font-bold text-white">تسجيل الخروج التلقائي (Auto Logout)</h5>
+                                        <p class="text-[10px] text-gray-400">يسجل خروج الإداري تلقائياً عند قطع الاتصال أو الخروج من ديسكورد لمنع الساعات الوهمية</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="flex justify-end pt-2">
+                                <button type="button" onclick="saveStaffSettingsQuick()" class="px-6 py-2.5 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-black transition shadow-lg">
+                                    حفظ إعدادات الإدارة 💾
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Active Shifts Live Alert Card -->
+                        ${activeShifts.length > 0 ? `
+                        <div class="bg-gradient-to-r from-emerald-950/40 via-[#12141f] to-emerald-950/40 border border-emerald-500/30 p-4 rounded-3xl flex items-center justify-between shadow-xl flex-wrap gap-3">
+                            <div class="flex items-center gap-2 flex-wrap">
+                                ${activeShifts.map(s => {
+                                    const mObj = botGuild?.members?.cache?.get(s.user_id);
+                                    const dName = mObj ? mObj.user.tag : s.user_id;
+                                    return `<span class="px-2.5 py-1 bg-emerald-900/50 border border-emerald-500/40 text-emerald-300 text-xs font-bold rounded-xl flex items-center gap-1">🟢 ${dName} (<t:${s.start_time}:R>)</span>`;
+                                }).join('')}
+                            </div>
+                            <div class="text-right flex items-center gap-2">
+                                <div>
+                                    <h5 class="text-xs font-black text-emerald-400">في الخدمة حالياً (${activeShifts.length} إداري)</h5>
+                                    <p class="text-[10px] text-gray-400">إداريون مسجلون دخول ويستقبلون التذاكر وخدمة الأعضاء الآن</p>
+                                </div>
+                                <span class="w-3 h-3 rounded-full bg-emerald-400 animate-ping"></span>
+                            </div>
+                        </div>
+                        ` : ''}
+
                         <!-- Stats Overview Cards -->
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
                             <div class="bg-[#12141f] border border-purple-500/20 p-5 rounded-2xl text-right">
                                 <div class="text-2xl font-black text-purple-400">${staffList.length}</div>
-                                <div class="text-xs text-gray-400 font-bold mt-1">إداريين نشطين</div>
+                                <div class="text-xs text-gray-400 font-bold mt-1">إداريين مسجلين</div>
+                            </div>
+                            <div class="bg-[#12141f] border border-emerald-500/20 p-5 rounded-2xl text-right">
+                                <div class="text-2xl font-black text-emerald-400">${totalShiftHours} ساعة</div>
+                                <div class="text-xs text-gray-400 font-bold mt-1">إجمالي ساعات الدوام</div>
                             </div>
                             <div class="bg-[#12141f] border border-amber-500/20 p-5 rounded-2xl text-right">
                                 <div class="text-2xl font-black text-amber-400">${totalStaffActions}</div>
                                 <div class="text-xs text-gray-400 font-bold mt-1">إجراءات إدارية</div>
                             </div>
-                            <div class="bg-[#12141f] border border-emerald-500/20 p-5 rounded-2xl text-right">
-                                <div class="text-2xl font-black text-emerald-400">${totalStaffTickets}</div>
+                            <div class="bg-[#12141f] border border-cyan-500/20 p-5 rounded-2xl text-right">
+                                <div class="text-2xl font-black text-cyan-400">${totalStaffTickets}</div>
                                 <div class="text-xs text-gray-400 font-bold mt-1">تذاكر مغلقة</div>
                             </div>
                             <div class="bg-[#12141f] border border-blue-500/20 p-5 rounded-2xl text-right">
                                 <div class="text-2xl font-black text-blue-400">${topPoints}</div>
-                                <div class="text-xs text-gray-400 font-bold mt-1">أعلى نقاط فردية</div>
+                                <div class="text-xs text-gray-400 font-bold mt-1">أعلى نقاط بونص</div>
                             </div>
                         </div>
 
@@ -6980,56 +7062,63 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                         <div class="bg-[#12141f] border border-white/5 rounded-3xl p-6 shadow-xl space-y-4">
                             <div class="flex items-center justify-between pb-3 border-b border-white/5">
                                 <span class="text-xs text-purple-400 font-bold">${staffList.length} إداري مسجل</span>
-                                <h4 class="text-sm font-black text-white flex items-center gap-2"><span>لوحة صدارة المشرفين</span><span>🏆</span></h4>
+                                <h4 class="text-sm font-black text-white flex items-center gap-2"><span>لوحة صدارة وتواجد المشرفين</span><span>🏆</span></h4>
                             </div>
 
                             ${staffList.length === 0 ? `
                                 <div class="py-12 text-center space-y-3">
                                     <div class="text-5xl">👮</div>
                                     <p class="text-gray-400 text-sm font-bold">لا يوجد نشاط مسجل للمشرفين حتى الآن</p>
-                                    <p class="text-gray-500 text-xs">يتم تسجيل إجراءات المشرفين تلقائياً عند تنفيذ أوامر الإشراف والتذاكر</p>
+                                    <p class="text-gray-500 text-xs">أرسل لوحة الحضور عبر الزر بالأعلى وسيبدأ حساب الساعات فور تسجيل الإداريين</p>
                                 </div>
                             ` : `
                                 <div class="overflow-x-auto">
-                                    <table class="w-full text-right text-xs min-w-[650px]">
+                                    <table class="w-full text-right text-xs min-w-[750px]">
                                         <thead>
                                             <tr class="text-gray-500 border-b border-white/5">
                                                 <th class="pb-3 pr-3 font-bold">#</th>
                                                 <th class="pb-3 font-bold">المشرف</th>
+                                                <th class="pb-3 text-center font-bold text-emerald-400">⏱️ ساعات الدوام</th>
+                                                <th class="pb-3 text-center font-bold">🔄 الجلسات</th>
                                                 <th class="pb-3 text-center font-bold">🎫 تذاكر</th>
-                                                <th class="pb-3 text-center font-bold">⚠️ تحذيرات</th>
-                                                <th class="pb-3 text-center font-bold">🔨 باند</th>
-                                                <th class="pb-3 text-center font-bold">👢 كيك</th>
-                                                <th class="pb-3 text-center font-bold">🔇 ميوت</th>
-                                                <th class="pb-3 text-center font-bold">💬 رسائل</th>
-                                                <th class="pb-3 text-center font-bold">🎤 صوتي</th>
-                                                <th class="pb-3 text-center font-bold text-purple-400">⭐ نقاط</th>
+                                                <th class="pb-3 text-center font-bold">🔨 إجراءات</th>
+                                                <th class="pb-3 text-center font-bold text-purple-400">⭐ نقاط البونص</th>
+                                                <th class="pb-3 text-center font-bold">إجراءات</th>
                                             </tr>
                                         </thead>
                                         <tbody class="divide-y divide-white/5">
                                             ${staffList.map((st, i) => {
-                                                const voiceH = Math.floor((st.voice_seconds || 0) / 3600);
-                                                const voiceM = Math.floor(((st.voice_seconds || 0) % 3600) / 60);
+                                                const sHours = Math.floor((st.shift_seconds || 0) / 3600);
+                                                const sMins = Math.floor(((st.shift_seconds || 0) % 3600) / 60);
                                                 const memberObj = botGuild?.members?.cache?.get(st.user_id);
                                                 const displayName = memberObj ? memberObj.user.tag : st.user_id;
                                                 const badge = i === 0 ? 'bg-amber-500/20 text-amber-300 border-amber-500/40' : i === 1 ? 'bg-gray-300/20 text-gray-300 border-gray-400/30' : i === 2 ? 'bg-orange-700/20 text-orange-400 border-orange-600/30' : 'bg-purple-600/20 text-purple-300 border-purple-500/30';
+                                                const isOnline = activeShifts.some(as => as.user_id === st.user_id);
                                                 return `
                                                 <tr class="hover:bg-white/5 transition">
                                                     <td class="py-3.5 pr-3"><span class="w-7 h-7 rounded-lg border ${badge} flex items-center justify-center font-mono text-[11px] font-black">${i + 1}</span></td>
                                                     <td class="py-3.5 font-bold text-white font-mono text-[11px]">
                                                         <div class="flex items-center gap-2">
-                                                            <div class="w-6 h-6 rounded-full bg-purple-900/50 flex items-center justify-center text-[10px]">👤</div>
-                                                            <span>${displayName}</span>
+                                                            <div class="relative">
+                                                                <div class="w-7 h-7 rounded-full bg-purple-900/50 flex items-center justify-center text-[10px]">👤</div>
+                                                                ${isOnline ? '<span class="w-2.5 h-2.5 rounded-full bg-emerald-400 absolute -bottom-0.5 -right-0.5 ring-2 ring-[#12141f]"></span>' : ''}
+                                                            </div>
+                                                            <div>
+                                                                <span>${displayName}</span>
+                                                                ${isOnline ? '<span class="text-[9px] text-emerald-400 block">🟢 في الخدمة</span>' : ''}
+                                                            </div>
                                                         </div>
                                                     </td>
-                                                    <td class="py-3.5 text-center font-mono font-bold text-emerald-400">${st.tickets_closed || 0}</td>
-                                                    <td class="py-3.5 text-center font-mono font-bold text-amber-400">${st.warns_count || 0}</td>
-                                                    <td class="py-3.5 text-center font-mono font-bold text-red-400">${st.bans_count || 0}</td>
-                                                    <td class="py-3.5 text-center font-mono font-bold text-orange-400">${st.kicks_count || 0}</td>
-                                                    <td class="py-3.5 text-center font-mono font-bold text-blue-400">${st.mutes_count || 0}</td>
-                                                    <td class="py-3.5 text-center font-mono text-gray-300">${(st.messages_count || 0).toLocaleString()}</td>
-                                                    <td class="py-3.5 text-center font-mono text-blue-300">${voiceH}س ${voiceM}د</td>
-                                                    <td class="py-3.5 text-center font-mono font-black text-purple-400 text-sm">${Number(st.total_points || 0).toLocaleString()}</td>
+                                                    <td class="py-3.5 text-center font-mono font-black text-emerald-400 text-sm">${sHours}س ${sMins}د</td>
+                                                    <td class="py-3.5 text-center font-mono font-bold text-gray-300">${st.total_shifts || 0}</td>
+                                                    <td class="py-3.5 text-center font-mono font-bold text-cyan-400">${st.tickets_closed || 0}</td>
+                                                    <td class="py-3.5 text-center font-mono font-bold text-amber-400">${st.mod_actions || 0}</td>
+                                                    <td class="py-3.5 text-center font-mono font-black text-purple-400 text-sm">${Number(st.points || 0).toLocaleString()}</td>
+                                                    <td class="py-3.5 text-center">
+                                                        <button type="button" onclick="modifyStaffPointsPrompt('${st.user_id}', '${displayName}')" class="px-2.5 py-1 bg-purple-600/30 hover:bg-purple-600 text-purple-200 rounded-lg text-[10px] font-bold transition">
+                                                            ⭐ تعديل النقاط
+                                                        </button>
+                                                    </td>
                                                 </tr>
                                                 `;
                                             }).join('')}
@@ -7041,12 +7130,68 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                     </div>
 
                     <script>
+                    async function saveStaffSettingsQuick() {
+                        const role = document.getElementById('staff_role')?.value;
+                        const loginCh = document.getElementById('staff_login_channel')?.value;
+                        const logCh = document.getElementById('staff_log_channel')?.value;
+                        const bannerUrl = document.querySelector('input[name="staff_banner_url"]')?.value;
+
+                        try {
+                            const r = await fetch('/api/guild/${guildId}/settings', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    staff_role: role,
+                                    staff_login_channel: loginCh,
+                                    staff_log_channel: logCh,
+                                    staff_banner_url: bannerUrl
+                                })
+                            });
+                            const d = await r.json();
+                            if (d.success) alert('✅ تم حفظ إعدادات طاقم الإدارة بنجاح!');
+                            else alert('❌ ' + (d.error || 'فشل الحفظ'));
+                        } catch(e) { alert('خطأ في الاتصال'); }
+                    }
+
+                    async function sendStaffPanelDirect() {
+                        const loginCh = document.getElementById('staff_login_channel')?.value;
+                        if (!loginCh) return alert('يرجى تحديد قناة لوحة تسجيل الحضور أولاً وحفظها.');
+                        if (!confirm('هل تريد إرسال لوحة الحضور والانصراف الآن في القناة المحددة؟')) return;
+
+                        try {
+                            const r = await fetch('/api/guild/${guildId}/staff/send-panel', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ channelId: loginCh })
+                            });
+                            const d = await r.json();
+                            if (d.success) alert('✅ تم إرسال لوحة الحضور والانصراف بنجاح في القناة!');
+                            else alert('❌ ' + (d.error || 'فشل الإرسال'));
+                        } catch(e) { alert('خطأ في الاتصال بالخادم'); }
+                    }
+
+                    async function modifyStaffPointsPrompt(userId, name) {
+                        const pts = prompt('أدخل عدد النقاط الجديد للإداري ' + name + ':', '100');
+                        if (pts === null || isNaN(pts)) return;
+
+                        try {
+                            const r = await fetch('/api/guild/${guildId}/staff/set-points', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ userId, points: parseInt(pts, 10) })
+                            });
+                            const d = await r.json();
+                            if (d.success) { alert('✅ تم تحديث نقاط الإداري بنجاح'); location.reload(); }
+                            else alert('❌ ' + (d.error || 'فشل التحديث'));
+                        } catch(e) { alert('خطأ في الاتصال'); }
+                    }
+
                     async function resetAllStaffStats() {
-                        if (!confirm('هل أنت متأكد من تصفير جميع إحصائيات طاقم الإدارة؟ لا يمكن التراجع عن هذا الإجراء.')) return;
+                        if (!confirm('هل أنت متأكد من تصفير جميع إحصائيات وساعات طاقم الإدارة؟ لا يمكن التراجع عن هذا الإجراء.')) return;
                         try {
                             const r = await fetch('/api/guild/${guildId}/staff/reset', { method: 'POST' });
                             const d = await r.json();
-                            if (d.success) { alert('✅ تم تصفير إحصائيات النشاط بنجاح'); location.reload(); }
+                            if (d.success) { alert('✅ تم تصفير إحصائيات النشاط والساعات بنجاح'); location.reload(); }
                             else alert('❌ ' + (d.error || 'فشل'));
                         } catch(e) { alert('خطأ في الاتصال بالسيرفر'); }
                     }
@@ -8536,7 +8681,105 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
     });
 
     
+    // =============================================
+    // Staff Activity & Shift API (نظام الإدارة والحضور)
+    // =============================================
+    app.post('/api/guild/:guildId/staff/send-panel', express.json(), async (req, res) => {
+        try {
+            if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
+            const { guildId } = req.params;
+            const settings = database.getGuildSettings(guildId);
+            const channelId = req.body.channelId || settings.staff_login_channel;
 
+            if (!channelId) return res.status(400).json({ success: false, error: 'لم يتم تحديد قناة لوحة الحضور والانصراف' });
+
+            const channel = client?.channels?.cache?.get(channelId) || await client?.channels?.fetch(channelId).catch(() => null);
+            if (!channel || !channel.isTextBased()) return res.status(400).json({ success: false, error: 'القناة غير موجودة أو ليست نصية' });
+
+            const guildObj = client?.guilds?.cache?.get(guildId);
+            const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+
+            const bannerImg = settings.staff_banner_url || guildObj?.bannerURL({ size: 1024 }) || null;
+            const embed = new EmbedBuilder()
+                .setColor('#7c3aed')
+                .setTitle('📋 لوحة تسجيل حضور وانصراف الإدارة | Staff Shift')
+                .setDescription(
+                    'مرحباً بكم يا أعضاء طاقم الإدارة 🫡\n\n' +
+                    '• لبدء فترة عملك واستقبال تذاكر ورومات الدعم، اضغط على زر **تسجيل الدخول (Login)** 🟢\n' +
+                    '• عند انتهاء فترة دوامك، اضغط على زر **تسجيل الخروج (Logout)** 🔴 لحفظ ساعاتك ونقاطك بدقة.\n\n' +
+                    '⚠️ **ملاحظة:** يتم تسجيل خروجك تلقائياً إذا خرجت من الديسكورد لمنع الساعات الوهمية.'
+                )
+                .setFooter({ text: guildObj?.name || 'ZENO Bot', iconURL: guildObj?.iconURL({ dynamic: true }) || undefined })
+                .setTimestamp();
+
+            if (settings.staff_banner_enabled !== 0 && bannerImg) {
+                embed.setImage(bannerImg);
+            }
+
+            const row = new ActionRowBuilder().addComponents(
+                new ButtonBuilder()
+                    .setCustomId('staff_login_btn')
+                    .setLabel('تسجيل الدخول | Login')
+                    .setEmoji('🟢')
+                    .setStyle(ButtonStyle.Success),
+                new ButtonBuilder()
+                    .setCustomId('staff_logout_btn')
+                    .setLabel('تسجيل الخروج | Logout')
+                    .setEmoji('🔴')
+                    .setStyle(ButtonStyle.Danger)
+            );
+
+            await channel.send({ embeds: [embed], components: [row] });
+            res.json({ success: true });
+        } catch (err) {
+            res.status(500).json({ success: false, error: err.message });
+        }
+    });
+
+    app.post('/api/guild/:guildId/staff/set-points', express.json(), (req, res) => {
+        try {
+            if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
+            const { guildId } = req.params;
+            const { userId, points } = req.body;
+            if (!userId || points === undefined) return res.status(400).json({ success: false, error: 'Missing parameters' });
+
+            if (database.setStaffPoints) {
+                database.setStaffPoints(guildId, userId, parseInt(points, 10) || 0);
+            }
+            res.json({ success: true });
+        } catch (e) {
+            res.status(500).json({ success: false, error: e.message });
+        }
+    });
+
+    app.post('/api/guild/:guildId/staff/add-points', express.json(), (req, res) => {
+        try {
+            if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
+            const { guildId } = req.params;
+            const { userId, points } = req.body;
+            if (!userId || !points) return res.status(400).json({ success: false, error: 'Missing parameters' });
+
+            if (database.addStaffPoints) {
+                database.addStaffPoints(guildId, userId, parseInt(points, 10) || 0);
+            }
+            res.json({ success: true });
+        } catch (e) {
+            res.status(500).json({ success: false, error: e.message });
+        }
+    });
+
+    app.post('/api/guild/:guildId/staff/reset', (req, res) => {
+        try {
+            if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
+            const { guildId } = req.params;
+            if (database.resetStaffStats) {
+                database.resetStaffStats(guildId);
+            }
+            res.json({ success: true });
+        } catch (e) {
+            res.status(500).json({ success: false, error: e.message });
+        }
+    });
 
     // =============================================
     // Backup System API
