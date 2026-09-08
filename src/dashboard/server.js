@@ -88,12 +88,11 @@ module.exports = function (app, client) {
     // Endpoint for claiming daily reward from web dashboard
     app.post('/api/user/daily', (req, res) => {
         try {
-            const user = req.session?.user || {
-                id: client?.user?.id || '1506005273893146775',
-                username: 'المسؤول'
-            };
-
-            const userId = user.id;
+            // Use real Discord user ID if logged in, else use stable session ID
+            const userId = req.session?.user?.id || req.session?.id;
+            if (!userId) {
+                return res.status(401).json({ success: false, error: 'يجب تسجيل الدخول أولاً' });
+            }
             const now = Date.now();
             const cooldown = 24 * 60 * 60 * 1000;
 
@@ -225,13 +224,14 @@ module.exports = function (app, client) {
     // 3. User Dashboard & Main Routes (لوحة التحكم الداخلية للسيرفرات)
     app.get('/dashboard/manage', (req, res) => {
         try {
-            // استخدام بيانات المستخدم الحالية أو حساب إدارة افتراضي مباشر
+            // استخدام بيانات المستخدم الحالية أو هوية مستقرة مبنية على الجلسة
             let user = req.session?.user || null;
             if (!user) {
+                // Use stable session ID as anonymous identity (never use bot's own ID)
                 user = {
-                    id: client?.user?.id || '1506005273893146775',
-                    username: 'المسؤول',
-                    avatar: client?.user?.avatar || null
+                    id: req.session?.id || 'anonymous',
+                    username: 'زائر',
+                    avatar: null
                 };
             }
 
