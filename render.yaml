@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: zeno-bot
+    runtime: docker
+    plan: free
+    region: frankfurt
+    branch: main
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/stats
+    autoDeploy: true
