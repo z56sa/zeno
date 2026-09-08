@@ -130,8 +130,7 @@ module.exports = function (app, client) {
             else if (streak >= 3) reward = 600;
 
             database.addCoins(userId, targetGuildId, reward);
-            database.setLastDaily(userId, targetGuildId, now);
-            database.db.prepare('UPDATE users SET streak = ? WHERE user_id = ? AND guild_id = ?').run(streak, userId, targetGuildId);
+            database.setLastDaily(userId, targetGuildId, now, streak);
 
             const updatedUser = database.getUser(userId, targetGuildId);
             const newBalance = updatedUser.coins || updatedUser.credits || 0;

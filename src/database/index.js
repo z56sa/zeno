@@ -5,6 +5,7 @@
 const Database = require('better-sqlite3');
 const path = require('path');
 const fs = require('fs');
+const tursoSync = require('./tursoSync');
 
 // مجلد البيانات (يدعم Persistent Volume في Railway أو أي استضافة عبر متغير البيئة DATA_DIR أو DATABASE_PATH)
 const customDbPath = process.env.DATABASE_PATH;
@@ -591,6 +592,7 @@ try {
 } catch(e) {}
 
 console.log('[DB] ✅ SQLite database initialized successfully');
+tursoSync.initAndRestore(db).catch(e => console.error('[TURSO] Init error:', e.message));
 
 
 // ==========================================
@@ -671,6 +673,9 @@ function addXp(userId, guildId, amount) {
     WHERE user_id = ? AND guild_id = ?
   `).run(xp, level, Date.now(), userId, guildId);
 
+  const updatedUser = getUser(userId, guildId);
+  tursoSync.queueUserSync(updatedUser);
+
   return { level, leveledUp, xp };
 }
 
@@ -678,6 +683,7 @@ function addCoins(userId, guildId, amount) {
   getUser(userId, guildId);
   db.prepare('UPDATE users SET coins = coins + ? WHERE user_id = ? AND guild_id = ?').run(amount, userId, guildId);
   const u = getUser(userId, guildId);
+  tursoSync.queueUserSync(u);
   return u.coins || 0;
 }
 
@@ -685,6 +691,7 @@ function removeCoins(userId, guildId, amount) {
   getUser(userId, guildId);
   db.prepare('UPDATE users SET coins = MAX(0, coins - ?) WHERE user_id = ? AND guild_id = ?').run(amount, userId, guildId);
   const u = getUser(userId, guildId);
+  tursoSync.queueUserSync(u);
   return u.coins || 0;
 }
 
@@ -692,6 +699,7 @@ function setCoins(userId, guildId, amount) {
   getUser(userId, guildId);
   db.prepare('UPDATE users SET coins = ? WHERE user_id = ? AND guild_id = ?').run(Math.max(0, amount), userId, guildId);
   const u = getUser(userId, guildId);
+  tursoSync.queueUserSync(u);
   return u.coins || 0;
 }
 
@@ -708,6 +716,8 @@ const transferCoins = db.transaction((guildId, senderId, receiverId, amount) => 
 
   const newSender = getUser(senderId, guildId);
   const newReceiver = getUser(receiverId, guildId);
+  tursoSync.queueUserSync(newSender);
+  tursoSync.queueUserSync(newReceiver);
   return {
     senderBalance: newSender.coins || 0,
     receiverBalance: newReceiver.coins || 0
@@ -719,9 +729,15 @@ function getLastDaily(userId) {
   return row?.last_daily || 0;
 }
 
-function setLastDaily(userId, guildId, timestamp) {
+function setLastDaily(userId, guildId, timestamp, streak = null) {
   getUser(userId, guildId);
-  db.prepare('UPDATE users SET last_daily = ? WHERE user_id = ?').run(timestamp, userId);
+  if (streak !== null && streak !== undefined) {
+    db.prepare('UPDATE users SET last_daily = ?, streak = ? WHERE user_id = ?').run(timestamp, streak, userId);
+  } else {
+    db.prepare('UPDATE users SET last_daily = ? WHERE user_id = ?').run(timestamp, userId);
+  }
+  const u = getUser(userId, guildId);
+  tursoSync.queueUserSync(u);
 }
 
 function getWallpaper(userId) {

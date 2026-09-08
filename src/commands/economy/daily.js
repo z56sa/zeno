@@ -60,8 +60,7 @@ module.exports = {
 
     // تحديث قاعدة البيانات
     db.addCoins(user.id, guildId, reward);
-    db.setLastDaily(user.id, guildId, now);
-    db.db.prepare('UPDATE users SET streak = ? WHERE user_id = ? AND guild_id = ?').run(streak, user.id, guildId);
+    db.setLastDaily(user.id, guildId, now, streak);
 
     const newUserData = db.getUser(user.id, guildId);
     const nextStreakTarget = streak < 3 ? 3 : streak < 7 ? 7 : streak < 30 ? 30 : streak < 100 ? 100 : null;
