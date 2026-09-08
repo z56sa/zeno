@@ -1,93 +1,86 @@
-const { createClient } = require("@libsql/client");
+const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+const db = require('../../database');
+const config = require('../../config.json');
 
-// الاتصال بقاعدة بيانات Turso باستخدام متغيرات البيئة
-const db = createClient({
-  url: process.env.TURSO_DATABASE_URL,
-  authToken: process.env.TURSO_AUTH_TOKEN,
-});
-
-// إنشاء الجداول تلقائياً عند تشغيل البوت
-async function initDatabase() {
-  try {
-    await db.execute(`
-      CREATE TABLE IF NOT EXISTS users (
-        user_id TEXT,
-        guild_id TEXT,
-        coins INTEGER DEFAULT 0,
-        streak INTEGER DEFAULT 0,
-        last_daily INTEGER DEFAULT 0,
-        PRIMARY KEY (user_id, guild_id)
-      )
-    `);
-    console.log("✅ تم الاتصال بقاعدة بيانات Turso وإنشاء الجداول بنجاح!");
-  } catch (error) {
-    console.error("❌ خطأ أثناء إنشاء جداول قاعدة البيانات:", error);
-  }
-}
-
-initDatabase();
-
-// دالة لجلب بيانات المستخدم أو إنشائه إن لم يكن موجوداً
-async function getUser(userId, guildId) {
-  try {
-    const result = await db.execute({
-      sql: "SELECT * FROM users WHERE user_id = ? AND guild_id = ?",
-      args: [userId, guildId]
-    });
-
-    if (result.rows.length === 0) {
-      // إذا لم يكن المستخدم موجوداً، نقوم بإنشائه بقيم افتراضية
-      await db.execute({
-        sql: "INSERT INTO users (user_id, guild_id, coins, streak, last_daily) VALUES (?, ?, 0, 0, 0)",
-        args: [userId, guildId]
-      });
-      return { user_id: userId, guild_id: guildId, coins: 0, streak: 0, last_daily: 0 };
-    }
-
-    return result.rows[0];
-  } catch (error) {
-    console.error("خطأ في دالة getUser:", error);
-    return { coins: 0, streak: 0, last_daily: 0 };
-  }
-}
-
-// دالة لجلب وقت آخر مكافأة يومية
-async function getLastDaily(userId, guildId) {
-  const user = await getUser(userId, guildId);
-  return user.last_daily || 0;
-}
-
-// دالة لإضافة الرصيد (الذهب/Coins)
-async function addCoins(userId, guildId, amount) {
-  try {
-    // التأكد من وجود المستخدم أولاً
-    await getUser(userId, guildId);
-
-    await db.execute({
-      sql: "UPDATE users SET coins = coins + ? WHERE user_id = ? AND guild_id = ?",
-      args: [amount, userId, guildId]
-    });
-  } catch (error) {
-    console.error("خطأ في دالة addCoins:", error);
-  }
-}
-
-// دالة لتحديث وقت الـ Daily والـ Streak
-async function setDailyData(userId, guildId, timestamp, streak) {
-  try {
-    await db.execute({
-      sql: "UPDATE users SET last_daily = ?, streak = ? WHERE user_id = ? AND guild_id = ?",
-      args: [timestamp, streak, userId, guildId]
-    });
-  } catch (error) {
-    console.error("خطأ في دالة setDailyData:", error);
-  }
-}
+const COOLDOWNS = new Map();
 
 module.exports = {
-  db,
-  getUser,
-  getLastDaily,
-  addCoins,
-  setDailyData
-};  
+  name: 'daily',
+  description: 'احصل على مكافأتك اليومية مع نظام الـ Streak',
+  aliases: ['يومي', 'كريدت'],
+  data: new SlashCommandBuilder()
+    .setName('daily')
+    .setDescription('احصل على مكافأتك اليومية'),
+
+  async execute(interaction) {
+    await interaction.deferReply();
+    await this.handleDaily(interaction.user, interaction.guild.id, (opts) => interaction.editReply(opts));
+  },
+
+  async executePrefix(message) {
+    await this.handleDaily(message.author, message.guild.id, (opts) => message.reply(opts));
+  },
+
+  async handleDaily(user, guildId, reply) {
+    const userData = db.getUser(user.id, guildId);
+    const now = Date.now();
+    const cooldown = 24 * 60 * 60 * 1000;
+    const lastDaily = db.getLastDaily(user.id);
+
+    if (now - lastDaily < cooldown) {
+      const remaining = cooldown - (now - lastDaily);
+      const h = Math.floor(remaining / 3600000);
+      const m = Math.floor((remaining % 3600000) / 60000);
+      const embed = new EmbedBuilder()
+        .setColor('#e74c3c')
+        .setTitle('⏰ انتهت مكافأتك اليومية!')
+        .setDescription(`المكافأة التالية خلال:\n⌛ **${h} ساعة و${m} دقيقة**`)
+        .setFooter({ text: 'عد قريباً!' })
+        .setTimestamp();
+      return reply({ embeds: [embed] });
+    }
+
+    // حساب الـ Streak
+    const oneDayMs = 24 * 60 * 60 * 1000;
+    const twoDaysMs = 48 * 60 * 60 * 1000;
+    let streak = userData.streak || 0;
+    if (now - lastDaily <= twoDaysMs && lastDaily > 0) {
+      streak += 1;
+    } else {
+      streak = 1;
+    }
+
+    // حساب المكافأة
+    let reward = 200;
+    let bonusText = '';
+    if (streak >= 100) { reward = 1200; bonusText = '🏆 **مكافأة 100 يوم متتالي!** (x6)'; }
+    else if (streak >= 30) { reward = 700; bonusText = '🌟 **مكافأة 30 يوم متتالي!** (x3.5)'; }
+    else if (streak >= 7) { reward = 500; bonusText = '🔥 **مكافأة 7 أيام متتالية!** (x2.5)'; }
+    else if (streak >= 3) { reward = 300; bonusText = '✨ **مكافأة 3 أيام متتالية!** (+100)'; }
+
+    // تحديث قاعدة البيانات
+    db.addCoins(user.id, guildId, reward);
+    db.setLastDaily(user.id, guildId, now);
+    db.db.prepare('UPDATE users SET streak = ? WHERE user_id = ? AND guild_id = ?').run(streak, user.id, guildId);
+
+    const newUserData = db.getUser(user.id, guildId);
+    const nextStreakTarget = streak < 3 ? 3 : streak < 7 ? 7 : streak < 30 ? 30 : streak < 100 ? 100 : null;
+    const streakBar = '🔥'.repeat(Math.min(streak, 10)) + (streak > 10 ? ` +${streak - 10}` : '');
+
+    const embed = new EmbedBuilder()
+      .setColor('#f1c40f')
+      .setTitle('💰 مكافأتك اليومية!')
+      .setThumbnail(user.displayAvatarURL({ dynamic: true }))
+      .addFields(
+        { name: '🎁 المكافأة', value: `\`+${reward}\` ⭐ Star Coin`, inline: true },
+        { name: '💳 رصيدك الجديد', value: `\`${(newUserData.coins || newUserData.credits || 0).toLocaleString()}\` ⭐`, inline: true },
+        { name: `🔥 الـ Streak: ${streak} يوم`, value: streakBar, inline: false }
+      )
+      .setFooter({ text: nextStreakTarget ? `🎯 ${nextStreakTarget - streak} يوم متبقٍ للمكافأة التالية` : '🏆 أنت على القمة!' })
+      .setTimestamp();
+
+    if (bonusText) embed.setDescription(bonusText);
+
+    await reply({ embeds: [embed] });
+  }
+};
