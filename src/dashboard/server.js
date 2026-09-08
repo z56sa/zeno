@@ -48,6 +48,18 @@ module.exports = function (app, client) {
         return res.sendFile(require('path').join(__dirname, 'public', 'index.html'));
     });
 
+    // Bot Info API for public landing pages
+    app.get('/api/bot-info', (req, res) => {
+        const avatarUrl = client?.user?.avatar 
+            ? `https://cdn.discordapp.com/avatars/${client.user.id}/${client.user.avatar}.png` 
+            : 'https://cdn.discordapp.com/embed/avatars/0.png';
+        res.json({
+            id: client?.user?.id || '1506005273893146775',
+            username: client?.user?.username || 'ZENO',
+            avatar: avatarUrl
+        });
+    });
+
     // ========================================================
     // 💡 ECONOMY API ENDPOINTS (Live Persistent Dashboard API)
     // ========================================================
@@ -150,6 +162,7 @@ module.exports = function (app, client) {
             }
 
             const userAvatar = user.avatar ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png` : 'https://cdn.discordapp.com/embed/avatars/0.png';
+            const botAvatarUrl = client?.user?.avatar ? `https://cdn.discordapp.com/avatars/${client.user.id}/${client.user.avatar}.png` : 'https://cdn.discordapp.com/embed/avatars/0.png';
 
             let userCoins = 0, userLevel = 1, userStars = 0, userXp = 0, userLastDaily = 0, userWallpaper = 'default';
             let xpLeaderboard = [];
@@ -465,6 +478,10 @@ module.exports = function (app, client) {
                         <a href="/logout" class="text-xs text-rose-400 hover:text-rose-300 font-bold transition">تسجيل الخروج</a>
                         <span class="text-gray-700">|</span>
                         <a href="https://discord.gg/zduGPYv7pE" target="_blank" class="text-xs text-gray-400 hover:text-gray-200 transition">الدعم الفني</a>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <img src="${botAvatarUrl}" class="w-8 h-8 rounded-xl object-cover ring-2 ring-purple-500/40 shadow-md shadow-purple-900/30">
+                        <span class="font-black text-sm text-white tracking-wide hidden sm:block">ZENO</span>
                     </div>
                     <div class="flex items-center gap-3">
                         <div class="text-right">
@@ -946,6 +963,7 @@ module.exports = function (app, client) {
 
             const botGuild = client?.guilds?.cache?.get(guildId);
             const userAvatar = user.avatar ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png` : 'https://cdn.discordapp.com/embed/avatars/0.png';
+            const botAvatarUrl = client?.user?.avatar ? `https://cdn.discordapp.com/avatars/${client.user.id}/${client.user.avatar}.png` : 'https://cdn.discordapp.com/embed/avatars/0.png';
             const guildIcon = guild.icon ? `https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.png` : 'https://cdn.discordapp.com/embed/avatars/0.png';
 
             const serverRailHtml = guilds.map(g => `
@@ -8056,7 +8074,7 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                     </div>
                     <div class="flex items-center gap-2">
                         <span class="font-black text-sm text-white tracking-wide">ZENO</span>
-                        <div class="w-8 h-8 rounded-xl bg-purple-600/30 border border-purple-500/40 flex items-center justify-center font-black text-xs text-purple-300">Z</div>
+                        <img src="${botAvatarUrl}" class="w-8 h-8 rounded-xl object-cover ring-2 ring-purple-500/40 shadow-md shadow-purple-900/30">
                     </div>
                 </header>
 

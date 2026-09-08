@@ -57,10 +57,8 @@
         
         <!-- Logo Left in RTL (ZENO Brand) -->
         <a href="/" class="flex items-center gap-3 group">
-            <div class="w-10 h-10 rounded-2xl bg-purple-600/20 border border-purple-500/40 flex items-center justify-center text-xl font-black text-purple-400 shadow-lg shadow-purple-600/20 group-hover:scale-105 transition-transform">
-                🔮
-            </div>
-            <span class="text-2xl font-black tracking-tight text-white">ZENO BOT</span>
+            <img id="navBotAvatar" src="https://cdn.discordapp.com/embed/avatars/0.png" alt="ZENO" class="w-10 h-10 rounded-2xl object-cover ring-2 ring-purple-500/40 shadow-lg shadow-purple-600/20 group-hover:scale-105 transition-transform">
+            <span id="navBotName" class="text-2xl font-black tracking-tight text-white">ZENO BOT</span>
         </a>
 
         <!-- Center Links (بدون بريميوم نهائياً) -->
@@ -123,5 +121,20 @@
         جميع الحقوق محفوظة © ZENO BOT 2026 - <a href="https://discord.gg/zduGPYv7pE" target="_blank" class="text-purple-400 hover:underline transition">سيرفر الدعم الفني</a>
     </footer>
 
+    <script>
+        fetch('/api/bot-info')
+            .then(res => res.json())
+            .then(data => {
+                if (data && data.avatar) {
+                    const img = document.getElementById('navBotAvatar');
+                    if (img) img.src = data.avatar;
+                }
+                if (data && data.username) {
+                    const name = document.getElementById('navBotName');
+                    if (name) name.textContent = data.username.toUpperCase() + ' BOT';
+                }
+            })
+            .catch(() => {});
+    </script>
 </body>
 </html>
