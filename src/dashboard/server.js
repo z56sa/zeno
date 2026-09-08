@@ -53,13 +53,35 @@ module.exports = function (app, client) {
         const avatarUrl = client?.user?.avatar 
             ? `https://cdn.discordapp.com/avatars/${client.user.id}/${client.user.avatar}.png` 
             : 'https://cdn.discordapp.com/embed/avatars/0.png';
+
+        // تصفية السيرفرات بحيث تقتصر على سيرفر ZENO فقط
+        let zenoGuilds = [];
+        if (client?.guilds?.cache) {
+            zenoGuilds = client.guilds.cache.filter(g => g.name.toLowerCase().includes('zeno'));
+            if (zenoGuilds.size === 0 && client.guilds.cache.size > 0) {
+                // إذا لم يكن هناك كلمة zeno في الاسم نأخذ السيرفر الأول
+                zenoGuilds = client.guilds.cache.first(1);
+            }
+        }
+
+        const guildsCount = zenoGuilds.size !== undefined ? zenoGuilds.size : (Array.isArray(zenoGuilds) ? zenoGuilds.length : 1);
+
+        // عدد المستخدمين الفعليين الذين دخلوا أو تفاعلوا عبر الداشبورد
+        let dashboardUsersCount = 1;
+        try {
+            const countRow = rawDb.prepare('SELECT COUNT(DISTINCT user_id) as total FROM users').get();
+            dashboardUsersCount = Math.max(1, countRow?.total || 0);
+        } catch (e) {
+            dashboardUsersCount = 1;
+        }
+
         res.json({
             id: client?.user?.id || '1506005273893146775',
             username: client?.user?.username || 'ZENO',
             avatar: avatarUrl,
-            guildsCount: client?.guilds?.cache?.size || 0,
-            usersCount: client?.guilds?.cache?.reduce((acc, g) => acc + (g.memberCount || 0), 0) || 0,
-            ping: client?.ws?.ping >= 0 ? client.ws.ping : 24
+            guildsCount: guildsCount || 1,
+            dashboardUsersCount: dashboardUsersCount,
+            ping: client?.ws?.ping >= 0 ? client.ws.ping : 21
         });
     });
 
@@ -214,16 +236,26 @@ module.exports = function (app, client) {
                 };
             }
 
-            // جلب سيرفرات البوت مباشرة لتمكين إدارتها فوراً
+            // جلب سيرفر ZENO فقط لتمكين إدارته حصرياً
             let guilds = req.session?.guilds || [];
             if (!guilds || guilds.length === 0) {
                 if (client?.guilds?.cache) {
-                    guilds = client.guilds.cache.map(g => ({
+                    let filtered = client.guilds.cache.filter(g => g.name.toLowerCase().includes('zeno'));
+                    if (filtered.size === 0) {
+                        filtered = client.guilds.cache.first(1);
+                    }
+                    guilds = filtered.map(g => ({
                         id: g.id,
                         name: g.name,
                         icon: g.icon,
                         permissions: 8
                     }));
+                }
+            } else {
+                guilds = guilds.filter(g => g.name.toLowerCase().includes('zeno'));
+                if (guilds.length === 0 && client?.guilds?.cache?.size > 0) {
+                    const first = client.guilds.cache.first();
+                    guilds = [{ id: first.id, name: first.name, icon: first.icon, permissions: 8 }];
                 }
             }
 
