@@ -8314,11 +8314,11 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                                 </div>
                             </div>
 
-                            <!-- الترفيه والتفاعل -->
+                            <!-- القرآن والإذاعة -->
                             <div class="space-y-1">
                                 <button type="button" onclick="toggleNavGroup('grp_sub_fun')" class="w-full flex items-center justify-between text-gray-400 hover:text-white px-2 py-1 font-bold text-[11px] transition">
                                     <svg id="arrow_grp_sub_fun" class="w-3.5 h-3.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                                    <span class="flex items-center gap-1.5"><span>الترفيه والتفاعل</span></span>
+                                    <span class="flex items-center gap-1.5"><span>القرآن والإذاعة</span></span>
                                 </button>
                                 <div id="grp_sub_fun" class="space-y-1">
                                     <a href="/dashboard/${guildId}/quran" class="flex items-center justify-between px-3 py-2 rounded-xl ${section === 'quran' ? 'bg-purple-600 text-white font-bold shadow-md' : 'text-gray-300 hover:text-white hover:bg-[#151724]'} transition group">

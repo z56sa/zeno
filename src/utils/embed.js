@@ -6,9 +6,10 @@ const embedUtil = {
    * إنشاء Embed رسالة نجاح
    */
   success(title, description) {
+    const icon = config.emojis?.success || '✅';
     return new EmbedBuilder()
-      .setColor(config.colors.success)
-      .setTitle(`${config.emojis.success} ${title}`)
+      .setColor(config.colors?.success || '#22c55e')
+      .setTitle(`${icon} ${title}`)
       .setDescription(description)
       .setTimestamp();
   },
@@ -17,9 +18,10 @@ const embedUtil = {
    * إنشاء Embed رسالة خطأ
    */
   error(title, description) {
+    const icon = config.emojis?.error || '❌';
     return new EmbedBuilder()
-      .setColor(config.colors.danger)
-      .setTitle(`${config.emojis.error} ${title}`)
+      .setColor(config.colors?.danger || '#ef4444')
+      .setTitle(`${icon} ${title}`)
       .setDescription(description)
       .setTimestamp();
   },
@@ -28,9 +30,10 @@ const embedUtil = {
    * إنشاء Embed رسالة تحذير
    */
   warning(title, description) {
+    const icon = config.emojis?.warning || '⚠️';
     return new EmbedBuilder()
-      .setColor(config.colors.warning)
-      .setTitle(`${config.emojis.warning} ${title}`)
+      .setColor(config.colors?.warning || '#f59e0b')
+      .setTitle(`${icon} ${title}`)
       .setDescription(description)
       .setTimestamp();
   },

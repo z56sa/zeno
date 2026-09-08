@@ -14,13 +14,21 @@ module.exports = {
       return interaction.reply({ content: '❌ لا تملك صلاحية إدارة القنوات.', flags: 64 });
     }
 
+    const botMember = interaction.guild.members.me || await interaction.guild.members.fetchMe().catch(() => null);
+    if (!botMember?.permissions.has(PermissionFlagsBits.ManageChannels)) {
+      return interaction.reply({ content: '❌ البوت لا يملك صلاحية إدارة القنوات (Manage Channels) لتنفيذ هذا الإجراء.', flags: 64 });
+    }
+
     await interaction.deferReply().catch(() => { });
 
-    await interaction.channel.permissionOverwrites.edit(interaction.guild.roles.everyone, {
-      SendMessages: false
-    });
-
-    await interaction.editReply({ content: '🔒 **تم قفل هذا الروم بنجاح.**' });
+    try {
+      await interaction.channel.permissionOverwrites.edit(interaction.guild.roles.everyone, {
+        SendMessages: false
+      });
+      await interaction.editReply({ content: '🔒 **تم قفل هذا الروم بنجاح.**' });
+    } catch (err) {
+      await interaction.editReply({ content: '❌ تعذر قفل الروم. تأكد من أن رتبة البوت أعلى من الصلاحيات ولديه صلاحية Manage Channels و Manage Roles.' }).catch(() => {});
+    }
   },
 
   async executePrefix(message) {

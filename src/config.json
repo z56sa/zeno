@@ -15,6 +15,12 @@
     "author": "ZENO System",
     "footerText": "ZENO Bot • All Rights Reserved"
   },
+  "emojis": {
+    "success": "✅",
+    "error": "❌",
+    "warning": "⚠️",
+    "info": "ℹ️"
+  },
   "economy": {
     "xpCooldownMs": 60000,
     "xpPerMessage": 5,

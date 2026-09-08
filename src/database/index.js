@@ -112,6 +112,7 @@ db.exec(`
     last_message_xp INTEGER DEFAULT 0,
     wallpaper TEXT DEFAULT 'default',
     warnings INTEGER DEFAULT 0,
+    streak INTEGER DEFAULT 0,
     PRIMARY KEY (user_id, guild_id)
   );
 
@@ -398,6 +399,7 @@ try { db.exec("ALTER TABLE guild_settings ADD COLUMN staff_banner_enabled INTEGE
 try { db.exec("ALTER TABLE guild_settings ADD COLUMN staff_auto_logout INTEGER DEFAULT 1;"); } catch(e) {}
 try { db.exec("ALTER TABLE staff_activity ADD COLUMN shift_seconds INTEGER DEFAULT 0;"); } catch(e) {}
 try { db.exec("ALTER TABLE staff_activity ADD COLUMN total_shifts INTEGER DEFAULT 0;"); } catch(e) {}
+try { db.exec("ALTER TABLE users ADD COLUMN streak INTEGER DEFAULT 0;"); } catch(e) {}
 try { db.exec("ALTER TABLE guild_settings ADD COLUMN boost_enabled INTEGER DEFAULT 1;"); } catch(e) {}
 try { db.exec("ALTER TABLE guild_settings ADD COLUMN boost_channel TEXT;"); } catch(e) {}
 try { db.exec("ALTER TABLE guild_settings ADD COLUMN boost_message TEXT;"); } catch(e) {}
