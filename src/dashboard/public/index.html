@@ -64,11 +64,7 @@
         <!-- Center Links (بدون بريميوم نهائياً) -->
         <nav class="hidden md:flex items-center gap-8 text-sm font-bold text-gray-400">
             <a href="https://discord.gg/zduGPYv7pE" target="_blank" class="hover:text-purple-400 transition">سيرفر الدعم</a>
-            <div class="flex items-center gap-1 hover:text-purple-400 cursor-pointer transition">
-                <span>المصادر</span>
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-            </div>
-            <a href="#features" class="hover:text-purple-400 transition">المميزات</a>
+            <a href="#features" class="hover:text-purple-400 transition">المميزات والأنظمة</a>
         </nav>
 
         <!-- Direct Dashboard CTA Button -->
@@ -100,7 +96,7 @@
         </p>
 
         <!-- Two Action Buttons -->
-        <div class="flex flex-wrap items-center justify-center gap-4 w-full max-w-md">
+        <div class="flex flex-wrap items-center justify-center gap-4 w-full max-w-md mb-12">
             <!-- 1. إضافة البوت في Discord -->
             <a href="https://discord.com/api/oauth2/authorize?client_id=1506005273893146775&permissions=8&scope=bot%20applications.commands" target="_blank" class="flex-1 min-w-[180px] py-4 zeno-btn-primary font-black rounded-2xl text-sm text-center shadow-xl flex items-center justify-center gap-2">
                 <span>➕</span>
@@ -114,11 +110,127 @@
             </a>
         </div>
 
+        <!-- Live Real-Time Bot Stats Strip (عدد السيرفرات، الأعضاء، سرعة الاستجابة/البنق) -->
+        <div class="w-full max-w-2xl grid grid-cols-3 gap-3 sm:gap-4 mb-20">
+            <!-- عدد السيرفرات -->
+            <div class="bg-[#0f111a]/80 backdrop-blur-md border border-purple-500/20 hover:border-purple-500/50 rounded-2xl p-4 sm:p-5 text-center transition shadow-lg shadow-black/40 group">
+                <div class="w-10 h-10 rounded-xl bg-purple-600/10 text-purple-400 flex items-center justify-center text-lg mx-auto mb-2 group-hover:scale-110 transition-transform">
+                    🖥️
+                </div>
+                <div class="text-xl sm:text-2xl font-black text-white font-mono" id="statServers">...</div>
+                <div class="text-[11px] sm:text-xs text-gray-400 font-bold mt-1">السيرفرات النشطة</div>
+            </div>
+
+            <!-- سرعة الاستجابة (البنق) -->
+            <div class="bg-[#0f111a]/80 backdrop-blur-md border border-purple-500/20 hover:border-emerald-500/40 rounded-2xl p-4 sm:p-5 text-center transition shadow-lg shadow-black/40 group">
+                <div class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-lg mx-auto mb-2 group-hover:scale-110 transition-transform">
+                    ⚡
+                </div>
+                <div class="text-xl sm:text-2xl font-black text-emerald-400 font-mono" id="statPing">...</div>
+                <div class="text-[11px] sm:text-xs text-gray-400 font-bold mt-1">سرعة الاستجابة (Ping)</div>
+            </div>
+
+            <!-- إجمالي الأعضاء المستفيدين -->
+            <div class="bg-[#0f111a]/80 backdrop-blur-md border border-purple-500/20 hover:border-indigo-500/40 rounded-2xl p-4 sm:p-5 text-center transition shadow-lg shadow-black/40 group">
+                <div class="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center text-lg mx-auto mb-2 group-hover:scale-110 transition-transform">
+                    👥
+                </div>
+                <div class="text-xl sm:text-2xl font-black text-white font-mono" id="statUsers">...</div>
+                <div class="text-[11px] sm:text-xs text-gray-400 font-bold mt-1">المستخدمين المخدومين</div>
+            </div>
+        </div>
+
+        <!-- مميزات البوت الاحترافية (Features Section) -->
+        <section id="features" class="w-full max-w-5xl text-right pt-6">
+            <div class="text-center mb-12">
+                <span class="text-xs font-black tracking-widest text-purple-400 uppercase bg-purple-950/50 border border-purple-800/40 px-3 py-1 rounded-full">مميزات حقيقية وشاملة</span>
+                <h2 class="text-2xl sm:text-4xl font-black text-white mt-3">كل ما يحتاجه سيرفرك في مكان واحد</h2>
+                <p class="text-gray-400 text-xs sm:text-sm mt-2 max-w-lg mx-auto">أنظمة برمجية متطورة مصممة بأعلى معايير الحماية والأداء، بتحكم كامل ولحظي.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                <!-- 1. الحماية والأمان -->
+                <div class="bg-[#0d0f17]/90 border border-white/5 hover:border-purple-500/40 rounded-3xl p-6 shadow-xl transition-all hover:-translate-y-1">
+                    <div class="w-12 h-12 rounded-2xl bg-purple-600/20 border border-purple-500/30 flex items-center justify-center text-2xl text-purple-400 mb-4 shadow-lg shadow-purple-900/20">
+                        🛡️
+                    </div>
+                    <h3 class="text-lg font-black text-white mb-2">حماية متقدمة ومانع تخريب</h3>
+                    <p class="text-xs text-gray-400 leading-relaxed">
+                        تصدي فوري لمحاولات السبام والروابط المشبوهة، حماية الرتب، منع تخريب القنوات، وسجل أمان ومراقبة متكامل لحظة بلحظة.
+                    </p>
+                </div>
+
+                <!-- 2. الترحيب والرتب التلقائية -->
+                <div class="bg-[#0d0f17]/90 border border-white/5 hover:border-purple-500/40 rounded-3xl p-6 shadow-xl transition-all hover:-translate-y-1">
+                    <div class="w-12 h-12 rounded-2xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center text-2xl text-indigo-400 mb-4 shadow-lg shadow-indigo-900/20">
+                        👋
+                    </div>
+                    <h3 class="text-lg font-black text-white mb-2">بطاقات ترحيب ورتب فورية</h3>
+                    <p class="text-xs text-gray-400 leading-relaxed">
+                        تصميم بطاقات ترحيب بالصور الاحترافية ومشاركتها فور دخول العضو، مع إسناد تلقائي للرتب وإرسال رسائل خاصة مميزة.
+                    </p>
+                </div>
+
+                <!-- 3. الاقتصاد والراتب اليومي -->
+                <div class="bg-[#0d0f17]/90 border border-white/5 hover:border-purple-500/40 rounded-3xl p-6 shadow-xl transition-all hover:-translate-y-1">
+                    <div class="w-12 h-12 rounded-2xl bg-amber-600/20 border border-amber-500/30 flex items-center justify-center text-2xl text-amber-400 mb-4 shadow-lg shadow-amber-900/20">
+                        🪙
+                    </div>
+                    <h3 class="text-lg font-black text-white mb-2">نظام اقتصاد ومكافآت يومية</h3>
+                    <p class="text-xs text-gray-400 leading-relaxed">
+                        نظام راتب يومي مع مكافآت Streak متتالية، لوحة متصدرين بالذهب والخبرة، ومتجر خلفيات هوية غني بـ 105 خلفية حصرية.
+                    </p>
+                </div>
+
+                <!-- 4. نظام التذاكر والدعم -->
+                <div class="bg-[#0d0f17]/90 border border-white/5 hover:border-purple-500/40 rounded-3xl p-6 shadow-xl transition-all hover:-translate-y-1">
+                    <div class="w-12 h-12 rounded-2xl bg-emerald-600/20 border border-emerald-500/30 flex items-center justify-center text-2xl text-emerald-400 mb-4 shadow-lg shadow-emerald-900/20">
+                        🎫
+                    </div>
+                    <h3 class="text-lg font-black text-white mb-2">لوحات تذاكر متعددة الأقسام</h3>
+                    <p class="text-xs text-gray-400 leading-relaxed">
+                        نظام تذاكر احترافي بأزرار تفاعلية، استلام التذاكر من فريق الدعم، حفظ سجل المحادثات (Transcripts)، وتقييم طاقم العمل.
+                    </p>
+                </div>
+
+                <!-- 5. سجلات السيرفر الشاملة -->
+                <div class="bg-[#0d0f17]/90 border border-white/5 hover:border-purple-500/40 rounded-3xl p-6 shadow-xl transition-all hover:-translate-y-1">
+                    <div class="w-12 h-12 rounded-2xl bg-rose-600/20 border border-rose-500/30 flex items-center justify-center text-2xl text-rose-400 mb-4 shadow-lg shadow-rose-900/20">
+                        📜
+                    </div>
+                    <h3 class="text-lg font-black text-white mb-2">سجلات دقيقة (Server Logs)</h3>
+                    <p class="text-xs text-gray-400 leading-relaxed">
+                        تسجيل شامل لـ 13 فئة (حذف وتعديل الرسائل، دخول وخروج الصوت، تعديل الرتب والقنوات، الطرد والحظر) بأدق التفاصيل.
+                    </p>
+                </div>
+
+                <!-- 6. القرآن والإذاعة والأذكار -->
+                <div class="bg-[#0d0f17]/90 border border-white/5 hover:border-purple-500/40 rounded-3xl p-6 shadow-xl transition-all hover:-translate-y-1">
+                    <div class="w-12 h-12 rounded-2xl bg-teal-600/20 border border-teal-500/30 flex items-center justify-center text-2xl text-teal-400 mb-4 shadow-lg shadow-teal-900/20">
+                        📖
+                    </div>
+                    <h3 class="text-lg font-black text-white mb-2">القرآن الكريم والإذاعة 24/7</h3>
+                    <p class="text-xs text-gray-400 leading-relaxed">
+                        بث متواصل لإذاعة القرآن الكريم بأصوات كبار القراء في الرومات الصوتية، مع أذكار الصباح والمساء وتذكيرات آلية مباركة.
+                    </p>
+                </div>
+            </div>
+        </section>
+
     </main>
 
     <!-- Footer -->
-    <footer class="border-t border-purple-900/20 bg-[#040508] py-6 text-center text-gray-500 text-xs font-semibold">
-        جميع الحقوق محفوظة © ZENO BOT 2026 - <a href="https://discord.gg/zduGPYv7pE" target="_blank" class="text-purple-400 hover:underline transition">سيرفر الدعم الفني</a>
+    <footer class="border-t border-purple-900/20 bg-[#040508] py-8 text-center text-gray-500 text-xs font-semibold">
+        <div class="max-w-4xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div>
+                جميع الحقوق محفوظة © <span class="text-white font-bold">ZENO BOT</span> 2026
+            </div>
+            <div class="flex items-center gap-4 text-gray-400">
+                <a href="https://discord.gg/zduGPYv7pE" target="_blank" class="hover:text-purple-400 transition">سيرفر الدعم الفني</a>
+                <span>•</span>
+                <a href="/dashboard/manage" class="hover:text-purple-400 transition">لوحة التحكم</a>
+            </div>
+        </div>
     </footer>
 
     <script>
@@ -132,6 +244,18 @@
                 if (data && data.username) {
                     const name = document.getElementById('navBotName');
                     if (name) name.textContent = data.username.toUpperCase() + ' BOT';
+                }
+                if (data && data.guildsCount !== undefined) {
+                    const el = document.getElementById('statServers');
+                    if (el) el.textContent = data.guildsCount.toLocaleString();
+                }
+                if (data && data.ping !== undefined) {
+                    const el = document.getElementById('statPing');
+                    if (el) el.textContent = Math.max(1, data.ping) + 'ms';
+                }
+                if (data && data.usersCount !== undefined) {
+                    const el = document.getElementById('statUsers');
+                    if (el) el.textContent = data.usersCount.toLocaleString();
                 }
             })
             .catch(() => {});

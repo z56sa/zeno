@@ -56,8 +56,74 @@ module.exports = function (app, client) {
         res.json({
             id: client?.user?.id || '1506005273893146775',
             username: client?.user?.username || 'ZENO',
-            avatar: avatarUrl
+            avatar: avatarUrl,
+            guildsCount: client?.guilds?.cache?.size || 0,
+            usersCount: client?.guilds?.cache?.reduce((acc, g) => acc + (g.memberCount || 0), 0) || 0,
+            ping: client?.ws?.ping >= 0 ? client.ws.ping : 24
         });
+    });
+
+    // Endpoint for claiming daily reward from web dashboard
+    app.post('/api/user/daily', (req, res) => {
+        try {
+            const user = req.session?.user || {
+                id: client?.user?.id || '1506005273893146775',
+                username: 'المسؤول'
+            };
+
+            const userId = user.id;
+            const now = Date.now();
+            const cooldown = 24 * 60 * 60 * 1000;
+
+            const lastDaily = database.getLastDaily(userId);
+            if (now - lastDaily < cooldown) {
+                const remaining = cooldown - (now - lastDaily);
+                const h = Math.floor(remaining / 3600000);
+                const m = Math.floor((remaining % 3600000) / 60000);
+                return res.status(400).json({
+                    success: false,
+                    error: `لقد استلمت راتبك اليومي مسبقاً! المكافأة التالية بعد ${h} ساعة و ${m} دقيقة.`
+                });
+            }
+
+            // Determine active guild
+            let targetGuildId = 'global';
+            if (client?.guilds?.cache?.size > 0) {
+                targetGuildId = client.guilds.cache.first().id;
+            }
+
+            const userData = database.getUser(userId, targetGuildId);
+            let streak = userData.streak || 0;
+            const twoDaysMs = 48 * 60 * 60 * 1000;
+            if (now - lastDaily <= twoDaysMs && lastDaily > 0) {
+                streak += 1;
+            } else {
+                streak = 1;
+            }
+
+            // Base reward 500 gold with streak bonus
+            let reward = 500;
+            if (streak >= 30) reward = 1000;
+            else if (streak >= 7) reward = 750;
+            else if (streak >= 3) reward = 600;
+
+            database.addCoins(userId, targetGuildId, reward);
+            database.setLastDaily(userId, targetGuildId, now);
+            database.db.prepare('UPDATE users SET streak = ? WHERE user_id = ? AND guild_id = ?').run(streak, userId, targetGuildId);
+
+            const updatedUser = database.getUser(userId, targetGuildId);
+            const newBalance = updatedUser.coins || updatedUser.credits || 0;
+
+            return res.json({
+                success: true,
+                amount: reward,
+                streak,
+                newBalance
+            });
+        } catch (err) {
+            console.error('Error claiming web daily:', err);
+            return res.status(500).json({ success: false, error: 'حدث خطأ أثناء معالجة الراتب اليومي: ' + err.message });
+        }
     });
 
     // ========================================================
@@ -446,29 +512,6 @@ module.exports = function (app, client) {
             }
         }
     };
-    </script>
-
-
-    <script>
-    // Live countdown timer for daily reward
-    setInterval(function() {
-        var timerEl = document.getElementById('liveDailyTimer');
-        if (!timerEl) return;
-        var nextTime = parseInt(timerEl.getAttribute('data-next'), 10);
-        if (!nextTime) return;
-        var diff = nextTime - Date.now();
-        if (diff <= 0) {
-            var box = document.getElementById('dailyActionBox');
-            if (box) {
-                box.innerHTML = '<button type="button" onclick="claimDailyReward()" id="claimDailyBtn" class="px-8 py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold text-sm rounded-2xl shadow-xl shadow-purple-950/50 hover:scale-105 transition-all cursor-pointer flex items-center gap-2 mx-auto"><span>🎁</span><span>استلام الرصيد</span></button>';
-            }
-            return;
-        }
-        var hours = Math.floor(diff / (1000 * 60 * 60));
-        var mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-        var secs = Math.floor((diff % (1000 * 60)) / 1000);
-        timerEl.textContent = (hours < 10 ? '0' + hours : hours) + 'س ' + (mins < 10 ? '0' + mins : mins) + 'د ' + (secs < 10 ? '0' + secs : secs) + 'ث';
-    }, 1000);
     </script>
 
 </head>
