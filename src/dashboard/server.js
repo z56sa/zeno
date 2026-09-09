@@ -875,8 +875,24 @@ module.exports = function (app, client) {
                                     ${dailyActionBoxHtml}
                                 </div>
                             </div>
-                        </div>
 
+                            <!-- زر التصويت للبوت على Top.gg -->
+                            <div class="bg-[#12141f] border border-blue-500/20 rounded-3xl p-8 shadow-xl text-center space-y-4 max-w-xl mx-auto">
+                                <div class="w-20 h-20 rounded-3xl bg-gradient-to-tr from-blue-600/30 to-indigo-600/30 border border-blue-500/40 flex items-center justify-center text-4xl mx-auto shadow-xl shadow-black/20">
+                                    🗳️
+                                </div>
+                                <div>
+                                    <h3 class="text-xl font-black text-white">صوّت للبوت على Top.gg</h3>
+                                    <p class="text-gray-400 text-xs mt-2 leading-relaxed">
+                                        صوّتك يساعد البوت على الانتشار ويدعم تطويره! يمكنك التصويت مرة كل <span class="text-blue-300 font-bold">12 ساعة</span>
+                                    </p>
+                                </div>
+                                <a href="https://top.gg/ar/bot/1506005273893146775/vote" target="_blank"
+                                   class="inline-flex items-center gap-2.5 px-8 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-2xl text-sm font-black transition-all shadow-lg shadow-blue-900/30 hover:shadow-blue-800/40 hover:scale-105">
+                                    🗳️ صوّت الآن على Top.gg
+                                </a>
+                            </div>
+                        </div>
                     </main>
 
                     <!-- Sidebar Right (Novax User Dashboard Menu with Exact Categories) -->
@@ -944,6 +960,10 @@ module.exports = function (app, client) {
                                         <span></span>
                                         <span class="flex items-center gap-2"><span>الراتب اليومي</span><span class="text-gray-400">🎁</span></span>
                                     </button>
+                                    <a href="https://top.gg/ar/bot/1506005273893146775/vote" target="_blank" class="flex items-center justify-between px-3 py-2 rounded-xl text-blue-400 hover:text-blue-300 hover:bg-blue-950/20 font-medium transition w-full">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5"/></svg>
+                                        <span class="flex items-center gap-2"><span>صوّت للبوت</span><span>🗳️</span></span>
+                                    </a>
                                     <a href="/logout" class="flex items-center justify-between px-3 py-2 rounded-xl text-rose-400 hover:text-rose-300 hover:bg-rose-950/20 font-medium transition w-full">
                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
                                         <span class="flex items-center gap-2"><span>تسجيل الخروج</span><span>🚪</span></span>
