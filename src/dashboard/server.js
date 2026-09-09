@@ -78,13 +78,14 @@ module.exports = function (app, client) {
 
         const guildsCount = zenoGuilds.size !== undefined ? zenoGuilds.size : (Array.isArray(zenoGuilds) ? zenoGuilds.length : 1);
 
-        // عدد المستخدمين الفعليين الذين دخلوا أو تفاعلوا عبر الداشبورد
+        // إجمالي الأعضاء والمستخدمين
         let dashboardUsersCount = 1;
         try {
             const countRow = rawDb.prepare('SELECT COUNT(DISTINCT user_id) as total FROM users').get();
-            dashboardUsersCount = Math.max(1, countRow?.total || 0);
+            const totalMembers = client?.guilds?.cache?.reduce((acc, g) => acc + (g.memberCount || 0), 0) || 0;
+            dashboardUsersCount = Math.max(totalMembers, countRow?.total || 0, 1);
         } catch (e) {
-            dashboardUsersCount = 1;
+            dashboardUsersCount = client?.guilds?.cache?.reduce((acc, g) => acc + (g.memberCount || 0), 0) || 1;
         }
 
         res.json({
@@ -93,6 +94,7 @@ module.exports = function (app, client) {
             avatar: avatarUrl,
             guildsCount: guildsCount || 1,
             dashboardUsersCount: dashboardUsersCount,
+            usersCount: dashboardUsersCount,
             ping: client?.ws?.ping >= 0 ? client.ws.ping : 21
         });
     });
@@ -7094,13 +7096,9 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                                 </div>
                             </div>
 
-                            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 pt-2">
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
                                 <div>
-                                    <label class="block text-xs font-bold text-gray-300 mb-1">رابط بانر لوحة الحضور (اختياري)</label>
-                                    <input type="text" name="staff_banner_url" id="staff_banner_url" value="${settings.staff_banner_url || ''}" placeholder="https://..." class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-left font-mono">
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-bold text-gray-300 mb-1">الحد الأقصى للشفت (بالساعات)</label>
+                                    <label class="block text-xs font-bold text-gray-300 mb-1">الحد الأقصى للتواجد المتواصل (بالساعات)</label>
                                     <select name="staff_max_shift_hours" id="staff_max_shift_hours" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right cursor-pointer">
                                         <option value="1" ${Number(settings.staff_max_shift_hours) === 1 ? 'selected' : ''}>ساعة واحدة</option>
                                         <option value="2" ${Number(settings.staff_max_shift_hours) === 2 ? 'selected' : ''}>ساعتان</option>
@@ -7120,15 +7118,24 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                                         <option value="0" ${Number(settings.staff_inactivity_minutes) === 0 ? 'selected' : ''}>معطل (حسب الحد الأقصى فقط)</option>
                                     </select>
                                 </div>
-                                <div class="flex items-center justify-between bg-[#0b0d14] border border-white/5 p-3.5 rounded-2xl">
-                                    <label class="toggle">
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-300 mb-1">رابط بانر لوحة الحضور (اختياري)</label>
+                                    <input type="text" name="staff_banner_url" id="staff_banner_url" value="${settings.staff_banner_url || ''}" placeholder="https://..." class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-left font-mono">
+                                </div>
+                            </div>
+
+                            <div class="pt-2">
+                                <div class="flex items-center justify-between bg-[#0b0d14] border border-white/5 p-4 rounded-2xl">
+                                    <div class="text-right">
+                                        <h5 class="text-xs font-bold text-white flex items-center gap-2">
+                                            <span>⚡ تسجيل الخروج التلقائي (Auto Logout)</span>
+                                        </h5>
+                                        <p class="text-[11px] text-gray-400 mt-0.5">يسجل خروج الإداري تلقائياً عند الخمول (AFK) أو انعدام التفاعل في الشات واستلام التذاكر أو انتهاء الحد الأقصى للمدة</p>
+                                    </div>
+                                    <label class="toggle flex-shrink-0 mr-4">
                                         <input type="checkbox" name="staff_auto_logout" value="1" ${settings.staff_auto_logout !== 0 ? 'checked' : ''} onchange="saveProtectionSetting('staff_auto_logout', this.checked)">
                                         <span class="slider"></span>
                                     </label>
-                                    <div class="text-right">
-                                        <h5 class="text-xs font-bold text-white">تسجيل الخروج التلقائي (Auto Logout)</h5>
-                                        <p class="text-[10px] text-gray-400">يسجل خروج الإداري تلقائياً عند الخمول (AFK) أو عدم التفاعل أو انتهاء المدة</p>
-                                    </div>
                                 </div>
                             </div>
 
@@ -7167,7 +7174,7 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                             </div>
                             <div class="bg-[#12141f] border border-emerald-500/20 p-5 rounded-2xl text-right">
                                 <div class="text-2xl font-black text-emerald-400">${totalShiftHours} ساعة</div>
-                                <div class="text-xs text-gray-400 font-bold mt-1">إجمالي ساعات الدوام</div>
+                                <div class="text-xs text-gray-400 font-bold mt-1">إجمالي ساعات تواجد الإداري</div>
                             </div>
                             <div class="bg-[#12141f] border border-amber-500/20 p-5 rounded-2xl text-right">
                                 <div class="text-2xl font-black text-amber-400">${totalStaffActions}</div>
@@ -7203,7 +7210,7 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                                             <tr class="text-gray-500 border-b border-white/5">
                                                 <th class="pb-3 pr-3 font-bold">#</th>
                                                 <th class="pb-3 font-bold">المشرف</th>
-                                                <th class="pb-3 text-center font-bold text-emerald-400">⏱️ ساعات الدوام</th>
+                                                <th class="pb-3 text-center font-bold text-emerald-400">⏱️ ساعات التواجد</th>
                                                 <th class="pb-3 text-center font-bold">🔄 الجلسات</th>
                                                 <th class="pb-3 text-center font-bold">🎫 تذاكر</th>
                                                 <th class="pb-3 text-center font-bold">🔨 إجراءات</th>
@@ -8838,8 +8845,8 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                 .setTitle('📋 لوحة تسجيل حضور وانصراف الإدارة | Staff Shift')
                 .setDescription(
                     'مرحباً بكم يا أعضاء طاقم الإدارة 🫡\n\n' +
-                    '• لبدء فترة عملك واستقبال تذاكر ورومات الدعم، اضغط على زر **تسجيل الدخول (Login)** 🟢\n' +
-                    '• عند انتهاء فترة دوامك، اضغط على زر **تسجيل الخروج (Logout)** 🔴 لحفظ ساعاتك ونقاطك بدقة.\n\n' +
+                    '• لبدء تسجيل تواجدك في السيرفر واستقبال تذاكر ورومات الدعم، اضغط على زر **تسجيل الدخول (Login)** 🟢\n' +
+                    '• عند انتهاء فترة تواجدك، اضغط على زر **تسجيل الخروج (Logout)** 🔴 لحفظ ساعاتك ونقاطك بدقة.\n\n' +
                     '⚠️ **ملاحظة:** يتم تسجيل خروجك تلقائياً إذا خرجت من الديسكورد لمنع الساعات الوهمية.'
                 )
                 .setFooter({ text: guildObj?.name || 'ZENO Bot', iconURL: guildObj?.iconURL({ dynamic: true }) || undefined })
