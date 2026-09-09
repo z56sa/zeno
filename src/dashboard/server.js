@@ -35,6 +35,18 @@ module.exports = function (app, client) {
         }
     }));
 
+    // Auto-initialize session user for direct access mode (no OAuth required)
+    app.use((req, res, next) => {
+        if (!req.session.user) {
+            req.session.user = {
+                id: client?.user?.id || '1506005273893146775',
+                username: 'المسؤول',
+                avatar: client?.user?.avatar || null
+            };
+        }
+        next();
+    });
+
     // 1. الصفحة الرئيسية وشاشة البداية (ProBot Black & Purple Landing Page)
     app.get(['/', '/dashboard'], (req, res) => {
         return res.sendFile(require('path').join(__dirname, 'public', 'index.html'));
