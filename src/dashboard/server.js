@@ -688,13 +688,19 @@ module.exports = function (app, client) {
     };
     </script>
 
+    <script src="/i18n.js"></script>
 </head>
             <body class="min-h-screen flex flex-col bg-[#0b0d14] text-gray-200">
                 <header class="h-16 bg-[#10121b]/95 backdrop-blur-md border-b border-white/5 px-6 flex items-center justify-between sticky top-0 z-40">
-                    <div class="flex items-center gap-4">
-                        <a href="/logout" class="text-xs text-rose-400 hover:text-rose-300 font-bold transition">تسجيل الخروج</a>
+                    <div class="flex items-center gap-3">
+                        <button type="button" onclick="window.zenoI18n.toggleLang()" class="zeno-lang-toggle-btn px-2.5 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 text-gray-200 rounded-xl transition flex items-center gap-1.5 cursor-pointer text-xs">
+                            <span class="text-sm">🌐</span>
+                            <span class="font-bold text-xs">English</span>
+                        </button>
                         <span class="text-gray-700">|</span>
-                        <a href="https://discord.gg/zduGPYv7pE" target="_blank" class="text-xs text-gray-400 hover:text-gray-200 transition">الدعم الفني</a>
+                        <a href="/logout" data-i18n="logout" class="text-xs text-rose-400 hover:text-rose-300 font-bold transition">تسجيل الخروج</a>
+                        <span class="text-gray-700">|</span>
+                        <a href="https://discord.gg/zduGPYv7pE" target="_blank" data-i18n="support_server" class="text-xs text-gray-400 hover:text-gray-200 transition">الدعم الفني</a>
                     </div>
                     <div class="flex items-center gap-3">
                         <img src="${botAvatarUrl}" class="w-8 h-8 rounded-xl object-cover ring-2 ring-purple-500/40 shadow-md shadow-purple-900/30">
@@ -8352,13 +8358,19 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                     input:checked + .slider { background: #9333ea; }
                     input:checked + .slider:before { transform: translateX(20px); }
                 </style>
+                <script src="/i18n.js"></script>
             </head>
             <body class="min-h-screen flex flex-col bg-[#0b0d14] text-gray-200">
                 <header class="h-16 bg-[#10121b]/95 backdrop-blur-md border-b border-white/5 px-6 flex items-center justify-between sticky top-0 z-40">
-                    <div class="flex items-center gap-4">
-                        <a href="/dashboard" class="text-xs text-purple-400 font-bold hover:text-purple-300 transition">الرجوع للوحة التحكم</a>
+                    <div class="flex items-center gap-3">
+                        <button type="button" onclick="window.zenoI18n.toggleLang()" class="zeno-lang-toggle-btn px-2.5 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 text-gray-200 rounded-xl transition flex items-center gap-1.5 cursor-pointer text-xs">
+                            <span class="text-sm">🌐</span>
+                            <span class="font-bold text-xs">English</span>
+                        </button>
                         <span class="text-gray-700">|</span>
-                        <a href="https://discord.gg/zduGPYv7pE" target="_blank" class="text-xs text-gray-400 hover:text-gray-200 transition">الدعم الفني</a>
+                        <a href="/dashboard/manage" data-i18n="back_to_dashboard" class="text-xs text-purple-400 font-bold hover:text-purple-300 transition">الرجوع للوحة التحكم</a>
+                        <span class="text-gray-700">|</span>
+                        <a href="https://discord.gg/zduGPYv7pE" target="_blank" data-i18n="support_server" class="text-xs text-gray-400 hover:text-gray-200 transition">الدعم الفني</a>
                     </div>
                     <div class="flex items-center gap-2">
                         <span class="font-black text-sm text-white tracking-wide">ZENO</span>
