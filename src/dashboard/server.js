@@ -278,27 +278,18 @@ module.exports = function (app, client) {
                 };
             }
 
-            // جلب سيرفر ZENO فقط لتمكين إدارته حصرياً
-            let guilds = req.session?.guilds || [];
-            if (!guilds || guilds.length === 0) {
-                if (client?.guilds?.cache) {
-                    let filtered = client.guilds.cache.filter(g => g.name.toLowerCase().includes('zeno'));
-                    if (filtered.size === 0) {
-                        filtered = client.guilds.cache.first(1);
-                    }
-                    guilds = filtered.map(g => ({
-                        id: g.id,
-                        name: g.name,
-                        icon: g.icon,
-                        permissions: 8
-                    }));
-                }
-            } else {
-                guilds = guilds.filter(g => g.name.toLowerCase().includes('zeno'));
-                if (guilds.length === 0 && client?.guilds?.cache?.size > 0) {
-                    const first = client.guilds.cache.first();
-                    guilds = [{ id: first.id, name: first.name, icon: first.icon, permissions: 8 }];
-                }
+            // عرض جميع السيرفرات المتواجد فيها البوت للإدارة
+            let guilds = [];
+            if (client?.guilds?.cache && client.guilds.cache.size > 0) {
+                guilds = client.guilds.cache.map(g => ({
+                    id: g.id,
+                    name: g.name,
+                    icon: g.icon,
+                    memberCount: g.memberCount,
+                    permissions: 8
+                }));
+            } else if (req.session?.guilds && req.session.guilds.length > 0) {
+                guilds = req.session.guilds;
             }
 
             const userAvatar = user.avatar ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png` : 'https://cdn.discordapp.com/embed/avatars/0.png';
