@@ -66,36 +66,35 @@ module.exports = function (app, client) {
             ? `https://cdn.discordapp.com/avatars/${client.user.id}/${client.user.avatar}.png` 
             : 'https://cdn.discordapp.com/embed/avatars/0.png';
 
-        // تصفية السيرفرات بحيث تقتصر على سيرفر ZENO فقط
-        let zenoGuilds = [];
+        // إحصائيات السيرفرات الحقيقية المتواجد بها البوت
+        const realGuildsCount = client?.guilds?.cache ? client.guilds.cache.size : 1;
+
+        // إجمالي الأعضاء الحقيقيين من كافة السيرفرات
+        let totalMembersCount = 0;
         if (client?.guilds?.cache) {
-            zenoGuilds = client.guilds.cache.filter(g => g.name.toLowerCase().includes('zeno'));
-            if (zenoGuilds.size === 0 && client.guilds.cache.size > 0) {
-                // إذا لم يكن هناك كلمة zeno في الاسم نأخذ السيرفر الأول
-                zenoGuilds = client.guilds.cache.first(1);
+            client.guilds.cache.forEach(g => {
+                totalMembersCount += (g.memberCount || 0);
+            });
+        }
+        if (totalMembersCount === 0) {
+            try {
+                const countRow = rawDb.prepare('SELECT COUNT(DISTINCT user_id) as total FROM users').get();
+                totalMembersCount = countRow?.total || 1;
+            } catch (e) {
+                totalMembersCount = 1;
             }
         }
 
-        const guildsCount = zenoGuilds.size !== undefined ? zenoGuilds.size : (Array.isArray(zenoGuilds) ? zenoGuilds.length : 1);
-
-        // إجمالي الأعضاء والمستخدمين
-        let dashboardUsersCount = 1;
-        try {
-            const countRow = rawDb.prepare('SELECT COUNT(DISTINCT user_id) as total FROM users').get();
-            const totalMembers = client?.guilds?.cache?.reduce((acc, g) => acc + (g.memberCount || 0), 0) || 0;
-            dashboardUsersCount = Math.max(totalMembers, countRow?.total || 0, 1);
-        } catch (e) {
-            dashboardUsersCount = client?.guilds?.cache?.reduce((acc, g) => acc + (g.memberCount || 0), 0) || 1;
-        }
+        const realPing = (client?.ws?.ping !== undefined && client.ws.ping >= 0) ? Math.round(client.ws.ping) : 21;
 
         res.json({
             id: client?.user?.id || '1506005273893146775',
             username: client?.user?.username || 'ZENO',
             avatar: avatarUrl,
-            guildsCount: guildsCount || 1,
-            dashboardUsersCount: dashboardUsersCount,
-            usersCount: dashboardUsersCount,
-            ping: client?.ws?.ping >= 0 ? client.ws.ping : 21
+            guildsCount: realGuildsCount,
+            dashboardUsersCount: totalMembersCount,
+            usersCount: totalMembersCount,
+            ping: realPing
         });
     });
 
