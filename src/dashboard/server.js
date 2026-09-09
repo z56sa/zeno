@@ -37,7 +37,7 @@ module.exports = function (app, client) {
 
     // Helper: Discord OAuth2 config
     const getOAuthConfig = (req) => {
-        const clientId = process.env.CLIENT_ID || '1506005273893146775';
+        const clientId = process.env.CLIENT_ID || client?.user?.id || '1506005273893146775';
         const clientSecret = process.env.CLIENT_SECRET || '';
         let redirectUri = process.env.REDIRECT_URI;
         if (!redirectUri) {
