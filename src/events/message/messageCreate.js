@@ -30,6 +30,7 @@ module.exports = {
 
     if (isStaff && db.addStaffMessages) {
       db.addStaffMessages(guildId, userId, 1);
+      if (db.touchStaffShiftAction) db.touchStaffShiftAction(guildId, userId);
     }
 
     // ==========================================

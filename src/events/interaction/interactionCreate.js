@@ -701,6 +701,7 @@ module.exports = {
         }
 
         db.claimTicket(interaction.channel.id, interaction.user.id);
+        if (db.touchStaffShiftAction) db.touchStaffShiftAction(interaction.guild.id, interaction.user.id);
 
         // تعديل الصلاحيات
         await interaction.channel.permissionOverwrites.edit(interaction.user.id, {

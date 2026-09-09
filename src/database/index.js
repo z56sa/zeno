@@ -591,6 +591,11 @@ try {
   db.exec(`ALTER TABLE applications ADD COLUMN reviewer_role TEXT;`);
 } catch(e) {}
 
+// تحديث جدول الشفتات لإضافة آخر تفاعل (شات أو استلام تكت)
+try {
+  db.exec(`ALTER TABLE staff_shifts ADD COLUMN last_action_time INTEGER;`);
+} catch(e) {}
+
 console.log('[DB] ✅ SQLite database initialized successfully');
 tursoSync.initAndRestore(db).catch(e => console.error('[TURSO] Init error:', e.message));
 
@@ -1536,6 +1541,14 @@ function getAllActiveShifts(guildId = null) {
   }
 }
 
+function touchStaffShiftAction(guildId, userId) {
+  try {
+    const now = Math.floor(Date.now() / 1000);
+    db.prepare("UPDATE staff_shifts SET last_action_time = ? WHERE guild_id = ? AND user_id = ? AND status = 'active'")
+      .run(now, guildId, userId);
+  } catch (e) {}
+}
+
 function getStaffHoursLeaderboard(guildId, limit = 25) {
   try {
     return db.prepare(`
@@ -1779,6 +1792,7 @@ module.exports = {
   endStaffShift,
   getActiveStaffShift,
   getAllActiveShifts,
+  touchStaffShiftAction,
   getStaffHoursLeaderboard,
   getStaffPointsLeaderboard,
   setStaffPoints,

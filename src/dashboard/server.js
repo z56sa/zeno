@@ -7094,7 +7094,7 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                                 </div>
                             </div>
 
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+                            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 pt-2">
                                 <div>
                                     <label class="block text-xs font-bold text-gray-300 mb-1">رابط بانر لوحة الحضور (اختياري)</label>
                                     <input type="text" name="staff_banner_url" id="staff_banner_url" value="${settings.staff_banner_url || ''}" placeholder="https://..." class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-left font-mono">
@@ -7110,6 +7110,16 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                                         <option value="12" ${Number(settings.staff_max_shift_hours) === 12 ? 'selected' : ''}>12 ساعة</option>
                                     </select>
                                 </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-300 mb-1">مهلة عدم التفاعل (شات/تذاكر)</label>
+                                    <select name="staff_inactivity_minutes" id="staff_inactivity_minutes" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right cursor-pointer">
+                                        <option value="15" ${Number(settings.staff_inactivity_minutes) === 15 ? 'selected' : ''}>15 دقيقة</option>
+                                        <option value="30" ${!settings.staff_inactivity_minutes || Number(settings.staff_inactivity_minutes) === 30 ? 'selected' : ''}>30 دقيقة (مستحسن)</option>
+                                        <option value="45" ${Number(settings.staff_inactivity_minutes) === 45 ? 'selected' : ''}>45 دقيقة</option>
+                                        <option value="60" ${Number(settings.staff_inactivity_minutes) === 60 ? 'selected' : ''}>60 دقيقة (ساعة)</option>
+                                        <option value="0" ${Number(settings.staff_inactivity_minutes) === 0 ? 'selected' : ''}>معطل (حسب الحد الأقصى فقط)</option>
+                                    </select>
+                                </div>
                                 <div class="flex items-center justify-between bg-[#0b0d14] border border-white/5 p-3.5 rounded-2xl">
                                     <label class="toggle">
                                         <input type="checkbox" name="staff_auto_logout" value="1" ${settings.staff_auto_logout !== 0 ? 'checked' : ''} onchange="saveProtectionSetting('staff_auto_logout', this.checked)">
@@ -7117,7 +7127,7 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                                     </label>
                                     <div class="text-right">
                                         <h5 class="text-xs font-bold text-white">تسجيل الخروج التلقائي (Auto Logout)</h5>
-                                        <p class="text-[10px] text-gray-400">يسجل خروج الإداري تلقائياً عند الخمول (AFK) أو انتهاء المدة المحددة دون إزعاج بالخاص</p>
+                                        <p class="text-[10px] text-gray-400">يسجل خروج الإداري تلقائياً عند الخمول (AFK) أو عدم التفاعل أو انتهاء المدة</p>
                                     </div>
                                 </div>
                             </div>
@@ -7255,6 +7265,7 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                         const bannerUrl = document.querySelector('input[name="staff_banner_url"]')?.value;
 
                         const maxHours = document.getElementById('staff_max_shift_hours')?.value;
+                        const inactMins = document.getElementById('staff_inactivity_minutes')?.value;
 
                         try {
                             const r = await fetch('/api/guild/${guildId}/settings', {
@@ -7265,7 +7276,8 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                                     staff_login_channel: loginCh,
                                     staff_log_channel: logCh,
                                     staff_banner_url: bannerUrl,
-                                    staff_max_shift_hours: parseInt(maxHours, 10) || 8
+                                    staff_max_shift_hours: parseInt(maxHours, 10) || 8,
+                                    staff_inactivity_minutes: parseInt(inactMins, 10) ?? 30
                                 })
                             });
                             const d = await r.json();
