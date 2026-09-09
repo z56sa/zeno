@@ -49,16 +49,6 @@ module.exports = {
 
             await logChannel.send({ embeds: [autoLogoutEmbed] }).catch(() => {});
           }
-
-          // محاولة إرسال تنبيه للعضو في الخاص
-          try {
-            const memberUser = await client.users.fetch(userId).catch(() => null);
-            if (memberUser) {
-              await memberUser.send({
-                content: `🔔 **تنبيه نظام الإدارة:** لقد تحولت إلى وضع **${isAfk ? 'الخمول (AFK / Idle)' : 'غير متصل'}** أثناء تواجدك في الخدمة بسيرفر **${guild.name}**، وتم تسجيل خروجك تلقائياً واحتساب ساعاتك: **${durationStr}**.`
-              }).catch(() => {});
-            }
-          } catch (e) {}
         }
       }
     } catch (err) {

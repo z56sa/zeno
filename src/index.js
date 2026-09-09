@@ -161,9 +161,14 @@ const autoBroadcaster = new AutoBroadcaster(client);
 const StatChannelsService = require('./services/statChannels');
 const statChannelsService = new StatChannelsService(client);
 
+// Staff Shift Service - مراقبة ساعات الإدارة وتسجيل الخروج التلقائي
+const StaffShiftService = require('./services/staffShiftService');
+const staffShiftService = new StaffShiftService(client);
+
 client.once('clientReady', () => {
     autoBroadcaster.start();
     statChannelsService.start();
+    staffShiftService.start();
 });
 
 // Export for dashboard API use
