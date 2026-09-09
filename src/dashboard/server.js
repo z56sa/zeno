@@ -35,29 +35,130 @@ module.exports = function (app, client) {
         }
     }));
 
-    // Auto-initialize session user for direct access mode (no OAuth required)
-    app.use((req, res, next) => {
-        if (!req.session.user) {
-            req.session.user = {
-                id: client?.user?.id || '1506005273893146775',
-                username: 'المسؤول',
-                avatar: client?.user?.avatar || null
-            };
+    // Helper: Discord OAuth2 config
+    const getOAuthConfig = (req) => {
+        const clientId = process.env.CLIENT_ID || '1506005273893146775';
+        const clientSecret = process.env.CLIENT_SECRET || '';
+        let redirectUri = process.env.REDIRECT_URI;
+        if (!redirectUri) {
+            const host = req.get('host') || 'zeno-0gme.onrender.com';
+            const protocol = req.protocol === 'https' || req.get('x-forwarded-proto') === 'https' ? 'https' : 'http';
+            redirectUri = `${protocol}://${host}/auth/discord/callback`;
         }
-        next();
-    });
+        return { clientId, clientSecret, redirectUri };
+    };
 
     // 1. الصفحة الرئيسية وشاشة البداية (ProBot Black & Purple Landing Page)
     app.get(['/', '/dashboard'], (req, res) => {
         return res.sendFile(require('path').join(__dirname, 'public', 'index.html'));
     });
 
-    // 2. Direct Auth Redirections (توجيه مباشر دون الحاجة لـ OAuth2)
-    app.get('/auth/discord', (req, res) => res.redirect('/dashboard/manage'));
-    app.get('/auth/discord/callback', (req, res) => res.redirect('/dashboard/manage'));
+    // 2. Real Discord OAuth2 Authentication Routes
+    app.get('/auth/discord', (req, res) => {
+        const { clientId, redirectUri } = getOAuthConfig(req);
+        const discordAuthUrl = `https://discord.com/api/oauth2/authorize?client_id=${encodeURIComponent(clientId)}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=identify%20guilds`;
+        res.redirect(discordAuthUrl);
+    });
+
+    app.get('/auth/discord/callback', async (req, res) => {
+        const code = req.query.code;
+        if (!code) {
+            return res.redirect('/auth/discord');
+        }
+
+        const { clientId, clientSecret, redirectUri } = getOAuthConfig(req);
+        if (!clientSecret) {
+            console.error('[OAUTH ERROR] CLIENT_SECRET is missing from environment variables!');
+            return res.status(500).send('خطأ في إعدادات البوت: CLIENT_SECRET غير مضاف في لوحة Render.');
+        }
+
+        try {
+            // Exchange code for Access Token
+            const tokenParams = new URLSearchParams({
+                client_id: clientId,
+                client_secret: clientSecret,
+                grant_type: 'authorization_code',
+                code: code,
+                redirect_uri: redirectUri
+            });
+
+            const tokenRes = await fetch('https://discord.com/api/v10/oauth2/token', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: tokenParams.toString()
+            });
+
+            if (!tokenRes.ok) {
+                const errText = await tokenRes.text();
+                console.error('[OAUTH ERROR] Token exchange failed:', errText);
+                return res.redirect('/auth/discord');
+            }
+
+            const tokenData = await tokenRes.json();
+            const accessToken = tokenData.access_token;
+
+            // Fetch user profile from Discord
+            const userRes = await fetch('https://discord.com/api/v10/users/@me', {
+                headers: { Authorization: `Bearer ${accessToken}` }
+            });
+            if (!userRes.ok) throw new Error('فشل جلب بيانات المستخدم من Discord');
+            const userData = await userRes.json();
+
+            // Fetch user guilds from Discord
+            const guildsRes = await fetch('https://discord.com/api/v10/users/@me/guilds', {
+                headers: { Authorization: `Bearer ${accessToken}` }
+            });
+            if (!guildsRes.ok) throw new Error('فشل جلب سيرفرات المستخدم من Discord');
+            const rawGuilds = await guildsRes.json();
+
+            // Filter guilds: User must be Owner OR have MANAGE_GUILD (0x20) or ADMINISTRATOR (0x8)
+            // AND Bot must be currently present in this guild
+            const ADMIN_OR_MANAGE = 0x8 | 0x20;
+            const manageableGuilds = [];
+
+            if (Array.isArray(rawGuilds)) {
+                for (const g of rawGuilds) {
+                    const isOwner = !!g.owner;
+                    const perms = BigInt(g.permissions || '0');
+                    const hasPerm = (perms & BigInt(0x8)) !== 0n || (perms & BigInt(0x20)) !== 0n;
+
+                    if (isOwner || hasPerm) {
+                        // Check if bot is present in this guild
+                        const botGuild = client?.guilds?.cache?.get(g.id);
+                        if (botGuild) {
+                            manageableGuilds.push({
+                                id: g.id,
+                                name: g.name,
+                                icon: g.icon,
+                                memberCount: botGuild.memberCount || 0,
+                                permissions: Number(perms & 0xffn) || 8,
+                                isOwner: isOwner
+                            });
+                        }
+                    }
+                }
+            }
+
+            // Save to user session
+            req.session.user = {
+                id: userData.id,
+                username: userData.global_name || userData.username,
+                discriminator: userData.discriminator,
+                avatar: userData.avatar
+            };
+            req.session.guilds = manageableGuilds;
+
+            // Redirect directly to dashboard
+            res.redirect('/dashboard/manage');
+        } catch (err) {
+            console.error('[OAUTH ERROR] OAuth callback error:', err);
+            res.status(500).send('حدث خطأ أثناء تسجيل الدخول: ' + err.message);
+        }
+    });
+
     app.get('/logout', (req, res) => {
         req.session?.destroy?.(() => {});
-        return res.sendFile(require('path').join(__dirname, 'public', 'index.html'));
+        return res.redirect('/');
     });
 
     // Bot Info API for public landing pages
@@ -267,29 +368,18 @@ module.exports = function (app, client) {
     // 3. User Dashboard & Main Routes (لوحة التحكم الداخلية للسيرفرات)
     app.get('/dashboard/manage', (req, res) => {
         try {
-            // استخدام بيانات المستخدم الحالية أو هوية مستقرة مبنية على الجلسة
+            // التحقق من تسجيل دخول المستخدم عبر Discord OAuth2
             let user = req.session?.user || null;
             if (!user) {
-                // Use stable session ID as anonymous identity (never use bot's own ID)
-                user = {
-                    id: req.session?.id || 'anonymous',
-                    username: 'زائر',
-                    avatar: null
-                };
+                return res.redirect('/auth/discord');
             }
 
-            // عرض جميع السيرفرات المتواجد فيها البوت للإدارة
-            let guilds = [];
-            if (client?.guilds?.cache && client.guilds.cache.size > 0) {
-                guilds = client.guilds.cache.map(g => ({
-                    id: g.id,
-                    name: g.name,
-                    icon: g.icon,
-                    memberCount: g.memberCount,
-                    permissions: 8
-                }));
-            } else if (req.session?.guilds && req.session.guilds.length > 0) {
-                guilds = req.session.guilds;
+            // عرض فقط السيرفرات التي يمتلك فيها المستخدم صلاحية إدارة والموجود فيها البوت
+            let guilds = req.session?.guilds || [];
+
+            // في حال تم إضافة سيرفر جديد للبوت أثناء جلسته، نتحقق من سيرفراته المدارة
+            if (client?.guilds?.cache) {
+                guilds = guilds.filter(g => client.guilds.cache.has(g.id));
             }
 
             const userAvatar = user.avatar ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png` : 'https://cdn.discordapp.com/embed/avatars/0.png';
@@ -349,7 +439,7 @@ module.exports = function (app, client) {
                 </a>
             `).join('');
 
-            const userDashboardGuildsHtml = guilds.map(g => `
+            const userDashboardGuildsHtml = guilds.length > 0 ? guilds.map(g => `
                 <div class="bg-[#1c1f2e] border border-white/5 p-4 rounded-2xl flex items-center justify-between hover:border-purple-500/40 transition group">
                     <a href="/dashboard/${g.id}" class="px-5 py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs rounded-xl transition shadow-lg shadow-purple-950/40 flex items-center gap-2">
                         <span>⚙️ إدارة السيرفر</span>
@@ -362,7 +452,16 @@ module.exports = function (app, client) {
                         <img src="${g.icon ? `https://cdn.discordapp.com/icons/${g.id}/${g.icon}.png` : 'https://cdn.discordapp.com/embed/avatars/0.png'}" class="w-12 h-12 rounded-2xl bg-[#0b0d14] object-cover ring-2 ring-white/5">
                     </div>
                 </div>
-            `).join('');
+            `).join('') : `
+                <div class="col-span-full py-12 text-center space-y-3 bg-[#131520] rounded-2xl border border-dashed border-white/10 p-6">
+                    <div class="text-4xl">🛡️</div>
+                    <h4 class="text-white font-bold text-sm">لا توجد سيرفرات مشتركة لديك صلاحيات إدارتها</h4>
+                    <p class="text-gray-400 text-xs max-w-md mx-auto">لإدارة سيرفر، يجب أن تكون مالك السيرفر أو تملك رتبة إدارية (Manage Server أو Administrator) ويكون البوت مضافاً في السيرفر.</p>
+                    <a href="https://discord.com/api/oauth2/authorize?client_id=1506005273893146775&permissions=8&scope=bot%20applications.commands" target="_blank" class="inline-flex items-center gap-2 px-5 py-2.5 bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold rounded-xl transition shadow-lg mt-2">
+                        <span>➕ إضافة البوت لسيرفرك</span>
+                    </a>
+                </div>
+            `;
 
             const xpLeaderboardHtml = xpLeaderboard.slice(0, 100).map((r, i) => `
                 <div class="bg-[#1c1f2e] border border-white/5 p-3 rounded-2xl flex items-center justify-between">
@@ -1011,26 +1110,44 @@ module.exports = function (app, client) {
         }
     });
 
-    // 4. Guild Dashboard & Sub-pages (وصول مباشر لكافة إعدادات السيرفر)
+    // 4. Guild Dashboard & Sub-pages (وصول محمي بصلاحيات ديسكورد)
     app.get('/dashboard/:guildId/:section?', (req, res) => {
         try {
             const guildId = req.params.guildId;
             const section = req.params.section || 'overview';
-            const user = req.session?.user || {
-                id: client?.user?.id || '1506005273893146775',
-                username: 'المسؤول',
-                avatar: client?.user?.avatar || null
-            };
-            const guilds = req.session?.guilds || [];
-
-            let guild = guilds.find(g => g.id === guildId);
-            if (!guild && client?.guilds?.cache) {
-                const botGuild = client.guilds.cache.get(guildId);
-                if (botGuild) {
-                    guild = { id: botGuild.id, name: botGuild.name, icon: botGuild.icon };
-                }
+            
+            // التحقق من تسجيل الدخول
+            const user = req.session?.user;
+            if (!user) {
+                return res.redirect('/auth/discord');
             }
-            if (!guild) guild = { id: guildId, name: 'Discord Server', icon: null };
+
+            // التحقق من وجود البوت في هذا السيرفر
+            const botGuild = client?.guilds?.cache?.get(guildId);
+            if (!botGuild) {
+                return res.status(404).send(`
+                    <div style="background:#0b0d14;color:#fff;font-family:sans-serif;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;">
+                        <h2>البوت غير موجود في هذا السيرفر</h2>
+                        <a href="/dashboard/manage" style="color:#a855f7;margin-top:10px;">العودة للوحة التحكم</a>
+                    </div>
+                `);
+            }
+
+            // التحقق من امتلاك المستخدم لصلاحية إدارة في هذا السيرفر
+            const sessionGuilds = req.session?.guilds || [];
+            const userCanManage = sessionGuilds.some(g => g.id === guildId);
+            if (!userCanManage) {
+                return res.status(403).send(`
+                    <div style="background:#0b0d14;color:#fff;font-family:sans-serif;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;">
+                        <h2>ليس لديك صلاحيات إدارة في هذا السيرفر</h2>
+                        <p style="color:#888;">يجب أن تكون مالك السيرفر أو تمتلك صلاحية Manage Server / Administrator</p>
+                        <a href="/dashboard/manage" style="color:#a855f7;margin-top:10px;">العودة لخوادمك المتاحة</a>
+                    </div>
+                `);
+            }
+
+            const guilds = sessionGuilds;
+            let guild = { id: botGuild.id, name: botGuild.name, icon: botGuild.icon };
 
             let settings = {};
             try {
@@ -1089,7 +1206,6 @@ module.exports = function (app, client) {
                 }
             } catch (err) {}
 
-            const botGuild = client?.guilds?.cache?.get(guildId);
             const userAvatar = user.avatar ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png` : 'https://cdn.discordapp.com/embed/avatars/0.png';
             const botAvatarUrl = client?.user?.avatar ? `https://cdn.discordapp.com/avatars/${client.user.id}/${client.user.avatar}.png` : 'https://cdn.discordapp.com/embed/avatars/0.png';
             const guildIcon = guild.icon ? `https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.png` : 'https://cdn.discordapp.com/embed/avatars/0.png';
