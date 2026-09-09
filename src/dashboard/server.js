@@ -66,32 +66,24 @@ module.exports = function (app, client) {
             ? `https://cdn.discordapp.com/avatars/${client.user.id}/${client.user.avatar}.png` 
             : 'https://cdn.discordapp.com/embed/avatars/0.png';
 
-        // إحصائيات السيرفرات الحقيقية المتواجد بها البوت (سيرفرين فقط)
-        const realGuildsCount = 2;
+        // إحصائيات حقيقية وديناميكية 100% بناءً على السيرفرات المتواجد فيها البوت فعلياً
+        const realGuildsCount = client?.guilds?.cache ? client.guilds.cache.size : 0;
 
-        // إجمالي الأعضاء الحقيقيين
+        // حساب إجمالي الأعضاء الفعليين ديناميكياً من كل سيرفر يدخله البوت
         let totalMembersCount = 0;
-        if (client?.guilds?.cache) {
+        if (client?.guilds?.cache && client.guilds.cache.size > 0) {
             client.guilds.cache.forEach(g => {
                 totalMembersCount += (g.memberCount || 0);
             });
         }
-        if (totalMembersCount === 0) {
-            try {
-                const countRow = rawDb.prepare('SELECT COUNT(DISTINCT user_id) as total FROM users').get();
-                totalMembersCount = countRow?.total || 515;
-            } catch (e) {
-                totalMembersCount = 515;
-            }
-        }
 
-        const realPing = (client?.ws?.ping !== undefined && client.ws.ping >= 0) ? Math.round(client.ws.ping) : 21;
+        const realPing = (client?.ws?.ping !== undefined && client.ws.ping >= 0) ? Math.round(client.ws.ping) : 0;
 
         res.json({
             id: client?.user?.id || '1506005273893146775',
             username: client?.user?.username || 'ZENO',
             avatar: avatarUrl,
-            guildsCount: 2,
+            guildsCount: realGuildsCount,
             dashboardUsersCount: totalMembersCount,
             usersCount: totalMembersCount,
             ping: realPing
