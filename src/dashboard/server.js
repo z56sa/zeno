@@ -38,13 +38,8 @@ module.exports = function (app, client) {
     // Helper: Discord OAuth2 config
     const getOAuthConfig = (req) => {
         const clientId = process.env.CLIENT_ID || client?.user?.id || '1506005273893146775';
-        const clientSecret = process.env.CLIENT_SECRET || '';
-        let redirectUri = process.env.REDIRECT_URI;
-        if (!redirectUri) {
-            const host = req.get('host') || 'zeno-0gme.onrender.com';
-            const protocol = req.protocol === 'https' || req.get('x-forwarded-proto') === 'https' ? 'https' : 'http';
-            redirectUri = `${protocol}://${host}/auth/discord/callback`;
-        }
+        const clientSecret = process.env.CLIENT_SECRET || 'Yf8Y8U4ohYXZ6FqD_goz2zY82pNcPlO5';
+        const redirectUri = process.env.REDIRECT_URI || 'https://zeno-0gme.onrender.com/auth/discord/callback';
         return { clientId, clientSecret, redirectUri };
     };
 
@@ -56,7 +51,7 @@ module.exports = function (app, client) {
     // 2. Real Discord OAuth2 Authentication Routes
     app.get('/auth/discord', (req, res) => {
         const { clientId, redirectUri } = getOAuthConfig(req);
-        const discordAuthUrl = `https://discord.com/api/oauth2/authorize?client_id=${encodeURIComponent(clientId)}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=identify%20guilds`;
+        const discordAuthUrl = `https://discord.com/oauth2/authorize?client_id=${clientId}&response_type=code&redirect_uri=${encodeURIComponent(redirectUri)}&scope=identify+guilds`;
         res.redirect(discordAuthUrl);
     });
 
