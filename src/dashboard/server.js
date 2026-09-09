@@ -72,10 +72,9 @@ module.exports = function (app, client) {
         }
 
         try {
-            // Exchange code for Access Token
+            // Exchange code for Access Token (Using Standard Basic Auth Header + Body for maximum Discord API compatibility)
+            const basicAuth = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
             const tokenParams = new URLSearchParams({
-                client_id: clientId,
-                client_secret: clientSecret,
                 grant_type: 'authorization_code',
                 code: code,
                 redirect_uri: redirectUri
@@ -83,14 +82,24 @@ module.exports = function (app, client) {
 
             const tokenRes = await fetch('https://discord.com/api/v10/oauth2/token', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'Authorization': `Basic ${basicAuth}`
+                },
                 body: tokenParams.toString()
             });
 
             if (!tokenRes.ok) {
                 const errText = await tokenRes.text();
                 console.error('[OAUTH ERROR] Token exchange failed:', errText);
-                return res.redirect('/auth/discord');
+                return res.status(400).send(`
+                    <div style="background:#0b0d14;color:#fff;font-family:sans-serif;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px;">
+                        <h2 style="color:#ef4444;">تعذر إكمال تسجيل الدخول عبر Discord</h2>
+                        <p style="color:#aaa;max-width:500px;margin-top:10px;">رسالة الخطأ من Discord: <code>${errText}</code></p>
+                        <p style="color:#888;font-size:13px;margin-top:5px;">تأكد من صحة Client Secret في إعدادات البوت.</p>
+                        <a href="/" style="color:#a855f7;margin-top:20px;text-decoration:none;font-weight:bold;">العودة للصفحة الرئيسية</a>
+                    </div>
+                `);
             }
 
             const tokenData = await tokenRes.json();
