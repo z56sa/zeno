@@ -7192,12 +7192,15 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                                         </thead>
                                         <tbody class="divide-y divide-white/5">
                                             ${staffList.map((st, i) => {
-                                                const sHours = Math.floor((st.shift_seconds || 0) / 3600);
-                                                const sMins = Math.floor(((st.shift_seconds || 0) % 3600) / 60);
+                                                const activeObj = activeShifts.find(as => as.user_id === st.user_id);
+                                                const currentLiveSeconds = activeObj ? Math.max(0, Math.floor(Date.now() / 1000) - activeObj.start_time) : 0;
+                                                const effectiveSeconds = (st.shift_seconds || 0) + currentLiveSeconds;
+                                                const sHours = Math.floor(effectiveSeconds / 3600);
+                                                const sMins = Math.floor((effectiveSeconds % 3600) / 60);
                                                 const memberObj = botGuild?.members?.cache?.get(st.user_id);
                                                 const displayName = memberObj ? memberObj.user.tag : st.user_id;
                                                 const badge = i === 0 ? 'bg-amber-500/20 text-amber-300 border-amber-500/40' : i === 1 ? 'bg-gray-300/20 text-gray-300 border-gray-400/30' : i === 2 ? 'bg-orange-700/20 text-orange-400 border-orange-600/30' : 'bg-purple-600/20 text-purple-300 border-purple-500/30';
-                                                const isOnline = activeShifts.some(as => as.user_id === st.user_id);
+                                                const isOnline = !!activeObj;
                                                 return `
                                                 <tr class="hover:bg-white/5 transition">
                                                     <td class="py-3.5 pr-3"><span class="w-7 h-7 rounded-lg border ${badge} flex items-center justify-center font-mono text-[11px] font-black">${i + 1}</span></td>
@@ -7209,7 +7212,7 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                                                             </div>
                                                             <div>
                                                                 <span>${displayName}</span>
-                                                                ${isOnline ? '<span class="text-[9px] text-emerald-400 block">🟢 في الخدمة</span>' : ''}
+                                                                ${isOnline ? '<span class="text-[9px] text-emerald-400 block">🟢 في الخدمة الآن</span>' : ''}
                                                             </div>
                                                         </div>
                                                     </td>

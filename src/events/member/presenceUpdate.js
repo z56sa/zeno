@@ -19,9 +19,11 @@ module.exports = {
 
       const newStatus = newPresence.status; // 'online', 'idle', 'dnd', 'offline'
 
-      // إذا أصبح غير متصل تماماً أو مخفي (Offline / Invisible)
-      if (newStatus === 'offline' || newStatus === 'invisible') {
-        const result = db.endStaffShift(guild.id, userId, 'auto_offline');
+      // إذا أصبح خامل (Idle / AFK) أو غير متصل تماماً أو مخفي (Offline / Invisible)
+      if (newStatus === 'idle' || newStatus === 'offline' || newStatus === 'invisible') {
+        const isAfk = newStatus === 'idle';
+        const exitReason = isAfk ? 'auto_afk' : 'auto_offline';
+        const result = db.endStaffShift(guild.id, userId, exitReason);
         if (result && result.success) {
           const durationHours = Math.floor(result.duration / 3600);
           const durationMins = Math.floor((result.duration % 3600) / 60);
@@ -33,14 +35,14 @@ module.exports = {
 
           if (logChannel && logChannel.isTextBased()) {
             const autoLogoutEmbed = new EmbedBuilder()
-              .setColor('#f59e0b')
-              .setTitle('⚠️ تسجيل خروج تلقائي (Auto Logout - Offline)')
-              .setDescription(`تم تسجيل خروج <@${userId}> تلقائياً لانقطاع الاتصال أو خروجه من ديسكورد، لضمان عدم احتساب ساعات وهمية.`)
+              .setColor(isAfk ? '#f59e0b' : '#ef4444')
+              .setTitle(isAfk ? '🌙 تسجيل خروج تلقائي (Auto Logout - خامل / AFK)' : '⚠️ تسجيل خروج تلقائي (Auto Logout - غير متصل)')
+              .setDescription(`تم تسجيل خروج <@${userId}> تلقائياً بسبب (${isAfk ? 'الخمول وعدم التفاعل / AFK' : 'الخروج من ديسكورد'}) لضمان دقة ساعات العمل.`)
               .addFields(
                 { name: '👤 الإداري', value: `<@${userId}>`, inline: true },
                 { name: '⏱️ مدة التواجد الفعلي', value: `\`${durationStr}\``, inline: true },
                 { name: '⭐ النقاط المحتسبة', value: `+${result.pointsEarned} نقطة`, inline: true },
-                { name: '📌 السبب', value: 'خروج من الديسكورد (Offline / Invisible)', inline: false }
+                { name: '📌 السبب', value: isAfk ? 'خامل / وضع الـ AFK (Idle)' : 'خروج من الديسكورد (Offline / Invisible)', inline: false }
               )
               .setFooter({ text: 'نظام مراقبة نشاط الإدارة الذكي • ZENO' })
               .setTimestamp();
@@ -53,7 +55,7 @@ module.exports = {
             const memberUser = await client.users.fetch(userId).catch(() => null);
             if (memberUser) {
               await memberUser.send({
-                content: `🔔 **تنبيه نظام الإدارة:** لقد قمت بالخروج من الديسكورد أثناء تواجدك في الخدمة بسيرفر **${guild.name}**، وتم تسجيل خروجك تلقائياً واحتساب مدة عملك: **${durationStr}**.`
+                content: `🔔 **تنبيه نظام الإدارة:** لقد تحولت إلى وضع **${isAfk ? 'الخمول (AFK / Idle)' : 'غير متصل'}** أثناء تواجدك في الخدمة بسيرفر **${guild.name}**، وتم تسجيل خروجك تلقائياً واحتساب ساعاتك: **${durationStr}**.`
               }).catch(() => {});
             }
           } catch (e) {}
