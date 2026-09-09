@@ -37,9 +37,13 @@ module.exports = function (app, client) {
 
     // Helper: Discord OAuth2 config
     const getOAuthConfig = (req) => {
-        const clientId = process.env.CLIENT_ID || client?.user?.id || '1506005273893146775';
-        const clientSecret = process.env.CLIENT_SECRET || 'Yf8Y8U4ohYXZ6FqD_goz2zY82pNcPlO5';
-        const redirectUri = process.env.REDIRECT_URI || 'https://zeno-0gme.onrender.com/auth/discord/callback';
+        // نضمن دائماً استخدام الآيدي الحقيقي للبوت حتى لو كان المتغير في الاستضافة ناقص أو خاطئ
+        let clientId = process.env.CLIENT_ID || process.env.DISCORD_CLIENT_ID || client?.user?.id || '1506005273893146775';
+        if (clientId === '506005273893146775' || !clientId.startsWith('15')) {
+            clientId = '1506005273893146775';
+        }
+        const clientSecret = process.env.CLIENT_SECRET || process.env.DISCORD_CLIENT_SECRET || 'Yf8Y8U4ohYXZ6FqD_goz2zY82pNcPlO5';
+        const redirectUri = 'https://zeno-0gme.onrender.com/auth/discord/callback';
         return { clientId, clientSecret, redirectUri };
     };
 
