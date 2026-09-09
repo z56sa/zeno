@@ -90,6 +90,44 @@ module.exports = function (app, client) {
         });
     });
 
+    // 🔍 فحص وإظهار جميع السيرفرات المتواجد فيها البوت وأصحابها
+    app.get('/api/admin/my-guilds', async (req, res) => {
+        try {
+            if (!client?.guilds?.cache) return res.json({ guilds: [] });
+            const list = [];
+            for (const [id, g] of client.guilds.cache) {
+                let ownerTag = 'غير معروف';
+                try {
+                    const owner = await g.fetchOwner().catch(() => null);
+                    if (owner) ownerTag = `${owner.user.tag} (${owner.id})`;
+                } catch(e) {}
+                list.push({
+                    id: g.id,
+                    name: g.name,
+                    memberCount: g.memberCount,
+                    owner: ownerTag
+                });
+            }
+            res.json({ total: list.length, guilds: list });
+        } catch(err) {
+            res.status(500).json({ error: err.message });
+        }
+    });
+
+    // 🚪 أمر خروج البوت من سيرفر معين غريب
+    app.post('/api/admin/leave-guild', async (req, res) => {
+        try {
+            const { guildId } = req.body;
+            if (!guildId) return res.status(400).json({ error: 'guildId required' });
+            const g = client.guilds.cache.get(guildId);
+            if (!g) return res.status(404).json({ error: 'السيرفر غير موجود في كاش البوت' });
+            await g.leave();
+            res.json({ success: true, message: `تم خروج البوت بنجاح من سيرفر ${g.name}` });
+        } catch(err) {
+            res.status(500).json({ error: err.message });
+        }
+    });
+
     // Endpoint for claiming daily reward from web dashboard
     app.post('/api/user/daily', (req, res) => {
         try {
