@@ -695,7 +695,7 @@ module.exports = function (app, client) {
                     <div class="flex items-center gap-3">
                         <button type="button" onclick="window.zenoI18n.toggleLang()" class="zeno-lang-toggle-btn px-2.5 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 text-gray-200 rounded-xl transition flex items-center gap-1.5 cursor-pointer text-xs">
                             <span class="text-sm">🌐</span>
-                            <span class="font-bold text-xs">English</span>
+                            <span class="font-black text-xs uppercase tracking-wider">EN</span>
                         </button>
                         <span class="text-gray-700">|</span>
                         <a href="/logout" data-i18n="logout" class="text-xs text-rose-400 hover:text-rose-300 font-bold transition">تسجيل الخروج</a>
@@ -8365,7 +8365,7 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                     <div class="flex items-center gap-3">
                         <button type="button" onclick="window.zenoI18n.toggleLang()" class="zeno-lang-toggle-btn px-2.5 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 text-gray-200 rounded-xl transition flex items-center gap-1.5 cursor-pointer text-xs">
                             <span class="text-sm">🌐</span>
-                            <span class="font-bold text-xs">English</span>
+                            <span class="font-black text-xs uppercase tracking-wider">EN</span>
                         </button>
                         <span class="text-gray-700">|</span>
                         <a href="/dashboard/manage" data-i18n="back_to_dashboard" class="text-xs text-purple-400 font-bold hover:text-purple-300 transition">الرجوع للوحة التحكم</a>
