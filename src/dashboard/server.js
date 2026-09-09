@@ -42,7 +42,7 @@ module.exports = function (app, client) {
         if (clientId === '506005273893146775' || !clientId.startsWith('15')) {
             clientId = '1506005273893146775';
         }
-        const clientSecret = process.env.CLIENT_SECRET || process.env.DISCORD_CLIENT_SECRET || 'Yf8Y8U4ohYXZ6FqD_goz2zY82pNcPlO5';
+        const clientSecret = process.env.CLIENT_SECRET || process.env.DISCORD_CLIENT_SECRET || 'MNeCz9uTvXRzXeEUp8lUckSQeviU-cRY';
         const redirectUri = 'https://zeno-0gme.onrender.com/auth/discord/callback';
         return { clientId, clientSecret, redirectUri };
     };
@@ -72,9 +72,11 @@ module.exports = function (app, client) {
         }
 
         try {
-            // Exchange code for Access Token (Using Standard Basic Auth Header + Body for maximum Discord API compatibility)
+            // Exchange code for Access Token
             const basicAuth = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
             const tokenParams = new URLSearchParams({
+                client_id: clientId,
+                client_secret: clientSecret,
                 grant_type: 'authorization_code',
                 code: code,
                 redirect_uri: redirectUri
