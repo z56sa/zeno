@@ -1299,7 +1299,63 @@
         "أدخل الحد الأدنى للمستوى الكتابي (مثال: 10):": "Enter minimum text level (e.g. 10):",
         "أدخل الحد الأدنى للمستوى الصوتي (مثال: 5):": "Enter minimum voice level (e.g. 5):",
         "أدخل ID الرتبة الممنوحة عند تحقق الشرطين:": "Enter Role ID granted when both conditions are met:",
-        "حدث خطأ في الاتصال بالخادم": "An error occurred connecting to the server"
+        "حدث خطأ في الاتصال بالخادم": "An error occurred connecting to the server",
+
+        // ── Auto Roles on Join (autoroles) ──
+        "رتب الأعضاء الجدد": "New Members Roles",
+        "الرتب التي تُعطى للأعضاء الجدد عند الانضمام": "Roles given to new members upon joining",
+        "رتبة البوتات الجديدة": "New Bots Role",
+        "الرتبة التي تُعطى للبوتات عند إضافتها للسيرفر": "Role given to bots when added to the server",
+
+        // ── Giveaways System (giveaways) ──
+        "نظام القيف اواي": "Giveaways System",
+        "إنشاء وإدارة مسابقات القيف اواي في سيرفرك": "Create and manage giveaways in your server",
+        "إنشاء قيف اواي جديد": "Create New Giveaway",
+        "نشطة الآن": "Active Now",
+        "المنتهية": "Ended",
+        "النشطة": "Active",
+        "الكل": "All",
+        "لا توجد قيف اواي بعد": "No giveaways yet",
+        "الفائزين:": "Winners:",
+        "مشارك": "Participant",
+        "نشط 🟢": "Active 🟢",
+        "منتهي 🔴": "Ended 🔴",
+
+        // ── Welcome & Leave Messages (welcome) ──
+        "رسائل الترحيب": "Welcome Messages",
+        "رسائل المغادرة": "Leave Messages",
+        "قناة الترحيب": "Welcome Channel",
+        "قناة المغادرة": "Leave Channel",
+        "رسالة الترحيب (نص عادي)": "Welcome Message (Plain Text)",
+        "رسالة المغادرة (نص عادي)": "Leave Message (Plain Text)",
+        "نص فقط": "Text Only",
+        "رسالة نصية بسيطة": "Simple text message",
+        "صورة ترحيب": "Welcome Image",
+        "صورة مخصصة مع اسم العضو": "Custom image with member name",
+        "رسالة Embed": "Embed Message",
+        "رسالة منسقة مع ألوان": "Formatted message with colors",
+        "رسالة نصية": "Text Message",
+        "رسالة بسيطة": "Simple message",
+        "تخصيص رسالة الترحيب": "Customize Welcome Message",
+        "تخصيص رسالة المغادرة": "Customize Leave Message",
+        "مرحباً بك!": "Welcome!",
+        "نتمنى لك وقتاً ممتعاً 🕒": "We wish you a pleasant time 🕒",
+        "إظهار الوقت": "Show Time",
+        "مرحباً {user} في سيرفر **{server}**! أنت العضو رقم **{memberCount}**": "Welcome {user} to **{server}**! You are member **{memberCount}**",
+        "مرحباً {user} في سيرفر **{server}**! 🎉 أنت العضو رقم **{memberCount}**": "Welcome {user} to **{server}**! 🎉 You are member **{memberCount}**",
+        "وداعاً **{user}**، نتمنى لك التوفيق 👋": "Goodbye **{user}**, we wish you all the best 👋",
+
+        // ── Advanced Invite Tracker (invites) ──
+        "العضو": "Member",
+        "حقيقية (Regular)": "Regular",
+        "مغادرين (Leaves)": "Leaves",
+        "وهمية (Fake)": "Fake",
+        "بونص (Bonus)": "Bonus",
+        "الصافي (Total)": "Total",
+        "تطبيق الرصيد ✅": "Apply Balance ✅",
+        "أيدي أو منشن العضو (User ID)": "User ID or mention",
+        "دعوة مسجلة": "registered invite",
+        "الأعضاء المشاركون بالدعوة": "Members Participating in Invites"
     };
 
     // Sort phrases by length descending to prevent sub-word collision
