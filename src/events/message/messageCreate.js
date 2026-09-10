@@ -466,8 +466,31 @@ module.exports = {
     const args = message.content.slice(prefix.length).trim().split(/ +/);
     const commandName = args.shift().toLowerCase();
 
-    const command = client.prefixCommands.get(commandName) ||
+    let command = client.prefixCommands.get(commandName) ||
                     client.prefixCommands.get(client.aliases.get(commandName));
+
+    // فحص اختصارات الأوامر المخصصة (Custom Aliases) من الداشبورد
+    let cmdConfigs = {};
+    try {
+      cmdConfigs = typeof settings.command_configs === 'string' ? JSON.parse(settings.command_configs) : (settings.command_configs || {});
+    } catch(e) {}
+
+    let matchedCmdKey = null;
+    if (!command) {
+      for (const [cmdKey, cfg] of Object.entries(cmdConfigs)) {
+        if (cfg && cfg.alias) {
+          const cleanAlias = cfg.alias.replace(/^[/#!.]+/, '').toLowerCase();
+          if (cleanAlias === commandName || cfg.alias.toLowerCase() === (prefix + commandName).toLowerCase()) {
+            const rawName = cmdKey.replace(/^\//, '');
+            command = client.prefixCommands.get(rawName) || client.prefixCommands.get(client.aliases.get(rawName));
+            if (command) {
+              matchedCmdKey = cmdKey;
+              break;
+            }
+          }
+        }
+      }
+    }
 
     if (!command) return;
 
@@ -477,7 +500,20 @@ module.exports = {
       let disabledCmdsList = [];
       try { disabledCmdsList = JSON.parse(disabledCmdsRaw); } catch(e) {}
       const prefixCmdSlash = '/' + commandName;
-      if (disabledCmdsList.includes(prefixCmdSlash) || disabledCmdsList.includes(commandName)) return;
+      if (disabledCmdsList.includes(prefixCmdSlash) || disabledCmdsList.includes(commandName) || (matchedCmdKey && disabledCmdsList.includes(matchedCmdKey))) return;
+
+      // فحص قيود الرتب والقنوات
+      const activeCfg = (matchedCmdKey && cmdConfigs[matchedCmdKey]) || cmdConfigs[prefixCmdSlash] || cmdConfigs[commandName];
+      if (activeCfg) {
+        if (activeCfg.allowedRoles && Array.isArray(activeCfg.allowedRoles) && activeCfg.allowedRoles.length > 0) {
+          const hasRole = message.member?.roles.cache.some(r => activeCfg.allowedRoles.includes(r.id));
+          const isAdmin = message.member?.permissions.has(1n << 3n); // Administrator
+          if (!hasRole && !isAdmin) return;
+        }
+        if (activeCfg.allowedChannels && Array.isArray(activeCfg.allowedChannels) && activeCfg.allowedChannels.length > 0) {
+          if (!activeCfg.allowedChannels.includes(message.channelId)) return;
+        }
+      }
 
       if (command.executePrefix) {
         await command.executePrefix(message, args, client);

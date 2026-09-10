@@ -24,6 +24,30 @@ module.exports = {
             if (disabledCmds.includes(slashName) || disabledCmds.includes(interaction.commandName)) {
               return interaction.reply({ content: '❌ هذا الأمر معطّل في هذا السيرفر من قبل الإدارة.', flags: 64 }).catch(() => {});
             }
+
+            // فحص إعدادات الصلاحيات والقنوات المخصصة للأمر
+            let cmdConfigs = {};
+            try {
+              cmdConfigs = typeof gSettings?.command_configs === 'string' ? JSON.parse(gSettings.command_configs) : (gSettings?.command_configs || {});
+            } catch(e) {}
+            const cfg = cmdConfigs[slashName] || cmdConfigs[interaction.commandName];
+            if (cfg) {
+              // فحص الرتب المسموح لها
+              if (cfg.allowedRoles && Array.isArray(cfg.allowedRoles) && cfg.allowedRoles.length > 0) {
+                const hasRole = interaction.member.roles.cache.some(r => cfg.allowedRoles.includes(r.id));
+                const isAdmin = interaction.member.permissions.has(PermissionFlagsBits.Administrator);
+                if (!hasRole && !isAdmin) {
+                  return interaction.reply({ content: '❌ ليس لديك الرتبة المسموح لها بتشغيل هذا الأمر.', flags: 64 }).catch(() => {});
+                }
+              }
+              // فحص القنوات المسموح فيها
+              if (cfg.allowedChannels && Array.isArray(cfg.allowedChannels) && cfg.allowedChannels.length > 0) {
+                if (!cfg.allowedChannels.includes(interaction.channelId)) {
+                  const allowedList = cfg.allowedChannels.map(id => `<#${id}>`).join(', ');
+                  return interaction.reply({ content: `❌ لا يمكن تشغيل هذا الأمر هنا. القنوات المسموح بها: ${allowedList}`, flags: 64 }).catch(() => {});
+                }
+              }
+            }
           } catch(e) {}
         }
 
