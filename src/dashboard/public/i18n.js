@@ -1372,7 +1372,53 @@
         "مطابقة تامة": "Exact Match",
         "يبدأ بـ": "Starts with",
         "ينتهي بـ": "Ends with",
-        "الكلمة:": "Word:"
+        "الكلمة:": "Word:",
+
+        // ── Tickets & Support (tickets) ──
+        "لوحات تذاكر تفاعلية، تصنيفات مخصصة، وتقييمات خدمة العملاء": "Interactive ticket panels, custom categories, and customer service reviews",
+        "التذاكر المفتوحة حالياً": "Currently Open Tickets",
+        "التذاكر المغلقة": "Closed Tickets",
+        "إعدادات ومظهر لوحة الدعم الفني (Wicks Design)": "Support Panel Settings & Appearance (Wicks Design)",
+        "رتبة طاقم الدعم الفني (Support Role)": "Support Staff Role (Support Role)",
+        "روم إرسال لوحة التذاكر (Panel Channel)": "Send Ticket Panel Channel (Panel Channel)",
+        "عنوان لوحة التذاكر (Panel Title)": "Ticket Panel Title (Panel Title)",
+        "قناة سجلات التذاكر (Transcripts Channel)": "Ticket Transcripts Channel",
+        "رابط بانر لوحة التذاكر (Panel Banner URL)": "Ticket Panel Banner URL",
+        "رابط صورة الترحيب داخل التذكرة (Welcome Embed Image)": "Welcome Embed Image URL inside Ticket",
+        "رسالة الترحيب التلقائية داخل التذكرة (Ticket Welcome Message)": "Automatic Welcome Message inside Ticket",
+        "مرحباً بك {user}! يرجى كتابة استفسارك وسيقوم طاقم الإدارة بالرد عليك قريباً 🌟": "Welcome {user}! Please write your inquiry and staff will reply soon 🌟",
+        "سجل التذاكر الأخيرة": "Recent Tickets Log",
+        "لا توجد تذاكر مسجلة حالياً في السيرفر 🎫": "No tickets currently registered in the server 🎫",
+        "صاحب التذكرة:": "Ticket Creator:",
+        "تذكرة": "ticket",
+        "مفتوحة 🟢": "Open 🟢",
+        "مغلقة 🔴": "Closed 🔴",
+
+        // ── Staff Applications (applications) ──
+        "طلبات بانتظار المراجعة": "Applications Pending Review",
+        "النماذج المفتوحة": "Open Application Forms",
+        "الحالية Application Forms": "Current Application Forms",
+        "نماذج التقديم الحالية": "Current Application Forms",
+        "لا توجد نماذج تقديم حالياً": "No application forms currently",
+        "رتبة المقبولين التلقائية": "Automatic Accepted Role",
+        "رتبة مسؤولي المراجعة": "Reviewers Role",
+        "الأسئلة المعينة": "Assigned Questions",
+
+        // ── Suggestions & Feedback (suggestions) ──
+        "جمع آراء وتصويتات الأعضاء ومراجعة وتحديث حالات الاقتراحات": "Collect member votes and feedback, review and update suggestion statuses",
+        "إضافة اقتراح جديد": "Add New Suggestion",
+        "مقبولة / منفذة": "Accepted / Implemented",
+        "مرفوضة": "Rejected",
+        "إعدادات قناة وصلاحيات الاقتراحات": "Suggestions Channel & Permissions Settings",
+        "قناة نشر الاقتراحات (Suggestions Channel)": "Post Suggestions Channel (Suggestions Channel)",
+        "قناة سجلات الإدارة (Log Channel)": "Admin Log Channel (Log Channel)",
+        "رتب الإدارة المسؤولة عن المراجعة (Staff Roles)": "Reviewing Staff Roles (Staff Roles)",
+        "إنشاء خيط نقاش تلقائي (Thread)": "Create Automatic Discussion Thread",
+        "فتح ثريد تحت كل اقتراح لتمكين الأعضاء من النقاش": "Open a thread under each suggestion to allow member discussions",
+        "المرفوضة": "Rejected",
+        "المقبولة": "Accepted",
+        "لا توجد اقتراحات بعد": "No suggestions yet",
+        "كن أول من يطرح فكرة لتطوير وتحسين السيرفر": "Be the first to propose an idea to improve the server"
     };
 
     // Sort phrases by length descending to prevent sub-word collision
