@@ -1175,4 +1175,12 @@
             observer.observe(document.body, { childList: true, subtree: true });
         });
     }
+
+    // Listen for storage changes across all open browser tabs / pages
+    window.addEventListener('storage', (e) => {
+        if (e.key === 'zeno_dashboard_lang' && (e.newValue === 'ar' || e.newValue === 'en')) {
+            currentLang = e.newValue;
+            applyLanguage(currentLang);
+        }
+    });
 })();
