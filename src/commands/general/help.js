@@ -84,6 +84,8 @@ module.exports = {
         const show = this.getMention(client, 'show');
         const role = this.getMention(client, 'role');
         const warn = this.getMention(client, 'warn');
+        const jail = this.getMention(client, 'jail');
+        const mute = this.getMention(client, 'mute');
         const slowmode = this.getMention(client, 'slowmode');
 
         categoryEmbed.setTitle('🛡️ أوامر الإشراف والرقابة (Moderation)')
@@ -91,8 +93,10 @@ module.exports = {
             `• ${ban} - حظر عضو مؤقتاً أو نهائياً مع إشعار خاص وتسجيل باللوق`,
             `• ${unban} - رفع الحظر عن عضو محظور بالأيدي أو الاسم`,
             `• ${kick} - طرد عضو مخالف من السيرفر مع إشعار في الخاص`,
+            `• ${jail} - سجن عضو وعزله في روم السجن مع سحب رتبه مؤقتاً أو دائماً`,
+            `• ${mute} - كتم العضو عبر رتبة Muted والتايم آوت وتحديد مدة اختيارية`,
             `• ${timeout} - إسكات عضو مؤقتاً (Timeout) أو إلغاء الإسكات`,
-            `• ${warn} - تحذير الأعضاء مع نظام عقوبات تلقائي (3 تحذيرات = تايم اوت، 5 = كيك، 7 = باند)`,
+            `• ${warn} - تحذير الأعضاء وعرض سجل المخالفات مع نظام عقوبات تلقائي`,
             `• ${clear} - مسح الرسائل مع فلاتر ذكية (الكل، البوتات، الروابط، الصور)`,
             `• ${lock} - قفل القناة الحالية أو قفل كل قنوات السيرفر دفعة واحدة`,
             `• ${unlock} - فتح القناة الحالية أو فتح جميع القنوات المغلقة`,

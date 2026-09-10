@@ -81,7 +81,9 @@ module.exports = {
 
     const row = new ActionRowBuilder().addComponents(
       new ButtonBuilder().setCustomId('sugg_upvote').setLabel('0').setEmoji('👍').setStyle(ButtonStyle.Success),
-      new ButtonBuilder().setCustomId('sugg_downvote').setLabel('0').setEmoji('👎').setStyle(ButtonStyle.Danger)
+      new ButtonBuilder().setCustomId('sugg_downvote').setLabel('0').setEmoji('👎').setStyle(ButtonStyle.Danger),
+      new ButtonBuilder().setCustomId('sugg_accept_btn').setLabel('قبول').setEmoji('✅').setStyle(ButtonStyle.Secondary),
+      new ButtonBuilder().setCustomId('sugg_reject_btn').setLabel('رفض').setEmoji('❌').setStyle(ButtonStyle.Secondary)
     );
 
     try {

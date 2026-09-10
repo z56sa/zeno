@@ -591,10 +591,41 @@ try {
   db.exec(`ALTER TABLE applications ADD COLUMN reviewer_role TEXT;`);
 } catch(e) {}
 
-// تحديث جدول الشفتات لإضافة آخر تفاعل (شات أو استلام تكت)
+// 🔒 جدول المسجونين (Jail System)
 try {
-  db.exec(`ALTER TABLE staff_shifts ADD COLUMN last_action_time INTEGER;`);
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS jail_users (
+      guild_id TEXT NOT NULL,
+      user_id TEXT NOT NULL,
+      moderator_id TEXT NOT NULL,
+      reason TEXT,
+      old_roles TEXT DEFAULT '[]',
+      jailed_at INTEGER DEFAULT (strftime('%s','now')),
+      jail_until INTEGER,
+      PRIMARY KEY (guild_id, user_id)
+    );
+  `);
 } catch(e) {}
+
+// 🔇 جدول الإسكات والرتب المؤقتة (Temp Mutes)
+try {
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS temp_mutes (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      guild_id TEXT NOT NULL,
+      user_id TEXT NOT NULL,
+      moderator_id TEXT NOT NULL,
+      reason TEXT,
+      unmute_at INTEGER NOT NULL,
+      created_at INTEGER DEFAULT (strftime('%s','now'))
+    );
+  `);
+} catch(e) {}
+
+// إعدادات السجن والرول في guild_settings
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN jail_role TEXT;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN jail_channel TEXT;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN mute_role TEXT;"); } catch(e) {}
 
 console.log('[DB] ✅ SQLite database initialized successfully');
 tursoSync.initAndRestore(db).catch(e => console.error('[TURSO] Init error:', e.message));
@@ -1873,6 +1904,54 @@ module.exports = {
     return { upvotesCount: upvotes.length, downvotesCount: downvotes.length };
   },
   deleteSuggestion: (id) => db.prepare('DELETE FROM suggestions WHERE id = ? OR message_id = ?').run(id, id),
+  // 🔒 Jail System Exports
+  jailUser: (guildId, userId, moderatorId, reason, oldRoles = [], jailUntil = null) => {
+    try {
+      db.prepare(`
+        INSERT OR REPLACE INTO jail_users (guild_id, user_id, moderator_id, reason, old_roles, jailed_at, jail_until)
+        VALUES (?, ?, ?, ?, ?, strftime('%s','now'), ?)
+      `).run(guildId, userId, moderatorId, reason, JSON.stringify(oldRoles), jailUntil);
+      return true;
+    } catch(e) {
+      console.error('Error jailing user:', e);
+      return false;
+    }
+  },
+  unjailUser: (guildId, userId) => {
+    try {
+      const row = db.prepare('SELECT * FROM jail_users WHERE guild_id = ? AND user_id = ?').get(guildId, userId);
+      db.prepare('DELETE FROM jail_users WHERE guild_id = ? AND user_id = ?').run(guildId, userId);
+      return row;
+    } catch(e) {
+      return null;
+    }
+  },
+  getJailUser: (guildId, userId) => {
+    return db.prepare('SELECT * FROM jail_users WHERE guild_id = ? AND user_id = ?').get(guildId, userId);
+  },
+  getGuildJailedUsers: (guildId) => {
+    return db.prepare('SELECT * FROM jail_users WHERE guild_id = ?').all(guildId);
+  },
+  getExpiredJails: () => {
+    const now = Math.floor(Date.now() / 1000);
+    return db.prepare('SELECT * FROM jail_users WHERE jail_until IS NOT NULL AND jail_until <= ?').all(now);
+  },
+  // 🔇 Temp Mutes System Exports
+  addTempMute: (guildId, userId, moderatorId, reason, unmuteAt) => {
+    try {
+      return db.prepare(`
+        INSERT INTO temp_mutes (guild_id, user_id, moderator_id, reason, unmute_at)
+        VALUES (?, ?, ?, ?, ?)
+      `).run(guildId, userId, moderatorId, reason, unmuteAt);
+    } catch(e) { return null; }
+  },
+  removeTempMute: (guildId, userId) => {
+    return db.prepare('DELETE FROM temp_mutes WHERE guild_id = ? AND user_id = ?').run(guildId, userId);
+  },
+  getExpiredTempMutes: () => {
+    const now = Math.floor(Date.now() / 1000);
+    return db.prepare('SELECT * FROM temp_mutes WHERE unmute_at <= ?').all(now);
+  },
   // Compatibility aliases
   getTopXp: getLeaderboard,
   getTopCredits: getCoinsLeaderboard,

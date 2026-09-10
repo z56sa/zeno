@@ -70,12 +70,41 @@ module.exports = {
           return interaction.reply({ content: '❌ تعذر العثور على بيانات هذا الاقتراح في قاعدة البيانات.', flags: 64 });
         }
 
-        const upBtn = ButtonBuilder.from(interaction.message.components[0].components[0]).setLabel(String(res.upvotesCount));
-        const downBtn = ButtonBuilder.from(interaction.message.components[0].components[1]).setLabel(String(res.downvotesCount));
-        const newRow = new ActionRowBuilder().addComponents(upBtn, downBtn);
+        const compList = interaction.message.components[0].components;
+        const upBtn = ButtonBuilder.from(compList[0]).setLabel(String(res.upvotesCount));
+        const downBtn = ButtonBuilder.from(compList[1]).setLabel(String(res.downvotesCount));
+        const remainingBtns = compList.slice(2).map(c => ButtonBuilder.from(c));
+        const newRow = new ActionRowBuilder().addComponents(upBtn, downBtn, ...remainingBtns);
 
         await interaction.message.edit({ components: [newRow] }).catch(() => {});
         return interaction.reply({ content: `✅ تم تسجيل تصويتك (${voteType === 'up' ? 'مؤيد 👍' : 'معارض 👎'}) بنجاح!`, flags: 64 });
+      }
+
+      // 2.1.1 التعامل مع قبول أو رفض الاقتراح إدارياً (Suggestion Staff Decision)
+      if (interaction.isButton() && (interaction.customId === 'sugg_accept_btn' || interaction.customId === 'sugg_reject_btn')) {
+        const isStaffOrAdmin = interaction.member.permissions.has(PermissionFlagsBits.ManageGuild) ||
+                               interaction.member.permissions.has(PermissionFlagsBits.Administrator) ||
+                               interaction.member.permissions.has(PermissionFlagsBits.ModerateMembers);
+
+        if (!isStaffOrAdmin) {
+          return interaction.reply({ content: '❌ هذا الإجراء مخصص لإدارة ومشرفي السيرفر فقط.', flags: 64 });
+        }
+
+        const isAccept = interaction.customId === 'sugg_accept_btn';
+        const modal = new ModalBuilder()
+          .setCustomId(`modal_sugg_${isAccept ? 'accept' : 'reject'}_${interaction.message.id}`)
+          .setTitle(isAccept ? '✅ قبول الاقتراح رسمياً' : '❌ رفض الاقتراح');
+
+        const reasonInput = new TextInputBuilder()
+          .setCustomId('sugg_decision_reason')
+          .setLabel(isAccept ? 'سبب أو تعليق القبول (اختياري):' : 'سبب الرفض:')
+          .setStyle(TextInputStyle.Paragraph)
+          .setPlaceholder(isAccept ? 'اكتب ملاحظة للإدارة أو صاحب الاقتراح...' : 'اكتب سبب عدم إمكانية تطبيق الاقتراح...')
+          .setRequired(!isAccept)
+          .setMaxLength(500);
+
+        modal.addComponents(new ActionRowBuilder().addComponents(reasonInput));
+        return interaction.showModal(modal);
       }
 
       // 2.2 التعامل مع زر المشاركة في القيف اواي (Giveaway Enter Button)
@@ -759,6 +788,75 @@ module.exports = {
 
         await interaction.reply({ content: `↩️ قام ${interaction.user} بإلغاء استلام التذكرة، وأصبحت متاحة لفريق الدعم.` });
         return interaction.message.edit({ components: [claimRow] }).catch(() => {});
+      }
+
+      // ==========================================
+      // 5.5 معالجة قبول أو رفض الاقتراح بعد إرسال النموذج (Suggestion Modal Submit)
+      // ==========================================
+      if (interaction.isModalSubmit() && (interaction.customId.startsWith('modal_sugg_accept_') || interaction.customId.startsWith('modal_sugg_reject_'))) {
+        await interaction.deferReply({ flags: 64 }).catch(() => {});
+        const isAccept = interaction.customId.startsWith('modal_sugg_accept_');
+        const msgId = interaction.customId.replace(isAccept ? 'modal_sugg_accept_' : 'modal_sugg_reject_', '');
+        const reason = interaction.fields.getTextInputValue('sugg_decision_reason') || (isAccept ? 'تمت الموافقة من قبل الإدارة' : 'تم الرفض من قبل الإدارة');
+
+        const sugg = db.getSuggestion ? db.getSuggestion(msgId) : null;
+        if (!sugg) {
+          return interaction.editReply({ content: '❌ لم يتم العثور على بيانات هذا الاقتراح في قاعدة البيانات.' });
+        }
+
+        const newStatus = isAccept ? 'accepted' : 'rejected';
+        db.updateSuggestionStatus(msgId, newStatus, reason, interaction.user.id);
+
+        if (db.recordStaffAction) {
+          db.recordStaffAction(interaction.guild.id, interaction.user.id, `sugg_${newStatus}`, sugg.user_id, reason);
+        }
+
+        // تحديث رسالة الاقتراح الأصلية
+        try {
+          const suggChannel = interaction.guild.channels.cache.get(sugg.channel_id) || await interaction.guild.channels.fetch(sugg.channel_id).catch(() => null);
+          if (suggChannel) {
+            const targetMsg = await suggChannel.messages.fetch(sugg.message_id).catch(() => null);
+            if (targetMsg && targetMsg.embeds.length > 0) {
+              const oldEmbed = targetMsg.embeds[0];
+              const updatedEmbed = EmbedBuilder.from(oldEmbed)
+                .setColor(isAccept ? '#2ecc71' : '#e74c3c')
+                .spliceFields(1, 1, {
+                  name: '⏳ الحالة',
+                  value: isAccept ? `✅ **مقبول** (بواسطة <@${interaction.user.id}>)` : `❌ **مرفوض** (بواسطة <@${interaction.user.id}>)`,
+                  inline: true
+                });
+
+              if (reason) {
+                updatedEmbed.addFields({ name: isAccept ? '💬 تعليق الإدارة' : '📝 سبب الرفض', value: reason, inline: false });
+              }
+
+              // إزالة أزرار القبول والرفض والإبقاء على التصويتات فقط
+              const compList = targetMsg.components[0].components.slice(0, 2).map(c => ButtonBuilder.from(c).setDisabled(true));
+              const finalRow = new ActionRowBuilder().addComponents(...compList);
+
+              await targetMsg.edit({ embeds: [updatedEmbed], components: [finalRow] });
+            }
+          }
+        } catch (editErr) {
+          console.error('Error updating suggestion message:', editErr);
+        }
+
+        // إرسال إشعار في الخاص لصاحب الاقتراح إذا كان مفعلاً
+        try {
+          const owner = await client.users.fetch(sugg.user_id).catch(() => null);
+          if (owner) {
+            const notifyEmbed = new EmbedBuilder()
+              .setColor(isAccept ? '#2ecc71' : '#e74c3c')
+              .setTitle(isAccept ? '🎉 تم قبول اقتراحك!' : '📌 تحديث بخصوص اقتراحك')
+              .setDescription(`مرحباً **${owner.username}**!\nقام فريق الإدارة بمراجعة اقتراحك في سيرفر **${interaction.guild.name}**:\n\n**الاقتراح:** ${sugg.content.slice(0, 300)}\n**الحالة:** ${isAccept ? '✅ مقبول' : '❌ مرفوض'}\n**التعليق/السبب:** \`${reason}\``)
+              .setTimestamp();
+            await owner.send({ embeds: [notifyEmbed] }).catch(() => {});
+          }
+        } catch (e) {}
+
+        return interaction.editReply({
+          content: `✅ تم ${isAccept ? 'قبول' : 'رفض'} الاقتراح بنجاح وتحديث حالته وإشعار صاحب الاقتراح.`
+        });
       }
 
       // ==========================================

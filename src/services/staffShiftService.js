@@ -139,6 +139,53 @@ class StaffShiftService {
                     }
                 }
             }
+
+            // ─── فحص انتهاء عقوبات السجن المؤقت (Expired Jails) ───
+            if (db.getExpiredJails) {
+                const expiredJails = db.getExpiredJails();
+                for (const row of expiredJails) {
+                    const guild = this.client.guilds.cache.get(row.guild_id);
+                    if (guild) {
+                        const member = guild.members.cache.get(row.user_id) || await guild.members.fetch(row.user_id).catch(() => null);
+                        const settings = db.getGuildSettings(guild.id);
+                        const jailRole = settings.jail_role ? guild.roles.cache.get(settings.jail_role) : guild.roles.cache.find(r => r.name.toLowerCase() === 'jailed' || r.name.includes('سجن'));
+                        if (member) {
+                            if (jailRole && member.roles.cache.has(jailRole.id)) {
+                                await member.roles.remove(jailRole).catch(() => {});
+                            }
+                            if (row.old_roles) {
+                                try {
+                                    const oldRolesArr = JSON.parse(row.old_roles);
+                                    if (oldRolesArr.length) await member.roles.add(oldRolesArr).catch(() => {});
+                                } catch (e) {}
+                            }
+                        }
+                    }
+                    db.unjailUser(row.guild_id, row.user_id);
+                }
+            }
+
+            // ─── فحص انتهاء عقوبات الكتم المؤقت (Expired Temp Mutes) ───
+            if (db.getExpiredTempMutes) {
+                const expiredMutes = db.getExpiredTempMutes();
+                for (const row of expiredMutes) {
+                    const guild = this.client.guilds.cache.get(row.guild_id);
+                    if (guild) {
+                        const member = guild.members.cache.get(row.user_id) || await guild.members.fetch(row.user_id).catch(() => null);
+                        const settings = db.getGuildSettings(guild.id);
+                        const muteRole = settings.mute_role ? guild.roles.cache.get(settings.mute_role) : guild.roles.cache.find(r => r.name.toLowerCase() === 'muted' || r.name.includes('مكتوم'));
+                        if (member) {
+                            if (muteRole && member.roles.cache.has(muteRole.id)) {
+                                await member.roles.remove(muteRole).catch(() => {});
+                            }
+                            if (member.communicationDisabledUntilTimestamp) {
+                                await member.timeout(null, 'انتهاء مدة الكتم التلقائي').catch(() => {});
+                            }
+                        }
+                    }
+                    db.removeTempMute(row.guild_id, row.user_id);
+                }
+            }
         } catch (e) {
             console.error('[StaffShiftService] Error in tick:', e.message);
         }
