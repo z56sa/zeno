@@ -1355,7 +1355,24 @@
         "تطبيق الرصيد ✅": "Apply Balance ✅",
         "أيدي أو منشن العضو (User ID)": "User ID or mention",
         "دعوة مسجلة": "registered invite",
-        "الأعضاء المشاركون بالدعوة": "Members Participating in Invites"
+        "الأعضاء المشاركون بالدعوة": "Members Participating in Invites",
+
+        // ── Auto Responder (autoresponder) ──
+        "الرد التلقائي": "Auto Responder",
+        "إعداد ردود تلقائية على كلمات أو عبارات معينة": "Set up automatic responses to specific words or phrases",
+        "إضافة رد تلقائي": "Add Auto Response",
+        "ردود نشطة": "Active Responses",
+        "رد مسجل": "registered response",
+        "الردود التلقائية النشطة": "Active Auto Responses",
+        "لا توجد ردود تلقائية": "No auto responses",
+        "أضف ردود تلقائية للرد على كلمات أو عبارات محددة": "Add auto responses to reply to specific words or phrases",
+        "إضافة أول رد تلقائي": "Add First Auto Response",
+        "إضافة رد جديد": "Add New Response",
+        "يحتوي على": "Contains",
+        "مطابقة تامة": "Exact Match",
+        "يبدأ بـ": "Starts with",
+        "ينتهي بـ": "Ends with",
+        "الكلمة:": "Word:"
     };
 
     // Sort phrases by length descending to prevent sub-word collision
