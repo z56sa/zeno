@@ -248,6 +248,94 @@
         "سجن عضو": "Jail member",
         "إخراج من السجن": "Unjail member",
 
+        // ── Appearance Section ──
+        "تخصيص البوت": "Bot Customization",
+        "غير اسم البوت وصورته وبنره لكل سيرفر": "Change bot name, avatar and banner per server",
+        "اسم البوت في السيرفر": "Bot Name in Server",
+        "تغيير اسم البوت المعروض في هذا السيرفر فقط": "Change bot name displayed in this server only",
+        "وصف البوت في السيرفر": "Bot Description in Server",
+        "تغيير وصف البوت (About Me) المعروض في هذا السيرفر فقط": "Change bot About Me displayed in this server only",
+        "اكتب وصفاً للبوت في هذا السيرفر...": "Write a description for the bot in this server...",
+        "صورة البوت في السيرفر": "Bot Avatar in Server",
+        "تغيير صورة البوت المعروضة في هذا السيرفر فقط (Per-Server Avatar)": "Change bot avatar displayed in this server only (Per-Server Avatar)",
+        "اختر صورة": "Choose Avatar",
+        "اضغط أو الصق رابط صورة جديدة": "Click or paste a new image link",
+        "بنر البوت في السيرفر": "Bot Banner in Server",
+        "تغيير بنر البوت المعروض في هذا السيرفر فقط (Per-Server Banner)": "Change bot banner displayed in this server only (Per-Server Banner)",
+        "اختر بنر": "Choose Banner",
+        "الصق رابط صورة البنر المباشر": "Paste direct banner image link",
+        "ملاحظات مهمة": "Important Notes",
+        "• تغيير الاسم والصورة والبنر يؤثر فقط على السيرفر المحدد.": "• Changing name, avatar, and banner affects only the selected server.",
+        "• قد يستغرق ظهور التغييرات بضع ثوانٍ في ديسكورد فور الضغط على حفظ.": "• Changes may take a few seconds to appear in Discord after saving.",
+        "• الصور يجب أن تكون بروابط مباشرة بصيغة PNG أو JPG أو WEBP أو GIF.": "• Images must be direct links ending in PNG, JPG, WEBP, or GIF.",
+        "رابط الصورة المباشر": "Direct image link",
+        "رابط البنر المباشر": "Direct banner link",
+
+        // ── Moderation Section Detailed Badges & Cards ──
+        "إعدادات الإشراف والعقوبات": "Moderation & Punishments Settings",
+        "مسح كل التحذيرات": "Clear All Warnings",
+        "رتب الإشراف": "Moderator Roles",
+        "رتب المشرفين": "Staff Roles",
+        "رتب مستثناة": "Excluded Roles",
+        "كلمات محظورة": "Banned Words",
+        "نظام التحذيرات": "Warnings System",
+        "نظام الكتم": "Mute System",
+        "سبام المنشنات": "Mention Spam",
+        "فلتر الحروف الكبيرة": "Caps Filter",
+        "سبام الإيموجيات": "Emoji Spam",
+
+        // ── General Settings & Danger Zone ──
+        "تصفير سجلات العقوبات التلقائي": "Auto-Clear Infractions",
+        "حذف دوري لسجلات العقوبات المنتهية / المزالة – العقوبات النشطة لا تتأثر إطلاقاً.": "Periodic cleanup of expired / removed punishment logs – active punishments are never affected.",
+        "فترة التصفير": "Clearing Period",
+        "كل أسبوع": "Every week",
+        "كل أسبوعين": "Every 2 weeks",
+        "كل 3 أسابيع": "Every 3 weeks",
+        "كل شهر": "Every month",
+        "أنواع العقوبات المشمولة": "Covered Punishment Types",
+        "كل الأنواع": "All Types",
+        "حظر": "Ban",
+        "حظر مؤقت": "Temporary Ban",
+        "ميوت": "Mute",
+        "ميوت صوتي": "Voice Mute",
+        "سجن": "Jail",
+        "تحذير": "Warning",
+        "طرد": "Kick",
+        "داون": "Down",
+        "بلوك": "Block",
+        "بلاك لست": "Blacklist",
+        "تايم اوت": "Timeout",
+        "منطقة الخطر": "Danger Zone",
+        "تصفير قاعدة بيانات السيرفر": "Reset Server Database",
+        "أونر السيرفر حصراً. يمسح كل بيانات البوت لهذا السيرفر نهائياً – الإعدادات، الحماية، سجل العقوبات، كل شيء (عدا التوب الكتابي/الصوتي والدعوات، تُدار منفصلة عبر أمر reset).": "Server owner only. Permanently deletes all bot data for this server – Settings, Security, Punishment Logs, everything (except text/voice top & invites, managed separately via reset command).",
+
+        // ── Analytics & Stats Section ──
+        "لوحة الإحصائيات والتحليلات المتقدمة": "Advanced Analytics & Stats Dashboard",
+        "تحليل شامل لحركة السيرفر ونموه وتوزيع الأعضاء والقنوات": "Comprehensive analysis of server activity, growth, and member & channel distribution",
+        "إدارة قنوات العدادات 📡": "Manage Stat Channels 📡",
+        "إدارة قنوات العدادات": "Manage Stat Channels",
+        "مؤشرات تفاعل السيرفر": "Server Engagement Indicators",
+        "الاقتراحات والشكاوى": "Suggestions & Feedback",
+        "إجمالي قنوات السيرفر": "Total Server Channels",
+        "قنوات السيرفر": "Server Channels",
+        "الربط السريع للعدادات": "Quick Stat Channels Setup",
+        "فتح مدير قنوات الإحصائيات (9 أنواع) 🚀": "Open Stat Channels Manager (9 Types) 🚀",
+        "فتح مدير قنوات الإحصائيات": "Open Stat Channels Manager",
+        "يمكنك الآن تفعيل **9 أنواع مختلفة** من قنوات الإحصائيات (أعضاء، بشر، بوتات، متصلين، صوتية، رتب...) تتحدث تلقائياً كل 10 دقائق من قسم قنوات الإحصائيات.": "You can now enable 9 different types of stat channels (members, humans, bots, online, voice, roles...) updating automatically every 10 minutes from the stat channels section.",
+        "عدد جميع الأعضاء في السيرفر": "Total count of all members in the server",
+        "عدد الأعضاء البشريين فقط": "Count of human members only",
+        "عدد البوتات في السيرفر": "Count of bots in the server",
+        "الأعضاء الأونلاين": "Online Members",
+        "عدد الأعضاء المتصلين حالياً": "Count of currently connected members",
+        "المتصلين صوتياً": "Connected to Voice",
+        "عدد الأعضاء في القنوات الصوتية": "Count of members in voice channels",
+        "عدد القنوات الكلي": "Total Channels Count",
+        "إجمالي عدد جميع القنوات": "Total count of all channels",
+        "الرتب الكلية": "Total Roles",
+        "عدد الرتب في السيرفر": "Count of roles in the server",
+        "حذف هذه القناة": "Delete this channel",
+        "مربوطة بـ:": "Linked to:",
+
         // ── Commands DB: Category titles & descriptions ──
         "الأوامر الرئيسية للبوت والاستخدام اليومي": "Core bot commands for daily use",
         "أوامر تنفيذ العقوبات المباشرة على الأعضاء": "Commands for direct member punishments",
@@ -833,11 +921,6 @@
         "الصفحة": "Page",
         "التالي": "Next",
         "السابق": "Previous",
-        "أول": "First",
-        "آخر": "Last",
-        "من": "of",
-        "نعم": "Yes",
-        "لا": "No",
         "موافق": "OK",
         "تأكيد": "Confirm",
         "رجوع": "Back",
@@ -926,8 +1009,18 @@
                     const keys = getSortedKeys();
                     for (let i = 0; i < keys.length; i++) {
                         const ar = keys[i];
+                        if (ar.length < 2) continue;
                         if (original.includes(ar)) {
-                            original = original.split(ar).join(dictionary[ar]);
+                            // If key has spaces or is long (>= 4 chars), replace directly
+                            // Otherwise, ensure it matches a discrete word boundary or standalone phrase
+                            if (ar.indexOf(' ') !== -1 || ar.length >= 4) {
+                                original = original.split(ar).join(dictionary[ar]);
+                            } else {
+                                // Short words (2-3 chars) like 'من', 'كل': only replace when surrounded by space or punctuation
+                                const escaped = ar.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                                const rx = new RegExp('(^|\\s|[.,!?:;()\\-\\[\\]])' + escaped + '(?=$|\\s|[.,!?:;()\\-\\[\\]])', 'g');
+                                original = original.replace(rx, '$1' + dictionary[ar]);
+                            }
                         }
                     }
                     node.textContent = original;
