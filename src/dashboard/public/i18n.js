@@ -196,9 +196,8 @@
         "سجلات دقيقة (Server Logs)": "Detailed Server Logs",
         "سجلات دقيقة": "Detailed Logs",
         "تسجيل شامل لـ 13 فئة (حذف وتعديل الرسائل، دخول وخروج الصوت، تعديل الرتب والقنوات، الطرد والحظر) بأدق التفاصيل.": "Comprehensive logging across 13 categories (messages, voice, roles, channels, kicks, bans) with precision details.",
-        "القرآن الكريم والإذاعة 24/7": "Holy Quran & 24/7 Radio",
-        "القرآن الكريم والإذاعة": "Holy Quran & Radio",
-        "بث متواصل لإذاعة القرآن الكريم بأصوات كبار القراء في الرومات الصوتية، مع أذكار الصباح والمساء وتذكيرات آلية مباركة.": "Continuous 24/7 Quran recitation broadcast by renowned reciters in voice channels, with morning/evening Athkar reminders.",
+        "رومات صوتية مؤقتة وتلقائية": "Automated Temp Voice Channels",
+        "إنشاء رومات صوتية خاصة تلقائياً فور دخول العضو، مع لوحة تحكم كاملة لقفل الروم، تحديد العدد، وتغيير الاسم والجودة.": "Automatic private voice channels on member join, with a complete control panel to lock, limit, rename, and adjust bitrate.",
         "جميع الحقوق محفوظة ©": "All Rights Reserved ©",
         "سيرفر الدعم الفني": "Support Server",
 
