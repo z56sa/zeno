@@ -181,6 +181,27 @@
         "سرعة الاستجابة": "Response Latency",
         "مستخدم نشط": "Active Users",
 
+        // ── Landing Page Features Section ──
+        "مميزات حقيقية وشاملة": "Real & Comprehensive Features",
+        "كل ما يحتاجه سيرفرك في مكان واحد": "Everything Your Server Needs in One Place",
+        "أنظمة برمجية متطورة مصممة بأعلى معايير الحماية والأداء، بتحكم كامل ولحظي.": "Advanced software systems built to the highest security and performance standards, with complete real-time control.",
+        "حماية متقدمة ومانع تخريب": "Advanced Protection & Anti-Nuke",
+        "تصدي فوري لمحاولات السبام والروابط المشبوهة، حماية الرتب، منع تخريب القنوات، وسجل أمان ومراقبة متكامل لحظة بلحظة.": "Instant defense against spam and suspicious links, role protection, channel lockdown, and full real-time audit logging.",
+        "بطاقات ترحيب ورتب فورية": "Welcome Cards & Instant Roles",
+        "تصميم بطاقات ترحيب بالصور الاحترافية ومشاركتها فور دخول العضو، مع إسناد تلقائي للرتب وإرسال رسائل خاصة مميزة.": "Professional image welcome cards upon member join, with automated role assignment and customized direct messages.",
+        "نظام اقتصاد ومكافآت يومية": "Economy & Daily Rewards System",
+        "نظام راتب يومي مع مكافآت Streak متتالية، لوحة متصدرين بالذهب والخبرة، ومتجر خلفيات هوية غني بـ 105 خلفية حصرية.": "Daily salary system with consecutive Streak rewards, Gold and XP leaderboards, and a profile card wallpaper shop with 105 exclusive designs.",
+        "لوحات تذاكر متعددة الأقسام": "Multi-Category Ticket Panels",
+        "نظام تذاكر احترافي بأزرار تفاعلية، استلام التذاكر من فريق الدعم، حفظ سجل المحادثات (Transcripts)، وتقييم طاقم العمل.": "Professional ticket panels with interactive buttons, support staff claiming, full chat transcripts, and staff rating.",
+        "سجلات دقيقة (Server Logs)": "Detailed Server Logs",
+        "سجلات دقيقة": "Detailed Logs",
+        "تسجيل شامل لـ 13 فئة (حذف وتعديل الرسائل، دخول وخروج الصوت، تعديل الرتب والقنوات، الطرد والحظر) بأدق التفاصيل.": "Comprehensive logging across 13 categories (messages, voice, roles, channels, kicks, bans) with precision details.",
+        "القرآن الكريم والإذاعة 24/7": "Holy Quran & 24/7 Radio",
+        "القرآن الكريم والإذاعة": "Holy Quran & Radio",
+        "بث متواصل لإذاعة القرآن الكريم بأصوات كبار القراء في الرومات الصوتية، مع أذكار الصباح والمساء وتذكيرات آلية مباركة.": "Continuous 24/7 Quran recitation broadcast by renowned reciters in voice channels, with morning/evening Athkar reminders.",
+        "جميع الحقوق محفوظة ©": "All Rights Reserved ©",
+        "سيرفر الدعم الفني": "Support Server",
+
         // Additional Dashboard & Sidebar Terms
         "إدارة السيرفر": "Server Management",
         "القرآن والإذاعة": "Quran & Radio",
