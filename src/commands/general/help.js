@@ -35,7 +35,7 @@ module.exports = {
         { name: '⭐ الاقتصاد والنجوم (Economy & Star)', value: 'نظام النجوم Star، البنك، الوظائف، المراهنات، البروفايل والمتصدرين.' },
         { name: '🎫 نظام التذاكر (Tickets)', value: 'لوحات الدعم الفني، إدارة التذاكر وحفظ الترانسكريبت.' },
         { name: '⚙️ الإعدادات والإدارة (Settings & Admin)', value: 'الترحيب، الرقابة التلقائية (AutoMod)، الرتب التلقائية، التحقق والحماية.' },
-        { name: '🌐 الأوامر العامة (General & Quran)', value: 'القرآن الكريم، إذاعة 24/7، الجيف أواي، التصويت، ومعلومات الحسابات والسيرفر.' }
+        { name: '🌐 الأوامر العامة (General)', value: 'الجيف أواي، التصويت، ومعلومات الحسابات والسيرفر.' }
       )
       .setFooter({ text: '💡 اختر قسماً من القائمة بالأسفل لاستعراض كامل الأوامر' })
       .setTimestamp();
@@ -51,59 +51,55 @@ module.exports = {
           { label: '⭐ الاقتصاد والنجوم', value: 'eco', description: 'أوامر النجوم Star، البنك، العمل، الكازينو وبطاقة البروفايل' },
           { label: '🎫 نظام التذاكر', value: 'ticket', description: 'أوامر إنشاء وإعداد وإدارة تذاكر الدعم الفني' },
           { label: '⚙️ إعدادات وحماية السيرفر', value: 'admin', description: 'إعداد الترحيب، اللوق، الرقابة، التحقق والحماية Anti-Nuke' },
-          { label: '🌐 الأوامر العامة والقرآن', value: 'gen', description: 'تلاوات القرآن، الإذاعة، الجيف أواي، التصويت ومعلومات السيرفر' }
+          { label: '🌐 الأوامر العامة', value: 'gen', description: 'الجيف أواي، التصويت ومعلومات السيرفر' }
         ])
     );
   },
 
   getMention(client, name, sub = null) {
     const id = client.slashCommandIds?.get(name) || '0';
-    return sub ? `</${name} ${sub}:${id}>` : `</${name}:${id}>`;
+    if (sub) return `</${name} ${sub}:${id}>`;
+    return `</${name}:${id}>`;
   },
 
-  handleMenu(message, userId, client) {
-    const collector = message.createMessageComponentCollector({
+  handleMenu(response, userId, client) {
+    const collector = response.createMessageComponentCollector({
       filter: (i) => i.customId === 'help_category_select' && i.user.id === userId,
-      time: 90000
+      time: 120000
     });
 
     collector.on('collect', async (i) => {
       const value = i.values[0];
-      const categoryEmbed = new EmbedBuilder().setColor(config.colors.primary || '#9333ea').setTimestamp();
-      categoryEmbed.setFooter({ text: '💡 اضغط على أي أمر لتعبئة بياناته وتنفيذه فوراً' });
+      const categoryEmbed = new EmbedBuilder()
+        .setColor(config.colors.primary || '#9333ea')
+        .setTimestamp();
 
       if (value === 'mod') {
         const ban = this.getMention(client, 'ban');
         const unban = this.getMention(client, 'unban');
         const kick = this.getMention(client, 'kick');
         const timeout = this.getMention(client, 'timeout');
+        const untimeout = this.getMention(client, 'untimeout');
+        const warn = this.getMention(client, 'warn');
+        const warns = this.getMention(client, 'warns');
+        const delwarn = this.getMention(client, 'delwarn');
         const clear = this.getMention(client, 'clear');
         const lock = this.getMention(client, 'lock');
         const unlock = this.getMention(client, 'unlock');
-        const hide = this.getMention(client, 'hide');
-        const show = this.getMention(client, 'show');
-        const role = this.getMention(client, 'role');
-        const warn = this.getMention(client, 'warn');
-        const jail = this.getMention(client, 'jail');
-        const mute = this.getMention(client, 'mute');
-        const slowmode = this.getMention(client, 'slowmode');
 
         categoryEmbed.setTitle('🛡️ أوامر الإشراف والرقابة (Moderation)')
           .setDescription([
-            `• ${ban} - حظر عضو مؤقتاً أو نهائياً مع إشعار خاص وتسجيل باللوق`,
-            `• ${unban} - رفع الحظر عن عضو محظور بالأيدي أو الاسم`,
-            `• ${kick} - طرد عضو مخالف من السيرفر مع إشعار في الخاص`,
-            `• ${jail} - سجن عضو وعزله في روم السجن مع سحب رتبه مؤقتاً أو دائماً`,
-            `• ${mute} - كتم العضو عبر رتبة Muted والتايم آوت وتحديد مدة اختيارية`,
-            `• ${timeout} - إسكات عضو مؤقتاً (Timeout) أو إلغاء الإسكات`,
-            `• ${warn} - تحذير الأعضاء وعرض سجل المخالفات مع نظام عقوبات تلقائي`,
-            `• ${clear} - مسح الرسائل مع فلاتر ذكية (الكل، البوتات، الروابط، الصور)`,
-            `• ${lock} - قفل القناة الحالية أو قفل كل قنوات السيرفر دفعة واحدة`,
-            `• ${unlock} - فتح القناة الحالية أو فتح جميع القنوات المغلقة`,
-            `• ${hide} - إخفاء القناة الحالية عن الأعضاء العاديين`,
-            `• ${show} - إظهار القناة للأعضاء`,
-            `• ${role} - إعطاء أو سحب الرتب الدائمة والمؤقتة (Temprole) حتى 5 أعضاء`,
-            `• ${slowmode} - تفعيل أو تعطيل الوضع البطيء للقناة أو لكل القنوات`
+            `• ${ban} - حظر عضو من السيرفر مع إمكانية تحديد سبب وحذف الرسائل`,
+            `• ${unban} - فك الحظر عن عضو محظور باستخدام الآيدي الخاص به`,
+            `• ${kick} - طرد عضو من السيرفر مع تسجيل السبب في السجلات`,
+            `• ${timeout} - إعطاء تايم أوت (إسكات مؤقت) لعضو لمدة محددة`,
+            `• ${untimeout} - إلغاء التايم أوت وفك الإسكات عن العضو فوراً`,
+            `• ${warn} - إعطاء تحذير رسمي لعضو مع إرسال تفاصيل التحذير بالخاص`,
+            `• ${warns} - استعراض قائمة وسجل تحذيرات عضو معين أو تفاصيل تحذير`,
+            `• ${delwarn} - حذف تحذير معين أو مسح جميع تحذيرات العضو`,
+            `• ${clear} - مسح عدد محدد من الرسائل من القناة (حتى 100 رسالة دفعة واحدة)`,
+            `• ${lock} - قفل القناة الحالية ومنع الأعضاء من الكتابة فيها`,
+            `• ${unlock} - فتح القناة والسماح للأعضاء بالكتابة مجدداً`
           ].join('\n\n'));
       } else if (value === 'eco') {
         const star = this.getMention(client, 'star');
@@ -167,9 +163,6 @@ module.exports = {
             `• ${prefix} - تخصيص رمز البرفكس الخاص بالسيرفر`
           ].join('\n\n'));
       } else if (value === 'gen') {
-        const quran = this.getMention(client, 'quran');
-        const radio = this.getMention(client, 'radio');
-        const stop = this.getMention(client, 'stop');
         const giveaway = this.getMention(client, 'giveaway');
         const poll = this.getMention(client, 'poll');
         const embed = this.getMention(client, 'embed');
@@ -179,11 +172,8 @@ module.exports = {
         const avatar = this.getMention(client, 'avatar');
         const banner = this.getMention(client, 'banner');
 
-        categoryEmbed.setTitle('🌐 الأوامر العامة والصوتيات (General & Quran)')
+        categoryEmbed.setTitle('🌐 الأوامر العامة (General)')
           .setDescription([
-            `• ${quran} - تلاوات القرآن الكريم بأصوات كبار القراء والتفاسير`,
-            `• ${radio} - تشغيل إذاعة القرآن الكريم المباشرة في الروم الصوتي 24/7`,
-            `• ${stop} - إيقاف الصوت والخروج من القناة الصوتية فوراً`,
             `• ${giveaway} - إنشاء وإدارة سحوبات الجيف أواي والمسابقات بالزر التفاعلي`,
             `• ${poll} - إنشاء تصويت واستطلاع رأي تفاعلي للأعضاء بنسب مئوية`,
             `• ${embed} - تصميم وإرسال رسائل الإيمبد المنسقة والمتقدمة`,

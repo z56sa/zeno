@@ -288,19 +288,4 @@ class AudioPlayerManager {
 
 const manager = new AudioPlayerManager();
 
-// قائمة محطات وإذاعات القرآن الكريم المباشرة 100% شغالة
-manager.quranStations = {
-    'cairo_radio': { name: 'إذاعة القرآن الكريم من القاهرة 🇪🇬', url: 'https://qurango.net/radio/tarateel' },
-    'makkah_radio': { name: 'إذاعة القرآن الكريم من مكة المكرمة 🇸🇦', url: 'http://live.mp3quran.net:9992/' },
-    'afasy': { name: 'الشيخ مشاري راشد العفاسي 📖', url: 'https://qurango.net/radio/mishary_alafasi' },
-    'abdulbasit': { name: 'الشيخ عبدالباسط عبدالصمد (المجود) 📖', url: 'https://qurango.net/radio/abdulbasit_abdulsamad_mojawwad' },
-    'muaiqly': { name: 'الشيخ ماهر المعيقلي 📖', url: 'https://qurango.net/radio/maher_al_muaiqly' },
-    'dosari': { name: 'الشيخ ياسر الدوسري 📖', url: 'https://qurango.net/radio/tarateel' },
-    'ghamdi': { name: 'الشيخ سعد الغامدي 📖', url: 'https://qurango.net/radio/saad_alghamdi' },
-    'sudais': { name: 'الشيخ عبدالرحمن السديس 📖', url: 'https://qurango.net/radio/abdulrahman_alsudaes' },
-    'shuraim': { name: 'الشيخ سعود الشريم 📖', url: 'https://qurango.net/radio/saud_alshuraim' },
-    'ajmy': { name: 'الشيخ أحمد العجمي 📖', url: 'https://qurango.net/radio/ahmad_alajmy' },
-    'shatri': { name: 'الشيخ أبو بكر الشاطري 📖', url: 'https://qurango.net/radio/shaik_abu_bakr_al_shatri' }
-};
-
 module.exports = manager;

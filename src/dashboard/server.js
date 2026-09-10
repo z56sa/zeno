@@ -1262,7 +1262,6 @@ module.exports = function (app, client) {
                 'invites': 'متتبع الدعوات المتقدم (Invite Tracker) 🔗',
                 'broadcast': 'نظام الإعلانات والمذيع الآلي 📢',
                 'embed': 'صانع رسائل الإيمبد المتقدم 📄',
-                'quran': 'القرآن الكريم والإذاعات الإسلامية 🕌',
                 'applications': 'نظام التقديمات والتوظيف 📝'
             };
 
@@ -7079,125 +7078,6 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
     </script>
 
 </div>`;
-            } else if (section === 'quran') {
-                formFieldsHtml = `
-                    <div class="space-y-6 text-right" dir="rtl">
-                        <!-- Header Banner -->
-                        <div class="bg-gradient-to-r from-[#1a132e] via-[#12141f] to-[#1a132e] border border-purple-500/20 p-6 rounded-3xl flex items-center justify-between shadow-2xl">
-                            <label class="toggle"><input type="checkbox" name="quran_enabled" value="1" checked><span class="slider"></span></label>
-                            <div class="flex items-center gap-3">
-                                <div class="text-right">
-                                    <h4 class="font-black text-white text-xl flex items-center gap-2 justify-end"><span>القرآن الكريم والإذاعات الإسلامية</span><span>🕌</span></h4>
-                                    <p class="text-gray-400 text-xs mt-0.5">تشغيل القرآن الكريم وإذاعات كبار القراء على مدار الساعة 24/7 في قنوات السيرفر الصوتية</p>
-                                </div>
-                                <div class="w-10 h-10 rounded-2xl bg-purple-600/20 text-purple-400 flex items-center justify-center text-xl border border-purple-500/30">📖</div>
-                            </div>
-                        </div>
-
-                        <!-- Direct Play Control Card -->
-                        <div class="bg-[#12141f] border border-white/5 p-6 rounded-3xl space-y-4 shadow-xl">
-                            <h4 class="text-sm font-black text-white border-b border-white/5 pb-3 flex items-center gap-2 justify-end">
-                                <span>تشغيل مباشر في القناة الصوتية</span>
-                                <span>▶️</span>
-                            </h4>
-
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-xs font-bold text-gray-300 mb-2">القناة الصوتية المستهدفة <span class="text-purple-400">*</span></label>
-                                    ${renderChannelSelect('quranVoiceChannel', '')}
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-bold text-gray-300 mb-2">اختر القارئ أو الإذاعة <span class="text-purple-400">*</span></label>
-                                    <select id="quranStationSelect" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right">
-                                        <option value="cairo_radio">📻 إذاعة القرآن الكريم من القاهرة (مباشر 24/7)</option>
-                                        <option value="makkah_radio">📻 إذاعة القرآن الكريم من مكة المكرمة (مباشر 24/7)</option>
-                                        <option value="afasy">📖 الشيخ مشاري راشد العفاسي</option>
-                                        <option value="abdulbasit">📖 الشيخ عبدالباسط عبدالصمد (المجود)</option>
-                                        <option value="muaiqly">📖 الشيخ ماهر المعيقلي</option>
-                                        <option value="dosari">📖 الشيخ ياسر الدوسري</option>
-                                        <option value="ghamdi">📖 الشيخ سعد الغامدي</option>
-                                        <option value="sudais">📖 الشيخ عبدالرحمن السديس</option>
-                                        <option value="shuraim">📖 الشيخ سعود الشريم</option>
-                                        <option value="ajmy">📖 الشيخ أحمد العجمي</option>
-                                        <option value="shatri">📖 الشيخ أبو بكر الشاطري</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div class="flex items-center justify-end gap-3 pt-2">
-                                <button type="button" onclick="stopQuranStream()" id="btnStopQuran" class="px-5 py-2.5 bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 border border-rose-800/40 rounded-xl text-xs font-bold transition flex items-center gap-1.5">
-                                    <span>⏹️ إيقاف البث</span>
-                                </button>
-                                <button type="button" onclick="playQuranStream()" id="btnPlayQuran" class="px-6 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold transition shadow-lg flex items-center gap-2">
-                                    <span>▶️ تشغيل الآن في الروم الصوتي</span>
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Available Stations Grid -->
-                        <div class="space-y-3">
-                            <h4 class="text-sm font-black text-white">قائمة المحطات والتلاوات المتاحة (11 محطة):</h4>
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                                <div class="bg-[#12141f] border border-white/5 p-4 rounded-2xl text-right">
-                                    <span class="text-xs font-black text-white block">إذاعة القاهرة 🇪🇬</span>
-                                    <span class="text-[10px] text-gray-400">بث مباشر متواصل على مدار الساعة</span>
-                                </div>
-                                <div class="bg-[#12141f] border border-white/5 p-4 rounded-2xl text-right">
-                                    <span class="text-xs font-black text-white block">إذاعة مكة المكرمة 🇸🇦</span>
-                                    <span class="text-[10px] text-gray-400">تلاوات الحرم المكي الشريف</span>
-                                </div>
-                                <div class="bg-[#12141f] border border-white/5 p-4 rounded-2xl text-right">
-                                    <span class="text-xs font-black text-white block">مشاري العفاسي 📖</span>
-                                    <span class="text-[10px] text-gray-400">المصحف المرتل كاملاً</span>
-                                </div>
-                                <div class="bg-[#12141f] border border-white/5 p-4 rounded-2xl text-right">
-                                    <span class="text-xs font-black text-white block">عبدالباسط عبدالصمد 📖</span>
-                                    <span class="text-[10px] text-gray-400">تلاوات نادرة ومجودة</span>
-                                </div>
-                                <div class="bg-[#12141f] border border-white/5 p-4 rounded-2xl text-right">
-                                    <span class="text-xs font-black text-white block">ماهر المعيقلي 📖</span>
-                                    <span class="text-[10px] text-gray-400">تلاوات عذبة وخاشعة</span>
-                                </div>
-                                <div class="bg-[#12141f] border border-white/5 p-4 rounded-2xl text-right">
-                                    <span class="text-xs font-black text-white block">ياسر الدوسري 📖</span>
-                                    <span class="text-[10px] text-gray-400">تلاوة ترتيل مؤثرة</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <script>
-                    async function playQuranStream() {
-                        const channelId = document.getElementById('quranVoiceChannel').value;
-                        const stationKey = document.getElementById('quranStationSelect').value;
-                        if (!channelId) return alert('يرجى اختيار القناة الصوتية أولاً');
-
-                        const btn = document.getElementById('btnPlayQuran');
-                        btn.disabled = true; btn.textContent = 'جارٍ الاتصال والتشغيل... ⏳';
-
-                        try {
-                            const r = await fetch('/api/guild/${guildId}/quran/play', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ channelId, stationKey })
-                            });
-                            const d = await r.json();
-                            if (d.success) alert('✅ تم بدء تشغيل إذاعة القرآن الكريم في القناة الصوتية بنجاح!');
-                            else alert('❌ خطأ: ' + (d.error || 'فشل التشغيل'));
-                        } catch(e) { alert('خطأ في الاتصال بالخادم'); }
-                        finally { btn.disabled = false; btn.textContent = '▶️ تشغيل الآن في الروم الصوتي'; }
-                    }
-
-                    async function stopQuranStream() {
-                        try {
-                            const r = await fetch('/api/guild/${guildId}/quran/stop', { method: 'POST' });
-                            const d = await r.json();
-                            if (d.success) alert('⏹️ تم إيقاف البث ومغادرة الروم الصوتي.');
-                            else alert('❌ خطأ: ' + (d.error || 'فشل'));
-                        } catch(e) { alert('خطأ في الاتصال'); }
-                    }
-                    </script>
-                `;
             } else if (section === 'staff-activity') {
                 const staffList = (() => {
                     try {
@@ -8632,21 +8512,7 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                                 </div>
                             </div>
 
-                            <!-- القرآن والإذاعة -->
-                            <div class="space-y-1">
-                                <button type="button" onclick="toggleNavGroup('grp_sub_fun')" class="w-full flex items-center justify-between text-gray-400 hover:text-white px-2 py-1 font-bold text-[11px] transition">
-                                    <svg id="arrow_grp_sub_fun" class="w-3.5 h-3.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                                    <span class="flex items-center gap-1.5"><span>القرآن والإذاعة</span></span>
-                                </button>
-                                <div id="grp_sub_fun" class="space-y-1">
-                                    <a href="/dashboard/${guildId}/quran" class="flex items-center justify-between px-3 py-2 rounded-xl ${section === 'quran' ? 'bg-purple-600 text-white font-bold shadow-md' : 'text-gray-300 hover:text-white hover:bg-[#151724]'} transition group">
-                                        <span class="w-4 h-4 rounded-full border border-emerald-500/60 bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-[9px] font-black">✓</span>
-                                        <span class="flex items-center gap-2"><span>القرآن & الراديو</span><span class="text-gray-400 group-hover:text-purple-400">📻</span></span>
-                                    </a>
-                                </div>
-                            </div>
-
-                        </div>
+                            
 
                         <!-- User Profile Bottom Bar -->
                         <div class="p-3 border-t border-white/5">
@@ -9509,42 +9375,6 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
             );
 
             await channel.send({ embeds: [panelEmbed], components: [row] });
-            res.json({ success: true });
-        } catch(e) {
-            res.status(500).json({ success: false, error: e.message });
-        }
-    });
-
-
-    // =============================================
-    // Quran Streaming API
-    // =============================================
-    app.post('/api/guild/:guildId/quran/play', express.json(), async (req, res) => {
-        try {
-            if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
-            const { guildId } = req.params;
-            const { channelId, stationKey } = req.body;
-
-            const channel = client.channels.cache.get(channelId) || await client.channels.fetch(channelId).catch(() => null);
-            if (!channel || !channel.isVoiceBased()) return res.status(404).json({ success: false, error: 'القناة الصوتية غير موجودة' });
-
-            const audioManager = require('../utils/audioPlayer');
-            const station = audioManager.quranStations[stationKey || 'cairo_radio'];
-            if (!station) return res.status(400).json({ success: false, error: 'محطة الراديو غير موجودة' });
-
-            await audioManager.playStream(channel, station.url, station.name);
-            res.json({ success: true, station: station.name });
-        } catch(e) {
-            res.status(500).json({ success: false, error: e.message });
-        }
-    });
-
-    app.post('/api/guild/:guildId/quran/stop', async (req, res) => {
-        try {
-            if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
-            const { guildId } = req.params;
-            const audioManager = require('../utils/audioPlayer');
-            audioManager.stop(guildId);
             res.json({ success: true });
         } catch(e) {
             res.status(500).json({ success: false, error: e.message });
