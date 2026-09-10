@@ -2274,7 +2274,68 @@
         "مثال: !ban": "e.g. !ban",
         "لا توجد أوامر مطابقة 🔍": "No matching commands found 🔍",
         "حُفظ": "Saved",
-
+        // ── Dashboard Manage & User Profile Translations ──
+        "خوادمك المتاحة للإدارة": "Your Manageable Servers",
+        "آخر 5 معاملات الذهب": "Last 5 Gold Transactions",
+        "سجل التحويلات والمكافآت": "Transfers & Rewards Log",
+        "المكافأة اليومية (Daily)": "Daily Reward (Daily)",
+        "المكافأة اليومية": "Daily Reward",
+        "الراتب اليومي (Daily Reward)": "Daily Reward (Daily Reward)",
+        "الراتب اليومي": "Daily Reward",
+        "مكافأة اليوم": "Today's Reward",
+        "التكرار": "Frequency",
+        "كل 24 ساعة": "Every 24 hours",
+        "استلام الرصيد اليومي": "Claim daily balance",
+        "استلام الرصيد": "Claim balance",
+        "متاح بعد:": "Available in:",
+        "متاح بعد": "Available in",
+        "صوّت للبوت على Top.gg": "Vote for Bot on Top.gg",
+        "صوّت للبوت": "Vote for Bot",
+        "صوّت الآن على Top.gg": "Vote Now on Top.gg",
+        "صوّتك يساعد البوت على الانتشار ويدعم تطويره! يمكنك التصويت مرة كل": "Your vote helps the bot grow and supports development! You can vote every",
+        "ساعة": "hours",
+        "ساعات": "hours",
+        "دقيقة": "minutes",
+        "ثانية": "seconds",
+        "احصل على": "Get",
+        "من الذهب": "Gold",
+        "مجاناً كل 24 ساعة!": "for free every 24 hours!",
+        "500 إلى 1,000 من الذهب": "500 to 1,000 Gold",
+        "إدارة سيرفر": "Server Management",
+        "إدارة السيرفر": "Manage Server",
+        "أعلى 100 عضو بواسطة نقاط الخبرة (XP Leaderboard) 🏆": "Top 100 Members by XP (XP Leaderboard) 🏆",
+        "أعلى 100 عضو بواسطة نقاط الخبرة": "Top 100 Members by XP",
+        "أغنى الأثرياء برصيد الذهب 🪙": "Richest Users by Gold 🪙",
+        "أغنى الأثرياء": "Richest Users",
+        "أعلى نقاط السمعة & XP": "Top Rep & XP",
+        "ترتيبك الحالي:": "Your current rank:",
+        "ترتيبك الحالي": "Your current rank",
+        "ترتيبك المالي:": "Your financial rank:",
+        "ترتيبك المالي": "Your financial rank",
+        "بطاقة الهوية": "ID Card",
+        "مرحباً بك في لوحة تحكم ZENO Bot!": "Welcome to ZENO Bot Dashboard!",
+        "لا توجد سيرفرات مشتركة لديك صلاحيات إدارتها": "No shared servers with manage permissions found",
+        "إضافة البوت لسيرفرك": "Add Bot to your Server",
+        "لا توجد بيانات خبرة مسجلة بعد": "No XP data recorded yet",
+        "لا توجد بيانات ذهب مسجلة بعد": "No Gold data recorded yet",
+        "لا توجد بيانات نشاط حتى الآن": "No activity data yet",
+        "المبلغ": "Amount",
+        "الرصيد": "Balance",
+        "تاريخ": "Date",
+        "اليوم": "Today",
+        "سيرفر": "Servers",
+        "الذهب": "Gold",
+        "السمعة": "Reputation",
+        "التصنيف": "Rank",
+        "المستوى": "Level",
+        "نظرة عامة": "Overview",
+        "لوحة المتصدرين": "Leaderboard",
+        "عام": "General",
+        "أخرى": "Other",
+        "شراء وتجهيز": "Buy & Equip",
+        "مجهزة على بطاقتك 🪪": "Equipped on your card 🪪",
+        "مفعّل حالياً": "Currently active",
+        "الصفحة الرئيسية": "Home Page",
     };
 
     // Sort phrases by length descending to prevent sub-word collision
@@ -2432,6 +2493,14 @@
                     }
                     html[dir="ltr"] .flex-row-reverse {
                         flex-direction: row !important;
+                    }
+                    html[dir="ltr"] .border-l {
+                        border-left-width: 0 !important;
+                        border-right-width: 1px !important;
+                    }
+                    html[dir="ltr"] .border-r {
+                        border-right-width: 0 !important;
+                        border-left-width: 1px !important;
                     }
                 `;
                 document.head.appendChild(enStyleElement);
