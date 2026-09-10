@@ -188,6 +188,22 @@ app.get('/api/stats', (req, res) => {
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`[INFO] 🚀 Web server running on port ${PORT}`);
+
+    // Self-Pinger: إرسال طلب ذاتي كل 10 دقائق لإبقاء سيرفر Render نشطاً وتفادي الـ Sleep
+    const pingUrl = process.env.RENDER_EXTERNAL_URL 
+        ? `${process.env.RENDER_EXTERNAL_URL}/api/stats` 
+        : 'https://zeno-0gme.onrender.com/api/stats';
+
+    setInterval(async () => {
+        try {
+            const res = await fetch(pingUrl);
+            if (res.ok) {
+                console.log(`[Self-Ping] 💓 Keep-alive ping sent to ${pingUrl} (Status: ${res.status})`);
+            }
+        } catch (err) {
+            console.error('[Self-Ping] ⚠️ Failed to ping self:', err.message);
+        }
+    }, 10 * 60 * 1000); // كل 10 دقائق
 });
 
 
