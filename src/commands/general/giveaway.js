@@ -154,7 +154,7 @@ module.exports = {
 
   async finishGiveaway(messageId, client) {
     const giveaway = db.getGiveaway(messageId);
-    if (!giveaway || giveaway.ended) return;
+    if (!giveaway || giveaway.status === 'ended') return;
 
     db.endGiveaway(messageId);
     const channel = client.channels.cache.get(giveaway.channel_id);
@@ -162,6 +162,8 @@ module.exports = {
 
     const message = await channel.messages.fetch(messageId).catch(() => null);
     const winners = await this.pickWinners(giveaway, giveaway.winners_count, client);
+
+    const hostId = giveaway.host_id || giveaway.hosted_by;
 
     if (!winners || winners.length === 0) {
       const endedEmbed = new EmbedBuilder()
@@ -184,7 +186,7 @@ module.exports = {
       .setTitle(`🎊 **انتهى القيف أواي: ${giveaway.prize}** 🎊`)
       .setDescription([
         `🏆 **الفائزون بالجائزة:** ${winnersMention}`,
-        `👤 **مستضاف بواسطة:** <@${giveaway.hosted_by}>`,
+        `👤 **مستضاف بواسطة:** <@${hostId}>`,
         `📦 **الجائزة:** \`${giveaway.prize}\``
       ].join('\n'))
       .setThumbnail('https://cdn-icons-png.flaticon.com/512/3112/3112946.png')
@@ -197,7 +199,7 @@ module.exports = {
 
     // إرسال إعلان الفوز
     await channel.send({
-      content: `🥳 **ألف مبروك ${winnersMention}!** لقد فزتم بسحب **${giveaway.prize}**! 🎁\nتواصلوا مع المستضيف <@${giveaway.hosted_by}> لتسلم الجائزة.`
+      content: `🥳 **ألف مبروك ${winnersMention}!** لقد فزتم بسحب **${giveaway.prize}**! 🎁\nتواصلوا مع المستضيف <@${hostId}> لتسلم الجائزة.`
     });
 
     // إرسال رسالة خاصة DMs للفائزين
@@ -208,13 +210,14 @@ module.exports = {
           const dmEmbed = new EmbedBuilder()
             .setColor('#2ECC71')
             .setTitle('🎁 مبروك! لقد فزت في سحب القيف أواي!')
-            .setDescription(`🎉 تهانينا يا **${user.username}**! لقد فزت بـ **${giveaway.prize}** في سيرفر **${channel.guild.name}**!\n\n👑 **المستضيف:** <@${giveaway.hosted_by}>\n💬 **القناة:** <#${channel.id}>`)
+            .setDescription(`🎉 تهانينا يا **${user.username}**! لقد فزت بـ **${giveaway.prize}** في سيرفر **${channel.guild.name}**!\n\n👑 **المستضيف:** <@${hostId}>\n💬 **القناة:** <#${channel.id}>`)
             .setTimestamp();
           await user.send({ embeds: [dmEmbed] }).catch(() => {});
         }
       } catch {}
     }
   },
+
 
   async pickWinners(giveaway, count, client) {
     const rawEntries = db.getGiveawayEntries(giveaway.message_id);

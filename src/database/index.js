@@ -1271,34 +1271,16 @@ function getStars(guildId, userId) {
 // ==========================================
 // Giveaways (نظام السحوبات المتقدم)
 // ==========================================
-function createGiveaway(messageIdOrGuildId, channelId, guildIdOrMessageId, prize, winnersCount, endTime, hostId, requiredRole = null, minLevel = 0, minAccountAge = 0, extraRole = null) {
-  let gId = guildIdOrMessageId;
-  let mId = messageIdOrGuildId;
-  let chId = channelId;
-  let pr = prize;
-  let wc = winnersCount || 1;
-  let et = endTime;
-  let hId = hostId;
-
-  // Flexible argument check: if called as (guildId, channelId, messageId, prize, winnersCount, hostId, endTime)
-  if (typeof endTime === 'string' && isNaN(endTime) && typeof hostId === 'number') {
-    gId = messageIdOrGuildId;
-    chId = channelId;
-    mId = guildIdOrMessageId;
-    pr = prize;
-    wc = winnersCount;
-    hId = endTime;
-    et = hostId;
-  }
-
+function createGiveaway(messageId, channelId, guildId, prize, winnersCount, endTime, hostId, requiredRole = null, minLevel = 0, minAccountAge = 0, extraRole = null) {
   db.prepare(`
     INSERT OR REPLACE INTO giveaways 
     (message_id, channel_id, guild_id, prize, winners_count, host_id, end_time, required_role, min_level, min_account_age, extra_role, status, entries)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'active', '[]')
-  `).run(mId, chId, gId, pr, wc, hId, et, requiredRole, minLevel, minAccountAge, extraRole);
+  `).run(messageId, channelId, guildId, prize, winnersCount || 1, hostId, endTime, requiredRole, minLevel || 0, minAccountAge || 0, extraRole);
 
-  return db.prepare('SELECT * FROM giveaways WHERE message_id = ?').get(mId);
+  return db.prepare('SELECT * FROM giveaways WHERE message_id = ?').get(messageId);
 }
+
 
 function getGiveaway(messageId) {
   return db.prepare('SELECT * FROM giveaways WHERE message_id = ?').get(messageId);

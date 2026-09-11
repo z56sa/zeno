@@ -8787,7 +8787,8 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
             const msg = await channel.send({ embeds: [gwEmbed], components: [row] });
 
             if (database.createGiveaway) {
-                database.createGiveaway(msg.id, channel.id, guildId, prize, winners || 1, req.session.user.id, endTime, reqRole);
+                // الترتيب الصحيح: (messageId, channelId, guildId, prize, winnersCount, endTime, hostId, reqRole)
+                database.createGiveaway(msg.id, channel.id, guildId, prize, winners || 1, endTime, req.session.user.id, reqRole);
             }
 
             res.json({ success: true, messageId: msg.id });
