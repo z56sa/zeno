@@ -174,7 +174,7 @@ module.exports = {
         .setTimestamp();
 
       if (message) {
-        await message.edit({ embeds: [endedEmbed], components: [] }).catch(() => {});
+        await message.edit({ embeds: [endedEmbed], components: [] }).catch(() => { });
       }
       return channel.send(`⚠️ انتهى وقت القيف أواي على **${giveaway.prize}** دون وجود مشتركين مؤهلين.`);
     }
@@ -194,12 +194,12 @@ module.exports = {
       .setTimestamp();
 
     if (message) {
-      await message.edit({ embeds: [endedEmbed], components: [] }).catch(() => {});
+      await message.edit({ embeds: [endedEmbed], components: [] }).catch(() => { });
     }
 
     // إرسال إعلان الفوز
     await channel.send({
-      content: `🥳 **ألف مبروك ${winnersMention}!** لقد فزتم بسحب **${giveaway.prize}**! 🎁\nتواصلوا مع المستضيف <@${hostId}> لتسلم الجائزة.`
+      content: `🥳 **ألف مبروك ${winnersMention}!** لقد فزت بسحب **${giveaway.prize}**! 🎁\nتواصلوا مع المستضيف <@${hostId}> لتسلم الجائزة.`
     });
 
     // إرسال رسالة خاصة DMs للفائزين
@@ -212,9 +212,9 @@ module.exports = {
             .setTitle('🎁 مبروك! لقد فزت في سحب القيف أواي!')
             .setDescription(`🎉 تهانينا يا **${user.username}**! لقد فزت بـ **${giveaway.prize}** في سيرفر **${channel.guild.name}**!\n\n👑 **المستضيف:** <@${hostId}>\n💬 **القناة:** <#${channel.id}>`)
             .setTimestamp();
-          await user.send({ embeds: [dmEmbed] }).catch(() => {});
+          await user.send({ embeds: [dmEmbed] }).catch(() => { });
         }
-      } catch {}
+      } catch { }
     }
   },
 
