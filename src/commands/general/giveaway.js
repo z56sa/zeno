@@ -199,7 +199,7 @@ module.exports = {
 
     // إرسال إعلان الفوز
     await channel.send({
-      content: `🥳 **ألف مبروك ${winnersMention}!** لقد فزت بسحب **${giveaway.prize}**! 🎁\nتواصلوا مع المستضيف <@${hostId}> لتسلم الجائزة.`
+      content: `🥳 **ألف مبروك ${winnersMention}!** لقد فزتم بسحب **${giveaway.prize}**! 🎁\nتواصلوا مع المستضيف <@${hostId}> لتستلم الجائزة.`
     });
 
     // إرسال رسالة خاصة DMs للفائزين
