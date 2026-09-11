@@ -2165,9 +2165,10 @@ const leaderboard = database.getInvitesLeaderboard ? database.getInvitesLeaderbo
 
                     <script>
                     async function submitBonusInvites() {
-                        const userId = document.getElementById('bonusUserId').value.trim();
+                        let rawUser = document.getElementById('bonusUserId').value.trim();
+                        const userId = rawUser.replace(/[^0-9]/g, '');
                         const amount = parseInt(document.getElementById('bonusAmount').value, 10);
-                        if (!userId || isNaN(amount)) return alert('يرجى كتابة أيدي العضو وتحديد عدد الدعوات!');
+                        if (!userId || isNaN(amount)) return alert('يرجى كتابة أيدي العضو أو منشن صالح وتحديد عدد الدعوات!');
                         const res = await fetch('/api/guild/${guildId}/invites/add-bonus', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
@@ -9395,6 +9396,41 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
             if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
             const { guildId } = req.params;
             if (database.resetStaffStats) database.resetStaffStats(guildId);
+            res.json({ success: true });
+        } catch(e) {
+            res.status(500).json({ success: false, error: e.message });
+        }
+    });
+
+    // =============================================
+    // Invites API (Add Bonus & Reset)
+    // =============================================
+    app.post('/api/guild/:guildId/invites/add-bonus', express.json(), async (req, res) => {
+        try {
+            if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
+            const { guildId } = req.params;
+            const { userId, amount } = req.body;
+            const cleanId = String(userId || '').replace(/[^0-9]/g, '');
+            const bonusAmount = parseInt(amount, 10);
+            if (!cleanId || isNaN(bonusAmount)) {
+                return res.status(400).json({ success: false, error: 'Invalid user ID or amount' });
+            }
+            if (database.addBonusInvites) {
+                database.addBonusInvites(guildId, cleanId, bonusAmount);
+            }
+            res.json({ success: true });
+        } catch(e) {
+            res.status(500).json({ success: false, error: e.message });
+        }
+    });
+
+    app.post('/api/guild/:guildId/invites/reset', express.json(), async (req, res) => {
+        try {
+            if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
+            const { guildId } = req.params;
+            if (database.resetInvites) {
+                database.resetInvites(guildId);
+            }
             res.json({ success: true });
         } catch(e) {
             res.status(500).json({ success: false, error: e.message });
