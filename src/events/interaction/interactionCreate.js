@@ -138,17 +138,79 @@ module.exports = {
           return interaction.reply({ content: '❌ هذا السحب منتهي أو غير متوفر حالياً.', flags: 64 });
         }
 
+        const entries = db.getGiveawayEntries(interaction.message.id);
+        const hasJoined = entries.includes(interaction.user.id);
+
+        if (hasJoined) {
+          // رسالة تأكيد إلغاء الاشتراك مع أزرار
+          const confirmRow = new ActionRowBuilder().addComponents(
+            new ButtonBuilder()
+              .setCustomId(`gw_leave_confirm_${interaction.message.id}`)
+              .setLabel('نعم، تأكيد إلغاء المشاركة')
+              .setStyle(ButtonStyle.Danger)
+              .setEmoji('🗑️'),
+            new ButtonBuilder()
+              .setCustomId('gw_leave_cancel')
+              .setLabel('تراجع والبقاء في السحب')
+              .setStyle(ButtonStyle.Secondary)
+          );
+
+          return interaction.reply({
+            content: `⚠️ **هل أنت متأكد من رغبتك في إلغاء مشاركتك في سحب: ${gw.prize}؟**\nإذا قمت بالإلغاء ستفقد فرصتك في الفوز!`,
+            components: [confirmRow],
+            flags: 64
+          });
+        }
+
         if (gw.required_role && !interaction.member.roles.cache.has(gw.required_role)) {
           return interaction.reply({ content: `❌ لا يمكنك المشاركة، يجب أن تمتلك رتبة <@&${gw.required_role}> للمشاركة في هذا السحب.`, flags: 64 });
         }
 
-        const res = db.toggleGiveawayEntry(interaction.message.id, interaction.user.id);
-        if (res.joined) {
-          return interaction.reply({ content: `🎉 تم اشتراكك في سحب **${gw.prize}** بنجاح! إجمالي المشاركين الآن: ${res.count}`, flags: 64 });
-        } else {
-          return interaction.reply({ content: `🗑️ تم إلغاء اشتراكك من سحب **${gw.prize}**. إجمالي المشاركين الآن: ${res.count}`, flags: 64 });
-        }
+        const res = db.addGiveawayEntry(interaction.message.id, interaction.user.id);
+        return interaction.reply({ content: `🎉 تم اشتراكك في سحب **${gw.prize}** بنجاح! إجمالي المشاركين الآن: ${res.count}`, flags: 64 });
       }
+
+      // تأكيد إلغاء المشاركة (من الداشبورد أو أمر السلاش)
+      if (interaction.isButton() && (interaction.customId.startsWith('gw_leave_confirm_') || interaction.customId.startsWith('slash_gw_leave_confirm_'))) {
+        const isSlashGw = interaction.customId.startsWith('slash_gw_leave_confirm_');
+        const targetMsgId = interaction.customId.replace(isSlashGw ? 'slash_gw_leave_confirm_' : 'gw_leave_confirm_', '');
+        const gw = db.getGiveaway(targetMsgId);
+        const res = db.removeGiveawayEntry(targetMsgId, interaction.user.id);
+
+        if (isSlashGw) {
+          try {
+            const channel = interaction.channel;
+            const originalMsg = await channel.messages.fetch(targetMsgId).catch(() => null);
+            if (originalMsg) {
+              const newRow = new ActionRowBuilder().addComponents(
+                new ButtonBuilder()
+                  .setCustomId('join_giveaway')
+                  .setLabel(`🎉 اشتراك (${res.count})`)
+                  .setStyle(ButtonStyle.Success),
+                new ButtonBuilder()
+                  .setCustomId('view_giveaway_entries')
+                  .setLabel('👥 المشتركين')
+                  .setStyle(ButtonStyle.Secondary)
+              );
+              await originalMsg.edit({ components: [newRow] }).catch(() => {});
+            }
+          } catch (e) {}
+        }
+
+        return interaction.update({
+          content: `🗑️ **تم إلغاء اشتراكك بنجاح** من سحب **${gw ? gw.prize : 'القيف أواي'}**. إجمالي المشاركين الآن: ${res.count}`,
+          components: []
+        });
+      }
+
+      // التراجع عن إلغاء المشاركة
+      if (interaction.isButton() && interaction.customId === 'gw_leave_cancel') {
+        return interaction.update({
+          content: '✅ **تم التراجع!** ما زلت مشاركاً في السحب، نتمنى لك التوفيق! 🍀',
+          components: []
+        });
+      }
+
 
 
 
@@ -320,20 +382,22 @@ module.exports = {
         const hasJoined = entries.includes(interaction.user.id);
 
         if (hasJoined) {
-          db.removeGiveawayEntry(interaction.message.id, interaction.user.id);
-          const newEntries = db.getGiveawayEntries(interaction.message.id);
-          const newRow = new ActionRowBuilder().addComponents(
+          const confirmRow = new ActionRowBuilder().addComponents(
             new ButtonBuilder()
-              .setCustomId('join_giveaway')
-              .setLabel(`🎉 اشتراك (${newEntries.length})`)
-              .setStyle(ButtonStyle.Success),
+              .setCustomId(`slash_gw_leave_confirm_${interaction.message.id}`)
+              .setLabel('نعم، تأكيد إلغاء المشاركة')
+              .setStyle(ButtonStyle.Danger)
+              .setEmoji('🗑️'),
             new ButtonBuilder()
-              .setCustomId('view_giveaway_entries')
-              .setLabel('👥 المشتركين')
+              .setCustomId('gw_leave_cancel')
+              .setLabel('تراجع والبقاء في السحب')
               .setStyle(ButtonStyle.Secondary)
           );
-          await interaction.message.edit({ components: [newRow] }).catch(() => { });
-          return interaction.editReply({ content: '👋 **تم إلغاء اشتراكك** من هذا السحب.' });
+
+          return interaction.editReply({
+            content: `⚠️ **هل أنت متأكد من رغبتك في إلغاء مشاركتك في سحب: ${giveaway.prize}؟**\nإذا قمت بالإلغاء ستفقد فرصتك في الفوز!`,
+            components: [confirmRow]
+          });
         } else {
           if (giveaway.required_role && !interaction.member.roles.cache.has(giveaway.required_role)) {
             return interaction.editReply({
