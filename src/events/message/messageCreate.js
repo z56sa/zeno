@@ -1,4 +1,4 @@
-const { PermissionFlagsBits } = require('discord.js');
+const { PermissionFlagsBits, EmbedBuilder } = require('discord.js');
 const db = require('../../database');
 const embedUtil = require('../../utils/embed');
 const config = require('../../config.json');
