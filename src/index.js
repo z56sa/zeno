@@ -165,10 +165,15 @@ const statChannelsService = new StatChannelsService(client);
 const StaffShiftService = require('./services/staffShiftService');
 const staffShiftService = new StaffShiftService(client);
 
+// Giveaway Auto-End Service - يُنهي القيف أواي تلقائياً عند انتهاء وقته
+const GiveawayService = require('./services/giveawayService');
+const giveawayService = new GiveawayService(client);
+
 client.once('clientReady', () => {
     autoBroadcaster.start();
     statChannelsService.start();
     staffShiftService.start();
+    giveawayService.start();
 });
 
 // Export for dashboard API use
