@@ -5294,10 +5294,29 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                                         <label class="text-xs font-bold text-gray-300">لون الإطار</label>
                                     </div>
 
-                                    <!-- صورة القيف اواي -->
-                                    <div class="space-y-1.5 pt-2 border-t border-white/5">
-                                        <label class="block text-xs font-bold text-gray-300">صورة القيف اواي (اختياري)</label>
-                                        <input type="text" id="gwImage" placeholder="https://..." class="w-full bg-[#12141f] border border-white/5 focus:border-purple-500 rounded-xl px-4 py-2 text-xs text-white outline-none text-left font-mono">
+                                    <!-- صورة القيف اواي (رفع ملف مع معاينة فورية بدون روابط) -->
+                                    <div class="space-y-2 pt-2 border-t border-white/5">
+                                        <div class="flex items-center justify-between">
+                                            <button type="button" onclick="clearGwImage()" class="text-[11px] text-rose-400 hover:text-rose-300 font-bold flex items-center gap-1 cursor-pointer">
+                                                <span>✕</span><span>إزالة الصورة</span>
+                                            </button>
+                                            <label class="block text-xs font-bold text-gray-300">صورة القيف اواي (اختياري)</label>
+                                        </div>
+                                        
+                                        <div class="flex items-center gap-3 bg-[#12141f] p-3 rounded-2xl border border-white/5">
+                                            <div class="w-16 h-16 rounded-xl border border-white/10 bg-[#0b0d14] overflow-hidden flex items-center justify-center shrink-0">
+                                                <img id="prev_gwImage_box" src="" class="w-full h-full object-cover hidden">
+                                                <span id="ph_gwImage" class="text-xl text-gray-600">🖼️</span>
+                                            </div>
+                                            <div class="flex-1 space-y-1">
+                                                <input type="hidden" id="gwImage" value="">
+                                                <input type="file" id="file_gwImage" accept="image/*" class="hidden" onchange="uploadGwImageFile(this)">
+                                                <button type="button" onclick="document.getElementById('file_gwImage').click()" class="w-full px-3 py-2 bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/30 text-purple-300 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 cursor-pointer transition active:scale-95">
+                                                    <span>📤</span><span id="btn_text_gwImage">اختيار صورة من الجهاز</span>
+                                                </button>
+                                                <p class="text-[10px] text-gray-400 text-right">اختر صورة من جهازك مباشرة بدون الحاجة لأي رابط</p>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -5410,6 +5429,72 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                             alert('حدث خطأ في الاتصال بالخادم');
                         }
                     }
+
+                    async function uploadGwImageFile(input) {
+                        var file = input.files && input.files[0];
+                        if (!file) return;
+                        if (!file.type.startsWith('image/')) {
+                            alert('❌ يرجى اختيار ملف صورة صالح (PNG, JPG, WEBP, GIF)');
+                            return;
+                        }
+                        if (file.size > 15 * 1024 * 1024) {
+                            alert('❌ حجم الصورة كبير جداً (أكثر من 15 ميجابايت)');
+                            return;
+                        }
+
+                        // معاينة فورية محلية
+                        var localUrl = URL.createObjectURL(file);
+                        var boxImg = document.getElementById('prev_gwImage_box');
+                        var ph = document.getElementById('ph_gwImage');
+                        if (boxImg) { boxImg.src = localUrl; boxImg.classList.remove('hidden'); }
+                        if (ph) ph.classList.add('hidden');
+                        var hiddenInput = document.getElementById('gwImage');
+                        if (hiddenInput) hiddenInput.value = localUrl;
+
+                        var btnText = document.getElementById('btn_text_gwImage');
+                        var origText = btnText ? btnText.innerText : 'اختيار صورة من الجهاز';
+                        if (btnText) btnText.innerText = 'جاري الرفع... ⏳';
+
+                        var reader = new FileReader();
+                        reader.onload = async function(e) {
+                            try {
+                                var res = await fetch('/api/guild/${guildId}/upload-image', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ imageBase64: e.target.result, fieldName: 'gwImage' })
+                                });
+                                var data = await res.json();
+                                if (data.success && data.url) {
+                                    if (hiddenInput) hiddenInput.value = data.url;
+                                    if (boxImg) boxImg.src = data.url;
+                                    if (btnText) btnText.innerText = '✅ تم الرفع';
+                                    setTimeout(function() { if (btnText) btnText.innerText = origText; }, 2000);
+                                    URL.revokeObjectURL(localUrl);
+                                } else {
+                                    alert('⚠️ تعذّر رفع الصورة: ' + (data.error || 'خطأ غير معروف'));
+                                    if (btnText) btnText.innerText = origText;
+                                }
+                            } catch(err) {
+                                alert('⚠️ خطأ في الاتصال أثناء رفع الصورة');
+                                if (btnText) btnText.innerText = origText;
+                            }
+                        };
+                        reader.readAsDataURL(file);
+                    }
+
+                    function clearGwImage() {
+                        var hiddenInput = document.getElementById('gwImage');
+                        if (hiddenInput) hiddenInput.value = '';
+                        var fileInp = document.getElementById('file_gwImage');
+                        if (fileInp) fileInp.value = '';
+                        var boxImg = document.getElementById('prev_gwImage_box');
+                        var ph = document.getElementById('ph_gwImage');
+                        if (boxImg) { boxImg.src = ''; boxImg.classList.add('hidden'); }
+                        if (ph) ph.classList.remove('hidden');
+                    }
+
+                    window.uploadGwImageFile = uploadGwImageFile;
+                    window.clearGwImage = clearGwImage;
                     </script>
 `;
             } else if (section === 'suggestions') {
