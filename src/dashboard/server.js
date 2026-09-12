@@ -8418,13 +8418,16 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                             </div>
                         </div>
                     </div>
+                `;
 
-                    <script>
+            // Embed page script (injected globally, not inside the form)
+            const embedScriptHtml = section === 'embed' ? `
                     let embedFields = [];
 
                     function selectColor(hex) {
                         const c = document.getElementById('embColor');
                         const h = document.getElementById('embHexInput');
+
                         if (c) c.value = hex;
                         if (h) h.value = hex.toUpperCase();
                         updateEmbedPreview();
@@ -8673,7 +8676,7 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                             alert('حدث خطأ أثناء الاتصال بالخادم');
                         } finally {
                             btn.disabled = false;
-                            btn.innerHTML = '<span>🚀 إرسال</span>';
+                            btn.innerHTML = '<span>🚀 إرسال للقناة</span>';
                         }
                     }
 
@@ -8782,8 +8785,7 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
 
                         updateEmbedPreview();
                     }
-                    </script>
-                `;
+                ` : '';
             } else {
                 formFieldsHtml = `
                     <div class="space-y-5 text-right" dir="rtl">
@@ -9319,6 +9321,7 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                     if (fileInput) fileInput.value = '';
                     if (typeof onDone === 'function') onDone();
                 }
+                ${embedScriptHtml}
                 </script>
             </body>
             </html>
