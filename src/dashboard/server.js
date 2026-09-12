@@ -8247,24 +8247,30 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                             </div>
 
                             <!-- Author row -->
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                <div>
-                                    <div class="flex items-center justify-between mb-1">
-                                        <button type="button" onclick="clearEmbedImageField('embAuthorIcon')" class="text-[10px] text-rose-400 hover:text-rose-300 font-bold transition">🗑️ إزالة</button>
-                                        <label class="block text-[11px] font-bold text-gray-300">أيقونة الكاتب (صورة دائرية أعلى الإيمبد)</label>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="bg-[#0b0d14] border border-white/5 rounded-2xl p-4 space-y-3">
+                                    <div class="flex items-center justify-between">
+                                        <button type="button" onclick="clearEmbedImageField('embAuthorIcon')" class="text-[11px] text-rose-400 hover:text-rose-300 font-bold transition">🗑️ إزالة الأيقونة</button>
+                                        <label class="block text-xs font-bold text-gray-300">أيقونة الكاتب (صورة دائرية)</label>
                                     </div>
-                                    <div class="flex items-center gap-2">
-                                        <input type="file" id="file_embAuthorIcon" accept="image/*" class="hidden" onchange="uploadEmbedImageFile(this, 'embAuthorIcon')">
-                                        <button type="button" onclick="document.getElementById('file_embAuthorIcon').click()" class="px-3 py-2 bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/30 text-purple-300 rounded-xl text-xs font-bold transition shrink-0 flex items-center gap-1">
-                                            <span>📤</span><span id="btn_text_embAuthorIcon">رفع أيقونة</span>
-                                        </button>
-                                        <input type="url" id="embAuthorIcon" placeholder="ارفع صورة أو ضع رابط https://..." oninput="updateEmbedPreview()" class="flex-1 bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-3 py-2 text-xs text-white outline-none text-left font-mono">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-12 h-12 rounded-full border border-white/10 bg-[#12141f] overflow-hidden flex items-center justify-center shrink-0">
+                                            <img id="prev_embAuthorIcon_box" src="" class="w-full h-full object-cover hidden">
+                                            <span id="ph_embAuthorIcon" class="text-xs text-gray-600 font-bold">👤</span>
+                                        </div>
+                                        <div class="flex-1 space-y-1">
+                                            <input type="hidden" id="embAuthorIcon" value="">
+                                            <input type="file" id="file_embAuthorIcon" accept="image/*" class="hidden" onchange="uploadEmbedImageFile(this, 'embAuthorIcon')">
+                                            <button type="button" onclick="document.getElementById('file_embAuthorIcon').click()" class="w-full px-4 py-2 bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/30 text-purple-300 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5">
+                                                <span>📤</span><span id="btn_text_embAuthorIcon">رفع أيقونة الكاتب</span>
+                                            </button>
+                                            <p class="text-[10px] text-gray-500 text-right">صورة دائرية تظهر بجانب الاسم في الأعلى</p>
+                                        </div>
                                     </div>
-                                    <p class="text-[10px] text-gray-500 text-right mt-1">تظهر كأيقونة مصغرة بجانب اسم الكاتب</p>
                                 </div>
-                                <div>
-                                    <label class="block text-[11px] font-bold text-gray-300 mb-1">اسم الكاتب أو الجهة (Author Name)</label>
-                                    <input type="text" id="embAuthor" placeholder="مثال: ZENO Announcement" oninput="updateEmbedPreview()" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-3 py-2.5 text-xs text-white outline-none text-right">
+                                <div class="space-y-1 flex flex-col justify-center">
+                                    <label class="block text-xs font-bold text-gray-300 mb-1">اسم الكاتب أو الجهة (Author Name)</label>
+                                    <input type="text" id="embAuthor" placeholder="مثال: إدارة السيرفر / ZENO Announcements" oninput="updateEmbedPreview()" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right">
                                     <p class="text-[10px] text-gray-500 text-right mt-1">يظهر كعنوان فرعي في أعلى الرسالة</p>
                                 </div>
                             </div>
@@ -8274,7 +8280,7 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                                 <div>
                                     <label class="block text-[11px] font-bold text-gray-300 mb-1">رابط العنوان عند الضغط عليه (موقع / سيرفر / صفحة)</label>
                                     <input type="url" id="embTitleUrl" placeholder="https://example.com (اختياري)" oninput="updateEmbedPreview()" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-3 py-2.5 text-xs text-white outline-none text-left font-mono">
-                                    <p class="text-[10px] text-gray-500 text-right mt-1">🔗 عند وضع رابط هنا، سيتحول عنوان الإيمبد إلى رابط قابل للضغط يفتح هذه الصفحة</p>
+                                    <p class="text-[10px] text-gray-500 text-right mt-1">🔗 عند وضع رابط هنا، سيتحول عنوان الإيمبد إلى رابط أزرق يفتح هذه الصفحة عند الضغط عليه</p>
                                 </div>
                                 <div>
                                     <label class="block text-[11px] font-bold text-gray-300 mb-1">عنوان الإيمبد الرئيسي (Title)</label>
@@ -8289,38 +8295,50 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                                 <textarea id="embDesc" rows="4" placeholder="اكتب محتوى الرسالة هنا... يدعم Markdown مثل **عريض** و *مائل*" oninput="updateEmbedPreview()" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-3 py-2.5 text-xs text-white outline-none text-right leading-relaxed"></textarea>
                             </div>
 
-                            <!-- Image & Thumbnail URLs with Upload options -->
+                            <!-- Image & Thumbnail - Pure Upload cards (No URL inputs) -->
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <!-- الصورة المصغرة (Thumbnail) -->
-                                <div class="bg-[#0b0d14] border border-white/5 rounded-2xl p-3.5 space-y-2.5">
+                                <div class="bg-[#0b0d14] border border-white/5 rounded-2xl p-4 space-y-3">
                                     <div class="flex items-center justify-between">
-                                        <button type="button" onclick="clearEmbedImageField('embThumbnail', 'prev_embThumbnail')" class="text-[10px] text-rose-400 hover:text-rose-300 font-bold transition">🗑️ إزالة</button>
-                                        <label class="block text-[11px] font-bold text-gray-300">الصورة المصغرة (Thumbnail)</label>
+                                        <button type="button" onclick="clearEmbedImageField('embThumbnail')" class="text-[11px] text-rose-400 hover:text-rose-300 font-bold transition">🗑️ إزالة الصورة</button>
+                                        <label class="block text-xs font-bold text-gray-300">الصورة المصغرة (Thumbnail)</label>
                                     </div>
-                                    <div class="flex items-center gap-2">
-                                        <input type="file" id="file_embThumbnail" accept="image/*" class="hidden" onchange="uploadEmbedImageFile(this, 'embThumbnail')">
-                                        <button type="button" onclick="document.getElementById('file_embThumbnail').click()" class="px-3 py-2 bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/30 text-purple-300 rounded-xl text-xs font-bold transition shrink-0 flex items-center gap-1">
-                                            <span>📤</span><span id="btn_text_embThumbnail">رفع</span>
-                                        </button>
-                                        <input type="url" id="embThumbnail" placeholder="https://... أو ارفع صورة" oninput="updateEmbedPreview()" class="flex-1 bg-[#12141f] border border-white/5 focus:border-purple-600 rounded-xl px-3 py-2 text-xs text-white outline-none text-left font-mono">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-16 h-16 rounded-xl border border-white/10 bg-[#12141f] overflow-hidden flex items-center justify-center shrink-0">
+                                            <img id="prev_embThumbnail_box" src="" class="w-full h-full object-cover hidden">
+                                            <span id="ph_embThumbnail" class="text-xl text-gray-600">🖼️</span>
+                                        </div>
+                                        <div class="flex-1 space-y-1">
+                                            <input type="hidden" id="embThumbnail" value="">
+                                            <input type="file" id="file_embThumbnail" accept="image/*" class="hidden" onchange="uploadEmbedImageFile(this, 'embThumbnail')">
+                                            <button type="button" onclick="document.getElementById('file_embThumbnail').click()" class="w-full px-4 py-2 bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/30 text-purple-300 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5">
+                                                <span>📤</span><span id="btn_text_embThumbnail">رفع صورة مصغرة</span>
+                                            </button>
+                                            <p class="text-[10px] text-gray-500 text-right">صورة صغيرة تظهر بأعلى يمين الإيمبد</p>
+                                        </div>
                                     </div>
-                                    <p class="text-[10px] text-gray-500 text-right">تظهر في الزاوية العلوية اليمنى للإيمبد</p>
                                 </div>
 
                                 <!-- الصورة الكبيرة (Main Image) -->
-                                <div class="bg-[#0b0d14] border border-white/5 rounded-2xl p-3.5 space-y-2.5">
+                                <div class="bg-[#0b0d14] border border-white/5 rounded-2xl p-4 space-y-3">
                                     <div class="flex items-center justify-between">
-                                        <button type="button" onclick="clearEmbedImageField('embImage', 'prev_embImage')" class="text-[10px] text-rose-400 hover:text-rose-300 font-bold transition">🗑️ إزالة</button>
-                                        <label class="block text-[11px] font-bold text-gray-300">الصورة الرئيسية (Main Image)</label>
+                                        <button type="button" onclick="clearEmbedImageField('embImage')" class="text-[11px] text-rose-400 hover:text-rose-300 font-bold transition">🗑️ إزالة الصورة</button>
+                                        <label class="block text-xs font-bold text-gray-300">الصورة الرئيسية (Main Image)</label>
                                     </div>
-                                    <div class="flex items-center gap-2">
-                                        <input type="file" id="file_embImage" accept="image/*" class="hidden" onchange="uploadEmbedImageFile(this, 'embImage')">
-                                        <button type="button" onclick="document.getElementById('file_embImage').click()" class="px-3 py-2 bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/30 text-purple-300 rounded-xl text-xs font-bold transition shrink-0 flex items-center gap-1">
-                                            <span>📤</span><span id="btn_text_embImage">رفع</span>
-                                        </button>
-                                        <input type="url" id="embImage" placeholder="https://... أو ارفع صورة" oninput="updateEmbedPreview()" class="flex-1 bg-[#12141f] border border-white/5 focus:border-purple-600 rounded-xl px-3 py-2 text-xs text-white outline-none text-left font-mono">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-20 h-16 rounded-xl border border-white/10 bg-[#12141f] overflow-hidden flex items-center justify-center shrink-0">
+                                            <img id="prev_embImage_box" src="" class="w-full h-full object-cover hidden">
+                                            <span id="ph_embImage" class="text-xl text-gray-600">🖼️</span>
+                                        </div>
+                                        <div class="flex-1 space-y-1">
+                                            <input type="hidden" id="embImage" value="">
+                                            <input type="file" id="file_embImage" accept="image/*" class="hidden" onchange="uploadEmbedImageFile(this, 'embImage')">
+                                            <button type="button" onclick="document.getElementById('file_embImage').click()" class="w-full px-4 py-2 bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/30 text-purple-300 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5">
+                                                <span>📤</span><span id="btn_text_embImage">رفع صورة عريضة</span>
+                                            </button>
+                                            <p class="text-[10px] text-gray-500 text-right">بانر عريض يظهر أسفل محتوى الرسالة</p>
+                                        </div>
                                     </div>
-                                    <p class="text-[10px] text-gray-500 text-right">تظهر بحجم عريض أسفل محتوى الإيمبد</p>
                                 </div>
                             </div>
 
@@ -8349,41 +8367,92 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                                 <h4 class="text-sm font-black text-white flex items-center gap-2"><span>التذييل والوقت (Footer)</span><span>⏰</span></h4>
                             </div>
 
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                <div>
-                                    <label class="block text-[11px] font-bold text-gray-400 mb-1">أيقونة التذييل (Footer Icon URL)</label>
-                                    <input type="url" id="embFooterIcon" placeholder="https://..." oninput="updateEmbedPreview()" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-3 py-2.5 text-xs text-white outline-none text-left font-mono">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="bg-[#0b0d14] border border-white/5 rounded-2xl p-3.5 space-y-2">
+                                    <div class="flex items-center justify-between">
+                                        <button type="button" onclick="clearEmbedImageField('embFooterIcon')" class="text-[10px] text-rose-400 hover:text-rose-300 font-bold transition">🗑️ إزالة</button>
+                                        <label class="block text-xs font-bold text-gray-300">أيقونة التذييل (صغيرة بجانب الفوتر)</label>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-9 h-9 rounded-full border border-white/10 bg-[#12141f] overflow-hidden flex items-center justify-center shrink-0">
+                                            <img id="prev_embFooterIcon_box" src="" class="w-full h-full object-cover hidden">
+                                            <span id="ph_embFooterIcon" class="text-xs text-gray-600">⏰</span>
+                                        </div>
+                                        <input type="hidden" id="embFooterIcon" value="">
+                                        <input type="file" id="file_embFooterIcon" accept="image/*" class="hidden" onchange="uploadEmbedImageFile(this, 'embFooterIcon')">
+                                        <button type="button" onclick="document.getElementById('file_embFooterIcon').click()" class="flex-1 px-3 py-2 bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/30 text-purple-300 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5">
+                                            <span>📤</span><span id="btn_text_embFooterIcon">رفع أيقونة</span>
+                                        </button>
+                                    </div>
                                 </div>
-                                <div>
-                                    <label class="block text-[11px] font-bold text-gray-400 mb-1">نص التذييل (Footer Text)</label>
-                                    <input type="text" id="embFooter" placeholder="مثال: ZENO Bot • اليوم" oninput="updateEmbedPreview()" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-3 py-2.5 text-xs text-white outline-none text-right">
+                                <div class="flex flex-col justify-center">
+                                    <label class="block text-xs font-bold text-gray-300 mb-1">نص التذييل (Footer Text)</label>
+                                    <input type="text" id="embFooter" placeholder="مثال: ZENO Bot • إعلان رسمي" oninput="updateEmbedPreview()" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right">
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Live Discord Preview Box -->
-                        <div id="livePreviewCard" class="bg-[#12141f] border border-purple-500/20 p-6 rounded-3xl space-y-3 shadow-2xl">
+                        <!-- Live Discord Preview Box (Real Discord Appearance) -->
+                        <div id="livePreviewCard" class="bg-[#12141f] border border-purple-500/20 p-6 rounded-3xl space-y-4 shadow-2xl">
                             <div class="flex items-center justify-between pb-3 border-b border-white/5">
-                                <span class="text-[10px] bg-purple-600/20 text-purple-300 px-2 py-0.5 rounded-full font-bold border border-purple-500/30">معاينة مباشرة</span>
+                                <span class="text-[10px] bg-emerald-600/20 text-emerald-300 px-2.5 py-1 rounded-full font-bold border border-emerald-500/30 flex items-center gap-1.5">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                                    <span>معاينة حية ومباشرة ديسكورد</span>
+                                </span>
                                 <h4 class="text-sm font-black text-white flex items-center gap-2"><span>شكل الرسالة في ديسكورد</span><span>👁️</span></h4>
                             </div>
 
-                            <div class="bg-[#2b2d31] p-4 rounded-xl max-w-2xl ml-auto border-r-4 shadow-md transition-all" id="previewEmbedBox" style="border-right-color: #9333ea;">
-                                <div id="prevAuthorRow" class="hidden items-center justify-end gap-2 mb-2">
-                                    <span id="prevAuthorText" class="text-xs font-bold text-white"></span>
-                                    <img id="prevAuthorImg" class="w-5 h-5 rounded-full object-cover hidden" src="" alt="">
+                            <!-- Discord Message Bubble simulation -->
+                            <div class="bg-[#313338] p-4 rounded-2xl max-w-2xl ml-auto text-right font-sans shadow-xl border border-black/30 space-y-2">
+                                <!-- Bot Header in Discord -->
+                                <div class="flex items-center justify-end gap-3 pb-1">
+                                    <div class="flex items-center gap-1.5">
+                                        <span class="text-[10px] text-gray-400 font-medium font-sans">اليوم في 12:00 م</span>
+                                        <span class="bg-[#5865f2] text-white text-[9px] font-extrabold px-1 py-0.2 rounded font-sans leading-tight">BOT</span>
+                                        <span class="font-bold text-white text-xs hover:underline cursor-pointer">ZENO</span>
+                                    </div>
+                                    <img src="${botAvatar}" class="w-9 h-9 rounded-full object-cover shadow">
                                 </div>
-                                <div id="prevTitle" class="text-sm font-black text-white mb-1.5 hover:underline cursor-pointer"></div>
-                                <div id="prevDesc" class="text-xs text-gray-300 whitespace-pre-wrap leading-relaxed"></div>
-                                <div id="prevFieldsGrid" class="grid grid-cols-2 gap-2 mt-3 hidden"></div>
-                                <div id="prevImageRow" class="mt-3 hidden">
-                                    <img id="prevMainImg" class="rounded-lg max-h-60 w-full object-cover" src="" alt="">
-                                </div>
-                                <div id="prevFooterRow" class="mt-3 pt-2 border-t border-white/5 flex items-center justify-end gap-2 text-[10px] text-gray-400">
-                                    <span id="prevTimestamp" class="text-gray-500"></span>
-                                    <span id="prevFooterDot" class="hidden">•</span>
-                                    <span id="prevFooterText"></span>
-                                    <img id="prevFooterImg" class="w-4 h-4 rounded-full object-cover hidden" src="" alt="">
+
+                                <!-- Embed Container -->
+                                <div class="bg-[#2b2d31] p-4 rounded-lg border-r-[4px] shadow-sm transition-all" id="previewEmbedBox" style="border-right-color: #9333ea;">
+                                    <div class="flex items-start justify-between gap-4">
+                                        <!-- Left: Thumbnail (in RTL, it will be on the left of content) -->
+                                        <div id="prevThumbnailWrap" class="hidden shrink-0">
+                                            <img id="prevThumbnailImg" class="w-20 h-20 rounded-lg object-cover shadow" src="" alt="">
+                                        </div>
+
+                                        <!-- Right: Embed Body -->
+                                        <div class="flex-1 min-w-0 space-y-2">
+                                            <!-- Author Row -->
+                                            <div id="prevAuthorRow" class="hidden items-center justify-end gap-2">
+                                                <span id="prevAuthorText" class="text-xs font-bold text-white leading-none"></span>
+                                                <img id="prevAuthorImg" class="w-5 h-5 rounded-full object-cover hidden shadow" src="" alt="">
+                                            </div>
+
+                                            <!-- Title -->
+                                            <div id="prevTitle" class="text-sm font-bold text-white hover:underline cursor-pointer leading-snug"></div>
+
+                                            <!-- Description -->
+                                            <div id="prevDesc" class="text-xs text-gray-300 whitespace-pre-wrap leading-relaxed"></div>
+
+                                            <!-- Fields -->
+                                            <div id="prevFieldsGrid" class="grid grid-cols-2 gap-2 pt-1 hidden"></div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Main Image -->
+                                    <div id="prevImageRow" class="mt-3 hidden">
+                                        <img id="prevMainImg" class="rounded-lg max-h-72 w-full object-cover shadow" src="" alt="">
+                                    </div>
+
+                                    <!-- Footer Row -->
+                                    <div id="prevFooterRow" class="mt-3 pt-2 flex items-center justify-end gap-2 text-[10px] text-gray-400">
+                                        <span id="prevTimestamp" class="text-gray-400 font-sans"></span>
+                                        <span id="prevFooterDot" class="hidden font-bold">•</span>
+                                        <span id="prevFooterText"></span>
+                                        <img id="prevFooterImg" class="w-4 h-4 rounded-full object-cover hidden" src="" alt="">
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -8493,8 +8562,31 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                         }
 
                         const prevTitle = document.getElementById('prevTitle');
-                        prevTitle.textContent = title || '';
-                        prevTitle.style.display = title ? 'block' : 'none';
+                        const titleUrl = document.getElementById('embTitleUrl').value.trim();
+                        if (title) {
+                            prevTitle.style.display = 'block';
+                            if (titleUrl) {
+                                prevTitle.innerHTML = '<a href="' + titleUrl + '" target="_blank" class="text-[#00a8fc] hover:underline">' + title + '</a>';
+                            } else {
+                                prevTitle.textContent = title;
+                            }
+                        } else {
+                            prevTitle.style.display = 'none';
+                            prevTitle.innerHTML = '';
+                        }
+
+                        // Thumbnail
+                        const prevThumbnailWrap = document.getElementById('prevThumbnailWrap');
+                        const prevThumbnailImg = document.getElementById('prevThumbnailImg');
+                        if (prevThumbnailWrap && prevThumbnailImg) {
+                            if (thumbnail) {
+                                prevThumbnailImg.src = thumbnail;
+                                prevThumbnailWrap.classList.remove('hidden');
+                            } else {
+                                prevThumbnailImg.src = '';
+                                prevThumbnailWrap.classList.add('hidden');
+                            }
+                        }
 
                         const prevDesc = document.getElementById('prevDesc');
                         prevDesc.textContent = desc || 'محتوى الإيمبد سيظهر هنا بالمعاينة المباشرة...';
@@ -8624,12 +8716,36 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                                 if (d.title) document.getElementById('embTitle').value = d.title;
                                 if (d.desc) document.getElementById('embDesc').value = d.desc;
                                 if (d.author) document.getElementById('embAuthor').value = d.author;
-                                if (d.authorIcon) document.getElementById('embAuthorIcon').value = d.authorIcon;
+                                if (d.authorIcon) {
+                                    document.getElementById('embAuthorIcon').value = d.authorIcon;
+                                    const b = document.getElementById('prev_embAuthorIcon_box');
+                                    const p = document.getElementById('ph_embAuthorIcon');
+                                    if (b) { b.src = d.authorIcon; b.classList.remove('hidden'); }
+                                    if (p) p.classList.add('hidden');
+                                }
                                 if (d.titleUrl) document.getElementById('embTitleUrl').value = d.titleUrl;
-                                if (d.image) document.getElementById('embImage').value = d.image;
-                                if (d.thumbnail) document.getElementById('embThumbnail').value = d.thumbnail;
+                                if (d.image) {
+                                    document.getElementById('embImage').value = d.image;
+                                    const b = document.getElementById('prev_embImage_box');
+                                    const p = document.getElementById('ph_embImage');
+                                    if (b) { b.src = d.image; b.classList.remove('hidden'); }
+                                    if (p) p.classList.add('hidden');
+                                }
+                                if (d.thumbnail) {
+                                    document.getElementById('embThumbnail').value = d.thumbnail;
+                                    const b = document.getElementById('prev_embThumbnail_box');
+                                    const p = document.getElementById('ph_embThumbnail');
+                                    if (b) { b.src = d.thumbnail; b.classList.remove('hidden'); }
+                                    if (p) p.classList.add('hidden');
+                                }
                                 if (d.footer) document.getElementById('embFooter').value = d.footer;
-                                if (d.footerIcon) document.getElementById('embFooterIcon').value = d.footerIcon;
+                                if (d.footerIcon) {
+                                    document.getElementById('embFooterIcon').value = d.footerIcon;
+                                    const b = document.getElementById('prev_embFooterIcon_box');
+                                    const p = document.getElementById('ph_embFooterIcon');
+                                    if (b) { b.src = d.footerIcon; b.classList.remove('hidden'); }
+                                    if (p) p.classList.add('hidden');
+                                }
                                 if (d.color) selectColor(d.color);
                                 if (Array.isArray(d.fields)) {
                                     embedFields = d.fields;
@@ -8643,11 +8759,12 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                     async function uploadEmbedImageFile(input, targetId) {
                         const file = input.files && input.files[0];
                         if (!file) return;
-                        if (!file.type.startsWith('image/')) return alert('يرجى اختيار ملف صورة صالح');
+                        if (!file.type.startsWith('image/')) return alert('يرجى اختيار ملف صورة صالح (PNG, JPG, WEBP, GIF)');
                         if (file.size > 15 * 1024 * 1024) return alert('حجم الصورة كبير جداً (أكثر من 15 ميجابايت)');
 
                         const btnText = document.getElementById('btn_text_' + targetId);
-                        if (btnText) btnText.innerText = 'جاري الرفع...';
+                        const origText = btnText ? btnText.innerText : 'رفع';
+                        if (btnText) btnText.innerText = 'جاري الرفع... ⏳';
 
                         const reader = new FileReader();
                         reader.onload = async function(e) {
@@ -8660,16 +8777,26 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                                 const data = await res.json();
                                 if (data.success && data.url) {
                                     document.getElementById(targetId).value = data.url;
+
+                                    // تحديث المعاينة داخل بطاقة الرفع
+                                    const boxImg = document.getElementById('prev_' + targetId + '_box');
+                                    const ph = document.getElementById('ph_' + targetId);
+                                    if (boxImg) {
+                                        boxImg.src = data.url;
+                                        boxImg.classList.remove('hidden');
+                                    }
+                                    if (ph) ph.classList.add('hidden');
+
                                     updateEmbedPreview();
-                                    if (btnText) btnText.innerText = '✅ تم';
-                                    setTimeout(() => { if (btnText) btnText.innerText = 'رفع'; }, 2000);
+                                    if (btnText) btnText.innerText = '✅ تم الرفع';
+                                    setTimeout(() => { if (btnText) btnText.innerText = origText; }, 2000);
                                 } else {
                                     alert('❌ فشل رفع الصورة: ' + (data.error || 'خطأ غير معروف'));
-                                    if (btnText) btnText.innerText = 'رفع';
+                                    if (btnText) btnText.innerText = origText;
                                 }
                             } catch(err) {
                                 alert('حدث خطأ في الاتصال بالخادم أثناء الرفع');
-                                if (btnText) btnText.innerText = 'رفع';
+                                if (btnText) btnText.innerText = origText;
                             }
                         };
                         reader.readAsDataURL(file);
@@ -8679,6 +8806,16 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                         document.getElementById(targetId).value = '';
                         const fileInp = document.getElementById('file_' + targetId);
                         if (fileInp) fileInp.value = '';
+
+                        // مسح المعاينة داخل بطاقة الرفع
+                        const boxImg = document.getElementById('prev_' + targetId + '_box');
+                        const ph = document.getElementById('ph_' + targetId);
+                        if (boxImg) {
+                            boxImg.src = '';
+                            boxImg.classList.add('hidden');
+                        }
+                        if (ph) ph.classList.remove('hidden');
+
                         updateEmbedPreview();
                     }
                     </script>
