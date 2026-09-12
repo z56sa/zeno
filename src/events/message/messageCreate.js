@@ -18,8 +18,8 @@ module.exports = {
     const isAdmin = message.member?.permissions.has(PermissionFlagsBits.Administrator) ||
                     message.member?.permissions.has(PermissionFlagsBits.ManageGuild);
 
-    // الأدمنية غير معفيين تلقائياً — يجب تفعيل automod_ignore_admins من الداشبورد لإعفائهم
-    const isAutoModWhitelisted = (settings.automod_ignore_admins === 1 && isAdmin) ||
+    // الأدمنية غير معفيين من الرقابة التلقائية بأي حال — يجب إضافتهم يدوياً في الداشبورد
+    const isAutoModWhitelisted =
       (settings.automod_whitelist_role && message.member?.roles.cache.has(settings.automod_whitelist_role)) ||
       (settings.automod_whitelist_channel && message.channel.id === settings.automod_whitelist_channel) ||
       (settings.automod_exempt_users && settings.automod_exempt_users.split(',').map(u => u.trim()).includes(userId)) ||
