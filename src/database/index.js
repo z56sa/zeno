@@ -446,6 +446,10 @@ try { db.exec("ALTER TABLE tickets ADD COLUMN claimed_at INTEGER;"); } catch(e) 
 try { db.exec("ALTER TABLE tickets ADD COLUMN closed_by TEXT;"); } catch(e) {}
 try { db.exec("ALTER TABLE tickets ADD COLUMN close_reason TEXT;"); } catch(e) {}
 try { db.exec("ALTER TABLE tickets ADD COLUMN transcript_url TEXT;"); } catch(e) {}
+try { db.exec("ALTER TABLE applications ADD COLUMN panel_image TEXT;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN welcome_banner_image TEXT;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN level_up_image TEXT;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN broadcast_image TEXT;"); } catch(e) {}
 
 try { db.exec("ALTER TABLE giveaways ADD COLUMN required_role TEXT;"); } catch(e) {}
 try { db.exec("ALTER TABLE giveaways ADD COLUMN min_level INTEGER DEFAULT 0;"); } catch(e) {}
@@ -1089,22 +1093,22 @@ function deleteTempVoice(channelId) {
 // ==========================================
 // Applications (نظام التقديمات)
 // ==========================================
-function createApplication(guildId, title, description, questions, logChannel, acceptedRole, reviewerRole = null) {
+function createApplication(guildId, title, description, questions, logChannel, acceptedRole, reviewerRole = null, panelImage = null) {
   const qStr = typeof questions === 'string' ? questions : JSON.stringify(questions);
   const result = db.prepare(`
-    INSERT INTO applications (guild_id, title, description, questions, log_channel, accepted_role, reviewer_role)
-    VALUES (?, ?, ?, ?, ?, ?, ?)
-  `).run(guildId, title, description, qStr, logChannel, acceptedRole, reviewerRole);
+    INSERT INTO applications (guild_id, title, description, questions, log_channel, accepted_role, reviewer_role, panel_image)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+  `).run(guildId, title, description, qStr, logChannel, acceptedRole, reviewerRole, panelImage);
   return db.prepare('SELECT * FROM applications WHERE id = ?').get(result.lastInsertRowid);
 }
 
-function updateApplication(id, title, description, questions, logChannel, acceptedRole, reviewerRole = null, status = 'open') {
+function updateApplication(id, title, description, questions, logChannel, acceptedRole, reviewerRole = null, status = 'open', panelImage = null) {
   const qStr = typeof questions === 'string' ? questions : JSON.stringify(questions);
   db.prepare(`
     UPDATE applications
-    SET title = ?, description = ?, questions = ?, log_channel = ?, accepted_role = ?, reviewer_role = ?, status = ?
+    SET title = ?, description = ?, questions = ?, log_channel = ?, accepted_role = ?, reviewer_role = ?, status = ?, panel_image = COALESCE(?, panel_image)
     WHERE id = ?
-  `).run(title, description, qStr, logChannel, acceptedRole, reviewerRole, status, id);
+  `).run(title, description, qStr, logChannel, acceptedRole, reviewerRole, status, panelImage, id);
   return db.prepare('SELECT * FROM applications WHERE id = ?').get(id);
 }
 

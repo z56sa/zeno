@@ -2306,6 +2306,49 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                                 </div>
                             </div>
 
+                            <!-- صورة بنر الإعلان بنمط Wicks -->
+                            <div class="bg-[#12141f] border border-white/5 hover:border-emerald-500/30 rounded-3xl p-6 transition shadow-xl space-y-3">
+                                <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+                                    <!-- المعاينة وزر الحذف -->
+                                    <div class="w-full md:w-auto flex flex-col items-center gap-2">
+                                        <div class="w-full md:w-56 h-28 rounded-2xl border border-white/10 bg-[#0b0d14] overflow-hidden flex items-center justify-center relative group">
+                                            <img id="img_broadcast_image" src="${settings.broadcast_image || ''}" class="w-full h-full object-cover ${settings.broadcast_image ? '' : 'hidden'}">
+                                            <div id="placeholder_broadcast_image" class="text-gray-500 text-xs flex flex-col items-center gap-1 ${settings.broadcast_image ? 'hidden' : ''}">
+                                                <span class="text-2xl">🖼️</span>
+                                                <span>لا توجد صورة</span>
+                                            </div>
+                                        </div>
+                                        <button type="button" onclick="clearUploadedImageInDOM('broadcast_image', () => saveBroadcastImageSetting(''))" class="text-xs text-rose-400 hover:text-rose-300 flex items-center gap-1.5 transition font-bold py-1 px-3 rounded-lg hover:bg-rose-950/30 cursor-pointer">
+                                            <span>🗑️</span>
+                                            <span>إزالة الصورة</span>
+                                        </button>
+                                    </div>
+
+                                    <!-- نصوص الشرح -->
+                                    <div class="flex-1 text-right space-y-1 w-full">
+                                        <div class="flex items-center justify-end gap-2">
+                                            <h5 class="text-sm font-black text-white">صورة بنر الإعلان / المذيع الآلي</h5>
+                                            <span class="text-emerald-400 text-base">📢</span>
+                                        </div>
+                                        <ul class="text-[11px] text-gray-400 space-y-0.5 list-disc list-inside">
+                                            <li>ستُرفق هذه الصورة أو البنر تلقائياً مع رسائل الإعلانات الدورية.</li>
+                                            <li>الحد الأدنى الموصى به للحجم هو 1024x512 أو 1920x1080 بكسل.</li>
+                                            <li>الصيغ المدعومة: PNG, JPG, GIF, WEBP.</li>
+                                        </ul>
+                                    </div>
+
+                                    <!-- زر الرفع -->
+                                    <div class="w-full md:w-auto flex justify-end">
+                                        <input type="file" id="file_broadcast_image" accept="image/*" class="hidden" onchange="uploadImageFile(this, 'broadcast_image', (url) => saveBroadcastImageSetting(url))">
+                                        <input type="hidden" id="input_broadcast_image" name="broadcast_image" value="${settings.broadcast_image || ''}">
+                                        <button type="button" onclick="document.getElementById('file_broadcast_image').click()" class="px-6 py-2.5 bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-500 hover:to-green-500 text-white rounded-xl text-xs font-black transition shadow-lg flex items-center gap-2 cursor-pointer w-full md:w-auto justify-center">
+                                            <span>📤</span>
+                                            <span id="btn_text_broadcast_image">رفع الصورة</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
                             <!-- Send Now (Manual Broadcast) -->
                             <div class="bg-[#12141f] border border-white/5 p-5 rounded-3xl flex items-center justify-between shadow-xl">
                                 <button type="button" onclick="sendBroadcastNow()" id="btnBroadcastNow" class="px-6 py-3 bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-500 hover:to-green-500 text-white rounded-xl text-xs font-black transition shadow-lg flex items-center gap-2">
@@ -2365,6 +2408,14 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ broadcast_messages: JSON.stringify(broadcastMsgs) })
+                        });
+                    }
+
+                    async function saveBroadcastImageSetting(url) {
+                        await fetch('/api/guild/${guildId}/settings', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ broadcast_image: url })
                         });
                     }
 
@@ -3316,6 +3367,49 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
 
                             <input type="hidden" name="welcome_embed_enabled" id="welcome_embed_enabled" value="${settings.welcome_embed_enabled !== 0 ? 1 : 0}">
                             <input type="hidden" name="welcome_image" id="welcome_image" value="${settings.welcome_image ? 1 : 0}">
+
+                            <!-- Upload Card: صورة الترحيب بنمط Wicks -->
+                            <div class="bg-[#0b0d14] border border-white/5 hover:border-purple-500/30 rounded-2xl p-5 transition shadow-lg" id="welcomeImageUploadCard">
+                                <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+                                    <!-- المعاينة وزر الحذف -->
+                                    <div class="w-full md:w-auto flex flex-col items-center gap-2">
+                                        <div class="w-full md:w-56 h-28 rounded-xl border border-white/10 bg-[#12141f] overflow-hidden flex items-center justify-center relative group">
+                                            <img id="img_welcome_banner_image" src="${settings.welcome_banner_image || ''}" class="w-full h-full object-cover ${settings.welcome_banner_image ? '' : 'hidden'}">
+                                            <div id="placeholder_welcome_banner_image" class="text-gray-500 text-xs flex flex-col items-center gap-1 ${settings.welcome_banner_image ? 'hidden' : ''}">
+                                                <span class="text-2xl">🖼️</span>
+                                                <span>لا توجد صورة</span>
+                                            </div>
+                                        </div>
+                                        <button type="button" onclick="clearUploadedImageInDOM('welcome_banner_image')" class="text-xs text-rose-400 hover:text-rose-300 flex items-center gap-1.5 transition font-bold py-1 px-3 rounded-lg hover:bg-rose-950/30 cursor-pointer">
+                                            <span>🗑️</span>
+                                            <span>إزالة الصورة</span>
+                                        </button>
+                                    </div>
+
+                                    <!-- نصوص الشرح -->
+                                    <div class="flex-1 text-right space-y-1 w-full">
+                                        <div class="flex items-center justify-end gap-2">
+                                            <h5 class="text-sm font-black text-white">صورة بانر الترحيب</h5>
+                                            <span class="text-purple-400 text-base">🖼️</span>
+                                        </div>
+                                        <ul class="text-[11px] text-gray-400 space-y-0.5 list-disc list-inside">
+                                            <li>ستظهر هذه الصورة كبانر رئيسي مع رسالة الترحيب بالأعضاء الجدد.</li>
+                                            <li>الحد الأدنى الموصى به للحجم هو 1024x512 بكسل.</li>
+                                            <li>الصيغ المدعومة: PNG, JPG, GIF, WEBP.</li>
+                                        </ul>
+                                    </div>
+
+                                    <!-- زر الرفع -->
+                                    <div class="w-full md:w-auto flex justify-end">
+                                        <input type="file" id="file_welcome_banner_image" accept="image/*" class="hidden" onchange="uploadImageFile(this, 'welcome_banner_image')">
+                                        <input type="hidden" id="input_welcome_banner_image" name="welcome_banner_image" value="${settings.welcome_banner_image || ''}">
+                                        <button type="button" onclick="document.getElementById('file_welcome_banner_image').click()" class="px-6 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-xl text-xs font-black transition shadow-lg shadow-purple-900/30 flex items-center gap-2 cursor-pointer w-full md:w-auto justify-center">
+                                            <span>📤</span>
+                                            <span id="btn_text_welcome_banner_image">رفع الصورة</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
 
                             <!-- Card 4: تخصيص رسالة الترحيب / الإيمبد (Live Preview & Embed Customizer - Exact to Image 2 & 3) -->
                             <div class="bg-[#12141f] border border-white/5 p-6 rounded-2xl space-y-4 shadow-xl">
@@ -4427,6 +4521,49 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                                     <div class="text-right">
                                         <h5 class="text-xs font-bold text-white">إرسال رسالة خاصة</h5>
                                         <p class="text-[10px] text-gray-500">إرسال إشعار رفع المستوى برسالة خاصة في DM</p>
+                                    </div>
+                                </div>
+
+                                <!-- صورة إشعار المستوى بنمط Wicks -->
+                                <div class="bg-[#0b0d14] border border-white/5 hover:border-purple-500/30 rounded-2xl p-4 transition shadow-lg">
+                                    <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+                                        <!-- المعاينة وزر الحذف -->
+                                        <div class="w-full md:w-auto flex flex-col items-center gap-2">
+                                            <div class="w-full md:w-48 h-24 rounded-xl border border-white/10 bg-[#12141f] overflow-hidden flex items-center justify-center relative group">
+                                                <img id="img_level_up_image" src="${settings.level_up_image || ''}" class="w-full h-full object-cover ${settings.level_up_image ? '' : 'hidden'}">
+                                                <div id="placeholder_level_up_image" class="text-gray-500 text-xs flex flex-col items-center gap-1 ${settings.level_up_image ? 'hidden' : ''}">
+                                                    <span class="text-2xl">🖼️</span>
+                                                    <span>لا توجد صورة</span>
+                                                </div>
+                                            </div>
+                                            <button type="button" onclick="clearUploadedImageInDOM('level_up_image')" class="text-xs text-rose-400 hover:text-rose-300 flex items-center gap-1.5 transition font-bold py-1 px-3 rounded-lg hover:bg-rose-950/30 cursor-pointer">
+                                                <span>🗑️</span>
+                                                <span>إزالة الصورة</span>
+                                            </button>
+                                        </div>
+
+                                        <!-- نصوص الشرح -->
+                                        <div class="flex-1 text-right space-y-1 w-full">
+                                            <div class="flex items-center justify-end gap-2">
+                                                <h5 class="text-sm font-black text-white">صورة إشعار رفع المستوى</h5>
+                                                <span class="text-purple-400 text-base">🎉</span>
+                                            </div>
+                                            <ul class="text-[11px] text-gray-400 space-y-0.5 list-disc list-inside">
+                                                <li>صورة تظهر مع رسالة التهنئة برفع المستوى في الشات أو الخاص.</li>
+                                                <li>الحد الأدنى الموصى به للحجم هو 1024x512 بكسل.</li>
+                                                <li>الصيغ المدعومة: PNG, JPG, GIF, WEBP.</li>
+                                            </ul>
+                                        </div>
+
+                                        <!-- زر الرفع -->
+                                        <div class="w-full md:w-auto flex justify-end">
+                                            <input type="file" id="file_level_up_image" accept="image/*" class="hidden" onchange="uploadImageFile(this, 'level_up_image')">
+                                            <input type="hidden" id="input_level_up_image" name="level_up_image" value="${settings.level_up_image || ''}">
+                                            <button type="button" onclick="document.getElementById('file_level_up_image').click()" class="px-5 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-xl text-xs font-black transition shadow-lg shadow-purple-900/30 flex items-center gap-2 cursor-pointer w-full md:w-auto justify-center">
+                                                <span>📤</span>
+                                                <span id="btn_text_level_up_image">رفع الصورة</span>
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -7775,6 +7912,35 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                                     </div>
                                 </div>
 
+                                <!-- صورة بانر التقديم (Wicks-Style) -->
+                                <div class="bg-[#0b0d14] border border-white/5 rounded-2xl p-4 space-y-3">
+                                    <div class="flex items-center justify-between">
+                                        <button type="button" onclick="clearUploadedImageInDOM('app_panel_image')" class="text-[11px] text-rose-400 hover:text-rose-300 font-bold">🗑️ إزالة الصورة</button>
+                                        <div class="flex items-center gap-1.5">
+                                            <span class="text-xs font-bold text-white">صورة بانر رسالة التقديم (اختياري)</span>
+                                            <span class="text-purple-400">🖼️</span>
+                                        </div>
+                                    </div>
+                                    <div class="flex flex-col sm:flex-row items-center gap-3">
+                                        <div class="w-full sm:w-44 h-20 rounded-xl border border-white/10 bg-[#12141f] overflow-hidden flex items-center justify-center relative">
+                                            <img id="img_app_panel_image" src="" class="w-full h-full object-cover hidden">
+                                            <div id="placeholder_app_panel_image" class="text-gray-500 text-xs flex flex-col items-center">
+                                                <span class="text-xl">🖼️</span>
+                                                <span class="text-[10px]">لا توجد صورة</span>
+                                            </div>
+                                        </div>
+                                        <div class="flex-1 space-y-2 w-full">
+                                            <input type="hidden" id="input_app_panel_image" value="">
+                                            <input type="file" id="file_app_panel_image" accept="image/*" class="hidden" onchange="uploadImageFile(this, 'app_panel_image')">
+                                            <button type="button" onclick="document.getElementById('file_app_panel_image').click()" class="w-full px-4 py-2 bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/30 text-purple-300 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5">
+                                                <span>📤</span>
+                                                <span id="btn_text_app_panel_image">رفع بانر التقديم</span>
+                                            </button>
+                                            <p class="text-[10px] text-gray-500 text-right">تظهر كصورة رئيسية أعلى بنر التقديم في القناة</p>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <!-- Questions Builder (Up to 5) -->
                                 <div class="space-y-3 pt-2">
                                     <div class="flex items-center justify-between">
@@ -7806,6 +7972,7 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                         document.getElementById('appLogChannel').value = '';
                         document.getElementById('appAcceptedRole').value = '';
                         document.getElementById('appReviewerRole').value = '';
+                        clearUploadedImageInDOM('app_panel_image');
                         currentQuestions = [
                             { text: 'ما هو عمرك وتواجدك اليومي؟', type: 'short' },
                             { text: 'ما هي خبراتك السابقة في الإدارة أو المجال؟', type: 'paragraph' },
@@ -7826,6 +7993,18 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                         document.getElementById('appLogChannel').value = app.log_channel || '';
                         document.getElementById('appAcceptedRole').value = app.accepted_role || '';
                         document.getElementById('appReviewerRole').value = app.reviewer_role || '';
+
+                        const panelImg = app.panel_image || '';
+                        document.getElementById('input_app_panel_image').value = panelImg;
+                        const imgEl = document.getElementById('img_app_panel_image');
+                        const phEl = document.getElementById('placeholder_app_panel_image');
+                        if (panelImg) {
+                            if (imgEl) { imgEl.src = panelImg; imgEl.classList.remove('hidden'); }
+                            if (phEl) phEl.classList.add('hidden');
+                        } else {
+                            if (imgEl) { imgEl.src = ''; imgEl.classList.add('hidden'); }
+                            if (phEl) phEl.classList.remove('hidden');
+                        }
 
                         try {
                             const parsed = typeof app.questions === 'string' ? JSON.parse(app.questions) : app.questions;
@@ -7895,6 +8074,7 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                         const logChannel = document.getElementById('appLogChannel').value;
                         const acceptedRole = document.getElementById('appAcceptedRole').value;
                         const reviewerRole = document.getElementById('appReviewerRole').value;
+                        const panelImage = document.getElementById('input_app_panel_image') ? document.getElementById('input_app_panel_image').value : '';
 
                         if (!title) return alert('يرجى إدخال عنوان النموذج');
                         if (!logChannel) return alert('يرجى اختيار قناة استقبال الطلبات');
@@ -7914,7 +8094,8 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                                     log_channel: logChannel,
                                     accepted_role: acceptedRole,
                                     reviewer_role: reviewerRole,
-                                    questions: validQuestions
+                                    questions: validQuestions,
+                                    panel_image: panelImage
                                 })
                             });
                             const d = await r.json();
@@ -8095,15 +8276,38 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                                 <textarea id="embDesc" rows="4" placeholder="اكتب محتوى الرسالة هنا... يدعم Markdown مثل **عريض** و *مائل*" oninput="updateEmbedPreview()" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-3 py-2.5 text-xs text-white outline-none text-right leading-relaxed"></textarea>
                             </div>
 
-                            <!-- Image & Thumbnail URLs -->
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                <div>
-                                    <label class="block text-[11px] font-bold text-gray-400 mb-1">الصورة المصغرة (Thumbnail URL)</label>
-                                    <input type="url" id="embThumbnail" placeholder="https://... (أعلى اليمين)" oninput="updateEmbedPreview()" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-3 py-2.5 text-xs text-white outline-none text-left font-mono">
+                            <!-- Image & Thumbnail URLs with Upload options -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <!-- الصورة المصغرة (Thumbnail) -->
+                                <div class="bg-[#0b0d14] border border-white/5 rounded-2xl p-3.5 space-y-2.5">
+                                    <div class="flex items-center justify-between">
+                                        <button type="button" onclick="clearEmbedImageField('embThumbnail', 'prev_embThumbnail')" class="text-[10px] text-rose-400 hover:text-rose-300 font-bold transition">🗑️ إزالة</button>
+                                        <label class="block text-[11px] font-bold text-gray-300">الصورة المصغرة (Thumbnail)</label>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <input type="file" id="file_embThumbnail" accept="image/*" class="hidden" onchange="uploadEmbedImageFile(this, 'embThumbnail')">
+                                        <button type="button" onclick="document.getElementById('file_embThumbnail').click()" class="px-3 py-2 bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/30 text-purple-300 rounded-xl text-xs font-bold transition shrink-0 flex items-center gap-1">
+                                            <span>📤</span><span id="btn_text_embThumbnail">رفع</span>
+                                        </button>
+                                        <input type="url" id="embThumbnail" placeholder="https://... أو ارفع صورة" oninput="updateEmbedPreview()" class="flex-1 bg-[#12141f] border border-white/5 focus:border-purple-600 rounded-xl px-3 py-2 text-xs text-white outline-none text-left font-mono">
+                                    </div>
+                                    <p class="text-[10px] text-gray-500 text-right">تظهر في الزاوية العلوية اليمنى للإيمبد</p>
                                 </div>
-                                <div>
-                                    <label class="block text-[11px] font-bold text-gray-400 mb-1">الصورة الكبيرة (Main Image URL)</label>
-                                    <input type="url" id="embImage" placeholder="https://... (أسفل الإيمبد)" oninput="updateEmbedPreview()" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-3 py-2.5 text-xs text-white outline-none text-left font-mono">
+
+                                <!-- الصورة الكبيرة (Main Image) -->
+                                <div class="bg-[#0b0d14] border border-white/5 rounded-2xl p-3.5 space-y-2.5">
+                                    <div class="flex items-center justify-between">
+                                        <button type="button" onclick="clearEmbedImageField('embImage', 'prev_embImage')" class="text-[10px] text-rose-400 hover:text-rose-300 font-bold transition">🗑️ إزالة</button>
+                                        <label class="block text-[11px] font-bold text-gray-300">الصورة الرئيسية (Main Image)</label>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <input type="file" id="file_embImage" accept="image/*" class="hidden" onchange="uploadEmbedImageFile(this, 'embImage')">
+                                        <button type="button" onclick="document.getElementById('file_embImage').click()" class="px-3 py-2 bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/30 text-purple-300 rounded-xl text-xs font-bold transition shrink-0 flex items-center gap-1">
+                                            <span>📤</span><span id="btn_text_embImage">رفع</span>
+                                        </button>
+                                        <input type="url" id="embImage" placeholder="https://... أو ارفع صورة" oninput="updateEmbedPreview()" class="flex-1 bg-[#12141f] border border-white/5 focus:border-purple-600 rounded-xl px-3 py-2 text-xs text-white outline-none text-left font-mono">
+                                    </div>
+                                    <p class="text-[10px] text-gray-500 text-right">تظهر بحجم عريض أسفل محتوى الإيمبد</p>
                                 </div>
                             </div>
 
@@ -8422,6 +8626,48 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                         } catch(e) {}
                         updateEmbedPreview();
                     });
+
+                    async function uploadEmbedImageFile(input, targetId) {
+                        const file = input.files && input.files[0];
+                        if (!file) return;
+                        if (!file.type.startsWith('image/')) return alert('يرجى اختيار ملف صورة صالح');
+                        if (file.size > 15 * 1024 * 1024) return alert('حجم الصورة كبير جداً (أكثر من 15 ميجابايت)');
+
+                        const btnText = document.getElementById('btn_text_' + targetId);
+                        if (btnText) btnText.innerText = 'جاري الرفع...';
+
+                        const reader = new FileReader();
+                        reader.onload = async function(e) {
+                            try {
+                                const res = await fetch('/api/guild/${guildId}/upload-image', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ imageBase64: e.target.result, fieldName: targetId })
+                                });
+                                const data = await res.json();
+                                if (data.success && data.url) {
+                                    document.getElementById(targetId).value = data.url;
+                                    updateEmbedPreview();
+                                    if (btnText) btnText.innerText = '✅ تم';
+                                    setTimeout(() => { if (btnText) btnText.innerText = 'رفع'; }, 2000);
+                                } else {
+                                    alert('❌ فشل رفع الصورة: ' + (data.error || 'خطأ غير معروف'));
+                                    if (btnText) btnText.innerText = 'رفع';
+                                }
+                            } catch(err) {
+                                alert('حدث خطأ في الاتصال بالخادم أثناء الرفع');
+                                if (btnText) btnText.innerText = 'رفع';
+                            }
+                        };
+                        reader.readAsDataURL(file);
+                    }
+
+                    function clearEmbedImageField(targetId) {
+                        document.getElementById(targetId).value = '';
+                        const fileInp = document.getElementById('file_' + targetId);
+                        if (fileInp) fileInp.value = '';
+                        updateEmbedPreview();
+                    }
                     </script>
                 `;
             } else {
@@ -8883,6 +9129,82 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                         });
                     }
                 }, 100);
+                // وظائف رفع وحذف الصور الموحدة بنمط Wicks لجميع الأقسام
+                async function uploadImageFile(input, fieldName, onDone) {
+                    const file = input.files && input.files[0];
+                    if (!file) return;
+
+                    if (!file.type.startsWith('image/')) {
+                        alert('❌ يرجى اختيار ملف صورة صالح (PNG, JPG, WEBP, GIF)');
+                        return;
+                    }
+
+                    if (file.size > 15 * 1024 * 1024) {
+                        alert('❌ حجم الصورة يتجاوز 15 ميجابايت. يرجى اختيار صورة أصغر.');
+                        return;
+                    }
+
+                    const btnText = document.getElementById('btn_text_' + fieldName);
+                    const origText = btnText ? btnText.innerText : 'رفع الصورة';
+                    if (btnText) btnText.innerText = 'جاري الرفع... ⏳';
+
+                    const reader = new FileReader();
+                    reader.onload = async function(e) {
+                        try {
+                            const res = await fetch('/api/guild/${guildId}/upload-image', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    imageBase64: e.target.result,
+                                    fieldName: fieldName
+                                })
+                            });
+                            const data = await res.json();
+                            if (data.success && data.url) {
+                                const hiddenInput = document.getElementById('input_' + fieldName);
+                                if (hiddenInput) hiddenInput.value = data.url;
+
+                                const imgElem = document.getElementById('img_' + fieldName);
+                                const placeholderElem = document.getElementById('placeholder_' + fieldName);
+                                if (imgElem) {
+                                    imgElem.src = data.url;
+                                    imgElem.classList.remove('hidden');
+                                }
+                                if (placeholderElem) {
+                                    placeholderElem.classList.add('hidden');
+                                }
+                                if (btnText) btnText.innerText = '✅ تم الرفع';
+                                setTimeout(() => { if (btnText) btnText.innerText = origText; }, 2500);
+                                if (typeof onDone === 'function') onDone(data.url);
+                            } else {
+                                alert('❌ فشل رفع الصورة: ' + (data.error || 'خطأ غير معروف'));
+                                if (btnText) btnText.innerText = origText;
+                            }
+                        } catch(err) {
+                            alert('❌ حدث خطأ في الاتصال أثناء رفع الصورة');
+                            if (btnText) btnText.innerText = origText;
+                        }
+                    };
+                    reader.readAsDataURL(file);
+                }
+
+                function clearUploadedImageInDOM(fieldName, onDone) {
+                    const hiddenInput = document.getElementById('input_' + fieldName);
+                    if (hiddenInput) hiddenInput.value = '';
+
+                    const imgElem = document.getElementById('img_' + fieldName);
+                    const placeholderElem = document.getElementById('placeholder_' + fieldName);
+                    if (imgElem) {
+                        imgElem.src = '';
+                        imgElem.classList.add('hidden');
+                    }
+                    if (placeholderElem) {
+                        placeholderElem.classList.remove('hidden');
+                    }
+                    const fileInput = document.getElementById('file_' + fieldName);
+                    if (fileInput) fileInput.value = '';
+                    if (typeof onDone === 'function') onDone();
+                }
                 </script>
             </body>
             </html>
@@ -8927,7 +9249,8 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                 fs.mkdirSync(uploadDir, { recursive: true });
             }
 
-            const fileName = `ticket_${fieldName || 'img'}_${req.params.guildId}_${Date.now()}.${ext}`;
+            const cleanField = (fieldName || 'img').replace(/[^a-zA-Z0-9_-]/g, '_');
+            const fileName = `${cleanField}_${req.params.guildId}_${Date.now()}.${ext}`;
             const filePath = path.join(uploadDir, fileName);
             fs.writeFileSync(filePath, dataBuffer);
 
@@ -9014,6 +9337,10 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                 .setDescription(randomMsg)
                 .setTimestamp()
                 .setFooter({ text: '📢 إعلان تلقائي — ZENO BOT' });
+
+            if (settings.broadcast_image) {
+                embed.setImage(settings.broadcast_image);
+            }
 
             const mentionContent = settings.broadcast_mention_role ? `<@&${settings.broadcast_mention_role}>` : '';
             await channel.send({ content: mentionContent || undefined, embeds: [embed] });
@@ -9645,12 +9972,12 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
         try {
             if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
             const { guildId } = req.params;
-            const { title, description, log_channel, accepted_role, reviewer_role, questions } = req.body;
+            const { title, description, log_channel, accepted_role, reviewer_role, questions, panel_image } = req.body;
 
             if (!title) return res.status(400).json({ success: false, error: 'عنوان النموذج مطلوب' });
             if (!log_channel) return res.status(400).json({ success: false, error: 'قناة استقبال الطلبات مطلوبة' });
 
-            const newApp = database.createApplication(guildId, title, description, questions || [], log_channel, accepted_role, reviewer_role);
+            const newApp = database.createApplication(guildId, title, description, questions || [], log_channel, accepted_role, reviewer_role, panel_image || null);
             res.json({ success: true, app: newApp });
         } catch(e) {
             res.status(500).json({ success: false, error: e.message });
@@ -9661,9 +9988,9 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
         try {
             if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
             const { appId } = req.params;
-            const { title, description, log_channel, accepted_role, reviewer_role, questions, status } = req.body;
+            const { title, description, log_channel, accepted_role, reviewer_role, questions, status, panel_image } = req.body;
 
-            const updated = database.updateApplication(appId, title, description, questions || [], log_channel, accepted_role, reviewer_role, status || 'open');
+            const updated = database.updateApplication(appId, title, description, questions || [], log_channel, accepted_role, reviewer_role, status || 'open', panel_image || null);
             res.json({ success: true, app: updated });
         } catch(e) {
             res.status(500).json({ success: false, error: e.message });
@@ -9701,6 +10028,10 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                 .setDescription(appData.description || 'اضغط على الزر بالأسفل لتعبئة استمارة التقديم والالتحاق بطاقم العمل.')
                 .setFooter({ text: channel.guild.name, iconURL: channel.guild.iconURL({ dynamic: true }) || undefined })
                 .setTimestamp();
+
+            if (appData.panel_image) {
+                panelEmbed.setImage(appData.panel_image);
+            }
 
             const row = new ActionRowBuilder().addComponents(
                 new ButtonBuilder()

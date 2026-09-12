@@ -188,9 +188,17 @@ module.exports = {
             .setThumbnail(member.user.displayAvatarURL({ dynamic: true, size: 256 }))
             .setFooter({ text: `العضو رقم #${guild.memberCount} • دعوة بواسطة: ${inviterName}`, iconURL: guild.iconURL() || undefined })
             .setTimestamp();
+
+          if (settings.welcome_banner_image) {
+            welcomeEmbed.setImage(settings.welcome_banner_image);
+          }
+
           sendPayload.embeds = [welcomeEmbed];
         } else {
           sendPayload.content = msg;
+          if (settings.welcome_banner_image) {
+            sendPayload.files = [{ attachment: settings.welcome_banner_image, name: 'welcome_banner.png' }];
+          }
         }
 
         if (settings.welcome_image) {
