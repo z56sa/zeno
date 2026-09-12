@@ -18,9 +18,10 @@ module.exports = {
     const isAdmin = message.member?.permissions.has(PermissionFlagsBits.Administrator) ||
                     message.member?.permissions.has(PermissionFlagsBits.ManageGuild);
 
-    const isAutoModWhitelisted = (settings.automod_ignore_admins === 1 ? isAdmin : false) ||
+    const isAutoModWhitelisted = (settings.automod_ignore_admins === 0 ? false : isAdmin) ||
       (settings.automod_whitelist_role && message.member?.roles.cache.has(settings.automod_whitelist_role)) ||
       (settings.automod_whitelist_channel && message.channel.id === settings.automod_whitelist_channel) ||
+      (settings.automod_exempt_users && settings.automod_exempt_users.split(',').map(u => u.trim()).includes(userId)) ||
       (db.isUserWhitelisted && db.isUserWhitelisted(guildId, userId, 'whitelist'));
 
     // 👮 Staff Activity: تسجيل رسائل الإدارة تلقائياً
@@ -244,11 +245,11 @@ module.exports = {
       const linkRegex = /(https?:\/\/[^\s]+)|(discord\.(gg|io|me|li)\/[^\s]+)|(discord\.com\/invite\/[^\s]+)|(www\.[^\s]+)|([a-zA-Z0-9-]+\.(com|net|org|xyz|gg|tk|ml|ga|cf|gq)\b)/gi;
       if (linkRegex.test(message.content)) {
         try {
-          await message.delete();
+          await message.delete().catch(() => {});
           const warnMsg = await message.channel.send({
             content: `🚫 **تم حذف الرابط تلقائياً!** يمنع نشر الروابط في السيرفر يا ${message.author}!`
-          });
-          setTimeout(() => warnMsg.delete().catch(() => {}), 5000);
+          }).catch(() => {});
+          if (warnMsg) setTimeout(() => warnMsg.delete().catch(() => {}), 5000);
           return;
         } catch (err) {
           console.error('فشل حذف الرابط (تأكد من صلاحيات البوت Manage Messages):', err);
@@ -258,14 +259,14 @@ module.exports = {
 
     // --- 1.5 نظام الحماية من دعوات الديسكورد (Anti-Invites) ---
     if ((settings.anti_invites || settings.anti_invite_links) && !isAutoModWhitelisted) {
-      const inviteRegex = /discord\.(gg|io|me|li|com\/invite)\/[^\s]+/gi;
+      const inviteRegex = /(discord\.(gg|io|me|li)\/[^\s]+)|(discord\.com\/invite\/[^\s]+)/gi;
       if (inviteRegex.test(message.content)) {
         try {
-          await message.delete();
+          await message.delete().catch(() => {});
           const warnMsg = await message.channel.send({
             content: `🔗 **تم حذف الدعوة!** ممنوع نشر دعوات السيرفرات الأخرى يا ${message.author}!`
-          });
-          setTimeout(() => warnMsg.delete().catch(() => {}), 5000);
+          }).catch(() => {});
+          if (warnMsg) setTimeout(() => warnMsg.delete().catch(() => {}), 5000);
           return;
         } catch (err) {
           console.error('فشل حذف دعوة الديسكورد:', err);

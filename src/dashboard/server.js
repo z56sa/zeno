@@ -9657,6 +9657,43 @@ ${embedScriptHtml}
         }
     });
 
+    // =============================================
+    // Autoresponder API
+    // =============================================
+    app.post('/api/guild/:guildId/autoresponder', express.json(), async (req, res) => {
+        try {
+            if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
+            const { guildId } = req.params;
+            const payload = req.body;
+            if (!payload || !payload.trigger_word || !payload.reply_text) {
+                return res.status(400).json({ success: false, error: 'المحفز والرد مطلوبان' });
+            }
+
+            if (database.addAutoResponder) {
+                const inserted = database.addAutoResponder(guildId, payload);
+                return res.json({ success: true, item: inserted });
+            }
+
+            res.json({ success: true });
+        } catch (e) {
+            res.status(500).json({ success: false, error: e.message });
+        }
+    });
+
+    app.delete('/api/guild/:guildId/autoresponder/:id', async (req, res) => {
+        try {
+            if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
+            const { guildId, id } = req.params;
+
+            if (database.deleteAutoResponder) {
+                database.deleteAutoResponder(guildId, id);
+            }
+            res.json({ success: true });
+        } catch (e) {
+            res.status(500).json({ success: false, error: e.message });
+        }
+    });
+
     app.post('/api/guild/:guildId/clear-all-warnings', async (req, res) => {
         try {
             if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });

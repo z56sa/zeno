@@ -1644,8 +1644,12 @@ function removeProtectionWhitelist(guildId, userId, type = 'whitelist') {
 }
 
 function isUserWhitelisted(guildId, userId, type = 'whitelist') {
-  const row = db.prepare('SELECT id FROM protection_whitelist WHERE guild_id = ? AND user_id = ? AND (type = ? OR type = "antimod")').get(guildId, userId, type);
-  return !!row;
+  try {
+    const row = db.prepare("SELECT id FROM protection_whitelist WHERE guild_id = ? AND user_id = ? AND (type = ? OR type = 'antimod')").get(guildId, userId, type);
+    return !!row;
+  } catch(e) {
+    return false;
+  }
 }
 
 // ==========================================
