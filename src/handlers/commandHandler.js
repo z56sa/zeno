@@ -43,7 +43,7 @@ module.exports = async (client) => {
   logger.info(`تم تحميل ${client.commands.size} أمر سلاش و ${client.prefixCommands.size} أمر نصي.`);
 
   // تسجيل أوامر السلاش في الديسكورد في الخلفية بشكل غير معطل (Background Asynchronous)
-  const botToken = (process.env.BOT_TOKEN || process.env.DISCORD_TOKEN || process.env.TOKEN || '').trim();
+  const botToken = (process.env.DISCORD_BOT_TOKEN || process.env.BOT_TOKEN || process.env.DISCORD_TOKEN || process.env.TOKEN || '').trim();
   
   if (botToken && botToken !== 'YOUR_BOT_TOKEN_HERE') {
     const registerCommands = async (targetClientId) => {
@@ -78,6 +78,9 @@ module.exports = async (client) => {
       safeRegister(client.user.id);
     } else {
       client.once('clientReady', () => {
+        safeRegister(client.user?.id);
+      });
+      client.once('ready', () => {
         safeRegister(client.user?.id);
       });
     }
