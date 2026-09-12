@@ -9694,6 +9694,74 @@ ${embedScriptHtml}
         }
     });
 
+    // =============================================
+    // Warn Punishments API
+    // =============================================
+    app.post('/api/guild/:guildId/warn-punishments', express.json(), async (req, res) => {
+        try {
+            if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
+            const { guildId } = req.params;
+            const { warnCount, actionType } = req.body;
+            if (!warnCount || !actionType) return res.status(400).json({ success: false, error: 'عدد التحذيرات ونوع العقوبة مطلوبان' });
+
+            if (database.addWarnPunishment) {
+                const inserted = database.addWarnPunishment(guildId, parseInt(warnCount), actionType);
+                return res.json({ success: true, item: inserted });
+            }
+            res.json({ success: true });
+        } catch (e) {
+            res.status(500).json({ success: false, error: e.message });
+        }
+    });
+
+    app.delete('/api/guild/:guildId/warn-punishments/:id', async (req, res) => {
+        try {
+            if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
+            const { guildId, id } = req.params;
+
+            if (database.deleteWarnPunishment) {
+                database.deleteWarnPunishment(id, guildId);
+            }
+            res.json({ success: true });
+        } catch (e) {
+            res.status(500).json({ success: false, error: e.message });
+        }
+    });
+
+    // =============================================
+    // Level Rewards API
+    // =============================================
+    app.post('/api/guild/:guildId/level-reward', express.json(), async (req, res) => {
+        try {
+            if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
+            const { guildId } = req.params;
+            const { level, roleId, rewardType, voiceLevel } = req.body;
+            if (!level || !roleId) return res.status(400).json({ success: false, error: 'المستوى والرتبة مطلوبان' });
+
+            if (database.addLevelReward) {
+                const inserted = database.addLevelReward(guildId, parseInt(level), String(roleId).trim(), rewardType || 'text', parseInt(voiceLevel) || 0);
+                return res.json({ success: true, item: inserted });
+            }
+            res.json({ success: true });
+        } catch (e) {
+            res.status(500).json({ success: false, error: e.message });
+        }
+    });
+
+    app.delete('/api/guild/:guildId/level-reward/:id', async (req, res) => {
+        try {
+            if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
+            const { guildId, id } = req.params;
+
+            if (database.removeLevelReward) {
+                database.removeLevelReward(guildId, id);
+            }
+            res.json({ success: true });
+        } catch (e) {
+            res.status(500).json({ success: false, error: e.message });
+        }
+    });
+
     app.post('/api/guild/:guildId/clear-all-warnings', async (req, res) => {
         try {
             if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
