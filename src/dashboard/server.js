@@ -8640,40 +8640,45 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
 
                     function clearEmbedFields() {
                         if (!confirm('هل تريد مسح جميع الحقول وإعادة الضبط؟')) return;
-                        document.getElementById('embTitle').value = '';
-                        document.getElementById('embDesc').value = '';
-                        document.getElementById('embAuthor').value = '';
-                        document.getElementById('embAuthorIcon').value = '';
-                        document.getElementById('embTitleUrl').value = '';
-                        document.getElementById('embImage').value = '';
-                        document.getElementById('embThumbnail').value = '';
-                        document.getElementById('embFooter').value = '';
-                        document.getElementById('embFooterIcon').value = '';
+                        const ids = ['embTitle', 'embDesc', 'embAuthor', 'embAuthorIcon', 'embTitleUrl', 'embImage', 'embThumbnail', 'embFooter', 'embFooterIcon'];
+                        ids.forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+                        const ts = document.getElementById('embTimestampToggle');
+                        if (ts) ts.checked = false;
+                        // مسح معاينات بطاقات الرفع
+                        ['embAuthorIcon', 'embImage', 'embThumbnail', 'embFooterIcon'].forEach(id => {
+                            const boxImg = document.getElementById('prev_' + id + '_box');
+                            const ph = document.getElementById('ph_' + id);
+                            if (boxImg) { boxImg.src = ''; boxImg.classList.add('hidden'); }
+                            if (ph) ph.classList.remove('hidden');
+                        });
                         embedFields = [];
                         renderFieldsEditor();
                         selectColor('#9333ea');
+                        updateEmbedPreview();
                     }
 
                     function saveEmbedDraft() {
                         const payload = getEmbedPayload();
                         localStorage.setItem('zeno_embed_draft_' + '${guildId}', JSON.stringify(payload));
                         alert('💾 تم حفظ المسودة محلياً في المتصفح!');
+
                     }
 
                     function getEmbedPayload() {
+                        const g = id => document.getElementById(id);
                         return {
-                            channelId: document.getElementById('embedChannel').value,
-                            color: document.getElementById('embColor').value,
-                            title: document.getElementById('embTitle').value.trim(),
-                            titleUrl: document.getElementById('embTitleUrl').value.trim(),
-                            desc: document.getElementById('embDesc').value.trim(),
-                            author: document.getElementById('embAuthor').value.trim(),
-                            authorIcon: document.getElementById('embAuthorIcon').value.trim(),
-                            image: document.getElementById('embImage').value.trim(),
-                            thumbnail: document.getElementById('embThumbnail').value.trim(),
-                            footer: document.getElementById('embFooter').value.trim(),
-                            footerIcon: document.getElementById('embFooterIcon').value.trim(),
-                            timestamp: document.getElementById('embTimestampToggle').checked,
+                            channelId: g('embedChannel')?.value || '',
+                            color: g('embColor')?.value || '#9333ea',
+                            title: g('embTitle')?.value?.trim() || '',
+                            titleUrl: g('embTitleUrl')?.value?.trim() || '',
+                            desc: g('embDesc')?.value?.trim() || '',
+                            author: g('embAuthor')?.value?.trim() || '',
+                            authorIcon: g('embAuthorIcon')?.value?.trim() || '',
+                            image: g('embImage')?.value?.trim() || '',
+                            thumbnail: g('embThumbnail')?.value?.trim() || '',
+                            footer: g('embFooter')?.value?.trim() || '',
+                            footerIcon: g('embFooterIcon')?.value?.trim() || '',
+                            timestamp: g('embTimestampToggle')?.checked || false,
                             fields: embedFields.filter(f => f.name || f.value)
                         };
                     }
@@ -9496,6 +9501,42 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
             await channel.send({ content: mentionContent || undefined, embeds: [embed] });
             res.json({ success: true });
         } catch (e) {
+            res.status(500).json({ success: false, error: e.message });
+        }
+    });
+
+    app.post('/api/guild/:guildId/send-embed', express.json(), async (req, res) => {
+        try {
+            if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
+            const { guildId } = req.params;
+            const { channelId, color, title, titleUrl, desc, author, authorIcon, image, thumbnail, footer, footerIcon, timestamp, fields } = req.body;
+
+            if (!channelId) return res.status(400).json({ success: false, error: 'يرجى تحديد القناة المستهدفة' });
+            if (!title && !desc) return res.status(400).json({ success: false, error: 'يرجى كتابة عنوان أو محتوى للرسالة' });
+
+            const channel = client.channels.cache.get(channelId) || await client.channels.fetch(channelId).catch(() => null);
+            if (!channel || !channel.isTextBased()) return res.status(404).json({ success: false, error: 'القناة غير متاحة أو لا يملك البوت صلاحية الوصول إليها' });
+
+            const { EmbedBuilder } = require('discord.js');
+            const embed = new EmbedBuilder();
+
+            if (color) embed.setColor(color);
+            if (title) embed.setTitle(title);
+            if (titleUrl) embed.setURL(titleUrl);
+            if (desc) embed.setDescription(desc);
+            if (author) embed.setAuthor({ name: author, iconURL: authorIcon || undefined });
+            if (image) embed.setImage(image);
+            if (thumbnail) embed.setThumbnail(thumbnail);
+            if (footer) embed.setFooter({ text: footer, iconURL: footerIcon || undefined });
+            if (timestamp) embed.setTimestamp();
+            if (Array.isArray(fields) && fields.length > 0) {
+                embed.addFields(fields.map(f => ({ name: f.name || '\u200b', value: f.value || '\u200b', inline: !!f.inline })));
+            }
+
+            await channel.send({ embeds: [embed] });
+            res.json({ success: true });
+        } catch (e) {
+            console.error('[send-embed] Error:', e);
             res.status(500).json({ success: false, error: e.message });
         }
     });
