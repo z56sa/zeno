@@ -8177,14 +8177,11 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                         <!-- Top Action Bar -->
                         <div class="flex items-center justify-between gap-3 flex-wrap">
                             <div class="flex items-center gap-2">
-                                <button type="button" onclick="sendEmbedDirect()" id="btnSendEmbed" class="px-5 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold transition shadow-lg flex items-center gap-2">
-                                    <span>🚀 إرسال</span>
+                                <button type="button" onclick="sendEmbedDirect()" id="btnSendEmbed" class="px-6 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold transition shadow-lg flex items-center gap-2">
+                                    <span>🚀 إرسال للقناة</span>
                                 </button>
-                                <button type="button" onclick="saveEmbedDraft()" class="px-4 py-2.5 bg-[#151724] hover:bg-[#1c1f2e] border border-white/10 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5">
-                                    <span>💾 حفظ</span>
-                                </button>
-                                <button type="button" onclick="clearEmbedFields()" class="px-4 py-2.5 bg-rose-900/30 hover:bg-rose-800/40 border border-rose-800/30 text-rose-300 rounded-xl text-xs font-bold transition flex items-center gap-1.5">
-                                    <span>🗑️ مسح</span>
+                                <button type="button" onclick="clearEmbedFields()" class="px-5 py-2.5 bg-rose-900/30 hover:bg-rose-800/40 border border-rose-800/30 text-rose-300 rounded-xl text-xs font-bold transition flex items-center gap-1.5">
+                                    <span>🗑️ مسح الكل</span>
                                 </button>
                             </div>
 
@@ -8608,7 +8605,6 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                     }
 
                     function clearEmbedFields() {
-                        if (!confirm('هل تريد مسح جميع الحقول وإعادة الضبط؟')) return;
                         const ids = ['embTitle', 'embDesc', 'embAuthor', 'embAuthorIcon', 'embTitleUrl', 'embImage', 'embThumbnail', 'embFooter', 'embFooterIcon'];
                         ids.forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
                         const ts = document.getElementById('embTimestampToggle');
@@ -8872,7 +8868,7 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                             <form id="settingsForm" class="space-y-6">
                                 ${formFieldsHtml}
 
-                                <div class="pt-6 border-t border-white/5 flex items-center justify-between flex-row-reverse">
+                                <div class="pt-6 border-t border-white/5 flex items-center justify-between flex-row-reverse${section === 'embed' ? ' hidden' : ''}">
                                     <button type="submit" class="px-8 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-bold rounded-xl transition shadow-lg shadow-black/20 flex items-center gap-2">
                                         <span>💾</span>
                                         <span>حفظ التغييرات</span>
