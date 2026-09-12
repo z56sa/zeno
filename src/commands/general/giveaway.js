@@ -186,8 +186,7 @@ module.exports = {
       .setTitle(`🎊 **انتهى القيف أواي: ${giveaway.prize}** 🎊`)
       .setDescription([
         `🏆 **الفائزون بالجائزة:** ${winnersMention}`,
-        `👤 **مستضاف بواسطة:** <@${hostId}>`,
-        `📦 **الجائزة:** \`${giveaway.prize}\``
+        `👤 **مستضاف بواسطة:** <@${hostId}>`
       ].join('\n'))
       .setThumbnail('https://cdn-icons-png.flaticon.com/512/3112/3112946.png')
       .setFooter({ text: 'مبروك للفائزين! 🎉' })
