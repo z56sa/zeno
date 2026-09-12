@@ -8182,17 +8182,17 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                         <!-- Top Toolbar & Status -->
                         <div class="bg-gradient-to-r from-[#12141f] via-[#161828] to-[#12141f] border border-purple-500/30 p-4 sm:p-5 rounded-3xl shadow-xl flex flex-wrap items-center justify-between gap-4">
                             <div class="flex items-center gap-2.5 flex-wrap">
-                                <button type="button" id="btnSendEmbed"
+                                <button type="button" id="btnSendEmbed" onclick="if(window.sendEmbedDirect)window.sendEmbedDirect()"
                                     class="px-6 py-3 bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 hover:from-purple-500 hover:to-indigo-500 text-white font-black text-xs rounded-2xl shadow-lg shadow-purple-950/60 border border-purple-400/40 flex items-center gap-2 cursor-pointer transition active:scale-95">
                                     <span class="text-base">🚀</span>
                                     <span>إرسال للقناة الآن</span>
                                 </button>
-                                <button type="button" id="btnSaveEmbedDraft"
+                                <button type="button" id="btnSaveEmbedDraft" onclick="if(window.saveEmbedDraft)window.saveEmbedDraft()"
                                     class="px-4 py-3 bg-[#0b0d14] hover:bg-white/5 text-gray-300 hover:text-white font-bold text-xs rounded-2xl border border-white/10 flex items-center gap-1.5 cursor-pointer transition active:scale-95">
                                     <span>💾</span>
                                     <span>حفظ مسودة</span>
                                 </button>
-                                <button type="button" id="btnClearEmbed"
+                                <button type="button" id="btnClearEmbed" onclick="if(window.clearEmbedFields)window.clearEmbedFields()"
                                     class="px-4 py-3 bg-rose-950/30 hover:bg-rose-900/50 text-rose-300 font-bold text-xs rounded-2xl border border-rose-800/40 flex items-center gap-1.5 cursor-pointer transition active:scale-95">
                                     <span>🗑️</span>
                                     <span>مسح الكل</span>
@@ -8236,8 +8236,8 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                                 <div class="bg-[#12141f] border border-white/5 p-5 rounded-3xl space-y-3 shadow-lg">
                                     <div class="flex items-center justify-between">
                                         <div class="flex items-center gap-2">
-                                            <input type="text" id="embHexInput" value="#9333ea" class="w-24 bg-[#0b0d14] border border-white/10 rounded-xl px-3 py-1.5 text-xs text-white text-center font-mono focus:border-purple-500 outline-none uppercase">
-                                            <input type="color" id="embColor" value="#9333ea" class="w-9 h-9 rounded-xl border border-white/10 bg-[#0b0d14] cursor-pointer p-0.5">
+                                            <input type="text" id="embHexInput" value="#9333ea" oninput="if(window.setCustomHex)window.setCustomHex(this.value)" class="w-24 bg-[#0b0d14] border border-white/10 rounded-xl px-3 py-1.5 text-xs text-white text-center font-mono focus:border-purple-500 outline-none uppercase">
+                                            <input type="color" id="embColor" value="#9333ea" oninput="if(window.onColorPickerChange)window.onColorPickerChange(this.value)" class="w-9 h-9 rounded-xl border border-white/10 bg-[#0b0d14] cursor-pointer p-0.5">
                                         </div>
                                         <div class="flex items-center gap-2">
                                             <span class="text-xs font-black text-white">لون شريط الإيمبد</span>
@@ -8246,16 +8246,16 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                                     </div>
 
                                     <div class="flex items-center justify-end gap-2 flex-wrap pt-2 border-t border-white/5">
-                                        <button type="button" onclick="window.selectColor&&window.selectColor('#10b981')" title="Emerald" class="w-7 h-7 rounded-full bg-[#10b981] hover:scale-110 transition border border-white/20 shadow cursor-pointer"></button>
-                                        <button type="button" onclick="window.selectColor&&window.selectColor('#06b6d4')" title="Cyan" class="w-7 h-7 rounded-full bg-[#06b6d4] hover:scale-110 transition border border-white/20 shadow cursor-pointer"></button>
-                                        <button type="button" onclick="window.selectColor&&window.selectColor('#3b82f6')" title="Blue" class="w-7 h-7 rounded-full bg-[#3b82f6] hover:scale-110 transition border border-white/20 shadow cursor-pointer"></button>
-                                        <button type="button" onclick="window.selectColor&&window.selectColor('#8b5cf6')" title="Violet" class="w-7 h-7 rounded-full bg-[#8b5cf6] hover:scale-110 transition border border-white/20 shadow cursor-pointer"></button>
-                                        <button type="button" onclick="window.selectColor&&window.selectColor('#9333ea')" title="Purple" class="w-7 h-7 rounded-full bg-[#9333ea] hover:scale-110 transition border-2 border-white shadow-lg ring-2 ring-purple-500/50 cursor-pointer"></button>
-                                        <button type="button" onclick="window.selectColor&&window.selectColor('#f97316')" title="Orange" class="w-7 h-7 rounded-full bg-[#f97316] hover:scale-110 transition border border-white/20 shadow cursor-pointer"></button>
-                                        <button type="button" onclick="window.selectColor&&window.selectColor('#ef4444')" title="Red" class="w-7 h-7 rounded-full bg-[#ef4444] hover:scale-110 transition border border-white/20 shadow cursor-pointer"></button>
-                                        <button type="button" onclick="window.selectColor&&window.selectColor('#ec4899')" title="Pink" class="w-7 h-7 rounded-full bg-[#ec4899] hover:scale-110 transition border border-white/20 shadow cursor-pointer"></button>
-                                        <button type="button" onclick="window.selectColor&&window.selectColor('#eab308')" title="Yellow" class="w-7 h-7 rounded-full bg-[#eab308] hover:scale-110 transition border border-white/20 shadow cursor-pointer"></button>
-                                        <button type="button" onclick="window.selectColor&&window.selectColor('#2b2d31')" title="Dark" class="w-7 h-7 rounded-full bg-[#2b2d31] hover:scale-110 transition border border-white/20 shadow cursor-pointer"></button>
+                                        <button type="button" onclick="if(window.selectColor)window.selectColor('#10b981')" title="Emerald" class="w-7 h-7 rounded-full bg-[#10b981] hover:scale-110 transition border border-white/20 shadow cursor-pointer"></button>
+                                        <button type="button" onclick="if(window.selectColor)window.selectColor('#06b6d4')" title="Cyan" class="w-7 h-7 rounded-full bg-[#06b6d4] hover:scale-110 transition border border-white/20 shadow cursor-pointer"></button>
+                                        <button type="button" onclick="if(window.selectColor)window.selectColor('#3b82f6')" title="Blue" class="w-7 h-7 rounded-full bg-[#3b82f6] hover:scale-110 transition border border-white/20 shadow cursor-pointer"></button>
+                                        <button type="button" onclick="if(window.selectColor)window.selectColor('#8b5cf6')" title="Violet" class="w-7 h-7 rounded-full bg-[#8b5cf6] hover:scale-110 transition border border-white/20 shadow cursor-pointer"></button>
+                                        <button type="button" onclick="if(window.selectColor)window.selectColor('#9333ea')" title="Purple" class="w-7 h-7 rounded-full bg-[#9333ea] hover:scale-110 transition border-2 border-white shadow-lg ring-2 ring-purple-500/50 cursor-pointer"></button>
+                                        <button type="button" onclick="if(window.selectColor)window.selectColor('#f97316')" title="Orange" class="w-7 h-7 rounded-full bg-[#f97316] hover:scale-110 transition border border-white/20 shadow cursor-pointer"></button>
+                                        <button type="button" onclick="if(window.selectColor)window.selectColor('#ef4444')" title="Red" class="w-7 h-7 rounded-full bg-[#ef4444] hover:scale-110 transition border border-white/20 shadow cursor-pointer"></button>
+                                        <button type="button" onclick="if(window.selectColor)window.selectColor('#ec4899')" title="Pink" class="w-7 h-7 rounded-full bg-[#ec4899] hover:scale-110 transition border border-white/20 shadow cursor-pointer"></button>
+                                        <button type="button" onclick="if(window.selectColor)window.selectColor('#eab308')" title="Yellow" class="w-7 h-7 rounded-full bg-[#eab308] hover:scale-110 transition border border-white/20 shadow cursor-pointer"></button>
+                                        <button type="button" onclick="if(window.selectColor)window.selectColor('#2b2d31')" title="Dark" class="w-7 h-7 rounded-full bg-[#2b2d31] hover:scale-110 transition border border-white/20 shadow cursor-pointer"></button>
                                     </div>
                                 </div>
 
@@ -8273,7 +8273,7 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                                     <div>
                                         <input type="hidden" id="embAuthorIcon" value="">
                                         <label class="block text-xs font-bold text-gray-300 mb-1">اسم الكاتب أو الهيدر (Author)</label>
-                                        <input type="text" id="embAuthor" placeholder="مثال: إدارة السيرفر / ZENO Support" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right">
+                                        <input type="text" id="embAuthor" oninput="if(window.updateEmbedPreview)window.updateEmbedPreview()" placeholder="مثال: إدارة السيرفر / ZENO Support" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right">
                                         <p class="text-[10px] text-gray-500 mt-1">يظهر كعنوان صغير أعلى الإيمبد</p>
                                     </div>
 
@@ -8281,7 +8281,7 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                                     <input type="hidden" id="embTitleUrl" value="">
                                     <div>
                                         <label class="block text-xs font-bold text-gray-300 mb-1">العنوان الرئيسي (Title)</label>
-                                        <input type="text" id="embTitle" placeholder="مثال: مرحباً بكم في مجتمعنا!" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right font-bold">
+                                        <input type="text" id="embTitle" oninput="if(window.updateEmbedPreview)window.updateEmbedPreview()" placeholder="مثال: مرحباً بكم في مجتمعنا!" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right font-bold">
                                         <p class="text-[10px] text-gray-500 mt-1">عنوان بارز وواضح بخط عريض</p>
                                     </div>
 
@@ -8293,7 +8293,7 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                                                 الوصف والمحتوى الأساسي <span class="text-purple-400">*</span>
                                             </label>
                                         </div>
-                                        <textarea id="embDesc" rows="5" placeholder="اكتب نص الإيمبد هنا... يدعم ديسكورد ماركداون: **عريض**، *مائل*، __مسطر__، > اقتباس، وروابط [هنا](https://...)" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right leading-relaxed"></textarea>
+                                        <textarea id="embDesc" rows="5" oninput="if(window.updateEmbedPreview)window.updateEmbedPreview()" placeholder="اكتب نص الإيمبد هنا... يدعم ديسكورد ماركداون: **عريض**، *مائل*، __مسطر__، > اقتباس، وروابط [هنا](https://...)" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right leading-relaxed"></textarea>
                                     </div>
                                 </div>
 
@@ -8302,7 +8302,7 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                                     <!-- Thumbnail -->
                                     <div class="bg-[#12141f] border border-white/5 rounded-3xl p-4 space-y-3 shadow-lg">
                                         <div class="flex items-center justify-between">
-                                            <button type="button" onclick="window.clearEmbedImageField&&window.clearEmbedImageField('embThumbnail')" class="text-[11px] text-rose-400 hover:text-rose-300 font-bold flex items-center gap-1 cursor-pointer">
+                                            <button type="button" onclick="if(window.clearEmbedImageField)window.clearEmbedImageField('embThumbnail')" class="text-[11px] text-rose-400 hover:text-rose-300 font-bold flex items-center gap-1 cursor-pointer">
                                                 <span>✕</span><span>حذف</span>
                                             </button>
                                             <span class="text-xs font-bold text-gray-300">الصورة المصغرة (Thumbnail)</span>
@@ -8314,7 +8314,7 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                                             </div>
                                             <div class="flex-1 space-y-1">
                                                 <input type="hidden" id="embThumbnail" value="">
-                                                <input type="file" id="file_embThumbnail" accept="image/*" class="hidden">
+                                                <input type="file" id="file_embThumbnail" accept="image/*" onchange="if(window.uploadEmbedImageFile)window.uploadEmbedImageFile(this,'embThumbnail')" class="hidden">
                                                 <button type="button" onclick="document.getElementById('file_embThumbnail').click()" class="w-full px-3 py-2 bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/30 text-purple-300 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 cursor-pointer transition active:scale-95">
                                                     <span>📤</span><span id="btn_text_embThumbnail">رفع صورة مصغرة</span>
                                                 </button>
@@ -8326,7 +8326,7 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                                     <!-- Main Banner -->
                                     <div class="bg-[#12141f] border border-white/5 rounded-3xl p-4 space-y-3 shadow-lg">
                                         <div class="flex items-center justify-between">
-                                            <button type="button" onclick="window.clearEmbedImageField&&window.clearEmbedImageField('embImage')" class="text-[11px] text-rose-400 hover:text-rose-300 font-bold flex items-center gap-1 cursor-pointer">
+                                            <button type="button" onclick="if(window.clearEmbedImageField)window.clearEmbedImageField('embImage')" class="text-[11px] text-rose-400 hover:text-rose-300 font-bold flex items-center gap-1 cursor-pointer">
                                                 <span>✕</span><span>حذف</span>
                                             </button>
                                             <span class="text-xs font-bold text-gray-300">الصورة الكبيرة (Main Image)</span>
@@ -8338,7 +8338,7 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                                             </div>
                                             <div class="flex-1 space-y-1">
                                                 <input type="hidden" id="embImage" value="">
-                                                <input type="file" id="file_embImage" accept="image/*" class="hidden">
+                                                <input type="file" id="file_embImage" accept="image/*" onchange="if(window.uploadEmbedImageFile)window.uploadEmbedImageFile(this,'embImage')" class="hidden">
                                                 <button type="button" onclick="document.getElementById('file_embImage').click()" class="w-full px-3 py-2 bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/30 text-purple-300 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 cursor-pointer transition active:scale-95">
                                                     <span>📤</span><span id="btn_text_embImage">رفع بانر عريض</span>
                                                 </button>
@@ -8351,7 +8351,7 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                                 <!-- Custom Fields Container -->
                                 <div class="bg-[#12141f] border border-white/5 p-5 rounded-3xl space-y-3 shadow-lg">
                                     <div class="flex items-center justify-between pb-2 border-b border-white/5">
-                                        <button type="button" onclick="window.addEmbedField&&window.addEmbedField()" class="px-3.5 py-1.5 bg-purple-600/20 hover:bg-purple-600/40 border border-purple-500/40 text-purple-300 rounded-xl text-xs font-bold transition flex items-center gap-1 cursor-pointer active:scale-95">
+                                        <button type="button" onclick="if(window.addEmbedField)window.addEmbedField()" class="px-3.5 py-1.5 bg-purple-600/20 hover:bg-purple-600/40 border border-purple-500/40 text-purple-300 rounded-xl text-xs font-bold transition flex items-center gap-1 cursor-pointer active:scale-95">
                                             <span>+</span><span>إضافة حقل جديد</span>
                                         </button>
                                         <h4 class="text-xs font-black text-white flex items-center gap-1.5">
@@ -8367,7 +8367,7 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                                     <div class="flex items-center justify-between pb-2 border-b border-white/5">
                                         <div class="flex items-center gap-2">
                                             <label class="relative inline-flex items-center cursor-pointer">
-                                                <input type="checkbox" id="embTimestampToggle" checked class="sr-only peer">
+                                                <input type="checkbox" id="embTimestampToggle" checked onchange="if(window.updateEmbedPreview)window.updateEmbedPreview()" class="sr-only peer">
                                                 <div class="w-10 h-5 bg-gray-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-purple-600 cursor-pointer"></div>
                                             </label>
                                             <span class="text-[11px] text-gray-400 font-bold">إظهار الوقت</span>
@@ -8381,7 +8381,7 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                                     <div>
                                         <input type="hidden" id="embFooterIcon" value="">
                                         <label class="block text-xs font-bold text-gray-300 mb-1">نص التذييل (Footer Text)</label>
-                                        <input type="text" id="embFooter" placeholder="مثال: ZENO Bot • نظام الدعم التلقائي" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right">
+                                        <input type="text" id="embFooter" oninput="if(window.updateEmbedPreview)window.updateEmbedPreview()" placeholder="مثال: ZENO Bot • نظام الدعم التلقائي" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right">
                                     </div>
                                 </div>
 
@@ -8414,7 +8414,7 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                                         </div>
 
                                         <!-- Embed Card -->
-                                        <div class="bg-[#2b2d31] p-3.5 rounded-lg border-r-[4px] shadow transition-all text-right" id="previewEmbedBox" style="border-right-color: #9333ea;">
+                                        <div class="bg-[#2b2d31] p-3.5 rounded-lg border-l-4 shadow transition-all text-right" id="previewEmbedBox" style="border-left-color: #9333ea; border-right: none;">
                                             <div class="flex items-start gap-3">
                                                 <!-- Thumbnail -->
                                                 <div id="prevThumbnailWrap" class="hidden shrink-0 order-first">
@@ -8570,7 +8570,10 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                         const showTimestamp = document.getElementById('embTimestampToggle')?.checked || false;
 
                         const previewBox = document.getElementById('previewEmbedBox');
-                        if (previewBox) previewBox.style.borderRightColor = color;
+                        if (previewBox) {
+                            previewBox.style.borderLeftColor = color;
+                            previewBox.style.borderRightColor = color;
+                        }
 
                         const prevAuthorRow = document.getElementById('prevAuthorRow');
                         const prevAuthorText = document.getElementById('prevAuthorText');
