@@ -55,6 +55,21 @@ module.exports = async (client) => {
     const rest = new REST({ version: '10' }).setToken(tokenToUse);
     try {
       logger.info(`جاري تسجيل ${slashCommandsArray.length} أمر سلاش للبوت (${client.user.id})...`);
+      
+      // 1. تسجيل الأوامر على مستوى السيرفرات المتصلة فورياً (Instant Guild Commands - تظهر خلال ثوانٍ)
+      if (client.guilds?.cache?.size > 0) {
+        for (const [guildId, guild] of client.guilds.cache) {
+          try {
+            await rest.put(
+              Routes.applicationGuildCommands(client.user.id, guildId),
+              { body: slashCommandsArray }
+            );
+            logger.info(`[INSTANT] ✅ تم تحديث الأوامر فورياً في سيرفر: ${guild.name}`);
+          } catch(e) {}
+        }
+      }
+
+      // 2. تسجيل الأوامر العامة (Global Commands)
       const registered = await rest.put(
         Routes.applicationCommands(client.user.id),
         { body: slashCommandsArray }
@@ -65,7 +80,7 @@ module.exports = async (client) => {
           client.slashCommandIds.set(cmd.name, cmd.id);
         }
       }
-      logger.info(`[SUCCESS] ✅ تم تسجيل ${registered?.length || slashCommandsArray.length} أمر سلاش بنجاح.`);
+      logger.info(`[SUCCESS] ✅ تم تسجيل ${registered?.length || slashCommandsArray.length} أمر سلاش عام بنجاح.`);
     } catch (err) {
       logger.error(`حدث خطأ أثناء تسجيل أوامر السلاش: ${err.message}`);
     }
