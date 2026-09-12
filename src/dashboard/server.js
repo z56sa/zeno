@@ -8463,8 +8463,9 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
             embedScriptHtml = `
                     let embedFields = [];
 
-                    function showFixedToast(msg, isSuccess = true) {
-                        let toast = document.getElementById('embedFixedToast');
+                    function showFixedToast(msg, isSuccess) {
+                        if (isSuccess === undefined) isSuccess = true;
+                        var toast = document.getElementById('embedFixedToast');
                         if (!toast) {
                             toast = document.createElement('div');
                             toast.id = 'embedFixedToast';
@@ -8478,51 +8479,51 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                         toast.style.opacity = '1';
                         toast.style.display = 'flex';
                         clearTimeout(toast._t);
-                        toast._t = setTimeout(() => {
+                        toast._t = setTimeout(function() {
                             toast.style.opacity = '0';
-                            setTimeout(() => { toast.style.display = 'none'; }, 300);
+                            setTimeout(function() { toast.style.display = 'none'; }, 300);
                         }, 4000);
                     }
 
                     function selectColor(hex) {
-                        const c = document.getElementById('embColor');
-                        const h = document.getElementById('embHexInput');
+                        var c = document.getElementById('embColor');
+                        var h = document.getElementById('embHexInput');
                         if (c) c.value = hex;
                         if (h) h.value = hex.toUpperCase();
                         updateEmbedPreview();
                     }
 
                     function onColorPickerChange(hex) {
-                        const h = document.getElementById('embHexInput');
+                        var h = document.getElementById('embHexInput');
                         if (h) h.value = hex.toUpperCase();
                         updateEmbedPreview();
                     }
 
                     function setCustomHex(hex) {
                         if (/^#[0-9A-F]{6}$/i.test(hex)) {
-                            const c = document.getElementById('embColor');
+                            var c = document.getElementById('embColor');
                             if (c) c.value = hex;
                             updateEmbedPreview();
                         }
                     }
 
                     function addEmbedField() {
-                        const id = 'f_' + Date.now();
+                        var id = 'f_' + Date.now();
                         embedFields.push({ id: id, name: '', value: '', inline: false });
                         renderFieldsEditor();
                         updateEmbedPreview();
-                        showFixedToast('✅ تم إضافة حقل مخصص جديد', true);
+                        showFixedToast('\u2705 \u062a\u0645 \u0625\u0636\u0627\u0641\u0629 \u062d\u0642\u0644 \u0645\u062e\u0635\u0635 \u062c\u062f\u064a\u062f', true);
                     }
 
                     function removeEmbedField(id) {
-                        embedFields = embedFields.filter(f => f.id !== id);
+                        embedFields = embedFields.filter(function(f) { return f.id !== id; });
                         renderFieldsEditor();
                         updateEmbedPreview();
-                        showFixedToast('🗑️ تم إزالة الحقل', false);
+                        showFixedToast('\uD83D\uDDD1\uFE0F \u062a\u0645 \u0625\u0632\u0627\u0644\u0629 \u0627\u0644\u062d\u0642\u0644', false);
                     }
 
                     function updateFieldData(id, key, val) {
-                        const field = embedFields.find(f => f.id === id);
+                        var field = embedFields.find(function(f) { return f.id === id; });
                         if (field) {
                             field[key] = val;
                             updateEmbedPreview();
@@ -8530,29 +8531,30 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                     }
 
                     function renderFieldsEditor() {
-                        const c = document.getElementById('fieldsContainer');
+                        var c = document.getElementById('fieldsContainer');
                         if (!c) return;
                         if (embedFields.length === 0) {
-                            c.innerHTML = '<div class="text-[11px] text-gray-500 text-center py-3 bg-[#0b0d14]/40 rounded-2xl border border-dashed border-white/5">لا توجد حقول إضافية حالياً، اضغط "+ إضافة حقل جديد" لإضافة حقول مخصصة</div>';
+                            c.innerHTML = '<div class=\"text-[11px] text-gray-500 text-center py-3 bg-[#0b0d14]/40 rounded-2xl border border-dashed border-white/5\">' +
+                                '\u0644\u0627 \u062a\u0648\u062c\u062f \u062d\u0642\u0648\u0644 \u0625\u0636\u0627\u0641\u064a\u0629 \u062d\u0627\u0644\u064a\u0627\u064b\u060c \u0627\u0636\u063a\u0637 \u0022+ \u0625\u0636\u0627\u0641\u0629 \u062d\u0642\u0644 \u062c\u062f\u064a\u062f\u0022 \u0644\u0625\u0636\u0627\u0641\u0629 \u062d\u0642\u0648\u0644 \u0645\u062e\u0635\u0635\u0629</div>';
                             return;
                         }
-                        let html = '';
-                        for (let i = 0; i < embedFields.length; i++) {
-                            const f = embedFields[i];
-                            html += '<div class="bg-[#0b0d14] border border-white/10 p-3.5 rounded-2xl space-y-2.5">' +
-                                '<div class="flex items-center justify-between">' +
-                                '<div class="flex items-center gap-2">' +
-                                '<label class="text-[11px] text-gray-300 font-bold flex items-center gap-1.5 cursor-pointer bg-[#12141f] px-2.5 py-1 rounded-xl border border-white/5">' +
-                                '<input type="checkbox" ' + (f.inline ? 'checked' : '') + ' onchange="window.updateFieldData(\'' + f.id + '\', \'inline\', this.checked)" class="rounded bg-[#151724] border-white/10 text-purple-600 focus:ring-0 cursor-pointer">' +
-                                '<span>جنباً لجنب (Inline)</span>' +
+                        var html = '';
+                        for (var i = 0; i < embedFields.length; i++) {
+                            var f = embedFields[i];
+                            html += '<div class=\"bg-[#0b0d14] border border-white/10 p-3.5 rounded-2xl space-y-2.5\">' +
+                                '<div class=\"flex items-center justify-between\">' +
+                                '<div class=\"flex items-center gap-2\">' +
+                                '<label class=\"text-[11px] text-gray-300 font-bold flex items-center gap-1.5 cursor-pointer bg-[#12141f] px-2.5 py-1 rounded-xl border border-white/5\">' +
+                                '<input type=\"checkbox\" ' + (f.inline ? 'checked' : '') + ' onchange=\"window.updateFieldData(\\\'' + f.id + '\\\', \\\'inline\\\', this.checked)\" class=\"rounded bg-[#151724] border-white/10 text-purple-600 focus:ring-0 cursor-pointer\">' +
+                                '<span>\u062c\u0646\u0628\u0627\u064b \u0644\u062c\u0646\u0628 (Inline)</span>' +
                                 '</label>' +
-                                '<button type="button" onclick="window.removeEmbedField(\'' + f.id + '\')" class="text-rose-400 hover:text-rose-300 text-xs px-2.5 py-1 rounded-xl bg-rose-950/40 border border-rose-800/40 font-bold cursor-pointer transition">✕ حذف</button>' +
+                                '<button type=\"button\" onclick=\"window.removeEmbedField(\\\'' + f.id + '\\\');\" class=\"text-rose-400 hover:text-rose-300 text-xs px-2.5 py-1 rounded-xl bg-rose-950/40 border border-rose-800/40 font-bold cursor-pointer transition\">\u2715 \u062d\u0630\u0641</button>' +
                                 '</div>' +
-                                '<span class="text-xs font-black text-purple-400 font-mono">الحقل #' + (i + 1) + '</span>' +
+                                '<span class=\"text-xs font-black text-purple-400 font-mono\">\u0627\u0644\u062d\u0642\u0644 #' + (i + 1) + '</span>' +
                                 '</div>' +
-                                '<div class="grid grid-cols-1 md:grid-cols-2 gap-2">' +
-                                '<div><input type="text" placeholder="عنوان الحقل..." value="' + (f.name || '').replace(/"/g, '&quot;') + '" oninput="window.updateFieldData(\'' + f.id + '\', \'name\', this.value)" class="w-full bg-[#12141f] border border-white/5 focus:border-purple-600 rounded-xl px-3 py-2 text-xs text-white text-right outline-none font-bold"></div>' +
-                                '<div><input type="text" placeholder="محتوى الحقل..." value="' + (f.value || '').replace(/"/g, '&quot;') + '" oninput="window.updateFieldData(\'' + f.id + '\', \'value\', this.value)" class="w-full bg-[#12141f] border border-white/5 focus:border-purple-600 rounded-xl px-3 py-2 text-xs text-white text-right outline-none"></div>' +
+                                '<div class=\"grid grid-cols-1 md:grid-cols-2 gap-2\">' +
+                                '<div><input type=\"text\" placeholder=\"\u0639\u0646\u0648\u0627\u0646 \u0627\u0644\u062d\u0642\u0644...\" value=\"' + (f.name || '').replace(/"/g, '&quot;') + '\" oninput=\"window.updateFieldData(\\\'' + f.id + '\\\', \\\'name\\\', this.value)\" class=\"w-full bg-[#12141f] border border-white/5 focus:border-purple-600 rounded-xl px-3 py-2 text-xs text-white text-right outline-none font-bold\"></div>' +
+                                '<div><input type=\"text\" placeholder=\"\u0645\u062d\u062a\u0648\u0649 \u0627\u0644\u062d\u0642\u0644...\" value=\"' + (f.value || '').replace(/"/g, '&quot;') + '\" oninput=\"window.updateFieldData(\\\'' + f.id + '\\\', \\\'value\\\', this.value)\" class=\"w-full bg-[#12141f] border border-white/5 focus:border-purple-600 rounded-xl px-3 py-2 text-xs text-white text-right outline-none\"></div>' +
                                 '</div>' +
                                 '</div>';
                         }
@@ -8560,23 +8562,31 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                     }
 
                     function updateEmbedPreview() {
-                        const color = document.getElementById('embColor')?.value || '#9333ea';
-                        const author = document.getElementById('embAuthor')?.value?.trim() || '';
-                        const title = document.getElementById('embTitle')?.value?.trim() || '';
-                        const desc = document.getElementById('embDesc')?.value?.trim() || '';
-                        const image = document.getElementById('embImage')?.value?.trim() || '';
-                        const thumbnail = document.getElementById('embThumbnail')?.value?.trim() || '';
-                        const footer = document.getElementById('embFooter')?.value?.trim() || '';
-                        const showTimestamp = document.getElementById('embTimestampToggle')?.checked || false;
+                        var embColor = document.getElementById('embColor');
+                        var color = embColor ? embColor.value : '#9333ea';
+                        var embAuthor = document.getElementById('embAuthor');
+                        var author = embAuthor ? (embAuthor.value || '').trim() : '';
+                        var embTitle = document.getElementById('embTitle');
+                        var title = embTitle ? (embTitle.value || '').trim() : '';
+                        var embDesc = document.getElementById('embDesc');
+                        var desc = embDesc ? (embDesc.value || '').trim() : '';
+                        var embImage = document.getElementById('embImage');
+                        var image = embImage ? (embImage.value || '').trim() : '';
+                        var embThumbnail = document.getElementById('embThumbnail');
+                        var thumbnail = embThumbnail ? (embThumbnail.value || '').trim() : '';
+                        var embFooter = document.getElementById('embFooter');
+                        var footer = embFooter ? (embFooter.value || '').trim() : '';
+                        var embTimestampToggle = document.getElementById('embTimestampToggle');
+                        var showTimestamp = embTimestampToggle ? embTimestampToggle.checked : false;
 
-                        const previewBox = document.getElementById('previewEmbedBox');
+                        var previewBox = document.getElementById('previewEmbedBox');
                         if (previewBox) {
                             previewBox.style.borderLeftColor = color;
                             previewBox.style.borderRightColor = color;
                         }
 
-                        const prevAuthorRow = document.getElementById('prevAuthorRow');
-                        const prevAuthorText = document.getElementById('prevAuthorText');
+                        var prevAuthorRow = document.getElementById('prevAuthorRow');
+                        var prevAuthorText = document.getElementById('prevAuthorText');
                         if (prevAuthorRow) {
                             if (author) {
                                 prevAuthorRow.classList.remove('hidden');
@@ -8588,71 +8598,53 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                             }
                         }
 
-                        const prevTitle = document.getElementById('prevTitle');
+                        var prevTitle = document.getElementById('prevTitle');
                         if (prevTitle) {
-                            if (title) {
-                                prevTitle.style.display = 'block';
-                                prevTitle.textContent = title;
-                            } else {
-                                prevTitle.style.display = 'none';
-                                prevTitle.textContent = '';
-                            }
+                            if (title) { prevTitle.style.display = 'block'; prevTitle.textContent = title; }
+                            else { prevTitle.style.display = 'none'; prevTitle.textContent = ''; }
                         }
 
-                        const prevThumbnailWrap = document.getElementById('prevThumbnailWrap');
-                        const prevThumbnailImg = document.getElementById('prevThumbnailImg');
+                        var prevThumbnailWrap = document.getElementById('prevThumbnailWrap');
+                        var prevThumbnailImg = document.getElementById('prevThumbnailImg');
                         if (prevThumbnailWrap && prevThumbnailImg) {
-                            if (thumbnail) {
-                                prevThumbnailImg.src = thumbnail;
-                                prevThumbnailWrap.classList.remove('hidden');
-                            } else {
-                                prevThumbnailImg.src = '';
-                                prevThumbnailWrap.classList.add('hidden');
-                            }
+                            if (thumbnail) { prevThumbnailImg.src = thumbnail; prevThumbnailWrap.classList.remove('hidden'); }
+                            else { prevThumbnailImg.src = ''; prevThumbnailWrap.classList.add('hidden'); }
                         }
 
-                        const prevDesc = document.getElementById('prevDesc');
-                        if (prevDesc) {
-                            prevDesc.textContent = desc || 'محتوى الإيمبد سيظهر هنا مباشرة...';
-                        }
+                        var prevDesc = document.getElementById('prevDesc');
+                        if (prevDesc) prevDesc.textContent = desc || '\u0645\u062d\u062a\u0648\u0649 \u0627\u0644\u0625\u064a\u0645\u0628\u062f \u0633\u064a\u0638\u0647\u0631 \u0647\u0646\u0627 \u0645\u0628\u0627\u0634\u0631\u0629...';
 
-                        const prevFieldsGrid = document.getElementById('prevFieldsGrid');
+                        var prevFieldsGrid = document.getElementById('prevFieldsGrid');
                         if (prevFieldsGrid) {
-                            const validFields = embedFields.filter(f => f.name || f.value);
+                            var validFields = embedFields.filter(function(f) { return f.name || f.value; });
                             if (validFields.length > 0) {
                                 prevFieldsGrid.classList.remove('hidden');
-                                let fieldsHtml = '';
-                                for (let f of validFields) {
-                                    fieldsHtml += '<div class="' + (f.inline ? 'col-span-1' : 'col-span-2') + ' bg-black/20 p-2 rounded-lg text-right">' +
-                                        '<div class="text-[11px] font-bold text-gray-300">' + (f.name || 'حقل') + '</div>' +
-                                        '<div class="text-[11px] text-gray-400">' + (f.value || '...') + '</div>' +
+                                var fieldsHtml = '';
+                                for (var fi = 0; fi < validFields.length; fi++) {
+                                    var ff = validFields[fi];
+                                    fieldsHtml += '<div class=\"' + (ff.inline ? 'col-span-1' : 'col-span-2') + ' bg-black/20 p-2 rounded-lg text-right\">' +
+                                        '<div class=\"text-[11px] font-bold text-gray-300\">' + (ff.name || '\u062d\u0642\u0644') + '</div>' +
+                                        '<div class=\"text-[11px] text-gray-400\">' + (ff.value || '...') + '</div>' +
                                         '</div>';
                                 }
                                 prevFieldsGrid.innerHTML = fieldsHtml;
-                            } else {
-                                prevFieldsGrid.classList.add('hidden');
-                            }
+                            } else { prevFieldsGrid.classList.add('hidden'); }
                         }
 
-                        const prevImageRow = document.getElementById('prevImageRow');
-                        const prevMainImg = document.getElementById('prevMainImg');
+                        var prevImageRow = document.getElementById('prevImageRow');
+                        var prevMainImg = document.getElementById('prevMainImg');
                         if (prevImageRow && prevMainImg) {
-                            if (image) {
-                                prevMainImg.src = image;
-                                prevImageRow.classList.remove('hidden');
-                            } else {
-                                prevImageRow.classList.add('hidden');
-                            }
+                            if (image) { prevMainImg.src = image; prevImageRow.classList.remove('hidden'); }
+                            else { prevImageRow.classList.add('hidden'); }
                         }
 
-                        const prevFooterText = document.getElementById('prevFooterText');
-                        const prevTimestamp = document.getElementById('prevTimestamp');
-                        const prevFooterDot = document.getElementById('prevFooterDot');
-
+                        var prevFooterText = document.getElementById('prevFooterText');
+                        var prevTimestamp = document.getElementById('prevTimestamp');
+                        var prevFooterDot = document.getElementById('prevFooterDot');
                         if (prevFooterText) prevFooterText.textContent = footer || '';
                         if (prevTimestamp) {
                             if (showTimestamp) {
-                                prevTimestamp.textContent = 'اليوم في ' + new Date().toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' });
+                                prevTimestamp.textContent = '\u0627\u0644\u064a\u0648\u0645 \u0641\u064a ' + new Date().toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' });
                                 if (prevFooterDot) prevFooterDot.classList.toggle('hidden', !footer);
                             } else {
                                 prevTimestamp.textContent = '';
@@ -8662,141 +8654,136 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                     }
 
                     function clearEmbedFields() {
-                        const ids = ['embTitle', 'embDesc', 'embAuthor', 'embImage', 'embThumbnail', 'embFooter'];
-                        ids.forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
-                        const ts = document.getElementById('embTimestampToggle');
+                        ['embTitle','embDesc','embAuthor','embImage','embThumbnail','embFooter'].forEach(function(id) {
+                            var el = document.getElementById(id); if (el) el.value = '';
+                        });
+                        var ts = document.getElementById('embTimestampToggle');
                         if (ts) ts.checked = true;
-                        ['embThumbnail', 'embImage'].forEach(id => {
-                            const boxImg = document.getElementById('prev_' + id + '_box');
-                            const ph = document.getElementById('ph_' + id);
+                        ['embThumbnail','embImage'].forEach(function(id) {
+                            var boxImg = document.getElementById('prev_' + id + '_box');
+                            var ph = document.getElementById('ph_' + id);
                             if (boxImg) { boxImg.src = ''; boxImg.classList.add('hidden'); }
                             if (ph) ph.classList.remove('hidden');
-                            const fileInp = document.getElementById('file_' + id);
+                            var fileInp = document.getElementById('file_' + id);
                             if (fileInp) fileInp.value = '';
                         });
                         embedFields = [];
                         renderFieldsEditor();
                         selectColor('#9333ea');
                         updateEmbedPreview();
-                        showFixedToast('🗑️ تم مسح جميع محتويات الإيمبد', true);
+                        showFixedToast('\uD83D\uDDD1\uFE0F \u062a\u0645 \u0645\u0633\u062d \u062c\u0645\u064a\u0639 \u0645\u062d\u062a\u0648\u064a\u0627\u062a \u0627\u0644\u0625\u064a\u0645\u0628\u062f', true);
                     }
 
                     function saveEmbedDraft() {
-                        const payload = getEmbedPayload();
+                        var payload = getEmbedPayload();
                         try {
                             localStorage.setItem('zeno_embed_draft_${guildId}', JSON.stringify(payload));
-                            showFixedToast('💾 تم حفظ المسودة في المتصفح بنجاح!', true);
+                            showFixedToast('\uD83D\uDCBE \u062a\u0645 \u062d\u0641\u0638 \u0627\u0644\u0645\u0633\u0648\u062f\u0629 \u0641\u064a \u0627\u0644\u0645\u062a\u0635\u0641\u062d \u0628\u0646\u062c\u0627\u062d!', true);
                         } catch(e) {
-                            showFixedToast('❌ فشل حفظ المسودة', false);
+                            showFixedToast('\u274C \u0641\u0634\u0644 \u062d\u0641\u0638 \u0627\u0644\u0645\u0633\u0648\u062f\u0629', false);
                         }
                     }
 
                     function getEmbedPayload() {
-                        const g = id => document.getElementById(id);
+                        function g(id) { return document.getElementById(id); }
                         return {
-                            channelId: g('embedChannel')?.value || '',
-                            color: g('embColor')?.value || '#9333ea',
-                            title: g('embTitle')?.value?.trim() || '',
+                            channelId: (g('embedChannel') || {}).value || '',
+                            color: (g('embColor') || {}).value || '#9333ea',
+                            title: ((g('embTitle') || {}).value || '').trim(),
                             titleUrl: '',
-                            desc: g('embDesc')?.value?.trim() || '',
-                            author: g('embAuthor')?.value?.trim() || '',
+                            desc: ((g('embDesc') || {}).value || '').trim(),
+                            author: ((g('embAuthor') || {}).value || '').trim(),
                             authorIcon: '',
-                            image: g('embImage')?.value?.trim() || '',
-                            thumbnail: g('embThumbnail')?.value?.trim() || '',
-                            footer: g('embFooter')?.value?.trim() || '',
+                            image: ((g('embImage') || {}).value || '').trim(),
+                            thumbnail: ((g('embThumbnail') || {}).value || '').trim(),
+                            footer: ((g('embFooter') || {}).value || '').trim(),
                             footerIcon: '',
-                            timestamp: g('embTimestampToggle')?.checked !== false,
-                            fields: embedFields.filter(f => f.name || f.value)
+                            timestamp: (g('embTimestampToggle') || {}).checked !== false,
+                            fields: embedFields.filter(function(f) { return f.name || f.value; })
                         };
                     }
 
                     async function sendEmbedDirect() {
-                        const payload = getEmbedPayload();
+                        var payload = getEmbedPayload();
                         if (!payload.channelId) {
-                            showFixedToast('⚠️ يرجى اختيار القناة المستهدفة أولاً من القائمة!', false);
+                            showFixedToast('\u26A0\uFE0F \u064a\u0631\u062c\u0649 \u0627\u062e\u062a\u064a\u0627\u0631 \u0627\u0644\u0642\u0646\u0627\u0629 \u0627\u0644\u0645\u0633\u062a\u0647\u062f\u0641\u0629 \u0623\u0648\u0644\u0627\u064b \u0645\u0646 \u0627\u0644\u0642\u0627\u0626\u0645\u0629!', false);
                             return;
                         }
                         if (!payload.desc && !payload.title) {
-                            showFixedToast('⚠️ يرجى كتابة عنوان أو محتوى للرسالة قبل الإرسال!', false);
+                            showFixedToast('\u26A0\uFE0F \u064a\u0631\u062c\u0649 \u0643\u062a\u0627\u0628\u0629 \u0639\u0646\u0648\u0627\u0646 \u0623\u0648 \u0645\u062d\u062a\u0648\u0649 \u0642\u0628\u0644 \u0627\u0644\u0625\u0631\u0633\u0627\u0644!', false);
                             return;
                         }
-
-                        const btn = document.getElementById('btnSendEmbed');
-                        const origHtml = btn ? btn.innerHTML : '';
-                        if (btn) {
-                            btn.disabled = true;
-                            btn.innerHTML = '<span>⏳</span><span>جاري إرسال الإيمبد...</span>';
-                        }
-
+                        var btn = document.getElementById('btnSendEmbed');
+                        var origHtml = btn ? btn.innerHTML : '';
+                        if (btn) { btn.disabled = true; btn.innerHTML = '<span>\u23F3</span><span>\u062c\u0627\u0631\u064a \u0625\u0631\u0633\u0627\u0644 \u0627\u0644\u0625\u064a\u0645\u0628\u062f...</span>'; }
                         try {
-                            const res = await fetch('/api/guild/${guildId}/send-embed', {
+                            var res = await fetch('/api/guild/${guildId}/send-embed', {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' },
                                 body: JSON.stringify(payload)
                             });
-                            const data = await res.json();
+                            var data = await res.json();
                             if (data.success) {
-                                showFixedToast('✅ تم إرسال الإيمبد بنجاح في القناة!', true);
+                                showFixedToast('\u2705 \u062a\u0645 \u0625\u0631\u0633\u0627\u0644 \u0627\u0644\u0625\u064a\u0645\u0628\u062f \u0628\u0646\u062c\u0627\u062d!', true);
                             } else {
-                                showFixedToast('❌ ' + (data.error || 'فشل الإرسال'), false);
+                                showFixedToast('\u274C ' + (data.error || '\u0641\u0634\u0644 \u0627\u0644\u0625\u0631\u0633\u0627\u0644'), false);
                             }
                         } catch(e) {
                             console.error('[sendEmbedDirect] error:', e);
-                            showFixedToast('❌ حدث خطأ في الاتصال بالخادم أثناء الإرسال', false);
+                            showFixedToast('\u274C \u062e\u0637\u0623 \u0641\u064a \u0627\u0644\u0627\u062a\u0635\u0627\u0644', false);
                         } finally {
-                            if (btn) {
-                                btn.disabled = false;
-                                btn.innerHTML = origHtml || '<span class="text-base">🚀</span><span>إرسال للقناة الآن</span>';
-                            }
+                            if (btn) { btn.disabled = false; btn.innerHTML = origHtml || '<span>\uD83D\uDE80</span><span>\u0625\u0631\u0633\u0627\u0644 \u0644\u0644\u0642\u0646\u0627\u0629 \u0627\u0644\u0622\u0646</span>'; }
                         }
                     }
 
                     async function uploadEmbedImageFile(input, targetId) {
-                        const file = input.files && input.files[0];
+                        var file = input.files && input.files[0];
                         if (!file) return;
                         if (!file.type.startsWith('image/')) {
-                            showFixedToast('❌ يرجى اختيار ملف صورة صالح (PNG, JPG, WEBP, GIF)', false);
+                            showFixedToast('\u274C \u064a\u0631\u062c\u0649 \u0627\u062e\u062a\u064a\u0627\u0631 \u0645\u0644\u0641 \u0635\u0648\u0631\u0629 \u0635\u0627\u0644\u062d', false);
                             return;
                         }
                         if (file.size > 15 * 1024 * 1024) {
-                            showFixedToast('❌ حجم الصورة كبير جداً (أكثر من 15 ميجابايت)', false);
+                            showFixedToast('\u274C \u062d\u062c\u0645 \u0627\u0644\u0635\u0648\u0631\u0629 \u0643\u0628\u064a\u0631 \u062c\u062f\u0627\u064b', false);
                             return;
                         }
+                        // Instant local preview
+                        var localUrl = URL.createObjectURL(file);
+                        var boxImg = document.getElementById('prev_' + targetId + '_box');
+                        var ph = document.getElementById('ph_' + targetId);
+                        if (boxImg) { boxImg.src = localUrl; boxImg.classList.remove('hidden'); }
+                        if (ph) ph.classList.add('hidden');
+                        var hiddenInput = document.getElementById(targetId);
+                        if (hiddenInput) hiddenInput.value = localUrl;
+                        updateEmbedPreview();
 
-                        const btnText = document.getElementById('btn_text_' + targetId);
-                        const origText = btnText ? btnText.innerText : 'رفع';
-                        if (btnText) btnText.innerText = 'جاري الرفع... ⏳';
+                        var btnText = document.getElementById('btn_text_' + targetId);
+                        var origText = btnText ? btnText.innerText : '\u0631\u0641\u0639';
+                        if (btnText) btnText.innerText = '\u062c\u0627\u0631\u064a \u0627\u0644\u0631\u0641\u0639... \u23F3';
 
-                        const reader = new FileReader();
+                        var reader = new FileReader();
                         reader.onload = async function(e) {
                             try {
-                                const res = await fetch('/api/guild/${guildId}/upload-image', {
+                                var res = await fetch('/api/guild/${guildId}/upload-image', {
                                     method: 'POST',
                                     headers: { 'Content-Type': 'application/json' },
                                     body: JSON.stringify({ imageBase64: e.target.result, fieldName: targetId })
                                 });
-                                const data = await res.json();
+                                var data = await res.json();
                                 if (data.success && data.url) {
-                                    document.getElementById(targetId).value = data.url;
-
-                                    const boxImg = document.getElementById('prev_' + targetId + '_box');
-                                    const ph = document.getElementById('ph_' + targetId);
-                                    if (boxImg) {
-                                        boxImg.src = data.url;
-                                        boxImg.classList.remove('hidden');
-                                    }
-                                    if (ph) ph.classList.add('hidden');
-
+                                    if (hiddenInput) hiddenInput.value = data.url;
+                                    if (boxImg) boxImg.src = data.url;
                                     updateEmbedPreview();
-                                    if (btnText) btnText.innerText = '✅ تم الرفع';
-                                    showFixedToast('✅ تم رفع الصورة بنجاح!', true);
-                                    setTimeout(() => { if (btnText) btnText.innerText = origText; }, 2000);
+                                    if (btnText) btnText.innerText = '\u2705 \u062a\u0645 \u0627\u0644\u0631\u0641\u0639';
+                                    showFixedToast('\u2705 \u062a\u0645 \u0631\u0641\u0639 \u0627\u0644\u0635\u0648\u0631\u0629 \u0628\u0646\u062c\u0627\u062d!', true);
+                                    setTimeout(function() { if (btnText) btnText.innerText = origText; }, 2000);
+                                    URL.revokeObjectURL(localUrl);
                                 } else {
-                                    showFixedToast('❌ فشل رفع الصورة: ' + (data.error || 'خطأ غير معروف'), false);
+                                    showFixedToast('\u26A0\uFE0F \u062a\u0639\u0630\u0651\u0631 \u0631\u0641\u0639 \u0627\u0644\u0635\u0648\u0631\u0629: ' + (data.error || '\u062e\u0637\u0623'), false);
                                     if (btnText) btnText.innerText = origText;
                                 }
                             } catch(err) {
-                                showFixedToast('❌ حدث خطأ في الاتصال أثناء الرفع', false);
+                                showFixedToast('\u26A0\uFE0F \u062e\u0637\u0623 \u0641\u064a \u0627\u0644\u0627\u062a\u0635\u0627\u0644 \u0623\u062b\u0646\u0627\u0621 \u0627\u0644\u0631\u0641\u0639', false);
                                 if (btnText) btnText.innerText = origText;
                             }
                         };
@@ -8804,96 +8791,75 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                     }
 
                     function clearEmbedImageField(targetId) {
-                        const el = document.getElementById(targetId);
+                        var el = document.getElementById(targetId);
                         if (el) el.value = '';
-                        const fileInp = document.getElementById('file_' + targetId);
+                        var fileInp = document.getElementById('file_' + targetId);
                         if (fileInp) fileInp.value = '';
-
-                        const boxImg = document.getElementById('prev_' + targetId + '_box');
-                        const ph = document.getElementById('ph_' + targetId);
-                        if (boxImg) {
-                            boxImg.src = '';
-                            boxImg.classList.add('hidden');
-                        }
+                        var boxImg = document.getElementById('prev_' + targetId + '_box');
+                        var ph = document.getElementById('ph_' + targetId);
+                        if (boxImg) { boxImg.src = ''; boxImg.classList.add('hidden'); }
                         if (ph) ph.classList.remove('hidden');
-
                         updateEmbedPreview();
-                        showFixedToast('🗑️ تم إزالة الصورة', true);
+                        showFixedToast('\uD83D\uDDD1\uFE0F \u062a\u0645 \u0625\u0632\u0627\u0644\u0629 \u0627\u0644\u0635\u0648\u0631\u0629', true);
                     }
 
                     function initEmbedEditor() {
+                        console.log('[Embed Editor] Initializing...');
                         renderFieldsEditor();
                         try {
-                            const saved = localStorage.getItem('zeno_embed_draft_${guildId}');
+                            var saved = localStorage.getItem('zeno_embed_draft_${guildId}');
                             if (saved) {
-                                const d = JSON.parse(saved);
-                                const setVal = (id, val) => { const el = document.getElementById(id); if (el && val !== undefined) el.value = val; };
+                                var d = JSON.parse(saved);
+                                function setVal(id, val) { var el = document.getElementById(id); if (el && val !== undefined) el.value = val; }
                                 setVal('embTitle', d.title);
                                 setVal('embDesc', d.desc);
                                 setVal('embAuthor', d.author);
                                 setVal('embFooter', d.footer);
                                 if (d.image) {
                                     setVal('embImage', d.image);
-                                    const b = document.getElementById('prev_embImage_box');
-                                    const p = document.getElementById('ph_embImage');
-                                    if (b) { b.src = d.image; b.classList.remove('hidden'); }
-                                    if (p) p.classList.add('hidden');
+                                    var bi = document.getElementById('prev_embImage_box');
+                                    var pi = document.getElementById('ph_embImage');
+                                    if (bi) { bi.src = d.image; bi.classList.remove('hidden'); }
+                                    if (pi) pi.classList.add('hidden');
                                 }
                                 if (d.thumbnail) {
                                     setVal('embThumbnail', d.thumbnail);
-                                    const b = document.getElementById('prev_embThumbnail_box');
-                                    const p = document.getElementById('ph_embThumbnail');
-                                    if (b) { b.src = d.thumbnail; b.classList.remove('hidden'); }
-                                    if (p) p.classList.add('hidden');
+                                    var bt = document.getElementById('prev_embThumbnail_box');
+                                    var pt = document.getElementById('ph_embThumbnail');
+                                    if (bt) { bt.src = d.thumbnail; bt.classList.remove('hidden'); }
+                                    if (pt) pt.classList.add('hidden');
                                 }
                                 if (d.color) selectColor(d.color);
-                                if (Array.isArray(d.fields)) {
-                                    embedFields = d.fields;
-                                    renderFieldsEditor();
-                                }
+                                if (Array.isArray(d.fields)) { embedFields = d.fields; renderFieldsEditor(); }
                             }
-                        } catch(e) {}
+                        } catch(e) { console.warn('[Embed Editor] Draft load error:', e); }
                         updateEmbedPreview();
 
-                        // Bind Events
-                        const btnSend = document.getElementById('btnSendEmbed');
-                        const btnSave = document.getElementById('btnSaveEmbedDraft');
-                        const btnClear = document.getElementById('btnClearEmbed');
-                        if (btnSend) {
-                            btnSend.onclick = function(e) { e.preventDefault(); e.stopPropagation(); sendEmbedDirect(); return false; };
-                        }
-                        if (btnSave) {
-                            btnSave.onclick = function(e) { e.preventDefault(); e.stopPropagation(); saveEmbedDraft(); return false; };
-                        }
-                        if (btnClear) {
-                            btnClear.onclick = function(e) { e.preventDefault(); e.stopPropagation(); clearEmbedFields(); return false; };
-                        }
+                        var btnSend = document.getElementById('btnSendEmbed');
+                        var btnSave = document.getElementById('btnSaveEmbedDraft');
+                        var btnClear = document.getElementById('btnClearEmbed');
+                        if (btnSend) btnSend.onclick = function(ev) { ev.preventDefault(); ev.stopPropagation(); sendEmbedDirect(); return false; };
+                        if (btnSave) btnSave.onclick = function(ev) { ev.preventDefault(); ev.stopPropagation(); saveEmbedDraft(); return false; };
+                        if (btnClear) btnClear.onclick = function(ev) { ev.preventDefault(); ev.stopPropagation(); clearEmbedFields(); return false; };
 
-                        // Live Inputs Binding
-                        ['embTitle', 'embDesc', 'embAuthor', 'embFooter'].forEach(id => {
-                            const el = document.getElementById(id);
+                        ['embTitle','embDesc','embAuthor','embFooter'].forEach(function(id) {
+                            var el = document.getElementById(id);
                             if (el) el.addEventListener('input', updateEmbedPreview);
                         });
-                        const colorInput = document.getElementById('embColor');
-                        if (colorInput) colorInput.addEventListener('input', e => onColorPickerChange(e.target.value));
-                        const hexInput = document.getElementById('embHexInput');
-                        if (hexInput) hexInput.addEventListener('input', e => setCustomHex(e.target.value));
-                        const tsToggle = document.getElementById('embTimestampToggle');
+                        var colorInput = document.getElementById('embColor');
+                        if (colorInput) colorInput.addEventListener('input', function(ev) { onColorPickerChange(ev.target.value); });
+                        var hexInput = document.getElementById('embHexInput');
+                        if (hexInput) hexInput.addEventListener('input', function(ev) { setCustomHex(ev.target.value); });
+                        var tsToggle = document.getElementById('embTimestampToggle');
                         if (tsToggle) tsToggle.addEventListener('change', updateEmbedPreview);
-
-                        const fThumb = document.getElementById('file_embThumbnail');
+                        var fThumb = document.getElementById('file_embThumbnail');
                         if (fThumb) fThumb.addEventListener('change', function() { uploadEmbedImageFile(this, 'embThumbnail'); });
-                        const fImg = document.getElementById('file_embImage');
+                        var fImg = document.getElementById('file_embImage');
                         if (fImg) fImg.addEventListener('change', function() { uploadEmbedImageFile(this, 'embImage'); });
+                        console.log('[Embed Editor] Ready \u2705');
                     }
 
-                    if (document.readyState === 'loading') {
-                        window.addEventListener('DOMContentLoaded', initEmbedEditor);
-                    } else {
-                        initEmbedEditor();
-                    }
-
-                    // Expose to window
+                    // ✅ CRITICAL: expose to window IMMEDIATELY
                     window.selectColor = selectColor;
                     window.onColorPickerChange = onColorPickerChange;
                     window.setCustomHex = setCustomHex;
@@ -8909,7 +8875,13 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                     window.uploadEmbedImageFile = uploadEmbedImageFile;
                     window.clearEmbedImageField = clearEmbedImageField;
                     window.initEmbedEditor = initEmbedEditor;
-                `;
+
+                    if (document.readyState === 'loading') {
+                        window.addEventListener('DOMContentLoaded', initEmbedEditor);
+                    } else {
+                        initEmbedEditor();
+                    }
+                `
             } else {
                 formFieldsHtml = `
                     <div class="space-y-5 text-right" dir="rtl">
@@ -9446,8 +9418,12 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                     if (fileInput) fileInput.value = '';
                     if (typeof onDone === 'function') onDone();
                 }
-                ${embedScriptHtml}
                 </script>
+                ${embedScriptHtml ? `<script>
+try {
+${embedScriptHtml}
+} catch(___e) { console.error('[Embed Editor] Fatal script error:', ___e); }
+</script>` : ''}
             </body>
             </html>
             `);
