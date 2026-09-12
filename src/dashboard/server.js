@@ -8411,7 +8411,7 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                                         <span class="bg-[#5865f2] text-white text-[9px] font-extrabold px-1 py-0.2 rounded font-sans leading-tight">BOT</span>
                                         <span class="font-bold text-white text-xs hover:underline cursor-pointer">ZENO</span>
                                     </div>
-                                    <img src="${botAvatar}" class="w-9 h-9 rounded-full object-cover shadow">
+                                    <img src="${botAvatarUrl}" class="w-9 h-9 rounded-full object-cover shadow">
                                 </div>
 
                                 <!-- Embed Container -->
