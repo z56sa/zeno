@@ -1309,6 +1309,7 @@ module.exports = function (app, client) {
             }
 
             let formFieldsHtml = '';
+            let embedScriptHtml = '';
 
             if (section === 'overview') {
 formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl">
@@ -8421,7 +8422,7 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                 `;
 
             // Embed page script (injected globally, not inside the form)
-            const embedScriptHtml = section === 'embed' ? `
+            embedScriptHtml = `
                     let embedFields = [];
 
                     function selectColor(hex) {
@@ -8785,7 +8786,7 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
 
                         updateEmbedPreview();
                     }
-                ` : '';
+                `;
             } else {
                 formFieldsHtml = `
                     <div class="space-y-5 text-right" dir="rtl">
