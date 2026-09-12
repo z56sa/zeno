@@ -56,20 +56,19 @@ module.exports = async (client) => {
     try {
       logger.info(`جاري تسجيل ${slashCommandsArray.length} أمر سلاش للبوت (${client.user.id})...`);
       
-      // 1. تسجيل الأوامر على مستوى السيرفرات المتصلة فورياً (Instant Guild Commands - تظهر خلال ثوانٍ)
+      // مسح أي أوامر مسجلة على مستوى السيرفرات لمنع ظهور الأمر مكرراً (Duplicate)
       if (client.guilds?.cache?.size > 0) {
         for (const [guildId, guild] of client.guilds.cache) {
           try {
             await rest.put(
               Routes.applicationGuildCommands(client.user.id, guildId),
-              { body: slashCommandsArray }
+              { body: [] }
             );
-            logger.info(`[INSTANT] ✅ تم تحديث الأوامر فورياً في سيرفر: ${guild.name}`);
           } catch(e) {}
         }
       }
 
-      // 2. تسجيل الأوامر العامة (Global Commands)
+      // تسجيل الأوامر العامة الرسمية الموحدة (Global Commands)
       const registered = await rest.put(
         Routes.applicationCommands(client.user.id),
         { body: slashCommandsArray }

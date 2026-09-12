@@ -8178,9 +8178,9 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
 
                         <!-- Mode tabs -->
                         <div class="flex items-center justify-end gap-2 bg-[#12141f] p-1.5 rounded-2xl border border-white/5 w-fit ml-auto">
-                            <button type="button" class="px-4 py-1.5 bg-purple-600 text-white font-bold text-xs rounded-xl shadow">محرر</button>
-                            <button type="button" onclick="alert('المحرر المرئي مفعل')" class="px-4 py-1.5 text-gray-400 hover:text-white font-bold text-xs rounded-xl transition">مستند</button>
-                            <button type="button" onclick="document.getElementById('livePreviewCard').scrollIntoView({behavior:'smooth'})" class="px-4 py-1.5 text-gray-400 hover:text-white font-bold text-xs rounded-xl transition">معاينة</button>
+                            <button type="button" id="tabBtnEditor" onclick="switchEmbedTab('editor')" class="px-4 py-1.5 bg-purple-600 text-white font-bold text-xs rounded-xl shadow cursor-pointer transition">محرر</button>
+                            <button type="button" id="tabBtnDocs" onclick="switchEmbedTab('docs')" class="px-4 py-1.5 text-gray-400 hover:text-white font-bold text-xs rounded-xl transition cursor-pointer">مستند ومساعدة</button>
+                            <button type="button" id="tabBtnPreview" onclick="switchEmbedTab('preview')" class="px-4 py-1.5 text-gray-400 hover:text-white font-bold text-xs rounded-xl transition cursor-pointer">معاينة</button>
                         </div>
 
                         <!-- Target Channel -->
@@ -8204,22 +8204,22 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
 
                             <!-- Color Swatches -->
                             <div class="flex items-center justify-end gap-2 flex-wrap pt-2 border-t border-white/5">
-                                <button type="button" onclick="selectColor('#10b981')" class="w-7 h-7 rounded-full bg-[#10b981] hover:scale-110 transition border border-white/20 shadow"></button>
-                                <button type="button" onclick="selectColor('#06b6d4')" class="w-7 h-7 rounded-full bg-[#06b6d4] hover:scale-110 transition border border-white/20 shadow"></button>
-                                <button type="button" onclick="selectColor('#3b82f6')" class="w-7 h-7 rounded-full bg-[#3b82f6] hover:scale-110 transition border border-white/20 shadow"></button>
-                                <button type="button" onclick="selectColor('#8b5cf6')" class="w-7 h-7 rounded-full bg-[#8b5cf6] hover:scale-110 transition border border-white/20 shadow"></button>
-                                <button type="button" onclick="selectColor('#9333ea')" class="w-7 h-7 rounded-full bg-[#9333ea] hover:scale-110 transition border-2 border-white shadow-lg ring-2 ring-purple-500/50"></button>
-                                <button type="button" onclick="selectColor('#f97316')" class="w-7 h-7 rounded-full bg-[#f97316] hover:scale-110 transition border border-white/20 shadow"></button>
-                                <button type="button" onclick="selectColor('#ef4444')" class="w-7 h-7 rounded-full bg-[#ef4444] hover:scale-110 transition border border-white/20 shadow"></button>
-                                <button type="button" onclick="selectColor('#ec4899')" class="w-7 h-7 rounded-full bg-[#ec4899] hover:scale-110 transition border border-white/20 shadow"></button>
-                                <button type="button" onclick="selectColor('#eab308')" class="w-7 h-7 rounded-full bg-[#eab308] hover:scale-110 transition border border-white/20 shadow"></button>
-                                <button type="button" onclick="selectColor('#14b8a6')" class="w-7 h-7 rounded-full bg-[#14b8a6] hover:scale-110 transition border border-white/20 shadow"></button>
-                                <button type="button" onclick="selectColor('#5865F2')" class="w-7 h-7 rounded-full bg-[#5865F2] hover:scale-110 transition border border-white/20 shadow"></button>
+                                <button type="button" onclick="selectColor('#10b981')" title="#10b981" class="w-7 h-7 rounded-full bg-[#10b981] hover:scale-110 transition border border-white/20 shadow cursor-pointer"></button>
+                                <button type="button" onclick="selectColor('#06b6d4')" title="#06b6d4" class="w-7 h-7 rounded-full bg-[#06b6d4] hover:scale-110 transition border border-white/20 shadow cursor-pointer"></button>
+                                <button type="button" onclick="selectColor('#3b82f6')" title="#3b82f6" class="w-7 h-7 rounded-full bg-[#3b82f6] hover:scale-110 transition border border-white/20 shadow cursor-pointer"></button>
+                                <button type="button" onclick="selectColor('#8b5cf6')" title="#8b5cf6" class="w-7 h-7 rounded-full bg-[#8b5cf6] hover:scale-110 transition border border-white/20 shadow cursor-pointer"></button>
+                                <button type="button" onclick="selectColor('#9333ea')" title="#9333ea" class="w-7 h-7 rounded-full bg-[#9333ea] hover:scale-110 transition border-2 border-white shadow-lg ring-2 ring-purple-500/50 cursor-pointer"></button>
+                                <button type="button" onclick="selectColor('#f97316')" title="#f97316" class="w-7 h-7 rounded-full bg-[#f97316] hover:scale-110 transition border border-white/20 shadow cursor-pointer"></button>
+                                <button type="button" onclick="selectColor('#ef4444')" title="#ef4444" class="w-7 h-7 rounded-full bg-[#ef4444] hover:scale-110 transition border border-white/20 shadow cursor-pointer"></button>
+                                <button type="button" onclick="selectColor('#ec4899')" title="#ec4899" class="w-7 h-7 rounded-full bg-[#ec4899] hover:scale-110 transition border border-white/20 shadow cursor-pointer"></button>
+                                <button type="button" onclick="selectColor('#eab308')" title="#eab308" class="w-7 h-7 rounded-full bg-[#eab308] hover:scale-110 transition border border-white/20 shadow cursor-pointer"></button>
+                                <button type="button" onclick="selectColor('#14b8a6')" title="#14b8a6" class="w-7 h-7 rounded-full bg-[#14b8a6] hover:scale-110 transition border border-white/20 shadow cursor-pointer"></button>
+                                <button type="button" onclick="selectColor('#5865F2')" title="#5865F2" class="w-7 h-7 rounded-full bg-[#5865F2] hover:scale-110 transition border border-white/20 shadow cursor-pointer"></button>
                             </div>
                         </div>
 
                         <!-- Main Visual Editor Form -->
-                        <div class="bg-[#12141f] border border-white/5 p-6 rounded-3xl space-y-4">
+                        <div id="embedVisualEditorSection" class="bg-[#12141f] border border-white/5 p-6 rounded-3xl space-y-4">
                             <div class="flex items-center justify-between pb-3 border-b border-white/5">
                                 <span class="text-[11px] text-gray-500 font-mono">Embed Builder</span>
                                 <h4 class="text-sm font-black text-white flex items-center gap-2"><span>محتوى الإيمبد</span><span>📝</span></h4>
@@ -8259,7 +8259,9 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                                 <!-- الصورة المصغرة (Thumbnail) -->
                                 <div class="bg-[#0b0d14] border border-white/5 rounded-2xl p-4 space-y-3">
                                     <div class="flex items-center justify-between">
-                                        <button type="button" onclick="clearEmbedImageField('embThumbnail')" class="text-[11px] text-rose-400 hover:text-rose-300 font-bold transition">🗑️ إزالة الصورة</button>
+                                        <button type="button" onclick="clearEmbedImageField('embThumbnail')" class="text-[11px] text-rose-400 hover:text-rose-300 font-bold transition flex items-center gap-1 cursor-pointer">
+                                            <span>🗑️</span><span>إزالة الصورة</span>
+                                        </button>
                                         <label class="block text-xs font-bold text-gray-300">الصورة المصغرة (Thumbnail)</label>
                                     </div>
                                     <div class="flex items-center gap-3">
@@ -8270,7 +8272,7 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                                         <div class="flex-1 space-y-1">
                                             <input type="hidden" id="embThumbnail" value="">
                                             <input type="file" id="file_embThumbnail" accept="image/*" class="hidden" onchange="uploadEmbedImageFile(this, 'embThumbnail')">
-                                            <button type="button" onclick="document.getElementById('file_embThumbnail').click()" class="w-full px-4 py-2 bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/30 text-purple-300 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5">
+                                            <button type="button" onclick="document.getElementById('file_embThumbnail').click()" class="w-full px-4 py-2 bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/30 text-purple-300 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer shadow-sm active:scale-[0.98]">
                                                 <span>📤</span><span id="btn_text_embThumbnail">رفع صورة مصغرة</span>
                                             </button>
                                             <p class="text-[10px] text-gray-500 text-right">صورة صغيرة تظهر بأعلى يمين الإيمبد</p>
@@ -8281,7 +8283,9 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                                 <!-- الصورة الكبيرة (Main Image) -->
                                 <div class="bg-[#0b0d14] border border-white/5 rounded-2xl p-4 space-y-3">
                                     <div class="flex items-center justify-between">
-                                        <button type="button" onclick="clearEmbedImageField('embImage')" class="text-[11px] text-rose-400 hover:text-rose-300 font-bold transition">🗑️ إزالة الصورة</button>
+                                        <button type="button" onclick="clearEmbedImageField('embImage')" class="text-[11px] text-rose-400 hover:text-rose-300 font-bold transition flex items-center gap-1 cursor-pointer">
+                                            <span>🗑️</span><span>إزالة الصورة</span>
+                                        </button>
                                         <label class="block text-xs font-bold text-gray-300">الصورة الرئيسية (Main Image)</label>
                                     </div>
                                     <div class="flex items-center gap-3">
@@ -8292,7 +8296,7 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                                         <div class="flex-1 space-y-1">
                                             <input type="hidden" id="embImage" value="">
                                             <input type="file" id="file_embImage" accept="image/*" class="hidden" onchange="uploadEmbedImageFile(this, 'embImage')">
-                                            <button type="button" onclick="document.getElementById('file_embImage').click()" class="w-full px-4 py-2 bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/30 text-purple-300 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5">
+                                            <button type="button" onclick="document.getElementById('file_embImage').click()" class="w-full px-4 py-2 bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/30 text-purple-300 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer shadow-sm active:scale-[0.98]">
                                                 <span>📤</span><span id="btn_text_embImage">رفع صورة عريضة</span>
                                             </button>
                                             <p class="text-[10px] text-gray-500 text-right">بانر عريض يظهر أسفل محتوى الرسالة</p>
@@ -8304,12 +8308,32 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                             <!-- Custom Fields list -->
                             <div class="space-y-3 pt-2">
                                 <div class="flex items-center justify-between">
-                                    <button type="button" onclick="addEmbedField()" class="px-3 py-1.5 bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/30 text-purple-300 rounded-xl text-xs font-bold transition flex items-center gap-1">
-                                        <span>+ إضافة حقل (Field)</span>
+                                    <button type="button" onclick="addEmbedField()" class="px-4 py-2 bg-purple-600/20 hover:bg-purple-600/40 border border-purple-500/40 text-purple-300 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-sm active:scale-95">
+                                        <span class="text-base leading-none">+</span>
+                                        <span>إضافة حقل (Field)</span>
                                     </button>
                                     <span class="text-xs font-bold text-gray-300">الحقول الإضافية (Fields)</span>
                                 </div>
                                 <div id="fieldsContainer" class="space-y-2.5"></div>
+                            </div>
+                        </div>
+
+                        <!-- Mode Docs / Help Box (Toggleable via Docs tab) -->
+                        <div id="embedDocsSection" class="hidden bg-[#12141f] border border-blue-500/20 p-6 rounded-3xl space-y-3 text-right">
+                            <div class="flex items-center justify-between pb-3 border-b border-white/5">
+                                <span class="text-[11px] text-blue-400 font-mono">Documentation</span>
+                                <h4 class="text-sm font-black text-white flex items-center gap-2"><span>دليل استخدام صانع الإيمبد</span><span>📖</span></h4>
+                            </div>
+                            <div class="space-y-2 text-xs text-gray-300 leading-relaxed">
+                                <p class="text-white font-bold">✨ تنسيقات النص المدعومة (Markdown):</p>
+                                <ul class="list-disc list-inside space-y-1 text-gray-400 pr-2">
+                                    <li><code class="bg-[#0b0d14] px-1.5 py-0.5 rounded text-purple-300">**نص عريض**</code> → <b>نص عريض</b></li>
+                                    <li><code class="bg-[#0b0d14] px-1.5 py-0.5 rounded text-purple-300">*نص مائل*</code> → <i>نص مائل</i></li>
+                                    <li><code class="bg-[#0b0d14] px-1.5 py-0.5 rounded text-purple-300">~~مشطوب~~</code> → <s>مشطوب</s></li>
+                                    <li><code class="bg-[#0b0d14] px-1.5 py-0.5 rounded text-purple-300">__تحته خط__</code> → <u>تحته خط</u></li>
+                                    <li><code class="bg-[#0b0d14] px-1.5 py-0.5 rounded text-purple-300">[رابط نصي](https://example.com)</code> → رابط مضمن قابل للنقر</li>
+                                </ul>
+                                <p class="text-gray-400 pt-2">💡 يمكنك الضغط على زر <b class="text-purple-300">حفظ مسودة</b> للاحتفاظ بالبيانات في متصفحك والرجوع إليها لاحقاً.</p>
                             </div>
                         </div>
 
@@ -8319,7 +8343,7 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                                 <div class="flex items-center gap-3">
                                     <label class="relative inline-flex items-center cursor-pointer">
                                         <input type="checkbox" id="embTimestampToggle" checked onchange="updateEmbedPreview()" class="sr-only peer">
-                                        <div class="w-11 h-6 bg-gray-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                                        <div class="w-11 h-6 bg-gray-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600 cursor-pointer"></div>
                                     </label>
                                     <span class="text-xs font-bold text-gray-300">إظهار الوقت (Timestamp)</span>
                                 </div>
@@ -8406,6 +8430,43 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
             embedScriptHtml = `
                     let embedFields = [];
 
+                    function switchEmbedTab(tab) {
+                        const editorSec = document.getElementById('embedVisualEditorSection');
+                        const docsSec = document.getElementById('embedDocsSection');
+                        const prevCard = document.getElementById('livePreviewCard');
+
+                        const btnEditor = document.getElementById('tabBtnEditor');
+                        const btnDocs = document.getElementById('tabBtnDocs');
+                        const btnPreview = document.getElementById('tabBtnPreview');
+
+                        const activeClass = 'px-4 py-1.5 bg-purple-600 text-white font-bold text-xs rounded-xl shadow cursor-pointer transition';
+                        const inactiveClass = 'px-4 py-1.5 text-gray-400 hover:text-white font-bold text-xs rounded-xl transition cursor-pointer';
+
+                        if (tab === 'editor') {
+                            if (editorSec) editorSec.classList.remove('hidden');
+                            if (docsSec) docsSec.classList.add('hidden');
+                            if (btnEditor) btnEditor.className = activeClass;
+                            if (btnDocs) btnDocs.className = inactiveClass;
+                            if (btnPreview) btnPreview.className = inactiveClass;
+                            editorSec?.scrollIntoView({ behavior: 'smooth' });
+                        } else if (tab === 'docs') {
+                            if (editorSec) editorSec.classList.add('hidden');
+                            if (docsSec) docsSec.classList.remove('hidden');
+                            if (btnEditor) btnEditor.className = inactiveClass;
+                            if (btnDocs) btnDocs.className = activeClass;
+                            if (btnPreview) btnPreview.className = inactiveClass;
+                            docsSec?.scrollIntoView({ behavior: 'smooth' });
+                        } else if (tab === 'preview') {
+                            if (editorSec) editorSec.classList.remove('hidden');
+                            if (docsSec) docsSec.classList.add('hidden');
+                            if (btnEditor) btnEditor.className = inactiveClass;
+                            if (btnDocs) btnDocs.className = inactiveClass;
+                            if (btnPreview) btnPreview.className = activeClass;
+                            prevCard?.scrollIntoView({ behavior: 'smooth' });
+                            setTimeout(() => { if (btnEditor) btnEditor.className = activeClass; if (btnPreview) btnPreview.className = inactiveClass; }, 1500);
+                        }
+                    }
+
                     function selectColor(hex) {
                         const c = document.getElementById('embColor');
                         const h = document.getElementById('embHexInput');
@@ -8433,12 +8494,14 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                         embedFields.push({ id: id, name: '', value: '', inline: false });
                         renderFieldsEditor();
                         updateEmbedPreview();
+                        showEmbedToast('✅ تم إضافة حقل جديد', true);
                     }
 
                     function removeEmbedField(id) {
                         embedFields = embedFields.filter(f => f.id !== id);
                         renderFieldsEditor();
                         updateEmbedPreview();
+                        showEmbedToast('🗑️ تم حذف الحقل', false);
                     }
 
                     function updateFieldData(id, key, val) {
@@ -8453,26 +8516,26 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                         const c = document.getElementById('fieldsContainer');
                         if (!c) return;
                         if (embedFields.length === 0) {
-                            c.innerHTML = '<p class="text-[11px] text-gray-500 text-center py-2">لا توجد حقول إضافية حالياً</p>';
+                            c.innerHTML = '<div class="text-[11px] text-gray-500 text-center py-3 bg-[#0b0d14]/40 rounded-2xl border border-dashed border-white/5">لا توجد حقول إضافية حالياً، اضغط "+ إضافة حقل" بالأعلى لإضافة حقول مخصصة</div>';
                             return;
                         }
                         let html = '';
                         for (let i = 0; i < embedFields.length; i++) {
                             const f = embedFields[i];
-                            html += '<div class="bg-[#0b0d14] border border-white/5 p-3 rounded-2xl space-y-2">' +
+                            html += '<div class="bg-[#0b0d14] border border-white/10 p-4 rounded-2xl space-y-3 transition shadow-sm hover:border-purple-500/30">' +
                                 '<div class="flex items-center justify-between">' +
                                 '<div class="flex items-center gap-2">' +
-                                '<label class="text-[10px] text-gray-400 flex items-center gap-1 cursor-pointer">' +
-                                '<input type="checkbox" ' + (f.inline ? 'checked' : '') + ' onchange="updateFieldData(\'' + f.id + '\', \'inline\', this.checked)" class="rounded bg-[#151724] border-white/10 text-purple-600 focus:ring-0">' +
+                                '<label class="text-[11px] text-gray-300 font-bold flex items-center gap-1.5 cursor-pointer bg-[#12141f] px-2.5 py-1 rounded-xl border border-white/5 hover:border-purple-500/30">' +
+                                '<input type="checkbox" ' + (f.inline ? 'checked' : '') + ' onchange="updateFieldData(\'' + f.id + '\', \'inline\', this.checked)" class="rounded bg-[#151724] border-white/10 text-purple-600 focus:ring-0 cursor-pointer">' +
                                 '<span>جنباً لجنب (Inline)</span>' +
                                 '</label>' +
-                                '<button type="button" onclick="removeEmbedField(\'' + f.id + '\')" class="text-rose-400 hover:text-rose-300 text-xs px-2 py-0.5 rounded bg-rose-950/40">✕ حذف</button>' +
+                                '<button type="button" onclick="removeEmbedField(\'' + f.id + '\')" class="text-rose-400 hover:text-rose-300 text-xs px-3 py-1 rounded-xl bg-rose-950/40 hover:bg-rose-900/60 border border-rose-800/40 font-bold transition flex items-center gap-1 cursor-pointer">✕ <span>حذف</span></button>' +
                                 '</div>' +
-                                '<span class="text-xs font-bold text-gray-300">الحقل #' + (i + 1) + '</span>' +
+                                '<span class="text-xs font-black text-purple-400 font-mono">الحقل #' + (i + 1) + '</span>' +
                                 '</div>' +
-                                '<div class="grid grid-cols-1 md:grid-cols-2 gap-2">' +
-                                '<input type="text" placeholder="عنوان الحقل..." value="' + (f.name || '') + '" oninput="updateFieldData(\'' + f.id + '\', \'name\', this.value)" class="w-full bg-[#12141f] border border-white/5 rounded-xl px-3 py-1.5 text-xs text-white text-right outline-none font-bold">' +
-                                '<input type="text" placeholder="قيمة ومحتوى الحقل..." value="' + (f.value || '') + '" oninput="updateFieldData(\'' + f.id + '\', \'value\', this.value)" class="w-full bg-[#12141f] border border-white/5 rounded-xl px-3 py-1.5 text-xs text-white text-right outline-none">' +
+                                '<div class="grid grid-cols-1 md:grid-cols-2 gap-2.5">' +
+                                '<div><input type="text" placeholder="عنوان الحقل..." value="' + (f.name || '').replace(/"/g, '&quot;') + '" oninput="updateFieldData(\'' + f.id + '\', \'name\', this.value)" class="w-full bg-[#12141f] border border-white/5 focus:border-purple-600 rounded-xl px-3 py-2 text-xs text-white text-right outline-none font-bold"></div>' +
+                                '<div><input type="text" placeholder="محتوى وقيمة الحقل..." value="' + (f.value || '').replace(/"/g, '&quot;') + '" oninput="updateFieldData(\'' + f.id + '\', \'value\', this.value)" class="w-full bg-[#12141f] border border-white/5 focus:border-purple-600 rounded-xl px-3 py-2 text-xs text-white text-right outline-none"></div>' +
                                 '</div>' +
                                 '</div>';
                         }
@@ -8610,19 +8673,24 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                             const ph = document.getElementById('ph_' + id);
                             if (boxImg) { boxImg.src = ''; boxImg.classList.add('hidden'); }
                             if (ph) ph.classList.remove('hidden');
+                            const fileInp = document.getElementById('file_' + id);
+                            if (fileInp) fileInp.value = '';
                         });
                         embedFields = [];
                         renderFieldsEditor();
                         selectColor('#9333ea');
                         updateEmbedPreview();
+                        showEmbedToast('🗑️ تم مسح جميع محتويات الإيمبد', true);
                     }
-
 
                     function saveEmbedDraft() {
                         const payload = getEmbedPayload();
-                        localStorage.setItem('zeno_embed_draft_${guildId}', JSON.stringify(payload));
-                        alert('💾 تم حفظ المسودة محلياً في المتصفح!');
-
+                        try {
+                            localStorage.setItem('zeno_embed_draft_${guildId}', JSON.stringify(payload));
+                            showEmbedToast('💾 تم حفظ المسودة في المتصفح بنجاح!', true);
+                        } catch(e) {
+                            showEmbedToast('❌ فشل حفظ المسودة', false);
+                        }
                     }
 
                     function getEmbedPayload() {
@@ -8651,19 +8719,17 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                         t.className = isSuccess 
                             ? 'flex px-3.5 py-2 rounded-xl text-xs font-bold items-center gap-1.5 bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-lg animate-fade-in'
                             : 'flex px-3.5 py-2 rounded-xl text-xs font-bold items-center gap-1.5 bg-rose-500/20 text-rose-300 border border-rose-500/40 shadow-lg animate-fade-in';
-                        setTimeout(() => { if (t) t.className = 'hidden'; }, 4000);
+                        setTimeout(() => { if (t) t.className = 'hidden'; }, 4500);
                     }
 
                     async function sendEmbedDirect() {
                         const payload = getEmbedPayload();
                         if (!payload.channelId) {
                             showEmbedToast('⚠️ يرجى اختيار القناة المستهدفة أولاً!', false);
-                            alert('⚠️ يرجى اختيار القناة المستهدفة أولاً!');
                             return;
                         }
                         if (!payload.desc && !payload.title) {
-                            showEmbedToast('⚠️ يرجى كتابة عنوان أو محتوى للرسالة!', false);
-                            alert('⚠️ يرجى كتابة عنوان أو محتوى للرسالة قبل الإرسال!');
+                            showEmbedToast('⚠️ يرجى كتابة عنوان أو محتوى للرسالة قبل الإرسال!', false);
                             return;
                         }
 
@@ -8679,15 +8745,12 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                             const data = await res.json();
                             if (data.success) {
                                 showEmbedToast('✅ تم إرسال الإيمبد بنجاح في القناة!', true);
-                                alert('✅ تم إرسال الإيمبد بنجاح في القناة!');
                             } else {
                                 showEmbedToast('❌ خطأ: ' + (data.error || 'فشل الإرسال'), false);
-                                alert('❌ خطأ: ' + (data.error || 'فشل الإرسال'));
                             }
                         } catch(e) {
                             console.error('[sendEmbedDirect] error:', e);
                             showEmbedToast('❌ حدث خطأ في الاتصال بالسيرفر', false);
-                            alert('حدث خطأ أثناء الاتصال بالخادم: ' + e.message);
                         } finally {
                             if (btn) { btn.disabled = false; btn.innerHTML = '<span class="text-base">🚀</span><span>إرسال للقناة</span>'; }
                         }
@@ -8727,8 +8790,6 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                             }
                         } catch(e) {}
                         updateEmbedPreview();
-
-                        // الأزرار تستخدم onclick مباشر على window.sendEmbedDirect / window.clearEmbedFields
                     }
 
                     if (document.readyState === 'loading') {
@@ -8737,13 +8798,17 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                         initEmbedEditor();
                     }
 
-
-
                     async function uploadEmbedImageFile(input, targetId) {
                         const file = input.files && input.files[0];
                         if (!file) return;
-                        if (!file.type.startsWith('image/')) return alert('يرجى اختيار ملف صورة صالح (PNG, JPG, WEBP, GIF)');
-                        if (file.size > 15 * 1024 * 1024) return alert('حجم الصورة كبير جداً (أكثر من 15 ميجابايت)');
+                        if (!file.type.startsWith('image/')) {
+                            showEmbedToast('❌ يرجى اختيار ملف صورة صالح (PNG, JPG, WEBP, GIF)', false);
+                            return;
+                        }
+                        if (file.size > 15 * 1024 * 1024) {
+                            showEmbedToast('❌ حجم الصورة كبير جداً (أكثر من 15 ميجابايت)', false);
+                            return;
+                        }
 
                         const btnText = document.getElementById('btn_text_' + targetId);
                         const origText = btnText ? btnText.innerText : 'رفع';
@@ -8772,13 +8837,14 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
 
                                     updateEmbedPreview();
                                     if (btnText) btnText.innerText = '✅ تم الرفع';
+                                    showEmbedToast('✅ تم رفع الصورة بنجاح!', true);
                                     setTimeout(() => { if (btnText) btnText.innerText = origText; }, 2000);
                                 } else {
-                                    alert('❌ فشل رفع الصورة: ' + (data.error || 'خطأ غير معروف'));
+                                    showEmbedToast('❌ فشل رفع الصورة: ' + (data.error || 'خطأ غير معروف'), false);
                                     if (btnText) btnText.innerText = origText;
                                 }
                             } catch(err) {
-                                alert('حدث خطأ في الاتصال بالخادم أثناء الرفع');
+                                showEmbedToast('❌ حدث خطأ في الاتصال أثناء الرفع', false);
                                 if (btnText) btnText.innerText = origText;
                             }
                         };
@@ -8800,9 +8866,11 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                         if (ph) ph.classList.remove('hidden');
 
                         updateEmbedPreview();
+                        showEmbedToast('🗑️ تم إزالة الصورة', true);
                     }
 
                     // ضمان توفر جميع الدوال في النطاق العام (window) لتعمل أزرار onclick دون مشاكل
+                    window.switchEmbedTab = switchEmbedTab;
                     window.selectColor = selectColor;
                     window.onColorPickerChange = onColorPickerChange;
                     window.setCustomHex = setCustomHex;
@@ -8907,14 +8975,21 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                                     <button type="button" id="btnSendEmbed"
                                         onclick="event.preventDefault();event.stopPropagation();window.sendEmbedDirect&&window.sendEmbedDirect();return false;"
                                         style="cursor:pointer;pointer-events:auto;position:relative;z-index:9999;"
-                                        class="px-7 py-3 bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 hover:from-purple-500 hover:via-indigo-500 hover:to-purple-600 text-white rounded-2xl text-xs font-black transition-all shadow-lg shadow-purple-900/40 border border-purple-400/30 flex items-center gap-2">
+                                        class="px-7 py-3 bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 hover:from-purple-500 hover:via-indigo-500 hover:to-purple-600 text-white rounded-2xl text-xs font-black transition-all shadow-lg shadow-purple-900/40 border border-purple-400/30 flex items-center gap-2 cursor-pointer active:scale-95">
                                         <span class="text-base">🚀</span>
                                         <span>إرسال للقناة</span>
+                                    </button>
+                                    <button type="button" id="btnSaveEmbedDraft"
+                                        onclick="event.preventDefault();event.stopPropagation();window.saveEmbedDraft&&window.saveEmbedDraft();return false;"
+                                        style="cursor:pointer;pointer-events:auto;position:relative;z-index:9999;"
+                                        class="px-4 py-3 bg-[#12141f] hover:bg-white/5 border border-white/10 text-gray-300 hover:text-white rounded-2xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer active:scale-95">
+                                        <span class="text-sm">💾</span>
+                                        <span>حفظ مسودة</span>
                                     </button>
                                     <button type="button" id="btnClearEmbed"
                                         onclick="event.preventDefault();event.stopPropagation();window.clearEmbedFields&&window.clearEmbedFields();return false;"
                                         style="cursor:pointer;pointer-events:auto;position:relative;z-index:9999;"
-                                        class="px-5 py-3 bg-rose-950/40 hover:bg-rose-900/60 border border-rose-700/40 text-rose-300 rounded-2xl text-xs font-bold transition-all flex items-center gap-2">
+                                        class="px-4 py-3 bg-rose-950/40 hover:bg-rose-900/60 border border-rose-700/40 text-rose-300 rounded-2xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer active:scale-95">
                                         <span class="text-sm">🗑️</span>
                                         <span>مسح الكل</span>
                                     </button>
