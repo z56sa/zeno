@@ -8712,14 +8712,24 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                         };
                     }
 
+
                     function showEmbedToast(msg, isSuccess = true) {
                         const t = document.getElementById('embedStatusToast');
-                        if (!t) return;
+                        if (!t) {
+                            // fallback if toast element not found
+                            console.log('[Toast]', msg);
+                            return;
+                        }
                         t.textContent = msg;
-                        t.className = isSuccess 
-                            ? 'flex px-3.5 py-2 rounded-xl text-xs font-bold items-center gap-1.5 bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-lg animate-fade-in'
-                            : 'flex px-3.5 py-2 rounded-xl text-xs font-bold items-center gap-1.5 bg-rose-500/20 text-rose-300 border border-rose-500/40 shadow-lg animate-fade-in';
-                        setTimeout(() => { if (t) t.className = 'hidden'; }, 4500);
+                        t.style.display = 'flex';
+                        t.className = isSuccess
+                            ? 'flex px-3.5 py-2 rounded-xl text-xs font-bold items-center gap-1.5 bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-lg'
+                            : 'flex px-3.5 py-2 rounded-xl text-xs font-bold items-center gap-1.5 bg-rose-500/20 text-rose-300 border border-rose-500/40 shadow-lg';
+                        clearTimeout(t._toastTimer);
+                        t._toastTimer = setTimeout(() => {
+                            t.style.display = 'none';
+                            t.className = 'hidden';
+                        }, 4500);
                     }
 
                     async function sendEmbedDirect() {
@@ -8790,6 +8800,32 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                             }
                         } catch(e) {}
                         updateEmbedPreview();
+
+                        // ✅ ربط الأزرار مباشرة عبر addEventListener بعد تجهيز الـ DOM
+                        const btnSend = document.getElementById('btnSendEmbed');
+                        const btnSave = document.getElementById('btnSaveEmbedDraft');
+                        const btnClear = document.getElementById('btnClearEmbed');
+                        if (btnSend) {
+                            btnSend.addEventListener('click', function(e) {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                sendEmbedDirect();
+                            });
+                        }
+                        if (btnSave) {
+                            btnSave.addEventListener('click', function(e) {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                saveEmbedDraft();
+                            });
+                        }
+                        if (btnClear) {
+                            btnClear.addEventListener('click', function(e) {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                clearEmbedFields();
+                            });
+                        }
                     }
 
                     if (document.readyState === 'loading') {
@@ -8993,7 +9029,7 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                                         <span class="text-sm">🗑️</span>
                                         <span>مسح الكل</span>
                                     </button>
-                                    <span id="embedStatusToast" class="hidden px-3.5 py-2 rounded-xl text-xs font-bold items-center gap-1.5 transition"></span>
+                                    <div id="embedStatusToast" class="hidden px-3.5 py-2 rounded-xl text-xs font-bold items-center gap-1.5 transition"></div>
                                 </div>
                                 <div class="flex items-center gap-3">
                                     <div class="text-right">
@@ -10389,37 +10425,5 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
         }
     });
 
-    app.post('/api/guild/:guildId/send-embed', express.json(), async (req, res) => {
-        try {
-            if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
-            const { guildId } = req.params;
-            const { channelId, title, titleUrl, desc, author, authorIcon, color, image, thumbnail, footer, footerIcon, timestamp, fields } = req.body;
-            const channel = client.channels.cache.get(channelId) || await client.channels.fetch(channelId).catch(() => null);
-            if (!channel || !channel.isTextBased()) {
-                return res.status(404).json({ success: false, error: 'لم يتم العثور على القناة أو البوت ليس لديه صلاحيات فيها' });
-            }
-            const { EmbedBuilder } = require('discord.js');
-            const emb = new EmbedBuilder().setColor(color || '#9333ea');
-            if (title) emb.setTitle(title);
-            if (titleUrl) emb.setURL(titleUrl);
-            if (desc) emb.setDescription(desc);
-            if (author) emb.setAuthor({ name: author, iconURL: authorIcon || undefined });
-            if (thumbnail) emb.setThumbnail(thumbnail);
-            if (image) emb.setImage(image);
-            if (footer) emb.setFooter({ text: footer, iconURL: footerIcon || undefined });
-            if (timestamp !== false) emb.setTimestamp();
-            if (Array.isArray(fields) && fields.length > 0) {
-                for (const f of fields) {
-                    if (f.name && f.value) {
-                        emb.addFields({ name: f.name, value: f.value, inline: !!f.inline });
-                    }
-                }
-            }
-            await channel.send({ embeds: [emb] });
-            res.json({ success: true });
-        } catch (e) {
-            res.status(500).json({ success: false, error: e.message });
-        }
-    });
 };
 
