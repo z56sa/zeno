@@ -8177,13 +8177,16 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                     <div class="space-y-6 text-right" dir="rtl">
                         <!-- Top Action Bar -->
                         <div class="flex items-center justify-between gap-3 flex-wrap">
-                            <div class="flex items-center gap-2">
-                                <button type="button" onclick="sendEmbedDirect()" id="btnSendEmbed" class="px-6 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold transition shadow-lg flex items-center gap-2">
-                                    <span>🚀 إرسال للقناة</span>
+                            <div class="flex items-center gap-3">
+                                <button type="button" id="btnSendEmbed" class="px-7 py-3 bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 hover:from-purple-500 hover:via-indigo-500 hover:to-purple-600 text-white rounded-2xl text-xs font-black transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-purple-900/40 border border-purple-400/30 flex items-center gap-2 cursor-pointer">
+                                    <span class="text-base">🚀</span>
+                                    <span>إرسال للقناة</span>
                                 </button>
-                                <button type="button" onclick="clearEmbedFields()" class="px-5 py-2.5 bg-rose-900/30 hover:bg-rose-800/40 border border-rose-800/30 text-rose-300 rounded-xl text-xs font-bold transition flex items-center gap-1.5">
-                                    <span>🗑️ مسح الكل</span>
+                                <button type="button" id="btnClearEmbed" class="px-5 py-3 bg-rose-950/40 hover:bg-rose-900/60 border border-rose-700/40 hover:border-rose-600/60 text-rose-300 hover:text-rose-200 rounded-2xl text-xs font-bold transition-all transform hover:scale-[1.02] active:scale-[0.98] flex items-center gap-2 cursor-pointer">
+                                    <span class="text-sm">🗑️</span>
+                                    <span>مسح الكل</span>
                                 </button>
+                                <span id="embedStatusToast" class="hidden px-3.5 py-2 rounded-xl text-xs font-bold items-center gap-1.5 transition"></span>
                             </div>
 
                             <div class="flex items-center gap-3">
@@ -8663,13 +8666,31 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                         };
                     }
 
+                    function showEmbedToast(msg, isSuccess = true) {
+                        const t = document.getElementById('embedStatusToast');
+                        if (!t) return;
+                        t.textContent = msg;
+                        t.className = isSuccess 
+                            ? 'flex px-3.5 py-2 rounded-xl text-xs font-bold items-center gap-1.5 bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-lg animate-fade-in'
+                            : 'flex px-3.5 py-2 rounded-xl text-xs font-bold items-center gap-1.5 bg-rose-500/20 text-rose-300 border border-rose-500/40 shadow-lg animate-fade-in';
+                        setTimeout(() => { if (t) t.className = 'hidden'; }, 4000);
+                    }
+
                     async function sendEmbedDirect() {
                         const payload = getEmbedPayload();
-                        if (!payload.channelId) { alert('⚠️ يرجى اختيار القناة المستهدفة أولاً!'); return; }
-                        if (!payload.desc && !payload.title) { alert('⚠️ يرجى كتابة عنوان أو محتوى للرسالة قبل الإرسال!'); return; }
+                        if (!payload.channelId) {
+                            showEmbedToast('⚠️ يرجى اختيار القناة المستهدفة أولاً!', false);
+                            alert('⚠️ يرجى اختيار القناة المستهدفة أولاً!');
+                            return;
+                        }
+                        if (!payload.desc && !payload.title) {
+                            showEmbedToast('⚠️ يرجى كتابة عنوان أو محتوى للرسالة!', false);
+                            alert('⚠️ يرجى كتابة عنوان أو محتوى للرسالة قبل الإرسال!');
+                            return;
+                        }
 
                         const btn = document.getElementById('btnSendEmbed');
-                        if (btn) { btn.disabled = true; btn.innerHTML = '⏳ جارٍ الإرسال...'; }
+                        if (btn) { btn.disabled = true; btn.innerHTML = '<span>⏳</span><span>جارٍ الإرسال...</span>'; }
 
                         try {
                             const res = await fetch('/api/guild/${guildId}/send-embed', {
@@ -8679,15 +8700,18 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                             });
                             const data = await res.json();
                             if (data.success) {
+                                showEmbedToast('✅ تم إرسال الإيمبد بنجاح في القناة!', true);
                                 alert('✅ تم إرسال الإيمبد بنجاح في القناة!');
                             } else {
+                                showEmbedToast('❌ خطأ: ' + (data.error || 'فشل الإرسال'), false);
                                 alert('❌ خطأ: ' + (data.error || 'فشل الإرسال'));
                             }
                         } catch(e) {
                             console.error('[sendEmbedDirect] error:', e);
+                            showEmbedToast('❌ حدث خطأ في الاتصال بالسيرفر', false);
                             alert('حدث خطأ أثناء الاتصال بالخادم: ' + e.message);
                         } finally {
-                            if (btn) { btn.disabled = false; btn.innerHTML = '<span>🚀 إرسال للقناة</span>'; }
+                            if (btn) { btn.disabled = false; btn.innerHTML = '<span class="text-base">🚀</span><span>إرسال للقناة</span>'; }
                         }
                     }
 
@@ -8725,6 +8749,22 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                             }
                         } catch(e) {}
                         updateEmbedPreview();
+
+                        // ربط مستمعات الأحداث الصريحة بالأزرار لضمان عملها في كل المتصفحات
+                        const sendBtn = document.getElementById('btnSendEmbed');
+                        if (sendBtn) {
+                            sendBtn.onclick = function(e) {
+                                if (e) e.preventDefault();
+                                sendEmbedDirect();
+                            };
+                        }
+                        const clearBtn = document.getElementById('btnClearEmbed');
+                        if (clearBtn) {
+                            clearBtn.onclick = function(e) {
+                                if (e) e.preventDefault();
+                                clearEmbedFields();
+                            };
+                        }
                     }
 
                     if (document.readyState === 'loading') {
