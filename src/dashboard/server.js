@@ -8234,18 +8234,12 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                             </div>
 
 
-                            <!-- Title & Title URL -->
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                <div>
-                                    <label class="block text-[11px] font-bold text-gray-300 mb-1">رابط العنوان عند الضغط عليه (موقع / سيرفر / صفحة)</label>
-                                    <input type="url" id="embTitleUrl" placeholder="https://example.com (اختياري)" oninput="updateEmbedPreview()" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-3 py-2.5 text-xs text-white outline-none text-left font-mono">
-                                    <p class="text-[10px] text-gray-500 text-right mt-1">🔗 عند وضع رابط هنا، سيتحول عنوان الإيمبد إلى رابط أزرق يفتح هذه الصفحة عند الضغط عليه</p>
-                                </div>
-                                <div>
-                                    <label class="block text-[11px] font-bold text-gray-300 mb-1">عنوان الإيمبد الرئيسي (Title)</label>
-                                    <input type="text" id="embTitle" placeholder="عنوان الرسالة الرئيسي..." oninput="updateEmbedPreview()" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-3 py-2.5 text-xs text-white outline-none text-right font-bold">
-                                    <p class="text-[10px] text-gray-500 text-right mt-1">العنوان البارز للرسالة بخط عريض</p>
-                                </div>
+                            <!-- Title only -->
+                            <input type="hidden" id="embTitleUrl" value="">
+                            <div>
+                                <label class="block text-[11px] font-bold text-gray-300 mb-1">عنوان الإيمبد الرئيسي (Title)</label>
+                                <input type="text" id="embTitle" placeholder="عنوان الرسالة الرئيسي..." oninput="updateEmbedPreview()" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-3 py-2.5 text-xs text-white outline-none text-right font-bold">
+                                <p class="text-[10px] text-gray-500 text-right mt-1">العنوان البارز للرسالة بخط عريض</p>
                             </div>
 
                             <!-- Description -->
