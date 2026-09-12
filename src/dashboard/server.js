@@ -8638,7 +8638,7 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
 
                     function saveEmbedDraft() {
                         const payload = getEmbedPayload();
-                        localStorage.setItem('zeno_embed_draft_' + '${guildId}', JSON.stringify(payload));
+                        localStorage.setItem('zeno_embed_draft_${guildId}', JSON.stringify(payload));
                         alert('💾 تم حفظ المسودة محلياً في المتصفح!');
 
                     }
@@ -8664,12 +8664,11 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
 
                     async function sendEmbedDirect() {
                         const payload = getEmbedPayload();
-                        if (!payload.channelId) return alert('يرجى اختيار القناة المستهدفة أولاً!');
-                        if (!payload.desc && !payload.title) return alert('يرجى كتابة عنوان أو محتوى للرسالة!');
+                        if (!payload.channelId) { alert('⚠️ يرجى اختيار القناة المستهدفة أولاً!'); return; }
+                        if (!payload.desc && !payload.title) { alert('⚠️ يرجى كتابة عنوان أو محتوى للرسالة قبل الإرسال!'); return; }
 
                         const btn = document.getElementById('btnSendEmbed');
-                        btn.disabled = true;
-                        btn.innerHTML = '⏳ جارٍ الإرسال...';
+                        if (btn) { btn.disabled = true; btn.innerHTML = '⏳ جارٍ الإرسال...'; }
 
                         try {
                             const res = await fetch('/api/guild/${guildId}/send-embed', {
@@ -8684,10 +8683,10 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                                 alert('❌ خطأ: ' + (data.error || 'فشل الإرسال'));
                             }
                         } catch(e) {
-                            alert('حدث خطأ أثناء الاتصال بالخادم');
+                            console.error('[sendEmbedDirect] error:', e);
+                            alert('حدث خطأ أثناء الاتصال بالخادم: ' + e.message);
                         } finally {
-                            btn.disabled = false;
-                            btn.innerHTML = '<span>🚀 إرسال للقناة</span>';
+                            if (btn) { btn.disabled = false; btn.innerHTML = '<span>🚀 إرسال للقناة</span>'; }
                         }
                     }
 
@@ -9480,7 +9479,8 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
 
     app.post('/api/guild/:guildId/send-embed', express.json(), async (req, res) => {
         try {
-            if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
+            console.log('[send-embed] session user:', req.session?.user?.id, 'guildId:', req.params.guildId);
+            if (!req.session?.user) return res.status(401).json({ success: false, error: 'غير مسجل دخول، يرجى تسجيل الدخول مجدداً' });
             const { guildId } = req.params;
             const { channelId, color, title, titleUrl, desc, author, authorIcon, image, thumbnail, footer, footerIcon, timestamp, fields } = req.body;
 
