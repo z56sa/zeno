@@ -18,7 +18,8 @@ module.exports = {
     const isAdmin = message.member?.permissions.has(PermissionFlagsBits.Administrator) ||
                     message.member?.permissions.has(PermissionFlagsBits.ManageGuild);
 
-    const isAutoModWhitelisted = (settings.automod_ignore_admins === 0 ? false : isAdmin) ||
+    // الأدمنية غير معفيين تلقائياً — يجب تفعيل automod_ignore_admins من الداشبورد لإعفائهم
+    const isAutoModWhitelisted = (settings.automod_ignore_admins === 1 && isAdmin) ||
       (settings.automod_whitelist_role && message.member?.roles.cache.has(settings.automod_whitelist_role)) ||
       (settings.automod_whitelist_channel && message.channel.id === settings.automod_whitelist_channel) ||
       (settings.automod_exempt_users && settings.automod_exempt_users.split(',').map(u => u.trim()).includes(userId)) ||
@@ -259,7 +260,7 @@ module.exports = {
 
     // --- 1.5 نظام الحماية من دعوات الديسكورد (Anti-Invites) ---
     if ((settings.anti_invites || settings.anti_invite_links) && !isAutoModWhitelisted) {
-      const inviteRegex = /(discord\.(gg|io|me|li)\/[^\s]+)|(discord\.com\/invite\/[^\s]+)/gi;
+      const inviteRegex = /(https?:\/\/)?(www\.)?(discord\.(gg|io|me|li)|discordapp\.com\/invite|discord\.com\/invite)\/[a-zA-Z0-9\-._]+/gi;
       if (inviteRegex.test(message.content)) {
         try {
           await message.delete().catch(() => {});
