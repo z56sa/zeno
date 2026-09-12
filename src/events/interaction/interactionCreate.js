@@ -818,6 +818,9 @@ module.exports = {
         }
 
         db.claimTicket(interaction.channel.id, interaction.user.id);
+        if (db.recordStaffAction) {
+          db.recordStaffAction(interaction.guild.id, interaction.user.id, 'ticket_claim', ticketData?.user_id || null, 'استلام تذكرة');
+        }
         if (db.touchStaffShiftAction) db.touchStaffShiftAction(interaction.guild.id, interaction.user.id);
 
         // تعديل الصلاحيات

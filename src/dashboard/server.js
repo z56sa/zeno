@@ -1191,6 +1191,11 @@ module.exports = function (app, client) {
             let warnPunishmentsList = [];
             let autoRespondersList = [];
             let guildTicketsList = [];
+            try {
+                if (database.getGuildTickets) {
+                    guildTicketsList = database.getGuildTickets(guildId, 100) || [];
+                }
+            } catch (e) {}
             let guildGiveawaysList = [];
             let guildSuggestionsList = [];
             try {

@@ -133,6 +133,10 @@ module.exports = {
       }
 
       db.claimTicket(interaction.channel.id, interaction.user.id);
+      if (db.recordStaffAction) {
+        db.recordStaffAction(interaction.guild.id, interaction.user.id, 'ticket_claim', ticket?.user_id || null, 'استلام تذكرة');
+      }
+      if (db.touchStaffShiftAction) db.touchStaffShiftAction(interaction.guild.id, interaction.user.id);
       await interaction.channel.permissionOverwrites.edit(interaction.user.id, {
         ViewChannel: true,
         SendMessages: true,
@@ -231,6 +235,10 @@ module.exports = {
     } else if (action === 'claim') {
       if (!isStaff) return message.reply('❌ مخصص لطاقم الدعم الفني فقط.');
       db.claimTicket(message.channel.id, message.author.id);
+      if (db.recordStaffAction) {
+        db.recordStaffAction(message.guild.id, message.author.id, 'ticket_claim', ticket?.user_id || null, 'استلام تذكرة');
+      }
+      if (db.touchStaffShiftAction) db.touchStaffShiftAction(message.guild.id, message.author.id);
       await message.channel.permissionOverwrites.edit(message.author.id, {
         ViewChannel: true,
         SendMessages: true,

@@ -1393,6 +1393,9 @@ function recordStaffAction(guildId, staffId, actionType, targetId = null, reason
     if (actionType === 'ticket_close') {
       colToIncrement = 'tickets_closed';
       pointsToAdd = 25;
+    } else if (actionType === 'ticket_claim') {
+      colToIncrement = 'mod_actions';
+      pointsToAdd = 10;
     } else if (actionType === 'ban') {
       colToIncrement = 'bans_count';
       pointsToAdd = 20;
