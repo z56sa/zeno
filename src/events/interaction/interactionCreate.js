@@ -1154,7 +1154,7 @@ module.exports = {
         }
 
         const settings = db.getGuildSettings(guildId);
-        const feedbackChannelId = settings?.ticket_log_channel || settings?.log_channel || settings?.feedback_channel;
+        const feedbackChannelId = settings?.ticket_feedback_channel || settings?.ticket_rating_channel || settings?.ticket_log_channel || settings?.log_channel || settings?.feedback_channel;
         if (feedbackChannelId) {
           const targetGuild = client.guilds.cache.get(guildId);
           const feedbackChan = targetGuild?.channels.cache.get(feedbackChannelId);

@@ -3935,6 +3935,23 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
+                                    <label class="block text-xs font-bold text-gray-300 mb-2">⭐ روم إرسال تقييمات التذاكر (Ratings / Feedback Channel)</label>
+                                    ${renderChannelSelect('ticket_feedback_channel', settings.ticket_feedback_channel || settings.ticket_rating_channel || '')}
+                                </div>
+                                <div class="flex items-center justify-between p-3 bg-[#0b0d14] border border-white/5 rounded-xl self-end h-[46px]">
+                                    <label class="toggle">
+                                        <input type="checkbox" name="ticket_rating_enabled" value="1" ${settings.ticket_rating_enabled !== 0 ? 'checked' : ''}>
+                                        <span class="slider"></span>
+                                    </label>
+                                    <div class="text-right">
+                                        <span class="text-xs font-bold text-white block">طلب تقييم الخدمة عند إغلاق التذكرة</span>
+                                        <span class="text-[10px] text-gray-400">إرسال نجوم التقييم ⭐ للعضو بعد الإغلاق</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
                                     <label class="block text-xs font-bold text-gray-300 mb-2">رابط بانر لوحة التذاكر (Panel Banner URL)</label>
                                     <input type="url" id="input_ticket_panel_banner" name="ticket_panel_banner" value="${settings.ticket_panel_banner || ''}" placeholder="https://example.com/ticket_banner.png" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-left font-mono">
                                 </div>

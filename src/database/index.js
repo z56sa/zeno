@@ -433,6 +433,8 @@ try { db.exec("ALTER TABLE guild_settings ADD COLUMN ticket_panel_title TEXT;");
 try { db.exec("ALTER TABLE guild_settings ADD COLUMN ticket_panel_desc TEXT;"); } catch(e) {}
 try { db.exec("ALTER TABLE guild_settings ADD COLUMN ticket_role TEXT;"); } catch(e) {}
 try { db.exec("ALTER TABLE guild_settings ADD COLUMN ticket_rating_enabled INTEGER DEFAULT 1;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN ticket_feedback_channel TEXT;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN ticket_rating_channel TEXT;"); } catch(e) {}
 
 try { db.exec("ALTER TABLE guild_settings ADD COLUMN ticket_panel_banner TEXT;"); } catch(e) {}
 try { db.exec("ALTER TABLE guild_settings ADD COLUMN ticket_welcome_image TEXT;"); } catch(e) {}
