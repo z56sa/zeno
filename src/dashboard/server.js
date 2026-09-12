@@ -8175,28 +8175,6 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
             } else if (section === 'embed') {
                 formFieldsHtml = `
                     <div class="space-y-6 text-right" dir="rtl">
-                        <!-- Top Action Bar -->
-                        <div class="flex items-center justify-between gap-3 flex-wrap">
-                            <div class="flex items-center gap-3">
-                                <button type="button" id="btnSendEmbed" class="px-7 py-3 bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 hover:from-purple-500 hover:via-indigo-500 hover:to-purple-600 text-white rounded-2xl text-xs font-black transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-purple-900/40 border border-purple-400/30 flex items-center gap-2 cursor-pointer">
-                                    <span class="text-base">🚀</span>
-                                    <span>إرسال للقناة</span>
-                                </button>
-                                <button type="button" id="btnClearEmbed" class="px-5 py-3 bg-rose-950/40 hover:bg-rose-900/60 border border-rose-700/40 hover:border-rose-600/60 text-rose-300 hover:text-rose-200 rounded-2xl text-xs font-bold transition-all transform hover:scale-[1.02] active:scale-[0.98] flex items-center gap-2 cursor-pointer">
-                                    <span class="text-sm">🗑️</span>
-                                    <span>مسح الكل</span>
-                                </button>
-                                <span id="embedStatusToast" class="hidden px-3.5 py-2 rounded-xl text-xs font-bold items-center gap-1.5 transition"></span>
-                            </div>
-
-                            <div class="flex items-center gap-3">
-                                <div class="text-right">
-                                    <h3 class="font-black text-white text-xl flex items-center gap-2 justify-end"><span>رسائل الإيمبد</span><span>📄</span></h3>
-                                    <p class="text-gray-400 text-xs">صمم وأرسل رسائل إيمبد منسقة واحترافية لقنواتك</p>
-                                </div>
-                                <div class="w-10 h-10 rounded-2xl bg-purple-600/20 border border-purple-500/30 text-purple-400 flex items-center justify-center text-xl">📄</div>
-                            </div>
-                        </div>
 
                         <!-- Mode tabs -->
                         <div class="flex items-center justify-end gap-2 bg-[#12141f] p-1.5 rounded-2xl border border-white/5 w-fit ml-auto">
@@ -8750,20 +8728,24 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                         } catch(e) {}
                         updateEmbedPreview();
 
-                        // ربط مستمعات الأحداث الصريحة بالأزرار لضمان عملها في كل المتصفحات
+                        // ربط مستمعات الأحداث بـ capture phase لضمان الأولوية على أي listener آخر
                         const sendBtn = document.getElementById('btnSendEmbed');
                         if (sendBtn) {
-                            sendBtn.onclick = function(e) {
-                                if (e) e.preventDefault();
+                            sendBtn.addEventListener('click', function(e) {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                e.stopImmediatePropagation();
                                 sendEmbedDirect();
-                            };
+                            }, true); // capture phase يضمن التنفيذ قبل أي bubble listener
                         }
                         const clearBtn = document.getElementById('btnClearEmbed');
                         if (clearBtn) {
-                            clearBtn.onclick = function(e) {
-                                if (e) e.preventDefault();
+                            clearBtn.addEventListener('click', function(e) {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                e.stopImmediatePropagation();
                                 clearEmbedFields();
-                            };
+                            }, true); // capture phase
                         }
                     }
 
@@ -8935,6 +8917,29 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                                 </div>
                             </div>
 
+                            <!-- ✅ Embed Action Bar — خارج الـ form تماماً لضمان عمل الأزرار -->
+                            ${section === 'embed' ? `
+                            <div id="embedActionBar" class="flex items-center justify-between gap-3 flex-wrap mb-6 pb-6 border-b border-white/5" dir="rtl">
+                                <div class="flex items-center gap-3">
+                                    <button type="button" id="btnSendEmbed" onclick="event.preventDefault();event.stopPropagation();if(typeof sendEmbedDirect==='function')sendEmbedDirect();return false;" class="px-7 py-3 bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 hover:from-purple-500 hover:via-indigo-500 hover:to-purple-600 text-white rounded-2xl text-xs font-black transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-purple-900/40 border border-purple-400/30 flex items-center gap-2 cursor-pointer">
+                                        <span class="text-base">🚀</span>
+                                        <span>إرسال للقناة</span>
+                                    </button>
+                                    <button type="button" id="btnClearEmbed" onclick="event.preventDefault();event.stopPropagation();if(typeof clearEmbedFields==='function')clearEmbedFields();return false;" class="px-5 py-3 bg-rose-950/40 hover:bg-rose-900/60 border border-rose-700/40 hover:border-rose-600/60 text-rose-300 hover:text-rose-200 rounded-2xl text-xs font-bold transition-all transform hover:scale-[1.02] active:scale-[0.98] flex items-center gap-2 cursor-pointer">
+                                        <span class="text-sm">🗑️</span>
+                                        <span>مسح الكل</span>
+                                    </button>
+                                    <span id="embedStatusToast" class="hidden px-3.5 py-2 rounded-xl text-xs font-bold items-center gap-1.5 transition"></span>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <div class="text-right">
+                                        <h3 class="font-black text-white text-xl flex items-center gap-2 justify-end"><span>رسائل الإيمبد</span><span>📄</span></h3>
+                                        <p class="text-gray-400 text-xs">صمم وأرسل رسائل إيمبد منسقة واحترافية لقنواتك</p>
+                                    </div>
+                                    <div class="w-10 h-10 rounded-2xl bg-purple-600/20 border border-purple-500/30 text-purple-400 flex items-center justify-center text-xl">📄</div>
+                                </div>
+                            </div>
+                            ` : ''}
                             <form id="settingsForm" class="space-y-6">
                                 ${formFieldsHtml}
 
