@@ -9647,13 +9647,35 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
             const { guildId } = req.params;
             const { channelId, color, title, titleUrl, desc, author, authorIcon, image, thumbnail, footer, footerIcon, timestamp, fields } = req.body;
 
+            console.log('[send-embed] body:', JSON.stringify({ channelId, title: title?.substring(0,30), desc: desc?.substring(0,30), color }));
+
             if (!channelId) return res.status(400).json({ success: false, error: 'يرجى تحديد القناة المستهدفة' });
             if (!title && !desc) return res.status(400).json({ success: false, error: 'يرجى كتابة عنوان أو محتوى للرسالة' });
 
-            const channel = client.channels.cache.get(channelId) || await client.channels.fetch(channelId).catch(() => null);
-            if (!channel || !channel.isTextBased()) return res.status(404).json({ success: false, error: 'القناة غير متاحة أو لا يملك البوت صلاحية الوصول إليها' });
+            const channel = client.channels.cache.get(channelId) || await client.channels.fetch(channelId).catch((e) => {
+                console.error('[send-embed] fetch channel error:', e.message);
+                return null;
+            });
 
-            const { EmbedBuilder } = require('discord.js');
+            console.log('[send-embed] channel found:', channel?.id, channel?.type, channel?.isTextBased?.());
+
+            if (!channel) return res.status(404).json({ success: false, error: 'لم يتم العثور على القناة — تأكد أن البوت موجود في السيرفر' });
+            if (!channel.isTextBased()) return res.status(400).json({ success: false, error: 'القناة المختارة ليست قناة نصية' });
+
+            const { EmbedBuilder, PermissionsBitField } = require('discord.js');
+
+            // التحقق من صلاحية الإرسال
+            const botMember = channel.guild?.members?.me;
+            if (botMember) {
+                const perms = channel.permissionsFor(botMember);
+                if (!perms?.has(PermissionsBitField.Flags.SendMessages)) {
+                    return res.status(403).json({ success: false, error: 'البوت لا يملك صلاحية الإرسال في هذه القناة' });
+                }
+                if (!perms?.has(PermissionsBitField.Flags.EmbedLinks)) {
+                    return res.status(403).json({ success: false, error: 'البوت لا يملك صلاحية إرسال Embed في هذه القناة — يلزم صلاحية Embed Links' });
+                }
+            }
+
             const embed = new EmbedBuilder();
 
             if (color) embed.setColor(color);
@@ -9670,6 +9692,7 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
             }
 
             await channel.send({ embeds: [embed] });
+            console.log('[send-embed] ✅ sent successfully to', channelId);
             res.json({ success: true });
         } catch (e) {
             console.error('[send-embed] Error:', e);
