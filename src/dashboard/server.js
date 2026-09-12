@@ -8723,16 +8723,39 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                         t._toastTimer = setTimeout(() => {
                             t.style.display = 'none';
                             t.className = 'hidden';
+                            t.style.display = 'none';
                         }, 4500);
+                    }
+
+                    // Toast ثابت في أسفل الشاشة يظهر دائماً
+                    function showFixedToast(msg, isSuccess = true) {
+                        let toast = document.getElementById('embedFixedToast');
+                        if (!toast) {
+                            toast = document.createElement('div');
+                            toast.id = 'embedFixedToast';
+                            toast.style.cssText = 'position:fixed;bottom:28px;left:50%;transform:translateX(-50%);z-index:99999;padding:12px 24px;border-radius:14px;font-size:14px;font-weight:bold;display:flex;align-items:center;gap:8px;box-shadow:0 8px 32px rgba(0,0,0,0.5);transition:opacity 0.3s;min-width:260px;justify-content:center;text-align:center;direction:rtl;';
+                            document.body.appendChild(toast);
+                        }
+                        toast.textContent = msg;
+                        toast.style.background = isSuccess ? 'rgba(16,185,129,0.95)' : 'rgba(239,68,68,0.95)';
+                        toast.style.color = '#fff';
+                        toast.style.border = isSuccess ? '1px solid #34d399' : '1px solid #f87171';
+                        toast.style.opacity = '1';
+                        toast.style.display = 'flex';
+                        clearTimeout(toast._t);
+                        toast._t = setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => { toast.style.display = 'none'; }, 300); }, 4000);
                     }
 
                     async function sendEmbedDirect() {
                         const payload = getEmbedPayload();
+                        console.log('[sendEmbedDirect] payload:', JSON.stringify({channelId: payload.channelId, title: payload.title, desc: payload.desc?.substring(0,20)}));
                         if (!payload.channelId) {
+                            showFixedToast('⚠️ يرجى اختيار القناة المستهدفة أولاً!', false);
                             showEmbedToast('⚠️ يرجى اختيار القناة المستهدفة أولاً!', false);
                             return;
                         }
                         if (!payload.desc && !payload.title) {
+                            showFixedToast('⚠️ يرجى كتابة عنوان أو محتوى للرسالة قبل الإرسال!', false);
                             showEmbedToast('⚠️ يرجى كتابة عنوان أو محتوى للرسالة قبل الإرسال!', false);
                             return;
                         }
@@ -8748,12 +8771,15 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                             });
                             const data = await res.json();
                             if (data.success) {
+                                showFixedToast('✅ تم إرسال الإيمبد بنجاح في القناة!', true);
                                 showEmbedToast('✅ تم إرسال الإيمبد بنجاح في القناة!', true);
                             } else {
+                                showFixedToast('❌ ' + (data.error || 'فشل الإرسال'), false);
                                 showEmbedToast('❌ خطأ: ' + (data.error || 'فشل الإرسال'), false);
                             }
                         } catch(e) {
                             console.error('[sendEmbedDirect] error:', e);
+                            showFixedToast('❌ خطأ في الاتصال بالسيرفر', false);
                             showEmbedToast('❌ حدث خطأ في الاتصال بالسيرفر', false);
                         } finally {
                             if (btn) { btn.disabled = false; btn.innerHTML = '<span class="text-base">🚀</span><span>إرسال للقناة</span>'; }
