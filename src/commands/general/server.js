@@ -20,6 +20,7 @@ module.exports = {
   },
 
   async buildEmbed(guild) {
+    try { await guild.fetch().catch(() => {}); } catch(e) {}
     const owner = await guild.fetchOwner().catch(() => null);
     const textChannels = guild.channels.cache.filter(c => c.type === ChannelType.GuildText).size;
     const voiceChannels = guild.channels.cache.filter(c => c.type === ChannelType.GuildVoice).size;

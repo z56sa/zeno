@@ -54,24 +54,26 @@ module.exports = {
 
     // بوست السيرفر
     if (!oldMember.premiumSince && newMember.premiumSince) {
+      try { await guild.fetch().catch(() => {}); } catch(e) {}
       await sendServerLog(guild, 'member_boost_add', 'members', {
         title: '💎 بوست جديد!',
         desc: `**${user.tag}** قام ببوست السيرفر! 🎉`,
         fields: [
           { name: '👤 العضو', value: `<@${user.id}>`, inline: true },
-          { name: '💎 إجمالي البوستات', value: `${guild.premiumSubscriptionCount}`, inline: true }
+          { name: '💎 إجمالي البوستات', value: `${guild.premiumSubscriptionCount || 0}`, inline: true }
         ],
         thumbnail: user.displayAvatarURL({ dynamic: true })
       });
     }
 
     if (oldMember.premiumSince && !newMember.premiumSince) {
+      try { await guild.fetch().catch(() => {}); } catch(e) {}
       await sendServerLog(guild, 'member_boost_remove', 'members', {
         title: '🗑️ إزالة البوست',
         desc: `**${user.tag}** أزال البوست من السيرفر`,
         fields: [
           { name: '👤 العضو', value: `<@${user.id}>`, inline: true },
-          { name: '💎 إجمالي البوستات', value: `${guild.premiumSubscriptionCount}`, inline: true }
+          { name: '💎 إجمالي البوستات', value: `${guild.premiumSubscriptionCount || 0}`, inline: true }
         ],
         thumbnail: user.displayAvatarURL({ dynamic: true })
       });

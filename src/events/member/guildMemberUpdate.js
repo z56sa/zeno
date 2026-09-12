@@ -7,7 +7,10 @@ module.exports = {
     const guild = newMember.guild;
     const settings = db.getGuildSettings(guild.id);
 
-    if (!settings || settings.boost_enabled === 0) return;
+    if (!settings) return;
+    // التحقق من تفعيل ميزة البوست (دعم الاسمين لضمان التوافق)
+    const isEnabled = settings.boost_enabled !== 0 && settings.boost_msg_enabled !== 0;
+    if (!isEnabled) return;
 
     // التحقق هل العضو قام بعمل بوست جديد
     const oldBoost = oldMember.premiumSince;
@@ -16,9 +19,25 @@ module.exports = {
     // إذا أصبح يمتلك بوست بعد أن لم يكن يمتلكه
     if (!oldBoost && newBoost) {
       const user = newMember.user;
+      
+      // جلب أحدث بيانات للسيرفر لضمان دقة عدد البوستات
+      try {
+        await guild.fetch().catch(() => {});
+      } catch (e) {}
+
       const totalBoosts = guild.premiumSubscriptionCount || 1;
 
-      // دالة استبدال المتغيرات
+      // إعطاء رتبة مكافأة البوستر التلقائية إن كانت محددة
+      if (settings.booster_reward_role) {
+        try {
+          const rewardRole = guild.roles.cache.get(settings.booster_reward_role);
+          if (rewardRole && !newMember.roles.cache.has(rewardRole.id)) {
+            await newMember.roles.add(rewardRole).catch(() => {});
+          }
+        } catch (e) {}
+      }
+
+      // دالة استبدال المتغيرات (دعم كل الصيغ [var] و {var})
       const formatText = (text) => {
         if (!text) return '';
         return text
@@ -26,7 +45,7 @@ module.exports = {
           .replace(/\[globalName\]|\{globalName\}/gi, user.globalName || user.username)
           .replace(/\[displayName\]|\{displayName\}/gi, newMember.displayName || user.username)
           .replace(/\[userName\]|\{userName\}/gi, user.username)
-          .replace(/\[totalBoosts\]|\{totalBoosts\}/gi, totalBoosts.toString())
+          .replace(/\[totalBoosts\]|\{totalBoosts\}|\[count\]|\{count\}/gi, totalBoosts.toString())
           .replace(/\[serverName\]|\{serverName\}/gi, guild.name)
           .replace(/\[server\]|\{server\}/gi, guild.name);
       };

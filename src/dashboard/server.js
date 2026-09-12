@@ -1131,7 +1131,7 @@ module.exports = function (app, client) {
     });
 
     // 4. Guild Dashboard & Sub-pages (وصول محمي بصلاحيات ديسكورد)
-    app.get('/dashboard/:guildId/:section?', (req, res) => {
+    app.get('/dashboard/:guildId/:section?', async (req, res) => {
         try {
             const guildId = req.params.guildId;
             const section = req.params.section || 'overview';
@@ -1142,8 +1142,18 @@ module.exports = function (app, client) {
                 return res.redirect('/auth/discord');
             }
 
-            // التحقق من وجود البوت في هذا السيرفر
-            const botGuild = client?.guilds?.cache?.get(guildId);
+            // التحقق من وجود البوت في هذا السيرفر وجلب أحدث بيانات (بما فيها البوستات والأعضاء)
+            let botGuild = client?.guilds?.cache?.get(guildId);
+            if (!botGuild) {
+                try {
+                    botGuild = await client?.guilds?.fetch(guildId);
+                } catch(e) {}
+            } else {
+                // جلب أحدث بيانات السيرفر لتحديث عداد البوستات في حال تغير
+                try {
+                    await botGuild.fetch().catch(() => {});
+                } catch(e) {}
+            }
             if (!botGuild) {
                 return res.status(404).send(`
                     <div style="background:#0b0d14;color:#fff;font-family:sans-serif;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;">
@@ -6433,6 +6443,8 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                     voice_channels: { label: 'القنوات الصوتية', icon: '🔊', desc: 'عدد القنوات الصوتية' },
                     total_channels: { label: 'عدد القنوات الكلي', icon: '📂', desc: 'إجمالي عدد جميع القنوات' },
                     roles:          { label: 'الرتب الكلية', icon: '🏷️', desc: 'عدد الرتب في السيرفر' },
+                    boosts:         { label: 'عدد البوستات', icon: '💎', desc: 'إجمالي عدد بوستات السيرفر الفعلية' },
+                    boost_level:    { label: 'مستوى البوست', icon: '🚀', desc: 'مستوى تعزيز السيرفر الحالي (Tier)' },
                 };
 
                 const configuredMap = {};
@@ -9142,7 +9154,7 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
 
             if (!stat_type || !channel_id) return res.status(400).json({ success: false, error: 'stat_type and channel_id are required' });
 
-            const VALID_TYPES = ['total_members','humans','bots','online','voice','text_channels','voice_channels','total_channels','roles'];
+            const VALID_TYPES = ['total_members','humans','bots','online','voice','text_channels','voice_channels','total_channels','roles','boosts','boost_level'];
             if (!VALID_TYPES.includes(stat_type)) return res.status(400).json({ success: false, error: 'Invalid stat_type' });
 
             rawDb.exec(`CREATE TABLE IF NOT EXISTS stat_channels (

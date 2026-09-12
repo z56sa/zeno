@@ -16,6 +16,8 @@ const STAT_TYPES = {
     voice_channels: { label: '🔊 صوتية', format: (g) => `🔊 قنوات صوتية: ${g.channels.cache.filter(c => c.type === 2).size}` },
     total_channels: { label: '📂 القنوات', format: (g) => `📂 جميع القنوات: ${g.channels.cache.size}` },
     roles:          { label: '🏷️ الرتب', format: (g) => `🏷️ الرتب: ${g.roles.cache.size}` },
+    boosts:         { label: '💎 البوستات', format: (g) => `💎 البوستات: ${g.premiumSubscriptionCount || 0}` },
+    boost_level:    { label: '🚀 مستوى البوست', format: (g) => `🚀 مستوى البوست: ${g.premiumTier || 0}` },
 };
 
 class StatChannelsService {
@@ -111,6 +113,8 @@ class StatChannelsService {
             case 'voice_channels': return guild.channels.cache.filter(c => c.type === 2).size;
             case 'total_channels': return guild.channels.cache.size;
             case 'roles':          return guild.roles.cache.size;
+            case 'boosts':         return guild.premiumSubscriptionCount || 0;
+            case 'boost_level':    return guild.premiumTier || 0;
             default:               return 0;
         }
     }
