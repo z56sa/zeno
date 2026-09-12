@@ -8249,24 +8249,37 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                             <!-- Author row -->
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                                 <div>
-                                    <label class="block text-[11px] font-bold text-gray-400 mb-1">أيقونة الكاتب (Author Icon URL)</label>
-                                    <input type="url" id="embAuthorIcon" placeholder="https://..." oninput="updateEmbedPreview()" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-3 py-2.5 text-xs text-white outline-none text-left font-mono">
+                                    <div class="flex items-center justify-between mb-1">
+                                        <button type="button" onclick="clearEmbedImageField('embAuthorIcon')" class="text-[10px] text-rose-400 hover:text-rose-300 font-bold transition">🗑️ إزالة</button>
+                                        <label class="block text-[11px] font-bold text-gray-300">أيقونة الكاتب (صورة دائرية أعلى الإيمبد)</label>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <input type="file" id="file_embAuthorIcon" accept="image/*" class="hidden" onchange="uploadEmbedImageFile(this, 'embAuthorIcon')">
+                                        <button type="button" onclick="document.getElementById('file_embAuthorIcon').click()" class="px-3 py-2 bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/30 text-purple-300 rounded-xl text-xs font-bold transition shrink-0 flex items-center gap-1">
+                                            <span>📤</span><span id="btn_text_embAuthorIcon">رفع أيقونة</span>
+                                        </button>
+                                        <input type="url" id="embAuthorIcon" placeholder="ارفع صورة أو ضع رابط https://..." oninput="updateEmbedPreview()" class="flex-1 bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-3 py-2 text-xs text-white outline-none text-left font-mono">
+                                    </div>
+                                    <p class="text-[10px] text-gray-500 text-right mt-1">تظهر كأيقونة مصغرة بجانب اسم الكاتب</p>
                                 </div>
                                 <div>
-                                    <label class="block text-[11px] font-bold text-gray-400 mb-1">اسم الكاتب (Author Name)</label>
+                                    <label class="block text-[11px] font-bold text-gray-300 mb-1">اسم الكاتب أو الجهة (Author Name)</label>
                                     <input type="text" id="embAuthor" placeholder="مثال: ZENO Announcement" oninput="updateEmbedPreview()" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-3 py-2.5 text-xs text-white outline-none text-right">
+                                    <p class="text-[10px] text-gray-500 text-right mt-1">يظهر كعنوان فرعي في أعلى الرسالة</p>
                                 </div>
                             </div>
 
                             <!-- Title & Title URL -->
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                                 <div>
-                                    <label class="block text-[11px] font-bold text-gray-400 mb-1">رابط العنوان (Title URL - اختياري)</label>
-                                    <input type="url" id="embTitleUrl" placeholder="https://..." oninput="updateEmbedPreview()" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-3 py-2.5 text-xs text-white outline-none text-left font-mono">
+                                    <label class="block text-[11px] font-bold text-gray-300 mb-1">رابط العنوان عند الضغط عليه (موقع / سيرفر / صفحة)</label>
+                                    <input type="url" id="embTitleUrl" placeholder="https://example.com (اختياري)" oninput="updateEmbedPreview()" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-3 py-2.5 text-xs text-white outline-none text-left font-mono">
+                                    <p class="text-[10px] text-gray-500 text-right mt-1">🔗 عند وضع رابط هنا، سيتحول عنوان الإيمبد إلى رابط قابل للضغط يفتح هذه الصفحة</p>
                                 </div>
                                 <div>
-                                    <label class="block text-[11px] font-bold text-gray-400 mb-1">عنوان الإيمبد (Title)</label>
+                                    <label class="block text-[11px] font-bold text-gray-300 mb-1">عنوان الإيمبد الرئيسي (Title)</label>
                                     <input type="text" id="embTitle" placeholder="عنوان الرسالة الرئيسي..." oninput="updateEmbedPreview()" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-3 py-2.5 text-xs text-white outline-none text-right font-bold">
+                                    <p class="text-[10px] text-gray-500 text-right mt-1">العنوان البارز للرسالة بخط عريض</p>
                                 </div>
                             </div>
 
