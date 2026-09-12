@@ -5307,8 +5307,12 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
 
                                     <!-- الرتب المطلوبة -->
                                     <div class="space-y-1.5">
-                                        <label class="block text-xs font-bold text-gray-300">الرتب المطلوبة (اختياري)</label>
+                                        <div class="flex items-center justify-between">
+                                            <span class="text-[10px] text-purple-400 font-bold">حصرية لهذه الرتبة فقط</span>
+                                            <label class="block text-xs font-bold text-gray-300">الرتبة المسموح لها بالمشاركة فقط (اختياري)</label>
+                                        </div>
                                         ${renderRoleSelect('gwReqRole', '')}
+                                        <p class="text-[10px] text-gray-500">إذا اخترت رتبة، لن يتمكن أي عضو من دخول السحب إلا إذا كان يمتلك هذه الرتبة فقط.</p>
                                     </div>
 
                                     <!-- طريقة المشاركة & لون الزر -->
@@ -9666,11 +9670,16 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
             const endTime = Date.now() + durationMs;
             const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 
+            let descText = '**الجائزة:** ' + prize + (desc ? ('\n\n' + desc) : '') + '\n\n**عدد الفائزين:** ' + (winners || 1) + '\n**ينتهي في:** <t:' + Math.floor(endTime / 1000) + ':R>';
+            if (reqRole) {
+                descText += '\n\n🛡️ **الرتبة المسموح لها بالمشاركة فقط:** <@&' + reqRole + '>';
+            }
+
             const gwEmbed = new EmbedBuilder()
                 .setTitle('🎉 سحب قيف اواي جديد!')
-                .setDescription('**الجائزة:** ' + prize + (desc ? ('\n\n' + desc) : '') + '\n\n**عدد الفائزين:** ' + (winners || 1) + '\n**ينتهي في:** <t:' + Math.floor(endTime / 1000) + ':R>')
+                .setDescription(descText)
                 .setColor(color || '#ef5700')
-                .setFooter({ text: 'اضغط على الزر أدناه للمشاركة!' })
+                .setFooter({ text: reqRole ? 'مخصص لرتبة معينة • اضغط للمشاركة' : 'اضغط على الزر أدناه للمشاركة!' })
                 .setTimestamp(endTime);
 
             if (image) gwEmbed.setImage(image);
