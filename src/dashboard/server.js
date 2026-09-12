@@ -3904,7 +3904,13 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
 
                         <!-- 3. إعدادات لوحة ورتب التذاكر الأساسية -->
                         <div class="bg-[#12141f] border border-white/5 p-6 rounded-2xl space-y-4 shadow-xl">
-                            <h4 class="text-xs font-black text-white border-b border-white/5 pb-3">إعدادات ومظهر لوحة الدعم الفني (Wicks Design)</h4>
+                            <div class="flex items-center justify-between border-b border-white/5 pb-3">
+                                <button type="button" onclick="sendTicketPanelDirect()" class="px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-xl text-xs font-black shadow-lg shadow-purple-900/30 flex items-center gap-2 transition cursor-pointer">
+                                    <span>📩</span>
+                                    <span>إرسال اللوحة للشات الآن</span>
+                                </button>
+                                <h4 class="text-xs font-black text-white">إعدادات ومظهر لوحة الدعم الفني (Wicks Design)</h4>
+                            </div>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <label class="block text-xs font-bold text-gray-300 mb-2">رتبة طاقم الدعم الفني (Support Role)</label>
@@ -3919,7 +3925,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <label class="block text-xs font-bold text-gray-300 mb-2">عنوان لوحة التذاكر (Panel Title)</label>
-                                    <input type="text" name="ticket_panel_title" value="${settings.ticket_panel_title || 'Open a ticket 🎫'}" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right">
+                                    <input type="text" id="input_ticket_panel_title" name="ticket_panel_title" value="${settings.ticket_panel_title || 'Open a ticket 🎫'}" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-gray-300 mb-2">قناة سجلات التذاكر (Transcripts Channel)</label>
@@ -3930,7 +3936,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <label class="block text-xs font-bold text-gray-300 mb-2">رابط بانر لوحة التذاكر (Panel Banner URL)</label>
-                                    <input type="url" name="ticket_panel_banner" value="${settings.ticket_panel_banner || ''}" placeholder="https://example.com/ticket_banner.png" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-left font-mono">
+                                    <input type="url" id="input_ticket_panel_banner" name="ticket_panel_banner" value="${settings.ticket_panel_banner || ''}" placeholder="https://example.com/ticket_banner.png" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-left font-mono">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-gray-300 mb-2">رابط صورة الترحيب داخل التذكرة (Welcome Embed Image)</label>
@@ -3969,6 +3975,39 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                         </div>
 
                     </div>
+                    <script>
+                    async function sendTicketPanelDirect() {
+                        const panelCh = document.getElementById('ticket_panel_channel')?.value;
+                        if (!panelCh) {
+                            return alert('يرجى اختيار "روم إرسال لوحة التذاكر (Panel Channel)" أولاً ثم حفظ التغييرات.');
+                        }
+
+                        const title = document.getElementById('input_ticket_panel_title')?.value || 'Open a ticket 🎫';
+                        const banner = document.getElementById('input_ticket_panel_banner')?.value || '';
+
+                        if (!confirm('هل تريد إرسال لوحة التذاكر الآن مباشرة إلى الروم المختار؟')) return;
+
+                        try {
+                            const res = await fetch('/api/guild/${guildId}/tickets/send-panel', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    channelId: panelCh,
+                                    ticket_panel_title: title,
+                                    ticket_panel_banner: banner
+                                })
+                            });
+                            const data = await res.json();
+                            if (data.success) {
+                                alert('✅ تم إرسال لوحة التذاكر بنجاح إلى القناة!');
+                            } else {
+                                alert('❌ فشل الإرسال: ' + (data.error || 'تأكد من صلاحيات البوت في القناة'));
+                            }
+                        } catch(e) {
+                            alert('حدث خطأ أثناء محاولة الإرسال: ' + e.message);
+                        }
+                    }
+                    </script>
 `;
             } else if (section === 'autoroles') {
 formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl">
@@ -8883,6 +8922,58 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
     });
 
     
+    // =============================================
+    // Tickets Panel API (إرسال لوحة التذاكر للشات مباشرة)
+    // =============================================
+    app.post('/api/guild/:guildId/tickets/send-panel', express.json(), async (req, res) => {
+        try {
+            if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
+            const { guildId } = req.params;
+            const settings = database.getGuildSettings(guildId);
+            const channelId = req.body.channelId || settings.ticket_panel_channel;
+
+            if (!channelId) return res.status(400).json({ success: false, error: 'لم يتم تحديد روم إرسال لوحة التذاكر' });
+
+            const channel = client?.channels?.cache?.get(channelId) || await client?.channels?.fetch(channelId).catch(() => null);
+            if (!channel || !channel.isTextBased()) return res.status(400).json({ success: false, error: 'القناة غير موجودة أو ليست نصية' });
+
+            const guildObj = client?.guilds?.cache?.get(guildId);
+            const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+
+            const title = req.body.ticket_panel_title || settings.ticket_panel_title || '🎫 تذاكر الدعم الفني';
+            const bannerUrl = req.body.ticket_panel_banner || settings.ticket_panel_banner || null;
+            const desc = req.body.ticket_panel_desc || settings.ticket_panel_desc || 'لطلب المساعدة أو الاستفسار أو تقديم الشكاوى، اضغط على الزر أدناه لفتح تذكرة خاصة مع فريق الدعم.';
+
+            const embed = new EmbedBuilder()
+                .setColor('#5865F2')
+                .setTitle(title)
+                .setDescription(desc)
+                .setFooter({ text: guildObj?.name || 'ZENO Tickets', iconURL: guildObj?.iconURL({ dynamic: true }) || undefined })
+                .setTimestamp();
+
+            if (bannerUrl) {
+                try {
+                    embed.setImage(bannerUrl);
+                } catch(e) {}
+            }
+
+            const row = new ActionRowBuilder().addComponents(
+                new ButtonBuilder()
+                    .setCustomId('open_ticket')
+                    .setLabel('فتح تذكرة | Open Ticket')
+                    .setEmoji('🎫')
+                    .setStyle(ButtonStyle.Primary)
+            );
+
+            await channel.send({ embeds: [embed], components: [row] });
+
+            res.json({ success: true });
+        } catch(e) {
+            console.error('Error sending ticket panel:', e);
+            res.status(500).json({ success: false, error: e.message });
+        }
+    });
+
     // =============================================
     // Staff Activity & Shift API (نظام الإدارة والحضور)
     // =============================================
