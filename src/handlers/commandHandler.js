@@ -42,47 +42,43 @@ module.exports = async (client) => {
 
   logger.info(`تم تحميل ${client.commands.size} أمر سلاش و ${client.prefixCommands.size} أمر نصي.`);
 
-  // تسجيل أوامر السلاش في الديسكورد في الخلفية بشكل غير معطل (Background Asynchronous)
+  client.slashCommandsData = slashCommandsArray;
+
+  // تسجيل أوامر السلاش في الديسكورد
   const botToken = (process.env.DISCORD_BOT_TOKEN || process.env.BOT_TOKEN || process.env.DISCORD_TOKEN || process.env.TOKEN || '').trim();
   
-  if (botToken && botToken !== 'YOUR_BOT_TOKEN_HERE') {
-    const registerCommands = async (targetClientId) => {
-      if (!targetClientId) return;
-      const rest = new REST({ version: '10' }).setToken(botToken);
-      try {
-        logger.info(`جاري تسجيل ${slashCommandsArray.length} أمر سلاش للبوت (${targetClientId})...`);
-        const registered = await rest.put(
-          Routes.applicationCommands(targetClientId),
-          { body: slashCommandsArray }
-        );
-        client.slashCommandIds = new Map();
-        if (Array.isArray(registered)) {
-          for (const cmd of registered) {
-            client.slashCommandIds.set(cmd.name, cmd.id);
-          }
+  client.registerSlashCommands = async () => {
+    if (!client.user?.id) return;
+    const tokenToUse = botToken || client.token;
+    if (!tokenToUse || tokenToUse === 'YOUR_BOT_TOKEN_HERE') return;
+
+    const rest = new REST({ version: '10' }).setToken(tokenToUse);
+    try {
+      logger.info(`جاري تسجيل ${slashCommandsArray.length} أمر سلاش للبوت (${client.user.id})...`);
+      const registered = await rest.put(
+        Routes.applicationCommands(client.user.id),
+        { body: slashCommandsArray }
+      );
+      client.slashCommandIds = new Map();
+      if (Array.isArray(registered)) {
+        for (const cmd of registered) {
+          client.slashCommandIds.set(cmd.name, cmd.id);
         }
-        logger.info(`[SUCCESS] ✅ تم تسجيل ${registered?.length || slashCommandsArray.length} أمر سلاش بنجاح.`);
-      } catch (err) {
-        logger.error(`حدث خطأ أثناء تسجيل أوامر السلاش: ${err.message}`);
       }
-    };
-
-    let isRegistered = false;
-    const safeRegister = (id) => {
-      if (isRegistered || !id) return;
-      isRegistered = true;
-      registerCommands(id);
-    };
-
-    if (client.isReady() && client.user?.id) {
-      safeRegister(client.user.id);
-    } else {
-      client.once('clientReady', () => {
-        safeRegister(client.user?.id);
-      });
-      client.once('ready', () => {
-        safeRegister(client.user?.id);
-      });
+      logger.info(`[SUCCESS] ✅ تم تسجيل ${registered?.length || slashCommandsArray.length} أمر سلاش بنجاح.`);
+    } catch (err) {
+      logger.error(`حدث خطأ أثناء تسجيل أوامر السلاش: ${err.message}`);
     }
+  };
+
+  if (client.isReady() && client.user?.id) {
+    client.registerSlashCommands();
+  } else {
+    client.once('clientReady', () => {
+      client.registerSlashCommands();
+    });
+    client.once('ready', () => {
+      client.registerSlashCommands();
+    });
   }
 };

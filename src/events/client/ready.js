@@ -18,6 +18,11 @@ module.exports = {
     // تهيئة متتبع الدعوات
     await inviteTracker.init(client);
 
+    // تسجيل وتحديث أوامر السلاش لدى ديسكورد فوراً
+    if (typeof client.registerSlashCommands === 'function') {
+      client.registerSlashCommands().catch(() => {});
+    }
+
     const totalMembers = client.guilds.cache.reduce((acc, g) => acc + (g.memberCount || g.members.cache.size || 0), 0);
     logger.info(`البوت متواجد في ${client.guilds.cache.size} سيرفر(ات) ويخدم ${totalMembers} مستخدم.`);
 
