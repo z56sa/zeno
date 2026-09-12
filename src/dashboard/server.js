@@ -1550,7 +1550,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                             <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between hover:border-purple-500/30 transition">
                                 <div class="flex items-center gap-2">
                                     <label class="toggle"><input type="checkbox" name="anti_invites" value="1" ${settings.anti_invites ? 'checked' : ''} onchange="saveAutomodSetting('anti_invites', this.checked)"><span class="slider"></span></label>
-                                    <button type="button" class="text-gray-400 hover:text-white p-1 text-xs">⚙️</button>
+                                    <button type="button" onclick="configureAutomodRule('anti_invites', 'حظر دعوات السيرفرات')" class="text-gray-400 hover:text-white p-1 text-xs" title="إعدادات">⚙️</button>
                                 </div>
                                 <div class="flex items-center gap-3 text-right">
                                     <div>
@@ -1573,7 +1573,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                             <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between hover:border-purple-500/30 transition">
                                 <div class="flex items-center gap-2">
                                     <label class="toggle"><input type="checkbox" name="anti_spam" value="1" ${settings.anti_spam ? 'checked' : ''} onchange="saveAutomodSetting('anti_spam', this.checked)"><span class="slider"></span></label>
-                                    <button type="button" class="text-gray-400 hover:text-white p-1 text-xs">⚙️</button>
+                                    <button type="button" onclick="configureAutomodRule('anti_spam', 'مكافحة السبام')" class="text-gray-400 hover:text-white p-1 text-xs" title="إعدادات">⚙️</button>
                                 </div>
                                 <div class="flex items-center gap-3 text-right">
                                     <div>
@@ -1591,7 +1591,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                             <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between hover:border-purple-500/30 transition">
                                 <div class="flex items-center gap-2">
                                     <label class="toggle"><input type="checkbox" name="anti_link" value="1" ${settings.anti_link ? 'checked' : ''} onchange="saveAutomodSetting('anti_link', this.checked)"><span class="slider"></span></label>
-                                    <button type="button" class="text-gray-400 hover:text-white p-1 text-xs">⚙️</button>
+                                    <button type="button" onclick="configureAutomodRule('anti_link', 'حظر الروابط')" class="text-gray-400 hover:text-white p-1 text-xs" title="إعدادات">⚙️</button>
                                 </div>
                                 <div class="flex items-center gap-3 text-right">
                                     <div>
@@ -1609,7 +1609,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                             <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between hover:border-purple-500/30 transition">
                                 <div class="flex items-center gap-2">
                                     <label class="toggle"><input type="checkbox" name="anti_mass_mention" value="1" ${settings.anti_mass_mention ? 'checked' : ''} onchange="saveAutomodSetting('anti_mass_mention', this.checked)"><span class="slider"></span></label>
-                                    <button type="button" class="text-gray-400 hover:text-white p-1 text-xs">⚙️</button>
+                                    <button type="button" onclick="configureAutomodRule('anti_mass_mention', 'حظر سبام المنشن')" class="text-gray-400 hover:text-white p-1 text-xs" title="إعدادات">⚙️</button>
                                 </div>
                                 <div class="flex items-center gap-3 text-right">
                                     <div>
@@ -1627,7 +1627,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                             <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between hover:border-purple-500/30 transition">
                                 <div class="flex items-center gap-2">
                                     <label class="toggle"><input type="checkbox" name="anti_caps" value="1" ${settings.anti_caps ? 'checked' : ''} onchange="saveAutomodSetting('anti_caps', this.checked)"><span class="slider"></span></label>
-                                    <button type="button" class="text-gray-400 hover:text-white p-1 text-xs">⚙️</button>
+                                    <button type="button" onclick="configureAutomodRule('anti_caps', 'حظر الحروف الكبيرة')" class="text-gray-400 hover:text-white p-1 text-xs" title="إعدادات">⚙️</button>
                                 </div>
                                 <div class="flex items-center gap-3 text-right">
                                     <div>
@@ -1645,7 +1645,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                             <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between hover:border-purple-500/30 transition">
                                 <div class="flex items-center gap-2">
                                     <label class="toggle"><input type="checkbox" name="anti_spoilers" value="1" ${settings.anti_spoilers ? 'checked' : ''} onchange="saveAutomodSetting('anti_spoilers', this.checked)"><span class="slider"></span></label>
-                                    <button type="button" class="text-gray-400 hover:text-white p-1 text-xs">⚙️</button>
+                                    <button type="button" onclick="configureAutomodRule('anti_spoilers', 'إزعاج Spoilers')" class="text-gray-400 hover:text-white p-1 text-xs" title="إعدادات">⚙️</button>
                                 </div>
                                 <div class="flex items-center gap-3 text-right">
                                     <div>
@@ -1663,7 +1663,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                             <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between hover:border-purple-500/30 transition">
                                 <div class="flex items-center gap-2">
                                     <label class="toggle"><input type="checkbox" name="anti_zalgo" value="1" ${settings.anti_zalgo ? 'checked' : ''} onchange="saveAutomodSetting('anti_zalgo', this.checked)"><span class="slider"></span></label>
-                                    <button type="button" class="text-gray-400 hover:text-white p-1 text-xs">⚙️</button>
+                                    <button type="button" onclick="configureAutomodRule('anti_zalgo', 'نص Zalgo')" class="text-gray-400 hover:text-white p-1 text-xs" title="إعدادات">⚙️</button>
                                 </div>
                                 <div class="flex items-center gap-3 text-right">
                                     <div>
@@ -1692,7 +1692,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                             <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between hover:border-purple-500/30 transition">
                                 <div class="flex items-center gap-2">
                                     <label class="toggle"><input type="checkbox" name="anti_spam_adv" value="1" checked onchange="saveAutomodSetting('anti_spam_adv', this.checked)"><span class="slider"></span></label>
-                                    <button type="button" class="text-gray-400 hover:text-white p-1 text-xs">⚙️</button>
+                                    <button type="button" onclick="configureAutomodRule('anti_spam_adv', 'مكافحة السبام المتقدم')" class="text-gray-400 hover:text-white p-1 text-xs" title="إعدادات">⚙️</button>
                                 </div>
                                 <div class="flex items-center gap-3 text-right">
                                     <div>
@@ -1710,7 +1710,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                             <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between hover:border-purple-500/30 transition">
                                 <div class="flex items-center gap-2">
                                     <label class="toggle"><input type="checkbox" name="anti_emoji" value="1" ${settings.anti_emoji ? 'checked' : ''} onchange="saveAutomodSetting('anti_emoji', this.checked)"><span class="slider"></span></label>
-                                    <button type="button" class="text-gray-400 hover:text-white p-1 text-xs">⚙️</button>
+                                    <button type="button" onclick="configureAutomodRule('anti_emoji', 'إزعاج الإيموجي')" class="text-gray-400 hover:text-white p-1 text-xs" title="إعدادات">⚙️</button>
                                 </div>
                                 <div class="flex items-center gap-3 text-right">
                                     <div>
@@ -1728,7 +1728,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                             <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between hover:border-purple-500/30 transition">
                                 <div class="flex items-center gap-2">
                                     <label class="toggle"><input type="checkbox" name="anti_text_repeat" value="1" ${settings.anti_text_repeat ? 'checked' : ''} onchange="saveAutomodSetting('anti_text_repeat', this.checked)"><span class="slider"></span></label>
-                                    <button type="button" class="text-gray-400 hover:text-white p-1 text-xs">⚙️</button>
+                                    <button type="button" onclick="configureAutomodRule('anti_text_repeat', 'تكرار النص')" class="text-gray-400 hover:text-white p-1 text-xs" title="إعدادات">⚙️</button>
                                 </div>
                                 <div class="flex items-center gap-3 text-right">
                                     <div>
@@ -1746,7 +1746,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                             <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between hover:border-purple-500/30 transition">
                                 <div class="flex items-center gap-2">
                                     <label class="toggle"><input type="checkbox" name="anti_repeat_messages" value="1" ${settings.anti_repeat_messages ? 'checked' : ''} onchange="saveAutomodSetting('anti_repeat_messages', this.checked)"><span class="slider"></span></label>
-                                    <button type="button" class="text-gray-400 hover:text-white p-1 text-xs">⚙️</button>
+                                    <button type="button" onclick="configureAutomodRule('anti_repeat_messages', 'رسائل مكررة')" class="text-gray-400 hover:text-white p-1 text-xs" title="إعدادات">⚙️</button>
                                 </div>
                                 <div class="flex items-center gap-3 text-right">
                                     <div>
@@ -1764,7 +1764,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                             <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between hover:border-purple-500/30 transition">
                                 <div class="flex items-center gap-2">
                                     <label class="toggle"><input type="checkbox" name="anti_stickers" value="1" ${settings.anti_stickers ? 'checked' : ''} onchange="saveAutomodSetting('anti_stickers', this.checked)"><span class="slider"></span></label>
-                                    <button type="button" class="text-gray-400 hover:text-white p-1 text-xs">⚙️</button>
+                                    <button type="button" onclick="configureAutomodRule('anti_stickers', 'سبام الملصقات')" class="text-gray-400 hover:text-white p-1 text-xs" title="إعدادات">⚙️</button>
                                 </div>
                                 <div class="flex items-center gap-3 text-right">
                                     <div>
@@ -1782,7 +1782,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                             <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between hover:border-purple-500/30 transition">
                                 <div class="flex items-center gap-2">
                                     <label class="toggle"><input type="checkbox" name="anti_line_spam" value="1" ${settings.anti_line_spam ? 'checked' : ''} onchange="saveAutomodSetting('anti_line_spam', this.checked)"><span class="slider"></span></label>
-                                    <button type="button" class="text-gray-400 hover:text-white p-1 text-xs">⚙️</button>
+                                    <button type="button" onclick="configureAutomodRule('anti_line_spam', 'سبام الأسطر')" class="text-gray-400 hover:text-white p-1 text-xs" title="إعدادات">⚙️</button>
                                 </div>
                                 <div class="flex items-center gap-3 text-right">
                                     <div>
@@ -1800,7 +1800,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                             <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between hover:border-purple-500/30 transition">
                                 <div class="flex items-center gap-2">
                                     <label class="toggle"><input type="checkbox" name="anti_long_messages" value="1" ${settings.anti_long_messages ? 'checked' : ''} onchange="saveAutomodSetting('anti_long_messages', this.checked)"><span class="slider"></span></label>
-                                    <button type="button" class="text-gray-400 hover:text-white p-1 text-xs">⚙️</button>
+                                    <button type="button" onclick="configureAutomodRule('anti_long_messages', 'الرسائل الطويلة')" class="text-gray-400 hover:text-white p-1 text-xs" title="إعدادات">⚙️</button>
                                 </div>
                                 <div class="flex items-center gap-3 text-right">
                                     <div>
@@ -2052,6 +2052,34 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                             }
                         } catch(e) {
                             alert('حدث خطأ في الاتصال');
+                        }
+                    }
+
+                    async function configureAutomodRule(ruleKey, ruleTitle) {
+                        const exemptUsersSec = document.querySelector('input[name="automod_exempt_users"]');
+                        if (ruleKey === 'anti_mass_mention') {
+                            const currentLimit = prompt('أدخل الحد الأقصى للمنشنات المسموح بها في الرسالة الواحدة (مثلاً: 5):', '5');
+                            if (currentLimit && !isNaN(currentLimit)) {
+                                await saveAutomodSetting('anti_mass_mention_limit', parseInt(currentLimit));
+                                alert('✅ تم تحديث حد المنشنات بنجاح!');
+                            }
+                        } else if (ruleKey === 'anti_long_messages') {
+                            const currentLimit = prompt('أدخل الحد الأقصى لطول الرسالة بالأحرف (مثلاً: 1000):', '1000');
+                            if (currentLimit && !isNaN(currentLimit)) {
+                                await saveAutomodSetting('max_message_length', parseInt(currentLimit));
+                                alert('✅ تم تحديث حد طول الرسائل بنجاح!');
+                            }
+                        } else if (ruleKey === 'bad_words_enabled') {
+                            const sec = document.getElementById('sec_strict_words');
+                            if (sec) sec.scrollIntoView({ behavior: 'smooth' });
+                        } else {
+                            if (exemptUsersSec) {
+                                exemptUsersSec.scrollIntoView({ behavior: 'smooth' });
+                                exemptUsersSec.focus();
+                                alert('⚙️ إعدادات ' + ruleTitle + ':\\nيمكنك استثناء أعضاء محددين عبر حقل "أعضاء معفيون من الفلتر" بالأسفل.');
+                            } else {
+                                alert('⚙️ ' + ruleTitle + ' تعمل بكفاءة وفق الإعدادات الحالية.');
+                            }
                         }
                     }
 
@@ -2497,10 +2525,10 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                             </div>
                         </div>
 
-                        <!-- 4. تحديد وعقوبة (0/12 مفعل) -->
+                        <!-- 4. تحديد وعقوبة -->
                         <div class="bg-[#12141f] border border-white/5 p-5 rounded-2xl space-y-6 shadow-xl">
                             <div class="flex items-center justify-between border-b border-white/5 pb-3">
-                                <span class="px-3 py-1 bg-amber-950/60 text-amber-300 border border-amber-800/40 rounded-xl text-xs font-bold font-mono">0/12 مفعل</span>
+                                <span id="badge_limit_punish" class="px-3 py-1 bg-amber-950/60 text-amber-300 border border-amber-800/40 rounded-xl text-xs font-bold font-mono">${[settings.anti_channel_delete, settings.anti_channel_create, settings.anti_channel_update, settings.anti_channel_permissions, settings.anti_role_delete, settings.anti_role_create, settings.anti_role_update, settings.anti_webhook_create, settings.anti_webhook_update, settings.anti_mass_ban, settings.anti_mass_kick, settings.anti_mass_mention].filter(Boolean).length}/12 مفعل</span>
                                 <div class="flex items-center gap-2">
                                     <div class="text-right">
                                         <h4 class="font-black text-white text-sm">تحديد وعقوبة</h4>
@@ -2513,7 +2541,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                             <!-- مجموعة 1: حماية الرومات / الشاتات -->
                             <div class="space-y-3">
                                 <div class="flex items-center justify-between text-xs text-gray-400 font-bold">
-                                    <span>0/4 مفعل</span>
+                                    <span id="badge_grp_channels">${[settings.anti_channel_delete, settings.anti_channel_create, settings.anti_channel_update, settings.anti_channel_permissions].filter(Boolean).length}/4 مفعل</span>
                                     <span class="text-white">حماية الرومات / الشاتات</span>
                                 </div>
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -2570,7 +2598,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                             <!-- مجموعة 2: حماية الرتب -->
                             <div class="space-y-3 pt-4 border-t border-white/5">
                                 <div class="flex items-center justify-between text-xs text-gray-400 font-bold">
-                                    <span>0/3 مفعل</span>
+                                    <span id="badge_grp_roles">${[settings.anti_role_delete, settings.anti_role_create, settings.anti_role_update].filter(Boolean).length}/3 مفعل</span>
                                     <span class="text-white">حماية الرتب</span>
                                 </div>
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -2615,7 +2643,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                             <!-- مجموعة 3: حماية الويب هوك -->
                             <div class="space-y-3 pt-4 border-t border-white/5">
                                 <div class="flex items-center justify-between text-xs text-gray-400 font-bold">
-                                    <span>0/2 مفعل</span>
+                                    <span id="badge_grp_webhooks">${[settings.anti_webhook_create, settings.anti_webhook_update].filter(Boolean).length}/2 مفعل</span>
                                     <span class="text-white">حماية الويب هوك</span>
                                 </div>
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -2648,7 +2676,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                             <!-- مجموعة 4: حماية الأعضاء -->
                             <div class="space-y-3 pt-4 border-t border-white/5">
                                 <div class="flex items-center justify-between text-xs text-gray-400 font-bold">
-                                    <span>0/2 مفعل</span>
+                                    <span id="badge_grp_members">${[settings.anti_mass_ban, settings.anti_mass_kick].filter(Boolean).length}/2 مفعل</span>
                                     <span class="text-white">حماية الأعضاء</span>
                                 </div>
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -2681,7 +2709,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                             <!-- مجموعة 5: حماية المحتوى -->
                             <div class="space-y-3 pt-4 border-t border-white/5">
                                 <div class="flex items-center justify-between text-xs text-gray-400 font-bold">
-                                    <span>0/1 مفعل</span>
+                                    <span id="badge_grp_content">${[settings.anti_mass_mention].filter(Boolean).length}/1 مفعل</span>
                                     <span class="text-white">حماية المحتوى</span>
                                 </div>
                                 <div class="grid grid-cols-1 gap-3">
@@ -2701,10 +2729,10 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
 
                         </div>
 
-                        <!-- 5. عقوبة فورية (0/9 مفعل) -->
+                        <!-- 5. عقوبة فورية -->
                         <div class="bg-[#12141f] border border-white/5 p-5 rounded-2xl space-y-4 shadow-xl">
                             <div class="flex items-center justify-between border-b border-white/5 pb-3">
-                                <span class="px-3 py-1 bg-rose-950/60 text-rose-300 border border-rose-800/40 rounded-xl text-xs font-bold font-mono">0/9 مفعل</span>
+                                <span id="badge_instant_punish" class="px-3 py-1 bg-rose-950/60 text-rose-300 border border-rose-800/40 rounded-xl text-xs font-bold font-mono">${[settings.anti_onboarding_danger, settings.anti_join_danger_roles, settings.anti_raid_fast, settings.anti_dangerous_perms, settings.anti_linked_roles, settings.anti_bot_add, settings.anti_prune, settings.anti_server_name_change, settings.anti_server_icon_change].filter(Boolean).length}/9 مفعل</span>
                                 <div class="flex items-center gap-2">
                                     <div class="text-right">
                                         <h4 class="font-black text-white text-sm">عقوبة فورية</h4>
@@ -2825,10 +2853,10 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                             </div>
                         </div>
 
-                        <!-- 6. كشف فقط (1/6 مفعل) -->
+                        <!-- 6. كشف فقط -->
                         <div class="bg-[#12141f] border border-white/5 p-5 rounded-2xl space-y-4 shadow-xl">
                             <div class="flex items-center justify-between border-b border-white/5 pb-3">
-                                <span class="px-3 py-1 bg-cyan-950/60 text-cyan-300 border border-cyan-800/40 rounded-xl text-xs font-bold font-mono">1/6 مفعل</span>
+                                <span id="badge_detect_only" class="px-3 py-1 bg-cyan-950/60 text-cyan-300 border border-cyan-800/40 rounded-xl text-xs font-bold font-mono">${[settings.anti_scam, settings.anti_invite_links, settings.anti_nsfw_content, settings.anti_ghost_ping, settings.anti_channel_move, (settings.anti_webhook_spam !== 0 ? 1 : 0)].filter(Boolean).length}/6 مفعل</span>
                                 <div class="flex items-center gap-2">
                                     <div class="text-right">
                                         <h4 class="font-black text-white text-sm">كشف فقط</h4>
@@ -2947,7 +2975,48 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                     </div>
 
                     <script>
+                    function updateProtectionBadges() {
+                        const countChecked = (names) => names.reduce((acc, n) => {
+                            const el = document.querySelector('input[name="' + n + '"]');
+                            return acc + (el && el.checked ? 1 : 0);
+                        }, 0);
+
+                        const chNames = ['anti_channel_delete', 'anti_channel_create', 'anti_channel_update', 'anti_channel_permissions'];
+                        const roleNames = ['anti_role_delete', 'anti_role_create', 'anti_role_update'];
+                        const whNames = ['anti_webhook_create', 'anti_webhook_update'];
+                        const memNames = ['anti_mass_ban', 'anti_mass_kick'];
+                        const cntNames = ['anti_mass_mention'];
+                        const instNames = ['anti_onboarding_danger', 'anti_join_danger_roles', 'anti_raid_fast', 'anti_dangerous_perms', 'anti_linked_roles', 'anti_bot_add', 'anti_prune', 'anti_server_name_change', 'anti_server_icon_change'];
+                        const detNames = ['anti_scam', 'anti_invite_links', 'anti_nsfw_content', 'anti_ghost_ping', 'anti_channel_move', 'anti_webhook_spam'];
+
+                        const bCh = document.getElementById('badge_grp_channels');
+                        if (bCh) bCh.innerText = countChecked(chNames) + '/4 مفعل';
+
+                        const bRoles = document.getElementById('badge_grp_roles');
+                        if (bRoles) bRoles.innerText = countChecked(roleNames) + '/3 مفعل';
+
+                        const bWh = document.getElementById('badge_grp_webhooks');
+                        if (bWh) bWh.innerText = countChecked(whNames) + '/2 مفعل';
+
+                        const bMem = document.getElementById('badge_grp_members');
+                        if (bMem) bMem.innerText = countChecked(memNames) + '/2 مفعل';
+
+                        const bCnt = document.getElementById('badge_grp_content');
+                        if (bCnt) bCnt.innerText = countChecked(cntNames) + '/1 مفعل';
+
+                        const allPunishNames = chNames.concat(roleNames, whNames, memNames, cntNames);
+                        const bPunish = document.getElementById('badge_limit_punish');
+                        if (bPunish) bPunish.innerText = countChecked(allPunishNames) + '/12 مفعل';
+
+                        const bInst = document.getElementById('badge_instant_punish');
+                        if (bInst) bInst.innerText = countChecked(instNames) + '/9 مفعل';
+
+                        const bDet = document.getElementById('badge_detect_only');
+                        if (bDet) bDet.innerText = countChecked(detNames) + '/6 مفعل';
+                    }
+
                     async function saveProtectionSetting(key, value) {
+                        updateProtectionBadges();
                         try {
                             const res = await fetch('/api/guild/${guildId}/settings', {
                                 method: 'POST',
@@ -9430,6 +9499,7 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                 // ✅ دوال الحفظ العالمية (تعمل في جميع الأقسام)
                 const _dashGuildId = window.location.pathname.split('/')[2];
                 async function saveProtectionSetting(key, value) {
+                    if (typeof updateProtectionBadges === 'function') updateProtectionBadges();
                     try {
                         await fetch('/api/guild/' + _dashGuildId + '/settings', {
                             method: 'POST',
