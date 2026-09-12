@@ -86,6 +86,8 @@ module.exports = {
         const clear = this.getMention(client, 'clear');
         const lock = this.getMention(client, 'lock');
         const unlock = this.getMention(client, 'unlock');
+        const hide = this.getMention(client, 'hide');
+        const unhide = this.getMention(client, 'unhide');
 
         categoryEmbed.setTitle('🛡️ أوامر الإشراف والرقابة (Moderation)')
           .setDescription([
@@ -99,7 +101,9 @@ module.exports = {
             `• ${delwarn} - حذف تحذير معين أو مسح جميع تحذيرات العضو`,
             `• ${clear} - مسح عدد محدد من الرسائل من القناة (حتى 100 رسالة دفعة واحدة)`,
             `• ${lock} - قفل القناة الحالية ومنع الأعضاء من الكتابة فيها`,
-            `• ${unlock} - فتح القناة والسماح للأعضاء بالكتابة مجدداً`
+            `• ${unlock} - فتح القناة والسماح للأعضاء بالكتابة مجدداً`,
+            `• ${hide} - إخفاء القناة الحالية عن الأعضاء العاديين`,
+            `• ${unhide} - إظهار القناة الحالية وإلغاء إخفائها عن الأعضاء`
           ].join('\n\n'));
       } else if (value === 'eco') {
         const star = this.getMention(client, 'star');

@@ -8728,25 +8728,7 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                         } catch(e) {}
                         updateEmbedPreview();
 
-                        // ربط مستمعات الأحداث بـ capture phase لضمان الأولوية على أي listener آخر
-                        const sendBtn = document.getElementById('btnSendEmbed');
-                        if (sendBtn) {
-                            sendBtn.addEventListener('click', function(e) {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                e.stopImmediatePropagation();
-                                sendEmbedDirect();
-                            }, true); // capture phase يضمن التنفيذ قبل أي bubble listener
-                        }
-                        const clearBtn = document.getElementById('btnClearEmbed');
-                        if (clearBtn) {
-                            clearBtn.addEventListener('click', function(e) {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                e.stopImmediatePropagation();
-                                clearEmbedFields();
-                            }, true); // capture phase
-                        }
+                        // الأزرار تستخدم onclick مباشر على window.sendEmbedDirect / window.clearEmbedFields
                     }
 
                     if (document.readyState === 'loading') {
@@ -8754,6 +8736,7 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                     } else {
                         initEmbedEditor();
                     }
+
 
 
                     async function uploadEmbedImageFile(input, targetId) {
@@ -8917,15 +8900,21 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                                 </div>
                             </div>
 
-                            <!-- ✅ Embed Action Bar — خارج الـ form تماماً لضمان عمل الأزرار -->
+                            <!-- ✅ Embed Action Bar — خارج الـ form تماماً -->
                             ${section === 'embed' ? `
                             <div id="embedActionBar" class="flex items-center justify-between gap-3 flex-wrap mb-6 pb-6 border-b border-white/5" dir="rtl">
                                 <div class="flex items-center gap-3">
-                                    <button type="button" id="btnSendEmbed" onclick="event.preventDefault();event.stopPropagation();if(typeof sendEmbedDirect==='function')sendEmbedDirect();return false;" class="px-7 py-3 bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 hover:from-purple-500 hover:via-indigo-500 hover:to-purple-600 text-white rounded-2xl text-xs font-black transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-purple-900/40 border border-purple-400/30 flex items-center gap-2 cursor-pointer">
+                                    <button type="button" id="btnSendEmbed"
+                                        onclick="event.preventDefault();event.stopPropagation();window.sendEmbedDirect&&window.sendEmbedDirect();return false;"
+                                        style="cursor:pointer;pointer-events:auto;position:relative;z-index:9999;"
+                                        class="px-7 py-3 bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 hover:from-purple-500 hover:via-indigo-500 hover:to-purple-600 text-white rounded-2xl text-xs font-black transition-all shadow-lg shadow-purple-900/40 border border-purple-400/30 flex items-center gap-2">
                                         <span class="text-base">🚀</span>
                                         <span>إرسال للقناة</span>
                                     </button>
-                                    <button type="button" id="btnClearEmbed" onclick="event.preventDefault();event.stopPropagation();if(typeof clearEmbedFields==='function')clearEmbedFields();return false;" class="px-5 py-3 bg-rose-950/40 hover:bg-rose-900/60 border border-rose-700/40 hover:border-rose-600/60 text-rose-300 hover:text-rose-200 rounded-2xl text-xs font-bold transition-all transform hover:scale-[1.02] active:scale-[0.98] flex items-center gap-2 cursor-pointer">
+                                    <button type="button" id="btnClearEmbed"
+                                        onclick="event.preventDefault();event.stopPropagation();window.clearEmbedFields&&window.clearEmbedFields();return false;"
+                                        style="cursor:pointer;pointer-events:auto;position:relative;z-index:9999;"
+                                        class="px-5 py-3 bg-rose-950/40 hover:bg-rose-900/60 border border-rose-700/40 text-rose-300 rounded-2xl text-xs font-bold transition-all flex items-center gap-2">
                                         <span class="text-sm">🗑️</span>
                                         <span>مسح الكل</span>
                                     </button>
