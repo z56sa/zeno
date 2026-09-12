@@ -8470,6 +8470,7 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
 
                     function renderFieldsEditor() {
                         const c = document.getElementById('fieldsContainer');
+                        if (!c) return;
                         if (embedFields.length === 0) {
                             c.innerHTML = '<p class="text-[11px] text-gray-500 text-center py-2">لا توجد حقول إضافية حالياً</p>';
                             return;
@@ -8693,7 +8694,7 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                     function initEmbedEditor() {
                         renderFieldsEditor();
                         try {
-                            const saved = localStorage.getItem('zeno_embed_draft_' + '${guildId}');
+                            const saved = localStorage.getItem('zeno_embed_draft_${guildId}');
                             if (saved) {
                                 const d = JSON.parse(saved);
                                 const setVal = (id, val) => { const el = document.getElementById(id); if (el && val !== undefined) el.value = val; };
@@ -8795,6 +8796,23 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
 
                         updateEmbedPreview();
                     }
+
+                    // ضمان توفر جميع الدوال في النطاق العام (window) لتعمل أزرار onclick دون مشاكل
+                    window.selectColor = selectColor;
+                    window.onColorPickerChange = onColorPickerChange;
+                    window.setCustomHex = setCustomHex;
+                    window.addEmbedField = addEmbedField;
+                    window.removeEmbedField = removeEmbedField;
+                    window.updateFieldData = updateFieldData;
+                    window.renderFieldsEditor = renderFieldsEditor;
+                    window.updateEmbedPreview = updateEmbedPreview;
+                    window.clearEmbedFields = clearEmbedFields;
+                    window.saveEmbedDraft = saveEmbedDraft;
+                    window.getEmbedPayload = getEmbedPayload;
+                    window.sendEmbedDirect = sendEmbedDirect;
+                    window.uploadEmbedImageFile = uploadEmbedImageFile;
+                    window.clearEmbedImageField = clearEmbedImageField;
+                    window.initEmbedEditor = initEmbedEditor;
                 `;
             } else {
                 formFieldsHtml = `
