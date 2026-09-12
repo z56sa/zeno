@@ -8175,296 +8175,314 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
             } else if (section === 'embed') {
                 formFieldsHtml = `
                     <div class="space-y-6 text-right" dir="rtl">
+                        <!-- Top Toolbar & Status -->
+                        <div class="bg-gradient-to-r from-[#12141f] via-[#161828] to-[#12141f] border border-purple-500/30 p-4 sm:p-5 rounded-3xl shadow-xl flex flex-wrap items-center justify-between gap-4">
+                            <div class="flex items-center gap-2.5 flex-wrap">
+                                <button type="button" id="btnSendEmbed"
+                                    class="px-6 py-3 bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 hover:from-purple-500 hover:to-indigo-500 text-white font-black text-xs rounded-2xl shadow-lg shadow-purple-950/60 border border-purple-400/40 flex items-center gap-2 cursor-pointer transition active:scale-95">
+                                    <span class="text-base">🚀</span>
+                                    <span>إرسال للقناة الآن</span>
+                                </button>
+                                <button type="button" id="btnSaveEmbedDraft"
+                                    class="px-4 py-3 bg-[#0b0d14] hover:bg-white/5 text-gray-300 hover:text-white font-bold text-xs rounded-2xl border border-white/10 flex items-center gap-1.5 cursor-pointer transition active:scale-95">
+                                    <span>💾</span>
+                                    <span>حفظ مسودة</span>
+                                </button>
+                                <button type="button" id="btnClearEmbed"
+                                    class="px-4 py-3 bg-rose-950/30 hover:bg-rose-900/50 text-rose-300 font-bold text-xs rounded-2xl border border-rose-800/40 flex items-center gap-1.5 cursor-pointer transition active:scale-95">
+                                    <span>🗑️</span>
+                                    <span>مسح الكل</span>
+                                </button>
+                            </div>
 
-                        <!-- Mode tabs -->
-                        <div class="flex items-center justify-end gap-2 bg-[#12141f] p-1.5 rounded-2xl border border-white/5 w-fit ml-auto">
-                            <button type="button" id="tabBtnEditor" onclick="switchEmbedTab('editor')" class="px-4 py-1.5 bg-purple-600 text-white font-bold text-xs rounded-xl shadow cursor-pointer transition">محرر</button>
-                            <button type="button" id="tabBtnDocs" onclick="switchEmbedTab('docs')" class="px-4 py-1.5 text-gray-400 hover:text-white font-bold text-xs rounded-xl transition cursor-pointer">مستند ومساعدة</button>
-                            <button type="button" id="tabBtnPreview" onclick="switchEmbedTab('preview')" class="px-4 py-1.5 text-gray-400 hover:text-white font-bold text-xs rounded-xl transition cursor-pointer">معاينة</button>
-                        </div>
-
-                        <!-- Target Channel -->
-                        <div class="bg-[#12141f] border border-white/5 p-5 rounded-2xl space-y-2">
-                            <label class="block text-xs font-bold text-gray-300">أرسل إلى القناة <span class="text-purple-400">*</span></label>
-                            ${renderChannelSelect('embedChannel', '')}
-                        </div>
-
-                        <!-- Embed Color Palette -->
-                        <div class="bg-[#12141f] border border-white/5 p-5 rounded-2xl space-y-3">
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center gap-2">
-                                    <input type="text" id="embHexInput" value="#9333ea" oninput="setCustomHex(this.value)" class="w-24 bg-[#0b0d14] border border-white/10 rounded-xl px-3 py-1.5 text-xs text-white text-center font-mono focus:border-purple-500 outline-none uppercase">
-                                    <input type="color" id="embColor" value="#9333ea" oninput="onColorPickerChange(this.value)" class="w-9 h-9 rounded-xl border border-white/10 bg-[#0b0d14] cursor-pointer p-0.5">
+                            <div class="flex items-center gap-3">
+                                <div class="text-right">
+                                    <h3 class="font-black text-white text-base sm:text-lg flex items-center gap-2 justify-end">
+                                        <span>صانع رسائل الإيمبد المتطور</span>
+                                        <span class="text-purple-400">✨</span>
+                                    </h3>
+                                    <p class="text-[11px] text-gray-400">صمم رسائل إيمبد غنية مع معاينة ديسكورد فورية لحظة بلحظة</p>
                                 </div>
-                                <div class="flex items-center gap-2">
-                                    <span class="text-xs font-bold text-white">لون الإيمبد</span>
-                                    <span class="text-purple-400 text-sm">🎨</span>
+                                <div class="w-11 h-11 rounded-2xl bg-purple-600/20 border border-purple-500/30 text-purple-300 flex items-center justify-center text-xl shadow-inner">
+                                    📜
                                 </div>
-                            </div>
-
-                            <!-- Color Swatches -->
-                            <div class="flex items-center justify-end gap-2 flex-wrap pt-2 border-t border-white/5">
-                                <button type="button" onclick="selectColor('#10b981')" title="#10b981" class="w-7 h-7 rounded-full bg-[#10b981] hover:scale-110 transition border border-white/20 shadow cursor-pointer"></button>
-                                <button type="button" onclick="selectColor('#06b6d4')" title="#06b6d4" class="w-7 h-7 rounded-full bg-[#06b6d4] hover:scale-110 transition border border-white/20 shadow cursor-pointer"></button>
-                                <button type="button" onclick="selectColor('#3b82f6')" title="#3b82f6" class="w-7 h-7 rounded-full bg-[#3b82f6] hover:scale-110 transition border border-white/20 shadow cursor-pointer"></button>
-                                <button type="button" onclick="selectColor('#8b5cf6')" title="#8b5cf6" class="w-7 h-7 rounded-full bg-[#8b5cf6] hover:scale-110 transition border border-white/20 shadow cursor-pointer"></button>
-                                <button type="button" onclick="selectColor('#9333ea')" title="#9333ea" class="w-7 h-7 rounded-full bg-[#9333ea] hover:scale-110 transition border-2 border-white shadow-lg ring-2 ring-purple-500/50 cursor-pointer"></button>
-                                <button type="button" onclick="selectColor('#f97316')" title="#f97316" class="w-7 h-7 rounded-full bg-[#f97316] hover:scale-110 transition border border-white/20 shadow cursor-pointer"></button>
-                                <button type="button" onclick="selectColor('#ef4444')" title="#ef4444" class="w-7 h-7 rounded-full bg-[#ef4444] hover:scale-110 transition border border-white/20 shadow cursor-pointer"></button>
-                                <button type="button" onclick="selectColor('#ec4899')" title="#ec4899" class="w-7 h-7 rounded-full bg-[#ec4899] hover:scale-110 transition border border-white/20 shadow cursor-pointer"></button>
-                                <button type="button" onclick="selectColor('#eab308')" title="#eab308" class="w-7 h-7 rounded-full bg-[#eab308] hover:scale-110 transition border border-white/20 shadow cursor-pointer"></button>
-                                <button type="button" onclick="selectColor('#14b8a6')" title="#14b8a6" class="w-7 h-7 rounded-full bg-[#14b8a6] hover:scale-110 transition border border-white/20 shadow cursor-pointer"></button>
-                                <button type="button" onclick="selectColor('#5865F2')" title="#5865F2" class="w-7 h-7 rounded-full bg-[#5865F2] hover:scale-110 transition border border-white/20 shadow cursor-pointer"></button>
                             </div>
                         </div>
 
-                        <!-- Main Visual Editor Form -->
-                        <div id="embedVisualEditorSection" class="bg-[#12141f] border border-white/5 p-6 rounded-3xl space-y-4">
-                            <div class="flex items-center justify-between pb-3 border-b border-white/5">
-                                <span class="text-[11px] text-gray-500 font-mono">Embed Builder</span>
-                                <h4 class="text-sm font-black text-white flex items-center gap-2"><span>محتوى الإيمبد</span><span>📝</span></h4>
-                            </div>
+                        <!-- 2-Column Responsive Layout: Left Editor, Right Sticky Preview -->
+                        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                            
+                            <!-- Left: Editor Controls (7 Cols on desktop) -->
+                            <div class="lg:col-span-7 space-y-5">
 
-                            <!-- Author row (Clean & Simple, no icon upload) -->
-                            <div>
-                                <input type="hidden" id="embAuthorIcon" value="">
-                                <label class="block text-xs font-bold text-gray-300 mb-1">اسم الكاتب أو الجهة (Author Name)</label>
-                                <input type="text" id="embAuthor" placeholder="مثال: إدارة السيرفر / ZENO Announcements" oninput="updateEmbedPreview()" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right">
-                                <p class="text-[10px] text-gray-500 text-right mt-1">يظهر كعنوان فرعي في أعلى الرسالة</p>
-                            </div>
+                                <!-- Target Channel Box -->
+                                <div class="bg-[#12141f] border border-white/5 p-5 rounded-3xl space-y-2 shadow-lg">
+                                    <div class="flex items-center justify-between mb-1">
+                                        <span class="text-[10px] text-purple-400 font-mono bg-purple-950/40 px-2.5 py-0.5 rounded-full border border-purple-800/40">مطلوب</span>
+                                        <label class="block text-xs font-black text-white flex items-center gap-1.5">
+                                            <span>أرسل إلى القناة</span>
+                                            <span class="text-purple-400">#</span>
+                                        </label>
+                                    </div>
+                                    ${renderChannelSelect('embedChannel', '')}
+                                    <p class="text-[10px] text-gray-500">اختر الروم النصي الذي سيقوم البوت بإرسال الإيمبد داخله فوراً</p>
+                                </div>
 
-
-                            <!-- Title only -->
-                            <input type="hidden" id="embTitleUrl" value="">
-                            <div>
-                                <label class="block text-[11px] font-bold text-gray-300 mb-1">عنوان الإيمبد الرئيسي (Title)</label>
-                                <input type="text" id="embTitle" placeholder="عنوان الرسالة الرئيسي..." oninput="updateEmbedPreview()" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-3 py-2.5 text-xs text-white outline-none text-right font-bold">
-                                <p class="text-[10px] text-gray-500 text-right mt-1">العنوان البارز للرسالة بخط عريض</p>
-                            </div>
-
-                            <!-- Description -->
-                            <div>
-                                <label class="block text-[11px] font-bold text-gray-400 mb-1">الوصف والمحتوى (Description) <span class="text-purple-400">*</span></label>
-                                <textarea id="embDesc" rows="4" placeholder="اكتب محتوى الرسالة هنا... يدعم Markdown مثل **عريض** و *مائل*" oninput="updateEmbedPreview()" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-3 py-2.5 text-xs text-white outline-none text-right leading-relaxed"></textarea>
-                            </div>
-
-                            <!-- Image & Thumbnail - Pure Upload cards (No URL inputs) -->
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <!-- الصورة المصغرة (Thumbnail) -->
-                                <div class="bg-[#0b0d14] border border-white/5 rounded-2xl p-4 space-y-3">
+                                <!-- Color Palette Box -->
+                                <div class="bg-[#12141f] border border-white/5 p-5 rounded-3xl space-y-3 shadow-lg">
                                     <div class="flex items-center justify-between">
-                                        <button type="button" onclick="clearEmbedImageField('embThumbnail')" class="text-[11px] text-rose-400 hover:text-rose-300 font-bold transition flex items-center gap-1 cursor-pointer">
-                                            <span>🗑️</span><span>إزالة الصورة</span>
-                                        </button>
-                                        <label class="block text-xs font-bold text-gray-300">الصورة المصغرة (Thumbnail)</label>
-                                    </div>
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-16 h-16 rounded-xl border border-white/10 bg-[#12141f] overflow-hidden flex items-center justify-center shrink-0">
-                                            <img id="prev_embThumbnail_box" src="" class="w-full h-full object-cover hidden">
-                                            <span id="ph_embThumbnail" class="text-xl text-gray-600">🖼️</span>
+                                        <div class="flex items-center gap-2">
+                                            <input type="text" id="embHexInput" value="#9333ea" class="w-24 bg-[#0b0d14] border border-white/10 rounded-xl px-3 py-1.5 text-xs text-white text-center font-mono focus:border-purple-500 outline-none uppercase">
+                                            <input type="color" id="embColor" value="#9333ea" class="w-9 h-9 rounded-xl border border-white/10 bg-[#0b0d14] cursor-pointer p-0.5">
                                         </div>
-                                        <div class="flex-1 space-y-1">
-                                            <input type="hidden" id="embThumbnail" value="">
-                                            <input type="file" id="file_embThumbnail" accept="image/*" class="hidden" onchange="uploadEmbedImageFile(this, 'embThumbnail')">
-                                            <button type="button" onclick="document.getElementById('file_embThumbnail').click()" class="w-full px-4 py-2 bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/30 text-purple-300 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer shadow-sm active:scale-[0.98]">
-                                                <span>📤</span><span id="btn_text_embThumbnail">رفع صورة مصغرة</span>
+                                        <div class="flex items-center gap-2">
+                                            <span class="text-xs font-black text-white">لون شريط الإيمبد</span>
+                                            <span class="text-purple-400 text-sm">🎨</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="flex items-center justify-end gap-2 flex-wrap pt-2 border-t border-white/5">
+                                        <button type="button" onclick="window.selectColor&&window.selectColor('#10b981')" title="Emerald" class="w-7 h-7 rounded-full bg-[#10b981] hover:scale-110 transition border border-white/20 shadow cursor-pointer"></button>
+                                        <button type="button" onclick="window.selectColor&&window.selectColor('#06b6d4')" title="Cyan" class="w-7 h-7 rounded-full bg-[#06b6d4] hover:scale-110 transition border border-white/20 shadow cursor-pointer"></button>
+                                        <button type="button" onclick="window.selectColor&&window.selectColor('#3b82f6')" title="Blue" class="w-7 h-7 rounded-full bg-[#3b82f6] hover:scale-110 transition border border-white/20 shadow cursor-pointer"></button>
+                                        <button type="button" onclick="window.selectColor&&window.selectColor('#8b5cf6')" title="Violet" class="w-7 h-7 rounded-full bg-[#8b5cf6] hover:scale-110 transition border border-white/20 shadow cursor-pointer"></button>
+                                        <button type="button" onclick="window.selectColor&&window.selectColor('#9333ea')" title="Purple" class="w-7 h-7 rounded-full bg-[#9333ea] hover:scale-110 transition border-2 border-white shadow-lg ring-2 ring-purple-500/50 cursor-pointer"></button>
+                                        <button type="button" onclick="window.selectColor&&window.selectColor('#f97316')" title="Orange" class="w-7 h-7 rounded-full bg-[#f97316] hover:scale-110 transition border border-white/20 shadow cursor-pointer"></button>
+                                        <button type="button" onclick="window.selectColor&&window.selectColor('#ef4444')" title="Red" class="w-7 h-7 rounded-full bg-[#ef4444] hover:scale-110 transition border border-white/20 shadow cursor-pointer"></button>
+                                        <button type="button" onclick="window.selectColor&&window.selectColor('#ec4899')" title="Pink" class="w-7 h-7 rounded-full bg-[#ec4899] hover:scale-110 transition border border-white/20 shadow cursor-pointer"></button>
+                                        <button type="button" onclick="window.selectColor&&window.selectColor('#eab308')" title="Yellow" class="w-7 h-7 rounded-full bg-[#eab308] hover:scale-110 transition border border-white/20 shadow cursor-pointer"></button>
+                                        <button type="button" onclick="window.selectColor&&window.selectColor('#2b2d31')" title="Dark" class="w-7 h-7 rounded-full bg-[#2b2d31] hover:scale-110 transition border border-white/20 shadow cursor-pointer"></button>
+                                    </div>
+                                </div>
+
+                                <!-- Text Content Box -->
+                                <div class="bg-[#12141f] border border-white/5 p-5 rounded-3xl space-y-4 shadow-lg">
+                                    <div class="flex items-center justify-between pb-3 border-b border-white/5">
+                                        <span class="text-[11px] text-gray-500 font-mono">Content</span>
+                                        <h4 class="text-xs font-black text-white flex items-center gap-1.5">
+                                            <span>محتوى الرسالة النصي</span>
+                                            <span>✍️</span>
+                                        </h4>
+                                    </div>
+
+                                    <!-- Author Name -->
+                                    <div>
+                                        <input type="hidden" id="embAuthorIcon" value="">
+                                        <label class="block text-xs font-bold text-gray-300 mb-1">اسم الكاتب أو الهيدر (Author)</label>
+                                        <input type="text" id="embAuthor" placeholder="مثال: إدارة السيرفر / ZENO Support" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right">
+                                        <p class="text-[10px] text-gray-500 mt-1">يظهر كعنوان صغير أعلى الإيمبد</p>
+                                    </div>
+
+                                    <!-- Main Title -->
+                                    <input type="hidden" id="embTitleUrl" value="">
+                                    <div>
+                                        <label class="block text-xs font-bold text-gray-300 mb-1">العنوان الرئيسي (Title)</label>
+                                        <input type="text" id="embTitle" placeholder="مثال: مرحباً بكم في مجتمعنا!" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right font-bold">
+                                        <p class="text-[10px] text-gray-500 mt-1">عنوان بارز وواضح بخط عريض</p>
+                                    </div>
+
+                                    <!-- Description -->
+                                    <div>
+                                        <div class="flex items-center justify-between mb-1">
+                                            <span class="text-[10px] text-gray-500 font-mono">Markdown Supported</span>
+                                            <label class="block text-xs font-bold text-gray-300">
+                                                الوصف والمحتوى الأساسي <span class="text-purple-400">*</span>
+                                            </label>
+                                        </div>
+                                        <textarea id="embDesc" rows="5" placeholder="اكتب نص الإيمبد هنا... يدعم ديسكورد ماركداون: **عريض**، *مائل*، __مسطر__، > اقتباس، وروابط [هنا](https://...)" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right leading-relaxed"></textarea>
+                                    </div>
+                                </div>
+
+                                <!-- Images (Thumbnail & Main Banner) -->
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <!-- Thumbnail -->
+                                    <div class="bg-[#12141f] border border-white/5 rounded-3xl p-4 space-y-3 shadow-lg">
+                                        <div class="flex items-center justify-between">
+                                            <button type="button" onclick="window.clearEmbedImageField&&window.clearEmbedImageField('embThumbnail')" class="text-[11px] text-rose-400 hover:text-rose-300 font-bold flex items-center gap-1 cursor-pointer">
+                                                <span>✕</span><span>حذف</span>
                                             </button>
-                                            <p class="text-[10px] text-gray-500 text-right">صورة صغيرة تظهر بأعلى يمين الإيمبد</p>
+                                            <span class="text-xs font-bold text-gray-300">الصورة المصغرة (Thumbnail)</span>
+                                        </div>
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-14 h-14 rounded-2xl border border-white/10 bg-[#0b0d14] overflow-hidden flex items-center justify-center shrink-0">
+                                                <img id="prev_embThumbnail_box" src="" class="w-full h-full object-cover hidden">
+                                                <span id="ph_embThumbnail" class="text-lg text-gray-600">🖼️</span>
+                                            </div>
+                                            <div class="flex-1 space-y-1">
+                                                <input type="hidden" id="embThumbnail" value="">
+                                                <input type="file" id="file_embThumbnail" accept="image/*" class="hidden">
+                                                <button type="button" onclick="document.getElementById('file_embThumbnail').click()" class="w-full px-3 py-2 bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/30 text-purple-300 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 cursor-pointer transition active:scale-95">
+                                                    <span>📤</span><span id="btn_text_embThumbnail">رفع صورة مصغرة</span>
+                                                </button>
+                                                <p class="text-[9px] text-gray-500">تظهر في الزاوية العلوية للإيمبد</p>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
 
-                                <!-- الصورة الكبيرة (Main Image) -->
-                                <div class="bg-[#0b0d14] border border-white/5 rounded-2xl p-4 space-y-3">
-                                    <div class="flex items-center justify-between">
-                                        <button type="button" onclick="clearEmbedImageField('embImage')" class="text-[11px] text-rose-400 hover:text-rose-300 font-bold transition flex items-center gap-1 cursor-pointer">
-                                            <span>🗑️</span><span>إزالة الصورة</span>
-                                        </button>
-                                        <label class="block text-xs font-bold text-gray-300">الصورة الرئيسية (Main Image)</label>
-                                    </div>
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-20 h-16 rounded-xl border border-white/10 bg-[#12141f] overflow-hidden flex items-center justify-center shrink-0">
-                                            <img id="prev_embImage_box" src="" class="w-full h-full object-cover hidden">
-                                            <span id="ph_embImage" class="text-xl text-gray-600">🖼️</span>
-                                        </div>
-                                        <div class="flex-1 space-y-1">
-                                            <input type="hidden" id="embImage" value="">
-                                            <input type="file" id="file_embImage" accept="image/*" class="hidden" onchange="uploadEmbedImageFile(this, 'embImage')">
-                                            <button type="button" onclick="document.getElementById('file_embImage').click()" class="w-full px-4 py-2 bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/30 text-purple-300 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer shadow-sm active:scale-[0.98]">
-                                                <span>📤</span><span id="btn_text_embImage">رفع صورة عريضة</span>
+                                    <!-- Main Banner -->
+                                    <div class="bg-[#12141f] border border-white/5 rounded-3xl p-4 space-y-3 shadow-lg">
+                                        <div class="flex items-center justify-between">
+                                            <button type="button" onclick="window.clearEmbedImageField&&window.clearEmbedImageField('embImage')" class="text-[11px] text-rose-400 hover:text-rose-300 font-bold flex items-center gap-1 cursor-pointer">
+                                                <span>✕</span><span>حذف</span>
                                             </button>
-                                            <p class="text-[10px] text-gray-500 text-right">بانر عريض يظهر أسفل محتوى الرسالة</p>
+                                            <span class="text-xs font-bold text-gray-300">الصورة الكبيرة (Main Image)</span>
+                                        </div>
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-14 h-14 rounded-2xl border border-white/10 bg-[#0b0d14] overflow-hidden flex items-center justify-center shrink-0">
+                                                <img id="prev_embImage_box" src="" class="w-full h-full object-cover hidden">
+                                                <span id="ph_embImage" class="text-lg text-gray-600">🖼️</span>
+                                            </div>
+                                            <div class="flex-1 space-y-1">
+                                                <input type="hidden" id="embImage" value="">
+                                                <input type="file" id="file_embImage" accept="image/*" class="hidden">
+                                                <button type="button" onclick="document.getElementById('file_embImage').click()" class="w-full px-3 py-2 bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/30 text-purple-300 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 cursor-pointer transition active:scale-95">
+                                                    <span>📤</span><span id="btn_text_embImage">رفع بانر عريض</span>
+                                                </button>
+                                                <p class="text-[9px] text-gray-500">تظهر كصورة عريضة أسفل الإيمبد</p>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
 
-                            <!-- Custom Fields list -->
-                            <div class="space-y-3 pt-2">
-                                <div class="flex items-center justify-between">
-                                    <button type="button" onclick="addEmbedField()" class="px-4 py-2 bg-purple-600/20 hover:bg-purple-600/40 border border-purple-500/40 text-purple-300 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-sm active:scale-95">
-                                        <span class="text-base leading-none">+</span>
-                                        <span>إضافة حقل (Field)</span>
-                                    </button>
-                                    <span class="text-xs font-bold text-gray-300">الحقول الإضافية (Fields)</span>
-                                </div>
-                                <div id="fieldsContainer" class="space-y-2.5"></div>
-                            </div>
-                        </div>
-
-                        <!-- Mode Docs / Help Box (Toggleable via Docs tab) -->
-                        <div id="embedDocsSection" class="hidden bg-[#12141f] border border-blue-500/20 p-6 rounded-3xl space-y-3 text-right">
-                            <div class="flex items-center justify-between pb-3 border-b border-white/5">
-                                <span class="text-[11px] text-blue-400 font-mono">Documentation</span>
-                                <h4 class="text-sm font-black text-white flex items-center gap-2"><span>دليل استخدام صانع الإيمبد</span><span>📖</span></h4>
-                            </div>
-                            <div class="space-y-2 text-xs text-gray-300 leading-relaxed">
-                                <p class="text-white font-bold">✨ تنسيقات النص المدعومة (Markdown):</p>
-                                <ul class="list-disc list-inside space-y-1 text-gray-400 pr-2">
-                                    <li><code class="bg-[#0b0d14] px-1.5 py-0.5 rounded text-purple-300">**نص عريض**</code> → <b>نص عريض</b></li>
-                                    <li><code class="bg-[#0b0d14] px-1.5 py-0.5 rounded text-purple-300">*نص مائل*</code> → <i>نص مائل</i></li>
-                                    <li><code class="bg-[#0b0d14] px-1.5 py-0.5 rounded text-purple-300">~~مشطوب~~</code> → <s>مشطوب</s></li>
-                                    <li><code class="bg-[#0b0d14] px-1.5 py-0.5 rounded text-purple-300">__تحته خط__</code> → <u>تحته خط</u></li>
-                                    <li><code class="bg-[#0b0d14] px-1.5 py-0.5 rounded text-purple-300">[رابط نصي](https://example.com)</code> → رابط مضمن قابل للنقر</li>
-                                </ul>
-                                <p class="text-gray-400 pt-2">💡 يمكنك الضغط على زر <b class="text-purple-300">حفظ مسودة</b> للاحتفاظ بالبيانات في متصفحك والرجوع إليها لاحقاً.</p>
-                            </div>
-                        </div>
-
-                        <!-- Footer & Timestamp -->
-                        <div class="bg-[#12141f] border border-white/5 p-6 rounded-3xl space-y-4">
-                            <div class="flex items-center justify-between pb-3 border-b border-white/5">
-                                <div class="flex items-center gap-3">
-                                    <label class="relative inline-flex items-center cursor-pointer">
-                                        <input type="checkbox" id="embTimestampToggle" checked onchange="updateEmbedPreview()" class="sr-only peer">
-                                        <div class="w-11 h-6 bg-gray-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600 cursor-pointer"></div>
-                                    </label>
-                                    <span class="text-xs font-bold text-gray-300">إظهار الوقت (Timestamp)</span>
-                                </div>
-                                <h4 class="text-sm font-black text-white flex items-center gap-2"><span>التذييل والوقت (Footer)</span><span>⏰</span></h4>
-                            </div>
-
-                            <div>
-                                <input type="hidden" id="embFooterIcon" value="">
-                                <label class="block text-xs font-bold text-gray-300 mb-1">نص التذييل (Footer Text)</label>
-                                <input type="text" id="embFooter" placeholder="مثال: ZENO Bot • إعلان رسمي" oninput="updateEmbedPreview()" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right">
-                            </div>
-                        </div>
-
-
-                        <!-- Live Discord Preview Box (Real Discord Appearance) -->
-                        <div id="livePreviewCard" class="bg-[#12141f] border border-purple-500/20 p-6 rounded-3xl space-y-4 shadow-2xl">
-                            <div class="flex items-center justify-between pb-3 border-b border-white/5">
-                                <span class="text-[10px] bg-emerald-600/20 text-emerald-300 px-2.5 py-1 rounded-full font-bold border border-emerald-500/30 flex items-center gap-1.5">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                                    <span>معاينة حية ومباشرة ديسكورد</span>
-                                </span>
-                                <h4 class="text-sm font-black text-white flex items-center gap-2"><span>شكل الرسالة في ديسكورد</span><span>👁️</span></h4>
-                            </div>
-
-                            <!-- Discord Message Bubble simulation -->
-                            <div class="bg-[#313338] p-4 rounded-2xl max-w-2xl ml-auto text-right font-sans shadow-xl border border-black/30 space-y-2">
-                                <!-- Bot Header in Discord -->
-                                <div class="flex items-center justify-end gap-3 pb-1">
-                                    <div class="flex items-center gap-1.5">
-                                        <span class="text-[10px] text-gray-400 font-medium font-sans">اليوم في 12:00 م</span>
-                                        <span class="bg-[#5865f2] text-white text-[9px] font-extrabold px-1 py-0.2 rounded font-sans leading-tight">BOT</span>
-                                        <span class="font-bold text-white text-xs hover:underline cursor-pointer">ZENO</span>
+                                <!-- Custom Fields Container -->
+                                <div class="bg-[#12141f] border border-white/5 p-5 rounded-3xl space-y-3 shadow-lg">
+                                    <div class="flex items-center justify-between pb-2 border-b border-white/5">
+                                        <button type="button" onclick="window.addEmbedField&&window.addEmbedField()" class="px-3.5 py-1.5 bg-purple-600/20 hover:bg-purple-600/40 border border-purple-500/40 text-purple-300 rounded-xl text-xs font-bold transition flex items-center gap-1 cursor-pointer active:scale-95">
+                                            <span>+</span><span>إضافة حقل جديد</span>
+                                        </button>
+                                        <h4 class="text-xs font-black text-white flex items-center gap-1.5">
+                                            <span>حقول إضافية مخصصة (Fields)</span>
+                                            <span>📑</span>
+                                        </h4>
                                     </div>
-                                    <img src="${botAvatarUrl}" class="w-9 h-9 rounded-full object-cover shadow">
+                                    <div id="fieldsContainer" class="space-y-2.5"></div>
                                 </div>
 
-                                <!-- Embed Container -->
-                                <div class="bg-[#2b2d31] p-4 rounded-lg border-r-[4px] shadow-sm transition-all text-right" id="previewEmbedBox" style="border-right-color: #9333ea;">
-                                    <div class="flex items-start gap-4">
-                                        <!-- Right: Thumbnail (appears top-right of embed) -->
-                                        <div id="prevThumbnailWrap" class="hidden shrink-0 order-first">
-                                            <img id="prevThumbnailImg" class="w-20 h-20 rounded-xl object-cover shadow border border-white/10" src="" alt="">
+                                <!-- Footer & Timestamp Box -->
+                                <div class="bg-[#12141f] border border-white/5 p-5 rounded-3xl space-y-3 shadow-lg">
+                                    <div class="flex items-center justify-between pb-2 border-b border-white/5">
+                                        <div class="flex items-center gap-2">
+                                            <label class="relative inline-flex items-center cursor-pointer">
+                                                <input type="checkbox" id="embTimestampToggle" checked class="sr-only peer">
+                                                <div class="w-10 h-5 bg-gray-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-purple-600 cursor-pointer"></div>
+                                            </label>
+                                            <span class="text-[11px] text-gray-400 font-bold">إظهار الوقت</span>
+                                        </div>
+                                        <h4 class="text-xs font-black text-white flex items-center gap-1.5">
+                                            <span>التذييل والوقت (Footer)</span>
+                                            <span>⏰</span>
+                                        </h4>
+                                    </div>
+
+                                    <div>
+                                        <input type="hidden" id="embFooterIcon" value="">
+                                        <label class="block text-xs font-bold text-gray-300 mb-1">نص التذييل (Footer Text)</label>
+                                        <input type="text" id="embFooter" placeholder="مثال: ZENO Bot • نظام الدعم التلقائي" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right">
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <!-- Right: Sticky Discord Live Preview (5 Cols on desktop) -->
+                            <div class="lg:col-span-5 lg:sticky lg:top-24 space-y-4">
+                                <div class="bg-[#12141f] border border-purple-500/30 p-5 rounded-3xl shadow-2xl space-y-3">
+                                    <div class="flex items-center justify-between pb-3 border-b border-white/5">
+                                        <span class="text-[10px] bg-emerald-500/20 text-emerald-300 px-2.5 py-1 rounded-full font-bold border border-emerald-500/30 flex items-center gap-1.5">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                                            <span>معاينة حية ديسكورد</span>
+                                        </span>
+                                        <h4 class="text-xs font-black text-white flex items-center gap-1.5">
+                                            <span>شكل الرسالة النهائي</span>
+                                            <span>👁️</span>
+                                        </h4>
+                                    </div>
+
+                                    <!-- Discord Bubble Simulation -->
+                                    <div class="bg-[#313338] p-4 rounded-2xl text-right font-sans shadow-2xl border border-black/40 space-y-2 select-none">
+                                        <!-- Header: Avatar + Bot tag -->
+                                        <div class="flex items-center justify-end gap-2.5 pb-1">
+                                            <div class="flex items-center gap-1.5">
+                                                <span class="text-[10px] text-gray-400 font-medium">اليوم في 12:00 م</span>
+                                                <span class="bg-[#5865f2] text-white text-[9px] font-extrabold px-1 py-0.5 rounded leading-none">BOT</span>
+                                                <span class="font-bold text-white text-xs">ZENO</span>
+                                            </div>
+                                            <img src="${botAvatarUrl}" class="w-8 h-8 rounded-full object-cover shadow">
                                         </div>
 
-                                        <!-- Left: Embed Body -->
-                                        <div class="flex-1 min-w-0 space-y-2">
-                                            <!-- Author Row -->
-                                            <div id="prevAuthorRow" class="hidden items-center justify-end gap-2">
-                                                <span id="prevAuthorText" class="text-xs font-bold text-white leading-none"></span>
-                                                <img id="prevAuthorImg" class="w-5 h-5 rounded-full object-cover hidden shadow" src="" alt="">
+                                        <!-- Embed Card -->
+                                        <div class="bg-[#2b2d31] p-3.5 rounded-lg border-r-[4px] shadow transition-all text-right" id="previewEmbedBox" style="border-right-color: #9333ea;">
+                                            <div class="flex items-start gap-3">
+                                                <!-- Thumbnail -->
+                                                <div id="prevThumbnailWrap" class="hidden shrink-0 order-first">
+                                                    <img id="prevThumbnailImg" class="w-16 h-16 rounded-lg object-cover shadow border border-white/10" src="" alt="">
+                                                </div>
+
+                                                <!-- Body -->
+                                                <div class="flex-1 min-w-0 space-y-1.5">
+                                                    <!-- Author -->
+                                                    <div id="prevAuthorRow" class="hidden items-center justify-end gap-1.5">
+                                                        <span id="prevAuthorText" class="text-[11px] font-bold text-gray-200"></span>
+                                                    </div>
+
+                                                    <!-- Title -->
+                                                    <div id="prevTitle" class="text-sm font-bold text-white leading-snug break-words"></div>
+
+                                                    <!-- Desc -->
+                                                    <div id="prevDesc" class="text-xs text-gray-300 whitespace-pre-wrap leading-relaxed break-words">محتوى الإيمبد سيظهر هنا مباشرة...</div>
+
+                                                    <!-- Fields -->
+                                                    <div id="prevFieldsGrid" class="grid grid-cols-2 gap-2 pt-1 hidden"></div>
+                                                </div>
                                             </div>
 
-                                            <!-- Title -->
-                                            <div id="prevTitle" class="text-sm font-bold text-white hover:underline cursor-pointer leading-snug"></div>
+                                            <!-- Main Image -->
+                                            <div id="prevImageRow" class="mt-2.5 hidden">
+                                                <img id="prevMainImg" class="rounded-lg max-h-60 w-full object-cover shadow" src="" alt="">
+                                            </div>
 
-                                            <!-- Description -->
-                                            <div id="prevDesc" class="text-xs text-gray-300 whitespace-pre-wrap leading-relaxed"></div>
-
-                                            <!-- Fields -->
-                                            <div id="prevFieldsGrid" class="grid grid-cols-2 gap-2 pt-1 hidden"></div>
+                                            <!-- Footer -->
+                                            <div id="prevFooterRow" class="mt-2.5 pt-2 flex items-center justify-end gap-1.5 text-[10px] text-gray-400">
+                                                <span id="prevTimestamp" class="text-gray-400"></span>
+                                                <span id="prevFooterDot" class="hidden font-bold">•</span>
+                                                <span id="prevFooterText"></span>
+                                            </div>
                                         </div>
-                                    </div>
-
-
-                                    <!-- Main Image -->
-                                    <div id="prevImageRow" class="mt-3 hidden">
-                                        <img id="prevMainImg" class="rounded-lg max-h-72 w-full object-cover shadow" src="" alt="">
-                                    </div>
-
-                                    <!-- Footer Row -->
-                                    <div id="prevFooterRow" class="mt-3 pt-2 flex items-center justify-end gap-2 text-[10px] text-gray-400">
-                                        <span id="prevTimestamp" class="text-gray-400 font-sans"></span>
-                                        <span id="prevFooterDot" class="hidden font-bold">•</span>
-                                        <span id="prevFooterText"></span>
-                                        <img id="prevFooterImg" class="w-4 h-4 rounded-full object-cover hidden" src="" alt="">
                                     </div>
                                 </div>
                             </div>
+
                         </div>
                     </div>
                 `;
 
-            // Embed page script (injected globally, not inside the form)
+            // Embed page script
             embedScriptHtml = `
                     let embedFields = [];
 
-                    function switchEmbedTab(tab) {
-                        const editorSec = document.getElementById('embedVisualEditorSection');
-                        const docsSec = document.getElementById('embedDocsSection');
-                        const prevCard = document.getElementById('livePreviewCard');
-
-                        const btnEditor = document.getElementById('tabBtnEditor');
-                        const btnDocs = document.getElementById('tabBtnDocs');
-                        const btnPreview = document.getElementById('tabBtnPreview');
-
-                        const activeClass = 'px-4 py-1.5 bg-purple-600 text-white font-bold text-xs rounded-xl shadow cursor-pointer transition';
-                        const inactiveClass = 'px-4 py-1.5 text-gray-400 hover:text-white font-bold text-xs rounded-xl transition cursor-pointer';
-
-                        if (tab === 'editor') {
-                            if (editorSec) editorSec.classList.remove('hidden');
-                            if (docsSec) docsSec.classList.add('hidden');
-                            if (btnEditor) btnEditor.className = activeClass;
-                            if (btnDocs) btnDocs.className = inactiveClass;
-                            if (btnPreview) btnPreview.className = inactiveClass;
-                            editorSec?.scrollIntoView({ behavior: 'smooth' });
-                        } else if (tab === 'docs') {
-                            if (editorSec) editorSec.classList.add('hidden');
-                            if (docsSec) docsSec.classList.remove('hidden');
-                            if (btnEditor) btnEditor.className = inactiveClass;
-                            if (btnDocs) btnDocs.className = activeClass;
-                            if (btnPreview) btnPreview.className = inactiveClass;
-                            docsSec?.scrollIntoView({ behavior: 'smooth' });
-                        } else if (tab === 'preview') {
-                            if (editorSec) editorSec.classList.remove('hidden');
-                            if (docsSec) docsSec.classList.add('hidden');
-                            if (btnEditor) btnEditor.className = inactiveClass;
-                            if (btnDocs) btnDocs.className = inactiveClass;
-                            if (btnPreview) btnPreview.className = activeClass;
-                            prevCard?.scrollIntoView({ behavior: 'smooth' });
-                            setTimeout(() => { if (btnEditor) btnEditor.className = activeClass; if (btnPreview) btnPreview.className = inactiveClass; }, 1500);
+                    function showFixedToast(msg, isSuccess = true) {
+                        let toast = document.getElementById('embedFixedToast');
+                        if (!toast) {
+                            toast = document.createElement('div');
+                            toast.id = 'embedFixedToast';
+                            toast.style.cssText = 'position:fixed;bottom:28px;left:50%;transform:translateX(-50%);z-index:999999;padding:12px 24px;border-radius:16px;font-size:13px;font-weight:bold;display:flex;align-items:center;gap:10px;box-shadow:0 12px 40px rgba(0,0,0,0.6);transition:all 0.3s cubic-bezier(0.4, 0, 0.2, 1);min-width:280px;justify-content:center;text-align:center;direction:rtl;';
+                            document.body.appendChild(toast);
                         }
+                        toast.textContent = msg;
+                        toast.style.background = isSuccess ? 'rgba(16,185,129,0.95)' : 'rgba(239,68,68,0.95)';
+                        toast.style.color = '#ffffff';
+                        toast.style.border = isSuccess ? '1px solid #34d399' : '1px solid #f87171';
+                        toast.style.opacity = '1';
+                        toast.style.display = 'flex';
+                        clearTimeout(toast._t);
+                        toast._t = setTimeout(() => {
+                            toast.style.opacity = '0';
+                            setTimeout(() => { toast.style.display = 'none'; }, 300);
+                        }, 4000);
                     }
 
                     function selectColor(hex) {
                         const c = document.getElementById('embColor');
                         const h = document.getElementById('embHexInput');
-
                         if (c) c.value = hex;
                         if (h) h.value = hex.toUpperCase();
                         updateEmbedPreview();
@@ -8478,7 +8496,8 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
 
                     function setCustomHex(hex) {
                         if (/^#[0-9A-F]{6}$/i.test(hex)) {
-                            document.getElementById('embColor').value = hex;
+                            const c = document.getElementById('embColor');
+                            if (c) c.value = hex;
                             updateEmbedPreview();
                         }
                     }
@@ -8488,14 +8507,14 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                         embedFields.push({ id: id, name: '', value: '', inline: false });
                         renderFieldsEditor();
                         updateEmbedPreview();
-                        showEmbedToast('✅ تم إضافة حقل جديد', true);
+                        showFixedToast('✅ تم إضافة حقل مخصص جديد', true);
                     }
 
                     function removeEmbedField(id) {
                         embedFields = embedFields.filter(f => f.id !== id);
                         renderFieldsEditor();
                         updateEmbedPreview();
-                        showEmbedToast('🗑️ تم حذف الحقل', false);
+                        showFixedToast('🗑️ تم إزالة الحقل', false);
                     }
 
                     function updateFieldData(id, key, val) {
@@ -8510,26 +8529,26 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                         const c = document.getElementById('fieldsContainer');
                         if (!c) return;
                         if (embedFields.length === 0) {
-                            c.innerHTML = '<div class="text-[11px] text-gray-500 text-center py-3 bg-[#0b0d14]/40 rounded-2xl border border-dashed border-white/5">لا توجد حقول إضافية حالياً، اضغط "+ إضافة حقل" بالأعلى لإضافة حقول مخصصة</div>';
+                            c.innerHTML = '<div class="text-[11px] text-gray-500 text-center py-3 bg-[#0b0d14]/40 rounded-2xl border border-dashed border-white/5">لا توجد حقول إضافية حالياً، اضغط "+ إضافة حقل جديد" لإضافة حقول مخصصة</div>';
                             return;
                         }
                         let html = '';
                         for (let i = 0; i < embedFields.length; i++) {
                             const f = embedFields[i];
-                            html += '<div class="bg-[#0b0d14] border border-white/10 p-4 rounded-2xl space-y-3 transition shadow-sm hover:border-purple-500/30">' +
+                            html += '<div class="bg-[#0b0d14] border border-white/10 p-3.5 rounded-2xl space-y-2.5">' +
                                 '<div class="flex items-center justify-between">' +
                                 '<div class="flex items-center gap-2">' +
-                                '<label class="text-[11px] text-gray-300 font-bold flex items-center gap-1.5 cursor-pointer bg-[#12141f] px-2.5 py-1 rounded-xl border border-white/5 hover:border-purple-500/30">' +
-                                '<input type="checkbox" ' + (f.inline ? 'checked' : '') + ' onchange="updateFieldData(\'' + f.id + '\', \'inline\', this.checked)" class="rounded bg-[#151724] border-white/10 text-purple-600 focus:ring-0 cursor-pointer">' +
+                                '<label class="text-[11px] text-gray-300 font-bold flex items-center gap-1.5 cursor-pointer bg-[#12141f] px-2.5 py-1 rounded-xl border border-white/5">' +
+                                '<input type="checkbox" ' + (f.inline ? 'checked' : '') + ' onchange="window.updateFieldData(\'' + f.id + '\', \'inline\', this.checked)" class="rounded bg-[#151724] border-white/10 text-purple-600 focus:ring-0 cursor-pointer">' +
                                 '<span>جنباً لجنب (Inline)</span>' +
                                 '</label>' +
-                                '<button type="button" onclick="removeEmbedField(\'' + f.id + '\')" class="text-rose-400 hover:text-rose-300 text-xs px-3 py-1 rounded-xl bg-rose-950/40 hover:bg-rose-900/60 border border-rose-800/40 font-bold transition flex items-center gap-1 cursor-pointer">✕ <span>حذف</span></button>' +
+                                '<button type="button" onclick="window.removeEmbedField(\'' + f.id + '\')" class="text-rose-400 hover:text-rose-300 text-xs px-2.5 py-1 rounded-xl bg-rose-950/40 border border-rose-800/40 font-bold cursor-pointer transition">✕ حذف</button>' +
                                 '</div>' +
                                 '<span class="text-xs font-black text-purple-400 font-mono">الحقل #' + (i + 1) + '</span>' +
                                 '</div>' +
-                                '<div class="grid grid-cols-1 md:grid-cols-2 gap-2.5">' +
-                                '<div><input type="text" placeholder="عنوان الحقل..." value="' + (f.name || '').replace(/"/g, '&quot;') + '" oninput="updateFieldData(\'' + f.id + '\', \'name\', this.value)" class="w-full bg-[#12141f] border border-white/5 focus:border-purple-600 rounded-xl px-3 py-2 text-xs text-white text-right outline-none font-bold"></div>' +
-                                '<div><input type="text" placeholder="محتوى وقيمة الحقل..." value="' + (f.value || '').replace(/"/g, '&quot;') + '" oninput="updateFieldData(\'' + f.id + '\', \'value\', this.value)" class="w-full bg-[#12141f] border border-white/5 focus:border-purple-600 rounded-xl px-3 py-2 text-xs text-white text-right outline-none"></div>' +
+                                '<div class="grid grid-cols-1 md:grid-cols-2 gap-2">' +
+                                '<div><input type="text" placeholder="عنوان الحقل..." value="' + (f.name || '').replace(/"/g, '&quot;') + '" oninput="window.updateFieldData(\'' + f.id + '\', \'name\', this.value)" class="w-full bg-[#12141f] border border-white/5 focus:border-purple-600 rounded-xl px-3 py-2 text-xs text-white text-right outline-none font-bold"></div>' +
+                                '<div><input type="text" placeholder="محتوى الحقل..." value="' + (f.value || '').replace(/"/g, '&quot;') + '" oninput="window.updateFieldData(\'' + f.id + '\', \'value\', this.value)" class="w-full bg-[#12141f] border border-white/5 focus:border-purple-600 rounded-xl px-3 py-2 text-xs text-white text-right outline-none"></div>' +
                                 '</div>' +
                                 '</div>';
                         }
@@ -8539,13 +8558,11 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                     function updateEmbedPreview() {
                         const color = document.getElementById('embColor')?.value || '#9333ea';
                         const author = document.getElementById('embAuthor')?.value?.trim() || '';
-                        const authorIcon = document.getElementById('embAuthorIcon')?.value?.trim() || '';
                         const title = document.getElementById('embTitle')?.value?.trim() || '';
                         const desc = document.getElementById('embDesc')?.value?.trim() || '';
                         const image = document.getElementById('embImage')?.value?.trim() || '';
                         const thumbnail = document.getElementById('embThumbnail')?.value?.trim() || '';
                         const footer = document.getElementById('embFooter')?.value?.trim() || '';
-                        const footerIcon = document.getElementById('embFooterIcon')?.value?.trim() || '';
                         const showTimestamp = document.getElementById('embTimestampToggle')?.checked || false;
 
                         const previewBox = document.getElementById('previewEmbedBox');
@@ -8553,40 +8570,28 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
 
                         const prevAuthorRow = document.getElementById('prevAuthorRow');
                         const prevAuthorText = document.getElementById('prevAuthorText');
-                        const prevAuthorImg = document.getElementById('prevAuthorImg');
                         if (prevAuthorRow) {
                             if (author) {
                                 prevAuthorRow.classList.remove('hidden');
                                 prevAuthorRow.classList.add('flex');
                                 if (prevAuthorText) prevAuthorText.textContent = author;
-                                if (prevAuthorImg) {
-                                    if (authorIcon) { prevAuthorImg.src = authorIcon; prevAuthorImg.classList.remove('hidden'); }
-                                    else { prevAuthorImg.classList.add('hidden'); }
-                                }
                             } else {
                                 prevAuthorRow.classList.add('hidden');
                                 prevAuthorRow.classList.remove('flex');
                             }
                         }
 
-
                         const prevTitle = document.getElementById('prevTitle');
-                        const titleUrl = document.getElementById('embTitleUrl')?.value?.trim() || '';
                         if (prevTitle) {
                             if (title) {
                                 prevTitle.style.display = 'block';
-                                if (titleUrl) {
-                                    prevTitle.innerHTML = '<a href="' + titleUrl + '" target="_blank" class="text-[#00a8fc] hover:underline">' + title + '</a>';
-                                } else {
-                                    prevTitle.textContent = title;
-                                }
+                                prevTitle.textContent = title;
                             } else {
                                 prevTitle.style.display = 'none';
-                                prevTitle.innerHTML = '';
+                                prevTitle.textContent = '';
                             }
                         }
 
-                        // Thumbnail
                         const prevThumbnailWrap = document.getElementById('prevThumbnailWrap');
                         const prevThumbnailImg = document.getElementById('prevThumbnailImg');
                         if (prevThumbnailWrap && prevThumbnailImg) {
@@ -8600,7 +8605,9 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                         }
 
                         const prevDesc = document.getElementById('prevDesc');
-                        if (prevDesc) prevDesc.textContent = desc || 'محتوى الإيمبد سيظهر هنا بالمعاينة المباشرة...';
+                        if (prevDesc) {
+                            prevDesc.textContent = desc || 'محتوى الإيمبد سيظهر هنا مباشرة...';
+                        }
 
                         const prevFieldsGrid = document.getElementById('prevFieldsGrid');
                         if (prevFieldsGrid) {
@@ -8632,20 +8639,10 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                         }
 
                         const prevFooterText = document.getElementById('prevFooterText');
-                        const prevFooterImg = document.getElementById('prevFooterImg');
                         const prevTimestamp = document.getElementById('prevTimestamp');
                         const prevFooterDot = document.getElementById('prevFooterDot');
 
                         if (prevFooterText) prevFooterText.textContent = footer || '';
-                        if (prevFooterImg) {
-                            if (footerIcon && footer) {
-                                prevFooterImg.src = footerIcon;
-                                prevFooterImg.classList.remove('hidden');
-                            } else {
-                                prevFooterImg.classList.add('hidden');
-                            }
-                        }
-
                         if (prevTimestamp) {
                             if (showTimestamp) {
                                 prevTimestamp.textContent = 'اليوم في ' + new Date().toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' });
@@ -8658,10 +8655,10 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                     }
 
                     function clearEmbedFields() {
-                        const ids = ['embTitle', 'embDesc', 'embAuthor', 'embAuthorIcon', 'embTitleUrl', 'embImage', 'embThumbnail', 'embFooter', 'embFooterIcon'];
+                        const ids = ['embTitle', 'embDesc', 'embAuthor', 'embImage', 'embThumbnail', 'embFooter'];
                         ids.forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
                         const ts = document.getElementById('embTimestampToggle');
-                        if (ts) ts.checked = false;
+                        if (ts) ts.checked = true;
                         ['embThumbnail', 'embImage'].forEach(id => {
                             const boxImg = document.getElementById('prev_' + id + '_box');
                             const ph = document.getElementById('ph_' + id);
@@ -8674,16 +8671,16 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                         renderFieldsEditor();
                         selectColor('#9333ea');
                         updateEmbedPreview();
-                        showEmbedToast('🗑️ تم مسح جميع محتويات الإيمبد', true);
+                        showFixedToast('🗑️ تم مسح جميع محتويات الإيمبد', true);
                     }
 
                     function saveEmbedDraft() {
                         const payload = getEmbedPayload();
                         try {
                             localStorage.setItem('zeno_embed_draft_${guildId}', JSON.stringify(payload));
-                            showEmbedToast('💾 تم حفظ المسودة في المتصفح بنجاح!', true);
+                            showFixedToast('💾 تم حفظ المسودة في المتصفح بنجاح!', true);
                         } catch(e) {
-                            showEmbedToast('❌ فشل حفظ المسودة', false);
+                            showFixedToast('❌ فشل حفظ المسودة', false);
                         }
                     }
 
@@ -8693,75 +8690,36 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                             channelId: g('embedChannel')?.value || '',
                             color: g('embColor')?.value || '#9333ea',
                             title: g('embTitle')?.value?.trim() || '',
-                            titleUrl: g('embTitleUrl')?.value?.trim() || '',
+                            titleUrl: '',
                             desc: g('embDesc')?.value?.trim() || '',
                             author: g('embAuthor')?.value?.trim() || '',
-                            authorIcon: g('embAuthorIcon')?.value?.trim() || '',
+                            authorIcon: '',
                             image: g('embImage')?.value?.trim() || '',
                             thumbnail: g('embThumbnail')?.value?.trim() || '',
                             footer: g('embFooter')?.value?.trim() || '',
-                            footerIcon: g('embFooterIcon')?.value?.trim() || '',
-                            timestamp: g('embTimestampToggle')?.checked || false,
+                            footerIcon: '',
+                            timestamp: g('embTimestampToggle')?.checked !== false,
                             fields: embedFields.filter(f => f.name || f.value)
                         };
                     }
 
-
-                    function showEmbedToast(msg, isSuccess = true) {
-                        const t = document.getElementById('embedStatusToast');
-                        if (!t) {
-                            // fallback if toast element not found
-                            console.log('[Toast]', msg);
-                            return;
-                        }
-                        t.textContent = msg;
-                        t.style.display = 'flex';
-                        t.className = isSuccess
-                            ? 'flex px-3.5 py-2 rounded-xl text-xs font-bold items-center gap-1.5 bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-lg'
-                            : 'flex px-3.5 py-2 rounded-xl text-xs font-bold items-center gap-1.5 bg-rose-500/20 text-rose-300 border border-rose-500/40 shadow-lg';
-                        clearTimeout(t._toastTimer);
-                        t._toastTimer = setTimeout(() => {
-                            t.style.display = 'none';
-                            t.className = 'hidden';
-                            t.style.display = 'none';
-                        }, 4500);
-                    }
-
-                    // Toast ثابت في أسفل الشاشة يظهر دائماً
-                    function showFixedToast(msg, isSuccess = true) {
-                        let toast = document.getElementById('embedFixedToast');
-                        if (!toast) {
-                            toast = document.createElement('div');
-                            toast.id = 'embedFixedToast';
-                            toast.style.cssText = 'position:fixed;bottom:28px;left:50%;transform:translateX(-50%);z-index:99999;padding:12px 24px;border-radius:14px;font-size:14px;font-weight:bold;display:flex;align-items:center;gap:8px;box-shadow:0 8px 32px rgba(0,0,0,0.5);transition:opacity 0.3s;min-width:260px;justify-content:center;text-align:center;direction:rtl;';
-                            document.body.appendChild(toast);
-                        }
-                        toast.textContent = msg;
-                        toast.style.background = isSuccess ? 'rgba(16,185,129,0.95)' : 'rgba(239,68,68,0.95)';
-                        toast.style.color = '#fff';
-                        toast.style.border = isSuccess ? '1px solid #34d399' : '1px solid #f87171';
-                        toast.style.opacity = '1';
-                        toast.style.display = 'flex';
-                        clearTimeout(toast._t);
-                        toast._t = setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => { toast.style.display = 'none'; }, 300); }, 4000);
-                    }
-
                     async function sendEmbedDirect() {
                         const payload = getEmbedPayload();
-                        console.log('[sendEmbedDirect] payload:', JSON.stringify({channelId: payload.channelId, title: payload.title, desc: payload.desc?.substring(0,20)}));
                         if (!payload.channelId) {
-                            showFixedToast('⚠️ يرجى اختيار القناة المستهدفة أولاً!', false);
-                            showEmbedToast('⚠️ يرجى اختيار القناة المستهدفة أولاً!', false);
+                            showFixedToast('⚠️ يرجى اختيار القناة المستهدفة أولاً من القائمة!', false);
                             return;
                         }
                         if (!payload.desc && !payload.title) {
                             showFixedToast('⚠️ يرجى كتابة عنوان أو محتوى للرسالة قبل الإرسال!', false);
-                            showEmbedToast('⚠️ يرجى كتابة عنوان أو محتوى للرسالة قبل الإرسال!', false);
                             return;
                         }
 
                         const btn = document.getElementById('btnSendEmbed');
-                        if (btn) { btn.disabled = true; btn.innerHTML = '<span>⏳</span><span>جارٍ الإرسال...</span>'; }
+                        const origHtml = btn ? btn.innerHTML : '';
+                        if (btn) {
+                            btn.disabled = true;
+                            btn.innerHTML = '<span>⏳</span><span>جاري إرسال الإيمبد...</span>';
+                        }
 
                         try {
                             const res = await fetch('/api/guild/${guildId}/send-embed', {
@@ -8772,18 +8730,88 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                             const data = await res.json();
                             if (data.success) {
                                 showFixedToast('✅ تم إرسال الإيمبد بنجاح في القناة!', true);
-                                showEmbedToast('✅ تم إرسال الإيمبد بنجاح في القناة!', true);
                             } else {
                                 showFixedToast('❌ ' + (data.error || 'فشل الإرسال'), false);
-                                showEmbedToast('❌ خطأ: ' + (data.error || 'فشل الإرسال'), false);
                             }
                         } catch(e) {
                             console.error('[sendEmbedDirect] error:', e);
-                            showFixedToast('❌ خطأ في الاتصال بالسيرفر', false);
-                            showEmbedToast('❌ حدث خطأ في الاتصال بالسيرفر', false);
+                            showFixedToast('❌ حدث خطأ في الاتصال بالخادم أثناء الإرسال', false);
                         } finally {
-                            if (btn) { btn.disabled = false; btn.innerHTML = '<span class="text-base">🚀</span><span>إرسال للقناة</span>'; }
+                            if (btn) {
+                                btn.disabled = false;
+                                btn.innerHTML = origHtml || '<span class="text-base">🚀</span><span>إرسال للقناة الآن</span>';
+                            }
                         }
+                    }
+
+                    async function uploadEmbedImageFile(input, targetId) {
+                        const file = input.files && input.files[0];
+                        if (!file) return;
+                        if (!file.type.startsWith('image/')) {
+                            showFixedToast('❌ يرجى اختيار ملف صورة صالح (PNG, JPG, WEBP, GIF)', false);
+                            return;
+                        }
+                        if (file.size > 15 * 1024 * 1024) {
+                            showFixedToast('❌ حجم الصورة كبير جداً (أكثر من 15 ميجابايت)', false);
+                            return;
+                        }
+
+                        const btnText = document.getElementById('btn_text_' + targetId);
+                        const origText = btnText ? btnText.innerText : 'رفع';
+                        if (btnText) btnText.innerText = 'جاري الرفع... ⏳';
+
+                        const reader = new FileReader();
+                        reader.onload = async function(e) {
+                            try {
+                                const res = await fetch('/api/guild/${guildId}/upload-image', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ imageBase64: e.target.result, fieldName: targetId })
+                                });
+                                const data = await res.json();
+                                if (data.success && data.url) {
+                                    document.getElementById(targetId).value = data.url;
+
+                                    const boxImg = document.getElementById('prev_' + targetId + '_box');
+                                    const ph = document.getElementById('ph_' + targetId);
+                                    if (boxImg) {
+                                        boxImg.src = data.url;
+                                        boxImg.classList.remove('hidden');
+                                    }
+                                    if (ph) ph.classList.add('hidden');
+
+                                    updateEmbedPreview();
+                                    if (btnText) btnText.innerText = '✅ تم الرفع';
+                                    showFixedToast('✅ تم رفع الصورة بنجاح!', true);
+                                    setTimeout(() => { if (btnText) btnText.innerText = origText; }, 2000);
+                                } else {
+                                    showFixedToast('❌ فشل رفع الصورة: ' + (data.error || 'خطأ غير معروف'), false);
+                                    if (btnText) btnText.innerText = origText;
+                                }
+                            } catch(err) {
+                                showFixedToast('❌ حدث خطأ في الاتصال أثناء الرفع', false);
+                                if (btnText) btnText.innerText = origText;
+                            }
+                        };
+                        reader.readAsDataURL(file);
+                    }
+
+                    function clearEmbedImageField(targetId) {
+                        const el = document.getElementById(targetId);
+                        if (el) el.value = '';
+                        const fileInp = document.getElementById('file_' + targetId);
+                        if (fileInp) fileInp.value = '';
+
+                        const boxImg = document.getElementById('prev_' + targetId + '_box');
+                        const ph = document.getElementById('ph_' + targetId);
+                        if (boxImg) {
+                            boxImg.src = '';
+                            boxImg.classList.add('hidden');
+                        }
+                        if (ph) ph.classList.remove('hidden');
+
+                        updateEmbedPreview();
+                        showFixedToast('🗑️ تم إزالة الصورة', true);
                     }
 
                     function initEmbedEditor() {
@@ -8796,7 +8824,6 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                                 setVal('embTitle', d.title);
                                 setVal('embDesc', d.desc);
                                 setVal('embAuthor', d.author);
-                                setVal('embTitleUrl', d.titleUrl);
                                 setVal('embFooter', d.footer);
                                 if (d.image) {
                                     setVal('embImage', d.image);
@@ -8821,31 +8848,36 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                         } catch(e) {}
                         updateEmbedPreview();
 
-                        // ✅ ربط الأزرار مباشرة عبر addEventListener بعد تجهيز الـ DOM
+                        // Bind Events
                         const btnSend = document.getElementById('btnSendEmbed');
                         const btnSave = document.getElementById('btnSaveEmbedDraft');
                         const btnClear = document.getElementById('btnClearEmbed');
                         if (btnSend) {
-                            btnSend.addEventListener('click', function(e) {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                sendEmbedDirect();
-                            });
+                            btnSend.onclick = function(e) { e.preventDefault(); e.stopPropagation(); sendEmbedDirect(); return false; };
                         }
                         if (btnSave) {
-                            btnSave.addEventListener('click', function(e) {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                saveEmbedDraft();
-                            });
+                            btnSave.onclick = function(e) { e.preventDefault(); e.stopPropagation(); saveEmbedDraft(); return false; };
                         }
                         if (btnClear) {
-                            btnClear.addEventListener('click', function(e) {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                clearEmbedFields();
-                            });
+                            btnClear.onclick = function(e) { e.preventDefault(); e.stopPropagation(); clearEmbedFields(); return false; };
                         }
+
+                        // Live Inputs Binding
+                        ['embTitle', 'embDesc', 'embAuthor', 'embFooter'].forEach(id => {
+                            const el = document.getElementById(id);
+                            if (el) el.addEventListener('input', updateEmbedPreview);
+                        });
+                        const colorInput = document.getElementById('embColor');
+                        if (colorInput) colorInput.addEventListener('input', e => onColorPickerChange(e.target.value));
+                        const hexInput = document.getElementById('embHexInput');
+                        if (hexInput) hexInput.addEventListener('input', e => setCustomHex(e.target.value));
+                        const tsToggle = document.getElementById('embTimestampToggle');
+                        if (tsToggle) tsToggle.addEventListener('change', updateEmbedPreview);
+
+                        const fThumb = document.getElementById('file_embThumbnail');
+                        if (fThumb) fThumb.addEventListener('change', function() { uploadEmbedImageFile(this, 'embThumbnail'); });
+                        const fImg = document.getElementById('file_embImage');
+                        if (fImg) fImg.addEventListener('change', function() { uploadEmbedImageFile(this, 'embImage'); });
                     }
 
                     if (document.readyState === 'loading') {
@@ -8854,79 +8886,7 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                         initEmbedEditor();
                     }
 
-                    async function uploadEmbedImageFile(input, targetId) {
-                        const file = input.files && input.files[0];
-                        if (!file) return;
-                        if (!file.type.startsWith('image/')) {
-                            showEmbedToast('❌ يرجى اختيار ملف صورة صالح (PNG, JPG, WEBP, GIF)', false);
-                            return;
-                        }
-                        if (file.size > 15 * 1024 * 1024) {
-                            showEmbedToast('❌ حجم الصورة كبير جداً (أكثر من 15 ميجابايت)', false);
-                            return;
-                        }
-
-                        const btnText = document.getElementById('btn_text_' + targetId);
-                        const origText = btnText ? btnText.innerText : 'رفع';
-                        if (btnText) btnText.innerText = 'جاري الرفع... ⏳';
-
-                        const reader = new FileReader();
-                        reader.onload = async function(e) {
-                            try {
-                                const res = await fetch('/api/guild/${guildId}/upload-image', {
-                                    method: 'POST',
-                                    headers: { 'Content-Type': 'application/json' },
-                                    body: JSON.stringify({ imageBase64: e.target.result, fieldName: targetId })
-                                });
-                                const data = await res.json();
-                                if (data.success && data.url) {
-                                    document.getElementById(targetId).value = data.url;
-
-                                    // تحديث المعاينة داخل بطاقة الرفع
-                                    const boxImg = document.getElementById('prev_' + targetId + '_box');
-                                    const ph = document.getElementById('ph_' + targetId);
-                                    if (boxImg) {
-                                        boxImg.src = data.url;
-                                        boxImg.classList.remove('hidden');
-                                    }
-                                    if (ph) ph.classList.add('hidden');
-
-                                    updateEmbedPreview();
-                                    if (btnText) btnText.innerText = '✅ تم الرفع';
-                                    showEmbedToast('✅ تم رفع الصورة بنجاح!', true);
-                                    setTimeout(() => { if (btnText) btnText.innerText = origText; }, 2000);
-                                } else {
-                                    showEmbedToast('❌ فشل رفع الصورة: ' + (data.error || 'خطأ غير معروف'), false);
-                                    if (btnText) btnText.innerText = origText;
-                                }
-                            } catch(err) {
-                                showEmbedToast('❌ حدث خطأ في الاتصال أثناء الرفع', false);
-                                if (btnText) btnText.innerText = origText;
-                            }
-                        };
-                        reader.readAsDataURL(file);
-                    }
-
-                    function clearEmbedImageField(targetId) {
-                        document.getElementById(targetId).value = '';
-                        const fileInp = document.getElementById('file_' + targetId);
-                        if (fileInp) fileInp.value = '';
-
-                        // مسح المعاينة داخل بطاقة الرفع
-                        const boxImg = document.getElementById('prev_' + targetId + '_box');
-                        const ph = document.getElementById('ph_' + targetId);
-                        if (boxImg) {
-                            boxImg.src = '';
-                            boxImg.classList.add('hidden');
-                        }
-                        if (ph) ph.classList.remove('hidden');
-
-                        updateEmbedPreview();
-                        showEmbedToast('🗑️ تم إزالة الصورة', true);
-                    }
-
-                    // ضمان توفر جميع الدوال في النطاق العام (window) لتعمل أزرار onclick دون مشاكل
-                    window.switchEmbedTab = switchEmbedTab;
+                    // Expose to window
                     window.selectColor = selectColor;
                     window.onColorPickerChange = onColorPickerChange;
                     window.setCustomHex = setCustomHex;
@@ -9014,7 +8974,7 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                 <div class="flex-1 flex overflow-hidden">
                     
                     <!-- Main Content Form Area -->
-                    <main class="flex-1 p-8 overflow-y-auto max-w-4xl mx-auto">
+                    <main class="flex-1 p-8 overflow-y-auto ${section === 'embed' ? 'max-w-7xl' : 'max-w-4xl'} mx-auto">
                         <div class="probot-card border border-white/5 rounded-3xl p-8 shadow-2xl mb-8">
                             <div class="flex items-center justify-between pb-6 mb-6 border-b border-white/5">
                                 <label class="toggle"><input type="checkbox" onchange="toggleModule('${guildId}', '${section}_enabled', this.checked)" checked><span class="slider"></span></label>
@@ -9024,42 +8984,7 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                                 </div>
                             </div>
 
-                            <!-- ✅ Embed Action Bar — خارج الـ form تماماً -->
-                            ${section === 'embed' ? `
-                            <div id="embedActionBar" class="flex items-center justify-between gap-3 flex-wrap mb-6 pb-6 border-b border-white/5" dir="rtl">
-                                <div class="flex items-center gap-3">
-                                    <button type="button" id="btnSendEmbed"
-                                        onclick="event.preventDefault();event.stopPropagation();window.sendEmbedDirect&&window.sendEmbedDirect();return false;"
-                                        style="cursor:pointer;pointer-events:auto;position:relative;z-index:9999;"
-                                        class="px-7 py-3 bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 hover:from-purple-500 hover:via-indigo-500 hover:to-purple-600 text-white rounded-2xl text-xs font-black transition-all shadow-lg shadow-purple-900/40 border border-purple-400/30 flex items-center gap-2 cursor-pointer active:scale-95">
-                                        <span class="text-base">🚀</span>
-                                        <span>إرسال للقناة</span>
-                                    </button>
-                                    <button type="button" id="btnSaveEmbedDraft"
-                                        onclick="event.preventDefault();event.stopPropagation();window.saveEmbedDraft&&window.saveEmbedDraft();return false;"
-                                        style="cursor:pointer;pointer-events:auto;position:relative;z-index:9999;"
-                                        class="px-4 py-3 bg-[#12141f] hover:bg-white/5 border border-white/10 text-gray-300 hover:text-white rounded-2xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer active:scale-95">
-                                        <span class="text-sm">💾</span>
-                                        <span>حفظ مسودة</span>
-                                    </button>
-                                    <button type="button" id="btnClearEmbed"
-                                        onclick="event.preventDefault();event.stopPropagation();window.clearEmbedFields&&window.clearEmbedFields();return false;"
-                                        style="cursor:pointer;pointer-events:auto;position:relative;z-index:9999;"
-                                        class="px-4 py-3 bg-rose-950/40 hover:bg-rose-900/60 border border-rose-700/40 text-rose-300 rounded-2xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer active:scale-95">
-                                        <span class="text-sm">🗑️</span>
-                                        <span>مسح الكل</span>
-                                    </button>
-                                    <div id="embedStatusToast" class="hidden px-3.5 py-2 rounded-xl text-xs font-bold items-center gap-1.5 transition"></div>
-                                </div>
-                                <div class="flex items-center gap-3">
-                                    <div class="text-right">
-                                        <h3 class="font-black text-white text-xl flex items-center gap-2 justify-end"><span>رسائل الإيمبد</span><span>📄</span></h3>
-                                        <p class="text-gray-400 text-xs">صمم وأرسل رسائل إيمبد منسقة واحترافية لقنواتك</p>
-                                    </div>
-                                    <div class="w-10 h-10 rounded-2xl bg-purple-600/20 border border-purple-500/30 text-purple-400 flex items-center justify-center text-xl">📄</div>
-                                </div>
-                            </div>
-                            ` : ''}
+
                             <form id="settingsForm" class="space-y-6">
                                 ${formFieldsHtml}
 
