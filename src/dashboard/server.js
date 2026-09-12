@@ -8246,34 +8246,14 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                                 <h4 class="text-sm font-black text-white flex items-center gap-2"><span>محتوى الإيمبد</span><span>📝</span></h4>
                             </div>
 
-                            <!-- Author row -->
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div class="bg-[#0b0d14] border border-white/5 rounded-2xl p-4 space-y-3">
-                                    <div class="flex items-center justify-between">
-                                        <button type="button" onclick="clearEmbedImageField('embAuthorIcon')" class="text-[11px] text-rose-400 hover:text-rose-300 font-bold transition">🗑️ إزالة الأيقونة</button>
-                                        <label class="block text-xs font-bold text-gray-300">أيقونة الكاتب (صورة دائرية)</label>
-                                    </div>
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-12 h-12 rounded-full border border-white/10 bg-[#12141f] overflow-hidden flex items-center justify-center shrink-0">
-                                            <img id="prev_embAuthorIcon_box" src="" class="w-full h-full object-cover hidden">
-                                            <span id="ph_embAuthorIcon" class="text-xs text-gray-600 font-bold">👤</span>
-                                        </div>
-                                        <div class="flex-1 space-y-1">
-                                            <input type="hidden" id="embAuthorIcon" value="">
-                                            <input type="file" id="file_embAuthorIcon" accept="image/*" class="hidden" onchange="uploadEmbedImageFile(this, 'embAuthorIcon')">
-                                            <button type="button" onclick="document.getElementById('file_embAuthorIcon').click()" class="w-full px-4 py-2 bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/30 text-purple-300 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5">
-                                                <span>📤</span><span id="btn_text_embAuthorIcon">رفع أيقونة الكاتب</span>
-                                            </button>
-                                            <p class="text-[10px] text-gray-500 text-right">صورة دائرية تظهر بجانب الاسم في الأعلى</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="space-y-1 flex flex-col justify-center">
-                                    <label class="block text-xs font-bold text-gray-300 mb-1">اسم الكاتب أو الجهة (Author Name)</label>
-                                    <input type="text" id="embAuthor" placeholder="مثال: إدارة السيرفر / ZENO Announcements" oninput="updateEmbedPreview()" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right">
-                                    <p class="text-[10px] text-gray-500 text-right mt-1">يظهر كعنوان فرعي في أعلى الرسالة</p>
-                                </div>
+                            <!-- Author row (Clean & Simple, no icon upload) -->
+                            <div>
+                                <input type="hidden" id="embAuthorIcon" value="">
+                                <label class="block text-xs font-bold text-gray-300 mb-1">اسم الكاتب أو الجهة (Author Name)</label>
+                                <input type="text" id="embAuthor" placeholder="مثال: إدارة السيرفر / ZENO Announcements" oninput="updateEmbedPreview()" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right">
+                                <p class="text-[10px] text-gray-500 text-right mt-1">يظهر كعنوان فرعي في أعلى الرسالة</p>
                             </div>
+
 
                             <!-- Title & Title URL -->
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -8367,30 +8347,13 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                                 <h4 class="text-sm font-black text-white flex items-center gap-2"><span>التذييل والوقت (Footer)</span><span>⏰</span></h4>
                             </div>
 
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div class="bg-[#0b0d14] border border-white/5 rounded-2xl p-3.5 space-y-2">
-                                    <div class="flex items-center justify-between">
-                                        <button type="button" onclick="clearEmbedImageField('embFooterIcon')" class="text-[10px] text-rose-400 hover:text-rose-300 font-bold transition">🗑️ إزالة</button>
-                                        <label class="block text-xs font-bold text-gray-300">أيقونة التذييل (صغيرة بجانب الفوتر)</label>
-                                    </div>
-                                    <div class="flex items-center gap-2">
-                                        <div class="w-9 h-9 rounded-full border border-white/10 bg-[#12141f] overflow-hidden flex items-center justify-center shrink-0">
-                                            <img id="prev_embFooterIcon_box" src="" class="w-full h-full object-cover hidden">
-                                            <span id="ph_embFooterIcon" class="text-xs text-gray-600">⏰</span>
-                                        </div>
-                                        <input type="hidden" id="embFooterIcon" value="">
-                                        <input type="file" id="file_embFooterIcon" accept="image/*" class="hidden" onchange="uploadEmbedImageFile(this, 'embFooterIcon')">
-                                        <button type="button" onclick="document.getElementById('file_embFooterIcon').click()" class="flex-1 px-3 py-2 bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/30 text-purple-300 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5">
-                                            <span>📤</span><span id="btn_text_embFooterIcon">رفع أيقونة</span>
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="flex flex-col justify-center">
-                                    <label class="block text-xs font-bold text-gray-300 mb-1">نص التذييل (Footer Text)</label>
-                                    <input type="text" id="embFooter" placeholder="مثال: ZENO Bot • إعلان رسمي" oninput="updateEmbedPreview()" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right">
-                                </div>
+                            <div>
+                                <input type="hidden" id="embFooterIcon" value="">
+                                <label class="block text-xs font-bold text-gray-300 mb-1">نص التذييل (Footer Text)</label>
+                                <input type="text" id="embFooter" placeholder="مثال: ZENO Bot • إعلان رسمي" oninput="updateEmbedPreview()" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right">
                             </div>
                         </div>
+
 
                         <!-- Live Discord Preview Box (Real Discord Appearance) -->
                         <div id="livePreviewCard" class="bg-[#12141f] border border-purple-500/20 p-6 rounded-3xl space-y-4 shadow-2xl">
@@ -8415,14 +8378,14 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                                 </div>
 
                                 <!-- Embed Container -->
-                                <div class="bg-[#2b2d31] p-4 rounded-lg border-r-[4px] shadow-sm transition-all" id="previewEmbedBox" style="border-right-color: #9333ea;">
-                                    <div class="flex items-start justify-between gap-4">
-                                        <!-- Left: Thumbnail (in RTL, it will be on the left of content) -->
-                                        <div id="prevThumbnailWrap" class="hidden shrink-0">
-                                            <img id="prevThumbnailImg" class="w-20 h-20 rounded-lg object-cover shadow" src="" alt="">
+                                <div class="bg-[#2b2d31] p-4 rounded-lg border-r-[4px] shadow-sm transition-all text-right" id="previewEmbedBox" style="border-right-color: #9333ea;">
+                                    <div class="flex items-start gap-4">
+                                        <!-- Right: Thumbnail (appears top-right of embed) -->
+                                        <div id="prevThumbnailWrap" class="hidden shrink-0 order-first">
+                                            <img id="prevThumbnailImg" class="w-20 h-20 rounded-xl object-cover shadow border border-white/10" src="" alt="">
                                         </div>
 
-                                        <!-- Right: Embed Body -->
+                                        <!-- Left: Embed Body -->
                                         <div class="flex-1 min-w-0 space-y-2">
                                             <!-- Author Row -->
                                             <div id="prevAuthorRow" class="hidden items-center justify-end gap-2">
@@ -8440,6 +8403,7 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                                             <div id="prevFieldsGrid" class="grid grid-cols-2 gap-2 pt-1 hidden"></div>
                                         </div>
                                     </div>
+
 
                                     <!-- Main Image -->
                                     <div id="prevImageRow" class="mt-3 hidden">
@@ -8462,13 +8426,16 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                     let embedFields = [];
 
                     function selectColor(hex) {
-                        document.getElementById('embColor').value = hex;
-                        document.getElementById('embHexInput').value = hex.toUpperCase();
+                        const c = document.getElementById('embColor');
+                        const h = document.getElementById('embHexInput');
+                        if (c) c.value = hex;
+                        if (h) h.value = hex.toUpperCase();
                         updateEmbedPreview();
                     }
 
                     function onColorPickerChange(hex) {
-                        document.getElementById('embHexInput').value = hex.toUpperCase();
+                        const h = document.getElementById('embHexInput');
+                        if (h) h.value = hex.toUpperCase();
                         updateEmbedPreview();
                     }
 
@@ -8530,39 +8497,41 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                     }
 
                     function updateEmbedPreview() {
-                        const color = document.getElementById('embColor').value || '#9333ea';
-                        const author = document.getElementById('embAuthor').value.trim();
-                        const authorIcon = document.getElementById('embAuthorIcon').value.trim();
-                        const title = document.getElementById('embTitle').value.trim();
-                        const desc = document.getElementById('embDesc').value.trim();
-                        const image = document.getElementById('embImage').value.trim();
-                        const thumbnail = document.getElementById('embThumbnail').value.trim();
-                        const footer = document.getElementById('embFooter').value.trim();
-                        const footerIcon = document.getElementById('embFooterIcon').value.trim();
-                        const showTimestamp = document.getElementById('embTimestampToggle').checked;
+                        const color = document.getElementById('embColor')?.value || '#9333ea';
+                        const author = document.getElementById('embAuthor')?.value?.trim() || '';
+                        const authorIcon = document.getElementById('embAuthorIcon')?.value?.trim() || '';
+                        const title = document.getElementById('embTitle')?.value?.trim() || '';
+                        const desc = document.getElementById('embDesc')?.value?.trim() || '';
+                        const image = document.getElementById('embImage')?.value?.trim() || '';
+                        const thumbnail = document.getElementById('embThumbnail')?.value?.trim() || '';
+                        const footer = document.getElementById('embFooter')?.value?.trim() || '';
+                        const footerIcon = document.getElementById('embFooterIcon')?.value?.trim() || '';
+                        const showTimestamp = document.getElementById('embTimestampToggle')?.checked || false;
 
-                        document.getElementById('previewEmbedBox').style.borderRightColor = color;
+                        const previewBox = document.getElementById('previewEmbedBox');
+                        if (previewBox) previewBox.style.borderRightColor = color;
 
                         const prevAuthorRow = document.getElementById('prevAuthorRow');
                         const prevAuthorText = document.getElementById('prevAuthorText');
                         const prevAuthorImg = document.getElementById('prevAuthorImg');
-                        if (author) {
-                            prevAuthorRow.classList.remove('hidden');
-                            prevAuthorRow.classList.add('flex');
-                            prevAuthorText.textContent = author;
-                            if (authorIcon) {
-                                prevAuthorImg.src = authorIcon;
-                                prevAuthorImg.classList.remove('hidden');
+                        if (prevAuthorRow) {
+                            if (author) {
+                                prevAuthorRow.classList.remove('hidden');
+                                prevAuthorRow.classList.add('flex');
+                                if (prevAuthorText) prevAuthorText.textContent = author;
+                                if (prevAuthorImg) {
+                                    if (authorIcon) { prevAuthorImg.src = authorIcon; prevAuthorImg.classList.remove('hidden'); }
+                                    else { prevAuthorImg.classList.add('hidden'); }
+                                }
                             } else {
-                                prevAuthorImg.classList.add('hidden');
+                                prevAuthorRow.classList.add('hidden');
+                                prevAuthorRow.classList.remove('flex');
                             }
-                        } else {
-                            prevAuthorRow.classList.add('hidden');
-                            prevAuthorRow.classList.remove('flex');
                         }
 
+
                         const prevTitle = document.getElementById('prevTitle');
-                        const titleUrl = document.getElementById('embTitleUrl').value.trim();
+                        const titleUrl = document.getElementById('embTitleUrl')?.value?.trim() || '';
                         if (title) {
                             prevTitle.style.display = 'block';
                             if (titleUrl) {
@@ -8644,8 +8613,7 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                         ids.forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
                         const ts = document.getElementById('embTimestampToggle');
                         if (ts) ts.checked = false;
-                        // مسح معاينات بطاقات الرفع
-                        ['embAuthorIcon', 'embImage', 'embThumbnail', 'embFooterIcon'].forEach(id => {
+                        ['embThumbnail', 'embImage'].forEach(id => {
                             const boxImg = document.getElementById('prev_' + id + '_box');
                             const ph = document.getElementById('ph_' + id);
                             if (boxImg) { boxImg.src = ''; boxImg.classList.add('hidden'); }
@@ -8656,6 +8624,7 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                         selectColor('#9333ea');
                         updateEmbedPreview();
                     }
+
 
                     function saveEmbedDraft() {
                         const payload = getEmbedPayload();
@@ -8712,43 +8681,30 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                         }
                     }
 
-                    window.addEventListener('DOMContentLoaded', () => {
+                    function initEmbedEditor() {
                         renderFieldsEditor();
                         try {
                             const saved = localStorage.getItem('zeno_embed_draft_' + '${guildId}');
                             if (saved) {
                                 const d = JSON.parse(saved);
-                                if (d.title) document.getElementById('embTitle').value = d.title;
-                                if (d.desc) document.getElementById('embDesc').value = d.desc;
-                                if (d.author) document.getElementById('embAuthor').value = d.author;
-                                if (d.authorIcon) {
-                                    document.getElementById('embAuthorIcon').value = d.authorIcon;
-                                    const b = document.getElementById('prev_embAuthorIcon_box');
-                                    const p = document.getElementById('ph_embAuthorIcon');
-                                    if (b) { b.src = d.authorIcon; b.classList.remove('hidden'); }
-                                    if (p) p.classList.add('hidden');
-                                }
-                                if (d.titleUrl) document.getElementById('embTitleUrl').value = d.titleUrl;
+                                const setVal = (id, val) => { const el = document.getElementById(id); if (el && val !== undefined) el.value = val; };
+                                setVal('embTitle', d.title);
+                                setVal('embDesc', d.desc);
+                                setVal('embAuthor', d.author);
+                                setVal('embTitleUrl', d.titleUrl);
+                                setVal('embFooter', d.footer);
                                 if (d.image) {
-                                    document.getElementById('embImage').value = d.image;
+                                    setVal('embImage', d.image);
                                     const b = document.getElementById('prev_embImage_box');
                                     const p = document.getElementById('ph_embImage');
                                     if (b) { b.src = d.image; b.classList.remove('hidden'); }
                                     if (p) p.classList.add('hidden');
                                 }
                                 if (d.thumbnail) {
-                                    document.getElementById('embThumbnail').value = d.thumbnail;
+                                    setVal('embThumbnail', d.thumbnail);
                                     const b = document.getElementById('prev_embThumbnail_box');
                                     const p = document.getElementById('ph_embThumbnail');
                                     if (b) { b.src = d.thumbnail; b.classList.remove('hidden'); }
-                                    if (p) p.classList.add('hidden');
-                                }
-                                if (d.footer) document.getElementById('embFooter').value = d.footer;
-                                if (d.footerIcon) {
-                                    document.getElementById('embFooterIcon').value = d.footerIcon;
-                                    const b = document.getElementById('prev_embFooterIcon_box');
-                                    const p = document.getElementById('ph_embFooterIcon');
-                                    if (b) { b.src = d.footerIcon; b.classList.remove('hidden'); }
                                     if (p) p.classList.add('hidden');
                                 }
                                 if (d.color) selectColor(d.color);
@@ -8759,7 +8715,14 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                             }
                         } catch(e) {}
                         updateEmbedPreview();
-                    });
+                    }
+
+                    if (document.readyState === 'loading') {
+                        window.addEventListener('DOMContentLoaded', initEmbedEditor);
+                    } else {
+                        initEmbedEditor();
+                    }
+
 
                     async function uploadEmbedImageFile(input, targetId) {
                         const file = input.files && input.files[0];
