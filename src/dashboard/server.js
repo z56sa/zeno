@@ -3955,14 +3955,92 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                                 </div>
                             </div>
 
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-xs font-bold text-gray-300 mb-2">رابط بانر لوحة التذاكر (Panel Banner URL)</label>
-                                    <input type="url" id="input_ticket_panel_banner" name="ticket_panel_banner" value="${settings.ticket_panel_banner || ''}" placeholder="https://example.com/ticket_banner.png" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-left font-mono">
+                            <!-- بطاقات رفع الصور بتصميم Wicks (صورة خلفية الإعداد & صورة خط الإعداد) -->
+                            <div class="space-y-4 pt-2">
+                                <!-- 1. صورة خلفية إعداد التذكرة (Panel Banner) -->
+                                <div class="bg-[#0b0d14] border border-white/5 hover:border-purple-500/30 rounded-2xl p-5 transition shadow-lg">
+                                    <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+                                        <!-- المعاينة وزر الحذف -->
+                                        <div class="w-full md:w-auto flex flex-col items-center gap-2">
+                                            <div id="preview_box_ticket_panel_banner" class="w-full md:w-56 h-28 rounded-xl border border-white/10 bg-[#12141f] overflow-hidden flex items-center justify-center relative group">
+                                                <img id="img_ticket_panel_banner" src="${settings.ticket_panel_banner || ''}" class="w-full h-full object-cover ${settings.ticket_panel_banner ? '' : 'hidden'}">
+                                                <div id="placeholder_ticket_panel_banner" class="text-gray-500 text-xs flex flex-col items-center gap-1 ${settings.ticket_panel_banner ? 'hidden' : ''}">
+                                                    <span class="text-2xl">🖼️</span>
+                                                    <span>لا توجد خلفية</span>
+                                                </div>
+                                            </div>
+                                            <button type="button" onclick="clearUploadedImage('ticket_panel_banner')" class="text-xs text-rose-400 hover:text-rose-300 flex items-center gap-1.5 transition font-bold py-1 px-3 rounded-lg hover:bg-rose-950/30 cursor-pointer">
+                                                <span>🗑️</span>
+                                                <span>إزالة الخلفية</span>
+                                            </button>
+                                        </div>
+
+                                        <!-- نصوص الشرح وزر الرفع -->
+                                        <div class="flex-1 text-right space-y-1 w-full">
+                                            <div class="flex items-center justify-end gap-2">
+                                                <h5 class="text-sm font-black text-white">صورة خلفية إعداد التذكرة</h5>
+                                                <span class="text-purple-400 text-base">🖼️</span>
+                                            </div>
+                                            <ul class="text-[11px] text-gray-400 space-y-0.5 list-disc list-inside">
+                                                <li>ستظهر هذه الصورة كبانر رئيسي أعلى رسالة لوحة التذاكر.</li>
+                                                <li>الحد الأدنى الموصى به للحجم هو 1920x1080 بكسل.</li>
+                                                <li>نسبة العرض إلى الارتفاع الموصى بها هي 16:9.</li>
+                                            </ul>
+                                        </div>
+
+                                        <!-- زر رفع الخلفية ومستودع الملف -->
+                                        <div class="w-full md:w-auto flex justify-end">
+                                            <input type="file" id="file_ticket_panel_banner" accept="image/*" class="hidden" onchange="handleImageFileUpload(this, 'ticket_panel_banner')">
+                                            <input type="hidden" id="input_ticket_panel_banner" name="ticket_panel_banner" value="${settings.ticket_panel_banner || ''}">
+                                            <button type="button" onclick="document.getElementById('file_ticket_panel_banner').click()" class="px-6 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-xl text-xs font-black transition shadow-lg shadow-purple-900/30 flex items-center gap-2 cursor-pointer w-full md:w-auto justify-center">
+                                                <span>📤</span>
+                                                <span id="btn_text_ticket_panel_banner">رفع الخلفية</span>
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div>
-                                    <label class="block text-xs font-bold text-gray-300 mb-2">رابط صورة الترحيب داخل التذكرة (Welcome Embed Image)</label>
-                                    <input type="url" name="ticket_welcome_image" value="${settings.ticket_welcome_image || ''}" placeholder="https://example.com/welcome_image.png" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-left font-mono">
+
+                                <!-- 2. صورة خط إعداد التذاكر / كفاصل (Welcome Embed Image) -->
+                                <div class="bg-[#0b0d14] border border-white/5 hover:border-purple-500/30 rounded-2xl p-5 transition shadow-lg">
+                                    <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+                                        <!-- المعاينة وزر الحذف -->
+                                        <div class="w-full md:w-auto flex flex-col items-center gap-2">
+                                            <div id="preview_box_ticket_welcome_image" class="w-full md:w-56 h-14 rounded-xl border border-white/10 bg-[#12141f] overflow-hidden flex items-center justify-center relative group">
+                                                <img id="img_ticket_welcome_image" src="${settings.ticket_welcome_image || ''}" class="w-full h-full object-cover ${settings.ticket_welcome_image ? '' : 'hidden'}">
+                                                <div id="placeholder_ticket_welcome_image" class="text-gray-500 text-xs flex flex-col items-center gap-1 ${settings.ticket_welcome_image ? 'hidden' : ''}">
+                                                    <span class="text-lg">🖼️</span>
+                                                    <span>لا يوجد خط</span>
+                                                </div>
+                                            </div>
+                                            <button type="button" onclick="clearUploadedImage('ticket_welcome_image')" class="text-xs text-rose-400 hover:text-rose-300 flex items-center gap-1.5 transition font-bold py-1 px-3 rounded-lg hover:bg-rose-950/30 cursor-pointer">
+                                                <span>🗑️</span>
+                                                <span>إزالة الخط</span>
+                                            </button>
+                                        </div>
+
+                                        <!-- نصوص الشرح وزر الرفع -->
+                                        <div class="flex-1 text-right space-y-1 w-full">
+                                            <div class="flex items-center justify-end gap-2">
+                                                <h5 class="text-sm font-black text-white">صورة خط إعداد التذاكر</h5>
+                                                <span class="text-purple-400 text-base">🖼️</span>
+                                            </div>
+                                            <ul class="text-[11px] text-gray-400 space-y-0.5 list-disc list-inside">
+                                                <li>ستظهر صورة الخط هذه كفاصل في الترحيب داخل التذكرة.</li>
+                                                <li>الحد الأدنى الموصى به للعرض هو 1920 بكسل.</li>
+                                                <li>نسبة العرض إلى الارتفاع الموصى بها هي 5:1.</li>
+                                            </ul>
+                                        </div>
+
+                                        <!-- زر رفع الخط ومستودع الملف -->
+                                        <div class="w-full md:w-auto flex justify-end">
+                                            <input type="file" id="file_ticket_welcome_image" accept="image/*" class="hidden" onchange="handleImageFileUpload(this, 'ticket_welcome_image')">
+                                            <input type="hidden" id="input_ticket_welcome_image" name="ticket_welcome_image" value="${settings.ticket_welcome_image || ''}">
+                                            <button type="button" onclick="document.getElementById('file_ticket_welcome_image').click()" class="px-6 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-xl text-xs font-black transition shadow-lg shadow-purple-900/30 flex items-center gap-2 cursor-pointer w-full md:w-auto justify-center">
+                                                <span>📤</span>
+                                                <span id="btn_text_ticket_welcome_image">رفع الخط</span>
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
@@ -3998,6 +4076,84 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
 
                     </div>
                     <script>
+                    async function handleImageFileUpload(input, fieldName) {
+                        const file = input.files && input.files[0];
+                        if (!file) return;
+
+                        if (!file.type.startsWith('image/')) {
+                            alert('❌ يرجى اختيار ملف صورة صالح (PNG, JPG, WEBP, GIF)');
+                            return;
+                        }
+
+                        if (file.size > 15 * 1024 * 1024) {
+                            alert('❌ حجم الصورة يتجاوز 15 ميجابايت. يرجى اختيار صورة أصغر.');
+                            return;
+                        }
+
+                        const btnText = document.getElementById('btn_text_' + fieldName);
+                        const origText = btnText ? btnText.innerText : 'رفع';
+                        if (btnText) btnText.innerText = 'جاري الرفع... ⏳';
+
+                        const reader = new FileReader();
+                        reader.onload = async function(e) {
+                            const base64Data = e.target.result;
+                            try {
+                                const res = await fetch('/api/guild/${guildId}/upload-image', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({
+                                        imageBase64: base64Data,
+                                        fieldName: fieldName
+                                    })
+                                });
+                                const data = await res.json();
+                                if (data.success && data.url) {
+                                    // Update hidden input
+                                    const hiddenInput = document.getElementById('input_' + fieldName);
+                                    if (hiddenInput) hiddenInput.value = data.url;
+
+                                    // Update preview
+                                    const imgElem = document.getElementById('img_' + fieldName);
+                                    const placeholderElem = document.getElementById('placeholder_' + fieldName);
+                                    if (imgElem) {
+                                        imgElem.src = data.url;
+                                        imgElem.classList.remove('hidden');
+                                    }
+                                    if (placeholderElem) {
+                                        placeholderElem.classList.add('hidden');
+                                    }
+                                    if (btnText) btnText.innerText = '✅ تم الرفع';
+                                    setTimeout(() => { if (btnText) btnText.innerText = origText; }, 2500);
+                                } else {
+                                    alert('❌ فشل رفع الصورة: ' + (data.error || 'خطأ غير معروف'));
+                                    if (btnText) btnText.innerText = origText;
+                                }
+                            } catch(err) {
+                                alert('حدث خطأ أثناء رفع الصورة: ' + err.message);
+                                if (btnText) btnText.innerText = origText;
+                            }
+                        };
+                        reader.readAsDataURL(file);
+                    }
+
+                    function clearUploadedImage(fieldName) {
+                        const hiddenInput = document.getElementById('input_' + fieldName);
+                        if (hiddenInput) hiddenInput.value = '';
+
+                        const imgElem = document.getElementById('img_' + fieldName);
+                        const placeholderElem = document.getElementById('placeholder_' + fieldName);
+                        if (imgElem) {
+                            imgElem.src = '';
+                            imgElem.classList.add('hidden');
+                        }
+                        if (placeholderElem) {
+                            placeholderElem.classList.remove('hidden');
+                        }
+
+                        const fileInput = document.getElementById('file_' + fieldName);
+                        if (fileInput) fileInput.value = '';
+                    }
+
                     async function sendTicketPanelDirect() {
                         const panelCh = document.getElementById('ticket_panel_channel')?.value;
                         if (!panelCh) {
@@ -8738,6 +8894,54 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
     });
 
     // 5. REST APIs
+    app.post('/api/guild/:guildId/upload-image', express.json({ limit: '20mb' }), async (req, res) => {
+        try {
+            if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
+            const { imageBase64, fieldName } = req.body;
+            if (!imageBase64) return res.status(400).json({ success: false, error: 'لم يتم إرسال أي صورة' });
+
+            // Base64 regex parsing
+            const matches = imageBase64.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
+            let ext = 'png';
+            let dataBuffer = null;
+
+            if (matches && matches.length === 3) {
+                const mime = matches[1];
+                if (mime === 'image/jpeg' || mime === 'image/jpg') ext = 'jpg';
+                else if (mime === 'image/gif') ext = 'gif';
+                else if (mime === 'image/webp') ext = 'webp';
+                else ext = 'png';
+                dataBuffer = Buffer.from(matches[2], 'base64');
+            } else {
+                dataBuffer = Buffer.from(imageBase64, 'base64');
+            }
+
+            if (dataBuffer.length > 15 * 1024 * 1024) {
+                return res.status(400).json({ success: false, error: 'حجم الصورة كبير جداً (الحد الأقصى 15 ميجابايت)' });
+            }
+
+            const fs = require('fs');
+            const path = require('path');
+            const uploadDir = path.join(__dirname, 'public', 'uploads');
+            if (!fs.existsSync(uploadDir)) {
+                fs.mkdirSync(uploadDir, { recursive: true });
+            }
+
+            const fileName = `ticket_${fieldName || 'img'}_${req.params.guildId}_${Date.now()}.${ext}`;
+            const filePath = path.join(uploadDir, fileName);
+            fs.writeFileSync(filePath, dataBuffer);
+
+            const protocol = req.headers['x-forwarded-proto'] || req.protocol || 'http';
+            const host = req.get('host');
+            const fullUrl = `${protocol}://${host}/uploads/${fileName}`;
+
+            res.json({ success: true, url: fullUrl });
+        } catch (e) {
+            console.error('Upload image error:', e);
+            res.status(500).json({ success: false, error: e.message });
+        }
+    });
+
     app.post('/api/guild/:guildId/settings', express.json(), (req, res) => {
         try {
             if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
