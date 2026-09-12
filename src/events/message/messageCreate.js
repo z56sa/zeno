@@ -18,9 +18,10 @@ module.exports = {
     const isAdmin = message.member?.permissions.has(PermissionFlagsBits.Administrator) ||
                     message.member?.permissions.has(PermissionFlagsBits.ManageGuild);
 
-    const isAutoModWhitelisted = isAdmin ||
+    const isAutoModWhitelisted = (settings.automod_ignore_admins === 1 ? isAdmin : false) ||
       (settings.automod_whitelist_role && message.member?.roles.cache.has(settings.automod_whitelist_role)) ||
-      (settings.automod_whitelist_channel && message.channel.id === settings.automod_whitelist_channel);
+      (settings.automod_whitelist_channel && message.channel.id === settings.automod_whitelist_channel) ||
+      (db.isUserWhitelisted && db.isUserWhitelisted(guildId, userId, 'whitelist'));
 
     // 👮 Staff Activity: تسجيل رسائل الإدارة تلقائياً
     const isStaff = isAdmin || 
@@ -133,7 +134,7 @@ module.exports = {
       }
 
       // 4. منع سبام الإيموجيات (Anti-Emoji-Spam)
-      if (settings.anti_emoji_spam) {
+      if (settings.anti_emoji_spam || settings.anti_emoji) {
         const maxEmojis = settings.max_emojis || 5;
         const customEmojis = (message.content.match(/<a?:.+?:\d+>/g) || []).length;
         const unicodeEmojis = (message.content.match(/\p{Extended_Pictographic}/gu) || []).length;
@@ -239,7 +240,7 @@ module.exports = {
     }
 
     // --- 1. نظام الحماية من الروابط (Anti-Link) ---
-    if (settings.anti_link && !isAutoModWhitelisted) {
+    if ((settings.anti_link || settings.anti_links) && !isAutoModWhitelisted) {
       const linkRegex = /(https?:\/\/[^\s]+)|(discord\.(gg|io|me|li)\/[^\s]+)|(discord\.com\/invite\/[^\s]+)|(www\.[^\s]+)|([a-zA-Z0-9-]+\.(com|net|org|xyz|gg|tk|ml|ga|cf|gq)\b)/gi;
       if (linkRegex.test(message.content)) {
         try {
@@ -256,7 +257,7 @@ module.exports = {
     }
 
     // --- 1.5 نظام الحماية من دعوات الديسكورد (Anti-Invites) ---
-    if (settings.anti_invites && !isAutoModWhitelisted) {
+    if ((settings.anti_invites || settings.anti_invite_links) && !isAutoModWhitelisted) {
       const inviteRegex = /discord\.(gg|io|me|li|com\/invite)\/[^\s]+/gi;
       if (inviteRegex.test(message.content)) {
         try {

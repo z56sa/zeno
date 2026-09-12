@@ -11,8 +11,11 @@ const antiNuke = {
    * فحص وتنفيذ إجراء الحماية عند تجاوز الحد المسموح
    */
   async checkAction(guild, actionType, logType) {
-    const settings = db.getGuildSettings(guild.id);
-    if (!settings.antinuke_enabled) return;
+    const settings = db.getGuildSettings(guild.id) || {};
+    const isProtectionOn = (settings.anti_nuke_enabled !== 0 && settings.anti_nuke_enabled !== undefined && settings.anti_nuke_enabled !== null) 
+      ? !!settings.anti_nuke_enabled 
+      : (settings.antinuke_enabled !== 0 && settings.antinuke_enabled !== undefined && settings.antinuke_enabled !== null);
+    if (!isProtectionOn) return;
 
     try {
       const fetchedLogs = await guild.fetchAuditLogs({

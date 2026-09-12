@@ -7429,7 +7429,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                     return `
                     <div class="bg-[#12141f] border border-white/5 hover:border-purple-500/30 rounded-2xl p-4 flex items-center justify-between gap-4 transition">
                         <div class="flex items-center gap-2">
-                            <button onclick="if(confirm('هل أنت متأكد من استعادة هذه النسخة الاحتياطية؟ سيتم إضافة العناصر المفقودة فقط.')) restoreBackup('${b.id}')" class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold shadow transition">استعادة</button>
+                            <button onclick="if(confirm('هل أنت متأكد من استعادة هذه النسخة الاحتياطية؟ سيتم إضافة العناصر المفقودة فقط.')) restoreBackup('${b.id}', this)" class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold shadow transition">استعادة</button>
                             <button onclick="if(confirm('حذف هذه النسخة الاحتياطية؟')) deleteBackup('${b.id}')" class="px-3 py-2 bg-rose-900/40 hover:bg-rose-700/50 text-rose-300 rounded-xl text-xs font-bold border border-rose-800/30 transition">🗑️</button>
                         </div>
                         <div class="flex-1 text-right">
@@ -7450,7 +7450,7 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
     <!-- Header -->
     <div class="bg-gradient-to-r from-[#1a132e] via-[#12141f] to-[#1a132e] border border-purple-500/20 p-6 rounded-3xl flex items-center justify-between shadow-2xl">
         <div class="flex items-center gap-3">
-            <button onclick="createBackupNow()" class="px-5 py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs rounded-xl shadow-lg transition">
+            <button onclick="createBackupNow(this)" class="px-5 py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs rounded-xl shadow-lg transition">
                 إنشاء نسخة الآن 💾
             </button>
         </div>
@@ -7499,12 +7499,11 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
     </div>
 
     <script>
-    async function createBackupNow() {
+    async function createBackupNow(btn) {
         const label = prompt('أدخل اسماً للنسخة (اختياري):', '');
         if (label === null) return;
-        const btn = event.target;
-        const orig = btn.textContent;
-        btn.disabled = true; btn.textContent = 'جارٍ الإنشاء... ⏳';
+        const orig = btn ? btn.textContent : '';
+        if (btn) { btn.disabled = true; btn.textContent = 'جارٍ الإنشاء... ⏳'; }
         try {
             const r = await fetch('/api/guild/${guildId}/backup/create', {
                 method: 'POST',
@@ -7515,18 +7514,18 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
             if (d.success) { alert('✅ تم إنشاء النسخة الاحتياطية بنجاح!\n📝 ' + d.channels_count + ' قناة، 🏷️ ' + d.roles_count + ' رتبة'); location.reload(); }
             else alert('❌ ' + (d.error || 'فشل الإنشاء'));
         } catch(e) { alert('❌ خطأ في الاتصال'); }
-        btn.disabled = false; btn.textContent = orig;
+        if (btn) { btn.disabled = false; btn.textContent = orig; }
     }
-    async function restoreBackup(id) {
-        const btn = event.target;
-        btn.disabled = true; btn.textContent = 'جارٍ الاستعادة... ⏳';
+    async function restoreBackup(id, btn) {
+        const orig = btn ? btn.textContent : 'استعادة';
+        if (btn) { btn.disabled = true; btn.textContent = 'جارٍ الاستعادة... ⏳'; }
         try {
             const r = await fetch('/api/guild/${guildId}/backup/' + id + '/restore', { method: 'POST' });
             const d = await r.json();
             if (d.success) alert('✅ تمت الاستعادة بنجاح!\n' + (d.message || ''));
             else alert('❌ ' + (d.error || 'فشل'));
         } catch(e) { alert('❌ خطأ'); }
-        btn.disabled = false; btn.textContent = 'استعادة';
+        if (btn) { btn.disabled = false; btn.textContent = orig; }
     }
     async function deleteBackup(id) {
         try {
@@ -9428,6 +9427,28 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                     }
                 }, 100);
                 // وظائف رفع وحذف الصور الموحدة بنمط Wicks لجميع الأقسام
+                // ✅ دوال الحفظ العالمية (تعمل في جميع الأقسام)
+                const _dashGuildId = window.location.pathname.split('/')[2];
+                async function saveProtectionSetting(key, value) {
+                    try {
+                        await fetch('/api/guild/' + _dashGuildId + '/settings', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ [key]: value ? 1 : 0 })
+                        });
+                        showSaveStatus();
+                    } catch(e) { console.error('saveProtectionSetting error', e); }
+                }
+                async function saveAutomodSetting(key, value) {
+                    try {
+                        await fetch('/api/guild/' + _dashGuildId + '/settings', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ [key]: value ? 1 : 0 })
+                        });
+                        showSaveStatus();
+                    } catch(e) { console.error('saveAutomodSetting error', e); }
+                }
                 async function uploadImageFile(input, fieldName, onDone) {
                     const file = input.files && input.files[0];
                     if (!file) return;
@@ -9583,6 +9604,53 @@ ${embedScriptHtml}
                     targetGuild.members.me.setNickname(settings.bot_nickname || null).catch(() => {});
                 }
             }
+            res.json({ success: true });
+        } catch (e) {
+            res.status(500).json({ success: false, error: e.message });
+        }
+    });
+
+    // =============================================
+    // Whitelist & AntiMod API
+    // =============================================
+    app.post('/api/guild/:guildId/whitelist', express.json(), async (req, res) => {
+        try {
+            if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
+            const { guildId } = req.params;
+            const { userId, type } = req.body;
+            if (!userId) return res.status(400).json({ success: false, error: 'User ID is required' });
+
+            if (database.addProtectionWhitelist) {
+                database.addProtectionWhitelist(guildId, String(userId).trim(), type || 'whitelist', req.session.user.id);
+            } else {
+                rawDb.prepare(`
+                    INSERT OR REPLACE INTO protection_whitelist (guild_id, user_id, type, added_by, created_at)
+                    VALUES (?, ?, ?, ?, strftime('%s','now'))
+                `).run(guildId, String(userId).trim(), type || 'whitelist', req.session.user.id);
+            }
+
+            res.json({ success: true });
+        } catch (e) {
+            res.status(500).json({ success: false, error: e.message });
+        }
+    });
+
+    app.delete('/api/guild/:guildId/whitelist', express.json(), async (req, res) => {
+        try {
+            if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
+            const { guildId } = req.params;
+            const { userId, type } = req.body;
+            if (!userId) return res.status(400).json({ success: false, error: 'User ID is required' });
+
+            if (database.removeProtectionWhitelist) {
+                database.removeProtectionWhitelist(guildId, String(userId).trim(), type || 'whitelist');
+            } else {
+                rawDb.prepare(`
+                    DELETE FROM protection_whitelist 
+                    WHERE guild_id = ? AND user_id = ? AND type = ?
+                `).run(guildId, String(userId).trim(), type || 'whitelist');
+            }
+
             res.json({ success: true });
         } catch (e) {
             res.status(500).json({ success: false, error: e.message });
@@ -9784,16 +9852,21 @@ ${embedScriptHtml}
                 const channel = client.channels.cache.get(channelId) || await client.channels.fetch(channelId).catch(() => null);
                 if (channel && channel.isTextBased()) {
                     const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+                    const avatarURL = req.session.user.avatar
+                        ? `https://cdn.discordapp.com/avatars/${req.session.user.id}/${req.session.user.avatar}.png`
+                        : `https://cdn.discordapp.com/embed/avatars/0.png`;
+
                     const suggEmbed = new EmbedBuilder()
-                        .setColor('#9333ea')
-                        .setAuthor({ name: req.session.user.username, iconURL: req.session.user.avatar ? 'https://cdn.discordapp.com/avatars/' + req.session.user.id + '/' + req.session.user.avatar + '.png' : undefined })
+                        .setColor(0x9333ea)
+                        .setAuthor({ name: req.session.user.username + ' • اقتراح جديد', iconURL: avatarURL })
                         .setTitle(title ? ('💡 ' + title) : '💡 اقتراح جديد')
                         .setDescription(content)
                         .addFields(
                             { name: '📂 التصنيف', value: category || 'عام', inline: true },
-                            { name: '⏳ الحالة', value: 'قيد المراجعة', inline: true }
+                            { name: '⏳ الحالة', value: 'قيد المراجعة', inline: true },
+                            { name: '📊 التصويت | 0%', value: '░░░░░░░░░░\n👍 0  |  👎 0', inline: false }
                         )
-                        .setFooter({ text: 'صاحب الاقتراح: ' + req.session.user.username })
+                        .setFooter({ text: 'صاحب الاقتراح: ' + req.session.user.username + ' • من الداشبورد' })
                         .setTimestamp();
 
                     const row = new ActionRowBuilder().addComponents(
@@ -9836,6 +9909,57 @@ ${embedScriptHtml}
             const { status, reason } = req.body;
 
             const updated = database.updateSuggestionStatus(id, status, reason, req.session.user.id);
+
+            // ✅ تحديث embed ديسكورد إذا كانت الرسالة موجودة
+            if (updated && updated.message_id && updated.channel_id) {
+                try {
+                    const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+                    const ch = client.channels.cache.get(updated.channel_id) || await client.channels.fetch(updated.channel_id).catch(() => null);
+                    if (ch && ch.isTextBased()) {
+                        const msg = await ch.messages.fetch(updated.message_id).catch(() => null);
+                        if (msg) {
+                            let upCount = 0, downCount = 0;
+                            try { upCount = JSON.parse(updated.upvotes || '[]').length; } catch(e) {}
+                            try { downCount = JSON.parse(updated.downvotes || '[]').length; } catch(e) {}
+                            const total = upCount + downCount || 1;
+                            const pct = Math.round((upCount / total) * 100);
+                            const bar = '█'.repeat(Math.round(pct / 10)) + '░'.repeat(10 - Math.round(pct / 10));
+
+                            const statusMap = {
+                                pending: { label: '⏳ قيد المراجعة', color: 0xf59e0b },
+                                accepted: { label: '✅ مقبول', color: 0x22c55e },
+                                rejected: { label: '❌ مرفوض', color: 0xef4444 },
+                                implemented: { label: '🚀 تم التنفيذ', color: 0x6366f1 }
+                            };
+                            const sm = statusMap[status] || statusMap.pending;
+
+                            const newEmbed = new EmbedBuilder()
+                                .setColor(sm.color)
+                                .setTitle(updated.title ? ('💡 ' + updated.title) : '💡 اقتراح')
+                                .setDescription(updated.content)
+                                .addFields(
+                                    { name: '📂 التصنيف', value: updated.category || 'عام', inline: true },
+                                    { name: '📊 الحالة', value: sm.label, inline: true },
+                                    { name: `📊 التصويت | ${pct}%`, value: `${bar}\n👍 ${upCount}  |  👎 ${downCount}`, inline: false }
+                                )
+                                .setFooter({ text: `صاحب الاقتراح: ${updated.user_id} • راجعه: ${req.session.user.username}` })
+                                .setTimestamp();
+
+                            if (reason) newEmbed.addFields({ name: '💬 رد الإدارة', value: reason });
+
+                            const row = new ActionRowBuilder().addComponents(
+                                new ButtonBuilder().setCustomId('sugg_upvote').setLabel(String(upCount)).setEmoji('👍').setStyle(ButtonStyle.Success),
+                                new ButtonBuilder().setCustomId('sugg_downvote').setLabel(String(downCount)).setEmoji('👎').setStyle(ButtonStyle.Danger)
+                            );
+
+                            await msg.edit({ embeds: [newEmbed], components: [row] });
+                        }
+                    }
+                } catch(embedErr) {
+                    console.error('[Suggestions] Failed to update Discord embed:', embedErr.message);
+                }
+            }
+
             res.json({ success: true, updated });
         } catch(e) {
             res.status(500).json({ success: false, error: e.message });
