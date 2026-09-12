@@ -8533,16 +8533,18 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
 
                         const prevTitle = document.getElementById('prevTitle');
                         const titleUrl = document.getElementById('embTitleUrl')?.value?.trim() || '';
-                        if (title) {
-                            prevTitle.style.display = 'block';
-                            if (titleUrl) {
-                                prevTitle.innerHTML = '<a href="' + titleUrl + '" target="_blank" class="text-[#00a8fc] hover:underline">' + title + '</a>';
+                        if (prevTitle) {
+                            if (title) {
+                                prevTitle.style.display = 'block';
+                                if (titleUrl) {
+                                    prevTitle.innerHTML = '<a href="' + titleUrl + '" target="_blank" class="text-[#00a8fc] hover:underline">' + title + '</a>';
+                                } else {
+                                    prevTitle.textContent = title;
+                                }
                             } else {
-                                prevTitle.textContent = title;
+                                prevTitle.style.display = 'none';
+                                prevTitle.innerHTML = '';
                             }
-                        } else {
-                            prevTitle.style.display = 'none';
-                            prevTitle.innerHTML = '';
                         }
 
                         // Thumbnail
@@ -8559,31 +8561,35 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                         }
 
                         const prevDesc = document.getElementById('prevDesc');
-                        prevDesc.textContent = desc || 'محتوى الإيمبد سيظهر هنا بالمعاينة المباشرة...';
+                        if (prevDesc) prevDesc.textContent = desc || 'محتوى الإيمبد سيظهر هنا بالمعاينة المباشرة...';
 
                         const prevFieldsGrid = document.getElementById('prevFieldsGrid');
-                        const validFields = embedFields.filter(f => f.name || f.value);
-                        if (validFields.length > 0) {
-                            prevFieldsGrid.classList.remove('hidden');
-                            let fieldsHtml = '';
-                            for (let f of validFields) {
-                                fieldsHtml += '<div class="' + (f.inline ? 'col-span-1' : 'col-span-2') + ' bg-black/20 p-2 rounded-lg text-right">' +
-                                    '<div class="text-[11px] font-bold text-gray-300">' + (f.name || 'حقل') + '</div>' +
-                                    '<div class="text-[11px] text-gray-400">' + (f.value || '...') + '</div>' +
-                                    '</div>';
+                        if (prevFieldsGrid) {
+                            const validFields = embedFields.filter(f => f.name || f.value);
+                            if (validFields.length > 0) {
+                                prevFieldsGrid.classList.remove('hidden');
+                                let fieldsHtml = '';
+                                for (let f of validFields) {
+                                    fieldsHtml += '<div class="' + (f.inline ? 'col-span-1' : 'col-span-2') + ' bg-black/20 p-2 rounded-lg text-right">' +
+                                        '<div class="text-[11px] font-bold text-gray-300">' + (f.name || 'حقل') + '</div>' +
+                                        '<div class="text-[11px] text-gray-400">' + (f.value || '...') + '</div>' +
+                                        '</div>';
+                                }
+                                prevFieldsGrid.innerHTML = fieldsHtml;
+                            } else {
+                                prevFieldsGrid.classList.add('hidden');
                             }
-                            prevFieldsGrid.innerHTML = fieldsHtml;
-                        } else {
-                            prevFieldsGrid.classList.add('hidden');
                         }
 
                         const prevImageRow = document.getElementById('prevImageRow');
                         const prevMainImg = document.getElementById('prevMainImg');
-                        if (image) {
-                            prevMainImg.src = image;
-                            prevImageRow.classList.remove('hidden');
-                        } else {
-                            prevImageRow.classList.add('hidden');
+                        if (prevImageRow && prevMainImg) {
+                            if (image) {
+                                prevMainImg.src = image;
+                                prevImageRow.classList.remove('hidden');
+                            } else {
+                                prevImageRow.classList.add('hidden');
+                            }
                         }
 
                         const prevFooterText = document.getElementById('prevFooterText');
@@ -8591,20 +8597,24 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                         const prevTimestamp = document.getElementById('prevTimestamp');
                         const prevFooterDot = document.getElementById('prevFooterDot');
 
-                        prevFooterText.textContent = footer || '';
-                        if (footerIcon && footer) {
-                            prevFooterImg.src = footerIcon;
-                            prevFooterImg.classList.remove('hidden');
-                        } else {
-                            prevFooterImg.classList.add('hidden');
+                        if (prevFooterText) prevFooterText.textContent = footer || '';
+                        if (prevFooterImg) {
+                            if (footerIcon && footer) {
+                                prevFooterImg.src = footerIcon;
+                                prevFooterImg.classList.remove('hidden');
+                            } else {
+                                prevFooterImg.classList.add('hidden');
+                            }
                         }
 
-                        if (showTimestamp) {
-                            prevTimestamp.textContent = 'اليوم في ' + new Date().toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' });
-                            prevFooterDot.classList.toggle('hidden', !footer);
-                        } else {
-                            prevTimestamp.textContent = '';
-                            prevFooterDot.classList.add('hidden');
+                        if (prevTimestamp) {
+                            if (showTimestamp) {
+                                prevTimestamp.textContent = 'اليوم في ' + new Date().toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' });
+                                if (prevFooterDot) prevFooterDot.classList.toggle('hidden', !footer);
+                            } else {
+                                prevTimestamp.textContent = '';
+                                if (prevFooterDot) prevFooterDot.classList.add('hidden');
+                            }
                         }
                     }
 
