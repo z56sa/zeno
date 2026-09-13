@@ -633,6 +633,12 @@ try { db.exec("ALTER TABLE guild_settings ADD COLUMN jail_role TEXT;"); } catch(
 try { db.exec("ALTER TABLE guild_settings ADD COLUMN jail_channel TEXT;"); } catch(e) {}
 try { db.exec("ALTER TABLE guild_settings ADD COLUMN mute_role TEXT;"); } catch(e) {}
 
+// نظام رتب الألوان (Color Roles)
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN colors_enabled INTEGER DEFAULT 1;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN color_picker_channel TEXT;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN colors_required_role TEXT;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN color_role_ids TEXT DEFAULT '';"); } catch(e) {}
+
 console.log('[DB] ✅ SQLite database initialized successfully');
 tursoSync.initAndRestore(db).catch(e => console.error('[TURSO] Init error:', e.message));
 

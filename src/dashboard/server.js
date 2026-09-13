@@ -6090,10 +6090,70 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                                     ${renderRoleSelect('colors_required_role', settings.colors_required_role || '')}
                                 </div>
                             </div>
-                            <div class="pt-2">
+                             <div class="pt-2">
                                 <label class="block text-xs font-bold text-gray-300 mb-2">رتب الألوان المتاحة (Role IDs مفصولة بفواصل)</label>
                                 <textarea name="color_role_ids" rows="3" placeholder="أيدي_رتبة_1, أيدي_رتبة_2, أيدي_رتبة_3..." class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl p-3 text-xs text-white outline-none font-mono text-right leading-relaxed">${settings.color_role_ids || ''}</textarea>
                             </div>
+                            <div class="pt-3 border-t border-white/5 flex justify-start gap-3">
+                                <button type="button" id="btnSendColorPanel" onclick="sendColorPanel('${guildId}')" class="flex items-center gap-2 px-5 py-2.5 bg-pink-600 hover:bg-pink-700 text-white font-bold rounded-xl text-xs transition shadow-lg shadow-pink-900/30">
+                                    <span>📤</span>
+                                    <span>إرسال لوحة الألوان للقناة</span>
+                                </button>
+                            </div>
+                            <script>
+                            async function sendColorPanel(guildId) {
+                                const btn = document.getElementById('btnSendColorPanel');
+                                const chSelect = document.querySelector('select[name="color_picker_channel"]');
+                                const rolesArea = document.querySelector('textarea[name="color_role_ids"]');
+                                const channelId = chSelect ? chSelect.value : '';
+                                const roleIds = rolesArea ? rolesArea.value.trim() : '';
+
+                                if (!channelId) {
+                                    alert('⚠️ يرجى اختيار قناة لوحة الألوان أولاً!');
+                                    return;
+                                }
+                                if (!roleIds) {
+                                    alert('⚠️ يرجى إدخال أيدي رتب الألوان مفصولة بفواصل أولاً!');
+                                    return;
+                                }
+
+                                if (!confirm('هل أنت متأكد من إرسال لوحة اختيار الألوان إلى القناة المحددة؟')) return;
+
+                                const origText = btn.innerHTML;
+                                btn.innerHTML = '<span>⏳</span><span>جارٍ الإرسال...</span>';
+                                btn.disabled = true;
+
+                                try {
+                                    // 1. أولاً نحفظ الإعدادات حتى تكون محدثة
+                                    await fetch('/api/guild/' + guildId + '/settings', {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({
+                                            color_picker_channel: channelId,
+                                            color_role_ids: roleIds
+                                        })
+                                    });
+
+                                    // 2. إرسال اللوحة
+                                    const res = await fetch('/api/guild/' + guildId + '/colors/send-panel', {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({ channelId: channelId })
+                                    });
+                                    const data = await res.json();
+                                    if (data.success) {
+                                        alert('✅ تم إرسال لوحة الألوان إلى القناة بنجاح!');
+                                    } else {
+                                        alert('❌ فشل الإرسال: ' + (data.error || 'حدث خطأ غير معروف'));
+                                    }
+                                } catch(e) {
+                                    alert('❌ حدث خطأ في الاتصال: ' + e.message);
+                                } finally {
+                                    btn.innerHTML = origText;
+                                    btn.disabled = false;
+                                }
+                            }
+                            </script>
                         </div>
                     </div>`;
             } else if (section === 'boost') {
@@ -10246,6 +10306,64 @@ ${embedScriptHtml}
             res.json({ success: true });
         } catch (err) {
             res.status(500).json({ success: false, error: err.message });
+        }
+    });
+
+    // =============================================
+    // Color Roles — إرسال لوحة اختيار الألوان
+    // =============================================
+    app.post('/api/guild/:guildId/colors/send-panel', express.json(), async (req, res) => {
+        try {
+            if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
+            const { guildId } = req.params;
+            const settings = database.getGuildSettings(guildId);
+            const channelId = req.body.channelId || settings.color_picker_channel;
+
+            if (!channelId) return res.status(400).json({ success: false, error: 'لم يتم تحديد قناة لوحة الألوان' });
+
+            const channel = client?.channels?.cache?.get(channelId) || await client?.channels?.fetch(channelId).catch(() => null);
+            if (!channel || !channel.isTextBased()) return res.status(400).json({ success: false, error: 'القناة غير موجودة أو ليست نصية' });
+
+            const guildObj = client?.guilds?.cache?.get(guildId);
+            const { EmbedBuilder, ActionRowBuilder, StringSelectMenuBuilder } = require('discord.js');
+
+            // جلب رتب الألوان
+            const roleIds = (settings.color_role_ids || '').split(',').map(r => r.trim()).filter(Boolean);
+            if (!roleIds.length) return res.status(400).json({ success: false, error: 'لا توجد رتب ألوان مضافة. أضف IDs الرتب أولاً.' });
+
+            // بناء الـ options من رتب السيرفر
+            const guildRoles = guildObj?.roles?.cache;
+            const options = roleIds.map(rid => {
+                const role = guildRoles?.get(rid);
+                return {
+                    label: role ? role.name : `رتبة (${rid})`,
+                    value: `color_role_${rid}`,
+                    description: role?.hexColor !== '#000000' ? role?.hexColor : undefined,
+                    emoji: '🎨'
+                };
+            }).slice(0, 25);
+
+            const menu = new StringSelectMenuBuilder()
+                .setCustomId('color_role_select')
+                .setPlaceholder('🎨 اختر لونك المفضل...')
+                .addOptions(options);
+
+            const embed = new EmbedBuilder()
+                .setColor('#9333ea')
+                .setTitle('🎨 اختيار لون الرتبة')
+                .setDescription('اختر لونك المفضل من القائمة أدناه!\nيمكنك تغيير لونك في أي وقت.')
+                .setFooter({ text: guildObj?.name || 'Color Roles', iconURL: guildObj?.iconURL({ dynamic: true }) || undefined })
+                .setTimestamp();
+
+            await channel.send({
+                embeds: [embed],
+                components: [new ActionRowBuilder().addComponents(menu)]
+            });
+
+            res.json({ success: true });
+        } catch(e) {
+            console.error('Error sending color panel:', e);
+            res.status(500).json({ success: false, error: e.message });
         }
     });
 

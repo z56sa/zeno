@@ -65,6 +65,51 @@ module.exports = {
         return;
       }
 
+      // 1.5 التعامل مع اختيار رتبة الألوان (Color Roles Select Menu)
+      if (interaction.isStringSelectMenu() && interaction.customId === 'color_role_select') {
+        await interaction.deferReply({ flags: 64 }).catch(() => {});
+        const selectedValue = interaction.values[0];
+        const roleId = selectedValue?.replace('color_role_', '');
+
+        if (!roleId) {
+          return interaction.editReply({ content: '❌ حدث خطأ في اختيار الرتبة.' });
+        }
+
+        const settings = db.getGuildSettings(interaction.guild.id);
+        // التحقق من الرتبة المطلوبة لاختيار الألوان
+        if (settings.colors_required_role) {
+          if (!interaction.member.roles.cache.has(settings.colors_required_role) && !interaction.member.permissions.has(PermissionFlagsBits.Administrator)) {
+            return interaction.editReply({ content: `❌ يجب أن تمتلك رتبة <@&${settings.colors_required_role}> لتتمكن من تغيير لونك!` });
+          }
+        }
+
+        // إزالة رتب الألوان السابقة الخاصة بنظام الألوان لتجنب تراكم الرتب
+        const allColorRoleIds = (settings.color_role_ids || '').split(',').map(r => r.trim()).filter(Boolean);
+        const rolesToRemove = interaction.member.roles.cache.filter(r => allColorRoleIds.includes(r.id) && r.id !== roleId);
+        
+        try {
+          if (rolesToRemove.size > 0) {
+            await interaction.member.roles.remove(rolesToRemove);
+          }
+
+          const targetRole = interaction.guild.roles.cache.get(roleId);
+          if (!targetRole) {
+            return interaction.editReply({ content: '❌ لم يتم العثور على الرتبة المحددة في السيرفر.' });
+          }
+
+          if (interaction.member.roles.cache.has(roleId)) {
+            await interaction.member.roles.remove(targetRole);
+            return interaction.editReply({ content: `🎨 تمت إزالة رتبة اللون **${targetRole.name}** منك بنجاح.` });
+          } else {
+            await interaction.member.roles.add(targetRole);
+            return interaction.editReply({ content: `🎨 تم تعيين لونك إلى **${targetRole.name}** بنجاح!` });
+          }
+        } catch (err) {
+          console.error('[Color Roles Error]', err);
+          return interaction.editReply({ content: '❌ تعذر إعطاء الرتبة. تأكد أن رتبة البوت أعلى من رتب الألوان في ترتيب الرتب بالسيرفر.' });
+        }
+      }
+
       // 2. التعامل مع أزرار الرتب التفاعلية (Reaction Roles)
       if (interaction.isButton() && interaction.customId.startsWith('rr_')) {
         await interaction.deferReply({ flags: 64 }).catch(() => { });
