@@ -6090,30 +6090,120 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                                     ${renderRoleSelect('colors_required_role', settings.colors_required_role || '')}
                                 </div>
                             </div>
-                             <div class="pt-2">
-                                <label class="block text-xs font-bold text-gray-300 mb-2">رتب الألوان المتاحة (Role IDs مفصولة بفواصل)</label>
-                                <textarea name="color_role_ids" rows="3" placeholder="أيدي_رتبة_1, أيدي_رتبة_2, أيدي_رتبة_3..." class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl p-3 text-xs text-white outline-none font-mono text-right leading-relaxed">${settings.color_role_ids || ''}</textarea>
+                              <div class="pt-2 space-y-3">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-[11px] text-gray-400">اختر الرتب التي تمثل الألوان ليختار منها الأعضاء</span>
+                                    <label class="block text-xs font-bold text-white">رتب الألوان المتاحة (Color Roles)</label>
+                                </div>
+
+                                <!-- أداة اختيار وإضافة الرتبة -->
+                                <div class="flex items-center gap-2">
+                                    <button type="button" onclick="addColorRoleFromSelect()" class="px-4 py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl text-xs transition flex items-center gap-1 shrink-0">
+                                        <span>➕</span>
+                                        <span>إضافة الرتبة</span>
+                                    </button>
+                                    <select id="colorRoleQuickSelect" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right cursor-pointer">
+                                        <option value="">...اختر رتبة لإضافتها كـ لون</option>
+                                        ${guildRoles.map(r => `
+                                            <option value="${r.id}" data-name="${r.name.replace(/"/g, '&quot;')}" data-color="${r.hexColor}">
+                                                ${r.name} (${r.hexColor})
+                                            </option>
+                                        `).join('')}
+                                    </select>
+                                </div>
+
+                                <!-- شارات الرتب المختارة حالياً -->
+                                <div id="selectedColorRolesBadges" class="flex flex-wrap gap-2 p-3 bg-[#0b0d14] border border-white/5 rounded-xl min-h-[60px] items-center">
+                                    <span id="noColorRolesNotice" class="text-xs text-gray-500 font-bold mx-auto py-2">لم يتم اختيار أي رتب ألوان بعد، اختر رتبة من القائمة أعلاه واضغط إضافة</span>
+                                </div>
+
+                                <!-- الحقل المخفي الفعلي الذي يحفظ في قاعدة البيانات -->
+                                <input type="hidden" name="color_role_ids" id="hidden_color_role_ids" value="${settings.color_role_ids || ''}">
                             </div>
+
                             <div class="pt-3 border-t border-white/5 flex justify-start gap-3">
-                                <button type="button" id="btnSendColorPanel" onclick="sendColorPanel('${guildId}')" class="flex items-center gap-2 px-5 py-2.5 bg-pink-600 hover:bg-pink-700 text-white font-bold rounded-xl text-xs transition shadow-lg shadow-pink-900/30">
+                                <button type="button" id="btnSendColorPanel" onclick="sendColorPanel('${guildId}')" class="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white font-bold rounded-xl text-xs transition shadow-lg shadow-pink-900/30">
                                     <span>📤</span>
                                     <span>إرسال لوحة الألوان للقناة</span>
                                 </button>
                             </div>
+
                             <script>
+                            var guildRolesMap = {
+                                ${guildRoles.map(r => `"${r.id}": { name: ${JSON.stringify(r.name)}, color: "${r.hexColor}" }`).join(',\n                                ')}
+                            };
+
+                            function refreshColorRoleBadges() {
+                                var hiddenInput = document.getElementById('hidden_color_role_ids');
+                                var container = document.getElementById('selectedColorRolesBadges');
+                                if (!hiddenInput || !container) return;
+
+                                var ids = hiddenInput.value.split(',').map(function(s) { return s.trim(); }).filter(Boolean);
+                                container.innerHTML = '';
+
+                                if (ids.length === 0) {
+                                    container.innerHTML = '<span id="noColorRolesNotice" class="text-xs text-gray-500 font-bold mx-auto py-2">لم يتم اختيار أي رتب ألوان بعد، اختر رتبة من القائمة أعلاه واضغط إضافة</span>';
+                                    return;
+                                }
+
+                                ids.forEach(function(rid) {
+                                    var role = guildRolesMap[rid] || { name: 'رتبة (' + rid + ')', color: '#99aab5' };
+                                    var roleColor = role.color === '#000000' ? '#99aab5' : role.color;
+
+                                    var badge = document.createElement('div');
+                                    badge.className = 'inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border border-white/10 bg-[#12141f] text-xs font-bold text-white shadow-sm';
+                                    badge.innerHTML = '<span class="w-3.5 h-3.5 rounded-full border border-white/20 shadow-inner shrink-0" style="background-color: ' + roleColor + '"></span>' +
+                                                      '<span>' + role.name + '</span>' +
+                                                      '<button type="button" onclick="removeColorRoleItem(\\'' + rid + '\\')" class="text-gray-400 hover:text-rose-400 font-black ml-1 text-sm transition" title="حذف">×</button>';
+                                    container.appendChild(badge);
+                                });
+                            }
+
+                            function addColorRoleFromSelect() {
+                                var select = document.getElementById('colorRoleQuickSelect');
+                                if (!select || !select.value) {
+                                    alert('⚠️ يرجى اختيار رتبة من القائمة أولاً!');
+                                    return;
+                                }
+                                var rid = select.value;
+                                var hiddenInput = document.getElementById('hidden_color_role_ids');
+                                var currentIds = hiddenInput.value.split(',').map(function(s) { return s.trim(); }).filter(Boolean);
+
+                                if (currentIds.indexOf(rid) !== -1) {
+                                    alert('⚠️ هذه الرتبة مضافة بالفعل في قائمة الألوان!');
+                                    return;
+                                }
+
+                                currentIds.push(rid);
+                                hiddenInput.value = currentIds.join(',');
+                                refreshColorRoleBadges();
+                                select.value = '';
+                            }
+
+                            function removeColorRoleItem(rid) {
+                                var hiddenInput = document.getElementById('hidden_color_role_ids');
+                                var currentIds = hiddenInput.value.split(',').map(function(s) { return s.trim(); }).filter(Boolean);
+                                var newIds = currentIds.filter(function(id) { return id !== rid; });
+                                hiddenInput.value = newIds.join(',');
+                                refreshColorRoleBadges();
+                            }
+
+                            // تشغيل العرض الأولي للشارات
+                            setTimeout(refreshColorRoleBadges, 50);
+
                             async function sendColorPanel(guildId) {
                                 const btn = document.getElementById('btnSendColorPanel');
                                 const chSelect = document.querySelector('select[name="color_picker_channel"]');
-                                const rolesArea = document.querySelector('textarea[name="color_role_ids"]');
+                                const hiddenInput = document.getElementById('hidden_color_role_ids');
                                 const channelId = chSelect ? chSelect.value : '';
-                                const roleIds = rolesArea ? rolesArea.value.trim() : '';
+                                const roleIds = hiddenInput ? hiddenInput.value.trim() : '';
 
                                 if (!channelId) {
                                     alert('⚠️ يرجى اختيار قناة لوحة الألوان أولاً!');
                                     return;
                                 }
                                 if (!roleIds) {
-                                    alert('⚠️ يرجى إدخال أيدي رتب الألوان مفصولة بفواصل أولاً!');
+                                    alert('⚠️ يرجى اختيار رتبة لون واحدة على الأقل قبل الإرسال!');
                                     return;
                                 }
 
