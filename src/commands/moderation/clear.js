@@ -20,6 +20,10 @@ module.exports = {
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages),
 
   async execute(interaction) {
+    // تأكد أن الأمر يُستخدم داخل سيرفر
+    if (!interaction.guild || !interaction.member)
+      return interaction.reply({ content: '❌ هذا الأمر يعمل فقط داخل السيرفر.', flags: 64 });
+
     if (!interaction.member.permissions.has(PermissionFlagsBits.ManageMessages))
       return interaction.reply({ content: '❌ ليس لديك صلاحية حذف الرسائل.', flags: 64 });
 
