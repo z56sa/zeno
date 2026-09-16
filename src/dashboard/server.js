@@ -723,7 +723,6 @@ module.exports = function (app, client) {
     </script>
 
     <script src="/i18n.js"></script>
-    <script src="/js/dashboard-actions.js"></script>
 </head>
             <body class="min-h-screen flex flex-col bg-[#0b0d14] text-gray-200">
                 <header class="h-16 bg-[#10121b]/95 backdrop-blur-md border-b border-white/5 px-6 flex items-center justify-between sticky top-0 z-40">
