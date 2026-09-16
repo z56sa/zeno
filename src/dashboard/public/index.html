@@ -51,7 +51,7 @@
     <script src="/i18n.js"></script>
 </head>
 
-<body class="min-h-screen flex flex-col justify-between bg-[#06070a] purple-glow-bg select-none">
+<body class="min-h-screen flex flex-col justify-between bg-[#06070a] purple-glow-bg">
 
     <!-- Header Navbar (ZENO Brand & Dark Purple ProBot Style) -->
     <header class="h-20 bg-[#06070a]/90 backdrop-blur-md border-b border-purple-900/20 px-6 sm:px-12 flex items-center justify-between sticky top-0 z-50">
@@ -122,8 +122,8 @@
                 <div class="w-10 h-10 rounded-xl bg-purple-600/10 text-purple-400 flex items-center justify-center text-lg mx-auto mb-2 group-hover:scale-110 transition-transform">
                     🖥️
                 </div>
-                <div class="text-xl sm:text-2xl font-black text-white font-mono" id="statServers">...</div>
-                <div class="text-[11px] sm:text-xs text-gray-400 font-bold mt-1">السيرفرات النشطة</div>
+                <div class="text-xl sm:text-2xl font-black text-white font-mono" id="statServers">1+</div>
+                <div class="text-[11px] sm:text-xs text-gray-400 font-bold mt-1" data-i18n="active_servers">السيرفرات النشطة</div>
             </div>
 
             <!-- سرعة الاستجابة (البنق) -->
@@ -131,8 +131,8 @@
                 <div class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-lg mx-auto mb-2 group-hover:scale-110 transition-transform">
                     ⚡
                 </div>
-                <div class="text-xl sm:text-2xl font-black text-emerald-400 font-mono" dir="ltr" id="statPing">...</div>
-                <div class="text-[11px] sm:text-xs text-gray-400 font-bold mt-1">سرعة الاستجابة</div>
+                <div class="text-xl sm:text-2xl font-black text-emerald-400 font-mono" dir="ltr" id="statPing">24ms</div>
+                <div class="text-[11px] sm:text-xs text-gray-400 font-bold mt-1" data-i18n="ping_response">سرعة الاستجابة</div>
             </div>
 
             <!-- إجمالي الأعضاء -->
@@ -140,8 +140,8 @@
                 <div class="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center text-lg mx-auto mb-2 group-hover:scale-110 transition-transform">
                     👥
                 </div>
-                <div class="text-xl sm:text-2xl font-black text-white font-mono" id="statUsers">...</div>
-                <div class="text-[11px] sm:text-xs text-gray-400 font-bold mt-1">إجمالي الأعضاء</div>
+                <div class="text-xl sm:text-2xl font-black text-white font-mono" id="statUsers">100+</div>
+                <div class="text-[11px] sm:text-xs text-gray-400 font-bold mt-1" data-i18n="total_members">إجمالي الأعضاء</div>
             </div>
         </div>
 
@@ -239,34 +239,38 @@
     </footer>
 
     <script>
-        fetch('/api/bot-info')
-            .then(res => res.json())
-            .then(data => {
-                if (data && data.avatar) {
-                    const img = document.getElementById('navBotAvatar');
-                    if (img) img.src = data.avatar;
-                }
-                if (data && data.username) {
-                    const name = document.getElementById('navBotName');
-                    if (name) name.textContent = data.username.toUpperCase() + ' BOT';
-                }
-                if (data && data.guildsCount !== undefined) {
-                    const el = document.getElementById('statServers');
-                    if (el) el.textContent = data.guildsCount.toLocaleString();
-                }
-                if (data && data.ping !== undefined) {
-                    const el = document.getElementById('statPing');
-                    if (el) el.textContent = Math.max(1, data.ping) + 'ms';
-                }
-                if (data && data.dashboardUsersCount !== undefined) {
-                    const el = document.getElementById('statUsers');
-                    if (el) el.textContent = data.dashboardUsersCount.toLocaleString();
-                } else if (data && data.usersCount !== undefined) {
-                    const el = document.getElementById('statUsers');
-                    if (el) el.textContent = data.usersCount.toLocaleString();
-                }
-            })
-            .catch(() => {});
+        function loadBotInfo() {
+            fetch('/api/bot-info')
+                .then(res => {
+                    if (!res.ok) throw new Error('Network error');
+                    return res.json();
+                })
+                .then(data => {
+                    if (data && data.avatar) {
+                        const img = document.getElementById('navBotAvatar');
+                        if (img) img.src = data.avatar;
+                    }
+                    if (data && data.username) {
+                        const name = document.getElementById('navBotName');
+                        if (name) name.textContent = data.username.toUpperCase() + ' BOT';
+                    }
+                    if (data && data.guildsCount !== undefined && data.guildsCount > 0) {
+                        const el = document.getElementById('statServers');
+                        if (el) el.textContent = data.guildsCount.toLocaleString();
+                    }
+                    if (data && data.ping !== undefined && data.ping > 0) {
+                        const el = document.getElementById('statPing');
+                        if (el) el.textContent = Math.max(1, data.ping) + 'ms';
+                    }
+                    const count = data.dashboardUsersCount || data.usersCount;
+                    if (count !== undefined && count > 0) {
+                        const el = document.getElementById('statUsers');
+                        if (el) el.textContent = count.toLocaleString();
+                    }
+                })
+                .catch(() => {});
+        }
+        loadBotInfo();
     </script>
 </body>
 </html>
