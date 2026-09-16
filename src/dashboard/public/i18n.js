@@ -2623,6 +2623,48 @@
         "مجهزة على بطاقتك 🪪": "Equipped on your card 🪪",
         "مفعّل حالياً": "Currently active",
         "الصفحة الرئيسية": "Home Page",
+
+        // ── Landing Page Full Texts & Keys ──
+        "جديد: نظام التذاكر والتحكم المتطور": "New: Advanced Ticket & Control System",
+        "اصنع خادم ديسكورد": "Build a Professional",
+        "احترافي!": "Discord Server!",
+        "إضافة البوت في Discord": "Add Bot to Discord",
+        "لوحة التحكم": "Dashboard",
+        "السيرفرات النشطة": "Active Servers",
+        "سرعة الاستجابة": "Response speed",
+        "إجمالي الأعضاء": "Total Members",
+        "مميزات حقيقية وشاملة": "Real & Comprehensive Features",
+        "كل ما يحتاجه سيرفرك في مكان واحد": "Everything Your Server Needs in One Place",
+        "أنظمة برمجية متطورة مصممة بأعلى معايير الحماية والأداء، بتحكم كامل ولحظي.": "Advanced software systems built to the highest security and performance standards, with complete real-time control.",
+        "حماية متقدمة ومانع تخريب": "Advanced Security & Anti-Nuke",
+        "تصدي فوري لمحاولات السبام والروابط المشبوهة، حماية الرتب، منع تخريب القنوات، وسجل أمان ومراقبة متكامل لحظة بلحظة.": "Instant defense against spam and suspicious links, role protection, anti-channel deletion, and comprehensive real-time security logging.",
+        "بطاقات ترحيب ورتب فورية": "Welcome Cards & Auto Roles",
+        "تصميم بطاقات ترحيب بالصور الاحترافية ومشاركتها فور دخول العضو، مع إسناد تلقائي للرتب وإرسال رسائل خاصة مميزة.": "Professional image welcome card designs sent instantly upon member join, with automatic role assignment and direct welcome messages.",
+        "نظام اقتصاد ومكافآت يومية": "Economy System & Daily Rewards",
+        "نظام راتب يومي مع مكافآت Streak متتالية، لوحة متصدرين بالذهب والخبرة، ومتجر خلفيات هوية غني بـ 105 خلفية حصرية.": "Daily salary system with consecutive Streak bonuses, Gold & XP leaderboards, and an ID wallpaper shop rich with 105 exclusive designs.",
+        "لوحات تذاكر متعددة الأقسام": "Multi-Category Ticket Panels",
+        "نظام تذاكر احترافي بأزرار تفاعلية، استلام التذاكر من فريق الدعم، حفظ سجل المحادثات (Transcripts)، وتقييم طاقم العمل.": "Professional ticket system with interactive buttons, staff claiming, transcript logging, and staff performance ratings.",
+        "سجلات دقيقة (Server Logs)": "Detailed Server Logs",
+        "تسجيل شامل لـ 13 فئة (حذف وتعديل الرسائل، دخول وخروج الصوت، تعديل الرتب والقنوات، الطرد والحظر) بأدق التفاصيل.": "Comprehensive logging across 13 categories (deleted/edited messages, voice join/leave, role and channel changes, kicks and bans) with full details.",
+        "رومات صوتية مؤقتة وتلقائية": "Temp Voice Channels",
+        "إنشاء رومات صوتية خاصة تلقائياً فور دخول العضو، مع لوحة تحكم كاملة لقفل الروم، تحديد العدد، وتغيير الاسم والجودة.": "Automatic private voice channels created instantly upon join, complete with a control panel to lock, limit, rename, and adjust bitrate.",
+        "جميع الحقوق محفوظة ©": "All Rights Reserved ©",
+        "سيرفر الدعم الفني": "Support Server",
+        "بوت متعدد الأغراض قابل للتخصيص جداً حيث يوفر لك تخصيص صورة كرسالة ترحيبية وسجلات متعمقة وأوامر اجتماعية وإشراف وأكثر ...": "A highly customizable multipurpose bot providing custom welcome image cards, in-depth logs, social commands, moderation, and more...",
+        "بوت متعدد الأغراض قابل للتخصيص جداً حيث يوفر لك تخصيص صورة كرسالة ترحيبية وسجلات متعمقة وأوامر اجتماعية وإشراف وأكثر": "A highly customizable multipurpose bot providing custom welcome image cards, in-depth logs, social commands, moderation, and more",
+
+        // data-i18n key mappings
+        "landing_badge": "New: Advanced Ticket & Control System",
+        "landing_h1_1": "Build a Professional",
+        "landing_h1_2": "Discord Server!",
+        "landing_desc": "A highly customizable multipurpose bot providing custom welcome image cards, in-depth logs, social commands, moderation, and more...",
+        "add_to_discord": "Add Bot to Discord",
+        "dashboard": "Dashboard",
+        "active_servers": "Active Servers",
+        "ping_response": "Response speed",
+        "total_members": "Total Members",
+        "support_server": "Support Server",
+        "features_systems": "Features & Systems",
     };
 
     // Sort phrases by length descending to prevent sub-word collision
@@ -2706,6 +2748,21 @@
         // Avoid translating script, style, code elements
         if (node.tagName === 'SCRIPT' || node.tagName === 'STYLE' || node.tagName === 'CODE') {
             return;
+        }
+
+        // Support data-i18n attribute translation
+        if (node.getAttribute && node.getAttribute('data-i18n')) {
+            const i18nKey = node.getAttribute('data-i18n');
+            if (lang === 'en') {
+                if (dictionary[i18nKey]) {
+                    if (!node._zenoOriginalHtml) node._zenoOriginalHtml = node.innerHTML;
+                    node.textContent = dictionary[i18nKey];
+                    return;
+                }
+            } else if (node._zenoOriginalHtml) {
+                node.innerHTML = node._zenoOriginalHtml;
+                return;
+            }
         }
 
         // Check attributes like placeholder, title
