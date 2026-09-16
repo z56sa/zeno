@@ -6229,12 +6229,12 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                         <!-- 3. Search & Filter Bar -->
                         <div class="flex items-center justify-between gap-4">
                             <div class="flex items-center gap-1.5 bg-[#12141f] border border-white/5 p-1 rounded-2xl">
-                                <button type="button" id="btnLogFilterDisabled" onclick="filterLogsByStatus('disabled')" class="px-3.5 py-1.5 rounded-xl text-xs font-bold text-gray-400 hover:text-white transition cursor-pointer">المعطلة</button>
-                                <button type="button" id="btnLogFilterEnabled" onclick="filterLogsByStatus('enabled')" class="px-3.5 py-1.5 rounded-xl text-xs font-bold text-gray-400 hover:text-white transition cursor-pointer">المفعلة</button>
-                                <button type="button" id="btnLogFilterAll" onclick="filterLogsByStatus('all')" class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-purple-600 text-white transition shadow cursor-pointer">الكل</button>
+                                <button type="button" id="btnLogFilterDisabled" onclick="window.filterLogsByStatus('disabled')" class="px-3.5 py-1.5 rounded-xl text-xs font-bold text-gray-400 hover:text-white transition cursor-pointer">المعطلة</button>
+                                <button type="button" id="btnLogFilterEnabled" onclick="window.filterLogsByStatus('enabled')" class="px-3.5 py-1.5 rounded-xl text-xs font-bold text-gray-400 hover:text-white transition cursor-pointer">المفعلة</button>
+                                <button type="button" id="btnLogFilterAll" onclick="window.filterLogsByStatus('all')" class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-purple-600 text-white transition shadow cursor-pointer">الكل</button>
                             </div>
                             <div class="flex-1 relative">
-                                <input type="text" id="logSearchInput" placeholder="...ابحث عن سجل" oninput="searchLogsItems()" class="w-full bg-[#12141f] border border-white/5 focus:border-purple-500 rounded-2xl px-4 py-2.5 text-xs text-white outline-none text-right pr-10">
+                                <input type="text" id="logSearchInput" placeholder="...ابحث عن سجل" oninput="window.searchLogsItems()" class="w-full bg-[#12141f] border border-white/5 focus:border-purple-500 rounded-2xl px-4 py-2.5 text-xs text-white outline-none text-right pr-10">
                                 <span class="absolute right-3.5 top-2.5 text-gray-400 text-sm">🔍</span>
                             </div>
                         </div>
@@ -6244,7 +6244,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
 
                             <!-- Sidebar: 13 Categories -->
                             <div class="lg:col-span-1 space-y-1 bg-[#12141f] border border-white/5 p-3 rounded-3xl shadow-xl h-fit">
-                                <button type="button" onclick="toggleLogsCategoriesDropdown()" class="w-full flex items-center justify-between text-xs font-black text-white px-2 py-2 border-b border-white/5 mb-1 cursor-pointer hover:text-purple-300 transition">
+                                <button type="button" onclick="window.toggleLogsCategoriesDropdown()" class="w-full flex items-center justify-between text-xs font-black text-white px-2 py-2 border-b border-white/5 mb-1 cursor-pointer hover:text-purple-300 transition">
                                     <span id="logsCategoriesDropdownArrow" class="text-gray-400 text-xs transition-transform duration-200">▼</span>
                                     <span class="flex items-center gap-1.5">
                                         <span>الأقسام</span>
@@ -6260,10 +6260,10 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                                 <!-- Active Category Title & Global Toggles -->
                                 <div class="bg-[#12141f] border border-white/5 p-5 rounded-3xl flex items-center justify-between shadow-xl flex-wrap gap-3">
                                     <div class="flex items-center gap-2">
-                                        <button type="button" onclick="toggleActiveCategoryLogs(false)" class="px-3.5 py-1.5 bg-rose-950/40 hover:bg-rose-900/60 text-rose-400 border border-rose-800/40 rounded-xl text-xs font-bold transition flex items-center gap-1 cursor-pointer">
+                                        <button type="button" onclick="window.toggleActiveCategoryLogs(false)" class="px-3.5 py-1.5 bg-rose-950/40 hover:bg-rose-900/60 text-rose-400 border border-rose-800/40 rounded-xl text-xs font-bold transition flex items-center gap-1 cursor-pointer">
                                             <span>✕</span><span>تعطيل الكل</span>
                                         </button>
-                                        <button type="button" onclick="toggleActiveCategoryLogs(true)" class="px-3.5 py-1.5 bg-emerald-950/40 hover:bg-emerald-900/60 text-emerald-400 border border-emerald-800/40 rounded-xl text-xs font-bold transition flex items-center gap-1 cursor-pointer">
+                                        <button type="button" onclick="window.toggleActiveCategoryLogs(true)" class="px-3.5 py-1.5 bg-emerald-950/40 hover:bg-emerald-900/60 text-emerald-400 border border-emerald-800/40 rounded-xl text-xs font-bold transition flex items-center gap-1 cursor-pointer">
                                             <span>✓</span><span>تفعيل الكل</span>
                                         </button>
                                     </div>
@@ -6305,7 +6305,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                                         </div>
                                     </div>
 
-                                    <button type="button" onclick="applyCatSettingsToAll()" class="w-full py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-black rounded-xl shadow-lg transition flex items-center justify-center gap-2 cursor-pointer">
+                                    <button type="button" onclick="window.applyCatSettingsToAll()" class="w-full py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-black rounded-xl shadow-lg transition flex items-center justify-center gap-2 cursor-pointer">
                                         <span>✨ تطبيق على جميع السجلات المفعلة</span>
                                     </button>
                                 </div>
@@ -6540,129 +6540,30 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                         })();
 
                         function isLogEnabled(logId) {
-                            if (logsState[logId] && logsState[logId].enabled !== undefined) {
+                            if (logsState && logsState[logId] && logsState[logId].enabled !== undefined) {
                                 return logsState[logId].enabled === true || logsState[logId].enabled === 1 || logsState[logId].enabled === '1';
                             }
                             return false;
                         }
 
-                        function renderCategoriesSidebar() {
-                            var container = document.getElementById('logsCategoriesList');
-                            if (!container) return;
-                            var html = '';
-                            var catKeys = Object.keys(LOG_CATEGORIES);
-                            var visibleCats = 0;
-
-                            for (var i = 0; i < catKeys.length; i++) {
-                                var k = catKeys[i];
-                                var cat = LOG_CATEGORIES[k];
-                                var isSel = k === currentCategory;
-
-                                var totalItems = cat.items.length;
-                                var enabledItems = 0;
-                                for (var j = 0; j < cat.items.length; j++) {
-                                    if (isLogEnabled(cat.items[j].id)) enabledItems++;
-                                }
-
-                                // تطبيق فلتر حالة القسم (الكل / المفعلة / المعطلة)
-                                if (currentFilter === 'enabled' && enabledItems === 0) continue;
-                                if (currentFilter === 'disabled' && enabledItems === totalItems) continue;
-
-                                visibleCats++;
-
-                                var badgeClass = enabledItems === 0
-                                    ? 'px-2 py-0.5 bg-rose-950/60 text-rose-400 rounded-lg text-[10px] font-mono'
-                                    : (enabledItems === totalItems
-                                        ? 'px-2 py-0.5 bg-emerald-950/60 text-emerald-400 rounded-lg text-[10px] font-mono'
-                                        : 'px-2 py-0.5 bg-purple-950/60 text-purple-300 rounded-lg text-[10px] font-mono');
-
-                                html += '<button type="button" onclick="switchLogsCategory(\'' + k + '\')" class="w-full flex items-center justify-between px-3 py-2.5 rounded-2xl text-xs font-bold transition cursor-pointer ' + (isSel ? 'bg-purple-600 text-white shadow-lg' : 'text-gray-400 hover:text-white hover:bg-white/5') + '">';
-                                html += '<span class="' + badgeClass + '">' + enabledItems + '/' + totalItems + '</span>';
-                                html += '<span class="flex items-center gap-2"><span>' + cat.title + '</span><span>' + cat.icon + '</span></span>';
-                                html += '</button>';
-                            }
-
-                            if (visibleCats === 0) {
-                                html = '<div class="py-4 text-center text-xs text-gray-500 font-bold">لا توجد أقسام مطابقة للفلتر</div>';
-                            }
-
-                            container.innerHTML = html;
-                            updateGlobalStats();
-                        }
-
-                        function renderLogsGrid() {
-                            var container = document.getElementById('logsCardsGrid');
-                            if (!container) return;
-
-                            var cat = LOG_CATEGORIES[currentCategory] || LOG_CATEGORIES.members;
-                            document.getElementById('activeCatTitle').textContent = cat.title;
-                            document.getElementById('activeCatIcon').textContent = cat.icon;
-                            document.getElementById('activeCatCount').textContent = cat.items.length + ' سجل';
-
-                            var searchVal = (document.getElementById('logSearchInput')?.value || '').toLowerCase().trim();
-
-                            var filtered = cat.items.filter(function(item) {
-                                var en = isLogEnabled(item.id);
-                                if (currentFilter === 'enabled' && !en) return false;
-                                if (currentFilter === 'disabled' && en) return false;
-                                if (searchVal && item.title.toLowerCase().indexOf(searchVal) === -1 && item.desc.toLowerCase().indexOf(searchVal) === -1) return false;
-                                return true;
-                            });
-
-                            if (!filtered.length) {
-                                container.innerHTML = '<div class="col-span-full py-12 bg-[#0b0d14] border border-white/5 rounded-3xl text-center text-xs text-gray-500 font-bold">لا توجد سجلات مطابقة للبحث أو الفلتر 🔍</div>';
-                                return;
-                            }
-
-                            var html = '';
-                            for (var i = 0; i < filtered.length; i++) {
-                                var item = filtered[i];
-                                var en = isLogEnabled(item.id);
-                                var customCfg = logsState[item.id] || {};
-                                var customChan = customCfg.channel_id || '';
-                                var customColor = customCfg.color || cat.defaultColor || '#5865F2';
-
-                                html += '<div class="bg-[#0b0d14] border border-white/5 hover:border-purple-500/40 p-4 rounded-2xl flex items-center justify-between transition ' + (en ? '' : 'opacity-40') + '" data-log-id="' + item.id + '">';
-
-                                // Left: Toggle + Edit Options Button
-                                html += '<div class="flex items-center gap-2.5">';
-                                html += '<label class="toggle"><input type="checkbox" data-log-checkbox="' + item.id + '" ' + (en ? 'checked' : '') + ' onchange="toggleSingleLogEvent(\'' + item.id + '\', this.checked)"><span class="slider"></span></label>';
-                                html += '<button type="button" onclick="openEditLogModal(\'' + item.id + '\', \'' + item.title + '\', \'' + item.icon + '\')" title="تخصيص القناة واللون" class="w-8 h-8 rounded-xl bg-[#1a1d2d] hover:bg-purple-600/30 text-purple-300 border border-purple-500/30 flex items-center justify-center text-xs font-bold transition shadow cursor-pointer">⚙️</button>';
-                                html += '</div>';
-
-                                // Right: Title + description + Icon & Badges
-                                html += '<div class="flex items-center gap-3">';
-                                html += '<div class="text-right">';
-                                html += '<div class="flex items-center justify-end gap-2">';
-                                if (item.isSpecial) html += '<span class="px-2 py-0.5 bg-amber-950/80 text-amber-400 border border-amber-500/30 rounded-lg text-[9px] font-bold flex items-center gap-1"><span>بوتات خاصة فقط</span><span>🔒</span></span>';
-                                if (customChan) html += '<span class="px-2 py-0.5 bg-blue-950/60 text-blue-300 border border-blue-800/40 rounded-lg text-[9px] font-bold">قناة مخصصة</span>';
-                                html += '<span class="font-black text-white text-xs">' + item.title + '</span>';
-                                html += '<span class="w-2.5 h-2.5 rounded-full" style="background-color:' + customColor + '" title="لون الإيمبد"></span>';
-                                html += '</div>';
-                                html += '<p class="text-[10px] text-gray-400 mt-0.5">' + item.desc + '</p>';
-                                html += '</div>';
-                                html += '<div class="w-9 h-9 rounded-xl bg-white/5 text-gray-300 flex items-center justify-center text-base border border-white/5 shadow-inner flex-shrink-0">' + item.icon + '</div>';
-                                html += '</div>';
-                            }
-                            container.innerHTML = html;
-                        }
-
                         function updateGlobalStats() {
-                            var total = 0, enabled = 0, channelsSet = new Set();
-                            var catKeys = Object.keys(LOG_CATEGORIES);
-                            for (var i = 0; i < catKeys.length; i++) {
-                                var items = LOG_CATEGORIES[catKeys[i]].items;
-                                total += items.length;
-                                for (var j = 0; j < items.length; j++) {
-                                    var id = items[j].id;
-                                    if (isLogEnabled(id)) enabled++;
-                                    if (logsState[id] && logsState[id].channel_id) channelsSet.add(logsState[id].channel_id);
+                            try {
+                                var total = 0, enabled = 0, channelsSet = new Set();
+                                var catKeys = Object.keys(LOG_CATEGORIES);
+                                for (var i = 0; i < catKeys.length; i++) {
+                                    var items = LOG_CATEGORIES[catKeys[i]].items || [];
+                                    total += items.length;
+                                    for (var j = 0; j < items.length; j++) {
+                                        var id = items[j].id;
+                                        if (isLogEnabled(id)) enabled++;
+                                        if (logsState[id] && logsState[id].channel_id) channelsSet.add(logsState[id].channel_id);
+                                    }
                                 }
-                            }
-                            var e1 = document.getElementById('statEnabledLogs');
-                            var e2 = document.getElementById('statChannelsUsed');
-                            if (e1) e1.textContent = enabled;
-                            if (e2) e2.textContent = channelsSet.size;
+                                var e1 = document.getElementById('statEnabledLogs');
+                                var e2 = document.getElementById('statChannelsUsed');
+                                if (e1) e1.textContent = enabled;
+                                if (e2) e2.textContent = channelsSet.size;
+                            } catch(e) {}
                         }
 
                         function showSavedBanner() {
@@ -6689,6 +6590,122 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                             } catch(e) {}
                         }
 
+                        function renderCategoriesSidebar() {
+                            var container = document.getElementById('logsCategoriesList');
+                            if (!container) return;
+                            var html = '';
+                            var catKeys = Object.keys(LOG_CATEGORIES);
+                            var visibleCats = 0;
+
+                            for (var i = 0; i < catKeys.length; i++) {
+                                var k = catKeys[i];
+                                var cat = LOG_CATEGORIES[k];
+                                var isSel = k === currentCategory;
+
+                                var totalItems = cat.items ? cat.items.length : 0;
+                                var enabledItems = 0;
+                                if (cat.items) {
+                                    for (var j = 0; j < cat.items.length; j++) {
+                                        if (isLogEnabled(cat.items[j].id)) enabledItems++;
+                                    }
+                                }
+
+                                // تطبيق فلتر حالة القسم (الكل / المفعلة / المعطلة)
+                                if (currentFilter === 'enabled' && enabledItems === 0) continue;
+                                if (currentFilter === 'disabled' && enabledItems === totalItems && totalItems > 0) continue;
+
+                                visibleCats++;
+
+                                var badgeClass = enabledItems === 0
+                                    ? 'px-2 py-0.5 bg-rose-950/60 text-rose-400 rounded-lg text-[10px] font-mono'
+                                    : (enabledItems === totalItems
+                                        ? 'px-2 py-0.5 bg-emerald-950/60 text-emerald-400 rounded-lg text-[10px] font-mono'
+                                        : 'px-2 py-0.5 bg-purple-950/60 text-purple-300 rounded-lg text-[10px] font-mono');
+
+                                html += '<button type="button" onclick="window.switchLogsCategory(\'' + k + '\')" class="w-full flex items-center justify-between px-3 py-2.5 rounded-2xl text-xs font-bold transition cursor-pointer ' + (isSel ? 'bg-purple-600 text-white shadow-lg' : 'text-gray-400 hover:text-white hover:bg-white/5') + '">';
+                                html += '<span class="' + badgeClass + '">' + enabledItems + '/' + totalItems + '</span>';
+                                html += '<span class="flex items-center gap-2"><span>' + cat.title + '</span><span>' + cat.icon + '</span></span>';
+                                html += '</button>';
+                            }
+
+                            if (visibleCats === 0) {
+                                html = '<div class="py-4 text-center text-xs text-gray-500 font-bold">لا توجد أقسام مطابقة للفلتر 🔍</div>';
+                            }
+
+                            container.innerHTML = html;
+                            updateGlobalStats();
+                        }
+
+                        function renderLogsGrid() {
+                            var container = document.getElementById('logsCardsGrid');
+                            if (!container) return;
+
+                            var cat = LOG_CATEGORIES[currentCategory] || LOG_CATEGORIES.members;
+                            var titleEl = document.getElementById('activeCatTitle');
+                            var iconEl = document.getElementById('activeCatIcon');
+                            var countEl = document.getElementById('activeCatCount');
+                            if (titleEl) titleEl.textContent = cat.title;
+                            if (iconEl) iconEl.textContent = cat.icon;
+                            if (countEl) countEl.textContent = (cat.items ? cat.items.length : 0) + ' سجل';
+
+                            var searchInp = document.getElementById('logSearchInput');
+                            var searchVal = (searchInp && searchInp.value) ? searchInp.value.toLowerCase().trim() : '';
+
+                            var itemsList = cat.items || [];
+                            var filtered = [];
+                            for (var fi = 0; fi < itemsList.length; fi++) {
+                                var itm = itemsList[fi];
+                                var en = isLogEnabled(itm.id);
+                                if (currentFilter === 'enabled' && !en) continue;
+                                if (currentFilter === 'disabled' && en) continue;
+                                if (searchVal) {
+                                    var titleMatch = itm.title && itm.title.toLowerCase().indexOf(searchVal) !== -1;
+                                    var descMatch = itm.desc && itm.desc.toLowerCase().indexOf(searchVal) !== -1;
+                                    if (!titleMatch && !descMatch) continue;
+                                }
+                                filtered.push(itm);
+                            }
+
+                            if (!filtered.length) {
+                                container.innerHTML = '<div class="col-span-full py-12 bg-[#0b0d14] border border-white/5 rounded-3xl text-center text-xs text-gray-500 font-bold">لا توجد سجلات مطابقة للبحث أو الفلتر 🔍</div>';
+                                return;
+                            }
+
+                            var html = '';
+                            for (var i = 0; i < filtered.length; i++) {
+                                var item = filtered[i];
+                                var en = isLogEnabled(item.id);
+                                var customCfg = logsState[item.id] || {};
+                                var customChan = customCfg.channel_id || '';
+                                var customColor = customCfg.color || cat.defaultColor || '#5865F2';
+
+                                html += '<div class="bg-[#0b0d14] border border-white/5 hover:border-purple-500/40 p-4 rounded-2xl flex items-center justify-between transition ' + (en ? '' : 'opacity-40') + '" data-log-id="' + item.id + '">';
+
+                                // Left: Toggle + Edit Options Button
+                                html += '<div class="flex items-center gap-2.5">';
+                                html += '<label class="toggle"><input type="checkbox" data-log-checkbox="' + item.id + '" ' + (en ? 'checked' : '') + ' onchange="window.toggleSingleLogEvent(\'' + item.id + '\', this.checked)"><span class="slider"></span></label>';
+                                html += '<button type="button" onclick="window.openEditLogModal(\'' + item.id + '\', \'' + item.title.replace(/'/g, "\\'") + '\', \'' + item.icon + '\')" title="تخصيص القناة واللون" class="w-8 h-8 rounded-xl bg-[#1a1d2d] hover:bg-purple-600/30 text-purple-300 border border-purple-500/30 flex items-center justify-center text-xs font-bold transition shadow cursor-pointer">⚙️</button>';
+                                html += '</div>';
+
+                                // Right: Title + description + Icon & Badges
+                                html += '<div class="flex items-center gap-3">';
+                                html += '<div class="text-right">';
+                                html += '<div class="flex items-center justify-end gap-2">';
+                                if (item.isSpecial) html += '<span class="px-2 py-0.5 bg-amber-950/80 text-amber-400 border border-amber-500/30 rounded-lg text-[9px] font-bold flex items-center gap-1"><span>بوتات خاصة فقط</span><span>🔒</span></span>';
+                                if (customChan) html += '<span class="px-2 py-0.5 bg-blue-950/60 text-blue-300 border border-blue-800/40 rounded-lg text-[9px] font-bold">قناة مخصصة</span>';
+                                html += '<span class="font-black text-white text-xs">' + item.title + '</span>';
+                                html += '<span class="w-2.5 h-2.5 rounded-full" style="background-color:' + customColor + '" title="لون الإيمبد"></span>';
+                                html += '</div>';
+                                html += '<p class="text-[10px] text-gray-400 mt-0.5">' + item.desc + '</p>';
+                                html += '</div>';
+                                html += '<div class="w-9 h-9 rounded-xl bg-white/5 text-gray-300 flex items-center justify-center text-base border border-white/5 shadow-inner flex-shrink-0">' + item.icon + '</div>';
+                                html += '</div>';
+                                html += '</div>';
+                            }
+                            container.innerHTML = html;
+                        }
+
+                        // Attach all functions to window IMMEDIATELY
                         window.saveLogsSetting = function(key, val) {
                             try {
                                 var gId = '${guildId}';
@@ -6729,9 +6746,40 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                             var btnAll = document.getElementById('btnLogFilterAll');
                             var btnEn = document.getElementById('btnLogFilterEnabled');
                             var btnDis = document.getElementById('btnLogFilterDisabled');
-                            if (btnAll) btnAll.className = status === 'all' ? "px-3.5 py-1.5 rounded-xl text-xs font-bold bg-purple-600 text-white transition shadow cursor-pointer" : "px-3.5 py-1.5 rounded-xl text-xs font-bold text-gray-400 hover:text-white transition cursor-pointer";
-                            if (btnEn) btnEn.className = status === 'enabled' ? "px-3.5 py-1.5 rounded-xl text-xs font-bold bg-purple-600 text-white transition shadow cursor-pointer" : "px-3.5 py-1.5 rounded-xl text-xs font-bold text-gray-400 hover:text-white transition cursor-pointer";
-                            if (btnDis) btnDis.className = status === 'disabled' ? "px-3.5 py-1.5 rounded-xl text-xs font-bold bg-purple-600 text-white transition shadow cursor-pointer" : "px-3.5 py-1.5 rounded-xl text-xs font-bold text-gray-400 hover:text-white transition cursor-pointer";
+                            var activeClass = "px-3.5 py-1.5 rounded-xl text-xs font-bold bg-purple-600 text-white transition shadow cursor-pointer";
+                            var inactiveClass = "px-3.5 py-1.5 rounded-xl text-xs font-bold text-gray-400 hover:text-white transition cursor-pointer";
+
+                            if (btnAll) btnAll.className = (status === 'all') ? activeClass : inactiveClass;
+                            if (btnEn) btnEn.className = (status === 'enabled') ? activeClass : inactiveClass;
+                            if (btnDis) btnDis.className = (status === 'disabled') ? activeClass : inactiveClass;
+
+                            // If currentCategory has no items matching the filter, auto-switch to first matching category if any
+                            var catKeys = Object.keys(LOG_CATEGORIES);
+                            var currentCatMatches = false;
+                            var currentCatObj = LOG_CATEGORIES[currentCategory];
+                            if (currentCatObj && currentCatObj.items) {
+                                var enabledCount = 0;
+                                for (var ci = 0; ci < currentCatObj.items.length; ci++) {
+                                    if (isLogEnabled(currentCatObj.items[ci].id)) enabledCount++;
+                                }
+                                if (status === 'all') currentCatMatches = true;
+                                else if (status === 'enabled' && enabledCount > 0) currentCatMatches = true;
+                                else if (status === 'disabled' && enabledCount < currentCatObj.items.length) currentCatMatches = true;
+                            }
+
+                            if (!currentCatMatches && status !== 'all') {
+                                for (var k = 0; k < catKeys.length; k++) {
+                                    var ck = catKeys[k];
+                                    var cObj = LOG_CATEGORIES[ck];
+                                    var cEn = 0;
+                                    for (var cj = 0; cj < cObj.items.length; cj++) {
+                                        if (isLogEnabled(cObj.items[cj].id)) cEn++;
+                                    }
+                                    if (status === 'enabled' && cEn > 0) { currentCategory = ck; break; }
+                                    if (status === 'disabled' && cEn < cObj.items.length) { currentCategory = ck; break; }
+                                }
+                            }
+
                             renderCategoriesSidebar();
                             renderLogsGrid();
                         };
@@ -6754,7 +6802,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
 
                         window.toggleActiveCategoryLogs = function(enable) {
                             var cat = LOG_CATEGORIES[currentCategory];
-                            if (!cat) return;
+                            if (!cat || !cat.items) return;
                             for (var i = 0; i < cat.items.length; i++) {
                                 var id = cat.items[i].id;
                                 if (!logsState[id]) logsState[id] = {};
@@ -6768,7 +6816,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                         window.toggleAllLogsGlobally = function(enable) {
                             var catKeys = Object.keys(LOG_CATEGORIES);
                             for (var i = 0; i < catKeys.length; i++) {
-                                var items = LOG_CATEGORIES[catKeys[i]].items;
+                                var items = LOG_CATEGORIES[catKeys[i]].items || [];
                                 for (var j = 0; j < items.length; j++) {
                                     var id = items[j].id;
                                     if (!logsState[id]) logsState[id] = {};
@@ -6782,9 +6830,11 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
 
                         window.applyCatSettingsToAll = function() {
                             var cat = LOG_CATEGORIES[currentCategory];
-                            if (!cat) return;
-                            var color = document.getElementById('catColorHex')?.value || '#5865F2';
-                            var chan = document.getElementById('catDefaultChannel')?.value || '';
+                            if (!cat || !cat.items) return;
+                            var colorInp = document.getElementById('catColorHex');
+                            var color = colorInp ? colorInp.value : '#5865F2';
+                            var chanInp = document.getElementById('catDefaultChannel');
+                            var chan = chanInp ? chanInp.value : '';
 
                             var appliedCount = 0;
                             for (var i = 0; i < cat.items.length; i++) {
@@ -6842,53 +6892,61 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                             renderLogsGrid();
                         };
 
-                        window.autoSetupLogsChannels = async function(mode) {
-                            const modeTitle = mode === 'grouped' ? 'القنوات العادية (قسم لكل قناة)' : 'القنوات المفصلة (قناة لكل نوع سجل)';
+                        window.autoSetupLogsChannels = function(mode) {
+                            var modeTitle = mode === 'grouped' ? 'القنوات العادية (قسم لكل قناة)' : 'القنوات المفصلة (قناة لكل نوع سجل)';
                             if (!confirm('هل تريد إنشاء قنوات السجلات تلقائياً بالسيرفر بنظام: ' + modeTitle + '؟')) return;
 
                             try {
-                                const gId = '${guildId}';
-                                const res = await fetch('/api/guild/' + gId + '/logs/auto-setup', {
+                                var gId = '${guildId}';
+                                fetch('/api/guild/' + gId + '/logs/auto-setup', {
                                     method: 'POST',
                                     headers: { 'Content-Type': 'application/json' },
-                                    body: JSON.stringify({ mode })
+                                    body: JSON.stringify({ mode: mode })
+                                }).then(function(res) { return res.json(); }).then(function(d) {
+                                    if (d.success) {
+                                        alert('✅ تم إنشاء وتوزيع قنوات السجلات بنجاح في السيرفر!');
+                                        location.reload();
+                                    } else {
+                                        alert('❌ ' + (d.error || 'فشل إنشاء القنوات'));
+                                    }
+                                }).catch(function() {
+                                    alert('حدث خطأ في الاتصال بالخادم');
                                 });
-                                const d = await res.json();
-                                if (d.success) {
-                                    alert('✅ تم إنشاء وتوزيع قنوات السجلات بنجاح في السيرفر!');
-                                    location.reload();
-                                } else {
-                                    alert('❌ ' + (d.error || 'فشل إنشاء القنوات'));
-                                }
                             } catch(e) {
                                 alert('حدث خطأ في الاتصال بالخادم');
                             }
                         };
 
-                        window.deleteLogsChannels = async function() {
+                        window.deleteLogsChannels = function() {
                             if (!confirm('⚠️ تحذير: هل أنت متأكد من حذف كاتيجوري سجلات ZENO وجميع القنوات بداخله نهائياً؟')) return;
 
                             try {
-                                const gId = '${guildId}';
-                                const res = await fetch('/api/guild/' + gId + '/logs/delete-channels', {
+                                var gId = '${guildId}';
+                                fetch('/api/guild/' + gId + '/logs/delete-channels', {
                                     method: 'POST',
                                     headers: { 'Content-Type': 'application/json' }
+                                }).then(function(res) { return res.json(); }).then(function(d) {
+                                    if (d.success) {
+                                        alert('✅ تم حذف قنوات السجلات بنجاح');
+                                        location.reload();
+                                    } else {
+                                        alert('❌ ' + (d.error || 'فشل الحذف'));
+                                    }
+                                }).catch(function() {
+                                    alert('حدث خطأ في الاتصال');
                                 });
-                                const d = await res.json();
-                                if (d.success) {
-                                    alert('✅ تم حذف قنوات السجلات بنجاح');
-                                    location.reload();
-                                } else {
-                                    alert('❌ ' + (d.error || 'فشل الحذف'));
-                                }
                             } catch(e) {
                                 alert('حدث خطأ في الاتصال');
                             }
                         };
 
-                        // Initial render
-                        renderCategoriesSidebar();
-                        renderLogsGrid();
+                        // Initial render wrapped safely
+                        try {
+                            renderCategoriesSidebar();
+                            renderLogsGrid();
+                        } catch(err) {
+                            console.error('Error in initial logs render:', err);
+                        }
                     })();
                     </script>
                 `;
