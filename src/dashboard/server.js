@@ -68,16 +68,17 @@ module.exports = function (app, client) {
             }
 
             res.json({
+                id: botUser?.id || '1506005273893146775',
                 username: botUser?.username || 'ZENO',
                 avatar: botUser
-                    ? `https://cdn.discordapp.com/avatars/${botUser.id}/${botUser.avatar}.png?size=128`
+                    ? (botUser.avatar ? `https://cdn.discordapp.com/avatars/${botUser.id}/${botUser.avatar}.png?size=128` : `https://cdn.discordapp.com/embed/avatars/${parseInt(botUser.discriminator || '0') % 5}.png`)
                     : null,
                 guildsCount,
                 ping: Math.max(0, ping),
                 usersCount: totalMembers
             });
         } catch (err) {
-            res.json({ guildsCount: 0, ping: 0, usersCount: 0 });
+            res.json({ id: '1506005273893146775', guildsCount: 0, ping: 0, usersCount: 0 });
         }
     });
 
