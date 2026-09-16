@@ -2745,8 +2745,11 @@
             return;
         }
 
-        // Avoid translating script, style, code elements
+        // Avoid translating script, style, code elements, or manually handled bilingual elements
         if (node.tagName === 'SCRIPT' || node.tagName === 'STYLE' || node.tagName === 'CODE') {
+            return;
+        }
+        if (node.classList && (node.classList.contains('lang-ar') || node.classList.contains('lang-en') || node.classList.contains('lang-ar-block') || node.classList.contains('lang-en-block'))) {
             return;
         }
 
