@@ -52,6 +52,35 @@ module.exports = function (app, client) {
         return res.sendFile(require('path').join(__dirname, 'public', 'index.html'));
     });
 
+    // 1.1 Real Bot Info API - used by landing page stats
+    app.get('/api/bot-info', async (req, res) => {
+        try {
+            const botUser = client?.user;
+            const guildsCount = client?.guilds?.cache?.size || 0;
+            const ping = client?.ws?.ping || 0;
+
+            // حساب إجمالي الأعضاء من كل السيرفرات
+            let totalMembers = 0;
+            if (client?.guilds?.cache) {
+                client.guilds.cache.forEach(guild => {
+                    totalMembers += guild.memberCount || 0;
+                });
+            }
+
+            res.json({
+                username: botUser?.username || 'ZENO',
+                avatar: botUser
+                    ? `https://cdn.discordapp.com/avatars/${botUser.id}/${botUser.avatar}.png?size=128`
+                    : null,
+                guildsCount,
+                ping: Math.max(0, ping),
+                usersCount: totalMembers
+            });
+        } catch (err) {
+            res.json({ guildsCount: 0, ping: 0, usersCount: 0 });
+        }
+    });
+
     // 2. Real Discord OAuth2 Authentication Routes
     app.get('/auth/discord', (req, res) => {
         const { clientId, redirectUri } = getOAuthConfig(req);
