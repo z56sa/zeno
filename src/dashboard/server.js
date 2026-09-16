@@ -6634,6 +6634,9 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
 
                             container.innerHTML = html;
                             updateGlobalStats();
+                            if (window.zenoI18n && window.zenoI18n.getLang() === 'en') {
+                                try { window.zenoI18n.apply(); } catch(e) {}
+                            }
                         }
 
                         function renderLogsGrid() {
@@ -6703,6 +6706,9 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                                 html += '</div>';
                             }
                             container.innerHTML = html;
+                            if (window.zenoI18n && window.zenoI18n.getLang() === 'en') {
+                                try { window.zenoI18n.apply(); } catch(e) {}
+                            }
                         }
 
                         // Attach all functions to window IMMEDIATELY
