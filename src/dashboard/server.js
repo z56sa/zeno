@@ -6290,7 +6290,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                                         <div>
                                             <label class="block text-[11px] font-bold text-gray-300 mb-1.5 text-right">اللون الافتراضي 🎨</label>
                                             <div class="flex items-center gap-2 bg-[#0b0d14] border border-white/5 p-1.5 rounded-xl">
-                                                <input type="text" id="catColorHex" value="#5865F2" class="w-full bg-transparent text-xs text-white font-mono outline-none text-center" dir="ltr" onchange="updateCatColorPreview(this.value)">
+                                                <input type="text" id="catColorHex" value="#5865F2" class="w-full bg-transparent text-xs text-white font-mono outline-none text-center" dir="ltr" onchange="document.getElementById('catColorPicker').value = this.value">
                                                 <input type="color" id="catColorPicker" value="#5865F2" class="w-7 h-7 rounded-lg cursor-pointer bg-transparent border-0" onchange="document.getElementById('catColorHex').value = this.value">
                                             </div>
                                         </div>
@@ -6347,6 +6347,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                         </div>
                     </div>
 
+                    <script id="__logsStateData__" type="application/json">${JSON.stringify((() => { try { const raw = settings.logs_config; const parsed = raw ? (typeof raw === 'string' ? JSON.parse(raw) : raw) : {}; return (parsed && typeof parsed === 'object') ? parsed : {}; } catch(e) { return {}; } })()).replace(/<\//g, '<\\/')}</script>
                     <script>
                     (function() {
                                                                         // 105 Comprehensive Log Events across 13 Categories (100% Exact to Screenshots)
@@ -6529,7 +6530,8 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                         // State loaded from DB
                         var logsState = (function() {
                             try {
-                                var s = ${JSON.stringify(settings.logs_config ? (typeof settings.logs_config === 'string' ? JSON.parse(settings.logs_config) : settings.logs_config) : {})};
+                                var el = document.getElementById('__logsStateData__');
+                                var s = el ? JSON.parse(el.textContent) : {};
                                 return (s && typeof s === 'object') ? s : {};
                             } catch(e) { return {}; }
                         })();
@@ -6658,7 +6660,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
 
                         function saveLogsConfigToServer() {
                             try {
-                                var gId = window.location.pathname.split('/')[2];
+                                var gId = '${guildId}';
                                 if (!gId) return;
                                 var xhr = new XMLHttpRequest();
                                 xhr.open('POST', '/api/guild/' + gId + '/settings', true);
@@ -6674,7 +6676,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
 
                         window.saveLogsSetting = function(key, val) {
                             try {
-                                var gId = window.location.pathname.split('/')[2];
+                                var gId = '${guildId}';
                                 if (!gId) return;
                                 var body = {};
                                 body[key] = val ? 1 : 0;
@@ -6796,7 +6798,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                             if (!confirm('هل تريد إنشاء قنوات السجلات تلقائياً بالسيرفر بنظام: ' + modeTitle + '؟')) return;
 
                             try {
-                                const gId = window.location.pathname.split('/')[2];
+                                const gId = '${guildId}';
                                 const res = await fetch('/api/guild/' + gId + '/logs/auto-setup', {
                                     method: 'POST',
                                     headers: { 'Content-Type': 'application/json' },
@@ -6818,7 +6820,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                             if (!confirm('⚠️ تحذير: هل أنت متأكد من حذف كاتيجوري سجلات ZENO وجميع القنوات بداخله نهائياً؟')) return;
 
                             try {
-                                const gId = window.location.pathname.split('/')[2];
+                                const gId = '${guildId}';
                                 const res = await fetch('/api/guild/' + gId + '/logs/delete-channels', {
                                     method: 'POST',
                                     headers: { 'Content-Type': 'application/json' }
