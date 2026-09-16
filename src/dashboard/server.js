@@ -6244,11 +6244,14 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
 
                             <!-- Sidebar: 13 Categories -->
                             <div class="lg:col-span-1 space-y-1 bg-[#12141f] border border-white/5 p-3 rounded-3xl shadow-xl h-fit">
-                                <div class="flex items-center justify-end gap-1.5 text-xs font-black text-white px-2 py-2 border-b border-white/5 mb-1">
-                                    <span>الأقسام</span>
-                                    <span>📁</span>
-                                </div>
-                                <div id="logsCategoriesList" class="space-y-1"></div>
+                                <button type="button" onclick="toggleLogsCategoriesDropdown()" class="w-full flex items-center justify-between text-xs font-black text-white px-2 py-2 border-b border-white/5 mb-1 cursor-pointer hover:text-purple-300 transition">
+                                    <span id="logsCategoriesDropdownArrow" class="text-gray-400 text-xs transition-transform duration-200">▼</span>
+                                    <span class="flex items-center gap-1.5">
+                                        <span>الأقسام</span>
+                                        <span>📁</span>
+                                    </span>
+                                </button>
+                                <div id="logsCategoriesList" class="space-y-1 transition-all"></div>
                             </div>
 
                             <!-- Right Display Area: Active Category Header + Section Default Channel/Color + Logs Grid -->
@@ -6548,6 +6551,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                             if (!container) return;
                             var html = '';
                             var catKeys = Object.keys(LOG_CATEGORIES);
+                            var visibleCats = 0;
 
                             for (var i = 0; i < catKeys.length; i++) {
                                 var k = catKeys[i];
@@ -6560,6 +6564,12 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                                     if (isLogEnabled(cat.items[j].id)) enabledItems++;
                                 }
 
+                                // تطبيق فلتر حالة القسم (الكل / المفعلة / المعطلة)
+                                if (currentFilter === 'enabled' && enabledItems === 0) continue;
+                                if (currentFilter === 'disabled' && enabledItems === totalItems) continue;
+
+                                visibleCats++;
+
                                 var badgeClass = enabledItems === 0
                                     ? 'px-2 py-0.5 bg-rose-950/60 text-rose-400 rounded-lg text-[10px] font-mono'
                                     : (enabledItems === totalItems
@@ -6571,6 +6581,11 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                                 html += '<span class="flex items-center gap-2"><span>' + cat.title + '</span><span>' + cat.icon + '</span></span>';
                                 html += '</button>';
                             }
+
+                            if (visibleCats === 0) {
+                                html = '<div class="py-4 text-center text-xs text-gray-500 font-bold">لا توجد أقسام مطابقة للفلتر</div>';
+                            }
+
                             container.innerHTML = html;
                             updateGlobalStats();
                         }
@@ -6696,11 +6711,28 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                             renderLogsGrid();
                         };
 
+                        window.toggleLogsCategoriesDropdown = function() {
+                            var list = document.getElementById('logsCategoriesList');
+                            var arrow = document.getElementById('logsCategoriesDropdownArrow');
+                            if (!list) return;
+                            if (list.classList.contains('hidden')) {
+                                list.classList.remove('hidden');
+                                if (arrow) arrow.textContent = '▼';
+                            } else {
+                                list.classList.add('hidden');
+                                if (arrow) arrow.textContent = '◀';
+                            }
+                        };
+
                         window.filterLogsByStatus = function(status) {
                             currentFilter = status;
-                            document.getElementById('btnLogFilterAll').className = status === 'all' ? "px-3.5 py-1.5 rounded-xl text-xs font-bold bg-purple-600 text-white transition shadow cursor-pointer" : "px-3.5 py-1.5 rounded-xl text-xs font-bold text-gray-400 hover:text-white transition cursor-pointer";
-                            document.getElementById('btnLogFilterEnabled').className = status === 'enabled' ? "px-3.5 py-1.5 rounded-xl text-xs font-bold bg-purple-600 text-white transition shadow cursor-pointer" : "px-3.5 py-1.5 rounded-xl text-xs font-bold text-gray-400 hover:text-white transition cursor-pointer";
-                            document.getElementById('btnLogFilterDisabled').className = status === 'disabled' ? "px-3.5 py-1.5 rounded-xl text-xs font-bold bg-purple-600 text-white transition shadow cursor-pointer" : "px-3.5 py-1.5 rounded-xl text-xs font-bold text-gray-400 hover:text-white transition cursor-pointer";
+                            var btnAll = document.getElementById('btnLogFilterAll');
+                            var btnEn = document.getElementById('btnLogFilterEnabled');
+                            var btnDis = document.getElementById('btnLogFilterDisabled');
+                            if (btnAll) btnAll.className = status === 'all' ? "px-3.5 py-1.5 rounded-xl text-xs font-bold bg-purple-600 text-white transition shadow cursor-pointer" : "px-3.5 py-1.5 rounded-xl text-xs font-bold text-gray-400 hover:text-white transition cursor-pointer";
+                            if (btnEn) btnEn.className = status === 'enabled' ? "px-3.5 py-1.5 rounded-xl text-xs font-bold bg-purple-600 text-white transition shadow cursor-pointer" : "px-3.5 py-1.5 rounded-xl text-xs font-bold text-gray-400 hover:text-white transition cursor-pointer";
+                            if (btnDis) btnDis.className = status === 'disabled' ? "px-3.5 py-1.5 rounded-xl text-xs font-bold bg-purple-600 text-white transition shadow cursor-pointer" : "px-3.5 py-1.5 rounded-xl text-xs font-bold text-gray-400 hover:text-white transition cursor-pointer";
+                            renderCategoriesSidebar();
                             renderLogsGrid();
                         };
 
@@ -6733,19 +6765,36 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                             saveLogsConfigToServer();
                         };
 
+                        window.toggleAllLogsGlobally = function(enable) {
+                            var catKeys = Object.keys(LOG_CATEGORIES);
+                            for (var i = 0; i < catKeys.length; i++) {
+                                var items = LOG_CATEGORIES[catKeys[i]].items;
+                                for (var j = 0; j < items.length; j++) {
+                                    var id = items[j].id;
+                                    if (!logsState[id]) logsState[id] = {};
+                                    logsState[id].enabled = enable;
+                                }
+                            }
+                            renderCategoriesSidebar();
+                            renderLogsGrid();
+                            saveLogsConfigToServer();
+                        };
+
                         window.applyCatSettingsToAll = function() {
                             var cat = LOG_CATEGORIES[currentCategory];
                             if (!cat) return;
                             var color = document.getElementById('catColorHex')?.value || '#5865F2';
                             var chan = document.getElementById('catDefaultChannel')?.value || '';
 
+                            var appliedCount = 0;
                             for (var i = 0; i < cat.items.length; i++) {
                                 var id = cat.items[i].id;
                                 if (!logsState[id]) logsState[id] = {};
                                 if (color) logsState[id].color = color;
                                 if (chan) logsState[id].channel_id = chan;
+                                appliedCount++;
                             }
-                            alert('✅ تم تطبيق القناة واللون الافتراضي على جميع سجلات قسم (' + cat.title + ') بنجاح!');
+                            alert('✅ تم تطبيق القناة واللون بنجاح على جميع سجلات قسم (' + cat.title + ') وعددهم: ' + appliedCount + '!');
                             renderCategoriesSidebar();
                             renderLogsGrid();
                             saveLogsConfigToServer();
