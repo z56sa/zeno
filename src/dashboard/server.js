@@ -7773,8 +7773,11 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
 
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <div>
-                                    <label class="block text-xs font-bold text-gray-300 mb-1">رتبة الإدارة المخولة بالتسجيل <span class="text-purple-400">*</span></label>
-                                    ${renderRoleSelect('staff_role', settings.staff_role)}
+                                    <label class="block text-xs font-bold text-gray-300 mb-1">رتبة الإدارة المخولة بالتسجيل <span class="text-gray-400 font-normal">(اختياري - متاح لكل الإدارة تلقائياً)</span></label>
+                                    <select name="staff_role" id="staff_role" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right cursor-pointer">
+                                        <option value="">👑 جميع أفراد الإدارة والمشرفين (تلقائي)</option>
+                                        ${guildRoles.map(r => `<option value="${r.id}" ${String(settings.staff_role) === String(r.id) ? 'selected' : ''}>@ ${r.name}</option>`).join('')}
+                                    </select>
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-gray-300 mb-1">قناة لوحة تسجيل الحضور والانصراف</label>
@@ -10321,7 +10324,7 @@ ${embedScriptHtml}
             const guildObj = client?.guilds?.cache?.get(guildId);
             const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 
-            const bannerImg = settings.staff_banner_url || guildObj?.bannerURL({ size: 1024 }) || null;
+            const bannerImg = settings.staff_banner_url && settings.staff_banner_url.trim() !== '' ? settings.staff_banner_url.trim() : null;
             const embed = new EmbedBuilder()
                 .setColor('#7c3aed')
                 .setTitle('📋 لوحة تسجيل حضور وانصراف الإدارة | Staff Shift')
@@ -10334,7 +10337,7 @@ ${embedScriptHtml}
                 .setFooter({ text: guildObj?.name || 'ZENO Bot', iconURL: guildObj?.iconURL({ dynamic: true }) || undefined })
                 .setTimestamp();
 
-            if (settings.staff_banner_enabled !== 0 && bannerImg) {
+            if (bannerImg) {
                 embed.setImage(bannerImg);
             }
 

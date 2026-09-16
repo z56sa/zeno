@@ -126,7 +126,7 @@ module.exports = {
         '⚠️ **ملاحظة:** يتم تسجيل خروجك تلقائياً إذا خرجت من الديسكورد لمنع الساعات الوهمية.';
 
       const settings = db.getGuildSettings(guildId);
-      const bannerImg = customBanner || settings.staff_banner_url || interaction.guild.bannerURL({ size: 1024 }) || null;
+      const bannerImg = (customBanner && customBanner.trim() !== '') ? customBanner.trim() : (settings.staff_banner_url && settings.staff_banner_url.trim() !== '' ? settings.staff_banner_url.trim() : null);
 
       const embed = new EmbedBuilder()
         .setColor('#7c3aed')

@@ -1480,16 +1480,27 @@ module.exports = {
           const settings = db.getGuildSettings(interaction.guild.id) || {};
           const staffRoleId = settings.staff_role;
 
-          // التحقق من امتلاك العضو لرتبة الإدارة المحددة أو صلاحية الإدارة
-          const isStaff = staffRoleId 
-            ? (interaction.member.roles.cache.has(staffRoleId) || interaction.member.permissions.has(PermissionFlagsBits.Administrator))
-            : interaction.member.permissions.has(PermissionFlagsBits.ManageGuild);
+          // التحقق من أن العضو من طاقم الإدارة (مالك، صلاحيات إدارية/إشرافية، أو يحمل رتب الإدارة المحددة)
+          const hasStaffPermissions = 
+            interaction.member.id === interaction.guild.ownerId ||
+            interaction.member.permissions.has(PermissionFlagsBits.Administrator) ||
+            interaction.member.permissions.has(PermissionFlagsBits.ManageGuild) ||
+            interaction.member.permissions.has(PermissionFlagsBits.ModerateMembers) ||
+            interaction.member.permissions.has(PermissionFlagsBits.ManageMessages) ||
+            interaction.member.permissions.has(PermissionFlagsBits.KickMembers) ||
+            interaction.member.permissions.has(PermissionFlagsBits.BanMembers);
+
+          const hasStaffRole = 
+            (staffRoleId && interaction.member.roles.cache.has(staffRoleId)) ||
+            (settings.admin_role && interaction.member.roles.cache.has(settings.admin_role)) ||
+            (settings.mod_role && interaction.member.roles.cache.has(settings.mod_role));
+
+          // متاح لجميع أفراد الإدارة أو من يملكون الرتب المحددة
+          const isStaff = hasStaffPermissions || hasStaffRole;
 
           if (!isStaff) {
             return interaction.editReply({
-              content: staffRoleId 
-                ? `❌ هذا الزر مخصص لطاقم الإدارة فقط! تحتاج لرتبة <@&${staffRoleId}> لاستخدامه.`
-                : '❌ لم يتم تحديد رتبة الإدارة المخولة بعد، أو أنك لا تملك صلاحيات كافية.'
+              content: '❌ هذا الزر مخصص لطاقم الإدارة والمشرفين فقط!'
             });
           }
 
