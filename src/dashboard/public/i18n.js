@@ -2881,8 +2881,8 @@
         // Update toggle buttons text & flag
         document.querySelectorAll('.zeno-lang-toggle-btn').forEach(btn => {
             btn.innerHTML = lang === 'ar' 
-                ? '<span class="text-sm">🌐</span><span class="font-black text-xs uppercase tracking-wider">EN</span>' 
-                : '<span class="text-sm">🌐</span><span class="font-black text-xs uppercase tracking-wider">AR</span>';
+                ? '<span class="text-sm">🌐</span><span class="lang-toggle-label font-black text-xs uppercase tracking-wider">EN</span>' 
+                : '<span class="text-sm">🌐</span><span class="lang-toggle-label font-black text-xs uppercase tracking-wider">AR</span>';
         });
     }
 
