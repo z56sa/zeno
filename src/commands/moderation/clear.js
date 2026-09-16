@@ -2,6 +2,9 @@ const { SlashCommandBuilder, PermissionFlagsBits, EmbedBuilder } = require('disc
 const db = require('../../database');
 const config = require('../../config.json');
 
+const clearCooldowns = new Map();
+const CLEAR_COOLDOWN_MS = 3000;
+
 module.exports = {
   name: 'clear',
   description: 'حذف رسائل متعددة مع فلاتر متقدمة',
@@ -26,6 +29,16 @@ module.exports = {
 
     if (!interaction.member.permissions.has(PermissionFlagsBits.ManageMessages))
       return interaction.reply({ content: '❌ ليس لديك صلاحية حذف الرسائل.', flags: 64 });
+
+    // وقت انتظار (Cooldown) 3 ثواني
+    const userId = interaction.user.id;
+    const now = Date.now();
+    const lastUsed = clearCooldowns.get(userId) || 0;
+    if (now - lastUsed < CLEAR_COOLDOWN_MS) {
+      const remaining = ((CLEAR_COOLDOWN_MS - (now - lastUsed)) / 1000).toFixed(1);
+      return interaction.reply({ content: `⏳ يرجى الانتظار **${remaining}** ثانية قبل استخدام هذا الأمر مرة أخرى.`, flags: 64 });
+    }
+    clearCooldowns.set(userId, now);
 
     await interaction.deferReply({ flags: 64 }).catch(() => {});
 
