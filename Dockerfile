@@ -1,5 +1,4 @@
 FROM node:20-bookworm-slim
-
 # Install runtime and build dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
     python3 \
@@ -19,7 +18,8 @@ WORKDIR /usr/src/app
 
 COPY package*.json ./
 
-RUN npm ci --omit=dev || npm install --omit=dev
+# التعديل هنا: استخدام npm install مباشرة
+RUN npm install --omit=dev
 
 COPY . .
 
