@@ -6364,7 +6364,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                     <div id="editLogModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
                         <div class="bg-[#12141f] border border-purple-500/30 rounded-3xl max-w-md w-full p-6 space-y-4 shadow-2xl text-right" dir="rtl">
                             <div class="flex items-center justify-between border-b border-white/5 pb-3">
-                                <button type="button" onclick="closeEditLogModal()" class="text-gray-400 hover:text-white text-lg font-bold">✕</button>
+                                <button type="button" onclick="window.closeEditLogModal()" class="text-gray-400 hover:text-white text-lg font-bold">✕</button>
                                 <div class="flex items-center gap-2">
                                     <h5 class="text-white font-black text-sm" id="modalLogTitle">تخصيص السجل</h5>
                                     <span id="modalLogIcon" class="text-base">📜</span>
@@ -6386,8 +6386,8 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                             </div>
 
                             <div class="flex items-center justify-end gap-2 pt-2 border-t border-white/5">
-                                <button type="button" onclick="closeEditLogModal()" class="px-4 py-2 bg-white/5 hover:bg-white/10 text-gray-300 rounded-xl text-xs font-bold transition">إلغاء</button>
-                                <button type="button" onclick="saveModalLogConfig()" class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold transition shadow-lg">حفظ التغييرات</button>
+                                <button type="button" onclick="window.closeEditLogModal()" class="px-4 py-2 bg-white/5 hover:bg-white/10 text-gray-300 rounded-xl text-xs font-bold transition">إلغاء</button>
+                                <button type="button" onclick="window.saveModalLogConfig()" class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold transition shadow-lg">حفظ التغييرات</button>
                             </div>
                         </div>
                     </div>
@@ -6940,7 +6940,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                             logsState[currentEditModalLogId].color = colorHex ? colorHex.value : '#5865F2';
 
                             saveLogsConfigToServer();
-                            closeEditLogModal();
+                            window.closeEditLogModal();
                             renderCategoriesSidebar();
                             renderLogsGrid();
                         };
