@@ -405,8 +405,19 @@ module.exports = function (app, client) {
     });
 
 
-    // 3. User Dashboard & Main Routes (لوحة التحكم الداخلية للسيرفرات)
-    app.get('/dashboard/manage', (req, res) => {
+    // API: حفظ إعدادات السجلات
+    app.post('/api/logs/save', (req, res) => {
+        try {
+            const { settings } = req.body;
+            // يمكنك هنا إضافة الكود الخاص بـ database.updateLogsSettings(settings)
+            console.log('Received log settings:', settings);
+            res.json({ success: true });
+        } catch (err) {
+            res.status(500).json({ success: false, error: err.message });
+        }
+    });
+
+    // 3. User Dashboard & Main Routes...
         try {
             // التحقق من تسجيل دخول المستخدم عبر Discord OAuth2
             let user = req.session?.user || null;
