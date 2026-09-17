@@ -417,7 +417,8 @@ module.exports = function (app, client) {
         }
     });
 
-    // 3. User Dashboard & Main Routes...
+    // 3. User Dashboard & Main Routes (لوحة التحكم الداخلية للسيرفرات)
+    app.get('/dashboard/manage', (req, res) => {
         try {
             // التحقق من تسجيل دخول المستخدم عبر Discord OAuth2
             let user = req.session?.user || null;
