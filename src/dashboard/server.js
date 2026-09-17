@@ -6856,25 +6856,6 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                             }
                         };
 
-                        var currentCategory = 'members';
-                        var currentFilter = 'all';
-                        var currentEditModalLogId = null;
-
-                        // State loaded from DB
-                        var logsState = (function() {
-                            try {
-                                var el = document.getElementById('__logsStateData__');
-                                var s = el ? JSON.parse(el.textContent) : {};
-                                return (s && typeof s === 'object') ? s : {};
-                            } catch(e) { return {}; }
-                        })();
-
-                        function isLogEnabled(logId) {
-                            if (logsState && logsState[logId] && logsState[logId].enabled !== undefined) {
-                                return logsState[logId].enabled === true || logsState[logId].enabled === 1 || logsState[logId].enabled === '1';
-                            }
-                            return false;
-                        }
 
                         function updateGlobalStats() {
                             try {
@@ -6893,30 +6874,6 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                                 var e2 = document.getElementById('statChannelsUsed');
                                 if (e1) e1.textContent = enabled;
                                 if (e2) e2.textContent = channelsSet.size;
-                            } catch(e) {}
-                        }
-
-                        function showSavedBanner() {
-                            var el = document.getElementById('logsSaveIndicator');
-                            if (el) {
-                                el.classList.remove('opacity-0');
-                                setTimeout(function() { el.classList.add('opacity-0'); }, 2000);
-                            }
-                        }
-
-                        function saveLogsConfigToServer() {
-                            try {
-                                var gId = '${guildId}';
-                                if (!gId) return;
-                                var xhr = new XMLHttpRequest();
-                                xhr.open('POST', '/api/guild/' + gId + '/settings', true);
-                                xhr.setRequestHeader('Content-Type', 'application/json');
-                                xhr.onload = function() {
-                                    try { if (JSON.parse(xhr.responseText).success) showSavedBanner(); } catch(e) {}
-                                };
-                                xhr.send(JSON.stringify({
-                                    logs_config: JSON.stringify(logsState)
-                                }));
                             } catch(e) {}
                         }
 
