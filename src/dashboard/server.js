@@ -6202,9 +6202,17 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                             </div>
                         </div>
 
-                        <!-- Top Stats Badges -->
+                        <!-- Top Stats Badges & Global Toggles -->
                         <div class="flex items-center justify-between gap-3 flex-wrap">
                             <div class="flex items-center gap-2">
+                                <button type="button" onclick="window.toggleAllLogsGlobally(false)" class="px-3 py-1.5 bg-rose-950/40 hover:bg-rose-900/60 text-rose-400 border border-rose-800/40 rounded-xl text-xs font-bold transition flex items-center gap-1 cursor-pointer">
+                                    <span>✕</span><span>تعطيل الكل (كل الأقسام)</span>
+                                </button>
+                                <button type="button" onclick="window.toggleAllLogsGlobally(true)" class="px-3 py-1.5 bg-emerald-950/40 hover:bg-emerald-900/60 text-emerald-400 border border-emerald-800/40 rounded-xl text-xs font-bold transition flex items-center gap-1 cursor-pointer">
+                                    <span>✓</span><span>تفعيل الكل (كل الأقسام)</span>
+                                </button>
+                            </div>
+                            <div class="flex items-center gap-2 flex-wrap">
                                 <span class="px-3 py-1.5 bg-[#12141f] border border-white/5 text-gray-300 rounded-xl text-xs font-bold flex items-center gap-1.5">
                                     <span class="w-2 h-2 rounded-full bg-purple-400"></span>
                                     <span id="statChannelsUsed">0</span>

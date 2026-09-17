@@ -462,6 +462,55 @@ module.exports = {
       }
     }
 
+    // --- 4.5. نظام الخط التلقائي (Auto-Line) ---
+    let autolineChannels = [];
+    try {
+      autolineChannels = JSON.parse(settings.autoline_channels || '[]');
+    } catch(e) {}
+
+    if (autolineChannels.includes(message.channel.id)) {
+      const lineUrl = settings.autoline_line || 'https://cdn.discordapp.com/attachments/1083818318856237128/1148721611180638318/line.png';
+      const mode = settings.autoline_mode || 'line';
+      if (mode === 'line') {
+        message.channel.send({ content: lineUrl }).catch(() => {});
+      } else if (mode === 'embed') {
+        const lineEmbed = new EmbedBuilder().setColor(config.colors?.primary || '#5865F2').setImage(lineUrl);
+        message.channel.send({ embeds: [lineEmbed] }).catch(() => {});
+      }
+    }
+
+    // --- 4.6. روم الملاحظات والآراء (Feedback Channel) ---
+    if (settings.feedback_channel && message.channel.id === settings.feedback_channel && !message.content.startsWith(settings.prefix || '#')) {
+      const feedbackLine = settings.feedback_line || settings.autoline_line;
+      const feedbackMode = settings.feedback_mode || 'embed';
+      if (feedbackMode === 'embed') {
+        const fbEmbed = new EmbedBuilder()
+          .setColor(config.colors?.primary || '#5865F2')
+          .setAuthor({ name: message.author.tag, iconURL: message.author.displayAvatarURL({ dynamic: true }) })
+          .setDescription(message.content)
+          .setTimestamp();
+        if (message.attachments.size > 0) {
+          fbEmbed.setImage(message.attachments.first().url);
+        }
+        await message.delete().catch(() => {});
+        const sent = await message.channel.send({ embeds: [fbEmbed] }).catch(() => null);
+        if (sent) {
+          sent.react('❤️').catch(() => {});
+          sent.react('⭐').catch(() => {});
+        }
+        if (feedbackLine) {
+          message.channel.send({ content: feedbackLine }).catch(() => {});
+        }
+      }
+    }
+
+    // --- 4.7. روم ناديكو (Nadeko Room Protection / Whitelist) ---
+    let nadekoChannels = [];
+    try {
+      nadekoChannels = JSON.parse(settings.nadeko_channels || '[]');
+    } catch(e) {}
+    // تمكين تفاعل الأعضاء بحرية أو توجيهات داخل الروم المخصص
+
     // --- 5. معالجة الأوامر بالبرفكس (Prefix Commands) ---
     const prefix = settings.prefix || config.defaultPrefix || '#';
     if (!message.content.startsWith(prefix)) return;

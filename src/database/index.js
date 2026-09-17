@@ -633,6 +633,24 @@ try { db.exec("ALTER TABLE guild_settings ADD COLUMN jail_role TEXT;"); } catch(
 try { db.exec("ALTER TABLE guild_settings ADD COLUMN jail_channel TEXT;"); } catch(e) {}
 try { db.exec("ALTER TABLE guild_settings ADD COLUMN mute_role TEXT;"); } catch(e) {}
 
+// أنظمة الخط التلقائي والاقتراحات والضريبة وناديكو (Autoline, Suggestions, Tax, Nadeko)
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN autoline_channels TEXT DEFAULT '[]';"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN autoline_line TEXT DEFAULT '';"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN autoline_mode TEXT DEFAULT 'line';"); } catch(e) {}
+
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN feedback_channel TEXT;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN feedback_line TEXT DEFAULT '';"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN feedback_mode TEXT DEFAULT 'embed';"); } catch(e) {}
+
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN suggestions_line TEXT DEFAULT '';"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN suggestion_mode TEXT DEFAULT 'embed';"); } catch(e) {}
+
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN tax_channel TEXT;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN tax_line TEXT DEFAULT '';"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN tax_mode TEXT DEFAULT 'all';"); } catch(e) {}
+
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN nadeko_channels TEXT DEFAULT '[]';"); } catch(e) {}
+
 console.log('[DB] ✅ SQLite database initialized successfully');
 tursoSync.initAndRestore(db).catch(e => console.error('[TURSO] Init error:', e.message));
 
