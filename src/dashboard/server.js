@@ -6875,12 +6875,17 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                             var appliedCount = 0;
                             for (var i = 0; i < cat.items.length; i++) {
                                 var id = cat.items[i].id;
-                                if (!logsState[id]) logsState[id] = {};
+                                if (!isLogEnabled(id)) continue; // تطبيق على المفعلة فقط
+                                if (!logsState[id]) logsState[id] = { enabled: true };
                                 if (color) logsState[id].color = color;
                                 if (chan) logsState[id].channel_id = chan;
                                 appliedCount++;
                             }
-                            alert('✅ تم تطبيق القناة واللون بنجاح على جميع سجلات قسم (' + cat.title + ') وعددهم: ' + appliedCount + '!');
+                            if (appliedCount === 0) {
+                                alert('⚠️ لا توجد سجلات مفعلة في قسم (' + cat.title + ') لتطبيق الإعدادات عليها!');
+                                return;
+                            }
+                            alert('✅ تم تطبيق القناة واللون بنجاح على السجلات المفعلة بقسم (' + cat.title + ') وعددهم: ' + appliedCount + '!');
                             renderCategoriesSidebar();
                             renderLogsGrid();
                             saveLogsConfigToServer();
@@ -9257,7 +9262,7 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                     <main class="flex-1 p-8 overflow-y-auto ${section === 'embed' ? 'max-w-7xl' : 'max-w-4xl'} mx-auto">
                         <div class="probot-card border border-white/5 rounded-3xl p-8 shadow-2xl mb-8">
                             <div class="flex items-center justify-between pb-6 mb-6 border-b border-white/5">
-                                <label class="toggle"><input type="checkbox" onchange="toggleModule('${guildId}', '${section}_enabled', this.checked)" checked><span class="slider"></span></label>
+                                <label class="toggle"><input type="checkbox" onchange="toggleModule('${guildId}', '${section === 'levels' ? 'leveling_enabled' : section + '_enabled'}', this.checked)" ${section === 'levels' ? (settings.leveling_enabled !== 0 ? 'checked' : '') : 'checked'}><span class="slider"></span></label>
                                 <div class="text-right">
                                     <h2 class="text-2xl font-black text-white">${title}</h2>
                                     <p class="text-gray-400 text-xs mt-1">يتم تطبيق كل التعديلات وحفظها مباشرة في سيرفر الديسكورد لحظياً بدون إعادة تشغيل.</p>
