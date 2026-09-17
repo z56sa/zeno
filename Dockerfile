@@ -18,12 +18,11 @@ WORKDIR /usr/src/app
 
 COPY package*.json ./
 
-# التعديل هنا: استخدام npm install مباشرة
-RUN npm install --omit=dev
+RUN npm install
 
 COPY . .
 
-# إنشاء مجلد البيانات مسبقاً لضمان عمل Railway Volume بشكل صحيح
+# إنشاء مجلد البيانات مسبقاً لضمان عمل RENDER Volume بشكل صحيح
 RUN mkdir -p /usr/src/app/data && chmod 777 /usr/src/app/data
 
 EXPOSE 3000
