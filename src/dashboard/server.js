@@ -6391,22 +6391,17 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                             </div>
                         </div>
                     </div>
+                `;
 
-                    <script id="__logsStateData__" type="application/json">${JSON.stringify((() => { try { const raw = settings.logs_config; const parsed = raw ? (typeof raw === 'string' ? JSON.parse(raw) : raw) : {}; return (parsed && typeof parsed === 'object') ? parsed : {}; } catch(e) { return {}; } })()).replace(/<\//g, '<\\/')}</script>
-                    <script>
-                    // ===== LOGS SECTION SCRIPT =====
+                // Scripts MUST be outside the <form> tag to execute in modern browsers
+                embedScriptHtml = `
+                    // ===== LOGS SECTION SCRIPT (outside form) =====
                     var currentCategory = 'members';
                     var currentFilter = 'all';
                     var currentEditModalLogId = null;
 
-                    // State loaded from DB
-                    var logsState = (function() {
-                        try {
-                            var el = document.getElementById('__logsStateData__');
-                            var s = el ? JSON.parse(el.textContent) : {};
-                            return (s && typeof s === 'object') ? s : {};
-                        } catch(e) { return {}; }
-                    })();
+                    // State directly injected from server (no DOM lookup needed)
+                    var logsState = ${JSON.stringify((() => { try { const raw = settings.logs_config; const parsed = raw ? (typeof raw === 'string' ? JSON.parse(raw) : raw) : {}; return (parsed && typeof parsed === 'object') ? parsed : {}; } catch(e) { return {}; } })())};
 
                     function isLogEnabled(logId) {
                         if (logsState && logsState[logId] && logsState[logId].enabled !== undefined) {
@@ -7014,7 +7009,6 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                             setTimeout(function() { errDiv.remove(); }, 10000);
                         }
                     // ===== END LOGS SECTION SCRIPT =====
-                    </script>
                 `;
             } else if (section === 'analytics' || section === 'stats') {
                 const totalMembers = guild.memberCount || 0;
