@@ -6184,7 +6184,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                             <div class="flex items-center gap-3">
                                 <span id="logsSaveIndicator" class="text-xs font-bold text-emerald-400 bg-emerald-950/60 px-3 py-1.5 rounded-xl opacity-0 transition-opacity duration-300">✓ حُفظت الإعدادات</span>
                                 <label class="toggle">
-                                    <input type="checkbox" id="logsMasterToggle" name="logs_enabled" value="1" ${settings.logs_enabled !== 0 ? 'checked' : ''} onchange="saveLogsSetting('logs_enabled', this.checked)">
+                                    <input type="checkbox" id="logsMasterToggle" name="logs_enabled" value="1" ${settings.logs_enabled !== 0 ? 'checked' : ''} onchange="window.saveLogsSetting('logs_enabled', this.checked)">
                                     <span class="slider"></span>
                                 </label>
                             </div>
@@ -6238,7 +6238,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
 
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-1">
                                 <!-- إنشـاء قنوات عادية -->
-                                <button type="button" onclick="autoSetupLogsChannels('grouped')" class="bg-[#0b0d14] border border-white/5 hover:border-purple-500/50 p-4 rounded-2xl text-right transition group cursor-pointer space-y-2">
+                                <button type="button" onclick="window.autoSetupLogsChannels('grouped')" class="bg-[#0b0d14] border border-white/5 hover:border-purple-500/50 p-4 rounded-2xl text-right transition group cursor-pointer space-y-2">
                                     <div class="flex items-center justify-between">
                                         <div class="w-8 h-8 rounded-xl bg-purple-600/20 text-purple-400 flex items-center justify-center text-sm border border-purple-500/30">📌</div>
                                         <span class="text-xs font-black text-white group-hover:text-purple-300 transition">إنشاء قنوات عادية</span>
@@ -6247,7 +6247,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                                 </button>
 
                                 <!-- إنشـاء قنوات مفصلة -->
-                                <button type="button" onclick="autoSetupLogsChannels('detailed')" class="bg-[#0b0d14] border border-white/5 hover:border-indigo-500/50 p-4 rounded-2xl text-right transition group cursor-pointer space-y-2">
+                                <button type="button" onclick="window.autoSetupLogsChannels('detailed')" class="bg-[#0b0d14] border border-white/5 hover:border-indigo-500/50 p-4 rounded-2xl text-right transition group cursor-pointer space-y-2">
                                     <div class="flex items-center justify-between">
                                         <div class="w-8 h-8 rounded-xl bg-indigo-600/20 text-indigo-400 flex items-center justify-center text-sm border border-indigo-500/30">📑</div>
                                         <span class="text-xs font-black text-white group-hover:text-indigo-300 transition">إنشاء قنوات مفصلة</span>
@@ -6256,7 +6256,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                                 </button>
 
                                 <!-- حذف قنوات السجلات -->
-                                <button type="button" onclick="deleteLogsChannels()" class="bg-[#0b0d14] border border-white/5 hover:border-rose-500/50 p-4 rounded-2xl text-right transition group cursor-pointer space-y-2">
+                                <button type="button" onclick="window.deleteLogsChannels()" class="bg-[#0b0d14] border border-white/5 hover:border-rose-500/50 p-4 rounded-2xl text-right transition group cursor-pointer space-y-2">
                                     <div class="flex items-center justify-between">
                                         <div class="w-8 h-8 rounded-xl bg-rose-600/20 text-rose-400 flex items-center justify-center text-sm border border-rose-500/30">🗑️</div>
                                         <span class="text-xs font-black text-white group-hover:text-rose-300 transition">حذف قنوات السجلات</span>
