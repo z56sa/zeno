@@ -6394,8 +6394,15 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
 
                     <script id="__logsStateData__" type="application/json">${JSON.stringify((() => { try { const raw = settings.logs_config; const parsed = raw ? (typeof raw === 'string' ? JSON.parse(raw) : raw) : {}; return (parsed && typeof parsed === 'object') ? parsed : {}; } catch(e) { return {}; } })()).replace(/<\//g, '<\\/')}</script>
                     <script>
-                    (function() {
-                                                                        // 105 Comprehensive Log Events across 13 Categories (100% Exact to Screenshots)
+                    // ===== LOGS SECTION SCRIPT =====
+                    // 105 Comprehensive Log Events across 13 Categories
+                    // Error handler to catch any runtime errors
+                    window._logsScriptError = null;
+                    window.onerror = function(msg, src, line, col, err) {
+                        window._logsScriptError = { msg: msg, line: line };
+                        console.error('[LOGS SCRIPT ERROR]', msg, 'line:', line);
+                    };
+
                         var LOG_CATEGORIES = {
                             members: {
                                 title: 'الأعضاء', icon: '🎯', desc: 'أحداث دخول وخروج وحظر وعقوبات الأعضاء', defaultColor: '#5865F2',
@@ -7000,7 +7007,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                         } catch(err) {
                             console.error('Error in initial logs render:', err);
                         }
-                    })();
+                    // ===== END LOGS SECTION SCRIPT =====
                     </script>
                 `;
             } else if (section === 'analytics' || section === 'stats') {
