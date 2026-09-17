@@ -6395,15 +6395,296 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                     <script id="__logsStateData__" type="application/json">${JSON.stringify((() => { try { const raw = settings.logs_config; const parsed = raw ? (typeof raw === 'string' ? JSON.parse(raw) : raw) : {}; return (parsed && typeof parsed === 'object') ? parsed : {}; } catch(e) { return {}; } })()).replace(/<\//g, '<\\/')}</script>
                     <script>
                     // ===== LOGS SECTION SCRIPT =====
-                    // 105 Comprehensive Log Events across 13 Categories
-                    // Error handler to catch any runtime errors
-                    window._logsScriptError = null;
-                    window.onerror = function(msg, src, line, col, err) {
-                        window._logsScriptError = { msg: msg, line: line };
-                        console.error('[LOGS SCRIPT ERROR]', msg, 'line:', line);
+                    var currentCategory = 'members';
+                    var currentFilter = 'all';
+                    var currentEditModalLogId = null;
+
+                    // State loaded from DB
+                    var logsState = (function() {
+                        try {
+                            var el = document.getElementById('__logsStateData__');
+                            var s = el ? JSON.parse(el.textContent) : {};
+                            return (s && typeof s === 'object') ? s : {};
+                        } catch(e) { return {}; }
+                    })();
+
+                    function isLogEnabled(logId) {
+                        if (logsState && logsState[logId] && logsState[logId].enabled !== undefined) {
+                            return logsState[logId].enabled === true || logsState[logId].enabled === 1 || logsState[logId].enabled === '1';
+                        }
+                        return false;
+                    }
+
+                    function showSavedBanner() {
+                        var el = document.getElementById('logsSaveIndicator');
+                        if (el) {
+                            el.classList.remove('opacity-0');
+                            setTimeout(function() { el.classList.add('opacity-0'); }, 2000);
+                        }
+                    }
+
+                    function saveLogsConfigToServer() {
+                        try {
+                            var gId = '${guildId}';
+                            if (!gId) return;
+                            var xhr = new XMLHttpRequest();
+                            xhr.open('POST', '/api/guild/' + gId + '/settings', true);
+                            xhr.setRequestHeader('Content-Type', 'application/json');
+                            xhr.onload = function() {
+                                try { if (JSON.parse(xhr.responseText).success) showSavedBanner(); } catch(e) {}
+                            };
+                            xhr.send(JSON.stringify({
+                                logs_config: JSON.stringify(logsState)
+                            }));
+                        } catch(e) {}
+                    }
+
+                    // Attach ALL window functions at top
+                    window.saveLogsSetting = function(key, val) {
+                        try {
+                            var gId = '${guildId}';
+                            if (!gId) return;
+                            var body = {};
+                            body[key] = val ? 1 : 0;
+                            var xhr = new XMLHttpRequest();
+                            xhr.open('POST', '/api/guild/' + gId + '/settings', true);
+                            xhr.setRequestHeader('Content-Type', 'application/json');
+                            xhr.onload = function() {
+                                try { if (JSON.parse(xhr.responseText).success) showSavedBanner(); } catch(e) {}
+                            };
+                            xhr.send(JSON.stringify(body));
+                        } catch(e) {}
                     };
 
-                        var LOG_CATEGORIES = {
+                    window.switchLogsCategory = function(catKey) {
+                        currentCategory = catKey;
+                        renderCategoriesSidebar();
+                        renderLogsGrid();
+                    };
+
+                    window.toggleLogsCategoriesDropdown = function() {
+                        var list = document.getElementById('logsCategoriesList');
+                        var arrow = document.getElementById('logsCategoriesDropdownArrow');
+                        if (!list) return;
+                        if (list.classList.contains('hidden')) {
+                            list.classList.remove('hidden');
+                            if (arrow) arrow.textContent = '▼';
+                        } else {
+                            list.classList.add('hidden');
+                            if (arrow) arrow.textContent = '◀';
+                        }
+                    };
+
+                    window.filterLogsByStatus = function(status) {
+                        currentFilter = status;
+                        var btnAll = document.getElementById('btnLogFilterAll');
+                        var btnEn = document.getElementById('btnLogFilterEnabled');
+                        var btnDis = document.getElementById('btnLogFilterDisabled');
+                        var activeClass = "px-3.5 py-1.5 rounded-xl text-xs font-bold bg-purple-600 text-white transition shadow cursor-pointer";
+                        var inactiveClass = "px-3.5 py-1.5 rounded-xl text-xs font-bold text-gray-400 hover:text-white transition cursor-pointer";
+
+                        if (btnAll) btnAll.className = (status === 'all') ? activeClass : inactiveClass;
+                        if (btnEn) btnEn.className = (status === 'enabled') ? activeClass : inactiveClass;
+                        if (btnDis) btnDis.className = (status === 'disabled') ? activeClass : inactiveClass;
+
+                        if (typeof LOG_CATEGORIES !== 'undefined') {
+                            var catKeys = Object.keys(LOG_CATEGORIES);
+                            var currentCatMatches = false;
+                            var currentCatObj = LOG_CATEGORIES[currentCategory];
+                            if (currentCatObj && currentCatObj.items) {
+                                var enabledCount = 0;
+                                for (var ci = 0; ci < currentCatObj.items.length; ci++) {
+                                    if (isLogEnabled(currentCatObj.items[ci].id)) enabledCount++;
+                                }
+                                if (status === 'all') currentCatMatches = true;
+                                else if (status === 'enabled' && enabledCount > 0) currentCatMatches = true;
+                                else if (status === 'disabled' && enabledCount < currentCatObj.items.length) currentCatMatches = true;
+                            }
+
+                            if (!currentCatMatches && status !== 'all') {
+                                for (var k = 0; k < catKeys.length; k++) {
+                                    var ck = catKeys[k];
+                                    var cObj = LOG_CATEGORIES[ck];
+                                    var cEn = 0;
+                                    for (var cj = 0; cj < cObj.items.length; cj++) {
+                                        if (isLogEnabled(cObj.items[cj].id)) cEn++;
+                                    }
+                                    if (status === 'enabled' && cEn > 0) { currentCategory = ck; break; }
+                                    if (status === 'disabled' && cEn < cObj.items.length) { currentCategory = ck; break; }
+                                }
+                            }
+                        }
+
+                        renderCategoriesSidebar();
+                        renderLogsGrid();
+                    };
+
+                    window.searchLogsItems = function() {
+                        renderLogsGrid();
+                    };
+
+                    window.toggleSingleLogEvent = function(logId, enable) {
+                        if (!logsState[logId]) logsState[logId] = {};
+                        logsState[logId].enabled = enable;
+                        var card = document.querySelector('div[data-log-id="' + logId + '"]');
+                        if (card) {
+                            if (enable) card.classList.remove('opacity-40');
+                            else card.classList.add('opacity-40');
+                        }
+                        renderCategoriesSidebar();
+                        saveLogsConfigToServer();
+                    };
+
+                    window.toggleActiveCategoryLogs = function(enable) {
+                        if (typeof LOG_CATEGORIES === 'undefined') return;
+                        var cat = LOG_CATEGORIES[currentCategory];
+                        if (!cat || !cat.items) return;
+                        for (var i = 0; i < cat.items.length; i++) {
+                            var id = cat.items[i].id;
+                            if (!logsState[id]) logsState[id] = {};
+                            logsState[id].enabled = enable;
+                        }
+                        renderCategoriesSidebar();
+                        renderLogsGrid();
+                        saveLogsConfigToServer();
+                    };
+
+                    window.toggleAllLogsGlobally = function(enable) {
+                        if (typeof LOG_CATEGORIES === 'undefined') return;
+                        var catKeys = Object.keys(LOG_CATEGORIES);
+                        for (var i = 0; i < catKeys.length; i++) {
+                            var items = LOG_CATEGORIES[catKeys[i]].items || [];
+                            for (var j = 0; j < items.length; j++) {
+                                var id = items[j].id;
+                                if (!logsState[id]) logsState[id] = {};
+                                logsState[id].enabled = enable;
+                            }
+                        }
+                        renderCategoriesSidebar();
+                        renderLogsGrid();
+                        saveLogsConfigToServer();
+                    };
+
+                    window.applyCatSettingsToAll = function() {
+                        if (typeof LOG_CATEGORIES === 'undefined') return;
+                        var cat = LOG_CATEGORIES[currentCategory];
+                        if (!cat || !cat.items) return;
+                        var colorInp = document.getElementById('catColorHex');
+                        var color = colorInp ? colorInp.value : '#5865F2';
+                        var chanInp = document.getElementById('catDefaultChannel');
+                        var chan = chanInp ? chanInp.value : '';
+
+                        var appliedCount = 0;
+                        for (var i = 0; i < cat.items.length; i++) {
+                            var id = cat.items[i].id;
+                            if (!isLogEnabled(id)) continue;
+                            if (!logsState[id]) logsState[id] = { enabled: true };
+                            if (color) logsState[id].color = color;
+                            if (chan) logsState[id].channel_id = chan;
+                            appliedCount++;
+                        }
+                        if (appliedCount === 0) {
+                            alert('⚠️ لا توجد سجلات مفعلة في قسم (' + cat.title + ') لتطبيق الإعدادات عليها!');
+                            return;
+                        }
+                        alert('✅ تم تطبيق القناة واللون بنجاح على السجلات المفعلة بقسم (' + cat.title + ') وعددهم: ' + appliedCount + '!');
+                        renderCategoriesSidebar();
+                        renderLogsGrid();
+                        saveLogsConfigToServer();
+                    };
+
+                    window.openEditLogModal = function(logId, title, icon) {
+                        currentEditModalLogId = logId;
+                        var modal = document.getElementById('editLogModal');
+                        var titleEl = document.getElementById('modalLogTitle');
+                        var iconEl = document.getElementById('modalLogIcon');
+                        var chanEl = document.getElementById('modalLogChannel');
+                        var colorHex = document.getElementById('modalLogColorHex');
+                        var colorPicker = document.getElementById('modalLogColorPicker');
+
+                        if (titleEl) titleEl.textContent = title || 'تخصيص السجل';
+                        if (iconEl) iconEl.textContent = icon || '📜';
+
+                        var cfg = logsState[logId] || {};
+                        if (chanEl) chanEl.value = cfg.channel_id || '';
+                        var col = cfg.color || '#5865F2';
+                        if (colorHex) colorHex.value = col;
+                        if (colorPicker) colorPicker.value = col;
+
+                        if (modal) modal.classList.remove('hidden');
+                    };
+
+                    window.closeEditLogModal = function() {
+                        var modal = document.getElementById('editLogModal');
+                        if (modal) modal.classList.add('hidden');
+                        currentEditModalLogId = null;
+                    };
+
+                    window.saveModalLogConfig = function() {
+                        if (!currentEditModalLogId) return;
+                        var chanEl = document.getElementById('modalLogChannel');
+                        var colorHex = document.getElementById('modalLogColorHex');
+
+                        if (!logsState[currentEditModalLogId]) logsState[currentEditModalLogId] = { enabled: true };
+                        logsState[currentEditModalLogId].channel_id = chanEl ? chanEl.value : '';
+                        logsState[currentEditModalLogId].color = colorHex ? colorHex.value : '#5865F2';
+
+                        saveLogsConfigToServer();
+                        window.closeEditLogModal();
+                        renderCategoriesSidebar();
+                        renderLogsGrid();
+                    };
+
+                    window.autoSetupLogsChannels = function(mode) {
+                        var modeTitle = mode === 'grouped' ? 'القنوات العادية (قسم لكل قناة)' : 'القنوات المفصلة (قناة لكل نوع سجل)';
+                        if (!confirm('هل تريد إنشاء قنوات السجلات تلقائياً بالسيرفر بنظام: ' + modeTitle + '؟')) return;
+
+                        try {
+                            var gId = '${guildId}';
+                            fetch('/api/guild/' + gId + '/logs/auto-setup', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ mode: mode })
+                            }).then(function(res) { return res.json(); }).then(function(d) {
+                                if (d.success) {
+                                    alert('✅ تم إنشاء وتوزيع قنوات السجلات بنجاح في السيرفر!');
+                                    location.reload();
+                                } else {
+                                    alert('❌ ' + (d.error || 'فشل إنشاء القنوات'));
+                                }
+                            }).catch(function() {
+                                alert('حدث خطأ في الاتصال بالخادم');
+                            });
+                        } catch(e) {
+                            alert('حدث خطأ في الاتصال بالخادم');
+                        }
+                    };
+
+                    window.deleteLogsChannels = function() {
+                        if (!confirm('⚠️ تحذير: هل أنت متأكد من حذف كاتيجوري سجلات ZENO وجميع القنوات بداخله نهائياً؟')) return;
+
+                        try {
+                            var gId = '${guildId}';
+                            fetch('/api/guild/' + gId + '/logs/delete-channels', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' }
+                            }).then(function(res) { return res.json(); }).then(function(d) {
+                                if (d.success) {
+                                    alert('✅ تم حذف قنوات السجلات بنجاح');
+                                    location.reload();
+                                } else {
+                                    alert('❌ ' + (d.error || 'فشل الحذف'));
+                                }
+                            }).catch(function() {
+                                alert('حدث خطأ في الاتصال');
+                            });
+                        } catch(e) {
+                            alert('حدث خطأ في الاتصال');
+                        }
+                    };
+
+                    // 105 Comprehensive Log Events across 13 Categories
+                    var LOG_CATEGORIES = {
                             members: {
                                 title: 'الأعضاء', icon: '🎯', desc: 'أحداث دخول وخروج وحظر وعقوبات الأعضاء', defaultColor: '#5865F2',
                                 items: [
@@ -6760,245 +7041,6 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                             }
                         }
 
-                        // Attach all functions to window IMMEDIATELY
-                        window.saveLogsSetting = function(key, val) {
-                            try {
-                                var gId = '${guildId}';
-                                if (!gId) return;
-                                var body = {};
-                                body[key] = val ? 1 : 0;
-                                var xhr = new XMLHttpRequest();
-                                xhr.open('POST', '/api/guild/' + gId + '/settings', true);
-                                xhr.setRequestHeader('Content-Type', 'application/json');
-                                xhr.onload = function() {
-                                    try { if (JSON.parse(xhr.responseText).success) showSavedBanner(); } catch(e) {}
-                                };
-                                xhr.send(JSON.stringify(body));
-                            } catch(e) {}
-                        };
-
-                        window.switchLogsCategory = function(catKey) {
-                            currentCategory = catKey;
-                            renderCategoriesSidebar();
-                            renderLogsGrid();
-                        };
-
-                        window.toggleLogsCategoriesDropdown = function() {
-                            var list = document.getElementById('logsCategoriesList');
-                            var arrow = document.getElementById('logsCategoriesDropdownArrow');
-                            if (!list) return;
-                            if (list.classList.contains('hidden')) {
-                                list.classList.remove('hidden');
-                                if (arrow) arrow.textContent = '▼';
-                            } else {
-                                list.classList.add('hidden');
-                                if (arrow) arrow.textContent = '◀';
-                            }
-                        };
-
-                        window.filterLogsByStatus = function(status) {
-                            currentFilter = status;
-                            var btnAll = document.getElementById('btnLogFilterAll');
-                            var btnEn = document.getElementById('btnLogFilterEnabled');
-                            var btnDis = document.getElementById('btnLogFilterDisabled');
-                            var activeClass = "px-3.5 py-1.5 rounded-xl text-xs font-bold bg-purple-600 text-white transition shadow cursor-pointer";
-                            var inactiveClass = "px-3.5 py-1.5 rounded-xl text-xs font-bold text-gray-400 hover:text-white transition cursor-pointer";
-
-                            if (btnAll) btnAll.className = (status === 'all') ? activeClass : inactiveClass;
-                            if (btnEn) btnEn.className = (status === 'enabled') ? activeClass : inactiveClass;
-                            if (btnDis) btnDis.className = (status === 'disabled') ? activeClass : inactiveClass;
-
-                            // If currentCategory has no items matching the filter, auto-switch to first matching category if any
-                            var catKeys = Object.keys(LOG_CATEGORIES);
-                            var currentCatMatches = false;
-                            var currentCatObj = LOG_CATEGORIES[currentCategory];
-                            if (currentCatObj && currentCatObj.items) {
-                                var enabledCount = 0;
-                                for (var ci = 0; ci < currentCatObj.items.length; ci++) {
-                                    if (isLogEnabled(currentCatObj.items[ci].id)) enabledCount++;
-                                }
-                                if (status === 'all') currentCatMatches = true;
-                                else if (status === 'enabled' && enabledCount > 0) currentCatMatches = true;
-                                else if (status === 'disabled' && enabledCount < currentCatObj.items.length) currentCatMatches = true;
-                            }
-
-                            if (!currentCatMatches && status !== 'all') {
-                                for (var k = 0; k < catKeys.length; k++) {
-                                    var ck = catKeys[k];
-                                    var cObj = LOG_CATEGORIES[ck];
-                                    var cEn = 0;
-                                    for (var cj = 0; cj < cObj.items.length; cj++) {
-                                        if (isLogEnabled(cObj.items[cj].id)) cEn++;
-                                    }
-                                    if (status === 'enabled' && cEn > 0) { currentCategory = ck; break; }
-                                    if (status === 'disabled' && cEn < cObj.items.length) { currentCategory = ck; break; }
-                                }
-                            }
-
-                            renderCategoriesSidebar();
-                            renderLogsGrid();
-                        };
-
-                        window.searchLogsItems = function() {
-                            renderLogsGrid();
-                        };
-
-                        window.toggleSingleLogEvent = function(logId, enable) {
-                            if (!logsState[logId]) logsState[logId] = {};
-                            logsState[logId].enabled = enable;
-                            var card = document.querySelector('div[data-log-id="' + logId + '"]');
-                            if (card) {
-                                if (enable) card.classList.remove('opacity-40');
-                                else card.classList.add('opacity-40');
-                            }
-                            renderCategoriesSidebar();
-                            saveLogsConfigToServer();
-                        };
-
-                        window.toggleActiveCategoryLogs = function(enable) {
-                            var cat = LOG_CATEGORIES[currentCategory];
-                            if (!cat || !cat.items) return;
-                            for (var i = 0; i < cat.items.length; i++) {
-                                var id = cat.items[i].id;
-                                if (!logsState[id]) logsState[id] = {};
-                                logsState[id].enabled = enable;
-                            }
-                            renderCategoriesSidebar();
-                            renderLogsGrid();
-                            saveLogsConfigToServer();
-                        };
-
-                        window.toggleAllLogsGlobally = function(enable) {
-                            var catKeys = Object.keys(LOG_CATEGORIES);
-                            for (var i = 0; i < catKeys.length; i++) {
-                                var items = LOG_CATEGORIES[catKeys[i]].items || [];
-                                for (var j = 0; j < items.length; j++) {
-                                    var id = items[j].id;
-                                    if (!logsState[id]) logsState[id] = {};
-                                    logsState[id].enabled = enable;
-                                }
-                            }
-                            renderCategoriesSidebar();
-                            renderLogsGrid();
-                            saveLogsConfigToServer();
-                        };
-
-                        window.applyCatSettingsToAll = function() {
-                            var cat = LOG_CATEGORIES[currentCategory];
-                            if (!cat || !cat.items) return;
-                            var colorInp = document.getElementById('catColorHex');
-                            var color = colorInp ? colorInp.value : '#5865F2';
-                            var chanInp = document.getElementById('catDefaultChannel');
-                            var chan = chanInp ? chanInp.value : '';
-
-                            var appliedCount = 0;
-                            for (var i = 0; i < cat.items.length; i++) {
-                                var id = cat.items[i].id;
-                                if (!isLogEnabled(id)) continue; // تطبيق على المفعلة فقط
-                                if (!logsState[id]) logsState[id] = { enabled: true };
-                                if (color) logsState[id].color = color;
-                                if (chan) logsState[id].channel_id = chan;
-                                appliedCount++;
-                            }
-                            if (appliedCount === 0) {
-                                alert('⚠️ لا توجد سجلات مفعلة في قسم (' + cat.title + ') لتطبيق الإعدادات عليها!');
-                                return;
-                            }
-                            alert('✅ تم تطبيق القناة واللون بنجاح على السجلات المفعلة بقسم (' + cat.title + ') وعددهم: ' + appliedCount + '!');
-                            renderCategoriesSidebar();
-                            renderLogsGrid();
-                            saveLogsConfigToServer();
-                        };
-
-                        window.openEditLogModal = function(logId, title, icon) {
-                            currentEditModalLogId = logId;
-                            var modal = document.getElementById('editLogModal');
-                            var titleEl = document.getElementById('modalLogTitle');
-                            var iconEl = document.getElementById('modalLogIcon');
-                            var chanEl = document.getElementById('modalLogChannel');
-                            var colorHex = document.getElementById('modalLogColorHex');
-                            var colorPicker = document.getElementById('modalLogColorPicker');
-
-                            if (titleEl) titleEl.textContent = title || 'تخصيص السجل';
-                            if (iconEl) iconEl.textContent = icon || '📜';
-
-                            var cfg = logsState[logId] || {};
-                            if (chanEl) chanEl.value = cfg.channel_id || '';
-                            var col = cfg.color || '#5865F2';
-                            if (colorHex) colorHex.value = col;
-                            if (colorPicker) colorPicker.value = col;
-
-                            if (modal) modal.classList.remove('hidden');
-                        };
-
-                        window.closeEditLogModal = function() {
-                            var modal = document.getElementById('editLogModal');
-                            if (modal) modal.classList.add('hidden');
-                            currentEditModalLogId = null;
-                        };
-
-                        window.saveModalLogConfig = function() {
-                            if (!currentEditModalLogId) return;
-                            var chanEl = document.getElementById('modalLogChannel');
-                            var colorHex = document.getElementById('modalLogColorHex');
-
-                            if (!logsState[currentEditModalLogId]) logsState[currentEditModalLogId] = { enabled: true };
-                            logsState[currentEditModalLogId].channel_id = chanEl ? chanEl.value : '';
-                            logsState[currentEditModalLogId].color = colorHex ? colorHex.value : '#5865F2';
-
-                            saveLogsConfigToServer();
-                            window.closeEditLogModal();
-                            renderCategoriesSidebar();
-                            renderLogsGrid();
-                        };
-
-                        window.autoSetupLogsChannels = function(mode) {
-                            var modeTitle = mode === 'grouped' ? 'القنوات العادية (قسم لكل قناة)' : 'القنوات المفصلة (قناة لكل نوع سجل)';
-                            if (!confirm('هل تريد إنشاء قنوات السجلات تلقائياً بالسيرفر بنظام: ' + modeTitle + '؟')) return;
-
-                            try {
-                                var gId = '${guildId}';
-                                fetch('/api/guild/' + gId + '/logs/auto-setup', {
-                                    method: 'POST',
-                                    headers: { 'Content-Type': 'application/json' },
-                                    body: JSON.stringify({ mode: mode })
-                                }).then(function(res) { return res.json(); }).then(function(d) {
-                                    if (d.success) {
-                                        alert('✅ تم إنشاء وتوزيع قنوات السجلات بنجاح في السيرفر!');
-                                        location.reload();
-                                    } else {
-                                        alert('❌ ' + (d.error || 'فشل إنشاء القنوات'));
-                                    }
-                                }).catch(function() {
-                                    alert('حدث خطأ في الاتصال بالخادم');
-                                });
-                            } catch(e) {
-                                alert('حدث خطأ في الاتصال بالخادم');
-                            }
-                        };
-
-                        window.deleteLogsChannels = function() {
-                            if (!confirm('⚠️ تحذير: هل أنت متأكد من حذف كاتيجوري سجلات ZENO وجميع القنوات بداخله نهائياً؟')) return;
-
-                            try {
-                                var gId = '${guildId}';
-                                fetch('/api/guild/' + gId + '/logs/delete-channels', {
-                                    method: 'POST',
-                                    headers: { 'Content-Type': 'application/json' }
-                                }).then(function(res) { return res.json(); }).then(function(d) {
-                                    if (d.success) {
-                                        alert('✅ تم حذف قنوات السجلات بنجاح');
-                                        location.reload();
-                                    } else {
-                                        alert('❌ ' + (d.error || 'فشل الحذف'));
-                                    }
-                                }).catch(function() {
-                                    alert('حدث خطأ في الاتصال');
-                                });
-                            } catch(e) {
-                                alert('حدث خطأ في الاتصال');
-                            }
-                        };
 
                         // Initial render wrapped safely
                         try {
