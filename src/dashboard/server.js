@@ -7004,8 +7004,15 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                         try {
                             renderCategoriesSidebar();
                             renderLogsGrid();
+                            console.log('[LOGS] Script loaded OK. logsState keys:', Object.keys(logsState).length, 'saveLogsSetting:', typeof window.saveLogsSetting);
                         } catch(err) {
                             console.error('Error in initial logs render:', err);
+                            // Show error to user for debugging
+                            var errDiv = document.createElement('div');
+                            errDiv.style = 'position:fixed;bottom:20px;left:20px;background:#7f1d1d;color:#fca5a5;padding:12px 16px;border-radius:12px;font-size:11px;z-index:9999;max-width:400px;font-family:monospace;';
+                            errDiv.textContent = '[LOGS ERROR] ' + err.message;
+                            document.body.appendChild(errDiv);
+                            setTimeout(function() { errDiv.remove(); }, 10000);
                         }
                     // ===== END LOGS SECTION SCRIPT =====
                     </script>
