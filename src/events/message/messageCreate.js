@@ -37,6 +37,54 @@ module.exports = {
       if (db.touchStaffShiftAction) db.touchStaffShiftAction(guildId, userId);
     }
 
+    // =========================================================================
+    // 🤖 التحدث التلقائي المباشر مع ZENO بالذكاء الاصطناعي (أولوية قصوى)
+    // =========================================================================
+    const cleanContent = message.content ? message.content.trim() : '';
+    const botMentionRegex = new RegExp(`^<@!?${client.user?.id}>`);
+    const isBotMentioned = botMentionRegex.test(cleanContent) || (message.mentions && message.mentions.has(client.user?.id) && !message.mentions.everyone);
+
+    // كشف مناداة ZENO أو زينو في بداية الرسالة أو كلمة ZENO منفردة
+    const zenoCallRegex = /^(?:zeno|زينو)(?:[\s,:!\?؟-]+(.+)|$)/i;
+    const matchZeno = cleanContent.match(zenoCallRegex);
+
+    if (isBotMentioned || matchZeno) {
+      let userPrompt = '';
+      if (isBotMentioned) {
+        userPrompt = cleanContent.replace(botMentionRegex, '').replace(new RegExp(`<@!?${client.user?.id}>`, 'g'), '').trim();
+      } else if (matchZeno) {
+        userPrompt = (matchZeno[1] || '').trim();
+      }
+
+      if (!userPrompt) {
+        userPrompt = 'أهلاً وسهلاً! أنا ZENO، كيف يمكنني مساعدتك اليوم؟';
+      }
+
+      try {
+        await message.channel.sendTyping().catch(() => {});
+        const aiResponse = await askAI(userPrompt);
+
+        if (aiResponse) {
+          if (aiResponse.length <= 2000) {
+            await message.reply({ content: aiResponse }).catch(async () => {
+              await message.channel.send({ content: aiResponse }).catch(() => {});
+            });
+          } else {
+            const chunks = aiResponse.match(/[\s\S]{1,1950}/g) || [aiResponse];
+            await message.reply({ content: chunks[0] }).catch(async () => {
+              await message.channel.send({ content: chunks[0] }).catch(() => {});
+            });
+            for (let i = 1; i < chunks.length; i++) {
+              await message.channel.send({ content: chunks[i] }).catch(() => {});
+            }
+          }
+        }
+        return; // تم التفاعل بنجاح
+      } catch (err) {
+        console.error('[Auto ZENO AI Error]:', err);
+      }
+    }
+
     // ==========================================
     // 🛡️ درع الرقابة التلقائية المتقدم (Auto-Mod)
     // ==========================================
@@ -511,55 +559,6 @@ module.exports = {
       nadekoChannels = JSON.parse(settings.nadeko_channels || '[]');
     } catch(e) {}
     // تمكين تفاعل الأعضاء بحرية أو توجيهات داخل الروم المخصص
-
-    // --- 4.8. التحدث التلقائي مع الذكاء الاصطناعي عند مناداة ZENO أو منشن البوت ---
-    const botMentionRegex = new RegExp(`^<@!?${client.user?.id}>`);
-    const isBotMentioned = botMentionRegex.test(message.content.trim()) || (message.mentions.has(client.user?.id) && !message.mentions.everyone);
-    
-    // التحقق إذا كانت الرسالة تبدأ بـ ZENO أو زينو أو تحتوي على نداء مباشر للبوت
-    const zenoCallRegex = /^(?:zeno|زينو)[\s,:!-]+(.+)|^((?:zeno|زينو)$)/i;
-    const matchZeno = message.content.trim().match(zenoCallRegex);
-
-    if (isBotMentioned || matchZeno) {
-      // استخراج نص السؤال أو الكلام الموجه للبوت
-      let userPrompt = '';
-      if (isBotMentioned) {
-        userPrompt = message.content.replace(botMentionRegex, '').replace(new RegExp(`<@!?${client.user?.id}>`, 'g'), '').trim();
-      } else if (matchZeno) {
-        userPrompt = (matchZeno[1] || matchZeno[2] || '').trim();
-      }
-
-      // إذا قال ZENO فقط بدون نص إضافي
-      if (!userPrompt || userPrompt.toLowerCase() === 'zeno' || userPrompt === 'زينو') {
-        userPrompt = 'أهلاً وسهلاً، كيف يمكنني مساعدتك اليوم؟';
-      }
-
-      try {
-        // إرسال علامة أن البوت يكتب (Typing Indicator)
-        await message.channel.sendTyping().catch(() => {});
-
-        const aiResponse = await askAI(userPrompt);
-
-        if (aiResponse) {
-          if (aiResponse.length <= 2000) {
-            await message.reply({ content: aiResponse }).catch(async () => {
-              await message.channel.send({ content: aiResponse }).catch(() => {});
-            });
-          } else {
-            const chunks = aiResponse.match(/[\s\S]{1,1950}/g) || [aiResponse];
-            await message.reply({ content: chunks[0] }).catch(async () => {
-              await message.channel.send({ content: chunks[0] }).catch(() => {});
-            });
-            for (let i = 1; i < chunks.length; i++) {
-              await message.channel.send({ content: chunks[i] }).catch(() => {});
-            }
-          }
-        }
-        return; // تم الرد بنجاح، لا تكمل إلى الأوامر الأخرى
-      } catch (err) {
-        console.error('[Auto ZENO AI Error]:', err);
-      }
-    }
 
     // --- 5. معالجة الأوامر بالبرفكس (Prefix Commands) ---
     const prefix = settings.prefix || config.defaultPrefix || '#';
