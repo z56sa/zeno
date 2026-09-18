@@ -593,10 +593,21 @@ module.exports = function (app, client) {
                         --primary: #9333ea;
                         --border: rgba(255, 255, 255, 0.05);
                     }
-                    body { background-color: var(--bg-main) !important; color: #ffffff !important; font-family: 'Cairo', sans-serif !important; }
+                    body { background-color: var(--bg-main) !important; color: #ffffff !important; font-family: 'Cairo', sans-serif !important; transition: background-color 0.3s, color 0.3s; }
+                    body.light-mode { background-color: #f8f9fa !important; color: #1a1a1a !important; }
+                    body.light-mode .bg-\[\#0b0e14\], body.light-mode .bg-\[\#0b0d14\] { background-color: #f3f4f6 !important; }
+                    body.light-mode .bg-\[\#121620\], body.light-mode .bg-\[\#151722\] { background-color: #ffffff !important; border-color: #e5e7eb !important; }
+                    body.light-mode .text-white { color: #1a1a1a !important; }
+                    body.light-mode .text-gray-300 { color: #4b5563 !important; }
+                    body.light-mode .text-gray-400 { color: #6b7280 !important; }
+                    body.light-mode .border-\[\#1e2638\] { border-color: #e5e7eb !important; }
                     ::-webkit-scrollbar { width: 6px; height: 6px; }
                     ::-webkit-scrollbar-track { background: #0b0d14; }
                     ::-webkit-scrollbar-thumb { background: #2f3146; border-radius: 10px; }
+                    @keyframes spin { to { transform: rotate(360deg); } }
+                    .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(139, 92, 246, 0.2); border-radius: 50%; border-top-color: #8b5cf6; animation: spin 0.8s linear infinite; }
+                    @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+                    .toast-enter { animation: slideUp 0.3s ease-out; }
                 </style>
             
     <script>
@@ -6216,6 +6227,11 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                                 <i class="fa-solid fa-download text-xs"></i>
                                 <span class="text-xs font-bold">تصدير</span>
                             </button>
+                            <div class="h-4 w-px bg-gray-700"></div>
+                            <button type="button" id="logs-btn-theme" class="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition cursor-pointer" title="تبديل المظهر">
+                                <i class="fa-solid fa-moon text-xs"></i>
+                                <span class="text-xs font-bold">مظهر</span>
+                            </button>
                         </div>
                         <div class="flex items-center gap-2 text-xs text-gray-500">
                             <i class="fa-solid fa-shield-halved text-violet-400"></i>
@@ -6688,6 +6704,35 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                                 } catch(e) {
                                     showToast('خطأ في التصدير', 'danger');
                                 }
+                            });
+                        }
+                    })();
+
+                    // ===== THEME TOGGLE (Dark / Light) =====
+                    (function() {
+                        var btnTheme = document.getElementById('logs-btn-theme');
+                        var savedTheme = localStorage.getItem('zenoTheme');
+                        var isDark = savedTheme !== 'light';
+
+                        function applyTheme(dark) {
+                            if (dark) {
+                                document.body.classList.remove('light-mode');
+                                if (btnTheme) btnTheme.innerHTML = '<i class="fa-solid fa-moon text-xs"></i><span class="text-xs font-bold">مظهر</span>';
+                                localStorage.setItem('zenoTheme', 'dark');
+                            } else {
+                                document.body.classList.add('light-mode');
+                                if (btnTheme) btnTheme.innerHTML = '<i class="fa-solid fa-sun text-xs"></i><span class="text-xs font-bold">مظهر</span>';
+                                localStorage.setItem('zenoTheme', 'light');
+                            }
+                        }
+
+                        if (!isDark) applyTheme(false);
+
+                        if (btnTheme) {
+                            btnTheme.addEventListener('click', function() {
+                                isDark = !isDark;
+                                applyTheme(isDark);
+                                showToast(isDark ? '🌙 تم التبديل إلى الوضع الداكن' : '☀️ تم التبديل إلى الوضع الفاتح', 'info');
                             });
                         }
                     })();
