@@ -3,7 +3,7 @@ const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
 module.exports = {
   name: 'unhide',
   description: 'إظهار الروم الحالي وإلغاء إخفائه عن الأعضاء',
-  aliases: ['انهايد', 'الغاء-الاخفاء'],
+  aliases: ['انهايد', 'الغاء-الاخفاء', 'show', 'اظهار', 'شو'],
   data: new SlashCommandBuilder()
     .setName('unhide')
     .setDescription('إظهار الروم الحالي وإلغاء إخفائه عن الأعضاء')
