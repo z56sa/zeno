@@ -11072,6 +11072,24 @@ ${embedScriptHtml}
         }
     });
 
+    // ===================== Guild Settings API (حفظ إعدادات السيرفر والسجلات الحية) =====================
+    app.post('/api/guild/:guildId/settings', express.json(), async (req, res) => {
+        try {
+            if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
+            const { guildId } = req.params;
+            const payload = req.body;
+            if (!payload || typeof payload !== 'object') {
+                return res.status(400).json({ success: false, error: 'Invalid payload' });
+            }
+
+            database.updateGuildSettings(guildId, payload);
+            res.json({ success: true, message: 'تم حفظ الإعدادات بنجاح في قاعدة البيانات' });
+        } catch (err) {
+            console.error('[SETTINGS API] Error updating settings:', err);
+            res.status(500).json({ success: false, error: err.message });
+        }
+    });
+
     // ===================== Logs System API (سجلات السيرفر الشاملة 📜) =====================
     const { PermissionFlagsBits } = require('discord.js');
     const logsCommand = require('../commands/admin/logs');
