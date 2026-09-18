@@ -1,18 +1,169 @@
 const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, StringSelectMenuBuilder } = require('discord.js');
 const config = require('../../config.json');
 
+// =============================================
+// قائمة الأوامر الكاملة مع التصنيفات
+// =============================================
+const CATEGORIES = {
+  mod: {
+    emoji: '🛡️',
+    title: 'الإشراف والحماية',
+    color: '#ef4444',
+    commands: [
+      { name: 'ban',            desc: 'اعطاء بان لشخص او ازالته' },
+      { name: 'unban',          desc: 'فك حظر عضو' },
+      { name: 'unbanall',       desc: 'فك حظر جميع الأعضاء المحظورين في السيرفر' },
+      { name: 'kick',           desc: 'اعطاء طرد لشخص او ازالته' },
+      { name: 'mute',           desc: 'اعطاء ميوت لشخص او ازالته' },
+      { name: 'timeout',        desc: 'اعطاء تايم اوت لشخص او ازالته' },
+      { name: 'untimeout',      desc: 'إزالة التايم أوت من عضو' },
+      { name: 'untimeall',      desc: 'إزالة التايم أوت من جميع الأعضاء' },
+      { name: 'warn',           desc: 'تحذير عضو' },
+      { name: 'unwarn',         desc: 'إزالة تحذير من عضو' },
+      { name: 'warns',          desc: 'عرض تحذيرات عضو' },
+      { name: 'clear',          desc: 'حذف عدد من الرسائل' },
+      { name: 'lock',           desc: 'قفل الروم' },
+      { name: 'unlock',         desc: 'فتح الروم' },
+      { name: 'hide',           desc: 'اخفاء الروم' },
+      { name: 'show',           desc: 'إظهار الروم الذي تم إخفاؤه' },
+      { name: 'unhide',         desc: 'اظهار الروم' },
+      { name: 'nickname',       desc: 'اعطاء اسم مستعار لشخص او ازالته' },
+      { name: 'demote',         desc: 'تخفيض عضو عن طريق إزالة أعلى رتبة يمتلكها' },
+      { name: 'promote',        desc: 'ترقية عضو تلقائياً لأعلى رتبة (فوق رتبته الحالية)' },
+      { name: 'role',           desc: 'اعطاء رتبة لشخص او ازالتها' },
+      { name: 'xroles',         desc: 'إعطاء أو إزالة رتبة لعدة أعضاء' },
+      { name: 'come',           desc: 'استدعاء شخص' },
+      { name: 'snipe',          desc: 'عرض آخر رسالة محذوفة في القناة' },
+    ]
+  },
+  protection: {
+    emoji: '🔐',
+    title: 'الحماية المتقدمة',
+    color: '#f97316',
+    commands: [
+      { name: 'anti-ban',          desc: 'تسطيب نظام الحماية من الباند' },
+      { name: 'anti-bots',         desc: 'تسطيب نظام الحماية من البوتات' },
+      { name: 'anti-delete-roles', desc: 'تسطيب نظام الحماية من حظر الرتب' },
+      { name: 'anti-delete-rooms', desc: 'تسطيب نظام الحماية من حذف الرومات' },
+      { name: 'antilink',          desc: 'إدارة الحماية من الروابط' },
+      { name: 'antispam',          desc: 'إدارة الحماية من السبام' },
+      { name: 'badwords',          desc: 'إدارة الكلمات الممنوعة' },
+      { name: 'protection-status', desc: 'للاستعلام عن حالة نظام الحماية' },
+      { name: 'set-protect-logs',  desc: 'لتحديد روم لوج الحماية' },
+    ]
+  },
+  tickets: {
+    emoji: '🎫',
+    title: 'التذاكر والتقديم',
+    color: '#8b5cf6',
+    commands: [
+      { name: 'setup-ticket',       desc: 'تثبيت التذكرة' },
+      { name: 'add-ticket-button',  desc: 'تثبيت التذكرة (زر إضافي)' },
+      { name: 'add-button',         desc: 'اضافة زر للرتبة أخرى' },
+      { name: 'close',              desc: 'إغلاق تذكرة التكت الحالي' },
+      { name: 'delete',             desc: 'حذف تذكرة التكت الحالي' },
+      { name: 'rename',             desc: 'إعادة تسمية تذكرة التكت الحالي' },
+      { name: 'add-user',           desc: 'إضافة مستخدم للتذكرة الحالية' },
+      { name: 'remove-user',        desc: 'إزالة مستخدم من التذكرة الحالية' },
+      { name: 'to-select',          desc: 'تحويل التكت الى سلكت منيو' },
+      { name: 'set-ticket-log',     desc: 'تحديد روم اللوغ للتذاكر' },
+      { name: 'setup-apply',        desc: 'تسطيب نظام التقديم' },
+      { name: 'new-apply',          desc: 'انشاء تقديم جديد' },
+      { name: 'close-apply',        desc: 'انهاء التقديم المفتوح' },
+    ]
+  },
+  giveaway: {
+    emoji: '🎉',
+    title: 'الجيف أواي',
+    color: '#ec4899',
+    commands: [
+      { name: 'gstart',   desc: 'بدأ جيف اواي' },
+      { name: 'gend',     desc: 'انهاء جيف اواي' },
+      { name: 'greroll',  desc: 'اعادة فائزين جيف اواي' },
+    ]
+  },
+  economy: {
+    emoji: '💰',
+    title: 'الاقتصاد والرصيد',
+    color: '#eab308',
+    commands: [
+      { name: 'daily',    desc: 'استلام الراتب اليومي' },
+      { name: 'rovex',    desc: 'تحويل رصيد أو عرض رصيدك' },
+      { name: 'tax',      desc: 'معرفة ضريبة رقم' },
+      { name: 'profile',  desc: 'عرض معلومات حسابك أو حساب شخص آخر' },
+      { name: 'rank',     desc: 'عرض رانكك في السيرفر' },
+      { name: 'top',      desc: 'عرض توب السيرفر (رصيد أو مستوى)' },
+    ]
+  },
+  broadcast: {
+    emoji: '📢',
+    title: 'البرودكاست والخطوط',
+    color: '#06b6d4',
+    commands: [
+      { name: 'add-autoline-channel',    desc: 'اضافة روم خط تلقائي' },
+      { name: 'remove-autoline-channel', desc: 'ازالة روم خط تلقائي' },
+      { name: 'set-autoline-line',       desc: 'تحديد الخط التلقائي' },
+      { name: 'line-mode',               desc: 'اختر بين إرسال صورة أو رابط' },
+      { name: 'add-nadeko-room',         desc: 'اضافة روم يتم تفعيل الخاصية فيها' },
+      { name: 'remove-nadeko-room',      desc: 'ازالة روم مفعل الخاصية فيها' },
+      { name: 'send-broadcast-panel',    desc: 'ارسال بانل التحكم في البرودكاست' },
+      { name: 'remove-all-tokens',       desc: 'إزالة جميع بوتات البرودكاست' },
+      { name: 'remove-token',            desc: 'إزالة توكن برودكاست' },
+      { name: 'set-feedback-line',       desc: 'تحديد خط الاراء' },
+      { name: 'set-feedback-room',       desc: 'تحديد روم الاراء' },
+      { name: 'set-suggestions-line',    desc: 'تحديد خط الاقتراحات' },
+      { name: 'set-suggestions-room',    desc: 'تحديد روم الاقتراحات' },
+      { name: 'suggestion-mode',         desc: 'أزرار أو رياكشنات للاقتراحات' },
+      { name: 'set-tax-line',            desc: 'تحديد خط الضريبة' },
+      { name: 'set-tax-room',            desc: 'تحديد روم الضريبة التلقائية' },
+      { name: 'tax-mode',                desc: 'اختيار بين استخدام امبد أو رسالة عادية' },
+    ]
+  },
+  settings: {
+    emoji: '⚙️',
+    title: 'الإعدادات والأوامر العامة',
+    color: '#10b981',
+    commands: [
+      { name: 'greet',           desc: 'إعدادات الترحيب' },
+      { name: 'setup-welcome',   desc: 'إعدادات الترحيب التفصيلية' },
+      { name: 'set-message',     desc: 'تحديد الرسالة عند الدخول' },
+      { name: 'autorole',        desc: 'إدارة الرتب التلقائية عند دخول الأعضاء' },
+      { name: 'settempvoice',    desc: 'إدارة إنشاء القنوات الصوتية المؤقتة' },
+      { name: 'setup-rating',    desc: 'تسطيب اعدادات التقييم' },
+      { name: 'setcommandrole',  desc: 'ربط رتبة معينة بأمر معين' },
+      { name: 'setup-logs',      desc: 'تسطيب نظام اللوج' },
+      { name: 'logs-info',       desc: 'معلومات نظام اللوج في السيرفر' },
+      { name: 'alias',           desc: 'إدارة اختصارات الأوامر' },
+      { name: 'set-shortcut',    desc: 'تحديد اختصار لأمر معين' },
+      { name: 'autoreply-add',   desc: 'لاضافة رد تلقائي' },
+      { name: 'autoreply-list',  desc: 'لرؤية جميع الردود التلقائية' },
+      { name: 'autoreply-remove',desc: 'لازالة رد تلقائي' },
+      { name: 'avatar',          desc: 'رؤية افاتارك او شخص اخر' },
+      { name: 'banner',          desc: 'رؤية بانرك او شخص اخر' },
+      { name: 'user',            desc: 'رؤية معلومات حسابك او شخص اخر' },
+      { name: 'server',          desc: 'رؤية معلومات السيرفر' },
+      { name: 'inrole',          desc: 'عرض جميع الأعضاء الذين يمتلكون رتبة معينة' },
+      { name: 'roles',           desc: 'للاستعلام عن رتب السيرفر' },
+      { name: 'embed',           desc: 'قول كلام في ايمبد' },
+      { name: 'say',             desc: 'قول كلام' },
+      { name: 'send',            desc: 'لارسال رسالة لشخص ما' },
+      { name: 'ping',            desc: 'لتجربة سرعة البوت' },
+      { name: 'help',            desc: 'قائمة اوامر البوت' },
+    ]
+  }
+};
+
 module.exports = {
   name: 'help',
-  description: 'عرض قائمة الأوامر والمساعدة التفاعلية',
+  description: 'قائمة اوامر البوت',
   aliases: ['h', 'اوامر', 'مساعدة'],
   data: new SlashCommandBuilder()
     .setName('help')
-    .setDescription('عرض قائمة الأوامر والمساعدة التفاعلية الخاصة بالبوت'),
+    .setDescription('عرض قائمة أوامر البوت الكاملة بشكل تفاعلي'),
 
   async execute(interaction, client) {
     const embed = this.getMainEmbed();
     const row = this.getSelectMenu();
-
     const response = await interaction.reply({ embeds: [embed], components: [row], withResponse: true });
     this.handleMenu(response, interaction.user.id, client);
   },
@@ -20,24 +171,27 @@ module.exports = {
   async executePrefix(message, args, client) {
     const embed = this.getMainEmbed();
     const row = this.getSelectMenu();
-
     const response = await message.reply({ embeds: [embed], components: [row] });
     this.handleMenu(response, message.author.id, client);
   },
 
   getMainEmbed() {
+    const totalCommands = Object.values(CATEGORIES).reduce((sum, cat) => sum + cat.commands.length, 0);
     return new EmbedBuilder()
-      .setColor(config.colors.primary || '#9333ea')
+      .setColor(config.colors?.primary || '#9333ea')
       .setTitle('📚 دليل أوامر بوت ZENO الشامل')
-      .setDescription('مرحباً بك في قائمة المساعدة الشاملة! يمكنك الضغط على أي أمر لتنفيذه مباشرة أو اختيار الفئة من القائمة المنسدلة بالأسفل:')
-      .addFields(
-        { name: '🛡️ الإشراف والرقابة (Moderation)', value: 'أوامر إدارة وحماية السيرفر (Ban, Kick, Timeout, Warn, Clear, Lock...)' },
-        { name: '⭐ الاقتصاد والنجوم (Economy & Star)', value: 'نظام النجوم Star، البنك، الوظائف، المراهنات، البروفايل والمتصدرين.' },
-        { name: '🎫 نظام التذاكر (Tickets)', value: 'لوحات الدعم الفني، إدارة التذاكر وحفظ الترانسكريبت.' },
-        { name: '⚙️ الإعدادات والإدارة (Settings & Admin)', value: 'الترحيب، الرقابة التلقائية (AutoMod)، الرتب التلقائية، التحقق والحماية.' },
-        { name: '🌐 الأوامر العامة (General)', value: 'الجيف أواي، التصويت، ومعلومات الحسابات والسيرفر.' }
+      .setDescription(
+        `مرحباً! يمتلك البوت **${totalCommands} أمراً** موزعاً على **${Object.keys(CATEGORIES).length} فئات**.\n` +
+        `اختر الفئة من القائمة المنسدلة لعرض الأوامر التفصيلية 👇`
       )
-      .setFooter({ text: '💡 اختر قسماً من القائمة بالأسفل لاستعراض كامل الأوامر' })
+      .addFields(
+        Object.entries(CATEGORIES).map(([, cat]) => ({
+          name: `${cat.emoji} ${cat.title}`,
+          value: `\`${cat.commands.length} أمر\``,
+          inline: true
+        }))
+      )
+      .setFooter({ text: `ZENO Bot • ${totalCommands} أمر إجمالي • اختر فئة للتفاصيل` })
       .setTimestamp();
   },
 
@@ -45,151 +199,50 @@ module.exports = {
     return new ActionRowBuilder().addComponents(
       new StringSelectMenuBuilder()
         .setCustomId('help_category_select')
-        .setPlaceholder('اختر الفئة لاستعراض أوامرها بالتفصيل...')
-        .addOptions([
-          { label: '🛡️ الإشراف والرقابة', value: 'mod', description: 'أوامر الطرد، الحظر، التحذيرات، الإسكات وقفل القنوات' },
-          { label: '⭐ الاقتصاد والنجوم', value: 'eco', description: 'أوامر النجوم Star، البنك، العمل، الكازينو وبطاقة البروفايل' },
-          { label: '🎫 نظام التذاكر', value: 'ticket', description: 'أوامر إنشاء وإعداد وإدارة تذاكر الدعم الفني' },
-          { label: '⚙️ إعدادات وحماية السيرفر', value: 'admin', description: 'إعداد الترحيب، اللوق، الرقابة، التحقق والحماية Anti-Nuke' },
-          { label: '🌐 الأوامر العامة', value: 'gen', description: 'الجيف أواي، التصويت ومعلومات السيرفر' }
-        ])
+        .setPlaceholder('🔍 اختر فئة لعرض أوامرها...')
+        .addOptions(
+          Object.entries(CATEGORIES).map(([key, cat]) => ({
+            label: `${cat.emoji} ${cat.title}`,
+            value: key,
+            description: `${cat.commands.length} أمر`
+          }))
+        )
     );
   },
 
-  getMention(client, name, sub = null) {
+  getMention(client, name) {
     const id = client.slashCommandIds?.get(name) || '0';
-    if (sub) return `</${name} ${sub}:${id}>`;
     return `</${name}:${id}>`;
   },
 
   handleMenu(response, userId, client) {
     const collector = response.createMessageComponentCollector({
       filter: (i) => i.customId === 'help_category_select' && i.user.id === userId,
-      time: 120000
+      time: 180000
     });
 
     collector.on('collect', async (i) => {
-      const value = i.values[0];
-      const categoryEmbed = new EmbedBuilder()
-        .setColor(config.colors.primary || '#9333ea')
+      const key = i.values[0];
+      const cat = CATEGORIES[key];
+      if (!cat) return;
+
+      const lines = cat.commands.map(cmd => {
+        const mention = this.getMention(client, cmd.name);
+        return `• ${mention} — ${cmd.desc}`;
+      });
+
+      const embed = new EmbedBuilder()
+        .setColor(cat.color || config.colors?.primary || '#9333ea')
+        .setTitle(`${cat.emoji} ${cat.title}`)
+        .setDescription(lines.join('\n\n') || 'لا توجد أوامر في هذه الفئة.')
+        .setFooter({ text: `${cat.commands.length} أمر في هذه الفئة • اختر فئة أخرى من القائمة` })
         .setTimestamp();
 
-      if (value === 'mod') {
-        const ban = this.getMention(client, 'ban');
-        const unban = this.getMention(client, 'unban');
-        const kick = this.getMention(client, 'kick');
-        const timeout = this.getMention(client, 'timeout');
-        const untimeout = this.getMention(client, 'untimeout');
-        const warn = this.getMention(client, 'warn');
-        const warns = this.getMention(client, 'warns');
-        const delwarn = this.getMention(client, 'delwarn');
-        const clear = this.getMention(client, 'clear');
-        const lock = this.getMention(client, 'lock');
-        const unlock = this.getMention(client, 'unlock');
-        const hide = this.getMention(client, 'hide');
-        const unhide = this.getMention(client, 'unhide');
+      await i.update({ embeds: [embed], components: [this.getSelectMenu()] });
+    });
 
-        categoryEmbed.setTitle('🛡️ أوامر الإشراف والرقابة (Moderation)')
-          .setDescription([
-            `• ${ban} - حظر عضو من السيرفر مع إمكانية تحديد سبب وحذف الرسائل`,
-            `• ${unban} - فك الحظر عن عضو محظور باستخدام الآيدي الخاص به`,
-            `• ${kick} - طرد عضو من السيرفر مع تسجيل السبب في السجلات`,
-            `• ${timeout} - إعطاء تايم أوت (إسكات مؤقت) لعضو لمدة محددة`,
-            `• ${untimeout} - إلغاء التايم أوت وفك الإسكات عن العضو فوراً`,
-            `• ${warn} - إعطاء تحذير رسمي لعضو مع إرسال تفاصيل التحذير بالخاص`,
-            `• ${warns} - استعراض قائمة وسجل تحذيرات عضو معين أو تفاصيل تحذير`,
-            `• ${delwarn} - حذف تحذير معين أو مسح جميع تحذيرات العضو`,
-            `• ${clear} - مسح عدد محدد من الرسائل من القناة (حتى 100 رسالة دفعة واحدة)`,
-            `• ${lock} - قفل القناة الحالية ومنع الأعضاء من الكتابة فيها`,
-            `• ${unlock} - فتح القناة والسماح للأعضاء بالكتابة مجدداً`,
-            `• ${hide} - إخفاء القناة الحالية عن الأعضاء العاديين`,
-            `• ${unhide} - إظهار القناة الحالية وإلغاء إخفائها عن الأعضاء`
-          ].join('\n\n'));
-      } else if (value === 'eco') {
-        const star = this.getMention(client, 'star');
-        const daily = this.getMention(client, 'daily');
-        const pay = this.getMention(client, 'pay');
-        const bank = this.getMention(client, 'bank');
-        const gamble = this.getMention(client, 'gamble');
-        const work = this.getMention(client, 'work');
-        const profile = this.getMention(client, 'profile');
-        const rank = this.getMention(client, 'rank');
-        const leaderboard = this.getMention(client, 'leaderboard');
-        const setwallpaper = this.getMention(client, 'setwallpaper');
-
-        categoryEmbed.setTitle('⭐ أوامر الاقتصاد والنجوم (Economy & Star System)')
-          .setDescription([
-            `• ${star} - استعراض رصيدك من نجوم Star ⭐ أو تحويلها للأعضاء`,
-            `• ${daily} - استلام المكافأة اليومية مع مكافآت الستريك المتتالية (🔥 Streak)`,
-            `• ${pay} - تحويل النجوم للأعضاء مع أزرار التأكيد والحماية من التحويل الخاطئ`,
-            `• ${bank} - نظام البنك لحفظ وإيداع وسحب النجوم لحمايتها من الخسارة`,
-            `• ${gamble} - المراهنة ومضاعفة النجوم في ألعاب الكازينو مع جوائز كبرى`,
-            `• ${work} - العمل في وظائف متنوعة لكسب النجوم كل 4 ساعات`,
-            `• ${profile} - عرض بطاقة الهوية والبروفايل الشخصي المصممة بالـ Canvas`,
-            `• ${rank} - عرض بطاقة مستواك ونقاط الخبرة XP ونسبة التقدم`,
-            `• ${leaderboard} - قائمة المتصدرين في النجوم ومستويات الخبرة XP مع أزرار الصفحات`,
-            `• ${setwallpaper} - تغيير وتخصيص خلفية بطاقة البروفايل الخاصة بك`
-          ].join('\n\n'));
-      } else if (value === 'ticket') {
-        const setup = this.getMention(client, 'ticket-setup');
-        const ticket = this.getMention(client, 'ticket');
-
-        categoryEmbed.setTitle('🎫 أوامر نظام التذاكر والدعم الفني (Tickets)')
-          .setDescription([
-            `• ${setup} - إنشاء لوحة فتح التذاكر المخصصة بروم الدعم مع الفئات والأزرار`,
-            `• ${ticket} - إدارة التذكرة الحالية (إغلاق وحفظ الترانسكريبت، إضافة/إزالة عضو، إعادة تسمية، ونقل الملكية)`
-          ].join('\n\n'));
-      } else if (value === 'admin') {
-        const automod = this.getMention(client, 'automod');
-        const welcome = this.getMention(client, 'set-welcome');
-        const logs = this.getMention(client, 'logs');
-        const autorole = this.getMention(client, 'set-autorole');
-        const protection = this.getMention(client, 'set-protection');
-        const antinuke = this.getMention(client, 'set-antinuke');
-        const tempvoice = this.getMention(client, 'set-tempvoice');
-        const verification = this.getMention(client, 'set-verification');
-        const autoresponder = this.getMention(client, 'auto-responder');
-        const rr = this.getMention(client, 'reaction-role');
-        const prefix = this.getMention(client, 'set-prefix');
-
-        categoryEmbed.setTitle('⚙️ أوامر إدارة وحماية السيرفر (Settings & Protection)')
-          .setDescription([
-            `• ${automod} - منظومة الرقابة التلقائية الذكية (فلاتر السبام، الروابط، الحروف الكبيرة، والكلمات المسيئة)`,
-            `• ${welcome} - إعداد روم ورسالة وبطاقة الترحيب ورسائل الخاص والوداع`,
-            `• ${protection} - إعداد جدار الحماية (Anti-Link, Anti-Spam, Anti-Bot, Anti-Alt, Anti-Raid)`,
-            `• ${antinuke} - نظام الحماية المتقدمة Anti-Nuke لحماية الرتب والقنوات والطرد الجماعي`,
-            `• ${verification} - إعداد ونشر لوحة تفعيل وتحقق الأعضاء التفاعلية بالزر`,
-            `• ${tempvoice} - تعيين روم الرومات الصوتية المؤقتة (Join to Create)`,
-            `• ${logs} - نظام سجلات السيرفر الشاملة (إعداد قنوات تلقائي، تفعيل/تعطيل الأقسام، عرض الحالة، وسجل تجريبي — 105 سجل بـ 13 قسم)`,
-            `• ${autorole} - تحديد الرتبة التلقائية للأعضاء الجدد والبوتات`,
-            `• ${autoresponder} - إضافة وتعديل الردود التلقائية المتعددة على الكلمات المفتاحية`,
-            `• ${rr} - إنشاء رسائل الرتب التفاعلية بأزرار ديسكورد`,
-            `• ${prefix} - تخصيص رمز البرفكس الخاص بالسيرفر`
-          ].join('\n\n'));
-      } else if (value === 'gen') {
-        const giveaway = this.getMention(client, 'giveaway');
-        const poll = this.getMention(client, 'poll');
-        const embed = this.getMention(client, 'embed');
-        const ping = this.getMention(client, 'ping');
-        const user = this.getMention(client, 'user');
-        const server = this.getMention(client, 'server');
-        const avatar = this.getMention(client, 'avatar');
-        const banner = this.getMention(client, 'banner');
-
-        categoryEmbed.setTitle('🌐 الأوامر العامة (General)')
-          .setDescription([
-            `• ${giveaway} - إنشاء وإدارة سحوبات الجيف أواي والمسابقات بالزر التفاعلي`,
-            `• ${poll} - إنشاء تصويت واستطلاع رأي تفاعلي للأعضاء بنسب مئوية`,
-            `• ${embed} - تصميم وإرسال رسائل الإيمبد المنسقة والمتقدمة`,
-            `• ${ping} - فحص سرعة استجابة البوت وسيرفرات ديسكورد`,
-            `• ${user} - عرض بطاقة معلومات الحساب وتاريخ الإنضمام والإنشاء`,
-            `• ${server} - عرض إحصائيات ومعلومات ومستوى بوستات السيرفر`,
-            `• ${avatar} - عرض وتحميل صورة حسابك أو حساب عضو آخر بجودة عالية`,
-            `• ${banner} - استعراض بنر الحساب الشخصي أو بنر السيرفر`
-          ].join('\n\n'));
-      }
-
-      await i.update({ embeds: [categoryEmbed] });
+    collector.on('end', () => {
+      // انتهى وقت الكولكتور
     });
   }
 };

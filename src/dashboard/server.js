@@ -7412,6 +7412,206 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                         });
                     // ===== END LOGS SECTION SCRIPT =====
                 `;
+            } else if (section === 'help') {
+                title = 'قائمة الأوامر الكاملة 📚';
+                // All commands data for the help page
+                const helpCommands = [
+                    // 🛡️ الإشراف
+                    { name: 'ban',              cat: 'mod',        catLabel: '🛡️ الإشراف',          desc: 'اعطاء بان لشخص او ازالته' },
+                    { name: 'unban',            cat: 'mod',        catLabel: '🛡️ الإشراف',          desc: 'فك حظر عضو' },
+                    { name: 'unbanall',         cat: 'mod',        catLabel: '🛡️ الإشراف',          desc: 'فك حظر جميع الأعضاء المحظورين في السيرفر' },
+                    { name: 'kick',             cat: 'mod',        catLabel: '🛡️ الإشراف',          desc: 'اعطاء طرد لشخص او ازالته' },
+                    { name: 'mute',             cat: 'mod',        catLabel: '🛡️ الإشراف',          desc: 'اعطاء ميوت لشخص او ازالته' },
+                    { name: 'timeout',          cat: 'mod',        catLabel: '🛡️ الإشراف',          desc: 'اعطاء تايم اوت لشخص او ازالته' },
+                    { name: 'untimeout',        cat: 'mod',        catLabel: '🛡️ الإشراف',          desc: 'إزالة التايم أوت من عضو' },
+                    { name: 'untimeall',        cat: 'mod',        catLabel: '🛡️ الإشراف',          desc: 'إزالة التايم أوت من جميع الأعضاء' },
+                    { name: 'warn',             cat: 'mod',        catLabel: '🛡️ الإشراف',          desc: 'تحذير عضو' },
+                    { name: 'unwarn',           cat: 'mod',        catLabel: '🛡️ الإشراف',          desc: 'إزالة تحذير من عضو' },
+                    { name: 'warns',            cat: 'mod',        catLabel: '🛡️ الإشراف',          desc: 'عرض تحذيرات عضو' },
+                    { name: 'clear',            cat: 'mod',        catLabel: '🛡️ الإشراف',          desc: 'حذف عدد من الرسائل' },
+                    { name: 'lock',             cat: 'mod',        catLabel: '🛡️ الإشراف',          desc: 'قفل الروم' },
+                    { name: 'unlock',           cat: 'mod',        catLabel: '🛡️ الإشراف',          desc: 'فتح الروم' },
+                    { name: 'hide',             cat: 'mod',        catLabel: '🛡️ الإشراف',          desc: 'اخفاء الروم' },
+                    { name: 'show',             cat: 'mod',        catLabel: '🛡️ الإشراف',          desc: 'إظهار الروم الذي تم إخفاؤه' },
+                    { name: 'unhide',           cat: 'mod',        catLabel: '🛡️ الإشراف',          desc: 'اظهار الروم' },
+                    { name: 'nickname',         cat: 'mod',        catLabel: '🛡️ الإشراف',          desc: 'اعطاء اسم مستعار لشخص او ازالته' },
+                    { name: 'demote',           cat: 'mod',        catLabel: '🛡️ الإشراف',          desc: 'تخفيض عضو عن طريق إزالة أعلى رتبة يمتلكها' },
+                    { name: 'promote',          cat: 'mod',        catLabel: '🛡️ الإشراف',          desc: 'ترقية عضو تلقائياً لأعلى رتبة (فوق رتبته الحالية)' },
+                    { name: 'role',             cat: 'mod',        catLabel: '🛡️ الإشراف',          desc: 'اعطاء رتبة لشخص او ازالتها' },
+                    { name: 'xroles',           cat: 'mod',        catLabel: '🛡️ الإشراف',          desc: 'إعطاء أو إزالة رتبة لعدة أعضاء' },
+                    { name: 'come',             cat: 'mod',        catLabel: '🛡️ الإشراف',          desc: 'استدعاء شخص' },
+                    { name: 'snipe',            cat: 'mod',        catLabel: '🛡️ الإشراف',          desc: 'عرض آخر رسالة محذوفة في القناة' },
+                    // 🔐 الحماية
+                    { name: 'anti-ban',             cat: 'protection', catLabel: '🔐 الحماية',           desc: 'تسطيب نظام الحماية من الباند' },
+                    { name: 'anti-bots',            cat: 'protection', catLabel: '🔐 الحماية',           desc: 'تسطيب نظام الحماية من البوتات' },
+                    { name: 'anti-delete-roles',    cat: 'protection', catLabel: '🔐 الحماية',           desc: 'تسطيب نظام الحماية من حظر الرتب' },
+                    { name: 'anti-delete-rooms',    cat: 'protection', catLabel: '🔐 الحماية',           desc: 'تسطيب نظام الحماية من حذف الرومات' },
+                    { name: 'antilink',             cat: 'protection', catLabel: '🔐 الحماية',           desc: 'إدارة الحماية من الروابط' },
+                    { name: 'antispam',             cat: 'protection', catLabel: '🔐 الحماية',           desc: 'إدارة الحماية من السبام' },
+                    { name: 'badwords',             cat: 'protection', catLabel: '🔐 الحماية',           desc: 'إدارة الكلمات الممنوعة' },
+                    { name: 'protection-status',    cat: 'protection', catLabel: '🔐 الحماية',           desc: 'للاستعلام عن حالة نظام الحماية' },
+                    { name: 'set-protect-logs',     cat: 'protection', catLabel: '🔐 الحماية',           desc: 'لتحديد روم لوج الحماية' },
+                    // 🎫 التذاكر
+                    { name: 'setup-ticket',         cat: 'tickets',    catLabel: '🎫 التذاكر',           desc: 'تثبيت التذكرة' },
+                    { name: 'add-ticket-button',    cat: 'tickets',    catLabel: '🎫 التذاكر',           desc: 'تثبيت التذكرة (زر إضافي)' },
+                    { name: 'add-button',           cat: 'tickets',    catLabel: '🎫 التذاكر',           desc: 'اضافة زر للرتبة أخرى' },
+                    { name: 'close',                cat: 'tickets',    catLabel: '🎫 التذاكر',           desc: 'إغلاق التذكرة الحالية' },
+                    { name: 'delete',               cat: 'tickets',    catLabel: '🎫 التذاكر',           desc: 'حذف التذكرة الحالية' },
+                    { name: 'rename',               cat: 'tickets',    catLabel: '🎫 التذاكر',           desc: 'إعادة تسمية التذكرة الحالية' },
+                    { name: 'add-user',             cat: 'tickets',    catLabel: '🎫 التذاكر',           desc: 'إضافة مستخدم للتذكرة' },
+                    { name: 'remove-user',          cat: 'tickets',    catLabel: '🎫 التذاكر',           desc: 'إزالة مستخدم من التذكرة' },
+                    { name: 'to-select',            cat: 'tickets',    catLabel: '🎫 التذاكر',           desc: 'تحويل التكت الى سلكت منيو' },
+                    { name: 'set-ticket-log',       cat: 'tickets',    catLabel: '🎫 التذاكر',           desc: 'تحديد روم اللوغ للتذاكر' },
+                    { name: 'setup-apply',          cat: 'tickets',    catLabel: '🎫 التذاكر',           desc: 'تسطيب نظام التقديم' },
+                    { name: 'new-apply',            cat: 'tickets',    catLabel: '🎫 التذاكر',           desc: 'انشاء تقديم جديد' },
+                    { name: 'close-apply',          cat: 'tickets',    catLabel: '🎫 التذاكر',           desc: 'انهاء التقديم المفتوح' },
+                    // 🎉 الجيف أواي
+                    { name: 'gstart',   cat: 'giveaway', catLabel: '🎉 الجيف أواي', desc: 'بدأ جيف اواي' },
+                    { name: 'gend',     cat: 'giveaway', catLabel: '🎉 الجيف أواي', desc: 'انهاء جيف اواي' },
+                    { name: 'greroll',  cat: 'giveaway', catLabel: '🎉 الجيف أواي', desc: 'اعادة فائزين جيف اواي' },
+                    // 💰 الاقتصاد
+                    { name: 'daily',    cat: 'economy', catLabel: '💰 الاقتصاد', desc: 'استلام الراتب اليومي' },
+                    { name: 'rovex',    cat: 'economy', catLabel: '💰 الاقتصاد', desc: 'تحويل رصيد أو عرض رصيدك' },
+                    { name: 'tax',      cat: 'economy', catLabel: '💰 الاقتصاد', desc: 'معرفة ضريبة رقم' },
+                    { name: 'profile',  cat: 'economy', catLabel: '💰 الاقتصاد', desc: 'عرض معلومات حسابك أو حساب شخص آخر' },
+                    { name: 'rank',     cat: 'economy', catLabel: '💰 الاقتصاد', desc: 'عرض رانكك في السيرفر' },
+                    { name: 'top',      cat: 'economy', catLabel: '💰 الاقتصاد', desc: 'عرض توب السيرفر (رصيد أو مستوى)' },
+                    // 📢 البرودكاست
+                    { name: 'add-autoline-channel',    cat: 'broadcast', catLabel: '📢 البرودكاست', desc: 'اضافة روم خط تلقائي' },
+                    { name: 'remove-autoline-channel', cat: 'broadcast', catLabel: '📢 البرودكاست', desc: 'ازالة روم خط تلقائي' },
+                    { name: 'set-autoline-line',       cat: 'broadcast', catLabel: '📢 البرودكاست', desc: 'تحديد الخط التلقائي' },
+                    { name: 'line-mode',               cat: 'broadcast', catLabel: '📢 البرودكاست', desc: 'اختر بين إرسال صورة أو رابط' },
+                    { name: 'add-nadeko-room',         cat: 'broadcast', catLabel: '📢 البرودكاست', desc: 'اضافة روم يتم تفعيل الخاصية فيها' },
+                    { name: 'remove-nadeko-room',      cat: 'broadcast', catLabel: '📢 البرودكاست', desc: 'ازالة روم مفعل الخاصية فيها' },
+                    { name: 'send-broadcast-panel',    cat: 'broadcast', catLabel: '📢 البرودكاست', desc: 'ارسال بانل التحكم في البرودكاست' },
+                    { name: 'remove-all-tokens',       cat: 'broadcast', catLabel: '📢 البرودكاست', desc: 'إزالة جميع بوتات البرودكاست' },
+                    { name: 'remove-token',            cat: 'broadcast', catLabel: '📢 البرودكاست', desc: 'إزالة توكن برودكاست' },
+                    { name: 'set-feedback-line',       cat: 'broadcast', catLabel: '📢 البرودكاست', desc: 'تحديد خط الاراء' },
+                    { name: 'set-feedback-room',       cat: 'broadcast', catLabel: '📢 البرودكاست', desc: 'تحديد روم الاراء' },
+                    { name: 'set-suggestions-line',    cat: 'broadcast', catLabel: '📢 البرودكاست', desc: 'تحديد خط الاقتراحات' },
+                    { name: 'set-suggestions-room',    cat: 'broadcast', catLabel: '📢 البرودكاست', desc: 'تحديد روم الاقتراحات' },
+                    { name: 'suggestion-mode',         cat: 'broadcast', catLabel: '📢 البرودكاست', desc: 'أزرار أو رياكشنات للاقتراحات' },
+                    { name: 'set-tax-line',            cat: 'broadcast', catLabel: '📢 البرودكاست', desc: 'تحديد خط الضريبة' },
+                    { name: 'set-tax-room',            cat: 'broadcast', catLabel: '📢 البرودكاست', desc: 'تحديد روم الضريبة التلقائية' },
+                    { name: 'tax-mode',                cat: 'broadcast', catLabel: '📢 البرودكاست', desc: 'اختيار بين استخدام امبد أو رسالة عادية' },
+                    // ⚙️ الإعدادات والعامة
+                    { name: 'greet',            cat: 'settings', catLabel: '⚙️ الإعدادات', desc: 'إعدادات الترحيب' },
+                    { name: 'setup-welcome',    cat: 'settings', catLabel: '⚙️ الإعدادات', desc: 'إعدادات الترحيب التفصيلية' },
+                    { name: 'set-message',      cat: 'settings', catLabel: '⚙️ الإعدادات', desc: 'تحديد الرسالة عند الدخول' },
+                    { name: 'autorole',         cat: 'settings', catLabel: '⚙️ الإعدادات', desc: 'إدارة الرتب التلقائية عند دخول الأعضاء' },
+                    { name: 'settempvoice',     cat: 'settings', catLabel: '⚙️ الإعدادات', desc: 'إدارة إنشاء القنوات الصوتية المؤقتة' },
+                    { name: 'setup-rating',     cat: 'settings', catLabel: '⚙️ الإعدادات', desc: 'تسطيب اعدادات التقييم' },
+                    { name: 'setcommandrole',   cat: 'settings', catLabel: '⚙️ الإعدادات', desc: 'ربط رتبة معينة بأمر معين' },
+                    { name: 'setup-logs',       cat: 'settings', catLabel: '⚙️ الإعدادات', desc: 'تسطيب نظام اللوج' },
+                    { name: 'logs-info',        cat: 'settings', catLabel: '⚙️ الإعدادات', desc: 'معلومات نظام اللوج في السيرفر' },
+                    { name: 'alias',            cat: 'settings', catLabel: '⚙️ الإعدادات', desc: 'إدارة اختصارات الأوامر' },
+                    { name: 'set-shortcut',     cat: 'settings', catLabel: '⚙️ الإعدادات', desc: 'تحديد اختصار لأمر معين' },
+                    { name: 'autoreply-add',    cat: 'settings', catLabel: '⚙️ الإعدادات', desc: 'لاضافة رد تلقائي' },
+                    { name: 'autoreply-list',   cat: 'settings', catLabel: '⚙️ الإعدادات', desc: 'لرؤية جميع الردود التلقائية' },
+                    { name: 'autoreply-remove', cat: 'settings', catLabel: '⚙️ الإعدادات', desc: 'لازالة رد تلقائي' },
+                    { name: 'avatar',           cat: 'settings', catLabel: '⚙️ الإعدادات', desc: 'رؤية افاتارك او شخص اخر' },
+                    { name: 'banner',           cat: 'settings', catLabel: '⚙️ الإعدادات', desc: 'رؤية بانرك او شخص اخر' },
+                    { name: 'user',             cat: 'settings', catLabel: '⚙️ الإعدادات', desc: 'رؤية معلومات حسابك او شخص اخر' },
+                    { name: 'server',           cat: 'settings', catLabel: '⚙️ الإعدادات', desc: 'رؤية معلومات السيرفر' },
+                    { name: 'inrole',           cat: 'settings', catLabel: '⚙️ الإعدادات', desc: 'عرض جميع الأعضاء الذين يمتلكون رتبة معينة' },
+                    { name: 'roles',            cat: 'settings', catLabel: '⚙️ الإعدادات', desc: 'للاستعلام عن رتب السيرفر' },
+                    { name: 'embed',            cat: 'settings', catLabel: '⚙️ الإعدادات', desc: 'قول كلام في ايمبد' },
+                    { name: 'say',              cat: 'settings', catLabel: '⚙️ الإعدادات', desc: 'قول كلام' },
+                    { name: 'send',             cat: 'settings', catLabel: '⚙️ الإعدادات', desc: 'لارسال رسالة لشخص ما' },
+                    { name: 'ping',             cat: 'settings', catLabel: '⚙️ الإعدادات', desc: 'لتجربة سرعة البوت' },
+                    { name: 'help',             cat: 'settings', catLabel: '⚙️ الإعدادات', desc: 'قائمة اوامر البوت' },
+                ];
+
+                const catColors = {
+                    mod:        { bg: 'bg-red-950/40',    border: 'border-red-500/30',    text: 'text-red-400',    badge: 'bg-red-950/60 text-red-400' },
+                    protection: { bg: 'bg-orange-950/40', border: 'border-orange-500/30', text: 'text-orange-400', badge: 'bg-orange-950/60 text-orange-400' },
+                    tickets:    { bg: 'bg-violet-950/40', border: 'border-violet-500/30', text: 'text-violet-400', badge: 'bg-violet-950/60 text-violet-400' },
+                    giveaway:   { bg: 'bg-pink-950/40',   border: 'border-pink-500/30',   text: 'text-pink-400',   badge: 'bg-pink-950/60 text-pink-400' },
+                    economy:    { bg: 'bg-yellow-950/40', border: 'border-yellow-500/30', text: 'text-yellow-400', badge: 'bg-yellow-950/60 text-yellow-400' },
+                    broadcast:  { bg: 'bg-cyan-950/40',   border: 'border-cyan-500/30',   text: 'text-cyan-400',   badge: 'bg-cyan-950/60 text-cyan-400' },
+                    settings:   { bg: 'bg-emerald-950/40',border: 'border-emerald-500/30',text: 'text-emerald-400',badge: 'bg-emerald-950/60 text-emerald-400' },
+                };
+
+                const cmdCards = helpCommands.map(cmd => {
+                    const c = catColors[cmd.cat] || catColors.settings;
+                    return '<div class="help-card border ' + c.border + ' ' + c.bg + ' rounded-2xl p-4 flex flex-col gap-2 hover:scale-[1.02] transition-transform cursor-default" data-cat="' + cmd.cat + '" data-name="' + cmd.name + '" data-desc="' + cmd.desc.replace(/"/g, '&quot;') + '">'
+                        + '<div class="flex items-center justify-between gap-2">'
+                        + '<span class="text-[10px] font-bold px-2 py-0.5 rounded-full ' + c.badge + '">' + cmd.catLabel + '</span>'
+                        + '<code class="' + c.text + ' font-bold text-sm font-mono">/' + cmd.name + '</code>'
+                        + '</div>'
+                        + '<p class="text-gray-300 text-xs leading-relaxed text-right">' + cmd.desc + '</p>'
+                        + '</div>';
+                }).join('');
+
+                const totalCount = helpCommands.length;
+                const catCounts = {};
+                helpCommands.forEach(c => { catCounts[c.cat] = (catCounts[c.cat] || 0) + 1; });
+
+                formFieldsHtml = '<div class="space-y-6 text-right" dir="rtl">'
+                    + '<div class="bg-gradient-to-r from-[#1a132e] via-[#12141f] to-[#1a132e] border border-purple-500/20 p-6 rounded-3xl shadow-2xl">'
+                    + '<div class="flex items-center justify-between flex-wrap gap-4">'
+                    + '<div class="flex items-center gap-3 flex-wrap">'
+                    + '<span class="bg-purple-950/60 text-purple-300 text-xs font-bold px-3 py-1.5 rounded-full border border-purple-500/30">' + totalCount + ' أمر</span>'
+                    + '<span class="bg-slate-900/60 text-gray-300 text-xs px-3 py-1.5 rounded-full border border-white/10">7 فئات</span>'
+                    + '</div><div>'
+                    + '<h1 class="text-2xl font-black text-white">📚 قائمة الأوامر الكاملة</h1>'
+                    + '<p class="text-gray-400 text-xs mt-1">جميع أوامر بوت ZENO مصنفة بالتفصيل</p>'
+                    + '</div></div></div>'
+                    + '<div class="flex flex-col sm:flex-row gap-3">'
+                    + '<input id="help-search" type="text" placeholder="🔍 ابحث عن أمر..." dir="rtl" class="flex-1 bg-[#0e1420] border border-[#1e2638] rounded-xl px-4 py-2.5 text-white text-sm placeholder:text-gray-500 focus:outline-none focus:border-purple-500 transition" />'
+                    + '<select id="help-filter" dir="rtl" class="bg-[#0e1420] border border-[#1e2638] rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-purple-500 transition">'
+                    + '<option value="all">جميع الفئات (' + totalCount + ')</option>'
+                    + '<option value="mod">🛡️ الإشراف (' + (catCounts.mod || 0) + ')</option>'
+                    + '<option value="protection">🔐 الحماية (' + (catCounts.protection || 0) + ')</option>'
+                    + '<option value="tickets">🎫 التذاكر (' + (catCounts.tickets || 0) + ')</option>'
+                    + '<option value="giveaway">🎉 الجيف أواي (' + (catCounts.giveaway || 0) + ')</option>'
+                    + '<option value="economy">💰 الاقتصاد (' + (catCounts.economy || 0) + ')</option>'
+                    + '<option value="broadcast">📢 البرودكاست (' + (catCounts.broadcast || 0) + ')</option>'
+                    + '<option value="settings">⚙️ الإعدادات (' + (catCounts.settings || 0) + ')</option>'
+                    + '</select></div>'
+                    + '<div class="grid grid-cols-2 sm:grid-cols-4 gap-3">'
+                    + '<div class="bg-[#121620] border border-[#1e2638] rounded-2xl p-3 text-center"><div class="text-2xl font-black text-white">' + totalCount + '</div><div class="text-gray-400 text-xs mt-0.5">أمر إجمالي</div></div>'
+                    + '<div class="bg-red-950/30 border border-red-500/20 rounded-2xl p-3 text-center"><div class="text-2xl font-black text-red-400">' + (catCounts.mod || 0) + '</div><div class="text-gray-400 text-xs mt-0.5">إشراف</div></div>'
+                    + '<div class="bg-violet-950/30 border border-violet-500/20 rounded-2xl p-3 text-center"><div class="text-2xl font-black text-violet-400">' + (catCounts.tickets || 0) + '</div><div class="text-gray-400 text-xs mt-0.5">تذاكر</div></div>'
+                    + '<div class="bg-cyan-950/30 border border-cyan-500/20 rounded-2xl p-3 text-center"><div class="text-2xl font-black text-cyan-400">' + (catCounts.broadcast || 0) + '</div><div class="text-gray-400 text-xs mt-0.5">برودكاست</div></div>'
+                    + '</div>'
+                    + '<div id="help-results-info" class="text-gray-400 text-xs text-right hidden"></div>'
+                    + '<div id="help-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">' + cmdCards + '</div>'
+                    + '<div id="help-empty" class="hidden text-center py-16 text-gray-500"><div class="text-4xl mb-3">🔍</div><p class="text-sm">لا توجد نتائج مطابقة للبحث</p></div>'
+                    + '</div>';
+
+                embedScriptHtml = '(function() {'
+                    + 'var searchEl = document.getElementById("help-search");'
+                    + 'var filterEl = document.getElementById("help-filter");'
+                    + 'var grid = document.getElementById("help-grid");'
+                    + 'var empty = document.getElementById("help-empty");'
+                    + 'var info = document.getElementById("help-results-info");'
+                    + 'var cards = Array.from(grid ? grid.querySelectorAll(".help-card") : []);'
+                    + 'function filterCards() {'
+                    + '  var q = (searchEl ? searchEl.value : "").trim().toLowerCase().replace(/^\\//, "");'
+                    + '  var cat = filterEl ? filterEl.value : "all";'
+                    + '  var shown = 0;'
+                    + '  cards.forEach(function(card) {'
+                    + '    var name = (card.dataset.name || "").toLowerCase();'
+                    + '    var desc = (card.dataset.desc || "").toLowerCase();'
+                    + '    var cardCat = card.dataset.cat || "";'
+                    + '    var matchQ = !q || name.includes(q) || desc.includes(q);'
+                    + '    var matchCat = cat === "all" || cardCat === cat;'
+                    + '    if (matchQ && matchCat) { card.style.display = ""; shown++; }'
+                    + '    else { card.style.display = "none"; }'
+                    + '  });'
+                    + '  if (empty) empty.classList.toggle("hidden", shown > 0);'
+                    + '  if (grid) grid.classList.toggle("hidden", shown === 0);'
+                    + '  if (info) {'
+                    + '    if (q || cat !== "all") {'
+                    + '      info.textContent = "عرض " + shown + " من " + cards.length + " أمر";'
+                    + '      info.classList.remove("hidden");'
+                    + '    } else { info.classList.add("hidden"); }'
+                    + '  }'
+                    + '}'
+                    + 'if (searchEl) searchEl.addEventListener("input", filterCards);'
+                    + 'if (filterEl) filterEl.addEventListener("change", filterCards);'
+                    + '})();';
             } else if (section === 'analytics' || section === 'stats') {
                 const totalMembers = guild.memberCount || 0;
                 const textChCount = (guildTextChannels || []).length;
@@ -9781,6 +9981,10 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                                     <a href="/dashboard/${guildId}/general" class="flex items-center justify-between px-3 py-2 rounded-xl ${section === 'general' ? 'bg-purple-600 text-white font-bold shadow-md' : 'text-gray-300 hover:text-white hover:bg-[#151724]'} transition group">
                                         <span class="text-[9px] font-bold text-rose-400 bg-rose-950/60 px-1.5 py-0.2 rounded">جديد</span>
                                         <span class="flex items-center gap-2"><span>الأوامر</span><span class="text-gray-400 group-hover:text-purple-400">⌨️</span></span>
+                                    </a>
+                                    <a href="/dashboard/${guildId}/help" class="flex items-center justify-between px-3 py-2 rounded-xl ${section === 'help' ? 'bg-purple-600 text-white font-bold shadow-md' : 'text-gray-300 hover:text-white hover:bg-[#151724]'} transition group">
+                                        <span></span>
+                                        <span class="flex items-center gap-2"><span>قائمة الأوامر</span><span class="text-gray-400 group-hover:text-purple-400">📚</span></span>
                                     </a>
                                 </div>
                             </div>

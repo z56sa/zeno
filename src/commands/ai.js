@@ -1,17 +1,31 @@
-import { GoogleGenAI } from '@google/genai';
+module.exports = {
+    name: 'ai', // اسم الأمر النصي
+    description: 'التحدث مع الذكاء الاصطناعي',
+    async execute(message, args) {
+        const query = args.join(' ');
+        if (!query) {
+            return message.reply('❌ يرجى كتابة السؤال أو النص بعد الأمر، مثال: `#ai مرحباً`');
+        }
 
-// التهيئة باستخدام المفتاح الخاص بك من ملف .env
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+        const waiting = await message.reply('⏳ جاري المعالجة...');
 
-export async function askAI(promptText) {
-    try {
-        const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
-            contents: promptText,
-        });
-        return response.text;
-    } catch (error) {
-        console.error("خطأ في الاتصال بـ Gemini AI:", error);
-        return "عذراً، حدث خطأ أثناء معالجة طلبك.";
+        try {
+            // استدعاء دالة الـ AI الخاصة بك
+            const aiResponse = await askAI(query);
+
+            // إذا كان رد الذكاء الاصطناعي طويلاً، نقوم بتقسيمه لكي لا يتخطي حدود ديسكورد (2000 حرف)
+            if (aiResponse.length > 2000) {
+                const chunks = aiResponse.match(/[\s\S]{1,2000}/g);
+                await waiting.edit(chunks[0]);
+                for (let i = 1; i < chunks.length; i++) {
+                    await message.channel.send(chunks[i]);
+                }
+            } else {
+                await waiting.edit(aiResponse);
+            }
+        } catch (error) {
+            console.error(error);
+            await waiting.edit('❌ حدث خطأ أثناء الاتصال بالذكاء الاصطناعي.');
+        }
     }
-}
+};
