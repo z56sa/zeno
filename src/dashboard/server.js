@@ -6540,7 +6540,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                                 <i class="fa-solid fa-shield-check text-emerald-400"></i>
                                 <span>التغييرات تُحفظ تلقائياً في قاعدة البيانات</span>
                             </div>
-                            <button type="submit" id="logs-btn-save" class="px-6 py-2.5 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-violet-600/20 transition flex items-center gap-2 cursor-pointer">
+                            <button type="button" id="logs-btn-save" onclick="window.saveLogsConfigToServer(null, '✓ تم حفظ جميع التغييرات في قاعدة البيانات')" class="px-6 py-2.5 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-violet-600/20 transition flex items-center gap-2 cursor-pointer">
                                 <i class="fa-solid fa-floppy-disk"></i>
                                 <span>حفظ التغييرات</span>
                             </button>
@@ -7376,6 +7376,40 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                             document.body.appendChild(errDiv);
                             setTimeout(function() { errDiv.remove(); }, 10000);
                         }
+
+                        // ============================================================
+                        // CRITICAL FIX: Move modals & toast to <body> level
+                        // The modals use position:fixed but are nested inside a parent
+                        // div with overflow:hidden which clips them in some browsers.
+                        // Moving them to document.body ensures they always overlay
+                        // the full viewport correctly.
+                        // ============================================================
+                        (function moveModalsToBody() {
+                            try {
+                                var ids = ['logs-confirm-modal', 'editLogModal', 'logs-toast-container'];
+                                ids.forEach(function(id) {
+                                    var el = document.getElementById(id);
+                                    if (el && el.parentElement !== document.body) {
+                                        document.body.appendChild(el);
+                                        console.log('[LOGS] Moved #' + id + ' to <body>');
+                                    }
+                                });
+                            } catch(e) {
+                                console.warn('[LOGS] moveModalsToBody failed:', e);
+                            }
+                        })();
+
+                        // ============================================================
+                        // Global error reporter for easy debugging
+                        // ============================================================
+                        window.addEventListener('error', function(e) {
+                            console.error('[LOGS GLOBAL ERROR]', e.message, 'at', e.filename, 'line', e.lineno);
+                            var errDiv = document.createElement('div');
+                            errDiv.style = 'position:fixed;bottom:20px;left:20px;background:#7f1d1d;color:#fca5a5;padding:10px 14px;border-radius:10px;font-size:11px;z-index:99999;max-width:450px;font-family:monospace;direction:ltr;';
+                            errDiv.textContent = '[JS ERROR] ' + e.message + ' (line ' + e.lineno + ')';
+                            document.body.appendChild(errDiv);
+                            setTimeout(function() { errDiv.remove(); }, 15000);
+                        });
                     // ===== END LOGS SECTION SCRIPT =====
                 `;
             } else if (section === 'analytics' || section === 'stats') {
@@ -9648,8 +9682,8 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                     
                     <!-- Main Content Form Area -->
                     <main class="flex-1 p-8 overflow-y-auto ${section === 'embed' ? 'max-w-7xl' : 'max-w-4xl'} mx-auto">
-                        <div class="probot-card border border-white/5 rounded-3xl p-8 shadow-2xl mb-8">
-                            <div class="flex items-center justify-between pb-6 mb-6 border-b border-white/5">
+                        <div class="${section === 'logs' ? '' : 'probot-card border border-white/5 rounded-3xl p-8 shadow-2xl mb-8'}">
+                            <div class="flex items-center justify-between pb-6 mb-6 border-b border-white/5${section === 'logs' ? ' hidden' : ''}">
                                 <label class="toggle"><input type="checkbox" onchange="toggleModule('${guildId}', '${section === 'levels' ? 'leveling_enabled' : section + '_enabled'}', this.checked)" ${section === 'levels' ? (settings.leveling_enabled !== 0 ? 'checked' : '') : 'checked'}><span class="slider"></span></label>
                                 <div class="text-right">
                                     <h2 class="text-2xl font-black text-white">${title}</h2>
