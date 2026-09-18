@@ -9,11 +9,11 @@ const express = require('express');
 const SecretManager = require('./utils/secretManager');
 require('dotenv').config(); // Keep dotenv for local development setup
 
-// --- Google GenAI Integration ---
-import { GoogleGenAI } from '@google/genai';
+// --- Google GenAI Integration (Converted to CommonJS require) ---
+const { GoogleGenAI } = require('@google/genai');
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
-export async function askAI(promptText) {
+async function askAI(promptText) {
     try {
         const response = await ai.models.generateContent({
             model: 'gemini-2.5-flash',
@@ -101,7 +101,7 @@ try {
 
 // =============================================================================
 // Initialization Sequence (The Core Logic)
-// =============================================================================
+// =============================================================
 
 (async () => {
     console.log('[INFO] 🚀 Starting Bot Initialization Sequence...');
@@ -122,9 +122,7 @@ try {
         console.log('[INFO] ✅ Successfully loaded commands and event handlers.');
 
     } catch (err) {
-        // This handles both the SecretManager error and any other setup failure
         console.error('[CRITICAL FAILURE] 🛑 Initialization failed due to missing or invalid configuration:', err.message);
-        // Stop execution if initialization fails critically
         process.exit(1);
     }
 })();
@@ -134,10 +132,6 @@ try {
 // Login and Connection (Uses SecretManager or Direct Env)
 // =============================================================
 
-/**
- * Securely retrieves the bot token.
- * @returns {string | null} The retrieved token or null if unavailable.
- */
 function getBotToken() {
     return process.env.DISCORD_BOT_TOKEN ||
         process.env.BOT_TOKEN ||
@@ -151,7 +145,6 @@ const token = getBotToken();
 if (!token) {
     console.error('[ERROR] ❌ Failed to retrieve Bot Token. The bot cannot connect.');
 } else {
-    // Attempt login only if the token is successfully retrieved
     client.login(token).catch((err) => {
         console.error('[ERROR] ⚠️ Could not log in to Discord:', err.message);
     });
@@ -162,28 +155,25 @@ if (!token) {
 // Dashboard + Web Server Setup (Web Interface Layer)
 // =============================================================================
 
-app.set('trust proxy', 1);
 app.use(express.json({ limit: '20mb' }));
 app.use(express.urlencoded({ extended: true, limit: '20mb' }));
-// Note: static files served directly from src/dashboard/public via server.js
-
 
 const mountDashboard = require('./dashboard/server');
 mountDashboard(app, client);
 
-// Auto-Broadcaster Service (Zero-Downtime - يقرأ الإعدادات من DB مباشرة)
+// Auto-Broadcaster Service
 const AutoBroadcaster = require('./services/autoBroadcaster');
 const autoBroadcaster = new AutoBroadcaster(client);
 
-// Stat Channels Service - يحدث قنوات الإحصائيات كل 10 دقائق
+// Stat Channels Service
 const StatChannelsService = require('./services/statChannels');
 const statChannelsService = new StatChannelsService(client);
 
-// Staff Shift Service - مراقبة ساعات الإدارة وتسجيل الخروج التلقائي
+// Staff Shift Service
 const StaffShiftService = require('./services/staffShiftService');
 const staffShiftService = new StaffShiftService(client);
 
-// Giveaway Auto-End Service - يُنهي القيف أواي تلقائياً عند انتهاء وقته
+// Giveaway Auto-End Service
 const GiveawayService = require('./services/giveawayService');
 const giveawayService = new GiveawayService(client);
 
@@ -194,11 +184,7 @@ client.once('clientReady', () => {
     giveawayService.start();
 });
 
-// Export for dashboard API use
-module.exports.statChannelsService = statChannelsService;
-
-
-// API Route for Stats (Keep this stateless)
+// API Route for Stats
 app.get('/api/stats', (req, res) => {
     res.json({
         status: client.isReady() ? 'online' : 'offline',
@@ -212,7 +198,6 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`[INFO] 🚀 Web server running on port ${PORT}`);
 
-    // Self-Pinger: إرسال طلب ذاتي كل 10 دقائق لإبقاء سيرفر Render نشطاً وتفادي الـ Sleep
     const pingUrl = process.env.RENDER_EXTERNAL_URL
         ? `${process.env.RENDER_EXTERNAL_URL}/api/stats`
         : 'https://zeno-0gme.onrender.com/api/stats';
@@ -226,8 +211,7 @@ app.listen(PORT, '0.0.0.0', () => {
         } catch (err) {
             console.error('[Self-Ping] ⚠️ Failed to ping self:', err.message);
         }
-    }, 10 * 60 * 1000); // كل 10 دقائق
+    }, 10 * 60 * 1000);
 });
 
-
-module.exports = { client };
+module.exports = { client, statChannelsService, askAI };
