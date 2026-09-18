@@ -6,8 +6,26 @@
 const { Client, GatewayIntentBits, Partials, Collection } = require('discord.js');
 const express = require('express');
 // Import SecretManager first to enforce security checks immediately upon load
-const SecretManager = require('./utils/secretManager'); 
+const SecretManager = require('./utils/secretManager');
 require('dotenv').config(); // Keep dotenv for local development setup
+
+// --- Google GenAI Integration ---
+import { GoogleGenAI } from '@google/genai';
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+
+export async function askAI(promptText) {
+    try {
+        const response = await ai.models.generateContent({
+            model: 'gemini-2.5-flash',
+            contents: promptText,
+        });
+        return response.text;
+    } catch (error) {
+        console.error("خطأ في الاتصال بـ Gemini AI:", error);
+        return "عذراً، حدث خطأ أثناء معالجة طلبك.";
+    }
+}
+// -----------------------------
 
 const app = express();
 app.set('trust proxy', 1);
@@ -33,11 +51,11 @@ const client = new Client({
 // Intercept client.on and client.once globally so any library or handler using 'ready' is converted to 'clientReady'
 const originalClientOn = Client.prototype.on;
 const originalClientOnce = Client.prototype.once;
-Client.prototype.on = function(event, ...args) {
+Client.prototype.on = function (event, ...args) {
     const ev = event === 'ready' ? 'clientReady' : event;
     return originalClientOn.call(this, ev, ...args);
 };
-Client.prototype.once = function(event, ...args) {
+Client.prototype.once = function (event, ...args) {
     const ev = event === 'ready' ? 'clientReady' : event;
     return originalClientOnce.call(this, ev, ...args);
 };
@@ -78,7 +96,7 @@ try {
         if (!proto) return;
         ['reply', 'deferReply', 'followUp'].forEach(m => patchInteractionMethod(proto, m));
     });
-} catch (e) {}
+} catch (e) { }
 
 
 // =============================================================================
@@ -87,7 +105,7 @@ try {
 
 (async () => {
     console.log('[INFO] 🚀 Starting Bot Initialization Sequence...');
-    
+
     try {
         // --- 1. Security Check (Mandatory Step): Validate token and essential variables ---
         const botToken = process.env.DISCORD_BOT_TOKEN || process.env.BOT_TOKEN || process.env.DISCORD_TOKEN || process.env.TOKEN;
@@ -98,7 +116,7 @@ try {
 
         // --- 2. Loading Handlers (Must run only after security check passes) ---
         const commandHandler = require('./handlers/commandHandler');
-        const eventHandler   = require('./handlers/eventHandler');
+        const eventHandler = require('./handlers/eventHandler');
         await commandHandler(client);
         eventHandler(client);
         console.log('[INFO] ✅ Successfully loaded commands and event handlers.');
@@ -107,25 +125,25 @@ try {
         // This handles both the SecretManager error and any other setup failure
         console.error('[CRITICAL FAILURE] 🛑 Initialization failed due to missing or invalid configuration:', err.message);
         // Stop execution if initialization fails critically
-        process.exit(1); 
+        process.exit(1);
     }
 })();
 
 
 // =============================================================================
 // Login and Connection (Uses SecretManager or Direct Env)
-// =============================================================================
+// =============================================================
 
 /**
  * Securely retrieves the bot token.
  * @returns {string | null} The retrieved token or null if unavailable.
  */
 function getBotToken() {
-    return process.env.DISCORD_BOT_TOKEN || 
-           process.env.BOT_TOKEN || 
-           process.env.DISCORD_TOKEN || 
-           process.env.TOKEN || 
-           SecretManager.getSecret('DISCORD_BOT_TOKEN'); 
+    return process.env.DISCORD_BOT_TOKEN ||
+        process.env.BOT_TOKEN ||
+        process.env.DISCORD_TOKEN ||
+        process.env.TOKEN ||
+        SecretManager.getSecret('DISCORD_BOT_TOKEN');
 }
 
 const token = getBotToken();
@@ -195,8 +213,8 @@ app.listen(PORT, '0.0.0.0', () => {
     console.log(`[INFO] 🚀 Web server running on port ${PORT}`);
 
     // Self-Pinger: إرسال طلب ذاتي كل 10 دقائق لإبقاء سيرفر Render نشطاً وتفادي الـ Sleep
-    const pingUrl = process.env.RENDER_EXTERNAL_URL 
-        ? `${process.env.RENDER_EXTERNAL_URL}/api/stats` 
+    const pingUrl = process.env.RENDER_EXTERNAL_URL
+        ? `${process.env.RENDER_EXTERNAL_URL}/api/stats`
         : 'https://zeno-0gme.onrender.com/api/stats';
 
     setInterval(async () => {
