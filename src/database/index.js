@@ -651,6 +651,24 @@ try { db.exec("ALTER TABLE guild_settings ADD COLUMN tax_mode TEXT DEFAULT 'all'
 
 try { db.exec("ALTER TABLE guild_settings ADD COLUMN nadeko_channels TEXT DEFAULT '[]';"); } catch(e) {}
 
+// نظام السجلات الشامل (Server Logs System)
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN logs_enabled INTEGER DEFAULT 1;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN logs_config TEXT DEFAULT '{}';"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN log_channel TEXT;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN log_channel_members TEXT;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN log_channel_roles TEXT;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN log_channel_channels TEXT;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN log_channel_messages TEXT;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN log_channel_voice TEXT;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN log_channel_moderation TEXT;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN log_channel_server TEXT;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN log_channel_invites TEXT;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN log_channel_emojis TEXT;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN log_channel_events TEXT;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN log_channel_integrations TEXT;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN log_channel_automod TEXT;"); } catch(e) {}
+try { db.exec("ALTER TABLE guild_settings ADD COLUMN log_channel_stage TEXT;"); } catch(e) {}
+
 console.log('[DB] ✅ SQLite database initialized successfully');
 tursoSync.initAndRestore(db).catch(e => console.error('[TURSO] Init error:', e.message));
 

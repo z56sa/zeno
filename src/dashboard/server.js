@@ -6177,6 +6177,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                 })();
 
                 formFieldsHtml = `
+                    <input type="hidden" name="logs_config" id="hidden_logs_config" value="${escapeHtml(JSON.stringify(logsConfig))}">
                     <div class="space-y-6 text-right" dir="rtl">
 
                         <!-- 1. Header Bar -->
@@ -6351,7 +6352,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                                         <!-- Channel Select -->
                                         <div class="sm:col-span-2">
                                             <label class="block text-[11px] font-bold text-gray-300 mb-1.5 text-right">القناة الافتراضية 📢</label>
-                                            ${renderChannelSelect('catDefaultChannel', '')}
+                                            ${renderChannelSelect('catDefaultChannel', settings.log_channel_members || settings.log_channel || '')}
                                         </div>
                                     </div>
 
@@ -6410,6 +6411,21 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
 
                     // State directly injected from server (no DOM lookup needed)
                     var logsState = ${JSON.stringify((() => { try { const raw = settings.logs_config; const parsed = raw ? (typeof raw === 'string' ? JSON.parse(raw) : raw) : {}; return (parsed && typeof parsed === 'object') ? parsed : {}; } catch(e) { return {}; } })())};
+                    var categoryChannels = ${JSON.stringify({
+                        members: settings.log_channel_members || settings.log_channel || '',
+                        roles: settings.log_channel_roles || settings.log_channel || '',
+                        channels: settings.log_channel_channels || settings.log_channel || '',
+                        messages: settings.log_channel_messages || settings.log_channel || '',
+                        voice: settings.log_channel_voice || settings.log_channel || '',
+                        moderation: settings.log_channel_moderation || settings.log_channel || '',
+                        server: settings.log_channel_server || settings.log_channel || '',
+                        invites: settings.log_channel_invites || settings.log_channel || '',
+                        emojis: settings.log_channel_emojis || settings.log_channel || '',
+                        events: settings.log_channel_events || settings.log_channel || '',
+                        integrations: settings.log_channel_integrations || settings.log_channel || '',
+                        automod: settings.log_channel_automod || settings.log_channel || '',
+                        stage: settings.log_channel_stage || settings.log_channel || ''
+                    })};
 
                     function isLogEnabled(logId) {
                         if (logsState && logsState[logId] && logsState[logId].enabled !== undefined) {
@@ -6426,8 +6442,16 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                         }
                     }
 
-                    function saveLogsConfigToServer() {
+                    function syncHiddenInput() {
+                        var hiddenInp = document.getElementById('hidden_logs_config');
+                        if (hiddenInp) {
+                            hiddenInp.value = JSON.stringify(logsState);
+                        }
+                    }
+
+                    function saveLogsConfigToServer(extraPayload) {
                         try {
+                            syncHiddenInput();
                             var gId = '${guildId}';
                             if (!gId) return;
                             var xhr = new XMLHttpRequest();
@@ -6436,9 +6460,11 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                             xhr.onload = function() {
                                 try { if (JSON.parse(xhr.responseText).success) showSavedBanner(); } catch(e) {}
                             };
-                            xhr.send(JSON.stringify({
-                                logs_config: JSON.stringify(logsState)
-                            }));
+                            var body = { logs_config: JSON.stringify(logsState) };
+                            if (extraPayload && typeof extraPayload === 'object') {
+                                Object.assign(body, extraPayload);
+                            }
+                            xhr.send(JSON.stringify(body));
                         } catch(e) {}
                     }
 
@@ -6448,7 +6474,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                             var gId = '${guildId}';
                             if (!gId) return;
                             var body = {};
-                            body[key] = val ? 1 : 0;
+                            body[key] = (typeof val === 'boolean') ? (val ? 1 : 0) : val;
                             var xhr = new XMLHttpRequest();
                             xhr.open('POST', '/api/guild/' + gId + '/settings', true);
                             xhr.setRequestHeader('Content-Type', 'application/json');
@@ -6461,6 +6487,16 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
 
                     window.switchLogsCategory = function(catKey) {
                         currentCategory = catKey;
+                        var chanSelect = document.getElementById('catDefaultChannel') || document.querySelector('select[name="catDefaultChannel"]');
+                        if (chanSelect && categoryChannels[catKey] !== undefined) {
+                            chanSelect.value = categoryChannels[catKey];
+                        }
+                        var catDefColor = (typeof LOG_CATEGORIES !== 'undefined' && LOG_CATEGORIES[catKey] && LOG_CATEGORIES[catKey].defaultColor) ? LOG_CATEGORIES[catKey].defaultColor : '#5865F2';
+                        var hexEl = document.getElementById('catColorHex');
+                        var pickEl = document.getElementById('catColorPicker');
+                        if (hexEl) hexEl.value = catDefColor;
+                        if (pickEl) pickEl.value = catDefColor;
+
                         renderCategoriesSidebar();
                         renderLogsGrid();
                     };
@@ -6586,6 +6622,9 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                             if (chan) logsState[id].channel_id = chan;
                             appliedCount++;
                         }
+                        if (chan) {
+                            categoryChannels[currentCategory] = chan;
+                        }
                         if (appliedCount === 0) {
                             alert('⚠️ لا توجد سجلات مفعلة في قسم (' + cat.title + ') لتطبيق الإعدادات عليها!');
                             return;
@@ -6593,7 +6632,9 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                         alert('✅ تم تطبيق القناة واللون بنجاح على السجلات المفعلة بقسم (' + cat.title + ') وعددهم: ' + appliedCount + '!');
                         renderCategoriesSidebar();
                         renderLogsGrid();
-                        saveLogsConfigToServer();
+                        var extra = {};
+                        if (chan) extra['log_channel_' + currentCategory] = chan;
+                        saveLogsConfigToServer(extra);
                     };
 
                     window.openEditLogModal = function(logId, title, icon) {
@@ -7004,8 +7045,17 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
 
                         // Initial render wrapped safely
                         try {
-                            renderCategoriesSidebar();
-                            renderLogsGrid();
+                            var chanSelect = document.getElementById('catDefaultChannel') || document.querySelector('select[name="catDefaultChannel"]');
+                            if (chanSelect) {
+                                chanSelect.addEventListener('change', function() {
+                                    var val = this.value;
+                                    categoryChannels[currentCategory] = val;
+                                    var extra = {};
+                                    extra['log_channel_' + currentCategory] = val;
+                                    window.saveLogsSetting('log_channel_' + currentCategory, val);
+                                });
+                            }
+                            window.switchLogsCategory('members');
                             console.log('[LOGS] Script loaded OK. logsState keys:', Object.keys(logsState).length, 'saveLogsSetting:', typeof window.saveLogsSetting);
                         } catch(err) {
                             console.error('Error in initial logs render:', err);
