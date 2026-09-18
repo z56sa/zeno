@@ -6178,187 +6178,249 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
 
                 formFieldsHtml = `
                     <input type="hidden" name="logs_config" id="hidden_logs_config" value="">
+                    <!-- Toast Notification Container -->
+                    <div id="logs-toast-container" class="fixed top-20 left-1/2 -translate-x-1/2 z-50 flex flex-col gap-2 pointer-events-none w-full max-w-md px-4"></div>
+
                     <div class="space-y-6 text-right" dir="rtl">
 
-                        <!-- 1. Header Bar -->
-                        <div class="bg-gradient-to-r from-[#1a132e] via-[#12141f] to-[#1a132e] border border-purple-500/20 p-6 rounded-3xl flex items-center justify-between shadow-2xl flex-wrap gap-4">
-                            <div class="flex items-center gap-3">
-                                <span id="logsSaveIndicator" class="text-xs font-bold text-emerald-400 bg-emerald-950/60 px-3 py-1.5 rounded-xl opacity-0 transition-opacity duration-300">✓ حُفظت الإعدادات</span>
-                                <label class="toggle">
+                        <!-- Global Master Logs Header Card -->
+                        <div class="bg-[#121620] border border-[#1e2638] rounded-2xl p-6 shadow-xl relative overflow-hidden">
+                            <div class="absolute top-0 right-0 w-32 h-32 bg-violet-600/10 rounded-full blur-3xl pointer-events-none"></div>
+                            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                                <div class="space-y-1">
+                                    <div class="flex items-center gap-3">
+                                        <div class="p-2.5 bg-violet-500/10 text-violet-400 rounded-xl">
+                                            <i class="fa-solid fa-book-bookmark text-xl"></i>
+                                        </div>
+                                        <h1 class="text-2xl font-black text-white">سجلات السيرفر الشاملة</h1>
+                                    </div>
+                                    <p class="text-sm text-gray-400 pr-11">يتم تطبيق كل التعديلات وحفظها مباشرة في سيرفر الديسكورد لحظياً بدون إعادة تشغيل.</p>
+                                </div>
+                                <label class="toggle relative inline-flex items-center cursor-pointer">
                                     <input type="checkbox" id="logsMasterToggle" name="logs_enabled" value="1" ${settings.logs_enabled !== 0 ? 'checked' : ''} onchange="window.saveLogsSetting('logs_enabled', this.checked)">
                                     <span class="slider"></span>
                                 </label>
                             </div>
-                            <div class="flex items-center gap-4">
-                                <div class="text-right">
-                                    <h4 class="font-black text-white text-xl flex items-center gap-2 justify-end">
-                                        <span>السجلات</span>
-                                        <span>📜</span>
-                                    </h4>
-                                    <p class="text-gray-400 text-xs mt-0.5">تتبع جميع الأحداث في السيرفر مع الفاعل والتفاصيل فورياً</p>
+
+                            <!-- Sub Logs Section Switcher Card -->
+                            <div class="mt-6 bg-[#0b0e14] border border-[#1e2638] rounded-xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center">
+                                        <i class="fa-solid fa-shield-halved text-lg"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-bold text-white text-base">السجلات</h3>
+                                        <p class="text-xs text-gray-400">تتبع جميع الأحداث في السيرفر مع الفاعل والتفاصيل فورياً</p>
+                                    </div>
                                 </div>
-                                <div class="w-12 h-12 rounded-2xl bg-purple-600/20 text-purple-400 flex items-center justify-center text-2xl border border-purple-500/30 shadow-inner">
-                                    🛡️
+                                <label class="toggle relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" id="sub-logs-switch" ${settings.logs_enabled !== 0 ? 'checked' : ''} onchange="window.saveLogsSetting('logs_enabled', this.checked); document.getElementById('logsMasterToggle').checked = this.checked;">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+
+                            <!-- Master Stats and Controls Bar -->
+                            <div class="mt-6 flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-[#1e2638]">
+                                <div class="flex items-center gap-2">
+                                    <button type="button" onclick="window.toggleAllLogsGlobally(false)" class="px-3.5 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 rounded-xl text-xs font-bold transition flex items-center gap-2 cursor-pointer">
+                                        <i class="fa-solid fa-xmark"></i>
+                                        <span>تعطيل الكل (كل الأقسام)</span>
+                                    </button>
+                                    <button type="button" onclick="window.toggleAllLogsGlobally(true)" class="px-3.5 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-xl text-xs font-bold transition flex items-center gap-2 cursor-pointer">
+                                        <i class="fa-solid fa-check"></i>
+                                        <span>تفعيل الكل (كل الأقسام)</span>
+                                    </button>
+                                </div>
+
+                                <div class="flex flex-wrap items-center gap-3 text-xs">
+                                    <span class="px-3 py-1.5 bg-[#1e2638] rounded-xl text-gray-300 font-medium flex items-center gap-1.5">
+                                        <i class="fa-solid fa-network-wired text-purple-400"></i>
+                                        <span id="statChannelsUsed">0</span>
+                                        <span>القنوات المستخدمة</span>
+                                    </span>
+                                    <span class="px-3 py-1.5 bg-[#1e2638] rounded-xl text-gray-300 font-medium flex items-center gap-1.5">
+                                        <i class="fa-solid fa-folder-tree text-amber-400"></i>
+                                        <span>13 الأقسام</span>
+                                    </span>
+                                    <span class="px-3 py-1.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-xl font-medium flex items-center gap-1.5">
+                                        <i class="fa-solid fa-circle-check"></i>
+                                        <span id="statEnabledLogs">0</span>
+                                        <span>السجلات المفعلة</span>
+                                    </span>
+                                    <span class="px-3 py-1.5 bg-violet-500/10 text-violet-400 border border-violet-500/20 rounded-xl font-medium flex items-center gap-1.5">
+                                        <i class="fa-solid fa-bars-progress"></i>
+                                        <span>105 إجمالي السجلات</span>
+                                    </span>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Top Stats Badges & Global Toggles -->
-                        <div class="flex items-center justify-between gap-3 flex-wrap">
-                            <div class="flex items-center gap-2">
-                                <button type="button" onclick="window.toggleAllLogsGlobally(false)" class="px-3 py-1.5 bg-rose-950/40 hover:bg-rose-900/60 text-rose-400 border border-rose-800/40 rounded-xl text-xs font-bold transition flex items-center gap-1 cursor-pointer">
-                                    <span>✕</span><span>تعطيل الكل (كل الأقسام)</span>
-                                </button>
-                                <button type="button" onclick="window.toggleAllLogsGlobally(true)" class="px-3 py-1.5 bg-emerald-950/40 hover:bg-emerald-900/60 text-emerald-400 border border-emerald-800/40 rounded-xl text-xs font-bold transition flex items-center gap-1 cursor-pointer">
-                                    <span>✓</span><span>تفعيل الكل (كل الأقسام)</span>
-                                </button>
-                            </div>
-                            <div class="flex items-center gap-2 flex-wrap">
-                                <span class="px-3 py-1.5 bg-[#12141f] border border-white/5 text-gray-300 rounded-xl text-xs font-bold flex items-center gap-1.5">
-                                    <span class="w-2 h-2 rounded-full bg-purple-400"></span>
-                                    <span id="statChannelsUsed">0</span>
-                                    <span>القنوات المستخدمة</span>
-                                </span>
-                                <span class="px-3 py-1.5 bg-[#12141f] border border-white/5 text-gray-300 rounded-xl text-xs font-bold flex items-center gap-1.5">
-                                    <span>⚡</span>
-                                    <span>13 الأقسام</span>
-                                </span>
-                                <span class="px-3 py-1.5 bg-emerald-950/40 text-emerald-400 border border-emerald-800/30 rounded-xl text-xs font-bold flex items-center gap-1.5">
-                                    <span>✓</span>
-                                    <span id="statEnabledLogs">0</span>
-                                    <span>السجلات المفعلة</span>
-                                </span>
-                                <span class="px-3 py-1.5 bg-purple-950/40 text-purple-300 border border-purple-800/30 rounded-xl text-xs font-bold flex items-center gap-1.5 font-mono">
-                                    <span>🎯</span>
-                                    <span>105 إجمالي السجلات</span>
-                                </span>
-                            </div>
-                        </div>
-
-                        <!-- 2. Auto Channel Setup Wizard Cards -->
-                        <div class="bg-[#12141f] border border-white/5 p-6 rounded-3xl space-y-4 shadow-xl">
-                            <div class="flex items-center justify-between border-b border-white/5 pb-3">
+                        <!-- Auto Setup Channels Card -->
+                        <div class="bg-[#121620] border border-[#1e2638] rounded-2xl p-6 shadow-xl">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="flex items-center gap-2">
+                                    <i class="fa-solid fa-gear text-violet-400"></i>
+                                    <h2 class="font-bold text-white text-base">إعداد تلقائي للقنوات</h2>
+                                </div>
                                 <span class="text-xs text-gray-400">إنشاء قنوات السجلات تلقائياً لجميع الأقسام بضغطة واحدة</span>
-                                <h4 class="text-sm font-black text-white flex items-center gap-2">
-                                    <span>إعداد تلقائي للقنوات</span>
-                                    <span>⚙️</span>
-                                </h4>
                             </div>
 
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-1">
-                                <!-- إنشـاء قنوات عادية -->
-                                <button type="button" onclick="window.autoSetupLogsChannels('grouped')" class="bg-[#0b0d14] border border-white/5 hover:border-purple-500/50 p-4 rounded-2xl text-right transition group cursor-pointer space-y-2">
-                                    <div class="flex items-center justify-between">
-                                        <div class="w-8 h-8 rounded-xl bg-purple-600/20 text-purple-400 flex items-center justify-center text-sm border border-purple-500/30">📌</div>
-                                        <span class="text-xs font-black text-white group-hover:text-purple-300 transition">إنشاء قنوات عادية</span>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <!-- Normal Channels Setup -->
+                                <button type="button" onclick="window.autoSetupLogsChannels('grouped')" class="group bg-[#0b0e14] hover:bg-[#181e2c] border border-[#1e2638] hover:border-violet-500/50 rounded-xl p-4 text-right transition flex flex-col justify-between gap-3 relative overflow-hidden cursor-pointer">
+                                    <div class="absolute top-0 right-0 w-24 h-24 bg-blue-500/5 rounded-full blur-xl group-hover:bg-blue-500/15 transition"></div>
+                                    <div class="flex items-center justify-between w-full">
+                                        <div class="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center group-hover:scale-110 transition">
+                                            <i class="fa-solid fa-thumbtack"></i>
+                                        </div>
+                                        <span class="text-xs font-semibold text-blue-400 bg-blue-500/10 px-2.5 py-1 rounded-lg">شائع</span>
                                     </div>
-                                    <p class="text-[11px] text-gray-400 leading-relaxed">قناة واحدة لكل قسم (أعضاء، رسائل، أدوار...) — مناسب لأغلب السيرفرات</p>
+                                    <div>
+                                        <h3 class="font-bold text-white text-sm">إنشاء قنوات عادية</h3>
+                                        <p class="text-xs text-gray-400 mt-1">قناة واحدة لكل قسم (أعضاء، رسائل، أدوار...) — مناسب لأغلب السيرفرات</p>
+                                    </div>
                                 </button>
 
-                                <!-- إنشـاء قنوات مفصلة -->
-                                <button type="button" onclick="window.autoSetupLogsChannels('detailed')" class="bg-[#0b0d14] border border-white/5 hover:border-indigo-500/50 p-4 rounded-2xl text-right transition group cursor-pointer space-y-2">
-                                    <div class="flex items-center justify-between">
-                                        <div class="w-8 h-8 rounded-xl bg-indigo-600/20 text-indigo-400 flex items-center justify-center text-sm border border-indigo-500/30">📑</div>
-                                        <span class="text-xs font-black text-white group-hover:text-indigo-300 transition">إنشاء قنوات مفصلة</span>
+                                <!-- Detailed Channels Setup -->
+                                <button type="button" onclick="window.autoSetupLogsChannels('detailed')" class="group bg-[#0b0e14] hover:bg-[#181e2c] border border-[#1e2638] hover:border-violet-500/50 rounded-xl p-4 text-right transition flex flex-col justify-between gap-3 relative overflow-hidden cursor-pointer">
+                                    <div class="absolute top-0 right-0 w-24 h-24 bg-purple-500/5 rounded-full blur-xl group-hover:bg-purple-500/15 transition"></div>
+                                    <div class="flex items-center justify-between w-full">
+                                        <div class="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center group-hover:scale-110 transition">
+                                            <i class="fa-solid fa-folder-open"></i>
+                                        </div>
+                                        <span class="text-xs font-semibold text-purple-400 bg-purple-500/10 px-2.5 py-1 rounded-lg">متقدم</span>
                                     </div>
-                                    <p class="text-[11px] text-gray-400 leading-relaxed">قناة منفصلة لكل نوع سجل — للسيرفرات الكبيرة التي تحتاج تنظيم دقيق</p>
+                                    <div>
+                                        <h3 class="font-bold text-white text-sm">إنشاء قنوات مفصلة</h3>
+                                        <p class="text-xs text-gray-400 mt-1">قناة منفصلة لكل نوع سجل — للسيرفرات الكبيرة التي تحتاج تنظيم دقيق</p>
+                                    </div>
                                 </button>
 
-                                <!-- حذف قنوات السجلات -->
-                                <button type="button" onclick="window.deleteLogsChannels()" class="bg-[#0b0d14] border border-white/5 hover:border-rose-500/50 p-4 rounded-2xl text-right transition group cursor-pointer space-y-2">
-                                    <div class="flex items-center justify-between">
-                                        <div class="w-8 h-8 rounded-xl bg-rose-600/20 text-rose-400 flex items-center justify-center text-sm border border-rose-500/30">🗑️</div>
-                                        <span class="text-xs font-black text-white group-hover:text-rose-300 transition">حذف قنوات السجلات</span>
+                                <!-- Delete Channels Setup -->
+                                <button type="button" onclick="window.deleteLogsChannels()" class="group bg-[#0b0e14] hover:bg-red-500/10 border border-[#1e2638] hover:border-red-500/40 rounded-xl p-4 text-right transition flex flex-col justify-between gap-3 relative overflow-hidden cursor-pointer">
+                                    <div class="absolute top-0 right-0 w-24 h-24 bg-red-500/5 rounded-full blur-xl group-hover:bg-red-500/15 transition"></div>
+                                    <div class="flex items-center justify-between w-full">
+                                        <div class="w-10 h-10 rounded-xl bg-red-500/10 text-red-400 flex items-center justify-center group-hover:scale-110 transition">
+                                            <i class="fa-solid fa-trash-can"></i>
+                                        </div>
+                                        <span class="text-xs font-semibold text-red-400 bg-red-500/10 px-2.5 py-1 rounded-lg">إزالة</span>
                                     </div>
-                                    <p class="text-[11px] text-gray-400 leading-relaxed">حذف كاتيجوري ZENO Server Logs وجميع القنوات بداخله وتعطيل السجلات</p>
+                                    <div>
+                                        <h3 class="font-bold text-white text-sm">حذف قنوات السجلات</h3>
+                                        <p class="text-xs text-gray-400 mt-1">حذف كاتيغوري ZENO Server Logs وجميع القنوات بداخله وتعطيل السجلات</p>
+                                    </div>
                                 </button>
                             </div>
                         </div>
 
-
-
-                        <!-- 3. Search & Filter Bar -->
-                        <div class="flex items-center justify-between gap-4">
-                            <div class="flex items-center gap-1.5 bg-[#12141f] border border-white/5 p-1 rounded-2xl">
-                                <button type="button" id="btnLogFilterDisabled" onclick="window.filterLogsByStatus('disabled')" class="px-3.5 py-1.5 rounded-xl text-xs font-bold text-gray-400 hover:text-white transition cursor-pointer">المعطلة</button>
-                                <button type="button" id="btnLogFilterEnabled" onclick="window.filterLogsByStatus('enabled')" class="px-3.5 py-1.5 rounded-xl text-xs font-bold text-gray-400 hover:text-white transition cursor-pointer">المفعلة</button>
-                                <button type="button" id="btnLogFilterAll" onclick="window.filterLogsByStatus('all')" class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-purple-600 text-white transition shadow cursor-pointer">الكل</button>
+                        <!-- Search and Filter Bar -->
+                        <div class="flex flex-col sm:flex-row items-center justify-between gap-4 bg-[#121620] border border-[#1e2638] p-4 rounded-2xl">
+                            <!-- Filter Tabs -->
+                            <div class="flex items-center gap-1.5 bg-[#0b0e14] p-1.5 rounded-xl border border-[#1e2638] w-full sm:w-auto">
+                                <button type="button" id="btnLogFilterDisabled" onclick="window.filterLogsByStatus('disabled')" class="filter-tab px-4 py-2 rounded-lg text-xs font-bold text-gray-400 hover:text-white transition cursor-pointer">المعطلة</button>
+                                <button type="button" id="btnLogFilterEnabled" onclick="window.filterLogsByStatus('enabled')" class="filter-tab px-4 py-2 rounded-lg text-xs font-bold text-gray-400 hover:text-white transition cursor-pointer">المفعلة</button>
+                                <button type="button" id="btnLogFilterAll" onclick="window.filterLogsByStatus('all')" class="filter-tab px-4 py-2 rounded-lg text-xs font-bold bg-violet-600 text-white shadow-md transition cursor-pointer">الكل</button>
                             </div>
-                            <div class="flex-1 relative">
-                                <input type="text" id="logSearchInput" placeholder="...ابحث عن سجل" oninput="window.searchLogsItems()" class="w-full bg-[#12141f] border border-white/5 focus:border-purple-500 rounded-2xl px-4 py-2.5 text-xs text-white outline-none text-right pr-10">
-                                <span class="absolute right-3.5 top-2.5 text-gray-400 text-sm">🔍</span>
+
+                            <!-- Search Bar -->
+                            <div class="relative w-full sm:w-72">
+                                <span class="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-gray-400">
+                                    <i class="fa-solid fa-magnifying-glass text-sm"></i>
+                                </span>
+                                <input type="text" id="logSearchInput" placeholder="ابحث عن سجل..." oninput="window.searchLogsItems()" class="w-full bg-[#0b0e14] border border-[#1e2638] rounded-xl py-2.5 pr-10 pl-4 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-violet-500 transition">
                             </div>
                         </div>
 
-                        <!-- 4. Main Two-Column View: Categories Sidebar + Active Category Content -->
+                        <!-- Main Two-Column View: Categories Sidebar + Active Category Content -->
                         <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
 
                             <!-- Sidebar: 13 Categories -->
-                            <div class="lg:col-span-1 space-y-1 bg-[#12141f] border border-white/5 p-3 rounded-3xl shadow-xl h-fit">
-                                <button type="button" onclick="window.toggleLogsCategoriesDropdown()" class="w-full flex items-center justify-between text-xs font-black text-white px-2 py-2 border-b border-white/5 mb-1 cursor-pointer hover:text-purple-300 transition">
-                                    <span id="logsCategoriesDropdownArrow" class="text-gray-400 text-xs transition-transform duration-200">▼</span>
-                                    <span class="flex items-center gap-1.5">
-                                        <span>الأقسام</span>
-                                        <span>📁</span>
+                            <div class="lg:col-span-1 space-y-1 bg-[#121620] border border-[#1e2638] p-3 rounded-2xl shadow-xl h-fit">
+                                <button type="button" onclick="window.toggleLogsCategoriesDropdown()" class="w-full flex items-center justify-between text-xs font-black text-white px-2 py-2 border-b border-[#1e2638] mb-1 cursor-pointer hover:text-violet-300 transition">
+                                    <i id="logsCategoriesDropdownArrow" class="fa-solid fa-chevron-down text-gray-400 text-xs"></i>
+                                    <span class="flex items-center gap-2">
+                                        <span>الأقسام (13 قسم)</span>
+                                        <i class="fa-solid fa-folder text-amber-400"></i>
                                     </span>
                                 </button>
                                 <div id="logsCategoriesList" class="space-y-1 transition-all"></div>
                             </div>
 
                             <!-- Right Display Area: Active Category Header + Section Default Channel/Color + Logs Grid -->
-                            <div class="lg:col-span-3 space-y-4">
+                            <div class="lg:col-span-3 space-y-6">
 
-                                <!-- Active Category Title & Global Toggles -->
-                                <div class="bg-[#12141f] border border-white/5 p-5 rounded-3xl flex items-center justify-between shadow-xl flex-wrap gap-3">
-                                    <div class="flex items-center gap-2">
-                                        <button type="button" onclick="window.toggleActiveCategoryLogs(false)" class="px-3.5 py-1.5 bg-rose-950/40 hover:bg-rose-900/60 text-rose-400 border border-rose-800/40 rounded-xl text-xs font-bold transition flex items-center gap-1 cursor-pointer">
-                                            <span>✕</span><span>تعطيل الكل</span>
-                                        </button>
-                                        <button type="button" onclick="window.toggleActiveCategoryLogs(true)" class="px-3.5 py-1.5 bg-emerald-950/40 hover:bg-emerald-900/60 text-emerald-400 border border-emerald-800/40 rounded-xl text-xs font-bold transition flex items-center gap-1 cursor-pointer">
-                                            <span>✓</span><span>تفعيل الكل</span>
-                                        </button>
-                                    </div>
-                                    <div class="flex items-center gap-3">
-                                        <div class="text-right">
-                                            <h4 id="activeCatTitle" class="font-black text-white text-base">الأعضاء</h4>
-                                            <p id="activeCatCount" class="text-gray-400 text-xs mt-0.5">17 سجل</p>
-                                        </div>
-                                        <div id="activeCatIcon" class="w-10 h-10 rounded-2xl bg-purple-600/20 text-purple-400 flex items-center justify-center text-xl border border-purple-500/30">
-                                            🎯
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Active Category Fast Preset: Channel + Color + Apply to all -->
-                                <div class="bg-[#12141f] border border-white/5 p-5 rounded-3xl space-y-4 shadow-xl">
-                                    <div class="flex items-center justify-between border-b border-white/5 pb-3">
-                                        <span class="text-[11px] text-gray-400">طبق نفس الإعدادات على جميع السجلات المفعلة بالقسم</span>
-                                        <h5 class="text-xs font-black text-white flex items-center gap-1.5">
-                                            <span>إعدادات القسم</span>
-                                            <span>⚙️</span>
-                                        </h5>
-                                    </div>
-
-                                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
-                                        <!-- Color Picker -->
-                                        <div>
-                                            <label class="block text-[11px] font-bold text-gray-300 mb-1.5 text-right">اللون الافتراضي 🎨</label>
-                                            <div class="flex items-center gap-2 bg-[#0b0d14] border border-white/5 p-1.5 rounded-xl">
-                                                <input type="text" id="catColorHex" value="#5865F2" class="w-full bg-transparent text-xs text-white font-mono outline-none text-center" dir="ltr" onchange="document.getElementById('catColorPicker').value = this.value">
-                                                <input type="color" id="catColorPicker" value="#5865F2" class="w-7 h-7 rounded-lg cursor-pointer bg-transparent border-0" onchange="document.getElementById('catColorHex').value = this.value">
+                                <!-- Active Category Card Header -->
+                                <div class="bg-[#121620] border border-[#1e2638] rounded-2xl p-6 shadow-xl space-y-6">
+                                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                                        <div class="flex items-center gap-3.5">
+                                            <div id="activeCatIconBox" class="w-12 h-12 rounded-2xl bg-gradient-to-br from-pink-500/20 to-purple-600/20 border border-pink-500/30 text-pink-400 flex items-center justify-center shadow-lg text-xl">
+                                                <span id="activeCatIcon">🎯</span>
+                                            </div>
+                                            <div>
+                                                <h2 id="activeCatTitle" class="text-lg font-black text-white">الأعضاء</h2>
+                                                <span id="activeCatCount" class="text-xs text-gray-400">17 سجل</span>
                                             </div>
                                         </div>
 
-                                        <!-- Channel Select -->
-                                        <div class="sm:col-span-2">
-                                            <label class="block text-[11px] font-bold text-gray-300 mb-1.5 text-right">القناة الافتراضية 📢</label>
-                                            ${renderChannelSelect('catDefaultChannel', settings.log_channel_members || settings.log_channel || '')}
+                                        <!-- Category Actions: Enable All / Disable All -->
+                                        <div class="flex items-center gap-2">
+                                            <button type="button" onclick="window.toggleActiveCategoryLogs(false)" class="px-3.5 py-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 rounded-xl text-xs font-bold transition flex items-center gap-2 cursor-pointer">
+                                                <i class="fa-solid fa-xmark"></i>
+                                                <span>تعطيل الكل</span>
+                                            </button>
+                                            <button type="button" onclick="window.toggleActiveCategoryLogs(true)" class="px-3.5 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-xl text-xs font-bold transition flex items-center gap-2 cursor-pointer">
+                                                <i class="fa-solid fa-check"></i>
+                                                <span>تفعيل الكل</span>
+                                            </button>
                                         </div>
                                     </div>
 
-                                    <button type="button" onclick="window.applyCatSettingsToAll()" class="w-full py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-black rounded-xl shadow-lg transition flex items-center justify-center gap-2 cursor-pointer">
-                                        <span>✨ تطبيق على جميع السجلات المفعلة</span>
-                                    </button>
+                                    <!-- Section Settings Form Block -->
+                                    <div class="bg-[#0b0e14] border border-[#1e2638] rounded-2xl p-5 space-y-5">
+                                        <div class="flex items-center justify-between border-b border-[#1e2638] pb-3">
+                                            <div class="flex items-center gap-2 text-white font-bold text-sm">
+                                                <i class="fa-solid fa-gear text-violet-400"></i>
+                                                <span>إعدادات القسم</span>
+                                            </div>
+                                            <span class="text-xs text-gray-500">طبق نفس الإعدادات على جميع السجلات المفعلة بالقسم</span>
+                                        </div>
+
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                            <!-- Default Channel Dropdown -->
+                                            <div class="space-y-2">
+                                                <label class="text-xs font-bold text-gray-300 flex items-center gap-1.5">
+                                                    <i class="fa-solid fa-bullhorn text-pink-400 text-sm"></i>
+                                                    <span>القناة الافتراضية</span>
+                                                </label>
+                                                <div class="relative">
+                                                    ${renderChannelSelect('catDefaultChannel', settings.log_channel_members || settings.log_channel || '')}
+                                                </div>
+                                            </div>
+
+                                            <!-- Default Color Picker Input -->
+                                            <div class="space-y-2">
+                                                <label class="text-xs font-bold text-gray-300 flex items-center gap-1.5">
+                                                    <i class="fa-solid fa-palette text-pink-400 text-sm"></i>
+                                                    <span>اللون الافتراضي</span>
+                                                </label>
+                                                <div class="flex items-center gap-3">
+                                                    <div class="relative w-10 h-10 rounded-xl overflow-hidden border border-[#1e2638] cursor-pointer shrink-0">
+                                                        <input type="color" id="catColorPicker" value="#5865F2" class="absolute -top-2 -right-2 w-16 h-16 cursor-pointer opacity-0" onchange="document.getElementById('catColorHex').value = this.value; document.getElementById('catColorPreviewBox').style.backgroundColor = this.value;">
+                                                        <div id="catColorPreviewBox" class="w-full h-full bg-[#5865F2]"></div>
+                                                    </div>
+                                                    <input type="text" id="catColorHex" value="#5865F2" class="w-full bg-[#121620] border border-[#1e2638] focus:border-violet-500 rounded-xl py-2.5 px-3.5 text-xs text-white font-mono focus:outline-none transition" dir="ltr" onchange="document.getElementById('catColorPicker').value = this.value; document.getElementById('catColorPreviewBox').style.backgroundColor = this.value;">
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Apply to All Enabled Logs Button -->
+                                        <div class="pt-2">
+                                            <button type="button" onclick="window.applyCatSettingsToAll()" class="w-full sm:w-auto px-6 py-2.5 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-violet-600/20 transition flex items-center justify-center gap-2 cursor-pointer">
+                                                <i class="fa-solid fa-wand-magic-sparkles"></i>
+                                                <span>تطبيق على جميع السجلات المفعلة</span>
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <!-- Logs Cards 2-Column Grid -->
@@ -6370,9 +6432,9 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                     </div>
 
                     <!-- Individual Log Edit Modal -->
-                    <div id="editLogModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-                        <div class="bg-[#12141f] border border-purple-500/30 rounded-3xl max-w-md w-full p-6 space-y-4 shadow-2xl text-right" dir="rtl">
-                            <div class="flex items-center justify-between border-b border-white/5 pb-3">
+                    <div id="editLogModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+                        <div class="bg-[#121620] border border-[#1e2638] rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl text-right" dir="rtl">
+                            <div class="flex items-center justify-between border-b border-[#1e2638] pb-3">
                                 <button type="button" onclick="window.closeEditLogModal()" class="text-gray-400 hover:text-white text-lg font-bold">✕</button>
                                 <div class="flex items-center gap-2">
                                     <h5 class="text-white font-black text-sm" id="modalLogTitle">تخصيص السجل</h5>
@@ -6381,22 +6443,34 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                             </div>
 
                             <div>
-                                <label class="block text-xs font-bold text-gray-300 mb-1">القناة المخصصة لهذا السجل</label>
+                                <label class="block text-xs font-bold text-gray-300 mb-1.5 flex items-center gap-1.5">
+                                    <i class="fa-solid fa-bullhorn text-violet-400 text-xs"></i>
+                                    <span>القناة المخصصة لهذا السجل</span>
+                                </label>
                                 ${renderChannelSelect('modalLogChannel', '')}
-                                <p class="text-[10px] text-gray-400 mt-1">اتركها فارغة لاستخدام القناة الافتراضية للقسم</p>
+                                <p class="text-[10px] text-gray-500 mt-1">اتركها فارغة لاستخدام القناة الافتراضية للقسم</p>
                             </div>
 
                             <div>
-                                <label class="block text-xs font-bold text-gray-300 mb-1">لون الإيمبد (Hex Color)</label>
-                                <div class="flex items-center gap-2 bg-[#0b0d14] border border-white/5 p-2 rounded-xl">
-                                    <input type="text" id="modalLogColorHex" value="#5865F2" class="w-full bg-transparent text-xs text-white font-mono outline-none text-center" dir="ltr" onchange="document.getElementById('modalLogColorPicker').value = this.value">
-                                    <input type="color" id="modalLogColorPicker" value="#5865F2" class="w-7 h-7 rounded-lg cursor-pointer bg-transparent border-0" onchange="document.getElementById('modalLogColorHex').value = this.value">
+                                <label class="block text-xs font-bold text-gray-300 mb-1.5 flex items-center gap-1.5">
+                                    <i class="fa-solid fa-palette text-violet-400 text-xs"></i>
+                                    <span>لون الإيمبد (Hex Color)</span>
+                                </label>
+                                <div class="flex items-center gap-3">
+                                    <div class="relative w-10 h-10 rounded-xl overflow-hidden border border-[#1e2638] cursor-pointer shrink-0">
+                                        <input type="color" id="modalLogColorPicker" value="#5865F2" class="absolute -top-2 -right-2 w-16 h-16 cursor-pointer opacity-0" onchange="document.getElementById('modalLogColorHex').value = this.value; document.getElementById('modalColorPreviewBox').style.backgroundColor = this.value;">
+                                        <div id="modalColorPreviewBox" class="w-full h-full bg-[#5865F2]"></div>
+                                    </div>
+                                    <input type="text" id="modalLogColorHex" value="#5865F2" class="w-full bg-[#0b0e14] border border-[#1e2638] focus:border-violet-500 rounded-xl py-2 px-3 text-xs text-white font-mono outline-none text-center" dir="ltr" onchange="document.getElementById('modalLogColorPicker').value = this.value; document.getElementById('modalColorPreviewBox').style.backgroundColor = this.value;">
                                 </div>
                             </div>
 
-                            <div class="flex items-center justify-end gap-2 pt-2 border-t border-white/5">
-                                <button type="button" onclick="window.closeEditLogModal()" class="px-4 py-2 bg-white/5 hover:bg-white/10 text-gray-300 rounded-xl text-xs font-bold transition">إلغاء</button>
-                                <button type="button" onclick="window.saveModalLogConfig()" class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold transition shadow-lg">حفظ التغييرات</button>
+                            <div class="flex items-center justify-end gap-2 pt-3 border-t border-[#1e2638]">
+                                <button type="button" onclick="window.closeEditLogModal()" class="px-4 py-2 bg-[#1e2638] hover:bg-[#28324a] text-gray-300 rounded-xl text-xs font-bold transition">إلغاء</button>
+                                <button type="button" onclick="window.saveModalLogConfig()" class="px-5 py-2 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold transition shadow-lg flex items-center gap-2">
+                                    <i class="fa-solid fa-floppy-disk"></i>
+                                    <span>حفظ التغييرات</span>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -6434,12 +6508,29 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                         return false;
                     }
 
-                    function showSavedBanner() {
-                        var el = document.getElementById('logsSaveIndicator');
-                        if (el) {
-                            el.classList.remove('opacity-0');
-                            setTimeout(function() { el.classList.add('opacity-0'); }, 2000);
-                        }
+                    function showToast(message, type) {
+                        type = type || 'success';
+                        var container = document.getElementById('logs-toast-container');
+                        if (!container) return;
+                        var toast = document.createElement('div');
+                        var bgClass = type === 'success' ? 'bg-emerald-900/90 border-emerald-500/50 text-emerald-200' :
+                                      type === 'danger' ? 'bg-red-900/90 border-red-500/50 text-red-200' :
+                                      'bg-violet-900/90 border-violet-500/50 text-violet-200';
+                        var icon = type === 'success' ? 'fa-circle-check' : type === 'danger' ? 'fa-triangle-exclamation' : 'fa-circle-info';
+                        toast.className = 'pointer-events-auto border rounded-xl p-4 shadow-2xl flex items-center justify-between gap-3 backdrop-blur-md transition-all duration-300 transform translate-y-2 opacity-0 ' + bgClass;
+                        toast.innerHTML = '<div class="flex items-center gap-3"><i class="fa-solid ' + icon + ' text-lg"></i><span class="text-xs font-bold">' + message + '</span></div><button type="button" class="text-xs opacity-70 hover:opacity-100 transition">✕</button>';
+                        container.appendChild(toast);
+                        setTimeout(function() { toast.classList.remove('translate-y-2', 'opacity-0'); }, 10);
+                        var removeToast = function() {
+                            toast.classList.add('translate-y-2', 'opacity-0');
+                            setTimeout(function() { toast.remove(); }, 300);
+                        };
+                        toast.querySelector('button').addEventListener('click', removeToast);
+                        setTimeout(removeToast, 3500);
+                    }
+
+                    function showSavedBanner(msg) {
+                        showToast(msg || '✓ حُفظت التغييرات في سيرفر الديسكورد بنجاح', 'success');
                     }
 
                     function syncHiddenInput() {
@@ -6449,7 +6540,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                         }
                     }
 
-                    function saveLogsConfigToServer(extraPayload) {
+                    function saveLogsConfigToServer(extraPayload, successMsg) {
                         try {
                             syncHiddenInput();
                             var gId = '${guildId}';
@@ -6458,7 +6549,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                             xhr.open('POST', '/api/guild/' + gId + '/settings', true);
                             xhr.setRequestHeader('Content-Type', 'application/json');
                             xhr.onload = function() {
-                                try { if (JSON.parse(xhr.responseText).success) showSavedBanner(); } catch(e) {}
+                                try { if (JSON.parse(xhr.responseText).success) showSavedBanner(successMsg); } catch(e) {}
                             };
                             var body = { logs_config: JSON.stringify(logsState) };
                             if (extraPayload && typeof extraPayload === 'object') {
@@ -6479,7 +6570,11 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                             xhr.open('POST', '/api/guild/' + gId + '/settings', true);
                             xhr.setRequestHeader('Content-Type', 'application/json');
                             xhr.onload = function() {
-                                try { if (JSON.parse(xhr.responseText).success) showSavedBanner(); } catch(e) {}
+                                try {
+                                    if (JSON.parse(xhr.responseText).success) {
+                                        showToast(val ? '✓ تم تفعيل السجلات بنجاح' : '✕ تم تعطيل السجلات', val ? 'success' : 'danger');
+                                    }
+                                } catch(e) {}
                             };
                             xhr.send(JSON.stringify(body));
                         } catch(e) {}
@@ -6494,8 +6589,10 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                         var catDefColor = (typeof LOG_CATEGORIES !== 'undefined' && LOG_CATEGORIES[catKey] && LOG_CATEGORIES[catKey].defaultColor) ? LOG_CATEGORIES[catKey].defaultColor : '#5865F2';
                         var hexEl = document.getElementById('catColorHex');
                         var pickEl = document.getElementById('catColorPicker');
+                        var prevBox = document.getElementById('catColorPreviewBox');
                         if (hexEl) hexEl.value = catDefColor;
                         if (pickEl) pickEl.value = catDefColor;
+                        if (prevBox) prevBox.style.backgroundColor = catDefColor;
 
                         renderCategoriesSidebar();
                         renderLogsGrid();
@@ -6507,10 +6604,10 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                         if (!list) return;
                         if (list.classList.contains('hidden')) {
                             list.classList.remove('hidden');
-                            if (arrow) arrow.textContent = '▼';
+                            if (arrow) arrow.className = 'fa-solid fa-chevron-down text-gray-400 text-xs';
                         } else {
                             list.classList.add('hidden');
-                            if (arrow) arrow.textContent = '◀';
+                            if (arrow) arrow.className = 'fa-solid fa-chevron-left text-gray-400 text-xs';
                         }
                     };
 
@@ -6519,8 +6616,8 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                         var btnAll = document.getElementById('btnLogFilterAll');
                         var btnEn = document.getElementById('btnLogFilterEnabled');
                         var btnDis = document.getElementById('btnLogFilterDisabled');
-                        var activeClass = "px-3.5 py-1.5 rounded-xl text-xs font-bold bg-purple-600 text-white transition shadow cursor-pointer";
-                        var inactiveClass = "px-3.5 py-1.5 rounded-xl text-xs font-bold text-gray-400 hover:text-white transition cursor-pointer";
+                        var activeClass = "filter-tab px-4 py-2 rounded-lg text-xs font-bold bg-violet-600 text-white shadow-md transition cursor-pointer";
+                        var inactiveClass = "filter-tab px-4 py-2 rounded-lg text-xs font-bold text-gray-400 hover:text-white transition cursor-pointer";
 
                         if (btnAll) btnAll.className = (status === 'all') ? activeClass : inactiveClass;
                         if (btnEn) btnEn.className = (status === 'enabled') ? activeClass : inactiveClass;
@@ -6626,10 +6723,10 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                             categoryChannels[currentCategory] = chan;
                         }
                         if (appliedCount === 0) {
-                            alert('⚠️ لا توجد سجلات مفعلة في قسم (' + cat.title + ') لتطبيق الإعدادات عليها!');
+                            showToast('⚠️ لا توجد سجلات مفعلة في قسم (' + cat.title + ') لتطبيق الإعدادات عليها!', 'danger');
                             return;
                         }
-                        alert('✅ تم تطبيق القناة واللون بنجاح على السجلات المفعلة بقسم (' + cat.title + ') وعددهم: ' + appliedCount + '!');
+                        showToast('✨ تم تطبيق القناة واللون بنجاح على ' + appliedCount + ' سجل في قسم (' + cat.title + ')', 'success');
                         renderCategoriesSidebar();
                         renderLogsGrid();
                         var extra = {};
@@ -6645,6 +6742,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                         var chanEl = document.getElementById('modalLogChannel');
                         var colorHex = document.getElementById('modalLogColorHex');
                         var colorPicker = document.getElementById('modalLogColorPicker');
+                        var previewBox = document.getElementById('modalColorPreviewBox');
 
                         if (titleEl) titleEl.textContent = title || 'تخصيص السجل';
                         if (iconEl) iconEl.textContent = icon || '📜';
@@ -6654,6 +6752,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                         var col = cfg.color || '#5865F2';
                         if (colorHex) colorHex.value = col;
                         if (colorPicker) colorPicker.value = col;
+                        if (previewBox) previewBox.style.backgroundColor = col;
 
                         if (modal) modal.classList.remove('hidden');
                     };
@@ -6673,7 +6772,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                         logsState[currentEditModalLogId].channel_id = chanEl ? chanEl.value : '';
                         logsState[currentEditModalLogId].color = colorHex ? colorHex.value : '#5865F2';
 
-                        saveLogsConfigToServer();
+                        saveLogsConfigToServer(null, '✓ تم حفظ تخصيص السجل بنجاح');
                         window.closeEditLogModal();
                         renderCategoriesSidebar();
                         renderLogsGrid();
@@ -6683,6 +6782,8 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                         var modeTitle = mode === 'grouped' ? 'القنوات العادية (قسم لكل قناة)' : 'القنوات المفصلة (قناة لكل نوع سجل)';
                         if (!confirm('هل تريد إنشاء قنوات السجلات تلقائياً بالسيرفر بنظام: ' + modeTitle + '؟')) return;
 
+                        showToast('🚀 جاري إنشاء قنوات السجلات تلقائياً في السيرفر...', 'info');
+
                         try {
                             var gId = '${guildId}';
                             fetch('/api/guild/' + gId + '/logs/auto-setup', {
@@ -6691,21 +6792,23 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                                 body: JSON.stringify({ mode: mode })
                             }).then(function(res) { return res.json(); }).then(function(d) {
                                 if (d.success) {
-                                    alert('✅ تم إنشاء وتوزيع قنوات السجلات بنجاح في السيرفر!');
-                                    location.reload();
+                                    showToast('✓ تم إنشاء وتوزيع قنوات السجلات بنجاح في السيرفر!', 'success');
+                                    setTimeout(function() { location.reload(); }, 1200);
                                 } else {
-                                    alert('❌ ' + (d.error || 'فشل إنشاء القنوات'));
+                                    showToast('✕ ' + (d.error || 'فشل إنشاء القنوات'), 'danger');
                                 }
                             }).catch(function() {
-                                alert('حدث خطأ في الاتصال بالخادم');
+                                showToast('✕ حدث خطأ في الاتصال بالخادم', 'danger');
                             });
                         } catch(e) {
-                            alert('حدث خطأ في الاتصال بالخادم');
+                            showToast('✕ حدث خطأ في الاتصال بالخادم', 'danger');
                         }
                     };
 
                     window.deleteLogsChannels = function() {
                         if (!confirm('⚠️ تحذير: هل أنت متأكد من حذف كاتيجوري سجلات ZENO وجميع القنوات بداخله نهائياً؟')) return;
+
+                        showToast('🗑️ جاري حذف كاتيغوري وقنوات السجلات...', 'danger');
 
                         try {
                             var gId = '${guildId}';
@@ -6714,16 +6817,16 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                                 headers: { 'Content-Type': 'application/json' }
                             }).then(function(res) { return res.json(); }).then(function(d) {
                                 if (d.success) {
-                                    alert('✅ تم حذف قنوات السجلات بنجاح');
-                                    location.reload();
+                                    showToast('✓ تم حذف قنوات السجلات بنجاح', 'success');
+                                    setTimeout(function() { location.reload(); }, 1200);
                                 } else {
-                                    alert('❌ ' + (d.error || 'فشل الحذف'));
+                                    showToast('✕ ' + (d.error || 'فشل الحذف'), 'danger');
                                 }
                             }).catch(function() {
-                                alert('حدث خطأ في الاتصال');
+                                showToast('✕ حدث خطأ في الاتصال', 'danger');
                             });
                         } catch(e) {
-                            alert('حدث خطأ في الاتصال');
+                            showToast('✕ حدث خطأ في الاتصال', 'danger');
                         }
                     };
 
@@ -6948,12 +7051,12 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                                 visibleCats++;
 
                                 var badgeClass = enabledItems === 0
-                                    ? 'px-2 py-0.5 bg-rose-950/60 text-rose-400 rounded-lg text-[10px] font-mono'
+                                    ? 'px-2 py-0.5 bg-red-500/10 text-red-400 border border-red-500/20 rounded-lg text-[10px] font-mono'
                                     : (enabledItems === totalItems
-                                        ? 'px-2 py-0.5 bg-emerald-950/60 text-emerald-400 rounded-lg text-[10px] font-mono'
-                                        : 'px-2 py-0.5 bg-purple-950/60 text-purple-300 rounded-lg text-[10px] font-mono');
+                                        ? 'px-2 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-lg text-[10px] font-mono'
+                                        : 'px-2 py-0.5 bg-violet-500/10 text-violet-300 border border-violet-500/20 rounded-lg text-[10px] font-mono');
 
-                                html += '<button type="button" onclick="window.switchLogsCategory(\'' + k + '\')" class="w-full flex items-center justify-between px-3 py-2.5 rounded-2xl text-xs font-bold transition cursor-pointer ' + (isSel ? 'bg-purple-600 text-white shadow-lg' : 'text-gray-400 hover:text-white hover:bg-white/5') + '">';
+                                html += '<button type="button" onclick="window.switchLogsCategory(\'' + k + '\')" class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition cursor-pointer ' + (isSel ? 'bg-violet-600 text-white shadow-lg' : 'text-gray-400 hover:text-white hover:bg-[#181e2c]') + '">';
                                 html += '<span class="' + badgeClass + '">' + enabledItems + '/' + totalItems + '</span>';
                                 html += '<span class="flex items-center gap-2"><span>' + cat.title + '</span><span>' + cat.icon + '</span></span>';
                                 html += '</button>';
@@ -7013,26 +7116,26 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                                 var customChan = customCfg.channel_id || '';
                                 var customColor = customCfg.color || cat.defaultColor || '#5865F2';
 
-                                html += '<div class="bg-[#0b0d14] border border-white/5 hover:border-purple-500/40 p-4 rounded-2xl flex items-center justify-between transition ' + (en ? '' : 'opacity-40') + '" data-log-id="' + item.id + '">';
+                                html += '<div class="bg-[#121620] border border-[#1e2638] hover:border-violet-500/40 p-4 rounded-2xl flex items-center justify-between transition shadow-md ' + (en ? '' : 'opacity-40') + '" data-log-id="' + item.id + '">';
 
                                 // Left: Toggle + Edit Options Button
                                 html += '<div class="flex items-center gap-2.5">';
                                 html += '<label class="toggle"><input type="checkbox" data-log-checkbox="' + item.id + '" ' + (en ? 'checked' : '') + ' onchange="window.toggleSingleLogEvent(\'' + item.id + '\', this.checked)"><span class="slider"></span></label>';
-                                html += '<button type="button" onclick="window.openEditLogModal(\'' + item.id + '\', \'' + item.title.replace(/'/g, "\\'") + '\', \'' + item.icon + '\')" title="تخصيص القناة واللون" class="w-8 h-8 rounded-xl bg-[#1a1d2d] hover:bg-purple-600/30 text-purple-300 border border-purple-500/30 flex items-center justify-center text-xs font-bold transition shadow cursor-pointer">⚙️</button>';
+                                html += '<button type="button" onclick="window.openEditLogModal(\'' + item.id + '\', \'' + item.title.replace(/'/g, "\\'") + '\', \'' + item.icon + '\')" title="تخصيص القناة واللون" class="w-8 h-8 rounded-xl bg-[#1e2638] hover:bg-violet-600/30 text-violet-400 border border-[#1e2638] hover:border-violet-500/30 flex items-center justify-center text-xs font-bold transition shadow cursor-pointer"><i class="fa-solid fa-gear"></i></button>';
                                 html += '</div>';
 
                                 // Right: Title + description + Icon & Badges
                                 html += '<div class="flex items-center gap-3">';
                                 html += '<div class="text-right">';
                                 html += '<div class="flex items-center justify-end gap-2">';
-                                if (item.isSpecial) html += '<span class="px-2 py-0.5 bg-amber-950/80 text-amber-400 border border-amber-500/30 rounded-lg text-[9px] font-bold flex items-center gap-1"><span>بوتات خاصة فقط</span><span>🔒</span></span>';
-                                if (customChan) html += '<span class="px-2 py-0.5 bg-blue-950/60 text-blue-300 border border-blue-800/40 rounded-lg text-[9px] font-bold">قناة مخصصة</span>';
-                                html += '<span class="font-black text-white text-xs">' + item.title + '</span>';
-                                html += '<span class="w-2.5 h-2.5 rounded-full" style="background-color:' + customColor + '" title="لون الإيمبد"></span>';
+                                if (item.isSpecial) html += '<span class="px-2 py-0.5 bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-lg text-[9px] font-bold flex items-center gap-1"><span>بوتات خاصة فقط</span><i class="fa-solid fa-lock text-[8px]"></i></span>';
+                                if (customChan) html += '<span class="px-2 py-0.5 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded-lg text-[9px] font-bold flex items-center gap-1"><span>قناة مخصصة</span><i class="fa-solid fa-hashtag text-[8px]"></i></span>';
+                                html += '<span class="font-bold text-white text-xs">' + item.title + '</span>';
+                                html += '<span class="w-2.5 h-2.5 rounded-full shadow-sm" style="background-color:' + customColor + '" title="لون الإيمبد"></span>';
                                 html += '</div>';
                                 html += '<p class="text-[10px] text-gray-400 mt-0.5">' + item.desc + '</p>';
                                 html += '</div>';
-                                html += '<div class="w-9 h-9 rounded-xl bg-white/5 text-gray-300 flex items-center justify-center text-base border border-white/5 shadow-inner flex-shrink-0">' + item.icon + '</div>';
+                                html += '<div class="w-10 h-10 rounded-xl bg-[#0b0e14] border border-[#1e2638] text-gray-200 flex items-center justify-center text-base shadow-inner flex-shrink-0">' + item.icon + '</div>';
                                 html += '</div>';
                                 html += '</div>';
                             }
