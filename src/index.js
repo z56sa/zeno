@@ -9,22 +9,8 @@ const express = require('express');
 const SecretManager = require('./utils/secretManager');
 require('dotenv').config(); // Keep dotenv for local development setup
 
-// --- Google GenAI Integration (Converted to CommonJS require) ---
-const { GoogleGenAI } = require('@google/genai');
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-
-async function askAI(promptText) {
-    try {
-        const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
-            contents: promptText,
-        });
-        return response.text;
-    } catch (error) {
-        console.error("خطأ في الاتصال بـ Gemini AI:", error);
-        return "عذراً، حدث خطأ أثناء معالجة طلبك.";
-    }
-}
+// --- Google GenAI Integration ---
+const { askAI } = require('./utils/ai');
 // -----------------------------
 
 const app = express();

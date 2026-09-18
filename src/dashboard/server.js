@@ -7518,6 +7518,8 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                     { name: 'embed',            cat: 'settings', catLabel: '⚙️ الإعدادات', desc: 'قول كلام في ايمبد' },
                     { name: 'say',              cat: 'settings', catLabel: '⚙️ الإعدادات', desc: 'قول كلام' },
                     { name: 'send',             cat: 'settings', catLabel: '⚙️ الإعدادات', desc: 'لارسال رسالة لشخص ما' },
+                    { name: 'ai',               cat: 'settings', catLabel: '⚙️ الإعدادات', desc: 'التحدث مع الذكاء الاصطناعي (Gemini)' },
+                    { name: 'ask',              cat: 'settings', catLabel: '⚙️ الإعدادات', desc: 'اسأل ذكاء جوجل الاصطناعي (Gemini) أي سؤال!' },
                     { name: 'ping',             cat: 'settings', catLabel: '⚙️ الإعدادات', desc: 'لتجربة سرعة البوت' },
                     { name: 'help',             cat: 'settings', catLabel: '⚙️ الإعدادات', desc: 'قائمة اوامر البوت' },
                 ];
