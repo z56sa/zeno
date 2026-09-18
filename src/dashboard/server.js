@@ -6177,7 +6177,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                 })();
 
                 formFieldsHtml = `
-                    <input type="hidden" name="logs_config" id="hidden_logs_config" value="${escapeHtml(JSON.stringify(logsConfig))}">
+                    <input type="hidden" name="logs_config" id="hidden_logs_config" value="">
                     <div class="space-y-6 text-right" dir="rtl">
 
                         <!-- 1. Header Bar -->
@@ -7045,6 +7045,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
 
                         // Initial render wrapped safely
                         try {
+                            syncHiddenInput();
                             var chanSelect = document.getElementById('catDefaultChannel') || document.querySelector('select[name="catDefaultChannel"]');
                             if (chanSelect) {
                                 chanSelect.addEventListener('change', function() {
