@@ -6179,8 +6179,49 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
 
                 formFieldsHtml = `
                     <input type="hidden" name="logs_config" id="hidden_logs_config" value="">
+
                     <!-- Toast Notification Container -->
-                    <div id="logs-toast-container" class="fixed top-20 left-1/2 -translate-x-1/2 z-50 flex flex-col gap-2 pointer-events-none w-full max-w-md px-4"></div>
+                    <div id="logs-toast-container" class="fixed top-24 left-1/2 -translate-x-1/2 z-[100] flex flex-col gap-2 pointer-events-none w-full max-w-md px-4"></div>
+
+                    <!-- Confirmation Modal -->
+                    <div id="logs-confirm-modal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-[90] flex items-center justify-center p-4">
+                        <div class="bg-[#121620] border border-[#1e2638] rounded-2xl p-6 max-w-sm w-full mx-4 shadow-2xl text-right" dir="rtl">
+                            <div class="flex items-center gap-3 mb-4">
+                                <div class="w-10 h-10 rounded-lg bg-red-500/10 text-red-400 flex items-center justify-center shrink-0">
+                                    <i class="fa-solid fa-triangle-exclamation"></i>
+                                </div>
+                                <h3 class="text-lg font-bold text-white">تأكيد العملية</h3>
+                            </div>
+                            <p id="logs-confirm-msg" class="text-sm text-gray-300 mb-6"></p>
+                            <div class="flex gap-3 justify-start">
+                                <button type="button" id="logs-confirm-ok" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-bold transition flex items-center gap-2 cursor-pointer">
+                                    <span>تأكيد</span>
+                                </button>
+                                <button type="button" id="logs-confirm-cancel" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg text-sm font-bold transition cursor-pointer">
+                                    إلغاء
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Top Logs Action Bar -->
+                    <div class="bg-[#121620]/90 backdrop-blur-md border border-[#1e2638] rounded-2xl px-5 py-3 flex items-center justify-between gap-4 shadow-xl mb-2" dir="rtl">
+                        <div class="flex items-center gap-3">
+                            <button type="button" id="logs-btn-undo" class="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition cursor-pointer disabled:opacity-40" disabled title="التراجع عن آخر تغيير">
+                                <i class="fa-solid fa-rotate-left text-xs"></i>
+                                <span class="text-xs font-bold">تراجع</span>
+                            </button>
+                            <div class="h-4 w-px bg-gray-700"></div>
+                            <button type="button" id="logs-btn-export" class="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition cursor-pointer" title="تصدير إعدادات السجلات">
+                                <i class="fa-solid fa-download text-xs"></i>
+                                <span class="text-xs font-bold">تصدير</span>
+                            </button>
+                        </div>
+                        <div class="flex items-center gap-2 text-xs text-gray-500">
+                            <i class="fa-solid fa-shield-halved text-violet-400"></i>
+                            <span>إعدادات السجلات الشاملة</span>
+                        </div>
+                    </div>
 
                     <div class="space-y-6 text-right" dir="rtl">
 
@@ -6475,6 +6516,20 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                             </div>
                         </div>
                     </div>
+
+                    <!-- Bottom Sticky Save Bar -->
+                    <div class="sticky bottom-0 z-40 bg-[#121620]/95 backdrop-blur-md border-t border-[#1e2638] p-4 mt-4 rounded-2xl shadow-2xl" dir="rtl">
+                        <div class="flex items-center justify-between gap-4">
+                            <div class="flex items-center gap-2 text-xs text-gray-400">
+                                <i class="fa-solid fa-shield-check text-emerald-400"></i>
+                                <span>التغييرات تُحفظ تلقائياً في قاعدة البيانات</span>
+                            </div>
+                            <button type="submit" id="logs-btn-save" class="px-6 py-2.5 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-violet-600/20 transition flex items-center gap-2 cursor-pointer">
+                                <i class="fa-solid fa-floppy-disk"></i>
+                                <span>حفظ التغييرات</span>
+                            </button>
+                        </div>
+                    </div>
                 `;
 
                 // Scripts MUST be outside the <form> tag to execute in modern browsers
@@ -6533,6 +6588,109 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                     function showSavedBanner(msg) {
                         showToast(msg || '✓ حُفظت التغييرات في سيرفر الديسكورد بنجاح', 'success');
                     }
+
+                    // ===== UNDO HISTORY =====
+                    var logsHistory = [];
+                    var maxLogsHistory = 20;
+
+                    function saveToLogsHistory(action, data) {
+                        logsHistory.push({ action: action, data: data, timestamp: Date.now() });
+                        if (logsHistory.length > maxLogsHistory) logsHistory.shift();
+                        updateUndoBtn();
+                    }
+
+                    function updateUndoBtn() {
+                        var btn = document.getElementById('logs-btn-undo');
+                        if (btn) btn.disabled = logsHistory.length === 0;
+                    }
+
+                    // ===== CONFIRMATION MODAL =====
+                    var logsConfirmCallback = null;
+
+                    function showLogsConfirm(message, callback) {
+                        var modal = document.getElementById('logs-confirm-modal');
+                        var msgEl = document.getElementById('logs-confirm-msg');
+                        if (!modal) { if (confirm(message)) callback(); return; }
+                        if (msgEl) msgEl.textContent = message;
+                        logsConfirmCallback = callback;
+                        modal.classList.remove('hidden');
+                    }
+
+                    function hideLogsConfirm() {
+                        var modal = document.getElementById('logs-confirm-modal');
+                        if (modal) modal.classList.add('hidden');
+                        logsConfirmCallback = null;
+                    }
+
+                    // Hook up confirmation modal buttons
+                    (function() {
+                        var ok = document.getElementById('logs-confirm-ok');
+                        var cancel = document.getElementById('logs-confirm-cancel');
+                        if (ok) ok.addEventListener('click', function() {
+                            if (logsConfirmCallback) logsConfirmCallback();
+                            hideLogsConfirm();
+                        });
+                        if (cancel) cancel.addEventListener('click', hideLogsConfirm);
+                    })();
+
+                    // ===== UNDO BUTTON =====
+                    (function() {
+                        var undoBtn = document.getElementById('logs-btn-undo');
+                        if (undoBtn) {
+                            undoBtn.addEventListener('click', function() {
+                                if (logsHistory.length === 0) return;
+                                var last = logsHistory.pop();
+                                updateUndoBtn();
+                                if (last.action === 'toggleLog' && last.data) {
+                                    var id = last.data.id;
+                                    var was = last.data.was;
+                                    if (!logsState[id]) logsState[id] = {};
+                                    logsState[id].enabled = was;
+                                    var cb = document.querySelector('input[data-log-checkbox="' + id + '"]');
+                                    if (cb) cb.checked = was;
+                                    renderCategoriesSidebar();
+                                    renderLogsGrid();
+                                    saveLogsConfigToServer();
+                                } else if (last.action === 'toggleAll' || last.action === 'toggleCat') {
+                                    if (last.data && last.data.snapshot) {
+                                        logsState = last.data.snapshot;
+                                        renderCategoriesSidebar();
+                                        renderLogsGrid();
+                                        saveLogsConfigToServer();
+                                    }
+                                }
+                                showToast('↶ تم التراجع عن: ' + last.action, 'info');
+                            });
+                        }
+                    })();
+
+                    // ===== EXPORT SETTINGS =====
+                    (function() {
+                        var exportBtn = document.getElementById('logs-btn-export');
+                        if (exportBtn) {
+                            exportBtn.addEventListener('click', function() {
+                                try {
+                                    var exportData = {
+                                        timestamp: new Date().toISOString(),
+                                        guildId: '${guildId}',
+                                        logsState: logsState,
+                                        categoryChannels: categoryChannels
+                                    };
+                                    var dataStr = JSON.stringify(exportData, null, 2);
+                                    var blob = new Blob([dataStr], { type: 'application/json' });
+                                    var url = URL.createObjectURL(blob);
+                                    var link = document.createElement('a');
+                                    link.href = url;
+                                    link.download = 'zeno-logs-settings-' + Date.now() + '.json';
+                                    link.click();
+                                    URL.revokeObjectURL(url);
+                                    showToast('📥 تم تصدير إعدادات السجلات بنجاح', 'success');
+                                } catch(e) {
+                                    showToast('خطأ في التصدير', 'danger');
+                                }
+                            });
+                        }
+                    })();
 
                     function syncHiddenInput() {
                         var hiddenInp = document.getElementById('hidden_logs_config');
@@ -6661,6 +6819,8 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                     };
 
                     window.toggleSingleLogEvent = function(logId, enable) {
+                        var was = isLogEnabled(logId);
+                        saveToLogsHistory('toggleLog', { id: logId, was: was, is: enable });
                         if (!logsState[logId]) logsState[logId] = {};
                         logsState[logId].enabled = enable;
                         var card = document.querySelector('div[data-log-id="' + logId + '"]');
@@ -6676,6 +6836,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                         if (typeof LOG_CATEGORIES === 'undefined') return;
                         var cat = LOG_CATEGORIES[currentCategory];
                         if (!cat || !cat.items) return;
+                        saveToLogsHistory('toggleCat', { snapshot: JSON.parse(JSON.stringify(logsState)) });
                         for (var i = 0; i < cat.items.length; i++) {
                             var id = cat.items[i].id;
                             if (!logsState[id]) logsState[id] = {};
@@ -6688,6 +6849,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
 
                     window.toggleAllLogsGlobally = function(enable) {
                         if (typeof LOG_CATEGORIES === 'undefined') return;
+                        saveToLogsHistory('toggleAll', { snapshot: JSON.parse(JSON.stringify(logsState)) });
                         var catKeys = Object.keys(LOG_CATEGORIES);
                         for (var i = 0; i < catKeys.length; i++) {
                             var items = LOG_CATEGORIES[catKeys[i]].items || [];
@@ -6781,54 +6943,52 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
 
                     window.autoSetupLogsChannels = function(mode) {
                         var modeTitle = mode === 'grouped' ? 'القنوات العادية (قسم لكل قناة)' : 'القنوات المفصلة (قناة لكل نوع سجل)';
-                        if (!confirm('هل تريد إنشاء قنوات السجلات تلقائياً بالسيرفر بنظام: ' + modeTitle + '؟')) return;
-
-                        showToast('🚀 جاري إنشاء قنوات السجلات تلقائياً في السيرفر...', 'info');
-
-                        try {
-                            var gId = '${guildId}';
-                            fetch('/api/guild/' + gId + '/logs/auto-setup', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ mode: mode })
-                            }).then(function(res) { return res.json(); }).then(function(d) {
-                                if (d.success) {
-                                    showToast('✓ تم إنشاء وتوزيع قنوات السجلات بنجاح في السيرفر!', 'success');
-                                    setTimeout(function() { location.reload(); }, 1200);
-                                } else {
-                                    showToast('✕ ' + (d.error || 'فشل إنشاء القنوات'), 'danger');
-                                }
-                            }).catch(function() {
+                        showLogsConfirm('هل تريد إنشاء قنوات السجلات تلقائياً بالسيرفر بنظام: ' + modeTitle + '؟', function() {
+                            showToast('🚀 جاري إنشاء قنوات السجلات تلقائياً في السيرفر...', 'info');
+                            try {
+                                var gId = '${guildId}';
+                                fetch('/api/guild/' + gId + '/logs/auto-setup', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ mode: mode })
+                                }).then(function(res) { return res.json(); }).then(function(d) {
+                                    if (d.success) {
+                                        showToast('✓ تم إنشاء وتوزيع قنوات السجلات بنجاح في السيرفر!', 'success');
+                                        setTimeout(function() { location.reload(); }, 1200);
+                                    } else {
+                                        showToast('✕ ' + (d.error || 'فشل إنشاء القنوات'), 'danger');
+                                    }
+                                }).catch(function() {
+                                    showToast('✕ حدث خطأ في الاتصال بالخادم', 'danger');
+                                });
+                            } catch(e) {
                                 showToast('✕ حدث خطأ في الاتصال بالخادم', 'danger');
-                            });
-                        } catch(e) {
-                            showToast('✕ حدث خطأ في الاتصال بالخادم', 'danger');
-                        }
+                            }
+                        });
                     };
 
                     window.deleteLogsChannels = function() {
-                        if (!confirm('⚠️ تحذير: هل أنت متأكد من حذف كاتيجوري سجلات ZENO وجميع القنوات بداخله نهائياً؟')) return;
-
-                        showToast('🗑️ جاري حذف كاتيغوري وقنوات السجلات...', 'danger');
-
-                        try {
-                            var gId = '${guildId}';
-                            fetch('/api/guild/' + gId + '/logs/delete-channels', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' }
-                            }).then(function(res) { return res.json(); }).then(function(d) {
-                                if (d.success) {
-                                    showToast('✓ تم حذف قنوات السجلات بنجاح', 'success');
-                                    setTimeout(function() { location.reload(); }, 1200);
-                                } else {
-                                    showToast('✕ ' + (d.error || 'فشل الحذف'), 'danger');
-                                }
-                            }).catch(function() {
+                        showLogsConfirm('هل أنت متأكد من حذف كاتيجوري وقنوات سجلات ZENO نهائياً؟ هذه العملية لا يمكن التراجع عنها.', function() {
+                            showToast('🗑️ جاري حذف كاتيغوري وقنوات السجلات...', 'danger');
+                            try {
+                                var gId = '${guildId}';
+                                fetch('/api/guild/' + gId + '/logs/delete-channels', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' }
+                                }).then(function(res) { return res.json(); }).then(function(d) {
+                                    if (d.success) {
+                                        showToast('✓ تم حذف قنوات السجلات بنجاح', 'success');
+                                        setTimeout(function() { location.reload(); }, 1200);
+                                    } else {
+                                        showToast('✕ ' + (d.error || 'فشل الحذف'), 'danger');
+                                    }
+                                }).catch(function() {
+                                    showToast('✕ حدث خطأ في الاتصال', 'danger');
+                                });
+                            } catch(e) {
                                 showToast('✕ حدث خطأ في الاتصال', 'danger');
-                            });
-                        } catch(e) {
-                            showToast('✕ حدث خطأ في الاتصال', 'danger');
-                        }
+                            }
+                        });
                     };
 
                     // 105 Comprehensive Log Events across 13 Categories
