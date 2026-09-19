@@ -1336,10 +1336,12 @@ module.exports = function (app, client) {
                 'invites': 'متتبع الدعوات المتقدم (Invite Tracker) 🔗',
                 'broadcast': 'نظام الإعلانات والمذيع الآلي 📢',
                 'embed': 'صانع رسائل الإيمبد المتقدم 📄',
-                'applications': 'نظام التقديمات والتوظيف 📝'
+                'applications': 'نظام التقديمات والتوظيف 📝',
+                'help': 'قائمة الأوامر الكاملة 📚',
+                'ai': 'الذكاء الاصطناعي (ZENO AI & Web) 🤖'
             };
 
-            const title = sectionTitles[section] || 'لوحة الإعدادات ⚙️';
+            let title = sectionTitles[section] || 'لوحة الإعدادات ⚙️';
 
             const guildTextChannels = botGuild ? Array.from(botGuild.channels.cache.values()).filter(c => c.type === 0 || c.type === 5) : [];
             const guildVoiceChannels = botGuild ? Array.from(botGuild.channels.cache.values()).filter(c => c.type === 2) : [];
