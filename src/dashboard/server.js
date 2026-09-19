@@ -10,6 +10,7 @@ const database = require('../database');
 const rawDb = database.db;
 const SecretManager = require('../utils/secretManager');
 const identityWallpapers = require('../data/identityWallpapers.json');
+const { askAI } = require('../utils/ai');
 
 module.exports = function (app, client) {
     const sessionStore = new SqliteStore({ client: rawDb });
@@ -7614,6 +7615,108 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                     + 'if (searchEl) searchEl.addEventListener("input", filterCards);'
                     + 'if (filterEl) filterEl.addEventListener("change", filterCards);'
                     + '})();';
+            } else if (section === 'ai') {
+                title = 'الذكاء الاصطناعي (ZENO AI & Web) 🤖';
+
+                formFieldsHtml = '<div class="space-y-6 text-right" dir="rtl">'
+                    + '<div class="bg-gradient-to-r from-[#1c0f38] via-[#12141f] to-[#0d1527] border border-purple-500/30 p-6 rounded-3xl shadow-2xl relative overflow-hidden">'
+                    + '<div class="flex items-center justify-between flex-wrap gap-4 relative z-10">'
+                    + '<div class="flex items-center gap-2 flex-wrap">'
+                    + '<span class="bg-purple-600/30 border border-purple-500/50 text-purple-300 text-xs font-bold px-3 py-1 rounded-full">Gemini 3.6 Flash</span>'
+                    + '<span class="bg-emerald-600/30 border border-emerald-500/50 text-emerald-300 text-xs font-bold px-3 py-1 rounded-full">🌐 متصل بالإنترنت</span>'
+                    + '<span class="bg-indigo-600/30 border border-indigo-500/50 text-indigo-300 text-xs font-bold px-3 py-1 rounded-full">تصفح حي</span>'
+                    + '</div>'
+                    + '<div>'
+                    + '<h3 class="text-2xl font-black text-white flex items-center gap-2 justify-end"><span>الذكاء الاصطناعي والتصفح الذكي</span><span>🤖</span></h3>'
+                    + '<p class="text-gray-400 text-xs mt-1">تحدث مباشرة مع ZENO AI، واختبر قدرات التصفح الحي والبحث من الإنترنت.</p>'
+                    + '</div>'
+                    + '</div>'
+                    + '</div>'
+                    + '<div class="grid grid-cols-1 md:grid-cols-3 gap-4">'
+                    + '<div class="bg-[#12141f] border border-white/5 rounded-2xl p-4 text-right">'
+                    + '<div class="text-purple-400 text-xl mb-1">⚡</div>'
+                    + '<h4 class="text-white font-bold text-sm">التفاعل التلقائي في السيرفر</h4>'
+                    + '<p class="text-gray-400 text-xs mt-1 leading-relaxed">أي عضو يكتب <code class="text-purple-300 bg-purple-950/60 px-1 py-0.5 rounded">zeno</code> أو <code class="text-purple-300 bg-purple-950/60 px-1 py-0.5 rounded">زينو</code> أو يمنشن البوت سيرد عليه الذكاء الاصطناعي فوراً.</p>'
+                    + '</div>'
+                    + '<div class="bg-[#12141f] border border-white/5 rounded-2xl p-4 text-right">'
+                    + '<div class="text-cyan-400 text-xl mb-1">🌐</div>'
+                    + '<h4 class="text-white font-bold text-sm">تصفح الويب المباشر</h4>'
+                    + '<p class="text-gray-400 text-xs mt-1 leading-relaxed">مدعوم بـ Google Search Grounding ومحرك بحث حي للإجابة عن أحدث الأخبار والنتائج والأسعار.</p>'
+                    + '</div>'
+                    + '<div class="bg-[#12141f] border border-white/5 rounded-2xl p-4 text-right">'
+                    + '<div class="text-amber-400 text-xl mb-1">⌨️</div>'
+                    + '<h4 class="text-white font-bold text-sm">أوامر ديسكورد السريعة</h4>'
+                    + '<p class="text-gray-400 text-xs mt-1 leading-relaxed">استخدم أوامر السلاش <code class="text-amber-300 bg-amber-950/60 px-1 py-0.5 rounded">/ai</code> و <code class="text-amber-300 bg-amber-950/60 px-1 py-0.5 rounded">/ask</code> أو البرفكس <code class="text-amber-300 bg-amber-950/60 px-1 py-0.5 rounded">#ai</code> لأي سؤال.</p>'
+                    + '</div>'
+                    + '</div>'
+                    + '<div class="bg-[#12141f] border border-white/10 rounded-3xl p-6 shadow-2xl space-y-4">'
+                    + '<div class="flex items-center justify-between border-b border-white/5 pb-3">'
+                    + '<span class="text-xs text-gray-400">محادثة تجريبية مباشرة من الداشبورد</span>'
+                    + '<h4 class="text-white font-black text-sm flex items-center gap-2"><span>تجربة الذكاء الاصطناعي الحي (Live Chat)</span><span>💬</span></h4>'
+                    + '</div>'
+                    + '<div id="ai-chat-box" class="h-80 overflow-y-auto space-y-3 p-4 bg-[#0a0c13] border border-white/5 rounded-2xl text-xs custom-scrollbar">'
+                    + '<div class="flex items-start gap-2.5 justify-start flex-row-reverse">'
+                    + '<div class="w-7 h-7 rounded-xl bg-purple-600/30 border border-purple-500/40 flex items-center justify-center text-sm shrink-0">🤖</div>'
+                    + '<div class="bg-[#161928] border border-white/10 text-gray-200 p-3 rounded-2xl max-w-[80%] leading-relaxed text-right">'
+                    + 'مرحباً بك في لوحة تحكم ZENO! أنا مساعدك الذكي المتصل بالإنترنت، اسألني عن أي شيء في سيرفرك أو ابحث عن أحدث الأخبار والمعلومات وسأجيبك فوراً.'
+                    + '</div>'
+                    + '</div>'
+                    + '</div>'
+                    + '<div class="flex items-center gap-2">'
+                    + '<button type="button" id="ai-send-btn" class="px-5 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs rounded-xl transition flex items-center gap-1.5 shrink-0 shadow-lg shadow-purple-900/30">'
+                    + '<span>إرسال</span><span>🚀</span>'
+                    + '</button>'
+                    + '<input type="text" id="ai-input" placeholder="اسأل ZENO أي سؤال أو ابحث في الويب..." dir="rtl" class="flex-1 bg-[#0a0c13] border border-white/10 focus:border-purple-500 rounded-xl px-4 py-2.5 text-xs text-white outline-none transition">'
+                    + '</div>'
+                    + '</div>'
+                    + '</div>';
+
+                embedScriptHtml = '(function() {'
+                    + 'var input = document.getElementById("ai-input");'
+                    + 'var btn = document.getElementById("ai-send-btn");'
+                    + 'var box = document.getElementById("ai-chat-box");'
+                    + 'function appendMsg(text, isUser) {'
+                    + '  var wrap = document.createElement("div");'
+                    + '  wrap.className = "flex items-start gap-2.5 " + (isUser ? "justify-end" : "justify-start flex-row-reverse");'
+                    + '  var avatar = document.createElement("div");'
+                    + '  avatar.className = "w-7 h-7 rounded-xl flex items-center justify-center text-sm shrink-0 " + (isUser ? "bg-indigo-600/30 border border-indigo-500/40" : "bg-purple-600/30 border border-purple-500/40");'
+                    + '  avatar.textContent = isUser ? "👤" : "🤖";'
+                    + '  var bubble = document.createElement("div");'
+                    + '  bubble.className = "p-3 rounded-2xl max-w-[80%] leading-relaxed text-right whitespace-pre-wrap " + (isUser ? "bg-purple-600/20 border border-purple-500/30 text-white" : "bg-[#161928] border border-white/10 text-gray-200");'
+                    + '  bubble.textContent = text;'
+                    + '  wrap.appendChild(bubble); wrap.appendChild(avatar);'
+                    + '  box.appendChild(wrap);'
+                    + '  box.scrollTop = box.scrollHeight;'
+                    + '}'
+                    + 'async function send() {'
+                    + '  var val = (input.value || "").trim();'
+                    + '  if (!val || btn.disabled) return;'
+                    + '  input.value = "";'
+                    + '  appendMsg(val, true);'
+                    + '  btn.disabled = true;'
+                    + '  btn.innerHTML = "<span>جاري التفكير...</span><span>⏳</span>";'
+                    + '  try {'
+                    + '    var res = await fetch("/api/guild/' + guildId + '/ai/chat", {'
+                    + '      method: "POST",'
+                    + '      headers: { "Content-Type": "application/json" },'
+                    + '      body: JSON.stringify({ prompt: val })'
+                    + '    });'
+                    + '    var data = await res.json();'
+                    + '    if (data && data.success) {'
+                    + '      appendMsg(data.response, false);'
+                    + '    } else {'
+                    + '      appendMsg("❌ " + (data.error || "حدث خطأ"), false);'
+                    + '    }'
+                    + '  } catch(err) {'
+                    + '    appendMsg("❌ تعذر الاتصال بالخادم، يرجى المحاولة لاحقاً.", false);'
+                    + '  } finally {'
+                    + '    btn.disabled = false;'
+                    + '    btn.innerHTML = "<span>إرسال</span><span>🚀</span>";'
+                    + '  }'
+                    + '}'
+                    + 'if (btn) btn.onclick = send;'
+                    + 'if (input) input.onkeydown = function(e) { if (e.key === "Enter") { e.preventDefault(); send(); } };'
+                    + '})();';
             } else if (section === 'analytics' || section === 'stats') {
                 const totalMembers = guild.memberCount || 0;
                 const textChCount = (guildTextChannels || []).length;
@@ -9988,6 +10091,10 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                                         <span></span>
                                         <span class="flex items-center gap-2"><span>قائمة الأوامر</span><span class="text-gray-400 group-hover:text-purple-400">📚</span></span>
                                     </a>
+                                    <a href="/dashboard/${guildId}/ai" class="flex items-center justify-between px-3 py-2 rounded-xl ${section === 'ai' ? 'bg-purple-600 text-white font-bold shadow-md' : 'text-gray-300 hover:text-white hover:bg-[#151724]'} transition group">
+                                        <span class="text-[9px] font-bold text-purple-300 bg-purple-950/70 border border-purple-500/30 px-1.5 py-0.2 rounded">Gemini</span>
+                                        <span class="flex items-center gap-2"><span>الذكاء الاصطناعي</span><span class="text-gray-400 group-hover:text-purple-400">🤖</span></span>
+                                    </a>
                                 </div>
                             </div>
 
@@ -11561,6 +11668,24 @@ ${embedScriptHtml}
             res.json({ success: true });
         } catch(e) {
             res.status(500).json({ success: false, error: e.message });
+        }
+    });
+
+    // =============================================
+    // ZENO AI Live Chat API for Dashboard
+    // =============================================
+    app.post('/api/guild/:guildId/ai/chat', express.json(), async (req, res) => {
+        try {
+            if (!req.session?.user) return res.status(401).json({ success: false, error: 'يجب تسجيل الدخول أولاً' });
+            const { prompt } = req.body;
+            if (!prompt || typeof prompt !== 'string' || !prompt.trim()) {
+                return res.status(400).json({ success: false, error: 'يرجى كتابة رسالة صالحة' });
+            }
+            const aiResponse = await askAI(prompt.trim());
+            res.json({ success: true, response: aiResponse });
+        } catch (e) {
+            console.error('[Dashboard AI API Error]:', e);
+            res.status(500).json({ success: false, error: e.message || 'حدث خطأ أثناء معالجة الطلب' });
         }
     });
 
