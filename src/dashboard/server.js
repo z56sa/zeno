@@ -6765,6 +6765,8 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                             xhr.send(JSON.stringify(body));
                         } catch(e) {}
                     }
+                    // CRITICAL: expose saveLogsConfigToServer on window so inline onclick handlers can call it
+                    window.saveLogsConfigToServer = saveLogsConfigToServer;
 
                     // Attach ALL window functions at top
                     window.saveLogsSetting = function(key, val) {
@@ -10567,6 +10569,47 @@ ${embedScriptHtml}
             res.json({ success: true });
         } catch (e) {
             res.status(500).json({ success: false, error: e.message });
+        }
+    });
+
+    // =============================================
+    // Logs Auto-Setup & Delete-Channels API
+    // =============================================
+    app.post('/api/guild/:guildId/logs/auto-setup', express.json(), async (req, res) => {
+        try {
+            if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
+            const { guildId } = req.params;
+            const { mode } = req.body;
+            if (!['grouped', 'detailed'].includes(mode)) {
+                return res.status(400).json({ success: false, error: 'Invalid mode. Use grouped or detailed.' });
+            }
+            const guild = client?.guilds?.cache?.get(guildId);
+            if (!guild) return res.status(404).json({ success: false, error: 'السيرفر غير متصل بالبوت حالياً' });
+            const logsCmd = require('../commands/admin/logs');
+            const runSetupFn = logsCmd._runSetup;
+            if (typeof runSetupFn !== 'function') return res.status(500).json({ success: false, error: 'تعذر تحميل وظيفة الإعداد' });
+            const created = await runSetupFn(guild, mode);
+            res.json({ success: true, created: created.length, message: 'تم إنشاء ' + created.length + ' قناة سجلات بنجاح' });
+        } catch (e) {
+            console.error('Logs auto-setup error:', e);
+            res.status(500).json({ success: false, error: e.message || 'حدث خطأ أثناء الإنشاء' });
+        }
+    });
+
+    app.post('/api/guild/:guildId/logs/delete-channels', express.json(), async (req, res) => {
+        try {
+            if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
+            const { guildId } = req.params;
+            const guild = client?.guilds?.cache?.get(guildId);
+            if (!guild) return res.status(404).json({ success: false, error: 'السيرفر غير متصل بالبوت حالياً' });
+            const logsCmd = require('../commands/admin/logs');
+            const deleteFn = logsCmd._deleteLogsChannels;
+            if (typeof deleteFn !== 'function') return res.status(500).json({ success: false, error: 'تعذر تحميل وظيفة الحذف' });
+            const deleted = await deleteFn(guild);
+            res.json({ success: true, deleted, message: 'تم حذف ' + deleted + ' قناة وتعطيل السجلات' });
+        } catch (e) {
+            console.error('Logs delete-channels error:', e);
+            res.status(500).json({ success: false, error: e.message || 'حدث خطأ أثناء الحذف' });
         }
     });
 
