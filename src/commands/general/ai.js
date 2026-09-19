@@ -40,12 +40,12 @@ async function sendFormattedAIResponse(target, query, isInteraction = false) {
 
 module.exports = {
     name: 'ai',
-    description: 'التحدث مع الذكاء الاصطناعي (Gemini)',
+    description: 'التحدث مع الذكاء الاصطناعي (ZENO AI)',
     aliases: ['bot-ai', 'gpt'],
     category: 'general',
     data: new SlashCommandBuilder()
         .setName('ai')
-        .setDescription('التحدث مع الذكاء الاصطناعي (Gemini)')
+        .setDescription('التحدث مع الذكاء الاصطناعي (ZENO AI)')
         .addStringOption(option =>
             option.setName('prompt')
                 .setDescription('السؤال أو النص الذي تريد إرساله للذكاء الاصطناعي')

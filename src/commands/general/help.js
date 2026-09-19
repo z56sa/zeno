@@ -147,8 +147,8 @@ const CATEGORIES = {
       { name: 'embed',           desc: 'قول كلام في ايمبد' },
       { name: 'say',             desc: 'قول كلام' },
       { name: 'send',            desc: 'لارسال رسالة لشخص ما' },
-      { name: 'ai',              desc: 'التحدث مع الذكاء الاصطناعي (Gemini)' },
-      { name: 'ask',             desc: 'اسأل ذكاء جوجل الاصطناعي (Gemini) أي سؤال!' },
+      { name: 'ai',              desc: 'التحدث مع الذكاء الاصطناعي (ZENO)' },
+      { name: 'ask',             desc: 'اسأل ذكاء ZENO الاصطناعي أي سؤال!' },
       { name: 'ping',            desc: 'لتجربة سرعة البوت' },
       { name: 'help',            desc: 'قائمة اوامر البوت' },
     ]

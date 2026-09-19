@@ -7521,8 +7521,8 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                     { name: 'embed',            cat: 'settings', catLabel: '⚙️ الإعدادات', desc: 'قول كلام في ايمبد' },
                     { name: 'say',              cat: 'settings', catLabel: '⚙️ الإعدادات', desc: 'قول كلام' },
                     { name: 'send',             cat: 'settings', catLabel: '⚙️ الإعدادات', desc: 'لارسال رسالة لشخص ما' },
-                    { name: 'ai',               cat: 'settings', catLabel: '⚙️ الإعدادات', desc: 'التحدث مع الذكاء الاصطناعي (Gemini)' },
-                    { name: 'ask',              cat: 'settings', catLabel: '⚙️ الإعدادات', desc: 'اسأل ذكاء جوجل الاصطناعي (Gemini) أي سؤال!' },
+                    { name: 'ai',               cat: 'settings', catLabel: '⚙️ الإعدادات', desc: 'التحدث مع الذكاء الاصطناعي (ZENO)' },
+                    { name: 'ask',              cat: 'settings', catLabel: '⚙️ الإعدادات', desc: 'اسأل ذكاء ZENO الاصطناعي أي سؤال!' },
                     { name: 'ping',             cat: 'settings', catLabel: '⚙️ الإعدادات', desc: 'لتجربة سرعة البوت' },
                     { name: 'help',             cat: 'settings', catLabel: '⚙️ الإعدادات', desc: 'قائمة اوامر البوت' },
                 ];
@@ -7624,7 +7624,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                     + '<div class="bg-gradient-to-r from-[#1c0f38] via-[#12141f] to-[#0d1527] border border-purple-500/30 p-6 rounded-3xl shadow-2xl relative overflow-hidden">'
                     + '<div class="flex items-center justify-between flex-wrap gap-4 relative z-10">'
                     + '<div class="flex items-center gap-2 flex-wrap">'
-                    + '<span class="bg-purple-600/30 border border-purple-500/50 text-purple-300 text-xs font-bold px-3 py-1 rounded-full">Gemini 3.6 Flash</span>'
+                    + '<span class="bg-purple-600/30 border border-purple-500/50 text-purple-300 text-xs font-bold px-3 py-1 rounded-full">ZENO AI</span>'
                     + '<span class="bg-emerald-600/30 border border-emerald-500/50 text-emerald-300 text-xs font-bold px-3 py-1 rounded-full">🌐 متصل بالإنترنت</span>'
                     + '<span class="bg-indigo-600/30 border border-indigo-500/50 text-indigo-300 text-xs font-bold px-3 py-1 rounded-full">تصفح حي</span>'
                     + '</div>'
@@ -10094,7 +10094,7 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                                         <span class="flex items-center gap-2"><span>قائمة الأوامر</span><span class="text-gray-400 group-hover:text-purple-400">📚</span></span>
                                     </a>
                                     <a href="/dashboard/${guildId}/ai" class="flex items-center justify-between px-3 py-2 rounded-xl ${section === 'ai' ? 'bg-purple-600 text-white font-bold shadow-md' : 'text-gray-300 hover:text-white hover:bg-[#151724]'} transition group">
-                                        <span class="text-[9px] font-bold text-purple-300 bg-purple-950/70 border border-purple-500/30 px-1.5 py-0.2 rounded">Gemini</span>
+                                        <span class="text-[9px] font-bold text-purple-300 bg-purple-950/70 border border-purple-500/30 px-1.5 py-0.2 rounded">ZENO</span>
                                         <span class="flex items-center gap-2"><span>الذكاء الاصطناعي</span><span class="text-gray-400 group-hover:text-purple-400">🤖</span></span>
                                     </a>
                                 </div>

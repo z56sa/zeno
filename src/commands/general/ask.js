@@ -38,12 +38,12 @@ async function sendFormattedAIResponse(target, query, isInteraction = false) {
 
 module.exports = {
     name: 'ask',
-    description: 'اسأل ذكاء جوجل الاصطناعي (Gemini) أي سؤال!',
+    description: 'اسأل ذكاء ZENO الاصطناعي أي سؤال!',
     aliases: ['اسال', 'سؤال'],
     category: 'general',
     data: new SlashCommandBuilder()
         .setName('ask')
-        .setDescription('اسأل ذكاء جوجل الاصطناعي (Gemini) أي سؤال!')
+        .setDescription('اسأل ذكاء ZENO الاصطناعي أي سؤال!')
         .addStringOption(option =>
             option.setName('question')
                 .setDescription('السؤال الذي تريد طرحه على البوت')
