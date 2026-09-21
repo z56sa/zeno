@@ -6602,7 +6602,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                         };
                         toast.querySelector('button').addEventListener('click', removeToast);
                         setTimeout(removeToast, 3500);
-                    }
+                    };
 
                     var showSavedBanner = function(msg) {
                         showToast(msg || '✓ حُفظت التغييرات في سيرفر الديسكورد بنجاح', 'success');
@@ -7372,6 +7372,20 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                             }
                             window.switchLogsCategory('members');
                             console.log('[LOGS] Script loaded OK. logsState keys:', Object.keys(logsState).length, 'saveLogsSetting:', typeof window.saveLogsSetting);
+                            // DEBUG: show status on screen
+                            var dbgDiv = document.createElement('div');
+                            dbgDiv.style = 'position:fixed;top:80px;right:20px;background:#0b0e14;color:#a0f0a0;padding:10px 14px;border-radius:10px;font-size:11px;z-index:99999;max-width:350px;font-family:monospace;border:1px solid #22c55e;direction:ltr;';
+                            var gridEl = document.getElementById('logsCardsGrid');
+                            var catEl = document.getElementById('logsCategoriesList');
+                            dbgDiv.innerHTML = '<b>[LOGS DEBUG]</b><br>'
+                                + 'logsState keys: ' + Object.keys(logsState).length + '<br>'
+                                + 'LOG_CATEGORIES: ' + (typeof LOG_CATEGORIES) + ' keys:' + (typeof LOG_CATEGORIES === 'object' ? Object.keys(LOG_CATEGORIES).length : '?') + '<br>'
+                                + 'cardsGrid el: ' + (gridEl ? 'found innerHTML.len=' + gridEl.innerHTML.length : 'MISSING') + '<br>'
+                                + 'catList el: ' + (catEl ? 'found innerHTML.len=' + catEl.innerHTML.length : 'MISSING') + '<br>'
+                                + 'switchLogsCategory: ' + typeof window.switchLogsCategory + '<br>'
+                                + 'renderLogsGrid: ' + typeof renderLogsGrid;
+                            document.body.appendChild(dbgDiv);
+                            setTimeout(function() { dbgDiv.remove(); }, 20000);
                         } catch(err) {
                             console.error('Error in initial logs render:', err);
                             // Show error to user for debugging
@@ -10488,9 +10502,11 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                 }
                 </script>
                 ${embedScriptHtml ? `<script>
+(function() {
 try {
 ${embedScriptHtml}
-} catch(___e) { console.error('[Embed Editor] Fatal script error:', ___e); }
+} catch(___e) { console.error('[Logs Script] Fatal error:', ___e); }
+})();
 </script>` : ''}
             </body>
             </html>
