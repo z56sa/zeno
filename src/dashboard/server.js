@@ -6583,7 +6583,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                         return false;
                     }
 
-                    function showToast(message, type) {
+                    var showToast = function(message, type) {
                         type = type || 'success';
                         var container = document.getElementById('logs-toast-container');
                         if (!container) return;
@@ -6604,42 +6604,42 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                         setTimeout(removeToast, 3500);
                     }
 
-                    function showSavedBanner(msg) {
+                    var showSavedBanner = function(msg) {
                         showToast(msg || '✓ حُفظت التغييرات في سيرفر الديسكورد بنجاح', 'success');
-                    }
+                    };
 
                     // ===== UNDO HISTORY =====
                     var logsHistory = [];
                     var maxLogsHistory = 20;
 
-                    function saveToLogsHistory(action, data) {
+                    var saveToLogsHistory = function(action, data) {
                         logsHistory.push({ action: action, data: data, timestamp: Date.now() });
                         if (logsHistory.length > maxLogsHistory) logsHistory.shift();
                         updateUndoBtn();
-                    }
+                    };
 
-                    function updateUndoBtn() {
+                    var updateUndoBtn = function() {
                         var btn = document.getElementById('logs-btn-undo');
                         if (btn) btn.disabled = logsHistory.length === 0;
-                    }
+                    };
 
                     // ===== CONFIRMATION MODAL =====
                     var logsConfirmCallback = null;
 
-                    function showLogsConfirm(message, callback) {
+                    var showLogsConfirm = function(message, callback) {
                         var modal = document.getElementById('logs-confirm-modal');
                         var msgEl = document.getElementById('logs-confirm-msg');
                         if (!modal) { if (confirm(message)) callback(); return; }
                         if (msgEl) msgEl.textContent = message;
                         logsConfirmCallback = callback;
                         modal.classList.remove('hidden');
-                    }
+                    };
 
-                    function hideLogsConfirm() {
+                    var hideLogsConfirm = function() {
                         var modal = document.getElementById('logs-confirm-modal');
                         if (modal) modal.classList.add('hidden');
                         logsConfirmCallback = null;
-                    }
+                    };
 
                     // Hook up confirmation modal buttons
                     (function() {
@@ -6740,14 +6740,14 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                         }
                     })();
 
-                    function syncHiddenInput() {
+                    var syncHiddenInput = function() {
                         var hiddenInp = document.getElementById('hidden_logs_config');
                         if (hiddenInp) {
                             hiddenInp.value = JSON.stringify(logsState);
                         }
-                    }
+                    };
 
-                    function saveLogsConfigToServer(extraPayload, successMsg) {
+                    var saveLogsConfigToServer = function(extraPayload, successMsg) {
                         try {
                             syncHiddenInput();
                             var gId = '${guildId}';
@@ -6764,7 +6764,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                             }
                             xhr.send(JSON.stringify(body));
                         } catch(e) {}
-                    }
+                    };
                     // CRITICAL: expose saveLogsConfigToServer on window so inline onclick handlers can call it
                     window.saveLogsConfigToServer = saveLogsConfigToServer;
 
@@ -7215,7 +7215,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                         };
 
 
-                        function updateGlobalStats() {
+                        var updateGlobalStats = function() {
                             try {
                                 var total = 0, enabled = 0, channelsSet = new Set();
                                 var catKeys = Object.keys(LOG_CATEGORIES);
@@ -7233,9 +7233,9 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                                 if (e1) e1.textContent = enabled;
                                 if (e2) e2.textContent = channelsSet.size;
                             } catch(e) {}
-                        }
+                        };
 
-                        function renderCategoriesSidebar() {
+                        var renderCategoriesSidebar = function() {
                             var container = document.getElementById('logsCategoriesList');
                             if (!container) return;
                             var html = '';
@@ -7282,9 +7282,9 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                             if (window.zenoI18n && window.zenoI18n.getLang() === 'en') {
                                 try { window.zenoI18n.apply(); } catch(e) {}
                             }
-                        }
+                        };
 
-                        function renderLogsGrid() {
+                        var renderLogsGrid = function() {
                             var container = document.getElementById('logsCardsGrid');
                             if (!container) return;
 
@@ -7354,7 +7354,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                             if (window.zenoI18n && window.zenoI18n.getLang() === 'en') {
                                 try { window.zenoI18n.apply(); } catch(e) {}
                             }
-                        }
+                        };
 
 
                         // Initial render wrapped safely
@@ -10004,7 +10004,7 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                             <form id="settingsForm" class="space-y-6">
                                 ${formFieldsHtml}
 
-                                <div class="pt-6 border-t border-white/5 flex items-center justify-between flex-row-reverse${section === 'embed' ? ' hidden' : ''}">
+                                <div class="pt-6 border-t border-white/5 flex items-center justify-between flex-row-reverse${(section === 'embed' || section === 'logs') ? ' hidden' : ''}">
                                     <button type="submit" class="px-8 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-bold rounded-xl transition shadow-lg shadow-black/20 flex items-center gap-2">
                                         <span>💾</span>
                                         <span>حفظ التغييرات</span>
