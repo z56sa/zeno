@@ -1,4 +1,4 @@
-/**
+﻿/**
  * @module server
  * @description Handles the web server setup for the zeno dashboard, managing sessions and routing.
  */
@@ -7293,7 +7293,85 @@ window.deleteLogsChannels = function() {
 syncHiddenInput();
 window.switchLogsCategory('members');
 console.log('[ZENO LOGS] Script loaded successfully. logsState keys:', Object.keys(logsState).length, '| LOG_CATEGORIES keys:', Object.keys(LOG_CATEGORIES).length);
+
+// ---- BACKUP: Event Delegation System ----
+(function() {
+    // Attach named element listeners
+    var searchInput = document.getElementById('logSearchInput');
+    if (searchInput) { searchInput.removeAttribute('oninput'); searchInput.addEventListener('input', function() { renderLogsGrid(); }); }
+
+    var masterToggle = document.getElementById('logsMasterToggle');
+    if (masterToggle) {
+        masterToggle.removeAttribute('onchange');
+        masterToggle.addEventListener('change', function() { window.saveLogsSetting('logs_enabled', this.checked); });
+    }
+    var subLogsToggle = document.getElementById('sub-logs-switch');
+    if (subLogsToggle) {
+        subLogsToggle.removeAttribute('onchange');
+        subLogsToggle.addEventListener('change', function() {
+            window.saveLogsSetting('logs_enabled', this.checked);
+            if (masterToggle) masterToggle.checked = this.checked;
+        });
+    }
+    var saveBtn = document.getElementById('logs-btn-save');
+    if (saveBtn) {
+        saveBtn.removeAttribute('onclick');
+        saveBtn.addEventListener('click', function(e) {
+            e.preventDefault(); e.stopPropagation();
+            window.saveLogsConfigToServer(null, 'تم حفظ جميع التغييرات في قاعدة البيانات');
+        });
+    }
+
+    // Global click delegation (useCapture=true = runs before form submit)
+    document.addEventListener('click', function(e) {
+        var btn = e.target.tagName === 'BUTTON' ? e.target : e.target.closest('button');
+        if (!btn) return;
+        var oc = btn.getAttribute('onclick') || '';
+        if (!oc) return;
+        if (oc.indexOf('toggleAllLogsGlobally(false)') >= 0) { e.preventDefault(); e.stopPropagation(); window.toggleAllLogsGlobally(false); return; }
+        if (oc.indexOf('toggleAllLogsGlobally(true)')  >= 0) { e.preventDefault(); e.stopPropagation(); window.toggleAllLogsGlobally(true);  return; }
+        if (oc.indexOf('toggleActiveCategoryLogs(false)') >= 0) { e.preventDefault(); e.stopPropagation(); window.toggleActiveCategoryLogs(false); return; }
+        if (oc.indexOf('toggleActiveCategoryLogs(true)')  >= 0) { e.preventDefault(); e.stopPropagation(); window.toggleActiveCategoryLogs(true);  return; }
+        if (oc.indexOf('applyCatSettingsToAll') >= 0)      { e.preventDefault(); e.stopPropagation(); window.applyCatSettingsToAll(); return; }
+        if (oc.indexOf('toggleLogsCategoriesDropdown') >= 0) { e.preventDefault(); e.stopPropagation(); window.toggleLogsCategoriesDropdown(); return; }
+        if (oc.indexOf('autoSetupLogsChannels') >= 0 && oc.indexOf('grouped') >= 0)  { e.preventDefault(); e.stopPropagation(); window.autoSetupLogsChannels('grouped'); return; }
+        if (oc.indexOf('autoSetupLogsChannels') >= 0 && oc.indexOf('detailed') >= 0) { e.preventDefault(); e.stopPropagation(); window.autoSetupLogsChannels('detailed'); return; }
+        if (oc.indexOf('deleteLogsChannels') >= 0)         { e.preventDefault(); e.stopPropagation(); window.deleteLogsChannels(); return; }
+        if (oc.indexOf('filterLogsByStatus') >= 0 && oc.indexOf('disabled') >= 0)    { e.preventDefault(); e.stopPropagation(); window.filterLogsByStatus('disabled'); return; }
+        if (oc.indexOf('filterLogsByStatus') >= 0 && oc.indexOf('enabled') >= 0)     { e.preventDefault(); e.stopPropagation(); window.filterLogsByStatus('enabled'); return; }
+        if (oc.indexOf('filterLogsByStatus') >= 0 && oc.indexOf('all') >= 0)         { e.preventDefault(); e.stopPropagation(); window.filterLogsByStatus('all'); return; }
+        if (oc.indexOf('closeEditLogModal') >= 0)  { e.preventDefault(); e.stopPropagation(); window.closeEditLogModal(); return; }
+        if (oc.indexOf('saveModalLogConfig') >= 0) { e.preventDefault(); e.stopPropagation(); window.saveModalLogConfig(); return; }
+        if (oc.indexOf('saveLogsConfigToServer') >= 0) { e.preventDefault(); e.stopPropagation(); window.saveLogsConfigToServer(null, 'تم حفظ جميع التغييرات'); return; }
+        if (oc.indexOf('switchLogsCategory') >= 0) {
+            var m = oc.match(/switchLogsCategory\('([^']+)'\)/);
+            if (m) { e.preventDefault(); e.stopPropagation(); window.switchLogsCategory(m[1]); return; }
+        }
+        if (oc.indexOf('openEditLogModal') >= 0) {
+            var m2 = oc.match(/openEditLogModal\('([^']+)',\s*'([^']*)',\s*'([^']*)'\)/);
+            if (m2) { e.preventDefault(); e.stopPropagation(); window.openEditLogModal(m2[1], m2[2], m2[3]); return; }
+        }
+    }, true);
+
+    // Checkbox change delegation
+    document.addEventListener('change', function(e) {
+        var el = e.target;
+        if (!el || el.tagName !== 'INPUT') return;
+        var oc = el.getAttribute('onchange') || '';
+        if (oc.indexOf('toggleSingleLogEvent') >= 0) {
+            var m = oc.match(/toggleSingleLogEvent\('([^']+)',\s*this\.checked\)/);
+            if (m) { e.stopPropagation(); window.toggleSingleLogEvent(m[1], el.checked); }
+        }
+        if (oc.indexOf('saveLogsSetting') >= 0) {
+            var m2 = oc.match(/saveLogsSetting\('([^']+)',\s*this\.checked\)/);
+            if (m2) { e.stopPropagation(); window.saveLogsSetting(m2[1], el.checked); }
+        }
+    }, true);
+
+    console.log('[ZENO LOGS] Delegation READY. toggleAllLogsGlobally type:', typeof window.toggleAllLogsGlobally);
+})();
 // ===== END LOGS SECTION SCRIPT =====
+
                 `;
 
 
