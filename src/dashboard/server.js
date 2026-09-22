@@ -7357,44 +7357,36 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                         };
 
 
-                        // Initial render wrapped safely
+                        // Initial render
+                        syncHiddenInput();
+                        var chanSelect = document.getElementById('catDefaultChannel') || document.querySelector('select[name=\"catDefaultChannel\"]');
+                        if (chanSelect) {
+                            chanSelect.addEventListener('change', function() {
+                                var val = this.value;
+                                categoryChannels[currentCategory] = val;
+                                window.saveLogsSetting('log_channel_' + currentCategory, val);
+                            });
+                        }
+
+                        // DEBUG panel - always shows for 30s
+                        var dbgDiv = document.createElement('div');
+                        dbgDiv.style = 'position:fixed;top:70px;right:10px;background:#0b0e14;color:#a0f0a0;padding:10px 14px;border-radius:10px;font-size:11px;z-index:99999;max-width:380px;font-family:monospace;border:1px solid #22c55e;direction:ltr;';
+                        dbgDiv.innerHTML = '<b>[LOGS DEBUG]</b><br>Script started...<br>LOG_CATEGORIES: ' + (typeof LOG_CATEGORIES) + ' keys:' + (typeof LOG_CATEGORIES === 'object' ? Object.keys(LOG_CATEGORIES).length : '?') + '<br>renderLogsGrid: ' + typeof renderLogsGrid + '<br>renderCategoriesSidebar: ' + typeof renderCategoriesSidebar;
+                        document.body.appendChild(dbgDiv);
+
                         try {
-                            syncHiddenInput();
-                            var chanSelect = document.getElementById('catDefaultChannel') || document.querySelector('select[name="catDefaultChannel"]');
-                            if (chanSelect) {
-                                chanSelect.addEventListener('change', function() {
-                                    var val = this.value;
-                                    categoryChannels[currentCategory] = val;
-                                    var extra = {};
-                                    extra['log_channel_' + currentCategory] = val;
-                                    window.saveLogsSetting('log_channel_' + currentCategory, val);
-                                });
-                            }
                             window.switchLogsCategory('members');
-                            console.log('[LOGS] Script loaded OK. logsState keys:', Object.keys(logsState).length, 'saveLogsSetting:', typeof window.saveLogsSetting);
-                            // DEBUG: show status on screen
-                            var dbgDiv = document.createElement('div');
-                            dbgDiv.style = 'position:fixed;top:80px;right:20px;background:#0b0e14;color:#a0f0a0;padding:10px 14px;border-radius:10px;font-size:11px;z-index:99999;max-width:350px;font-family:monospace;border:1px solid #22c55e;direction:ltr;';
                             var gridEl = document.getElementById('logsCardsGrid');
                             var catEl = document.getElementById('logsCategoriesList');
-                            dbgDiv.innerHTML = '<b>[LOGS DEBUG]</b><br>'
-                                + 'logsState keys: ' + Object.keys(logsState).length + '<br>'
-                                + 'LOG_CATEGORIES: ' + (typeof LOG_CATEGORIES) + ' keys:' + (typeof LOG_CATEGORIES === 'object' ? Object.keys(LOG_CATEGORIES).length : '?') + '<br>'
-                                + 'cardsGrid el: ' + (gridEl ? 'found innerHTML.len=' + gridEl.innerHTML.length : 'MISSING') + '<br>'
-                                + 'catList el: ' + (catEl ? 'found innerHTML.len=' + catEl.innerHTML.length : 'MISSING') + '<br>'
-                                + 'switchLogsCategory: ' + typeof window.switchLogsCategory + '<br>'
-                                + 'renderLogsGrid: ' + typeof renderLogsGrid;
-                            document.body.appendChild(dbgDiv);
-                            setTimeout(function() { dbgDiv.remove(); }, 20000);
+                            dbgDiv.innerHTML += '<br>✅ switchLogsCategory OK'
+                                + '<br>cardsGrid innerHTML.len=' + (gridEl ? gridEl.innerHTML.length : 'MISSING')
+                                + '<br>catList innerHTML.len=' + (catEl ? catEl.innerHTML.length : 'MISSING');
                         } catch(err) {
-                            console.error('Error in initial logs render:', err);
-                            // Show error to user for debugging
-                            var errDiv = document.createElement('div');
-                            errDiv.style = 'position:fixed;bottom:20px;left:20px;background:#7f1d1d;color:#fca5a5;padding:12px 16px;border-radius:12px;font-size:11px;z-index:9999;max-width:400px;font-family:monospace;';
-                            errDiv.textContent = '[LOGS ERROR] ' + err.message;
-                            document.body.appendChild(errDiv);
-                            setTimeout(function() { errDiv.remove(); }, 10000);
+                            dbgDiv.style.borderColor = '#ef4444';
+                            dbgDiv.style.color = '#fca5a5';
+                            dbgDiv.innerHTML += '<br>❌ ERROR: ' + err.message;
                         }
+                        setTimeout(function() { dbgDiv.remove(); }, 30000);
 
                         // ============================================================
                         // CRITICAL FIX: Move modals & toast to <body> level
