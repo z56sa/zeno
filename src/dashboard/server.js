@@ -2031,7 +2031,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                         const word = input.value.trim();
                         if (!word) return;
                         
-                        let current = "${(settings.bad_words_list || '').replace(/"/g, '\\"')}";
+                        let current = ${JSON.stringify(String(settings.bad_words_list || ''))};
                         let words = current ? current.split(/[\n,]+/).map(w => w.trim()).filter(Boolean) : [];
                         if (!words.includes(word)) {
                             words.push(word);
@@ -2045,7 +2045,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                     }
 
                     async function removeStrictBadWord(word) {
-                        let current = "${(settings.bad_words_list || '').replace(/"/g, '\\"')}";
+                        let current = ${JSON.stringify(String(settings.bad_words_list || ''))};
                         let words = current ? current.split(/[\n,]+/).map(w => w.trim()).filter(Boolean) : [];
                         words = words.filter(w => w !== word);
                         await fetch('/api/guild/${guildId}/settings', {
@@ -2061,7 +2061,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                         const word = input.value.trim();
                         if (!word) return;
 
-                        let current = "${(settings.whitelist_words_list || '').replace(/"/g, '\\"')}";
+                        let current = ${JSON.stringify(String(settings.whitelist_words_list || ''))}
                         let words = current ? current.split(/[\n,]+/).map(w => w.trim()).filter(Boolean) : [];
                         if (!words.includes(word)) {
                             words.push(word);
@@ -2075,7 +2075,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                     }
 
                     async function removeWhitelistedWord(word) {
-                        let current = "${(settings.whitelist_words_list || '').replace(/"/g, '\\"')}";
+                        let current = ${JSON.stringify(String(settings.whitelist_words_list || ''))}
                         let words = current ? current.split(/[\n,]+/).map(w => w.trim()).filter(Boolean) : [];
                         words = words.filter(w => w !== word);
                         await fetch('/api/guild/${guildId}/settings', {
