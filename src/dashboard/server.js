@@ -6933,12 +6933,10 @@ function renderLogsGrid() {
         var customCfg   = logsState[item.id] || {};
         var customChan  = customCfg.channel_id || '';
         var customColor = customCfg.color || cat.defaultColor || '#5865F2';
-        var safetitle   = (item.title || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
-        var safeicon    = (item.icon  || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
         html += '<div class="bg-[#121620] border border-[#1e2638] hover:border-violet-500/40 p-4 rounded-2xl flex items-center justify-between transition shadow-md ' + (enabled ? '' : 'opacity-40') + '" data-log-id="' + item.id + '">';
         html += '<div class="flex items-center gap-2.5">';
-        html += '<label class="toggle"><input type="checkbox" data-log-checkbox="' + item.id + '" ' + (enabled ? 'checked' : '') + ' onchange="window.toggleSingleLogEvent(\\'' + item.id + '\\', this.checked)"><span class="slider"></span></label>';
-        html += '<button type="button" onclick="window.openEditLogModal(\\'' + item.id + '\\', \\'' + safetitle + '\\', \\'' + safeicon + '\\')" title="تخصيص القناة واللون" class="w-8 h-8 rounded-xl bg-[#1e2638] hover:bg-violet-600/30 text-violet-400 border border-[#1e2638] hover:border-violet-500/30 flex items-center justify-center text-xs font-bold transition shadow cursor-pointer"><i class="fa-solid fa-gear"></i></button>';
+        html += '<label class="toggle"><input type="checkbox" data-log-checkbox="' + item.id + '" ' + (enabled ? 'checked' : '') + ' data-logid="' + item.id + '"><span class="slider"></span></label>';
+        html += '<button type="button" data-action="editlog" data-logid="' + item.id + '" data-logtitle="' + encodeURIComponent(item.title || '') + '" data-logicon="' + encodeURIComponent(item.icon || '') + '" title="تخصيص القناة واللون" class="w-8 h-8 rounded-xl bg-[#1e2638] hover:bg-violet-600/30 text-violet-400 border border-[#1e2638] hover:border-violet-500/30 flex items-center justify-center text-xs font-bold transition shadow cursor-pointer"><i class="fa-solid fa-gear"></i></button>';
         html += '</div>';
         html += '<div class="flex items-center gap-3">';
         html += '<div class="text-right">';
@@ -7351,20 +7349,34 @@ console.log('[ZENO LOGS] Script loaded successfully. logsState keys:', Object.ke
             var m2 = oc.match(/openEditLogModal\('([^']+)',\s*'([^']*)',\s*'([^']*)'\)/);
             if (m2) { e.preventDefault(); e.stopPropagation(); window.openEditLogModal(m2[1], m2[2], m2[3]); return; }
         }
+        // data-action="editlog" buttons (no inline onclick needed)
+        var editBtn = e.target.closest('[data-action="editlog"]');
+        if (editBtn) {
+            e.preventDefault(); e.stopPropagation();
+            var lid = editBtn.getAttribute('data-logid') || '';
+            var ltitle = decodeURIComponent(editBtn.getAttribute('data-logtitle') || '');
+            var licon  = decodeURIComponent(editBtn.getAttribute('data-logicon')  || '');
+            window.openEditLogModal(lid, ltitle, licon);
+            return;
+        }
     }, true);
 
     // Checkbox change delegation
     document.addEventListener('change', function(e) {
         var el = e.target;
         if (!el || el.tagName !== 'INPUT') return;
+        // data-logid checkboxes (new approach)
+        var lid = el.getAttribute('data-logid') || el.getAttribute('data-log-checkbox');
+        if (lid) { e.stopPropagation(); window.toggleSingleLogEvent(lid, el.checked); return; }
+        // Legacy onchange attribute approach
         var oc = el.getAttribute('onchange') || '';
         if (oc.indexOf('toggleSingleLogEvent') >= 0) {
             var m = oc.match(/toggleSingleLogEvent\('([^']+)',\s*this\.checked\)/);
-            if (m) { e.stopPropagation(); window.toggleSingleLogEvent(m[1], el.checked); }
+            if (m) { e.stopPropagation(); window.toggleSingleLogEvent(m[1], el.checked); return; }
         }
         if (oc.indexOf('saveLogsSetting') >= 0) {
             var m2 = oc.match(/saveLogsSetting\('([^']+)',\s*this\.checked\)/);
-            if (m2) { e.stopPropagation(); window.saveLogsSetting(m2[1], el.checked); }
+            if (m2) { e.stopPropagation(); window.saveLogsSetting(m2[1], el.checked); return; }
         }
     }, true);
 
