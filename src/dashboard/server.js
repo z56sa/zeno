@@ -6553,876 +6553,750 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
 
                 // Scripts MUST be outside the <form> tag to execute in modern browsers
                 embedScriptHtml = `
-                    // ===== LOGS SECTION SCRIPT (outside form) =====
-                    var currentCategory = 'members';
-                    var currentFilter = 'all';
-                    var currentEditModalLogId = null;
-
-                    // State directly injected from server (no DOM lookup needed)
-                    var logsState = ${JSON.stringify((() => { try { const raw = settings.logs_config; const parsed = raw ? (typeof raw === 'string' ? JSON.parse(raw) : raw) : {}; return (parsed && typeof parsed === 'object') ? parsed : {}; } catch(e) { return {}; } })())};
-                    var categoryChannels = ${JSON.stringify({
-                        members: settings.log_channel_members || settings.log_channel || '',
-                        roles: settings.log_channel_roles || settings.log_channel || '',
-                        channels: settings.log_channel_channels || settings.log_channel || '',
-                        messages: settings.log_channel_messages || settings.log_channel || '',
-                        voice: settings.log_channel_voice || settings.log_channel || '',
-                        moderation: settings.log_channel_moderation || settings.log_channel || '',
-                        server: settings.log_channel_server || settings.log_channel || '',
-                        invites: settings.log_channel_invites || settings.log_channel || '',
-                        emojis: settings.log_channel_emojis || settings.log_channel || '',
-                        events: settings.log_channel_events || settings.log_channel || '',
-                        integrations: settings.log_channel_integrations || settings.log_channel || '',
-                        automod: settings.log_channel_automod || settings.log_channel || '',
-                        stage: settings.log_channel_stage || settings.log_channel || ''
-                    })};
-
-                    function isLogEnabled(logId) {
-                        if (logsState && logsState[logId] && logsState[logId].enabled !== undefined) {
-                            return logsState[logId].enabled === true || logsState[logId].enabled === 1 || logsState[logId].enabled === '1';
-                        }
-                        return false;
-                    }
-
-                    var showToast = function(message, type) {
-                        type = type || 'success';
-                        var container = document.getElementById('logs-toast-container');
-                        if (!container) return;
-                        var toast = document.createElement('div');
-                        var bgClass = type === 'success' ? 'bg-emerald-900/90 border-emerald-500/50 text-emerald-200' :
-                                      type === 'danger' ? 'bg-red-900/90 border-red-500/50 text-red-200' :
-                                      'bg-violet-900/90 border-violet-500/50 text-violet-200';
-                        var icon = type === 'success' ? 'fa-circle-check' : type === 'danger' ? 'fa-triangle-exclamation' : 'fa-circle-info';
-                        toast.className = 'pointer-events-auto border rounded-xl p-4 shadow-2xl flex items-center justify-between gap-3 backdrop-blur-md transition-all duration-300 transform translate-y-2 opacity-0 ' + bgClass;
-                        toast.innerHTML = '<div class="flex items-center gap-3"><i class="fa-solid ' + icon + ' text-lg"></i><span class="text-xs font-bold">' + message + '</span></div><button type="button" class="text-xs opacity-70 hover:opacity-100 transition">✕</button>';
-                        container.appendChild(toast);
-                        setTimeout(function() { toast.classList.remove('translate-y-2', 'opacity-0'); }, 10);
-                        var removeToast = function() {
-                            toast.classList.add('translate-y-2', 'opacity-0');
-                            setTimeout(function() { toast.remove(); }, 300);
-                        };
-                        toast.querySelector('button').addEventListener('click', removeToast);
-                        setTimeout(removeToast, 3500);
-                    };
-
-                    var showSavedBanner = function(msg) {
-                        showToast(msg || '✓ حُفظت التغييرات في سيرفر الديسكورد بنجاح', 'success');
-                    };
-
-                    // ===== UNDO HISTORY =====
-                    var logsHistory = [];
-                    var maxLogsHistory = 20;
-
-                    var saveToLogsHistory = function(action, data) {
-                        logsHistory.push({ action: action, data: data, timestamp: Date.now() });
-                        if (logsHistory.length > maxLogsHistory) logsHistory.shift();
-                        updateUndoBtn();
-                    };
-
-                    var updateUndoBtn = function() {
-                        var btn = document.getElementById('logs-btn-undo');
-                        if (btn) btn.disabled = logsHistory.length === 0;
-                    };
-
-                    // ===== CONFIRMATION MODAL =====
-                    var logsConfirmCallback = null;
-
-                    var showLogsConfirm = function(message, callback) {
-                        var modal = document.getElementById('logs-confirm-modal');
-                        var msgEl = document.getElementById('logs-confirm-msg');
-                        if (!modal) { if (confirm(message)) callback(); return; }
-                        if (msgEl) msgEl.textContent = message;
-                        logsConfirmCallback = callback;
-                        modal.classList.remove('hidden');
-                    };
-
-                    var hideLogsConfirm = function() {
-                        var modal = document.getElementById('logs-confirm-modal');
-                        if (modal) modal.classList.add('hidden');
-                        logsConfirmCallback = null;
-                    };
-
-                    // Hook up confirmation modal buttons
-                    (function() {
-                        var ok = document.getElementById('logs-confirm-ok');
-                        var cancel = document.getElementById('logs-confirm-cancel');
-                        if (ok) ok.addEventListener('click', function() {
-                            if (logsConfirmCallback) logsConfirmCallback();
-                            hideLogsConfirm();
-                        });
-                        if (cancel) cancel.addEventListener('click', hideLogsConfirm);
-                    })();
-
-                    // ===== UNDO BUTTON =====
-                    (function() {
-                        var undoBtn = document.getElementById('logs-btn-undo');
-                        if (undoBtn) {
-                            undoBtn.addEventListener('click', function() {
-                                if (logsHistory.length === 0) return;
-                                var last = logsHistory.pop();
-                                updateUndoBtn();
-                                if (last.action === 'toggleLog' && last.data) {
-                                    var id = last.data.id;
-                                    var was = last.data.was;
-                                    if (!logsState[id]) logsState[id] = {};
-                                    logsState[id].enabled = was;
-                                    var cb = document.querySelector('input[data-log-checkbox="' + id + '"]');
-                                    if (cb) cb.checked = was;
-                                    renderCategoriesSidebar();
-                                    renderLogsGrid();
-                                    saveLogsConfigToServer();
-                                } else if (last.action === 'toggleAll' || last.action === 'toggleCat') {
-                                    if (last.data && last.data.snapshot) {
-                                        logsState = last.data.snapshot;
-                                        renderCategoriesSidebar();
-                                        renderLogsGrid();
-                                        saveLogsConfigToServer();
-                                    }
-                                }
-                                showToast('↶ تم التراجع عن: ' + last.action, 'info');
-                            });
-                        }
-                    })();
-
-                    // ===== EXPORT SETTINGS =====
-                    (function() {
-                        var exportBtn = document.getElementById('logs-btn-export');
-                        if (exportBtn) {
-                            exportBtn.addEventListener('click', function() {
-                                try {
-                                    var exportData = {
-                                        timestamp: new Date().toISOString(),
-                                        guildId: '${guildId}',
-                                        logsState: logsState,
-                                        categoryChannels: categoryChannels
-                                    };
-                                    var dataStr = JSON.stringify(exportData, null, 2);
-                                    var blob = new Blob([dataStr], { type: 'application/json' });
-                                    var url = URL.createObjectURL(blob);
-                                    var link = document.createElement('a');
-                                    link.href = url;
-                                    link.download = 'zeno-logs-settings-' + Date.now() + '.json';
-                                    link.click();
-                                    URL.revokeObjectURL(url);
-                                    showToast('📥 تم تصدير إعدادات السجلات بنجاح', 'success');
-                                } catch(e) {
-                                    showToast('خطأ في التصدير', 'danger');
-                                }
-                            });
-                        }
-                    })();
-
-                    // ===== THEME TOGGLE (Dark / Light) =====
-                    (function() {
-                        var btnTheme = document.getElementById('logs-btn-theme');
-                        var savedTheme = localStorage.getItem('zenoTheme');
-                        var isDark = savedTheme !== 'light';
-
-                        function applyTheme(dark) {
-                            if (dark) {
-                                document.body.classList.remove('light-mode');
-                                if (btnTheme) btnTheme.innerHTML = '<i class="fa-solid fa-moon text-xs"></i><span class="text-xs font-bold">مظهر</span>';
-                                localStorage.setItem('zenoTheme', 'dark');
-                            } else {
-                                document.body.classList.add('light-mode');
-                                if (btnTheme) btnTheme.innerHTML = '<i class="fa-solid fa-sun text-xs"></i><span class="text-xs font-bold">مظهر</span>';
-                                localStorage.setItem('zenoTheme', 'light');
-                            }
-                        }
-
-                        if (!isDark) applyTheme(false);
-
-                        if (btnTheme) {
-                            btnTheme.addEventListener('click', function() {
-                                isDark = !isDark;
-                                applyTheme(isDark);
-                                showToast(isDark ? '🌙 تم التبديل إلى الوضع الداكن' : '☀️ تم التبديل إلى الوضع الفاتح', 'info');
-                            });
-                        }
-                    })();
-
-                    var syncHiddenInput = function() {
-                        var hiddenInp = document.getElementById('hidden_logs_config');
-                        if (hiddenInp) {
-                            hiddenInp.value = JSON.stringify(logsState);
-                        }
-                    };
-
-                    var saveLogsConfigToServer = function(extraPayload, successMsg) {
-                        try {
-                            syncHiddenInput();
-                            var gId = '${guildId}';
-                            if (!gId) return;
-                            var xhr = new XMLHttpRequest();
-                            xhr.open('POST', '/api/guild/' + gId + '/settings', true);
-                            xhr.setRequestHeader('Content-Type', 'application/json');
-                            xhr.onload = function() {
-                                try { if (JSON.parse(xhr.responseText).success) showSavedBanner(successMsg); } catch(e) {}
-                            };
-                            var body = { logs_config: JSON.stringify(logsState) };
-                            if (extraPayload && typeof extraPayload === 'object') {
-                                Object.assign(body, extraPayload);
-                            }
-                            xhr.send(JSON.stringify(body));
-                        } catch(e) {}
-                    };
-                    // CRITICAL: expose saveLogsConfigToServer on window so inline onclick handlers can call it
-                    window.saveLogsConfigToServer = saveLogsConfigToServer;
-
-                    // Attach ALL window functions at top
-                    window.saveLogsSetting = function(key, val) {
-                        try {
-                            var gId = '${guildId}';
-                            if (!gId) return;
-                            var body = {};
-                            body[key] = (typeof val === 'boolean') ? (val ? 1 : 0) : val;
-                            var xhr = new XMLHttpRequest();
-                            xhr.open('POST', '/api/guild/' + gId + '/settings', true);
-                            xhr.setRequestHeader('Content-Type', 'application/json');
-                            xhr.onload = function() {
-                                try {
-                                    if (JSON.parse(xhr.responseText).success) {
-                                        showToast(val ? '✓ تم تفعيل السجلات بنجاح' : '✕ تم تعطيل السجلات', val ? 'success' : 'danger');
-                                    }
-                                } catch(e) {}
-                            };
-                            xhr.send(JSON.stringify(body));
-                        } catch(e) {}
-                    };
-
-                    window.switchLogsCategory = function(catKey) {
-                        currentCategory = catKey;
-                        var chanSelect = document.getElementById('catDefaultChannel') || document.querySelector('select[name="catDefaultChannel"]');
-                        if (chanSelect && categoryChannels[catKey] !== undefined) {
-                            chanSelect.value = categoryChannels[catKey];
-                        }
-                        var catDefColor = (typeof LOG_CATEGORIES !== 'undefined' && LOG_CATEGORIES[catKey] && LOG_CATEGORIES[catKey].defaultColor) ? LOG_CATEGORIES[catKey].defaultColor : '#5865F2';
-                        var hexEl = document.getElementById('catColorHex');
-                        var pickEl = document.getElementById('catColorPicker');
-                        var prevBox = document.getElementById('catColorPreviewBox');
-                        if (hexEl) hexEl.value = catDefColor;
-                        if (pickEl) pickEl.value = catDefColor;
-                        if (prevBox) prevBox.style.backgroundColor = catDefColor;
-
-                        renderCategoriesSidebar();
-                        renderLogsGrid();
-                    };
-
-                    window.toggleLogsCategoriesDropdown = function() {
-                        var list = document.getElementById('logsCategoriesList');
-                        var arrow = document.getElementById('logsCategoriesDropdownArrow');
-                        if (!list) return;
-                        if (list.classList.contains('hidden')) {
-                            list.classList.remove('hidden');
-                            if (arrow) arrow.className = 'fa-solid fa-chevron-down text-gray-400 text-xs';
-                        } else {
-                            list.classList.add('hidden');
-                            if (arrow) arrow.className = 'fa-solid fa-chevron-left text-gray-400 text-xs';
-                        }
-                    };
-
-                    window.filterLogsByStatus = function(status) {
-                        currentFilter = status;
-                        var btnAll = document.getElementById('btnLogFilterAll');
-                        var btnEn = document.getElementById('btnLogFilterEnabled');
-                        var btnDis = document.getElementById('btnLogFilterDisabled');
-                        var activeClass = "filter-tab px-4 py-2 rounded-lg text-xs font-bold bg-violet-600 text-white shadow-md transition cursor-pointer";
-                        var inactiveClass = "filter-tab px-4 py-2 rounded-lg text-xs font-bold text-gray-400 hover:text-white transition cursor-pointer";
-
-                        if (btnAll) btnAll.className = (status === 'all') ? activeClass : inactiveClass;
-                        if (btnEn) btnEn.className = (status === 'enabled') ? activeClass : inactiveClass;
-                        if (btnDis) btnDis.className = (status === 'disabled') ? activeClass : inactiveClass;
-
-                        if (typeof LOG_CATEGORIES !== 'undefined') {
-                            var catKeys = Object.keys(LOG_CATEGORIES);
-                            var currentCatMatches = false;
-                            var currentCatObj = LOG_CATEGORIES[currentCategory];
-                            if (currentCatObj && currentCatObj.items) {
-                                var enabledCount = 0;
-                                for (var ci = 0; ci < currentCatObj.items.length; ci++) {
-                                    if (isLogEnabled(currentCatObj.items[ci].id)) enabledCount++;
-                                }
-                                if (status === 'all') currentCatMatches = true;
-                                else if (status === 'enabled' && enabledCount > 0) currentCatMatches = true;
-                                else if (status === 'disabled' && enabledCount < currentCatObj.items.length) currentCatMatches = true;
-                            }
-
-                            if (!currentCatMatches && status !== 'all') {
-                                for (var k = 0; k < catKeys.length; k++) {
-                                    var ck = catKeys[k];
-                                    var cObj = LOG_CATEGORIES[ck];
-                                    var cEn = 0;
-                                    for (var cj = 0; cj < cObj.items.length; cj++) {
-                                        if (isLogEnabled(cObj.items[cj].id)) cEn++;
-                                    }
-                                    if (status === 'enabled' && cEn > 0) { currentCategory = ck; break; }
-                                    if (status === 'disabled' && cEn < cObj.items.length) { currentCategory = ck; break; }
-                                }
-                            }
-                        }
-
-                        renderCategoriesSidebar();
-                        renderLogsGrid();
-                    };
-
-                    window.searchLogsItems = function() {
-                        renderLogsGrid();
-                    };
-
-                    window.toggleSingleLogEvent = function(logId, enable) {
-                        var was = isLogEnabled(logId);
-                        saveToLogsHistory('toggleLog', { id: logId, was: was, is: enable });
-                        if (!logsState[logId]) logsState[logId] = {};
-                        logsState[logId].enabled = enable;
-                        var card = document.querySelector('div[data-log-id="' + logId + '"]');
-                        if (card) {
-                            if (enable) card.classList.remove('opacity-40');
-                            else card.classList.add('opacity-40');
-                        }
-                        renderCategoriesSidebar();
-                        saveLogsConfigToServer();
-                    };
-
-                    window.toggleActiveCategoryLogs = function(enable) {
-                        if (typeof LOG_CATEGORIES === 'undefined') return;
-                        var cat = LOG_CATEGORIES[currentCategory];
-                        if (!cat || !cat.items) return;
-                        saveToLogsHistory('toggleCat', { snapshot: JSON.parse(JSON.stringify(logsState)) });
-                        for (var i = 0; i < cat.items.length; i++) {
-                            var id = cat.items[i].id;
-                            if (!logsState[id]) logsState[id] = {};
-                            logsState[id].enabled = enable;
-                        }
-                        renderCategoriesSidebar();
-                        renderLogsGrid();
-                        saveLogsConfigToServer();
-                    };
-
-                    window.toggleAllLogsGlobally = function(enable) {
-                        if (typeof LOG_CATEGORIES === 'undefined') return;
-                        saveToLogsHistory('toggleAll', { snapshot: JSON.parse(JSON.stringify(logsState)) });
-                        var catKeys = Object.keys(LOG_CATEGORIES);
-                        for (var i = 0; i < catKeys.length; i++) {
-                            var items = LOG_CATEGORIES[catKeys[i]].items || [];
-                            for (var j = 0; j < items.length; j++) {
-                                var id = items[j].id;
-                                if (!logsState[id]) logsState[id] = {};
-                                logsState[id].enabled = enable;
-                            }
-                        }
-                        renderCategoriesSidebar();
-                        renderLogsGrid();
-                        saveLogsConfigToServer();
-                    };
-
-                    window.applyCatSettingsToAll = function() {
-                        if (typeof LOG_CATEGORIES === 'undefined') return;
-                        var cat = LOG_CATEGORIES[currentCategory];
-                        if (!cat || !cat.items) return;
-                        var colorInp = document.getElementById('catColorHex');
-                        var color = colorInp ? colorInp.value : '#5865F2';
-                        var chanInp = document.getElementById('catDefaultChannel');
-                        var chan = chanInp ? chanInp.value : '';
-
-                        var appliedCount = 0;
-                        for (var i = 0; i < cat.items.length; i++) {
-                            var id = cat.items[i].id;
-                            if (!isLogEnabled(id)) continue;
-                            if (!logsState[id]) logsState[id] = { enabled: true };
-                            if (color) logsState[id].color = color;
-                            if (chan) logsState[id].channel_id = chan;
-                            appliedCount++;
-                        }
-                        if (chan) {
-                            categoryChannels[currentCategory] = chan;
-                        }
-                        if (appliedCount === 0) {
-                            showToast('⚠️ لا توجد سجلات مفعلة في قسم (' + cat.title + ') لتطبيق الإعدادات عليها!', 'danger');
-                            return;
-                        }
-                        showToast('✨ تم تطبيق القناة واللون بنجاح على ' + appliedCount + ' سجل في قسم (' + cat.title + ')', 'success');
-                        renderCategoriesSidebar();
-                        renderLogsGrid();
-                        var extra = {};
-                        if (chan) extra['log_channel_' + currentCategory] = chan;
-                        saveLogsConfigToServer(extra);
-                    };
-
-                    window.openEditLogModal = function(logId, title, icon) {
-                        currentEditModalLogId = logId;
-                        var modal = document.getElementById('editLogModal');
-                        var titleEl = document.getElementById('modalLogTitle');
-                        var iconEl = document.getElementById('modalLogIcon');
-                        var chanEl = document.getElementById('modalLogChannel');
-                        var colorHex = document.getElementById('modalLogColorHex');
-                        var colorPicker = document.getElementById('modalLogColorPicker');
-                        var previewBox = document.getElementById('modalColorPreviewBox');
-
-                        if (titleEl) titleEl.textContent = title || 'تخصيص السجل';
-                        if (iconEl) iconEl.textContent = icon || '📜';
-
-                        var cfg = logsState[logId] || {};
-                        if (chanEl) chanEl.value = cfg.channel_id || '';
-                        var col = cfg.color || '#5865F2';
-                        if (colorHex) colorHex.value = col;
-                        if (colorPicker) colorPicker.value = col;
-                        if (previewBox) previewBox.style.backgroundColor = col;
-
-                        if (modal) modal.classList.remove('hidden');
-                    };
-
-                    window.closeEditLogModal = function() {
-                        var modal = document.getElementById('editLogModal');
-                        if (modal) modal.classList.add('hidden');
-                        currentEditModalLogId = null;
-                    };
-
-                    window.saveModalLogConfig = function() {
-                        if (!currentEditModalLogId) return;
-                        var chanEl = document.getElementById('modalLogChannel');
-                        var colorHex = document.getElementById('modalLogColorHex');
-
-                        if (!logsState[currentEditModalLogId]) logsState[currentEditModalLogId] = { enabled: true };
-                        logsState[currentEditModalLogId].channel_id = chanEl ? chanEl.value : '';
-                        logsState[currentEditModalLogId].color = colorHex ? colorHex.value : '#5865F2';
-
-                        saveLogsConfigToServer(null, '✓ تم حفظ تخصيص السجل بنجاح');
-                        window.closeEditLogModal();
-                        renderCategoriesSidebar();
-                        renderLogsGrid();
-                    };
-
-                    window.autoSetupLogsChannels = function(mode) {
-                        var modeTitle = mode === 'grouped' ? 'القنوات العادية (قسم لكل قناة)' : 'القنوات المفصلة (قناة لكل نوع سجل)';
-                        showLogsConfirm('هل تريد إنشاء قنوات السجلات تلقائياً بالسيرفر بنظام: ' + modeTitle + '؟', function() {
-                            showToast('🚀 جاري إنشاء قنوات السجلات تلقائياً في السيرفر...', 'info');
-                            try {
-                                var gId = '${guildId}';
-                                fetch('/api/guild/' + gId + '/logs/auto-setup', {
-                                    method: 'POST',
-                                    headers: { 'Content-Type': 'application/json' },
-                                    body: JSON.stringify({ mode: mode })
-                                }).then(function(res) { return res.json(); }).then(function(d) {
-                                    if (d.success) {
-                                        showToast('✓ تم إنشاء وتوزيع قنوات السجلات بنجاح في السيرفر!', 'success');
-                                        setTimeout(function() { location.reload(); }, 1200);
-                                    } else {
-                                        showToast('✕ ' + (d.error || 'فشل إنشاء القنوات'), 'danger');
-                                    }
-                                }).catch(function() {
-                                    showToast('✕ حدث خطأ في الاتصال بالخادم', 'danger');
-                                });
-                            } catch(e) {
-                                showToast('✕ حدث خطأ في الاتصال بالخادم', 'danger');
-                            }
-                        });
-                    };
-
-                    window.deleteLogsChannels = function() {
-                        showLogsConfirm('هل أنت متأكد من حذف كاتيجوري وقنوات سجلات ZENO نهائياً؟ هذه العملية لا يمكن التراجع عنها.', function() {
-                            showToast('🗑️ جاري حذف كاتيغوري وقنوات السجلات...', 'danger');
-                            try {
-                                var gId = '${guildId}';
-                                fetch('/api/guild/' + gId + '/logs/delete-channels', {
-                                    method: 'POST',
-                                    headers: { 'Content-Type': 'application/json' }
-                                }).then(function(res) { return res.json(); }).then(function(d) {
-                                    if (d.success) {
-                                        showToast('✓ تم حذف قنوات السجلات بنجاح', 'success');
-                                        setTimeout(function() { location.reload(); }, 1200);
-                                    } else {
-                                        showToast('✕ ' + (d.error || 'فشل الحذف'), 'danger');
-                                    }
-                                }).catch(function() {
-                                    showToast('✕ حدث خطأ في الاتصال', 'danger');
-                                });
-                            } catch(e) {
-                                showToast('✕ حدث خطأ في الاتصال', 'danger');
-                            }
-                        });
-                    };
-
-                    // 105 Comprehensive Log Events across 13 Categories
-                    var LOG_CATEGORIES = {
-                            members: {
-                                title: 'الأعضاء', icon: '🎯', desc: 'أحداث دخول وخروج وحظر وعقوبات الأعضاء', defaultColor: '#5865F2',
-                                items: [
-                                    { id: 'member_join', title: 'دخول عضو', desc: 'عند دخول عضو جديد للسيرفر', icon: '📥', isSpecial: false },
-                                    { id: 'member_leave', title: 'خروج عضو', desc: 'عند خروج عضو من السيرفر', icon: '📤', isSpecial: false },
-                                    { id: 'member_ban', title: 'حظر عضو', desc: 'عند حظر عضو من السيرفر', icon: '🪓', isSpecial: false },
-                                    { id: 'member_unban', title: 'فك حظر عضو', desc: 'عند فك حظر عضو', icon: '🔓', isSpecial: false },
-                                    { id: 'member_kick', title: 'طرد عضو', desc: 'عند طرد عضو من السيرفر', icon: '👢', isSpecial: false },
-                                    { id: 'member_prison', title: 'سجن عضو', desc: 'عند سجن عضو', icon: '🔒', isSpecial: false },
-                                    { id: 'member_unprison', title: 'إخراج من السجن', desc: 'عند إخراج عضو من السجن', icon: '🔓', isSpecial: false },
-                                    { id: 'member_timeout', title: 'عزل عضو', desc: 'عند عزل عضو (تايم أوت)', icon: '⏳', isSpecial: false },
-                                    { id: 'member_untimeout', title: 'إزالة العزل', desc: 'عند إزالة العزل عن عضو', icon: '➕', isSpecial: false },
-                                    { id: 'member_mute', title: 'إسكات كتابي', desc: 'عند إسكات عضو كتابياً', icon: '🔇', isSpecial: false },
-                                    { id: 'member_unmute', title: 'إلغاء إسكات كتابي', desc: 'عند إلغاء الإسكات الكتابي', icon: '🔊', isSpecial: false },
-                                    { id: 'member_nick_change', title: 'تغيير الاسم المستعار', desc: 'عند تغيير الاسم المستعار للعضو', icon: '✏️', isSpecial: false },
-                                    { id: 'member_avatar_change', title: 'تغيير الصورة', desc: 'عند تغيير صورة العضو', icon: '🖼️', isSpecial: true },
-                                    { id: 'member_username_change', title: 'تغيير اسم المستخدم', desc: 'عند تغيير اسم المستخدم للعضو', icon: '👤', isSpecial: true },
-                                    { id: 'member_boost_add', title: 'بوست السيرفر', desc: 'عند بوست السيرفر من قبل عضو', icon: '💎', isSpecial: false },
-                                    { id: 'member_boost_remove', title: 'إزالة البوست', desc: 'عند إزالة البوست من السيرفر', icon: '🗑️', isSpecial: false },
-                                    { id: 'member_suspicious', title: 'حساب مشبوه', desc: 'عند إسناد رتبة لحساب جديد بسبب عمر الحساب', icon: '🚨', isSpecial: false }
-                                ]
-                            },
-                            roles: {
-                                title: 'الرتب', icon: '🎖️', desc: 'أحداث إنشاء وتعديل وحذف وإعطاء الرتب', defaultColor: '#5865F2',
-                                items: [
-                                    { id: 'role_create', title: 'إنشاء رتبة', desc: 'عند إنشاء رتبة جديدة', icon: '➕', isSpecial: false },
-                                    { id: 'role_delete', title: 'حذف رتبة', desc: 'عند حذف رتبة', icon: '🗑️', isSpecial: false },
-                                    { id: 'role_update', title: 'تعديل رتبة', desc: 'عند تعديل رتبة', icon: '✏️', isSpecial: false },
-                                    { id: 'role_give_member', title: 'إضافة رتبة لعضو', desc: 'عند إعطاء رتبة لعضو', icon: '🎁', isSpecial: false },
-                                    { id: 'role_remove_member', title: 'إزالة رتبة من عضو', desc: 'عند إزالة رتبة من عضو', icon: '❌', isSpecial: false },
-                                    { id: 'role_custom_manage', title: 'رتبة خاصة', desc: 'تعديل/حذف رتبة خاصة (نفس أمر rlog)', icon: '👑', isSpecial: false }
-                                ]
-                            },
-                            channels: {
-                                title: 'القنوات', icon: '📌', desc: 'أحداث إنشاء وتعديل وحذف القنوات والثريدات', defaultColor: '#5865F2',
-                                items: [
-                                    { id: 'channel_create', title: 'إنشاء قناة', desc: 'عند إنشاء قناة جديدة', icon: '➕', isSpecial: false },
-                                    { id: 'channel_delete', title: 'حذف قناة', desc: 'عند حذف قناة', icon: '🗑️', isSpecial: false },
-                                    { id: 'channel_update', title: 'تعديل قناة', desc: 'عند تعديل قناة', icon: '✏️', isSpecial: false },
-                                    { id: 'channel_perms_update', title: 'تعديل صلاحيات قناة', desc: 'عند تعديل صلاحيات قناة', icon: '🔒', isSpecial: false },
-                                    { id: 'thread_create', title: 'إنشاء ثريد', desc: 'عند إنشاء ثريد جديد', icon: '💬', isSpecial: false },
-                                    { id: 'thread_delete', title: 'حذف ثريد', desc: 'عند حذف ثريد', icon: '🗑️', isSpecial: false },
-                                    { id: 'thread_update', title: 'تعديل ثريد', desc: 'عند تعديل ثريد', icon: '✏️', isSpecial: false }
-                                ]
-                            },
-                            messages: {
-                                title: 'الرسائل', icon: '💬', desc: 'أحداث حذف وتعديل وتثبيت ومسح الرسائل', defaultColor: '#5865F2',
-                                items: [
-                                    { id: 'msg_delete', title: 'حذف رسالة', desc: 'عند حذف رسالة', icon: '🗑️', isSpecial: false },
-                                    { id: 'msg_image_delete', title: 'حذف صورة', desc: 'عند حذف رسالة تحتوي على صورة', icon: '🖼️', isSpecial: false },
-                                    { id: 'msg_update', title: 'تعديل رسالة', desc: 'عند تعديل رسالة', icon: '✏️', isSpecial: false },
-                                    { id: 'msg_purge', title: 'حذف رسائل جماعي', desc: 'عند حذف عدة رسائل', icon: 'ℹ️', isSpecial: false },
-                                    { id: 'msg_pin', title: 'تثبيت رسالة', desc: 'عند تثبيت رسالة', icon: 'ℹ️', isSpecial: false },
-                                    { id: 'msg_unpin', title: 'إلغاء تثبيت رسالة', desc: 'عند إلغاء تثبيت رسالة', icon: 'ℹ️', isSpecial: false },
-                                    { id: 'msg_reaction_add', title: 'إضافة تفاعل', desc: 'عند إضافة تفاعل على رسالة', icon: 'ℹ️', isSpecial: false },
-                                    { id: 'msg_reaction_remove', title: 'إزالة تفاعل', desc: 'عند إزالة تفاعل من رسالة', icon: 'ℹ️', isSpecial: false },
-                                    { id: 'msg_reaction_remove_all', title: 'مسح جميع التفاعلات', desc: 'عند مسح جميع التفاعلات', icon: 'ℹ️', isSpecial: false }
-                                ]
-                            },
-                            voice: {
-                                title: 'الصوت', icon: '🎙️', desc: 'أحداث الرومات الصوتية والكتم والبث والكاميرا', defaultColor: '#5865F2',
-                                items: [
-                                    { id: 'vc_join', title: 'دخول روم صوتي', desc: 'عند دخول عضو لروم صوتي', icon: '⬇️', isSpecial: true },
-                                    { id: 'vc_leave', title: 'خروج من روم صوتي', desc: 'عند خروج عضو من روم صوتي', icon: '⬆️', isSpecial: true },
-                                    { id: 'vc_switch', title: 'نقل بين الرومات', desc: 'عند نقل عضو بين الرومات', icon: '🔀', isSpecial: true },
-                                    { id: 'vc_mute_server', title: 'كتم عضو', desc: 'عند كتم عضو في الصوتي', icon: '⬆️', isSpecial: true },
-                                    { id: 'vc_unmute_server', title: 'إلغاء كتم عضو', desc: 'عند إلغاء كتم عضو', icon: '🔓', isSpecial: true },
-                                    { id: 'vc_deafen_server', title: 'إصمات عضو', desc: 'عند إصمات عضو', icon: '🔒', isSpecial: true },
-                                    { id: 'vc_undeafen_server', title: 'إلغاء إصمات', desc: 'عند إلغاء إصمات عضو', icon: '🔓', isSpecial: true },
-                                    { id: 'vc_self_mute', title: 'سيلف ميوت', desc: 'عند تفعيل العضو سيلف ميوت', icon: 'ℹ️', isSpecial: true },
-                                    { id: 'vc_self_unmute', title: 'إلغاء السيلف ميوت', desc: 'عند إلغاء العضو السيلف ميوت', icon: 'ℹ️', isSpecial: true },
-                                    { id: 'vc_self_deaf', title: 'سيلف ديفن', desc: 'عند تفعيل العضو سيلف ديفن', icon: 'ℹ️', isSpecial: true },
-                                    { id: 'vc_self_undeaf', title: 'إلغاء السيلف ديفن', desc: 'عند إلغاء العضو السيلف ديفن', icon: '🔓', isSpecial: true },
-                                    { id: 'vc_stream_start', title: 'بدء بث', desc: 'عند بدء عضو بث مباشر', icon: '🖼️', isSpecial: true },
-                                    { id: 'vc_stream_stop', title: 'إنهاء بث', desc: 'عند إنهاء البث', icon: '🖼️', isSpecial: true },
-                                    { id: 'vc_video_start', title: 'تشغيل الكاميرا', desc: 'عند تشغيل الكاميرا', icon: '🖼️', isSpecial: true },
-                                    { id: 'vc_video_stop', title: 'إيقاف الكاميرا', desc: 'عند إيقاف الكاميرا', icon: '⬆️', isSpecial: true },
-                                    { id: 'vc_disconnect', title: 'فصل من الصوتية', desc: 'عند فصل عضو من قناة صوتية (بواسطة مشرف)', icon: 'ℹ️', isSpecial: true }
-                                ]
-                            },
-                            moderation: {
-                                title: 'الإشراف', icon: '🛡️', desc: 'أحداث التحذيرات والبلوك والبلاك لست', defaultColor: '#5865F2',
-                                items: [
-                                    { id: 'mod_warn_add', title: 'إعطاء تحذير', desc: 'عند إعطاء عضو تحذير', icon: 'ℹ️', isSpecial: false },
-                                    { id: 'mod_warn_remove', title: 'إزالة تحذير', desc: 'عند إزالة تحذير واحد من عضو', icon: 'ℹ️', isSpecial: false },
-                                    { id: 'mod_warn_clear', title: 'مسح التحذيرات', desc: 'عند مسح جميع تحذيرات عضو أو السيرفر', icon: 'ℹ️', isSpecial: false },
-                                    { id: 'mod_block_add', title: 'إعطاء بلوك', desc: 'عند إعطاء عضو بلوك على رتبة', icon: '🗑️', isSpecial: false },
-                                    { id: 'mod_blacklist_add', title: 'إضافة بلاك لست', desc: 'عند إضافة عضو إلى البلاك لست', icon: 'ℹ️', isSpecial: false },
-                                    { id: 'mod_blacklist_remove', title: 'إزالة بلاك لست', desc: 'عند إزالة عضو من البلاك لست', icon: '➕', isSpecial: false }
-                                ]
-                            },
-                            server: {
-                                title: 'السيرفر', icon: '⚙️', desc: 'أحداث تعديل إعدادات وبنر وبوستات السيرفر', defaultColor: '#5865F2',
-                                items: [
-                                    { id: 'server_update', title: 'تعديل السيرفر', desc: 'عند تعديل إعدادات السيرفر', icon: '✏️', isSpecial: true },
-                                    { id: 'server_name_change', title: 'تغيير اسم السيرفر', desc: 'عند تغيير اسم السيرفر', icon: '✏️', isSpecial: true },
-                                    { id: 'server_icon_change', title: 'تغيير أيقونة السيرفر', desc: 'عند تغيير أيقونة السيرفر', icon: '🖼️', isSpecial: true },
-                                    { id: 'server_banner_change', title: 'تغيير بانر السيرفر', desc: 'عند تغيير بانر السيرفر', icon: '✏️', isSpecial: true },
-                                    { id: 'server_vanity_change', title: 'تغيير رابط الفانيتي', desc: 'عند تغيير رابط الدعوة المخصص', icon: '✏️', isSpecial: true },
-                                    { id: 'server_boost_level_up', title: 'رفع مستوى البوست', desc: 'عند رفع مستوى بوست السيرفر', icon: '✏️', isSpecial: true },
-                                    { id: 'server_boost_level_down', title: 'انخفاض مستوى البوست', desc: 'عند انخفاض مستوى البوست', icon: '✏️', isSpecial: true }
-                                ]
-                            },
-                            invites: {
-                                title: 'الدعوات', icon: '🔗', desc: 'أحداث إنشاء وحذف واستخدام روابط الدعوة', defaultColor: '#5865F2',
-                                items: [
-                                    { id: 'invite_create', title: 'إنشاء دعوة', desc: 'عند إنشاء رابط دعوة', icon: '➕', isSpecial: false },
-                                    { id: 'invite_delete', title: 'حذف دعوة', desc: 'عند حذف رابط دعوة', icon: '🗑️', isSpecial: false },
-                                    { id: 'invite_used', title: 'استخدام دعوة', desc: 'عند استخدام رابط دعوة', icon: '🖼️', isSpecial: false }
-                                ]
-                            },
-                            emojis: {
-                                title: 'الإيموجي والستيكرز', icon: '😃', desc: 'أحداث إضافة وتعديل وحذف الإيموجيات والستيكرات', defaultColor: '#5865F2',
-                                items: [
-                                    { id: 'emoji_create', title: 'إضافة إيموجي', desc: 'عند إضافة إيموجي جديد', icon: '➕', isSpecial: true },
-                                    { id: 'emoji_delete', title: 'حذف إيموجي', desc: 'عند حذف إيموجي', icon: '🗑️', isSpecial: true },
-                                    { id: 'emoji_update', title: 'تعديل إيموجي', desc: 'عند تعديل إيموجي', icon: '✏️', isSpecial: true },
-                                    { id: 'sticker_create', title: 'إضافة ستيكر', desc: 'عند إضافة ستيكر جديد', icon: '🖼️', isSpecial: true },
-                                    { id: 'sticker_delete', title: 'حذف ستيكر', desc: 'عند حذف ستيكر', icon: '🗑️', isSpecial: true },
-                                    { id: 'sticker_update', title: 'تعديل ستيكر', desc: 'عند تعديل ستيكر', icon: '✏️', isSpecial: true }
-                                ]
-                            },
-                            events: {
-                                title: 'الأحداث', icon: '📅', desc: 'أحداث إنشاء ومجدولة وبدء الأحداث المباشرة بالسيرفر', defaultColor: '#5865F2',
-                                items: [
-                                    { id: 'event_create', title: 'إنشاء حدث', desc: 'عند إنشاء حدث مجدول', icon: '➕', isSpecial: true },
-                                    { id: 'event_delete', title: 'حذف حدث', desc: 'عند حذف حدث', icon: '🗑️', isSpecial: true },
-                                    { id: 'event_update', title: 'تعديل حدث', desc: 'عند تعديل حدث', icon: '✏️', isSpecial: true },
-                                    { id: 'event_start', title: 'بدء حدث', desc: 'عند بدء حدث', icon: '⬇️', isSpecial: true },
-                                    { id: 'event_end', title: 'انتهاء حدث', desc: 'عند انتهاء حدث', icon: '⬆️', isSpecial: true },
-                                    { id: 'event_user_interested', title: 'اشتراك في حدث', desc: 'عند اشتراك عضو في حدث', icon: '⬇️', isSpecial: true }
-                                ]
-                            },
-                            integrations: {
-                                title: 'التكاملات', icon: '🔌', desc: 'أحداث التكاملات والويب هوك والبوتات', defaultColor: '#5865F2',
-                                items: [
-                                    { id: 'integration_create', title: 'إضافة تكامل', desc: 'عند إضافة تكامل جديد', icon: '➕', isSpecial: false },
-                                    { id: 'integration_delete', title: 'حذف تكامل', desc: 'عند حذف تكامل', icon: '🗑️', isSpecial: false },
-                                    { id: 'integration_update', title: 'تعديل تكامل', desc: 'عند تعديل تكامل', icon: '✏️', isSpecial: false },
-                                    { id: 'webhook_create', title: 'إنشاء ويب هوك', desc: 'عند إنشاء ويب هوك', icon: 'ℹ️', isSpecial: false },
-                                    { id: 'webhook_delete', title: 'حذف ويب هوك', desc: 'عند حذف ويب هوك', icon: '🗑️', isSpecial: false },
-                                    { id: 'webhook_update', title: 'تعديل ويب هوك', desc: 'عند تعديل ويب هوك', icon: '✏️', isSpecial: false },
-                                    { id: 'bot_add', title: 'إضافة بوت', desc: 'عند إضافة بوت للسيرفر', icon: 'ℹ️', isSpecial: false },
-                                    { id: 'bot_remove', title: 'إزالة بوت', desc: 'عند إزالة بوت من السيرفر', icon: '🗑️', isSpecial: false }
-                                ]
-                            },
-                            automod: {
-                                title: 'الأوتو مود', icon: '🤖', desc: 'أحداث وقواعد الأوتو مود وحظر المحتوى والسبام', defaultColor: '#5865F2',
-                                items: [
-                                    { id: 'automod_rule_create', title: 'إنشاء قاعدة', desc: 'عند إنشاء قاعدة أوتو مود', icon: '➕', isSpecial: false },
-                                    { id: 'automod_rule_delete', title: 'حذف قاعدة', desc: 'عند حذف قاعدة أوتو مود', icon: '🗑️', isSpecial: false },
-                                    { id: 'automod_rule_update', title: 'تعديل قاعدة', desc: 'عند تعديل قاعدة أوتو مود', icon: '✏️', isSpecial: false },
-                                    { id: 'automod_action_trigger', title: 'إجراء أوتو مود', desc: 'عند تنفيذ إجراء أوتو مود', icon: 'ℹ️', isSpecial: false },
-                                    { id: 'automod_content_block', title: 'حظر محتوى', desc: 'عند حظر محتوى تلقائياً', icon: '🗑️', isSpecial: false },
-                                    { id: 'automod_timeout', title: 'عزل تلقائي', desc: 'عند عزل عضو تلقائياً', icon: '🔒', isSpecial: false },
-                                    { id: 'automod_spam_detect', title: 'رقابة السبام', desc: 'عند اكتشاف سبام أو رسائل مكررة أو نص متكرر', icon: 'ℹ️', isSpecial: false }
-                                ]
-                            },
-                            stage: {
-                                title: 'المنصة', icon: '📢', desc: 'أحداث الرومات التفاعلية والمنصة والمتحدثين', defaultColor: '#5865F2',
-                                items: [
-                                    { id: 'stage_create', title: 'إنشاء منصة', desc: 'عند إنشاء منصة صوتية', icon: '➕', isSpecial: true },
-                                    { id: 'stage_delete', title: 'حذف منصة', desc: 'عند حذف منصة', icon: '🗑️', isSpecial: true },
-                                    { id: 'stage_update', title: 'تعديل منصة', desc: 'عند تعديل منصة', icon: '✏️', isSpecial: true },
-                                    { id: 'stage_speaker_add', title: 'إضافة متحدث', desc: 'عند إضافة متحدث للمنصة', icon: 'ℹ️', isSpecial: true },
-                                    { id: 'stage_speaker_remove', title: 'إزالة متحدث', desc: 'عند إزالة متحدث', icon: '⬆️', isSpecial: true },
-                                    { id: 'stage_hand_raise', title: 'طلب التحدث', desc: 'عند طلب عضو التحدث', icon: '⬇️', isSpecial: true }
-                                ]
-                            }
-                        };
-
-
-                        var updateGlobalStats = function() {
-                            try {
-                                var total = 0, enabled = 0, channelsSet = new Set();
-                                var catKeys = Object.keys(LOG_CATEGORIES);
-                                for (var i = 0; i < catKeys.length; i++) {
-                                    var items = LOG_CATEGORIES[catKeys[i]].items || [];
-                                    total += items.length;
-                                    for (var j = 0; j < items.length; j++) {
-                                        var id = items[j].id;
-                                        if (isLogEnabled(id)) enabled++;
-                                        if (logsState[id] && logsState[id].channel_id) channelsSet.add(logsState[id].channel_id);
-                                    }
-                                }
-                                var e1 = document.getElementById('statEnabledLogs');
-                                var e2 = document.getElementById('statChannelsUsed');
-                                if (e1) e1.textContent = enabled;
-                                if (e2) e2.textContent = channelsSet.size;
-                            } catch(e) {}
-                        };
-
-                        var renderCategoriesSidebar = function() {
-                            var container = document.getElementById('logsCategoriesList');
-                            if (!container) return;
-                            var html = '';
-                            var catKeys = Object.keys(LOG_CATEGORIES);
-                            var visibleCats = 0;
-
-                            for (var i = 0; i < catKeys.length; i++) {
-                                var k = catKeys[i];
-                                var cat = LOG_CATEGORIES[k];
-                                var isSel = k === currentCategory;
-
-                                var totalItems = cat.items ? cat.items.length : 0;
-                                var enabledItems = 0;
-                                if (cat.items) {
-                                    for (var j = 0; j < cat.items.length; j++) {
-                                        if (isLogEnabled(cat.items[j].id)) enabledItems++;
-                                    }
-                                }
-
-                                // تطبيق فلتر حالة القسم (الكل / المفعلة / المعطلة)
-                                if (currentFilter === 'enabled' && enabledItems === 0) continue;
-                                if (currentFilter === 'disabled' && enabledItems === totalItems && totalItems > 0) continue;
-
-                                visibleCats++;
-
-                                var badgeClass = enabledItems === 0
-                                    ? 'px-2 py-0.5 bg-red-500/10 text-red-400 border border-red-500/20 rounded-lg text-[10px] font-mono'
-                                    : (enabledItems === totalItems
-                                        ? 'px-2 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-lg text-[10px] font-mono'
-                                        : 'px-2 py-0.5 bg-violet-500/10 text-violet-300 border border-violet-500/20 rounded-lg text-[10px] font-mono');
-
-                                html += '<button type="button" onclick="window.switchLogsCategory(\'' + k + '\')" class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition cursor-pointer ' + (isSel ? 'bg-violet-600 text-white shadow-lg' : 'text-gray-400 hover:text-white hover:bg-[#181e2c]') + '">';
-                                html += '<span class="' + badgeClass + '">' + enabledItems + '/' + totalItems + '</span>';
-                                html += '<span class="flex items-center gap-2"><span>' + cat.title + '</span><span>' + cat.icon + '</span></span>';
-                                html += '</button>';
-                            }
-
-                            if (visibleCats === 0) {
-                                html = '<div class="py-4 text-center text-xs text-gray-500 font-bold">لا توجد أقسام مطابقة للفلتر 🔍</div>';
-                            }
-
-                            container.innerHTML = html;
-                            updateGlobalStats();
-                            if (window.zenoI18n && window.zenoI18n.getLang() === 'en') {
-                                try { window.zenoI18n.apply(); } catch(e) {}
-                            }
-                        };
-
-                        var renderLogsGrid = function() {
-                            var container = document.getElementById('logsCardsGrid');
-                            if (!container) return;
-
-                            var cat = LOG_CATEGORIES[currentCategory] || LOG_CATEGORIES.members;
-                            var titleEl = document.getElementById('activeCatTitle');
-                            var iconEl = document.getElementById('activeCatIcon');
-                            var countEl = document.getElementById('activeCatCount');
-                            if (titleEl) titleEl.textContent = cat.title;
-                            if (iconEl) iconEl.textContent = cat.icon;
-                            if (countEl) countEl.textContent = (cat.items ? cat.items.length : 0) + ' سجل';
-
-                            var searchInp = document.getElementById('logSearchInput');
-                            var searchVal = (searchInp && searchInp.value) ? searchInp.value.toLowerCase().trim() : '';
-
-                            var itemsList = cat.items || [];
-                            var filtered = [];
-                            for (var fi = 0; fi < itemsList.length; fi++) {
-                                var itm = itemsList[fi];
-                                var en = isLogEnabled(itm.id);
-                                if (currentFilter === 'enabled' && !en) continue;
-                                if (currentFilter === 'disabled' && en) continue;
-                                if (searchVal) {
-                                    var titleMatch = itm.title && itm.title.toLowerCase().indexOf(searchVal) !== -1;
-                                    var descMatch = itm.desc && itm.desc.toLowerCase().indexOf(searchVal) !== -1;
-                                    if (!titleMatch && !descMatch) continue;
-                                }
-                                filtered.push(itm);
-                            }
-
-                            if (!filtered.length) {
-                                container.innerHTML = '<div class="col-span-full py-12 bg-[#0b0d14] border border-white/5 rounded-3xl text-center text-xs text-gray-500 font-bold">لا توجد سجلات مطابقة للبحث أو الفلتر 🔍</div>';
-                                return;
-                            }
-
-                            var html = '';
-                            for (var i = 0; i < filtered.length; i++) {
-                                var item = filtered[i];
-                                var en = isLogEnabled(item.id);
-                                var customCfg = logsState[item.id] || {};
-                                var customChan = customCfg.channel_id || '';
-                                var customColor = customCfg.color || cat.defaultColor || '#5865F2';
-
-                                html += '<div class="bg-[#121620] border border-[#1e2638] hover:border-violet-500/40 p-4 rounded-2xl flex items-center justify-between transition shadow-md ' + (en ? '' : 'opacity-40') + '" data-log-id="' + item.id + '">';
-
-                                // Left: Toggle + Edit Options Button
-                                html += '<div class="flex items-center gap-2.5">';
-                                html += '<label class="toggle"><input type="checkbox" data-log-checkbox="' + item.id + '" ' + (en ? 'checked' : '') + ' onchange="window.toggleSingleLogEvent(\'' + item.id + '\', this.checked)"><span class="slider"></span></label>';
-                                html += '<button type="button" onclick="window.openEditLogModal(\'' + item.id + '\', \'' + item.title.replace(/'/g, "\\'") + '\', \'' + item.icon + '\')" title="تخصيص القناة واللون" class="w-8 h-8 rounded-xl bg-[#1e2638] hover:bg-violet-600/30 text-violet-400 border border-[#1e2638] hover:border-violet-500/30 flex items-center justify-center text-xs font-bold transition shadow cursor-pointer"><i class="fa-solid fa-gear"></i></button>';
-                                html += '</div>';
-
-                                // Right: Title + description + Icon & Badges
-                                html += '<div class="flex items-center gap-3">';
-                                html += '<div class="text-right">';
-                                html += '<div class="flex items-center justify-end gap-2">';
-                                if (item.isSpecial) html += '<span class="px-2 py-0.5 bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-lg text-[9px] font-bold flex items-center gap-1"><span>بوتات خاصة فقط</span><i class="fa-solid fa-lock text-[8px]"></i></span>';
-                                if (customChan) html += '<span class="px-2 py-0.5 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded-lg text-[9px] font-bold flex items-center gap-1"><span>قناة مخصصة</span><i class="fa-solid fa-hashtag text-[8px]"></i></span>';
-                                html += '<span class="font-bold text-white text-xs">' + item.title + '</span>';
-                                html += '<span class="w-2.5 h-2.5 rounded-full shadow-sm" style="background-color:' + customColor + '" title="لون الإيمبد"></span>';
-                                html += '</div>';
-                                html += '<p class="text-[10px] text-gray-400 mt-0.5">' + item.desc + '</p>';
-                                html += '</div>';
-                                html += '<div class="w-10 h-10 rounded-xl bg-[#0b0e14] border border-[#1e2638] text-gray-200 flex items-center justify-center text-base shadow-inner flex-shrink-0">' + item.icon + '</div>';
-                                html += '</div>';
-                                html += '</div>';
-                            }
-                            container.innerHTML = html;
-                            if (window.zenoI18n && window.zenoI18n.getLang() === 'en') {
-                                try { window.zenoI18n.apply(); } catch(e) {}
-                            }
-                        };
-
-
-                        // Initial render
-                        syncHiddenInput();
-                        var chanSelect = document.getElementById('catDefaultChannel') || document.querySelector('select[name=\"catDefaultChannel\"]');
-                        if (chanSelect) {
-                            chanSelect.addEventListener('change', function() {
-                                var val = this.value;
-                                categoryChannels[currentCategory] = val;
-                                window.saveLogsSetting('log_channel_' + currentCategory, val);
-                            });
-                        }
-
-                        // DEBUG panel - always shows for 30s
-                        var dbgDiv = document.createElement('div');
-                        dbgDiv.style = 'position:fixed;top:70px;right:10px;background:#0b0e14;color:#a0f0a0;padding:10px 14px;border-radius:10px;font-size:11px;z-index:99999;max-width:380px;font-family:monospace;border:1px solid #22c55e;direction:ltr;';
-                        dbgDiv.innerHTML = '<b>[LOGS DEBUG]</b><br>Script started...<br>LOG_CATEGORIES: ' + (typeof LOG_CATEGORIES) + ' keys:' + (typeof LOG_CATEGORIES === 'object' ? Object.keys(LOG_CATEGORIES).length : '?') + '<br>renderLogsGrid: ' + typeof renderLogsGrid + '<br>renderCategoriesSidebar: ' + typeof renderCategoriesSidebar;
-                        document.body.appendChild(dbgDiv);
-
-                        try {
-                            window.switchLogsCategory('members');
-                            var gridEl = document.getElementById('logsCardsGrid');
-                            var catEl = document.getElementById('logsCategoriesList');
-                            dbgDiv.innerHTML += '<br>✅ switchLogsCategory OK'
-                                + '<br>cardsGrid innerHTML.len=' + (gridEl ? gridEl.innerHTML.length : 'MISSING')
-                                + '<br>catList innerHTML.len=' + (catEl ? catEl.innerHTML.length : 'MISSING');
-                        } catch(err) {
-                            dbgDiv.style.borderColor = '#ef4444';
-                            dbgDiv.style.color = '#fca5a5';
-                            dbgDiv.innerHTML += '<br>❌ ERROR: ' + err.message;
-                        }
-                        setTimeout(function() { dbgDiv.remove(); }, 30000);
-
-                        // ============================================================
-                        // CRITICAL FIX: Move modals & toast to <body> level
-                        // The modals use position:fixed but are nested inside a parent
-                        // div with overflow:hidden which clips them in some browsers.
-                        // Moving them to document.body ensures they always overlay
-                        // the full viewport correctly.
-                        // ============================================================
-                        (function moveModalsToBody() {
-                            try {
-                                var ids = ['logs-confirm-modal', 'editLogModal', 'logs-toast-container'];
-                                ids.forEach(function(id) {
-                                    var el = document.getElementById(id);
-                                    if (el && el.parentElement !== document.body) {
-                                        document.body.appendChild(el);
-                                        console.log('[LOGS] Moved #' + id + ' to <body>');
-                                    }
-                                });
-                            } catch(e) {
-                                console.warn('[LOGS] moveModalsToBody failed:', e);
-                            }
-                        })();
-
-                        // ============================================================
-                        // Global error reporter for easy debugging
-                        // ============================================================
-                        window.addEventListener('error', function(e) {
-                            console.error('[LOGS GLOBAL ERROR]', e.message, 'at', e.filename, 'line', e.lineno);
-                            var errDiv = document.createElement('div');
-                            errDiv.style = 'position:fixed;bottom:20px;left:20px;background:#7f1d1d;color:#fca5a5;padding:10px 14px;border-radius:10px;font-size:11px;z-index:99999;max-width:450px;font-family:monospace;direction:ltr;';
-                            errDiv.textContent = '[JS ERROR] ' + e.message + ' (line ' + e.lineno + ')';
-                            document.body.appendChild(errDiv);
-                            setTimeout(function() { errDiv.remove(); }, 15000);
-                        });
-                    // ===== END LOGS SECTION SCRIPT =====
+// ===== ZENO LOGS SCRIPT - FULL REWRITE =====
+// =============================================
+
+// ---- Server-injected state ----
+var _logsGuildId = '${guildId}';
+var logsState = ${JSON.stringify((() => { try { const raw = settings.logs_config; const parsed = raw ? (typeof raw === 'string' ? JSON.parse(raw) : raw) : {}; return (parsed && typeof parsed === 'object') ? parsed : {}; } catch(e) { return {}; } })())};
+var categoryChannels = ${JSON.stringify({
+    members: settings.log_channel_members || settings.log_channel || '',
+    roles: settings.log_channel_roles || settings.log_channel || '',
+    channels: settings.log_channel_channels || settings.log_channel || '',
+    messages: settings.log_channel_messages || settings.log_channel || '',
+    voice: settings.log_channel_voice || settings.log_channel || '',
+    moderation: settings.log_channel_moderation || settings.log_channel || '',
+    server: settings.log_channel_server || settings.log_channel || '',
+    invites: settings.log_channel_invites || settings.log_channel || '',
+    emojis: settings.log_channel_emojis || settings.log_channel || '',
+    events: settings.log_channel_events || settings.log_channel || '',
+    integrations: settings.log_channel_integrations || settings.log_channel || '',
+    automod: settings.log_channel_automod || settings.log_channel || '',
+    stage: settings.log_channel_stage || settings.log_channel || ''
+})};
+
+// ---- UI state ----
+var currentCategory = 'members';
+var currentFilter = 'all';
+var currentEditModalLogId = null;
+var logsHistory = [];
+var logsConfirmCallback = null;
+
+// ---- LOG_CATEGORIES (defined FIRST so all functions below can use it) ----
+var LOG_CATEGORIES = {
+    members: {
+        title: 'الأعضاء', icon: '🎯', desc: 'أحداث دخول وخروج وحظر وعقوبات الأعضاء', defaultColor: '#5865F2',
+        items: [
+            { id: 'member_join', title: 'دخول عضو', desc: 'عند دخول عضو جديد للسيرفر', icon: '📥' },
+            { id: 'member_leave', title: 'خروج عضو', desc: 'عند خروج عضو من السيرفر', icon: '📤' },
+            { id: 'member_ban', title: 'حظر عضو', desc: 'عند حظر عضو من السيرفر', icon: '🪓' },
+            { id: 'member_unban', title: 'فك حظر عضو', desc: 'عند فك حظر عضو', icon: '🔓' },
+            { id: 'member_kick', title: 'طرد عضو', desc: 'عند طرد عضو من السيرفر', icon: '👢' },
+            { id: 'member_prison', title: 'سجن عضو', desc: 'عند سجن عضو', icon: '🔒' },
+            { id: 'member_unprison', title: 'إخراج من السجن', desc: 'عند إخراج عضو من السجن', icon: '🔓' },
+            { id: 'member_timeout', title: 'عزل عضو', desc: 'عند عزل عضو (تايم أوت)', icon: '⏳' },
+            { id: 'member_untimeout', title: 'إزالة العزل', desc: 'عند إزالة العزل عن عضو', icon: '➕' },
+            { id: 'member_mute', title: 'إسكات كتابي', desc: 'عند إسكات عضو كتابياً', icon: '🔇' },
+            { id: 'member_unmute', title: 'إلغاء إسكات كتابي', desc: 'عند إلغاء الإسكات الكتابي', icon: '🔊' },
+            { id: 'member_nick_change', title: 'تغيير الاسم المستعار', desc: 'عند تغيير الاسم المستعار للعضو', icon: '✏️' },
+            { id: 'member_avatar_change', title: 'تغيير الصورة', desc: 'عند تغيير صورة العضو', icon: '🖼️', isSpecial: true },
+            { id: 'member_username_change', title: 'تغيير اسم المستخدم', desc: 'عند تغيير اسم المستخدم للعضو', icon: '👤', isSpecial: true },
+            { id: 'member_boost_add', title: 'بوست السيرفر', desc: 'عند بوست السيرفر من قبل عضو', icon: '💎' },
+            { id: 'member_boost_remove', title: 'إزالة البوست', desc: 'عند إزالة البوست من السيرفر', icon: '🗑️' },
+            { id: 'member_suspicious', title: 'حساب مشبوه', desc: 'عند إسناد رتبة لحساب جديد بسبب عمر الحساب', icon: '🚨' }
+        ]
+    },
+    roles: {
+        title: 'الرتب', icon: '🎖️', desc: 'أحداث إنشاء وتعديل وحذف وإعطاء الرتب', defaultColor: '#5865F2',
+        items: [
+            { id: 'role_create', title: 'إنشاء رتبة', desc: 'عند إنشاء رتبة جديدة', icon: '➕' },
+            { id: 'role_delete', title: 'حذف رتبة', desc: 'عند حذف رتبة', icon: '🗑️' },
+            { id: 'role_update', title: 'تعديل رتبة', desc: 'عند تعديل رتبة', icon: '✏️' },
+            { id: 'role_give_member', title: 'إضافة رتبة لعضو', desc: 'عند إعطاء رتبة لعضو', icon: '🎁' },
+            { id: 'role_remove_member', title: 'إزالة رتبة من عضو', desc: 'عند إزالة رتبة من عضو', icon: '❌' },
+            { id: 'role_custom_manage', title: 'رتبة خاصة', desc: 'تعديل/حذف رتبة خاصة (نفس أمر rlog)', icon: '👑' }
+        ]
+    },
+    channels: {
+        title: 'القنوات', icon: '📌', desc: 'أحداث إنشاء وتعديل وحذف القنوات والثريدات', defaultColor: '#5865F2',
+        items: [
+            { id: 'channel_create', title: 'إنشاء قناة', desc: 'عند إنشاء قناة جديدة', icon: '➕' },
+            { id: 'channel_delete', title: 'حذف قناة', desc: 'عند حذف قناة', icon: '🗑️' },
+            { id: 'channel_update', title: 'تعديل قناة', desc: 'عند تعديل قناة', icon: '✏️' },
+            { id: 'channel_perms_update', title: 'تعديل صلاحيات قناة', desc: 'عند تعديل صلاحيات قناة', icon: '🔒' },
+            { id: 'thread_create', title: 'إنشاء ثريد', desc: 'عند إنشاء ثريد جديد', icon: '💬' },
+            { id: 'thread_delete', title: 'حذف ثريد', desc: 'عند حذف ثريد', icon: '🗑️' },
+            { id: 'thread_update', title: 'تعديل ثريد', desc: 'عند تعديل ثريد', icon: '✏️' }
+        ]
+    },
+    messages: {
+        title: 'الرسائل', icon: '💬', desc: 'أحداث حذف وتعديل وتثبيت ومسح الرسائل', defaultColor: '#5865F2',
+        items: [
+            { id: 'msg_delete', title: 'حذف رسالة', desc: 'عند حذف رسالة', icon: '🗑️' },
+            { id: 'msg_image_delete', title: 'حذف صورة', desc: 'عند حذف رسالة تحتوي على صورة', icon: '🖼️' },
+            { id: 'msg_update', title: 'تعديل رسالة', desc: 'عند تعديل رسالة', icon: '✏️' },
+            { id: 'msg_purge', title: 'حذف رسائل جماعي', desc: 'عند حذف عدة رسائل', icon: 'ℹ️' },
+            { id: 'msg_pin', title: 'تثبيت رسالة', desc: 'عند تثبيت رسالة', icon: 'ℹ️' },
+            { id: 'msg_unpin', title: 'إلغاء تثبيت رسالة', desc: 'عند إلغاء تثبيت رسالة', icon: 'ℹ️' },
+            { id: 'msg_reaction_add', title: 'إضافة تفاعل', desc: 'عند إضافة تفاعل على رسالة', icon: 'ℹ️' },
+            { id: 'msg_reaction_remove', title: 'إزالة تفاعل', desc: 'عند إزالة تفاعل من رسالة', icon: 'ℹ️' },
+            { id: 'msg_reaction_remove_all', title: 'مسح جميع التفاعلات', desc: 'عند مسح جميع التفاعلات', icon: 'ℹ️' }
+        ]
+    },
+    voice: {
+        title: 'الصوت', icon: '🎙️', desc: 'أحداث الرومات الصوتية والكتم والبث والكاميرا', defaultColor: '#5865F2',
+        items: [
+            { id: 'vc_join', title: 'دخول روم صوتي', desc: 'عند دخول عضو لروم صوتي', icon: '⬇️', isSpecial: true },
+            { id: 'vc_leave', title: 'خروج من روم صوتي', desc: 'عند خروج عضو من روم صوتي', icon: '⬆️', isSpecial: true },
+            { id: 'vc_switch', title: 'نقل بين الرومات', desc: 'عند نقل عضو بين الرومات', icon: '🔀', isSpecial: true },
+            { id: 'vc_mute_server', title: 'كتم عضو', desc: 'عند كتم عضو في الصوتي', icon: '⬆️', isSpecial: true },
+            { id: 'vc_unmute_server', title: 'إلغاء كتم عضو', desc: 'عند إلغاء كتم عضو', icon: '🔓', isSpecial: true },
+            { id: 'vc_deafen_server', title: 'إصمات عضو', desc: 'عند إصمات عضو', icon: '🔒', isSpecial: true },
+            { id: 'vc_undeafen_server', title: 'إلغاء إصمات', desc: 'عند إلغاء إصمات عضو', icon: '🔓', isSpecial: true },
+            { id: 'vc_self_mute', title: 'سيلف ميوت', desc: 'عند تفعيل العضو سيلف ميوت', icon: 'ℹ️', isSpecial: true },
+            { id: 'vc_self_unmute', title: 'إلغاء السيلف ميوت', desc: 'عند إلغاء العضو السيلف ميوت', icon: 'ℹ️', isSpecial: true },
+            { id: 'vc_self_deaf', title: 'سيلف ديفن', desc: 'عند تفعيل العضو سيلف ديفن', icon: 'ℹ️', isSpecial: true },
+            { id: 'vc_self_undeaf', title: 'إلغاء السيلف ديفن', desc: 'عند إلغاء العضو السيلف ديفن', icon: '🔓', isSpecial: true },
+            { id: 'vc_stream_start', title: 'بدء بث', desc: 'عند بدء عضو بث مباشر', icon: '🖼️', isSpecial: true },
+            { id: 'vc_stream_stop', title: 'إنهاء بث', desc: 'عند إنهاء البث', icon: '🖼️', isSpecial: true },
+            { id: 'vc_video_start', title: 'تشغيل الكاميرا', desc: 'عند تشغيل الكاميرا', icon: '🖼️', isSpecial: true },
+            { id: 'vc_video_stop', title: 'إيقاف الكاميرا', desc: 'عند إيقاف الكاميرا', icon: '⬆️', isSpecial: true },
+            { id: 'vc_disconnect', title: 'فصل من الصوتية', desc: 'عند فصل عضو من قناة صوتية (بواسطة مشرف)', icon: 'ℹ️', isSpecial: true }
+        ]
+    },
+    moderation: {
+        title: 'الإشراف', icon: '🛡️', desc: 'أحداث التحذيرات والبلوك والبلاك لست', defaultColor: '#5865F2',
+        items: [
+            { id: 'mod_warn_add', title: 'إعطاء تحذير', desc: 'عند إعطاء عضو تحذير', icon: 'ℹ️' },
+            { id: 'mod_warn_remove', title: 'إزالة تحذير', desc: 'عند إزالة تحذير واحد من عضو', icon: 'ℹ️' },
+            { id: 'mod_warn_clear', title: 'مسح التحذيرات', desc: 'عند مسح جميع تحذيرات عضو أو السيرفر', icon: 'ℹ️' },
+            { id: 'mod_block_add', title: 'إعطاء بلوك', desc: 'عند إعطاء عضو بلوك على رتبة', icon: '🗑️' },
+            { id: 'mod_blacklist_add', title: 'إضافة بلاك لست', desc: 'عند إضافة عضو إلى البلاك لست', icon: 'ℹ️' },
+            { id: 'mod_blacklist_remove', title: 'إزالة بلاك لست', desc: 'عند إزالة عضو من البلاك لست', icon: '➕' }
+        ]
+    },
+    server: {
+        title: 'السيرفر', icon: '⚙️', desc: 'أحداث تعديل إعدادات وبنر وبوستات السيرفر', defaultColor: '#5865F2',
+        items: [
+            { id: 'server_update', title: 'تعديل السيرفر', desc: 'عند تعديل إعدادات السيرفر', icon: '✏️', isSpecial: true },
+            { id: 'server_name_change', title: 'تغيير اسم السيرفر', desc: 'عند تغيير اسم السيرفر', icon: '✏️', isSpecial: true },
+            { id: 'server_icon_change', title: 'تغيير أيقونة السيرفر', desc: 'عند تغيير أيقونة السيرفر', icon: '🖼️', isSpecial: true },
+            { id: 'server_banner_change', title: 'تغيير بانر السيرفر', desc: 'عند تغيير بانر السيرفر', icon: '✏️', isSpecial: true },
+            { id: 'server_vanity_change', title: 'تغيير رابط الفانيتي', desc: 'عند تغيير رابط الدعوة المخصص', icon: '✏️', isSpecial: true },
+            { id: 'server_boost_level_up', title: 'رفع مستوى البوست', desc: 'عند رفع مستوى بوست السيرفر', icon: '✏️', isSpecial: true },
+            { id: 'server_boost_level_down', title: 'انخفاض مستوى البوست', desc: 'عند انخفاض مستوى البوست', icon: '✏️', isSpecial: true }
+        ]
+    },
+    invites: {
+        title: 'الدعوات', icon: '🔗', desc: 'أحداث إنشاء وحذف واستخدام روابط الدعوة', defaultColor: '#5865F2',
+        items: [
+            { id: 'invite_create', title: 'إنشاء دعوة', desc: 'عند إنشاء رابط دعوة', icon: '➕' },
+            { id: 'invite_delete', title: 'حذف دعوة', desc: 'عند حذف رابط دعوة', icon: '🗑️' },
+            { id: 'invite_used', title: 'استخدام دعوة', desc: 'عند استخدام رابط دعوة', icon: '🖼️' }
+        ]
+    },
+    emojis: {
+        title: 'الإيموجي والستيكرز', icon: '😃', desc: 'أحداث إضافة وتعديل وحذف الإيموجيات والستيكرات', defaultColor: '#5865F2',
+        items: [
+            { id: 'emoji_create', title: 'إضافة إيموجي', desc: 'عند إضافة إيموجي جديد', icon: '➕', isSpecial: true },
+            { id: 'emoji_delete', title: 'حذف إيموجي', desc: 'عند حذف إيموجي', icon: '🗑️', isSpecial: true },
+            { id: 'emoji_update', title: 'تعديل إيموجي', desc: 'عند تعديل إيموجي', icon: '✏️', isSpecial: true },
+            { id: 'sticker_create', title: 'إضافة ستيكر', desc: 'عند إضافة ستيكر جديد', icon: '🖼️', isSpecial: true },
+            { id: 'sticker_delete', title: 'حذف ستيكر', desc: 'عند حذف ستيكر', icon: '🗑️', isSpecial: true },
+            { id: 'sticker_update', title: 'تعديل ستيكر', desc: 'عند تعديل ستيكر', icon: '✏️', isSpecial: true }
+        ]
+    },
+    events: {
+        title: 'الأحداث', icon: '📅', desc: 'أحداث إنشاء ومجدولة وبدء الأحداث المباشرة بالسيرفر', defaultColor: '#5865F2',
+        items: [
+            { id: 'event_create', title: 'إنشاء حدث', desc: 'عند إنشاء حدث مجدول', icon: '➕', isSpecial: true },
+            { id: 'event_delete', title: 'حذف حدث', desc: 'عند حذف حدث', icon: '🗑️', isSpecial: true },
+            { id: 'event_update', title: 'تعديل حدث', desc: 'عند تعديل حدث', icon: '✏️', isSpecial: true },
+            { id: 'event_start', title: 'بدء حدث', desc: 'عند بدء حدث', icon: '⬇️', isSpecial: true },
+            { id: 'event_end', title: 'انتهاء حدث', desc: 'عند انتهاء حدث', icon: '⬆️', isSpecial: true },
+            { id: 'event_user_interested', title: 'اشتراك في حدث', desc: 'عند اشتراك عضو في حدث', icon: '⬇️', isSpecial: true }
+        ]
+    },
+    integrations: {
+        title: 'التكاملات', icon: '🔌', desc: 'أحداث التكاملات والويب هوك والبوتات', defaultColor: '#5865F2',
+        items: [
+            { id: 'integration_create', title: 'إضافة تكامل', desc: 'عند إضافة تكامل جديد', icon: '➕' },
+            { id: 'integration_delete', title: 'حذف تكامل', desc: 'عند حذف تكامل', icon: '🗑️' },
+            { id: 'integration_update', title: 'تعديل تكامل', desc: 'عند تعديل تكامل', icon: '✏️' },
+            { id: 'webhook_create', title: 'إنشاء ويب هوك', desc: 'عند إنشاء ويب هوك', icon: 'ℹ️' },
+            { id: 'webhook_delete', title: 'حذف ويب هوك', desc: 'عند حذف ويب هوك', icon: '🗑️' },
+            { id: 'webhook_update', title: 'تعديل ويب هوك', desc: 'عند تعديل ويب هوك', icon: '✏️' },
+            { id: 'bot_add', title: 'إضافة بوت', desc: 'عند إضافة بوت للسيرفر', icon: 'ℹ️' },
+            { id: 'bot_remove', title: 'إزالة بوت', desc: 'عند إزالة بوت من السيرفر', icon: '🗑️' }
+        ]
+    },
+    automod: {
+        title: 'الأوتو مود', icon: '🤖', desc: 'أحداث وقواعد الأوتو مود وحظر المحتوى والسبام', defaultColor: '#5865F2',
+        items: [
+            { id: 'automod_rule_create', title: 'إنشاء قاعدة', desc: 'عند إنشاء قاعدة أوتو مود', icon: '➕' },
+            { id: 'automod_rule_delete', title: 'حذف قاعدة', desc: 'عند حذف قاعدة أوتو مود', icon: '🗑️' },
+            { id: 'automod_rule_update', title: 'تعديل قاعدة', desc: 'عند تعديل قاعدة أوتو مود', icon: '✏️' },
+            { id: 'automod_action_trigger', title: 'إجراء أوتو مود', desc: 'عند تنفيذ إجراء أوتو مود', icon: 'ℹ️' },
+            { id: 'automod_content_block', title: 'حظر محتوى', desc: 'عند حظر محتوى تلقائياً', icon: '🗑️' },
+            { id: 'automod_timeout', title: 'عزل تلقائي', desc: 'عند عزل عضو تلقائياً', icon: '🔒' },
+            { id: 'automod_spam_detect', title: 'رقابة السبام', desc: 'عند اكتشاف سبام أو رسائل مكررة أو نص متكرر', icon: 'ℹ️' }
+        ]
+    },
+    stage: {
+        title: 'المنصة', icon: '📢', desc: 'أحداث الرومات التفاعلية والمنصة والمتحدثين', defaultColor: '#5865F2',
+        items: [
+            { id: 'stage_create', title: 'إنشاء منصة', desc: 'عند إنشاء منصة صوتية', icon: '➕', isSpecial: true },
+            { id: 'stage_delete', title: 'حذف منصة', desc: 'عند حذف منصة', icon: '🗑️', isSpecial: true },
+            { id: 'stage_update', title: 'تعديل منصة', desc: 'عند تعديل منصة', icon: '✏️', isSpecial: true },
+            { id: 'stage_speaker_add', title: 'إضافة متحدث', desc: 'عند إضافة متحدث للمنصة', icon: 'ℹ️', isSpecial: true },
+            { id: 'stage_speaker_remove', title: 'إزالة متحدث', desc: 'عند إزالة متحدث', icon: '⬆️', isSpecial: true },
+            { id: 'stage_hand_raise', title: 'طلب التحدث', desc: 'عند طلب عضو التحدث', icon: '⬇️', isSpecial: true }
+        ]
+    }
+};
+
+// ================================================================
+// HELPER FUNCTIONS
+// ================================================================
+
+function isLogEnabled(logId) {
+    var s = logsState[logId];
+    if (!s) return false;
+    return s.enabled === true || s.enabled === 1 || s.enabled === '1';
+}
+
+function showToast(message, type) {
+    var container = document.getElementById('logs-toast-container');
+    if (!container) return;
+    var bgMap = {
+        success: 'bg-emerald-900/90 border-emerald-500/50 text-emerald-200',
+        danger:  'bg-red-900/90 border-red-500/50 text-red-200',
+        info:    'bg-violet-900/90 border-violet-500/50 text-violet-200'
+    };
+    var iconMap = {
+        success: 'fa-circle-check',
+        danger:  'fa-triangle-exclamation',
+        info:    'fa-circle-info'
+    };
+    var t = type || 'success';
+    var toast = document.createElement('div');
+    toast.className = 'pointer-events-auto border rounded-xl p-4 shadow-2xl flex items-center justify-between gap-3 backdrop-blur-md transition-all duration-300 transform translate-y-2 opacity-0 ' + (bgMap[t] || bgMap.info);
+    toast.innerHTML = '<div class="flex items-center gap-3"><i class="fa-solid ' + (iconMap[t] || 'fa-circle-info') + ' text-lg"></i><span class="text-xs font-bold">' + message + '</span></div><button type="button" class="text-xs opacity-70 hover:opacity-100 transition">✕</button>';
+    container.appendChild(toast);
+    setTimeout(function() { toast.classList.remove('translate-y-2', 'opacity-0'); }, 10);
+    var removeToast = function() {
+        toast.classList.add('translate-y-2', 'opacity-0');
+        setTimeout(function() { if (toast.parentNode) toast.parentNode.removeChild(toast); }, 300);
+    };
+    toast.querySelector('button').addEventListener('click', removeToast);
+    setTimeout(removeToast, 3500);
+}
+
+function showSavedBanner(msg) {
+    showToast(msg || '✓ حُفظت التغييرات في سيرفر الديسكورد بنجاح', 'success');
+}
+
+function saveToLogsHistory(action, data) {
+    logsHistory.push({ action: action, data: data, timestamp: Date.now() });
+    if (logsHistory.length > 20) logsHistory.shift();
+    updateUndoBtn();
+}
+
+function updateUndoBtn() {
+    var btn = document.getElementById('logs-btn-undo');
+    if (btn) btn.disabled = logsHistory.length === 0;
+}
+
+function showLogsConfirm(message, callback) {
+    var modal = document.getElementById('logs-confirm-modal');
+    var msgEl = document.getElementById('logs-confirm-msg');
+    if (!modal) { if (confirm(message)) callback(); return; }
+    if (msgEl) msgEl.textContent = message;
+    logsConfirmCallback = callback;
+    modal.classList.remove('hidden');
+}
+
+function hideLogsConfirm() {
+    var modal = document.getElementById('logs-confirm-modal');
+    if (modal) modal.classList.add('hidden');
+    logsConfirmCallback = null;
+}
+
+function syncHiddenInput() {
+    var hiddenInp = document.getElementById('hidden_logs_config');
+    if (hiddenInp) hiddenInp.value = JSON.stringify(logsState);
+}
+
+function saveLogsConfigToServer(extraPayload, successMsg) {
+    syncHiddenInput();
+    if (!_logsGuildId) return;
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', '/api/guild/' + _logsGuildId + '/settings', true);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.onload = function() {
+        try { if (JSON.parse(xhr.responseText).success) showSavedBanner(successMsg); } catch(e) {}
+    };
+    var body = { logs_config: JSON.stringify(logsState) };
+    if (extraPayload && typeof extraPayload === 'object') Object.assign(body, extraPayload);
+    xhr.send(JSON.stringify(body));
+}
+
+function updateGlobalStats() {
+    var total = 0, enabled = 0, channelsSet = [];
+    var catKeys = Object.keys(LOG_CATEGORIES);
+    for (var i = 0; i < catKeys.length; i++) {
+        var items = LOG_CATEGORIES[catKeys[i]].items || [];
+        total += items.length;
+        for (var j = 0; j < items.length; j++) {
+            var id = items[j].id;
+            if (isLogEnabled(id)) enabled++;
+            if (logsState[id] && logsState[id].channel_id && channelsSet.indexOf(logsState[id].channel_id) === -1) {
+                channelsSet.push(logsState[id].channel_id);
+            }
+        }
+    }
+    var e1 = document.getElementById('statEnabledLogs');
+    var e2 = document.getElementById('statChannelsUsed');
+    if (e1) e1.textContent = enabled;
+    if (e2) e2.textContent = channelsSet.length;
+}
+
+function renderCategoriesSidebar() {
+    var container = document.getElementById('logsCategoriesList');
+    if (!container) return;
+    var catKeys = Object.keys(LOG_CATEGORIES);
+    var html = '';
+    var visibleCats = 0;
+    for (var k = 0; k < catKeys.length; k++) {
+        var key = catKeys[k];
+        var cat = LOG_CATEGORIES[key];
+        var isSel = (key === currentCategory);
+        var totalItems = cat.items ? cat.items.length : 0;
+        var enabledItems = 0;
+        for (var j = 0; j < (cat.items || []).length; j++) {
+            if (isLogEnabled(cat.items[j].id)) enabledItems++;
+        }
+        if (currentFilter === 'enabled' && enabledItems === 0) continue;
+        if (currentFilter === 'disabled' && enabledItems === totalItems && totalItems > 0) continue;
+        visibleCats++;
+        var badgeClass = enabledItems === 0
+            ? 'px-2 py-0.5 bg-red-500/10 text-red-400 border border-red-500/20 rounded-lg text-[10px] font-mono'
+            : (enabledItems === totalItems
+                ? 'px-2 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-lg text-[10px] font-mono'
+                : 'px-2 py-0.5 bg-violet-500/10 text-violet-300 border border-violet-500/20 rounded-lg text-[10px] font-mono');
+        html += '<button type="button" onclick="window.switchLogsCategory(\\'' + key + '\\')" class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition cursor-pointer ' + (isSel ? 'bg-violet-600 text-white shadow-lg' : 'text-gray-400 hover:text-white hover:bg-[#181e2c]') + '">';
+        html += '<span class="' + badgeClass + '">' + enabledItems + '/' + totalItems + '</span>';
+        html += '<span class="flex items-center gap-2"><span>' + cat.title + '</span><span>' + cat.icon + '</span></span>';
+        html += '</button>';
+    }
+    if (visibleCats === 0) {
+        html = '<div class="py-4 text-center text-xs text-gray-500 font-bold">لا توجد أقسام مطابقة للفلتر 🔍</div>';
+    }
+    container.innerHTML = html;
+    updateGlobalStats();
+}
+
+function renderLogsGrid() {
+    var container = document.getElementById('logsCardsGrid');
+    if (!container) { console.warn('[LOGS] logsCardsGrid not found'); return; }
+    var cat = LOG_CATEGORIES[currentCategory] || LOG_CATEGORIES.members;
+    var titleEl = document.getElementById('activeCatTitle');
+    var iconEl  = document.getElementById('activeCatIcon');
+    var countEl = document.getElementById('activeCatCount');
+    if (titleEl) titleEl.textContent = cat.title;
+    if (iconEl)  iconEl.textContent  = cat.icon;
+    if (countEl) countEl.textContent = (cat.items ? cat.items.length : 0) + ' سجل';
+    var searchInp = document.getElementById('logSearchInput');
+    var searchVal = (searchInp && searchInp.value) ? searchInp.value.toLowerCase().trim() : '';
+    var itemsList = cat.items || [];
+    var filtered = [];
+    for (var fi = 0; fi < itemsList.length; fi++) {
+        var itm = itemsList[fi];
+        var en = isLogEnabled(itm.id);
+        if (currentFilter === 'enabled' && !en) continue;
+        if (currentFilter === 'disabled' && en) continue;
+        if (searchVal) {
+            var tMatch = itm.title && itm.title.toLowerCase().indexOf(searchVal) !== -1;
+            var dMatch = itm.desc  && itm.desc.toLowerCase().indexOf(searchVal) !== -1;
+            if (!tMatch && !dMatch) continue;
+        }
+        filtered.push(itm);
+    }
+    if (!filtered.length) {
+        container.innerHTML = '<div class="col-span-full py-12 bg-[#0b0d14] border border-white/5 rounded-3xl text-center text-xs text-gray-500 font-bold">لا توجد سجلات مطابقة للبحث أو الفلتر 🔍</div>';
+        return;
+    }
+    var html = '';
+    for (var i = 0; i < filtered.length; i++) {
+        var item = filtered[i];
+        var enabled = isLogEnabled(item.id);
+        var customCfg   = logsState[item.id] || {};
+        var customChan  = customCfg.channel_id || '';
+        var customColor = customCfg.color || cat.defaultColor || '#5865F2';
+        var safetitle   = (item.title || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+        var safeicon    = (item.icon  || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+        html += '<div class="bg-[#121620] border border-[#1e2638] hover:border-violet-500/40 p-4 rounded-2xl flex items-center justify-between transition shadow-md ' + (enabled ? '' : 'opacity-40') + '" data-log-id="' + item.id + '">';
+        html += '<div class="flex items-center gap-2.5">';
+        html += '<label class="toggle"><input type="checkbox" data-log-checkbox="' + item.id + '" ' + (enabled ? 'checked' : '') + ' onchange="window.toggleSingleLogEvent(\\'' + item.id + '\\', this.checked)"><span class="slider"></span></label>';
+        html += '<button type="button" onclick="window.openEditLogModal(\\'' + item.id + '\\', \\'' + safetitle + '\\', \\'' + safeicon + '\\')" title="تخصيص القناة واللون" class="w-8 h-8 rounded-xl bg-[#1e2638] hover:bg-violet-600/30 text-violet-400 border border-[#1e2638] hover:border-violet-500/30 flex items-center justify-center text-xs font-bold transition shadow cursor-pointer"><i class="fa-solid fa-gear"></i></button>';
+        html += '</div>';
+        html += '<div class="flex items-center gap-3">';
+        html += '<div class="text-right">';
+        html += '<div class="flex items-center justify-end gap-2">';
+        if (item.isSpecial) html += '<span class="px-2 py-0.5 bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-lg text-[9px] font-bold flex items-center gap-1"><span>بوتات خاصة فقط</span><i class="fa-solid fa-lock text-[8px]"></i></span>';
+        if (customChan)     html += '<span class="px-2 py-0.5 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded-lg text-[9px] font-bold flex items-center gap-1"><span>قناة مخصصة</span><i class="fa-solid fa-hashtag text-[8px]"></i></span>';
+        html += '<span class="font-bold text-white text-xs">' + item.title + '</span>';
+        html += '<span class="w-2.5 h-2.5 rounded-full shadow-sm" style="background-color:' + customColor + '" title="لون الإيمبد"></span>';
+        html += '</div>';
+        html += '<p class="text-[10px] text-gray-400 mt-0.5">' + item.desc + '</p>';
+        html += '</div>';
+        html += '<div class="w-10 h-10 rounded-xl bg-[#0b0e14] border border-[#1e2638] text-gray-200 flex items-center justify-center text-base shadow-inner flex-shrink-0">' + item.icon + '</div>';
+        html += '</div>';
+        html += '</div>';
+    }
+    container.innerHTML = html;
+}
+
+// ================================================================
+// WINDOW FUNCTIONS (callable from onclick attributes)
+// ================================================================
+
+window.switchLogsCategory = function(catKey) {
+    currentCategory = catKey;
+    var chanSelect = document.getElementById('catDefaultChannel');
+    if (chanSelect && categoryChannels[catKey] !== undefined) {
+        chanSelect.value = categoryChannels[catKey];
+    }
+    var catDefColor = (LOG_CATEGORIES[catKey] && LOG_CATEGORIES[catKey].defaultColor) ? LOG_CATEGORIES[catKey].defaultColor : '#5865F2';
+    var hexEl   = document.getElementById('catColorHex');
+    var pickEl  = document.getElementById('catColorPicker');
+    var prevBox = document.getElementById('catColorPreviewBox');
+    if (hexEl)   hexEl.value = catDefColor;
+    if (pickEl)  pickEl.value = catDefColor;
+    if (prevBox) prevBox.style.backgroundColor = catDefColor;
+    renderCategoriesSidebar();
+    renderLogsGrid();
+};
+
+window.toggleLogsCategoriesDropdown = function() {
+    var list  = document.getElementById('logsCategoriesList');
+    var arrow = document.getElementById('logsCategoriesDropdownArrow');
+    if (!list) return;
+    if (list.classList.contains('hidden')) {
+        list.classList.remove('hidden');
+        if (arrow) arrow.className = 'fa-solid fa-chevron-down text-gray-400 text-xs';
+    } else {
+        list.classList.add('hidden');
+        if (arrow) arrow.className = 'fa-solid fa-chevron-left text-gray-400 text-xs';
+    }
+};
+
+window.filterLogsByStatus = function(status) {
+    currentFilter = status;
+    var btnAll = document.getElementById('btnLogFilterAll');
+    var btnEn  = document.getElementById('btnLogFilterEnabled');
+    var btnDis = document.getElementById('btnLogFilterDisabled');
+    var ac = 'filter-tab px-4 py-2 rounded-lg text-xs font-bold bg-violet-600 text-white shadow-md transition cursor-pointer';
+    var ic = 'filter-tab px-4 py-2 rounded-lg text-xs font-bold text-gray-400 hover:text-white transition cursor-pointer';
+    if (btnAll) btnAll.className = (status === 'all')      ? ac : ic;
+    if (btnEn)  btnEn.className  = (status === 'enabled')  ? ac : ic;
+    if (btnDis) btnDis.className = (status === 'disabled') ? ac : ic;
+    renderCategoriesSidebar();
+    renderLogsGrid();
+};
+
+window.searchLogsItems = function() {
+    renderLogsGrid();
+};
+
+window.toggleSingleLogEvent = function(logId, enable) {
+    var was = isLogEnabled(logId);
+    saveToLogsHistory('toggleLog', { id: logId, was: was, is: enable });
+    if (!logsState[logId]) logsState[logId] = {};
+    logsState[logId].enabled = enable;
+    var card = document.querySelector('div[data-log-id="' + logId + '"]');
+    if (card) {
+        if (enable) card.classList.remove('opacity-40');
+        else        card.classList.add('opacity-40');
+    }
+    renderCategoriesSidebar();
+    saveLogsConfigToServer();
+};
+
+window.toggleActiveCategoryLogs = function(enable) {
+    var cat = LOG_CATEGORIES[currentCategory];
+    if (!cat || !cat.items) return;
+    saveToLogsHistory('toggleCat', { snapshot: JSON.parse(JSON.stringify(logsState)) });
+    for (var i = 0; i < cat.items.length; i++) {
+        var id = cat.items[i].id;
+        if (!logsState[id]) logsState[id] = {};
+        logsState[id].enabled = enable;
+    }
+    renderCategoriesSidebar();
+    renderLogsGrid();
+    saveLogsConfigToServer();
+};
+
+window.toggleAllLogsGlobally = function(enable) {
+    saveToLogsHistory('toggleAll', { snapshot: JSON.parse(JSON.stringify(logsState)) });
+    var catKeys = Object.keys(LOG_CATEGORIES);
+    for (var i = 0; i < catKeys.length; i++) {
+        var items = LOG_CATEGORIES[catKeys[i]].items || [];
+        for (var j = 0; j < items.length; j++) {
+            var id = items[j].id;
+            if (!logsState[id]) logsState[id] = {};
+            logsState[id].enabled = enable;
+        }
+    }
+    renderCategoriesSidebar();
+    renderLogsGrid();
+    saveLogsConfigToServer();
+};
+
+window.applyCatSettingsToAll = function() {
+    var cat = LOG_CATEGORIES[currentCategory];
+    if (!cat || !cat.items) return;
+    var colorInp = document.getElementById('catColorHex');
+    var color = colorInp ? colorInp.value : '#5865F2';
+    var chanInp = document.getElementById('catDefaultChannel');
+    var chan = chanInp ? chanInp.value : '';
+    var appliedCount = 0;
+    for (var i = 0; i < cat.items.length; i++) {
+        var id = cat.items[i].id;
+        if (!isLogEnabled(id)) continue;
+        if (!logsState[id]) logsState[id] = { enabled: true };
+        if (color) logsState[id].color = color;
+        if (chan)  logsState[id].channel_id = chan;
+        appliedCount++;
+    }
+    if (chan) categoryChannels[currentCategory] = chan;
+    if (appliedCount === 0) {
+        showToast('⚠️ لا توجد سجلات مفعلة في القسم الحالي لتطبيق الإعدادات عليها!', 'danger');
+        return;
+    }
+    showToast('✨ تم تطبيق القناة واللون بنجاح على ' + appliedCount + ' سجل', 'success');
+    renderCategoriesSidebar();
+    renderLogsGrid();
+    var extra = {};
+    if (chan) extra['log_channel_' + currentCategory] = chan;
+    saveLogsConfigToServer(extra);
+};
+
+window.openEditLogModal = function(logId, title, icon) {
+    currentEditModalLogId = logId;
+    var modal    = document.getElementById('editLogModal');
+    var titleEl  = document.getElementById('modalLogTitle');
+    var iconEl   = document.getElementById('modalLogIcon');
+    var chanEl   = document.getElementById('modalLogChannel');
+    var colorHex = document.getElementById('modalLogColorHex');
+    var colorPkr = document.getElementById('modalLogColorPicker');
+    var prevBox  = document.getElementById('modalColorPreviewBox');
+    if (titleEl) titleEl.textContent = title || 'تخصيص السجل';
+    if (iconEl)  iconEl.textContent  = icon  || '📜';
+    var cfg = logsState[logId] || {};
+    if (chanEl)   chanEl.value = cfg.channel_id || '';
+    var col = cfg.color || '#5865F2';
+    if (colorHex) colorHex.value = col;
+    if (colorPkr) colorPkr.value = col;
+    if (prevBox)  prevBox.style.backgroundColor = col;
+    if (modal) modal.classList.remove('hidden');
+};
+
+window.closeEditLogModal = function() {
+    var modal = document.getElementById('editLogModal');
+    if (modal) modal.classList.add('hidden');
+    currentEditModalLogId = null;
+};
+
+window.saveModalLogConfig = function() {
+    if (!currentEditModalLogId) return;
+    var chanEl   = document.getElementById('modalLogChannel');
+    var colorHex = document.getElementById('modalLogColorHex');
+    if (!logsState[currentEditModalLogId]) logsState[currentEditModalLogId] = { enabled: true };
+    logsState[currentEditModalLogId].channel_id = chanEl ? chanEl.value : '';
+    logsState[currentEditModalLogId].color = colorHex ? colorHex.value : '#5865F2';
+    saveLogsConfigToServer(null, '✓ تم حفظ تخصيص السجل بنجاح');
+    window.closeEditLogModal();
+    renderCategoriesSidebar();
+    renderLogsGrid();
+};
+
+window.saveLogsSetting = function(key, val) {
+    if (!_logsGuildId) return;
+    var body = {};
+    body[key] = (typeof val === 'boolean') ? (val ? 1 : 0) : val;
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', '/api/guild/' + _logsGuildId + '/settings', true);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.onload = function() {
+        try {
+            if (JSON.parse(xhr.responseText).success) {
+                showToast(val ? '✓ تم تفعيل السجلات بنجاح' : '✕ تم تعطيل السجلات', val ? 'success' : 'danger');
+            }
+        } catch(e) {}
+    };
+    xhr.send(JSON.stringify(body));
+};
+
+window.saveLogsConfigToServer = saveLogsConfigToServer;
+
+window.autoSetupLogsChannels = function(mode) {
+    var modeTitle = mode === 'grouped' ? 'القنوات العادية (قسم لكل قناة)' : 'القنوات المفصلة (قناة لكل نوع سجل)';
+    showLogsConfirm('هل تريد إنشاء قنوات السجلات تلقائياً بالسيرفر بنظام: ' + modeTitle + '؟', function() {
+        showToast('🚀 جاري إنشاء قنوات السجلات تلقائياً في السيرفر...', 'info');
+        fetch('/api/guild/' + _logsGuildId + '/logs/auto-setup', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ mode: mode })
+        }).then(function(res) { return res.json(); }).then(function(d) {
+            if (d.success) {
+                showToast('✓ تم إنشاء وتوزيع قنوات السجلات بنجاح في السيرفر!', 'success');
+                setTimeout(function() { location.reload(); }, 1200);
+            } else {
+                showToast('✕ ' + (d.error || 'فشل إنشاء القنوات'), 'danger');
+            }
+        }).catch(function() { showToast('✕ حدث خطأ في الاتصال بالخادم', 'danger'); });
+    });
+};
+
+window.deleteLogsChannels = function() {
+    showLogsConfirm('هل أنت متأكد من حذف كاتيجوري وقنوات سجلات ZENO نهائياً؟ هذه العملية لا يمكن التراجع عنها.', function() {
+        showToast('🗑️ جاري حذف كاتيغوري وقنوات السجلات...', 'danger');
+        fetch('/api/guild/' + _logsGuildId + '/logs/delete-channels', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        }).then(function(res) { return res.json(); }).then(function(d) {
+            if (d.success) {
+                showToast('✓ تم حذف قنوات السجلات بنجاح', 'success');
+                setTimeout(function() { location.reload(); }, 1200);
+            } else {
+                showToast('✕ ' + (d.error || 'فشل الحذف'), 'danger');
+            }
+        }).catch(function() { showToast('✕ حدث خطأ في الاتصال', 'danger'); });
+    });
+};
+
+// ================================================================
+// EVENT LISTENERS (attached via JS, not onclick attributes)
+// ================================================================
+
+// Confirmation modal buttons
+(function() {
+    var ok     = document.getElementById('logs-confirm-ok');
+    var cancel = document.getElementById('logs-confirm-cancel');
+    if (ok)     ok.addEventListener('click', function() { if (logsConfirmCallback) logsConfirmCallback(); hideLogsConfirm(); });
+    if (cancel) cancel.addEventListener('click', hideLogsConfirm);
+})();
+
+// Undo button
+(function() {
+    var undoBtn = document.getElementById('logs-btn-undo');
+    if (undoBtn) {
+        undoBtn.addEventListener('click', function() {
+            if (logsHistory.length === 0) return;
+            var last = logsHistory.pop();
+            updateUndoBtn();
+            if (last.action === 'toggleLog' && last.data) {
+                var id = last.data.id;
+                if (!logsState[id]) logsState[id] = {};
+                logsState[id].enabled = last.data.was;
+                var cb = document.querySelector('input[data-log-checkbox="' + id + '"]');
+                if (cb) cb.checked = last.data.was;
+                renderCategoriesSidebar();
+                renderLogsGrid();
+                saveLogsConfigToServer();
+            } else if (last.action === 'toggleAll' || last.action === 'toggleCat') {
+                if (last.data && last.data.snapshot) {
+                    logsState = last.data.snapshot;
+                    renderCategoriesSidebar();
+                    renderLogsGrid();
+                    saveLogsConfigToServer();
+                }
+            }
+            showToast('↶ تم التراجع عن: ' + last.action, 'info');
+        });
+    }
+})();
+
+// Export button
+(function() {
+    var exportBtn = document.getElementById('logs-btn-export');
+    if (exportBtn) {
+        exportBtn.addEventListener('click', function() {
+            try {
+                var exportData = { timestamp: new Date().toISOString(), guildId: _logsGuildId, logsState: logsState, categoryChannels: categoryChannels };
+                var dataStr = JSON.stringify(exportData, null, 2);
+                var blob = new Blob([dataStr], { type: 'application/json' });
+                var url = URL.createObjectURL(blob);
+                var link = document.createElement('a');
+                link.href = url;
+                link.download = 'zeno-logs-settings-' + Date.now() + '.json';
+                link.click();
+                URL.revokeObjectURL(url);
+                showToast('📥 تم تصدير إعدادات السجلات بنجاح', 'success');
+            } catch(e) {
+                showToast('خطأ في التصدير', 'danger');
+            }
+        });
+    }
+})();
+
+// Channel select per category
+(function() {
+    var chanSelect = document.getElementById('catDefaultChannel');
+    if (chanSelect) {
+        chanSelect.addEventListener('change', function() {
+            var val = this.value;
+            categoryChannels[currentCategory] = val;
+            window.saveLogsSetting('log_channel_' + currentCategory, val);
+        });
+    }
+})();
+
+// Color pickers sync
+(function() {
+    var catColorPicker = document.getElementById('catColorPicker');
+    var catColorHex    = document.getElementById('catColorHex');
+    var catColorPrev   = document.getElementById('catColorPreviewBox');
+    if (catColorPicker) {
+        catColorPicker.addEventListener('input', function() {
+            if (catColorHex)  catColorHex.value = this.value;
+            if (catColorPrev) catColorPrev.style.backgroundColor = this.value;
+        });
+    }
+    if (catColorHex) {
+        catColorHex.addEventListener('input', function() {
+            if (catColorPicker) catColorPicker.value = this.value;
+            if (catColorPrev)   catColorPrev.style.backgroundColor = this.value;
+        });
+    }
+    var modalColorPicker = document.getElementById('modalLogColorPicker');
+    var modalColorHex    = document.getElementById('modalLogColorHex');
+    var modalColorPrev   = document.getElementById('modalColorPreviewBox');
+    if (modalColorPicker) {
+        modalColorPicker.addEventListener('input', function() {
+            if (modalColorHex)  modalColorHex.value = this.value;
+            if (modalColorPrev) modalColorPrev.style.backgroundColor = this.value;
+        });
+    }
+    if (modalColorHex) {
+        modalColorHex.addEventListener('input', function() {
+            if (modalColorPicker) modalColorPicker.value = this.value;
+            if (modalColorPrev)   modalColorPrev.style.backgroundColor = this.value;
+        });
+    }
+})();
+
+// ================================================================
+// INITIAL RENDER
+// ================================================================
+syncHiddenInput();
+window.switchLogsCategory('members');
+console.log('[ZENO LOGS] Script loaded successfully. logsState keys:', Object.keys(logsState).length, '| LOG_CATEGORIES keys:', Object.keys(LOG_CATEGORIES).length);
+// ===== END LOGS SECTION SCRIPT =====
                 `;
+
+
             } else if (section === 'help') {
                 title = 'قائمة الأوامر الكاملة 📚';
                 // All commands data for the help page
@@ -10494,12 +10368,9 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                 }
                 </script>
                 ${embedScriptHtml ? `<script>
-(function() {
-try {
 ${embedScriptHtml}
-} catch(___e) { console.error('[Logs Script] Fatal error:', ___e); }
-})();
 </script>` : ''}
+
             </body>
             </html>
             `);
