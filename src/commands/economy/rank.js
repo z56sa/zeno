@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, AttachmentBuilder } = require('discord.js');
+﻿const { SlashCommandBuilder, AttachmentBuilder } = require('discord.js');
 const db = require('../../database');
 const canvasUtil = require('../../utils/canvas');
 
@@ -12,6 +12,10 @@ module.exports = {
     .addUserOption(opt => opt.setName('user').setDescription('العضو المراد فحص مستواه').setRequired(false)),
 
   async execute(interaction) {
+    const settings = db.getGuildSettings(interaction.guild.id);
+    if (settings.leveling_enabled === 0) {
+      return interaction.reply({ content: '❌ نظام المستويات واللفل معطل في هذا السيرفر حالياً.', ephemeral: true });
+    }
     await interaction.deferReply();
 
     const targetUser = interaction.options.getUser('user') || interaction.user;
@@ -26,6 +30,10 @@ module.exports = {
   },
 
   async executePrefix(message, args) {
+    const settings = db.getGuildSettings(message.guild.id);
+    if (settings.leveling_enabled === 0) {
+      return message.reply('❌ نظام المستويات واللفل معطل في هذا السيرفر حالياً.');
+    }
     const targetUser = message.mentions.users.first() ||
                        (args[0] ? await message.client.users.fetch(args[0]).catch(() => null) : null) ||
                        message.author;

@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+﻿const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const db = require('../../database');
 const config = require('../../config.json');
 
@@ -21,12 +21,20 @@ module.exports = {
 
   async execute(interaction) {
     const type = interaction.options.getString('type') || 'xp';
+    const settings = db.getGuildSettings(interaction.guild.id);
+    if (type === 'xp' && settings.leveling_enabled === 0) {
+      return interaction.reply({ content: '❌ نظام المستويات واللفل معطل في هذا السيرفر حالياً.', ephemeral: true });
+    }
     const embed = await this.buildEmbed(interaction.guild, type);
     await interaction.reply({ embeds: [embed] });
   },
 
   async executePrefix(message, args) {
     const type = args[0]?.toLowerCase() === 'credits' || args[0]?.toLowerCase() === 'credit' || args[0]?.toLowerCase() === 'star' || args[0]?.toLowerCase() === 'coins' ? 'credits' : 'xp';
+    const settings = db.getGuildSettings(message.guild.id);
+    if (type === 'xp' && settings.leveling_enabled === 0) {
+      return message.reply('❌ نظام المستويات واللفل معطل في هذا السيرفر حالياً.');
+    }
     const embed = await this.buildEmbed(message.guild, type);
     await message.reply({ embeds: [embed] });
   },
