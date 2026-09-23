@@ -2701,7 +2701,26 @@
 
     // Translate DOM tree nodes
     function translateNode(node, lang) {
+        if (!node) return;
+
+        // Avoid translating script, style, code elements, or manually handled bilingual elements
+        if (node.nodeType === Node.ELEMENT_NODE) {
+            if (node.tagName === 'SCRIPT' || node.tagName === 'STYLE' || node.tagName === 'CODE') {
+                return;
+            }
+            if (node.classList && (node.classList.contains('lang-ar') || node.classList.contains('lang-en') || node.classList.contains('lang-ar-block') || node.classList.contains('lang-en-block'))) {
+                return;
+            }
+        }
+
         if (node.nodeType === Node.TEXT_NODE) {
+            const parent = node.parentElement;
+            if (parent) {
+                if (parent.closest && parent.closest('.lang-ar, .lang-en, .lang-ar-block, .lang-en-block, script, style, code')) {
+                    return;
+                }
+            }
+
             let text = node.textContent;
             let trimmed = text.trim();
             if (!trimmed) return;
@@ -2742,14 +2761,6 @@
                     node.textContent = node._zenoOriginalAr;
                 }
             }
-            return;
-        }
-
-        // Avoid translating script, style, code elements, or manually handled bilingual elements
-        if (node.tagName === 'SCRIPT' || node.tagName === 'STYLE' || node.tagName === 'CODE') {
-            return;
-        }
-        if (node.classList && (node.classList.contains('lang-ar') || node.classList.contains('lang-en') || node.classList.contains('lang-ar-block') || node.classList.contains('lang-en-block'))) {
             return;
         }
 
