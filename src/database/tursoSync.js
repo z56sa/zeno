@@ -13,7 +13,7 @@ class TursoSync {
     this.syncQueue = [];
     this.isProcessingQueue = false;
 
-    const url = (process.env.TURSO_DATABASE_URL || '').trim();
+    const url = (process.env.TURSO_DATABASE_URL || process.env.TURSO_DATABASE_UR || '').trim();
     const authToken = (process.env.TURSO_AUTH_TOKEN || '').trim();
 
     if (url && (url.startsWith('libsql://') || url.startsWith('https://'))) {
