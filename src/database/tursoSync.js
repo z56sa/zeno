@@ -47,8 +47,10 @@ class TursoSync {
           xp INTEGER DEFAULT 0,
           level INTEGER DEFAULT 1,
           coins INTEGER DEFAULT 0,
+          bank_balance INTEGER DEFAULT 0,
           reputation INTEGER DEFAULT 0,
           last_daily INTEGER DEFAULT 0,
+          last_work INTEGER DEFAULT 0,
           last_message_xp INTEGER DEFAULT 0,
           wallpaper TEXT DEFAULT 'default',
           warnings INTEGER DEFAULT 0,
@@ -56,6 +58,10 @@ class TursoSync {
           PRIMARY KEY (user_id, guild_id)
         );
       `);
+
+      // Add columns safely if table already existed
+      try { await this.client.execute("ALTER TABLE users ADD COLUMN bank_balance INTEGER DEFAULT 0;"); } catch (e) {}
+      try { await this.client.execute("ALTER TABLE users ADD COLUMN last_work INTEGER DEFAULT 0;"); } catch (e) {}
 
       await this.client.execute(`
         CREATE TABLE IF NOT EXISTS guild_settings (
@@ -74,13 +80,15 @@ class TursoSync {
       if (usersResult.rows && usersResult.rows.length > 0) {
         console.log(`[TURSO] 🔄 Restoring ${usersResult.rows.length} users from Turso into local SQLite...`);
         const insertOrReplace = localDb.prepare(`
-          INSERT INTO users (user_id, guild_id, xp, level, coins, reputation, last_daily, last_message_xp, wallpaper, warnings, streak)
-          VALUES (@user_id, @guild_id, @xp, @level, @coins, @reputation, @last_daily, @last_message_xp, @wallpaper, @warnings, @streak)
+          INSERT INTO users (user_id, guild_id, xp, level, coins, bank_balance, reputation, last_daily, last_work, last_message_xp, wallpaper, warnings, streak)
+          VALUES (@user_id, @guild_id, @xp, @level, @coins, @bank_balance, @reputation, @last_daily, @last_work, @last_message_xp, @wallpaper, @warnings, @streak)
           ON CONFLICT(user_id, guild_id) DO UPDATE SET
             coins = MAX(users.coins, excluded.coins),
+            bank_balance = MAX(users.bank_balance, excluded.bank_balance),
             xp = MAX(users.xp, excluded.xp),
             level = MAX(users.level, excluded.level),
             last_daily = MAX(users.last_daily, excluded.last_daily),
+            last_work = MAX(users.last_work, excluded.last_work),
             streak = MAX(users.streak, excluded.streak);
         `);
 
@@ -92,8 +100,10 @@ class TursoSync {
               xp: Number(row.xp || 0),
               level: Number(row.level || 1),
               coins: Number(row.coins || 0),
+              bank_balance: Number(row.bank_balance || 0),
               reputation: Number(row.reputation || 0),
               last_daily: Number(row.last_daily || 0),
+              last_work: Number(row.last_work || 0),
               last_message_xp: Number(row.last_message_xp || 0),
               wallpaper: String(row.wallpaper || 'default'),
               warnings: Number(row.warnings || 0),
@@ -121,13 +131,15 @@ class TursoSync {
     if (!this.enabled || !this.client || !userData || !userData.user_id) return;
 
     const sql = `
-      INSERT INTO users (user_id, guild_id, xp, level, coins, reputation, last_daily, last_message_xp, wallpaper, warnings, streak)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO users (user_id, guild_id, xp, level, coins, bank_balance, reputation, last_daily, last_work, last_message_xp, wallpaper, warnings, streak)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       ON CONFLICT(user_id, guild_id) DO UPDATE SET
         coins = excluded.coins,
+        bank_balance = excluded.bank_balance,
         xp = excluded.xp,
         level = excluded.level,
         last_daily = excluded.last_daily,
+        last_work = excluded.last_work,
         streak = excluded.streak;
     `;
     const args = [
@@ -136,8 +148,10 @@ class TursoSync {
       Number(userData.xp || 0),
       Number(userData.level || 1),
       Number(userData.coins || 0),
+      Number(userData.bank_balance || 0),
       Number(userData.reputation || 0),
       Number(userData.last_daily || 0),
+      Number(userData.last_work || 0),
       Number(userData.last_message_xp || 0),
       String(userData.wallpaper || 'default'),
       Number(userData.warnings || 0),

@@ -401,6 +401,8 @@ try { db.exec("ALTER TABLE guild_settings ADD COLUMN staff_auto_logout INTEGER D
 try { db.exec("ALTER TABLE staff_activity ADD COLUMN shift_seconds INTEGER DEFAULT 0;"); } catch(e) {}
 try { db.exec("ALTER TABLE staff_activity ADD COLUMN total_shifts INTEGER DEFAULT 0;"); } catch(e) {}
 try { db.exec("ALTER TABLE users ADD COLUMN streak INTEGER DEFAULT 0;"); } catch(e) {}
+try { db.exec("ALTER TABLE users ADD COLUMN bank_balance INTEGER DEFAULT 0;"); } catch(e) {}
+try { db.exec("ALTER TABLE users ADD COLUMN last_work INTEGER DEFAULT 0;"); } catch(e) {}
 try { db.exec("ALTER TABLE guild_settings ADD COLUMN boost_enabled INTEGER DEFAULT 1;"); } catch(e) {}
 try { db.exec("ALTER TABLE guild_settings ADD COLUMN boost_channel TEXT;"); } catch(e) {}
 try { db.exec("ALTER TABLE guild_settings ADD COLUMN boost_message TEXT;"); } catch(e) {}
@@ -755,6 +757,45 @@ function addXp(userId, guildId, amount) {
   tursoSync.queueUserSync(updatedUser);
 
   return { level, leveledUp, xp };
+}
+
+function getCoins(userId, guildId) {
+  const user = getUser(userId, guildId);
+  return user.coins || 0;
+}
+
+function getBank(userId, guildId) {
+  const user = getUser(userId, guildId);
+  return user.bank_balance || 0;
+}
+
+function setLastWork(userId, guildId, timestamp) {
+  getUser(userId, guildId);
+  db.prepare('UPDATE users SET last_work = ? WHERE user_id = ? AND guild_id = ?').run(timestamp, userId, guildId);
+  const u = getUser(userId, guildId);
+  tursoSync.queueUserSync(u);
+}
+
+function depositBank(userId, guildId, amount) {
+  const user = getUser(userId, guildId);
+  const coins = user.coins || 0;
+  if (coins < amount) throw new Error('INSUFFICIENT_WALLET');
+  db.prepare('UPDATE users SET coins = coins - ?, bank_balance = COALESCE(bank_balance, 0) + ? WHERE user_id = ? AND guild_id = ?')
+    .run(amount, amount, userId, guildId);
+  const u = getUser(userId, guildId);
+  tursoSync.queueUserSync(u);
+  return { wallet: u.coins || 0, bank: u.bank_balance || 0 };
+}
+
+function withdrawBank(userId, guildId, amount) {
+  const user = getUser(userId, guildId);
+  const bank = user.bank_balance || 0;
+  if (bank < amount) throw new Error('INSUFFICIENT_BANK');
+  db.prepare('UPDATE users SET bank_balance = bank_balance - ?, coins = coins + ? WHERE user_id = ? AND guild_id = ?')
+    .run(amount, amount, userId, guildId);
+  const u = getUser(userId, guildId);
+  tursoSync.queueUserSync(u);
+  return { wallet: u.coins || 0, bank: u.bank_balance || 0 };
 }
 
 function addCoins(userId, guildId, amount) {
@@ -1988,6 +2029,11 @@ module.exports = {
   getTopCredits: getCoinsLeaderboard,
   addCredits: addCoins,
   getUser,
+  getCoins,
+  getBank,
+  depositBank,
+  withdrawBank,
+  setLastWork,
   addCoins,
   removeCoins,
   setCoins,

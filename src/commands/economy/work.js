@@ -68,7 +68,7 @@ module.exports = {
     }
 
     db.addCoins(user.id, guildId, reward);
-    db.db.prepare('UPDATE users SET last_work = ? WHERE user_id = ? AND guild_id = ?').run(now, user.id, guildId);
+    db.setLastWork(user.id, guildId, now);
 
     const newUserData = db.getUser(user.id, guildId);
     const embed = new EmbedBuilder()
