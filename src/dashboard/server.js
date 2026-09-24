@@ -15,6 +15,20 @@ const { askAI } = require('../utils/ai');
 const { requireAuth, createGuildAuthMiddleware } = require('./middleware/auth');
 const { apiLimiter, sensitiveActionLimiter, aiLimiter } = require('./middleware/rateLimiter');
 const { errorHandler } = require('./middleware/errorHandler');
+const {
+    validate,
+    settingsSchema,
+    whitelistSchema,
+    autoresponderSchema,
+    warnPunishmentSchema,
+    levelRewardSchema,
+    sendEmbedSchema,
+    giveawaySchema,
+    suggestionSchema,
+    staffPointsSchema,
+    inviteBonusSchema,
+    aiChatSchema
+} = require('./validators/apiSchemas');
 
 module.exports = function (app, client) {
     const sessionStore = new SqliteStore({ client: rawDb });
@@ -10212,7 +10226,7 @@ ${embedScriptHtml}
         }
     });
 
-    app.post('/api/guild/:guildId/settings', express.json(), (req, res) => {
+    app.post('/api/guild/:guildId/settings', express.json(), validate(settingsSchema), (req, res) => {
         try {
             if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
             const { guildId } = req.params;
@@ -10236,7 +10250,7 @@ ${embedScriptHtml}
     // =============================================
     // Logs Auto-Setup & Delete-Channels API
     // =============================================
-    app.post('/api/guild/:guildId/logs/auto-setup', express.json(), async (req, res) => {
+    app.post('/api/guild/:guildId/logs/auto-setup', express.json(), sensitiveActionLimiter, async (req, res) => {
         try {
             if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
             const { guildId } = req.params;
@@ -10257,7 +10271,7 @@ ${embedScriptHtml}
         }
     });
 
-    app.post('/api/guild/:guildId/logs/delete-channels', express.json(), async (req, res) => {
+    app.post('/api/guild/:guildId/logs/delete-channels', express.json(), sensitiveActionLimiter, async (req, res) => {
         try {
             if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
             const { guildId } = req.params;
@@ -10277,12 +10291,11 @@ ${embedScriptHtml}
     // =============================================
     // Whitelist & AntiMod API
     // =============================================
-    app.post('/api/guild/:guildId/whitelist', express.json(), async (req, res) => {
+    app.post('/api/guild/:guildId/whitelist', express.json(), validate(whitelistSchema), async (req, res) => {
         try {
             if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
             const { guildId } = req.params;
             const { userId, type } = req.body;
-            if (!userId) return res.status(400).json({ success: false, error: 'User ID is required' });
 
             if (database.addProtectionWhitelist) {
                 database.addProtectionWhitelist(guildId, String(userId).trim(), type || 'whitelist', req.session.user.id);
@@ -10299,12 +10312,11 @@ ${embedScriptHtml}
         }
     });
 
-    app.delete('/api/guild/:guildId/whitelist', express.json(), async (req, res) => {
+    app.delete('/api/guild/:guildId/whitelist', express.json(), validate(whitelistSchema), async (req, res) => {
         try {
             if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
             const { guildId } = req.params;
             const { userId, type } = req.body;
-            if (!userId) return res.status(400).json({ success: false, error: 'User ID is required' });
 
             if (database.removeProtectionWhitelist) {
                 database.removeProtectionWhitelist(guildId, String(userId).trim(), type || 'whitelist');
@@ -10324,14 +10336,11 @@ ${embedScriptHtml}
     // =============================================
     // Autoresponder API
     // =============================================
-    app.post('/api/guild/:guildId/autoresponder', express.json(), async (req, res) => {
+    app.post('/api/guild/:guildId/autoresponder', express.json(), validate(autoresponderSchema), async (req, res) => {
         try {
             if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
             const { guildId } = req.params;
             const payload = req.body;
-            if (!payload || !payload.trigger_word || !payload.reply_text) {
-                return res.status(400).json({ success: false, error: 'المحفز والرد مطلوبان' });
-            }
 
             if (database.addAutoResponder) {
                 const inserted = database.addAutoResponder(guildId, payload);
@@ -10361,12 +10370,11 @@ ${embedScriptHtml}
     // =============================================
     // Warn Punishments API
     // =============================================
-    app.post('/api/guild/:guildId/warn-punishments', express.json(), async (req, res) => {
+    app.post('/api/guild/:guildId/warn-punishments', express.json(), validate(warnPunishmentSchema), async (req, res) => {
         try {
             if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
             const { guildId } = req.params;
             const { warnCount, actionType } = req.body;
-            if (!warnCount || !actionType) return res.status(400).json({ success: false, error: 'عدد التحذيرات ونوع العقوبة مطلوبان' });
 
             if (database.addWarnPunishment) {
                 const inserted = database.addWarnPunishment(guildId, parseInt(warnCount), actionType);
@@ -10395,7 +10403,7 @@ ${embedScriptHtml}
     // =============================================
     // Level Rewards API
     // =============================================
-    app.post('/api/guild/:guildId/level-reward', express.json(), async (req, res) => {
+    app.post('/api/guild/:guildId/level-reward', express.json(), validate(levelRewardSchema), async (req, res) => {
         try {
             if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
             const { guildId } = req.params;
@@ -10438,7 +10446,7 @@ ${embedScriptHtml}
         }
     });
 
-    app.post('/api/guild/:guildId/reset-data', async (req, res) => {
+    app.post('/api/guild/:guildId/reset-data', sensitiveActionLimiter, async (req, res) => {
         try {
             if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
             const { guildId } = req.params;
@@ -10455,24 +10463,17 @@ ${embedScriptHtml}
         }
     });
 
-    app.post('/api/guild/:guildId/send-embed', express.json(), async (req, res) => {
+    app.post('/api/guild/:guildId/send-embed', express.json(), sensitiveActionLimiter, validate(sendEmbedSchema), async (req, res) => {
         try {
             console.log('[send-embed] session user:', req.session?.user?.id, 'guildId:', req.params.guildId);
             if (!req.session?.user) return res.status(401).json({ success: false, error: 'غير مسجل دخول، يرجى تسجيل الدخول مجدداً' });
             const { guildId } = req.params;
             const { channelId, color, title, titleUrl, desc, author, authorIcon, image, thumbnail, footer, footerIcon, timestamp, fields } = req.body;
 
-            console.log('[send-embed] body:', JSON.stringify({ channelId, title: title?.substring(0,30), desc: desc?.substring(0,30), color }));
-
-            if (!channelId) return res.status(400).json({ success: false, error: 'يرجى تحديد القناة المستهدفة' });
-            if (!title && !desc) return res.status(400).json({ success: false, error: 'يرجى كتابة عنوان أو محتوى للرسالة' });
-
             const channel = client.channels.cache.get(channelId) || await client.channels.fetch(channelId).catch((e) => {
                 console.error('[send-embed] fetch channel error:', e.message);
                 return null;
             });
-
-            console.log('[send-embed] channel found:', channel?.id, channel?.type, channel?.isTextBased?.());
 
             if (!channel) return res.status(404).json({ success: false, error: 'لم يتم العثور على القناة — تأكد أن البوت موجود في السيرفر' });
             if (!channel.isTextBased()) return res.status(400).json({ success: false, error: 'القناة المختارة ليست قناة نصية' });
@@ -10515,12 +10516,11 @@ ${embedScriptHtml}
         }
     });
 
-    app.post('/api/guild/:guildId/giveaways', express.json(), async (req, res) => {
+    app.post('/api/guild/:guildId/giveaways', express.json(), sensitiveActionLimiter, validate(giveawaySchema), async (req, res) => {
         try {
             if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
             const { guildId } = req.params;
             const { prize, channelId, duration, winners, desc, color, image, emoji, reqRole } = req.body;
-            if (!prize || !channelId) return res.status(400).json({ success: false, error: 'Missing prize or channel' });
 
             const channel = client.channels.cache.get(channelId) || await client.channels.fetch(channelId).catch(() => null);
             if (!channel || !channel.isTextBased()) return res.status(404).json({ success: false, error: 'Channel not found' });
@@ -10571,7 +10571,7 @@ ${embedScriptHtml}
         }
     });
 
-    app.post('/api/guild/:guildId/suggestions', express.json(), async (req, res) => {
+    app.post('/api/guild/:guildId/suggestions', express.json(), validate(suggestionSchema), async (req, res) => {
         try {
             if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
             const { guildId } = req.params;
@@ -10808,15 +10808,14 @@ ${embedScriptHtml}
         }
     });
 
-    app.post('/api/guild/:guildId/staff/set-points', express.json(), (req, res) => {
+    app.post('/api/guild/:guildId/staff/set-points', express.json(), validate(staffPointsSchema), (req, res) => {
         try {
             if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
             const { guildId } = req.params;
             const { userId, points } = req.body;
-            if (!userId || points === undefined) return res.status(400).json({ success: false, error: 'Missing parameters' });
 
             if (database.setStaffPoints) {
-                database.setStaffPoints(guildId, userId, parseInt(points, 10) || 0);
+                database.setStaffPoints(guildId, userId, points);
             }
             res.json({ success: true });
         } catch (e) {
@@ -10824,15 +10823,14 @@ ${embedScriptHtml}
         }
     });
 
-    app.post('/api/guild/:guildId/staff/add-points', express.json(), (req, res) => {
+    app.post('/api/guild/:guildId/staff/add-points', express.json(), validate(staffPointsSchema), (req, res) => {
         try {
             if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
             const { guildId } = req.params;
             const { userId, points } = req.body;
-            if (!userId || !points) return res.status(400).json({ success: false, error: 'Missing parameters' });
 
             if (database.addStaffPoints) {
-                database.addStaffPoints(guildId, userId, parseInt(points, 10) || 0);
+                database.addStaffPoints(guildId, userId, points);
             }
             res.json({ success: true });
         } catch (e) {
@@ -10840,7 +10838,7 @@ ${embedScriptHtml}
         }
     });
 
-    app.post('/api/guild/:guildId/staff/reset', (req, res) => {
+    app.post('/api/guild/:guildId/staff/reset', sensitiveActionLimiter, (req, res) => {
         try {
             if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
             const { guildId } = req.params;
@@ -10934,67 +10932,7 @@ ${embedScriptHtml}
         }
     });
 
-    // ===================== Guild Settings API (حفظ إعدادات السيرفر والسجلات الحية) =====================
-    app.post('/api/guild/:guildId/settings', express.json(), async (req, res) => {
-        try {
-            if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
-            const { guildId } = req.params;
-            const payload = req.body;
-            if (!payload || typeof payload !== 'object') {
-                return res.status(400).json({ success: false, error: 'Invalid payload' });
-            }
 
-            database.updateGuildSettings(guildId, payload);
-            res.json({ success: true, message: 'تم حفظ الإعدادات بنجاح في قاعدة البيانات' });
-        } catch (err) {
-            console.error('[SETTINGS API] Error updating settings:', err);
-            res.status(500).json({ success: false, error: err.message });
-        }
-    });
-
-    // ===================== Logs System API (سجلات السيرفر الشاملة 📜) =====================
-    const { PermissionFlagsBits } = require('discord.js');
-    const logsCommand = require('../commands/admin/logs');
-
-    // إنشاء قنوات السجلات تلقائياً (grouped = قناة لكل قسم / detailed = قناة لكل نوع سجل)
-    app.post('/api/guild/:guildId/logs/auto-setup', express.json(), async (req, res) => {
-        try {
-            if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
-            const { guildId } = req.params;
-            const mode = req.body?.mode === 'detailed' ? 'detailed' : 'grouped';
-
-            const guild = client?.guilds?.cache?.get(guildId);
-            if (!guild) return res.status(404).json({ success: false, error: 'البوت غير موجود في هذا السيرفر' });
-
-            const botMember = guild.members.me || await guild.members.fetchMe().catch(() => null);
-            if (!botMember?.permissions?.has(PermissionFlagsBits.ManageChannels)) {
-                return res.status(400).json({ success: false, error: 'البوت لا يملك صلاحية إدارة القنوات' });
-            }
-
-            const created = await logsCommand._runSetup(guild, mode);
-            res.json({ success: true, created: created.length });
-        } catch (e) {
-            console.error('[LOGS API] auto-setup error:', e);
-            res.status(500).json({ success: false, error: e.message });
-        }
-    });
-
-    // حذف كاتيجوري سجلات ZENO وجميع القنوات بداخلها وتعطيل السجلات
-    app.post('/api/guild/:guildId/logs/delete-channels', express.json(), async (req, res) => {
-        try {
-            if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
-            const { guildId } = req.params;
-
-            const guild = client?.guilds?.cache?.get(guildId);
-            if (!guild) return res.status(404).json({ success: false, error: 'البوت غير موجود في هذا السيرفر' });
-
-            const deleted = await logsCommand._deleteLogsChannels(guild);
-            res.json({ success: true, deleted });
-        } catch (e) {
-            console.error('[LOGS API] delete-channels error:', e);
-            res.status(500).json({ success: false, error: e.message });
-        }
-    });
 
     // User Economy API
     app.post('/api/user/daily', (req, res) => {
@@ -11154,18 +11092,14 @@ ${embedScriptHtml}
     // =============================================
     // Invites API (Add Bonus & Reset)
     // =============================================
-    app.post('/api/guild/:guildId/invites/add-bonus', express.json(), async (req, res) => {
+    app.post('/api/guild/:guildId/invites/add-bonus', express.json(), validate(inviteBonusSchema), async (req, res) => {
         try {
             if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
             const { guildId } = req.params;
             const { userId, amount } = req.body;
-            const cleanId = String(userId || '').replace(/[^0-9]/g, '');
-            const bonusAmount = parseInt(amount, 10);
-            if (!cleanId || isNaN(bonusAmount)) {
-                return res.status(400).json({ success: false, error: 'Invalid user ID or amount' });
-            }
+
             if (database.addBonusInvites) {
-                database.addBonusInvites(guildId, cleanId, bonusAmount);
+                database.addBonusInvites(guildId, userId, amount);
             }
             res.json({ success: true });
         } catch(e) {
@@ -11173,7 +11107,7 @@ ${embedScriptHtml}
         }
     });
 
-    app.post('/api/guild/:guildId/invites/reset', express.json(), async (req, res) => {
+    app.post('/api/guild/:guildId/invites/reset', express.json(), sensitiveActionLimiter, async (req, res) => {
         try {
             if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
             const { guildId } = req.params;
@@ -11189,13 +11123,10 @@ ${embedScriptHtml}
     // =============================================
     // ZENO AI Live Chat API for Dashboard
     // =============================================
-    app.post('/api/guild/:guildId/ai/chat', express.json(), async (req, res) => {
+    app.post('/api/guild/:guildId/ai/chat', express.json(), aiLimiter, validate(aiChatSchema), async (req, res) => {
         try {
             if (!req.session?.user) return res.status(401).json({ success: false, error: 'يجب تسجيل الدخول أولاً' });
             const { prompt } = req.body;
-            if (!prompt || typeof prompt !== 'string' || !prompt.trim()) {
-                return res.status(400).json({ success: false, error: 'يرجى كتابة رسالة صالحة' });
-            }
             const aiResponse = await askAI(prompt.trim());
             res.json({ success: true, response: aiResponse });
         } catch (e) {
