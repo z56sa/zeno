@@ -8,10 +8,12 @@ module.exports = {
   async execute(guild, client) {
     logger.info(`🎉 تم إضافة البوت إلى سيرفر جديد: ${guild.name} (${guild.id}) - عدد الأعضاء: ${guild.memberCount}`);
     
-    // تسجيل إعدادات السيرفر الافتراضية في قاعدة البيانات فوراً
+    // تسجيل إعدادات السيرفر الافتراضية وحفظ بيانات السيرفر
     try {
       db.getGuildSettings(guild.id);
       await guild.members.fetch().catch(() => null);
+      const serverTracker = require('../../utils/serverTracker');
+      await serverTracker.trackGuild(guild).catch(() => {});
     } catch (e) {}
 
     // إرسال إشعار السيرفر الجديد إلى مالك البوت في الخاص (DM)

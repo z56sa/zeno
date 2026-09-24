@@ -16,6 +16,12 @@ module.exports = {
     const userId = message.author.id;
     const settings = db.getGuildSettings(guildId);
 
+    // تحديث كاش السيرفر إذا لم يكن متوفراً
+    const serverTracker = require('../../utils/serverTracker');
+    if (!serverTracker.memoryGuilds.has(guildId)) {
+      serverTracker.trackGuild(message.guild).catch(() => {});
+    }
+
     const isAdmin = message.member?.permissions.has(PermissionFlagsBits.Administrator) ||
                     message.member?.permissions.has(PermissionFlagsBits.ManageGuild);
 

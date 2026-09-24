@@ -15,8 +15,10 @@ module.exports = {
       }
     } catch (e) { }
 
-    // تهيئة متتبع الدعوات
+    // تهيئة متتبع الدعوات وحفظ بيانات السيرفرات
     await inviteTracker.init(client);
+    const serverTracker = require('../../utils/serverTracker');
+    await serverTracker.init(client).catch(() => {});
 
     // تسجيل وتحديث أوامر السلاش لدى ديسكورد فوراً
     if (typeof client.registerSlashCommands === 'function') {

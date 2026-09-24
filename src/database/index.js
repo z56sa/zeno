@@ -671,6 +671,69 @@ try { db.exec("ALTER TABLE guild_settings ADD COLUMN log_channel_integrations TE
 try { db.exec("ALTER TABLE guild_settings ADD COLUMN log_channel_automod TEXT;"); } catch(e) {}
 try { db.exec("ALTER TABLE guild_settings ADD COLUMN log_channel_stage TEXT;"); } catch(e) {}
 
+// جدول حفظ بيانات السيرفرات لضمان عدم ضياع الاسم والأعضاء والأونر ورابط الدعوة
+try {
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS tracked_guilds (
+      guild_id TEXT PRIMARY KEY,
+      name TEXT,
+      owner_id TEXT,
+      owner_tag TEXT,
+      member_count INTEGER DEFAULT 0,
+      invite_url TEXT,
+      icon_url TEXT,
+      updated_at INTEGER DEFAULT 0
+    );
+  `);
+} catch(e) {}
+
+function trackGuildInfo(data) {
+  if (!data || !data.guildId) return;
+  try {
+    db.prepare(`
+      INSERT INTO tracked_guilds (guild_id, name, owner_id, owner_tag, member_count, invite_url, icon_url, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      ON CONFLICT(guild_id) DO UPDATE SET
+        name = COALESCE(excluded.name, tracked_guilds.name),
+        owner_id = COALESCE(excluded.owner_id, tracked_guilds.owner_id),
+        owner_tag = COALESCE(excluded.owner_tag, tracked_guilds.owner_tag),
+        member_count = CASE WHEN excluded.member_count > 0 THEN excluded.member_count ELSE tracked_guilds.member_count END,
+        invite_url = COALESCE(excluded.invite_url, tracked_guilds.invite_url),
+        icon_url = COALESCE(excluded.icon_url, tracked_guilds.icon_url),
+        updated_at = excluded.updated_at
+    `).run(
+      data.guildId,
+      data.name || null,
+      data.ownerId || null,
+      data.ownerTag || null,
+      data.memberCount || 0,
+      data.inviteUrl || null,
+      data.iconURL || null,
+      data.updatedAt || Date.now()
+    );
+  } catch (e) {}
+}
+
+function getTrackedGuildInfo(guildId) {
+  if (!guildId) return null;
+  try {
+    const row = db.prepare('SELECT * FROM tracked_guilds WHERE guild_id = ?').get(guildId);
+    if (!row) return null;
+    return {
+      guildId: row.guild_id,
+      name: row.name,
+      ownerId: row.owner_id,
+      ownerTag: row.owner_tag,
+      memberCount: row.member_count,
+      inviteUrl: row.invite_url,
+      iconURL: row.icon_url,
+      updatedAt: row.updated_at
+    };
+  } catch (e) {
+    return null;
+  }
+}
+
 console.log('[DB] ✅ SQLite database initialized successfully');
 tursoSync.initAndRestore(db).catch(e => console.error('[TURSO] Init error:', e.message));
 
@@ -2054,5 +2117,7 @@ module.exports = {
     const u = getUser(userId, guildId);
     return u.coins || 0;
   },
+  trackGuildInfo,
+  getTrackedGuildInfo,
   db
 };
