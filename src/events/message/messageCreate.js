@@ -420,8 +420,7 @@ module.exports = {
           } else if (channelMode === 'dm') {
             message.author.send({ embeds: [levelEmbed] }).catch(() => {});
           } else if (channelMode === 'current') {
-            const lvlMsg = await message.channel.send({ embeds: [levelEmbed] }).catch(() => {});
-            if (lvlMsg) setTimeout(() => lvlMsg.delete().catch(() => {}), 10000);
+            await message.channel.send({ embeds: [levelEmbed] }).catch(() => {});
           } else {
             // روم مخصص
             const targetChan = message.guild.channels.cache.get(channelMode) || await message.guild.channels.fetch(channelMode).catch(() => null);
