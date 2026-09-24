@@ -147,10 +147,6 @@ app.use(express.urlencoded({ extended: true, limit: '20mb' }));
 const mountDashboard = require('./dashboard/server');
 mountDashboard(app, client);
 
-// Auto-Broadcaster Service
-const AutoBroadcaster = require('./services/autoBroadcaster');
-const autoBroadcaster = new AutoBroadcaster(client);
-
 // Stat Channels Service
 const StatChannelsService = require('./services/statChannels');
 const statChannelsService = new StatChannelsService(client);
@@ -164,7 +160,6 @@ const GiveawayService = require('./services/giveawayService');
 const giveawayService = new GiveawayService(client);
 
 client.once('clientReady', () => {
-    autoBroadcaster.start();
     statChannelsService.start();
     staffShiftService.start();
     giveawayService.start();

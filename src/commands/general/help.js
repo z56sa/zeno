@@ -31,6 +31,7 @@ const CATEGORIES = {
       { name: 'demote',         desc: 'تخفيض عضو عن طريق إزالة أعلى رتبة يمتلكها' },
       { name: 'promote',        desc: 'ترقية عضو تلقائياً لأعلى رتبة (فوق رتبته الحالية)' },
       { name: 'role',           desc: 'اعطاء رتبة لشخص او ازالتها' },
+      { name: 'role-all',       desc: 'اعطاء أو ازالة رتبة لجميع الأعضاء دفعة واحدة' },
       { name: 'xroles',         desc: 'إعطاء أو إزالة رتبة لعدة أعضاء' },
       { name: 'come',           desc: 'استدعاء شخص' },
       { name: 'snipe',          desc: 'عرض آخر رسالة محذوفة في القناة' },
@@ -95,9 +96,9 @@ const CATEGORIES = {
       { name: 'top',      desc: 'عرض توب السيرفر (رصيد أو مستوى)' },
     ]
   },
-  broadcast: {
-    emoji: '📢',
-    title: 'البرودكاست والخطوط',
+  autoline: {
+    emoji: '📏',
+    title: 'الخطوط التلقائية ورومات الخدمات',
     color: '#06b6d4',
     commands: [
       { name: 'add-autoline-channel',    desc: 'اضافة روم خط تلقائي' },
@@ -106,9 +107,6 @@ const CATEGORIES = {
       { name: 'line-mode',               desc: 'اختر بين إرسال صورة أو رابط' },
       { name: 'add-nadeko-room',         desc: 'اضافة روم يتم تفعيل الخاصية فيها' },
       { name: 'remove-nadeko-room',      desc: 'ازالة روم مفعل الخاصية فيها' },
-      { name: 'send-broadcast-panel',    desc: 'ارسال بانل التحكم في البرودكاست' },
-      { name: 'remove-all-tokens',       desc: 'إزالة جميع بوتات البرودكاست' },
-      { name: 'remove-token',            desc: 'إزالة توكن برودكاست' },
       { name: 'set-feedback-line',       desc: 'تحديد خط الاراء' },
       { name: 'set-feedback-room',       desc: 'تحديد روم الاراء' },
       { name: 'set-suggestions-line',    desc: 'تحديد خط الاقتراحات' },

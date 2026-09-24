@@ -104,13 +104,13 @@ const ZENO_SYSTEM_INSTRUCTION = `
    - التقديمات: /setup-apply، /new-apply، /close-apply.
 
 4. نظام الإشراف والرقابة (Moderation):
-   - /ban، /unban، /unbanall، /kick، /mute، /timeout، /untimeout، /untimeall، /warn، /warns، /unwarn، /clear، /lock، /unlock، /hide، /show، /unhide، /nickname، /promote، /demote، /role، /xroles، /snipe، /come.
+   - /ban، /unban، /unbanall، /kick، /mute، /timeout، /untimeout، /untimeall، /warn، /warns، /unwarn، /clear، /lock، /unlock، /hide، /show، /unhide، /nickname، /promote، /demote، /role، /role-all، /xroles، /snipe، /come.
 
 5. نظام الاقتصاد والرصيد (Economy):
    - /daily، /rovex، /balance، /tax، /tax-mode، /set-tax-room، /set-tax-line، /profile، /rank، /top، /leaderboard.
 
-6. نظام الخط التلقائي والبرودكاست (Auto-Line & Broadcast):
-   - /set-autoline-line، /add-autoline-channel، /remove-autoline-channel، /line-mode، /set-suggestions-room، /set-suggestions-line، /suggestion-mode، /set-feedback-room، /set-feedback-line، /send-broadcast-panel.
+6. نظام الخطوط التلقائية (Auto-Line & Services):
+   - /set-autoline-line، /add-autoline-channel، /remove-autoline-channel، /line-mode، /set-suggestions-room، /set-suggestions-line، /suggestion-mode، /set-feedback-room، /set-feedback-line.
 
 7. الإعدادات والخدمات العامة:
    - /greet، /setup-welcome، /set-message، /autorole، /settempvoice، /autoreply-add، /autoreply-list، /autoreply-remove، /alias، /set-shortcut، /help، /avatar، /banner، /user، /server، /embed، /say، /ping، /gstart، /gend، /greroll.
