@@ -394,44 +394,46 @@ module.exports = {
             }
           } catch (e) {}
 
-          // تجهيز رسالة رفع المستوى
-          let rawMsg = settings.level_message || '🎉 مبروك يا [user]! لقد ارتفع مستواك إلى **المستوى [level]**! 🚀';
-          const formattedMsg = rawMsg
-            .replace(/\[user\]/gi, `<@${message.author.id}>`)
-            .replace(/\{user\}/gi, `<@${message.author.id}>`)
-            .replace(/\[mention\]/gi, `<@${message.author.id}>`)
-            .replace(/\{mention\}/gi, `<@${message.author.id}>`)
-            .replace(/\[userName\]/gi, message.author.username)
-            .replace(/\{userName\}/gi, message.author.username)
-            .replace(/\[level\]/gi, level.toString())
-            .replace(/\{level\}/gi, level.toString())
-            .replace(/\[server\]/gi, message.guild.name)
-            .replace(/\{server\}/gi, message.guild.name);
+          // تجهيز رسالة رفع المستوى (إن كانت مفعّلة)
+          if (settings.level_up_msg_enabled !== 0) {
+            let rawMsg = settings.level_message || '🎉 مبروك يا [user]! لقد ارتفع مستواك إلى **المستوى [level]**! 🚀';
+            const formattedMsg = rawMsg
+              .replace(/\[user\]/gi, `<@${message.author.id}>`)
+              .replace(/\{user\}/gi, `<@${message.author.id}>`)
+              .replace(/\[mention\]/gi, `<@${message.author.id}>`)
+              .replace(/\{mention\}/gi, `<@${message.author.id}>`)
+              .replace(/\[userName\]/gi, message.author.username)
+              .replace(/\{userName\}/gi, message.author.username)
+              .replace(/\[level\]/gi, level.toString())
+              .replace(/\{level\}/gi, level.toString())
+              .replace(/\[server\]/gi, message.guild.name)
+              .replace(/\{server\}/gi, message.guild.name);
 
-          const levelEmbed = new EmbedBuilder()
-            .setColor(config.colors.primary || '#9333ea')
-            .setAuthor({ name: `ترقية مستوى جديد! (Level Up) 🎉`, iconURL: message.guild.iconURL() || undefined })
-            .setDescription(formattedMsg)
-            .setThumbnail(message.author.displayAvatarURL({ dynamic: true, size: 256 }))
-            .addFields(
-              { name: '🎖️ المستوى الجديد', value: `\`Level ${level}\``, inline: true },
-              { name: '👤 العضو', value: `<@${message.author.id}>`, inline: true }
-            )
-            .setFooter({ text: `${message.guild.name} • Leveling System` })
-            .setTimestamp();
+            const levelEmbed = new EmbedBuilder()
+              .setColor(config.colors.primary || '#9333ea')
+              .setAuthor({ name: `ترقية مستوى جديد! (Level Up) 🎉`, iconURL: message.guild.iconURL() || undefined })
+              .setDescription(formattedMsg)
+              .setThumbnail(message.author.displayAvatarURL({ dynamic: true, size: 256 }))
+              .addFields(
+                { name: '🎖️ المستوى الجديد', value: `\`Level ${level}\``, inline: true },
+                { name: '👤 العضو', value: `<@${message.author.id}>`, inline: true }
+              )
+              .setFooter({ text: `${message.guild.name} • Leveling System` })
+              .setTimestamp();
 
-          const channelMode = settings.level_channel || 'current';
-          if (channelMode === 'disabled') {
-            // معطلة بدون إرسال رسالة
-          } else if (channelMode === 'dm') {
-            message.author.send({ embeds: [levelEmbed] }).catch(() => {});
-          } else if (channelMode === 'current') {
-            await message.channel.send({ embeds: [levelEmbed] }).catch(() => {});
-          } else {
-            // روم مخصص
-            const targetChan = message.guild.channels.cache.get(channelMode) || await message.guild.channels.fetch(channelMode).catch(() => null);
-            if (targetChan && targetChan.isTextBased()) {
-              targetChan.send({ embeds: [levelEmbed] }).catch(() => {});
+            const channelMode = settings.level_channel || 'current';
+            if (channelMode === 'disabled') {
+              // معطلة بدون إرسال رسالة
+            } else if (channelMode === 'dm') {
+              message.author.send({ embeds: [levelEmbed] }).catch(() => {});
+            } else if (channelMode === 'current') {
+              await message.channel.send({ embeds: [levelEmbed] }).catch(() => {});
+            } else {
+              // روم مخصص
+              const targetChan = message.guild.channels.cache.get(channelMode) || await message.guild.channels.fetch(channelMode).catch(() => null);
+              if (targetChan && targetChan.isTextBased()) {
+                targetChan.send({ embeds: [levelEmbed] }).catch(() => {});
+              }
             }
           }
         }

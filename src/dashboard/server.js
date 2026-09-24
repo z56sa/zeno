@@ -4396,7 +4396,14 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
 
                                 <div class="space-y-2">
                                     <label class="block text-xs font-bold text-gray-300">قناة إشعارات المستوى</label>
-                                    ${renderChannelSelect('level_channel', settings.level_channel || '')}
+                                    <select name="level_channel" id="level_channel" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right cursor-pointer">
+                                        <option value="current" ${(!settings.level_channel || settings.level_channel === 'current') ? 'selected' : ''}>💬 الروم الحالي (نفس مكان كتابة الرسالة)</option>
+                                        <option value="dm" ${settings.level_channel === 'dm' ? 'selected' : ''}>📩 رسالة خاصة بالخاص (DM)</option>
+                                        <option value="disabled" ${settings.level_channel === 'disabled' ? 'selected' : ''}>🚫 معطل (بدون إرسال رسالة ترقية)</option>
+                                        <optgroup label="── القنوات النصية ──">
+                                            ${guildTextChannels.map(c => `<option value="${c.id}" ${settings.level_channel === c.id ? 'selected' : ''}># ${c.name}</option>`).join('')}
+                                        </optgroup>
+                                    </select>
                                 </div>
 
                                 <div class="space-y-2">
