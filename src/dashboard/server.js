@@ -10,6 +10,7 @@ const database = require('../database');
 const rawDb = database.db;
 const SecretManager = require('../utils/secretManager');
 const identityWallpapers = require('../data/identityWallpapers.json');
+const config = require('../../config.json');
 const { askAI } = require('../utils/ai');
 
 const { requireAuth, createGuildAuthMiddleware } = require('./middleware/auth');
@@ -63,13 +64,10 @@ module.exports = function (app, client) {
 
     // Helper: Discord OAuth2 config
     const getOAuthConfig = (req) => {
-        // نضمن دائماً استخدام الآيدي الحقيقي للبوت حتى لو كان المتغير في الاستضافة ناقص أو خاطئ
-        let clientId = process.env.CLIENT_ID || process.env.DISCORD_CLIENT_ID || client?.user?.id || '1506005273893146775';
-        if (clientId === '506005273893146775' || !clientId.startsWith('15')) {
-            clientId = '1506005273893146775';
-        }
+        const clientId = process.env.CLIENT_ID || process.env.DISCORD_CLIENT_ID || client?.user?.id || config.clientId;
         const clientSecret = process.env.CLIENT_SECRET || process.env.DISCORD_CLIENT_SECRET || 'MNeCz9uTvXRzXeEUp8lUckSQeviU-cRY';
-        const redirectUri = 'https://zeno-0gme.onrender.com/auth/discord/callback';
+        const baseUrl = process.env.DASHBOARD_URL || config.dashboardUrl || `${req.protocol}://${req.get('host')}`;
+        const redirectUri = `${baseUrl}/auth/discord/callback`;
         return { clientId, clientSecret, redirectUri };
     };
 
@@ -94,8 +92,8 @@ module.exports = function (app, client) {
             }
 
             res.json({
-                id: botUser?.id || '1506005273893146775',
-                username: botUser?.username || 'ZENO',
+                id: botUser?.id || config.clientId,
+                username: botUser?.username || config.botName || 'ZENO',
                 avatar: botUser
                     ? (botUser.avatar ? `https://cdn.discordapp.com/avatars/${botUser.id}/${botUser.avatar}.png?size=128` : `https://cdn.discordapp.com/embed/avatars/${parseInt(botUser.discriminator || '0') % 5}.png`)
                     : null,
@@ -104,7 +102,7 @@ module.exports = function (app, client) {
                 usersCount: totalMembers
             });
         } catch (err) {
-            res.json({ id: '1506005273893146775', guildsCount: 0, ping: 0, usersCount: 0 });
+            res.json({ id: config.clientId, guildsCount: 0, ping: 0, usersCount: 0 });
         }
     });
 
@@ -262,8 +260,8 @@ module.exports = function (app, client) {
         const realPing = (client?.ws?.ping !== undefined && client.ws.ping >= 0) ? Math.round(client.ws.ping) : 0;
 
         res.json({
-            id: client?.user?.id || '1506005273893146775',
-            username: client?.user?.username || 'ZENO',
+            id: client?.user?.id || config.clientId,
+            username: client?.user?.username || config.botName || 'ZENO',
             avatar: avatarUrl,
             guildsCount: realGuildsCount,
             dashboardUsersCount: totalMembersCount,
@@ -550,7 +548,7 @@ module.exports = function (app, client) {
                     <div class="text-4xl">🛡️</div>
                     <h4 class="text-white font-bold text-sm">لا توجد سيرفرات مشتركة لديك صلاحيات إدارتها</h4>
                     <p class="text-gray-400 text-xs max-w-md mx-auto">لإدارة سيرفر، يجب أن تكون مالك السيرفر أو تملك رتبة إدارية (Manage Server أو Administrator) ويكون البوت مضافاً في السيرفر.</p>
-                    <a href="https://discord.com/api/oauth2/authorize?client_id=1506005273893146775&permissions=8&scope=bot%20applications.commands" target="_blank" class="inline-flex items-center gap-2 px-5 py-2.5 bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold rounded-xl transition shadow-lg mt-2">
+                    <a href="https://discord.com/api/oauth2/authorize?client_id=${client?.user?.id || config.clientId}&permissions=8&scope=bot%20applications.commands" target="_blank" class="inline-flex items-center gap-2 px-5 py-2.5 bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold rounded-xl transition shadow-lg mt-2">
                         <span>➕ إضافة البوت لسيرفرك</span>
                     </a>
                 </div>
@@ -1092,7 +1090,7 @@ module.exports = function (app, client) {
                                         صوّتك يساعد البوت على الانتشار ويدعم تطويره! يمكنك التصويت مرة كل <span class="text-blue-300 font-bold">12 ساعة</span>
                                     </p>
                                 </div>
-                                <a href="https://top.gg/ar/bot/1506005273893146775/vote" target="_blank"
+                                <a href="https://top.gg/ar/bot/${client?.user?.id || config.clientId}/vote" target="_blank"
                                    class="inline-flex items-center gap-2.5 px-8 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-2xl text-sm font-black transition-all shadow-lg shadow-blue-900/30 hover:shadow-blue-800/40 hover:scale-105">
                                     🗳️ صوّت الآن على Top.gg
                                 </a>
@@ -1165,7 +1163,7 @@ module.exports = function (app, client) {
                                         <span></span>
                                         <span class="flex items-center gap-2"><span>الراتب اليومي</span><span class="text-gray-400">🎁</span></span>
                                     </button>
-                                    <a href="https://top.gg/ar/bot/1506005273893146775/vote" target="_blank" class="flex items-center justify-between px-3 py-2 rounded-xl text-blue-400 hover:text-blue-300 hover:bg-blue-950/20 font-medium transition w-full">
+                                    <a href="https://top.gg/ar/bot/${client?.user?.id || config.clientId}/vote" target="_blank" class="flex items-center justify-between px-3 py-2 rounded-xl text-blue-400 hover:text-blue-300 hover:bg-blue-950/20 font-medium transition w-full">
                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5"/></svg>
                                         <span class="flex items-center gap-2"><span>صوّت للبوت</span><span>🗳️</span></span>
                                     </a>

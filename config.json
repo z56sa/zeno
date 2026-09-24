@@ -11,6 +11,9 @@
     "gold": "#eab308"
   },
   "footer": "ZENO Security & Management",
+  "clientId": "1506005273893146775",
+  "dashboardUrl": "https://zeno-0gme.onrender.com",
+  "supportServer": "https://discord.gg/zeno",
   "embeds": {
     "author": "ZENO System",
     "footerText": "ZENO Bot • All Rights Reserved"

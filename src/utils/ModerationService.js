@@ -39,21 +39,28 @@ const isProfanity = (message, config) => {
     return false;
 };
 
+// In-memory sliding window rate limiter per user
+const messageTimestamps = new Map();
+
 /**
  * التحقق من معدل إرسال الرسائل والسبام المتعدد (Rate Limiting).
- * **يتطلب هذا الدالة الوصول إلى سجل بيانات المستخدم في الـ DB.**
  */
 const checkRateLimit = async (user, config) => {
     if (!config?.rules?.spam_control?.anti_word_spam?.enabled) return null;
 
-    // **ملاحظة:** يجب استبدال هذا الجزء بمنطق حقيقي لقراءة سجل الرسائل للمستخدم من قاعدة البيانات.
-    /*
-    const userMessages = await getRecentUserMessages(user.id, 'messageCreate', config.rules.spam_control.anti_word_spam.max_count);
-    if (userMessages.length > config.rules.spam_control.anti_word_spam.max_count) {
+    const maxCount = config.rules.spam_control.anti_word_spam.max_count || 5;
+    const windowMs = config.rules.spam_control.anti_word_spam.window_ms || 5000;
+    const now = Date.now();
+
+    let userTimes = messageTimestamps.get(user.id) || [];
+    userTimes = userTimes.filter(t => now - t < windowMs);
+    userTimes.push(now);
+    messageTimestamps.set(user.id, userTimes);
+
+    if (userTimes.length > maxCount) {
         return "Word Spam / Excessive Messaging";
     }
-    */
-    return null; // Placeholder: يجب استكمال هذا الجزء بربطه بقاعدة البيانات الفعليّة.
+    return null;
 };
 
 // ==============================================
@@ -85,3 +92,10 @@ async function processMessageForModeration(message, client, config) {
         // هنا يتم استدعاء دالة تنفيذ العقوبة (ApplyPunishment(user, 'spam'))
     }
 }
+
+module.exports = {
+    checkLink,
+    isProfanity,
+    checkRateLimit,
+    processMessageForModeration
+};

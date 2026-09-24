@@ -181,7 +181,7 @@ app.listen(PORT, '0.0.0.0', () => {
 
     const pingUrl = process.env.RENDER_EXTERNAL_URL
         ? `${process.env.RENDER_EXTERNAL_URL}/api/stats`
-        : 'https://zeno-0gme.onrender.com/api/stats';
+        : `${config.dashboardUrl || 'http://localhost:' + PORT}/api/stats`;
 
     setInterval(async () => {
         try {
