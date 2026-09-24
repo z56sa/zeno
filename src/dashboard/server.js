@@ -2294,238 +2294,15 @@ const leaderboard = database.getInvitesLeaderboard ? database.getInvitesLeaderbo
                 `;
             } else if (section === 'broadcast' || section === 'announcements') {
 formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl">
-
-                        <!-- Header -->
-                        <div class="bg-gradient-to-r from-[#0a1a10] via-[#12141f] to-[#141724] border border-emerald-500/20 p-6 rounded-3xl flex items-center justify-between shadow-2xl">
-                            <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-2xl bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center text-xl shadow-lg">📢</div>
-                                <div class="text-right">
-                                    <h3 class="font-black text-white text-lg">نظام الإعلانات والمذيع الآلي</h3>
-                                    <p class="text-gray-400 text-xs mt-0.5">جدولة وإرسال إعلانات دورية تلقائية بتضمينات جذابة وتحديثات آلية</p>
-                                </div>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <span class="text-xs font-bold ${settings.broadcast_enabled ? 'text-emerald-400 bg-emerald-950/60 border border-emerald-500/30' : 'text-red-400 bg-red-950/60 border border-red-500/30'} px-3 py-1 rounded-xl">${settings.broadcast_enabled ? '🟢 مفعل' : '🔴 معطل'}</span>
+                        <div class="bg-[#12141f] border border-white/5 p-8 rounded-3xl text-center space-y-4 shadow-xl">
+                            <div class="w-16 h-16 rounded-2xl bg-rose-600/20 text-rose-400 border border-rose-500/30 flex items-center justify-center text-3xl mx-auto shadow-lg">🚫</div>
+                            <h3 class="font-black text-white text-lg">تم إيقاف وحذف نظام الإعلانات والبرودكاست</h3>
+                            <p class="text-gray-400 text-xs max-w-md mx-auto leading-relaxed">تم إزالة هذا القسم بالكامل من البوت بناءً على طلبكم. يمكنك استخدام رسائل الأمبد أو باقي الميزات لإدارة سيرفرك.</p>
+                            <div class="pt-2">
+                                <a href="/dashboard/${guildId}/embed" class="px-5 py-2.5 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-xs font-bold transition inline-block">الانتقال إلى رسائل الأمبد 📄</a>
                             </div>
                         </div>
-
-                        <!-- Master Toggle & Channel -->
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div class="bg-[#12141f] border border-white/5 p-5 rounded-3xl flex items-center justify-between shadow-xl">
-                                <label class="toggle">
-                                    <input type="checkbox" name="broadcast_enabled" value="1" id="broadcastToggle" onchange="document.getElementById('broadcastContent').classList.toggle('opacity-40', !this.checked)" ${settings.broadcast_enabled ? 'checked' : ''}>
-                                    <span class="slider"></span>
-                                </label>
-                                <div class="flex items-center gap-3">
-                                    <div class="text-right">
-                                        <h4 class="font-black text-white text-sm">تفعيل المذيع الآلي</h4>
-                                        <p class="text-gray-400 text-xs mt-0.5">إرسال رسائل إعلانية دورية تلقائياً في القناة المحددة</p>
-                                    </div>
-                                    <div class="w-8 h-8 rounded-xl bg-emerald-600/20 text-emerald-400 flex items-center justify-center text-sm border border-emerald-500/30">📡</div>
-                                </div>
-                            </div>
-
-                            <div class="bg-[#12141f] border border-white/5 p-5 rounded-3xl space-y-2 shadow-xl text-right">
-                                <h4 class="font-black text-white text-sm flex items-center justify-end gap-2"><span>قناة البث</span><span>📻</span></h4>
-                                ${renderChannelSelect('broadcast_channel', settings.broadcast_channel)}
-                            </div>
-                        </div>
-
-                        <!-- Broadcast Content Area -->
-                        <div id="broadcastContent" class="${settings.broadcast_enabled ? '' : 'opacity-40'} transition-opacity space-y-6">
-
-                            <!-- Interval & Mention Role -->
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-                                <!-- Interval Selector -->
-                                <div class="bg-[#12141f] border border-white/5 p-6 rounded-3xl space-y-4 shadow-xl text-right">
-                                    <h4 class="font-black text-white text-sm flex items-center justify-end gap-2"><span>فترة التكرار</span><span>⏱️</span></h4>
-                                    <input type="hidden" name="broadcast_interval" id="inpBroadcastInterval" value="${settings.broadcast_interval || 60}">
-                                    <div class="grid grid-cols-2 gap-2">
-                                        ${[15, 30, 60, 120, 360, 720, 1440, 2880].map(m => `
-                                        <button type="button" onclick="selectBroadcastInterval(${m}, this)" class="bc-interval-btn py-2.5 px-3 rounded-xl border text-xs font-bold transition ${(settings.broadcast_interval || 60) == m ? 'bg-purple-900/40 border-purple-500 text-white' : 'bg-[#0b0d14] border-white/5 text-gray-400 hover:text-white'}">
-                                            ${m < 60 ? m + ' دقيقة' : m === 60 ? 'ساعة' : m < 1440 ? (m/60) + ' ساعات' : (m/1440) + ' يوم'}
-                                        </button>`).join('')}
-                                    </div>
-                                </div>
-
-                                <!-- Mention Role -->
-                                <div class="bg-[#12141f] border border-white/5 p-6 rounded-3xl space-y-3 shadow-xl text-right">
-                                    <h4 class="font-black text-white text-sm flex items-center justify-end gap-2"><span>رتبة الإشارة (اختياري)</span><span>📣</span></h4>
-                                    <p class="text-gray-400 text-[11px]">رتبة يتم ذكرها تلقائياً مع كل إعلان للتنبيه</p>
-                                    ${renderRoleSelect('broadcast_mention_role', settings.broadcast_mention_role)}
-                                </div>
-                            </div>
-
-                            <!-- Messages List & Add New -->
-                            <div class="bg-[#12141f] border border-white/5 p-6 rounded-3xl space-y-4 shadow-xl">
-                                <div class="flex items-center justify-between border-b border-white/5 pb-4">
-                                    <button type="button" onclick="addBroadcastMessage()" class="px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold transition shadow-md flex items-center gap-1.5">
-                                        <span>➕</span><span>إضافة رسالة جديدة</span>
-                                    </button>
-                                    <h4 class="font-black text-white text-sm flex items-center gap-2"><span>قائمة رسائل البث</span><span>📋</span></h4>
-                                </div>
-
-                                <div id="broadcastMsgList" class="space-y-3">
-                                    ${(() => {
-                                        let msgs = [];
-                                        try { msgs = JSON.parse(settings.broadcast_messages || '[]'); } catch(e) {}
-                                        if (msgs.length === 0) return `<div class="text-center py-8 text-xs text-gray-500">لا توجد رسائل مضافة بعد — أضف رسالتك الأولى أعلاه 📢</div>`;
-                                        return msgs.map((m, i) => `
-                                        <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-2xl flex items-start justify-between gap-3 hover:border-purple-500/20 transition" id="bcMsg${i}">
-                                            <div class="flex items-center gap-2 shrink-0 mt-1">
-                                                <button type="button" onclick="deleteBroadcastMessage(${i})" class="text-rose-400 hover:text-rose-300 text-sm transition">🗑️</button>
-                                                <span class="w-6 h-6 rounded-lg bg-purple-950/60 text-purple-300 text-[10px] font-black flex items-center justify-center border border-purple-500/20">${i+1}</span>
-                                            </div>
-                                            <p class="text-xs text-gray-300 text-right leading-relaxed flex-1 truncate">${m}</p>
-                                        </div>`).join('');
-                                    })()}
-                                </div>
-
-                                <!-- Add Message Input Area (hidden by default) -->
-                                <div id="addMsgArea" class="hidden space-y-3 border-t border-white/5 pt-4">
-                                    <textarea id="newBcMsgInput" rows="3" placeholder="اكتب نص الإعلان هنا... (يدعم markdown ومتغيرات مثل {server} و {members})" class="w-full bg-[#0b0d14] border border-white/5 focus:border-purple-600 rounded-xl px-4 py-3 text-xs text-white outline-none text-right leading-relaxed transition"></textarea>
-                                    <div class="flex items-center gap-2 justify-end">
-                                        <button type="button" onclick="cancelAddMessage()" class="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-xl text-xs font-bold transition">إلغاء</button>
-                                        <button type="button" onclick="confirmAddMessage()" class="px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-xs font-bold transition">✓ إضافة</button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- صورة بنر الإعلان بنمط Wicks -->
-                            <div class="bg-[#12141f] border border-white/5 hover:border-emerald-500/30 rounded-3xl p-6 transition shadow-xl space-y-3">
-                                <div class="flex flex-col md:flex-row items-center justify-between gap-4">
-                                    <!-- المعاينة وزر الحذف -->
-                                    <div class="w-full md:w-auto flex flex-col items-center gap-2">
-                                        <div class="w-full md:w-56 h-28 rounded-2xl border border-white/10 bg-[#0b0d14] overflow-hidden flex items-center justify-center relative group">
-                                            <img id="img_broadcast_image" src="${settings.broadcast_image || ''}" class="w-full h-full object-cover ${settings.broadcast_image ? '' : 'hidden'}">
-                                            <div id="placeholder_broadcast_image" class="text-gray-500 text-xs flex flex-col items-center gap-1 ${settings.broadcast_image ? 'hidden' : ''}">
-                                                <span class="text-2xl">🖼️</span>
-                                                <span>لا توجد صورة</span>
-                                            </div>
-                                        </div>
-                                        <button type="button" onclick="clearUploadedImageInDOM('broadcast_image', () => saveBroadcastImageSetting(''))" class="text-xs text-rose-400 hover:text-rose-300 flex items-center gap-1.5 transition font-bold py-1 px-3 rounded-lg hover:bg-rose-950/30 cursor-pointer">
-                                            <span>🗑️</span>
-                                            <span>إزالة الصورة</span>
-                                        </button>
-                                    </div>
-
-                                    <!-- نصوص الشرح -->
-                                    <div class="flex-1 text-right space-y-1 w-full">
-                                        <div class="flex items-center justify-end gap-2">
-                                            <h5 class="text-sm font-black text-white">صورة بنر الإعلان / المذيع الآلي</h5>
-                                            <span class="text-emerald-400 text-base">📢</span>
-                                        </div>
-                                        <ul class="text-[11px] text-gray-400 space-y-0.5 list-disc list-inside">
-                                            <li>ستُرفق هذه الصورة أو البنر تلقائياً مع رسائل الإعلانات الدورية.</li>
-                                            <li>الحد الأدنى الموصى به للحجم هو 1024x512 أو 1920x1080 بكسل.</li>
-                                            <li>الصيغ المدعومة: PNG, JPG, GIF, WEBP.</li>
-                                        </ul>
-                                    </div>
-
-                                    <!-- زر الرفع -->
-                                    <div class="w-full md:w-auto flex justify-end">
-                                        <input type="file" id="file_broadcast_image" accept="image/*" class="hidden" onchange="uploadImageFile(this, 'broadcast_image', (url) => saveBroadcastImageSetting(url))">
-                                        <input type="hidden" id="input_broadcast_image" name="broadcast_image" value="${settings.broadcast_image || ''}">
-                                        <button type="button" onclick="document.getElementById('file_broadcast_image').click()" class="px-6 py-2.5 bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-500 hover:to-green-500 text-white rounded-xl text-xs font-black transition shadow-lg flex items-center gap-2 cursor-pointer w-full md:w-auto justify-center">
-                                            <span>📤</span>
-                                            <span id="btn_text_broadcast_image">رفع الصورة</span>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Send Now (Manual Broadcast) -->
-                            <div class="bg-[#12141f] border border-white/5 p-5 rounded-3xl flex items-center justify-between shadow-xl">
-                                <button type="button" onclick="sendBroadcastNow()" id="btnBroadcastNow" class="px-6 py-3 bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-500 hover:to-green-500 text-white rounded-xl text-xs font-black transition shadow-lg flex items-center gap-2">
-                                    <span>📤</span>
-                                    <span>إرسال الآن يدوياً</span>
-                                </button>
-                                <div class="text-right">
-                                    <h4 class="font-black text-white text-sm">إرسال فوري</h4>
-                                    <p class="text-gray-400 text-[11px] mt-0.5">إرسال رسالة عشوائية من القائمة فوراً إلى القناة المحددة</p>
-                                </div>
-                            </div>
-
-                        </div>
-
                     </div>
-
-                    <script>
-                    let broadcastMsgs = [];
-                    try { broadcastMsgs = JSON.parse('${(settings.broadcast_messages || '[]').replace(/'/g, "\\'")}'); } catch(e) {}
-
-                    function selectBroadcastInterval(interval, btn) {
-                        document.getElementById('inpBroadcastInterval').value = interval;
-                        document.querySelectorAll('.bc-interval-btn').forEach(b => {
-                            b.className = 'bc-interval-btn py-2.5 px-3 rounded-xl border text-xs font-bold transition bg-[#0b0d14] border-white/5 text-gray-400 hover:text-white';
-                        });
-                        btn.className = 'bc-interval-btn py-2.5 px-3 rounded-xl border text-xs font-bold transition bg-purple-900/40 border-purple-500 text-white';
-                    }
-
-                    function addBroadcastMessage() {
-                        document.getElementById('addMsgArea').classList.remove('hidden');
-                        document.getElementById('newBcMsgInput').focus();
-                    }
-
-                    function cancelAddMessage() {
-                        document.getElementById('addMsgArea').classList.add('hidden');
-                        document.getElementById('newBcMsgInput').value = '';
-                    }
-
-                    async function confirmAddMessage() {
-                        const txt = document.getElementById('newBcMsgInput').value.trim();
-                        if (!txt) return alert('يرجى كتابة نص الرسالة أولاً!');
-                        broadcastMsgs.push(txt);
-                        await saveBroadcastMessages();
-                        cancelAddMessage();
-                        location.reload();
-                    }
-
-                    async function deleteBroadcastMessage(idx) {
-                        if (!confirm('هل تريد حذف هذه الرسالة؟')) return;
-                        broadcastMsgs.splice(idx, 1);
-                        await saveBroadcastMessages();
-                        location.reload();
-                    }
-
-                    async function saveBroadcastMessages() {
-                        await fetch('/api/guild/${guildId}/settings', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ broadcast_messages: JSON.stringify(broadcastMsgs) })
-                        });
-                    }
-
-                    async function saveBroadcastImageSetting(url) {
-                        await fetch('/api/guild/${guildId}/settings', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ broadcast_image: url })
-                        });
-                    }
-
-                    async function sendBroadcastNow() {
-                        const btn = document.getElementById('btnBroadcastNow');
-                        btn.disabled = true;
-                        btn.innerHTML = '⏳ جارٍ الإرسال...';
-                        try {
-                            const res = await fetch('/api/guild/${guildId}/broadcast-now', { method: 'POST' });
-                            const d = await res.json();
-                            if (d.success) {
-                                btn.innerHTML = '✅ تم الإرسال!';
-                                setTimeout(() => { btn.disabled = false; btn.innerHTML = '📤 إرسال الآن يدوياً'; }, 3000);
-                            } else {
-                                alert('❌ ' + (d.error || 'فشل الإرسال. تأكد من ضبط القناة وإضافة رسائل في القائمة.'));
-                                btn.disabled = false;
-                                btn.innerHTML = '📤 إرسال الآن يدوياً';
-                            }
-                        } catch(e) {
-                            btn.disabled = false;
-                            btn.innerHTML = '📤 إرسال الآن يدوياً';
-                        }
-                    }
-                    </script>
 `;
             } else if (section === 'protection') {
 formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl">
@@ -10082,12 +9859,8 @@ formFieldsHtml = `<div class="space-y-6 text-right" dir="rtl">
                                 </button>
                                 <div id="grp_sub_messages" class="space-y-1">
                                     <a href="/dashboard/${guildId}/embed" class="flex items-center justify-between px-3 py-2 rounded-xl ${section === 'embed' ? 'bg-purple-600 text-white font-bold shadow-md' : 'text-gray-300 hover:text-white hover:bg-[#151724]'} transition group">
-                                        <span></span>
+                                         <span></span>
                                         <span class="flex items-center gap-2"><span>رسائل الأمبد</span><span class="text-gray-400 group-hover:text-purple-400">📄</span></span>
-                                    </a>
-                                    <a href="/dashboard/${guildId}/broadcast" class="flex items-center justify-between px-3 py-2 rounded-xl ${section === 'broadcast' ? 'bg-purple-600 text-white font-bold shadow-md' : 'text-gray-300 hover:text-white hover:bg-[#151724]'} transition group">
-                                        <span class="text-[9px] font-bold text-cyan-400 bg-cyan-950/60 px-1.5 py-0.2 rounded">جديد</span>
-                                        <span class="flex items-center gap-2"><span>نظام الإعلانات</span><span class="text-gray-400 group-hover:text-purple-400">📢</span></span>
                                     </a>
                                 </div>
                             </div>
@@ -10775,41 +10548,6 @@ ${embedScriptHtml}
             rawDb.prepare('DELETE FROM giveaways WHERE guild_id = ?').run(guildId);
             rawDb.prepare('DELETE FROM suggestions WHERE guild_id = ?').run(guildId);
             rawDb.prepare('DELETE FROM security_logs WHERE guild_id = ?').run(guildId);
-            res.json({ success: true });
-        } catch (e) {
-            res.status(500).json({ success: false, error: e.message });
-        }
-    });
-
-    app.post('/api/guild/:guildId/broadcast-now', async (req, res) => {
-        try {
-            if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
-            const { guildId } = req.params;
-            const settings = database.getGuildSettings(guildId);
-            const channelId = settings.broadcast_channel;
-            if (!channelId) return res.status(400).json({ success: false, error: 'لم يتم تحديد قناة البث' });
-
-            let msgs = [];
-            try { msgs = JSON.parse(settings.broadcast_messages || '[]'); } catch(e) {}
-            if (msgs.length === 0) return res.status(400).json({ success: false, error: 'لا توجد رسائل مضافة في القائمة' });
-
-            const channel = client.channels.cache.get(channelId) || await client.channels.fetch(channelId).catch(() => null);
-            if (!channel || !channel.isTextBased()) return res.status(404).json({ success: false, error: 'القناة غير متاحة' });
-
-            const randomMsg = msgs[Math.floor(Math.random() * msgs.length)];
-            const { EmbedBuilder } = require('discord.js');
-            const embed = new EmbedBuilder()
-                .setColor('#9333ea')
-                .setDescription(randomMsg)
-                .setTimestamp()
-                .setFooter({ text: '📢 إعلان تلقائي — ZENO BOT' });
-
-            if (settings.broadcast_image) {
-                embed.setImage(settings.broadcast_image);
-            }
-
-            const mentionContent = settings.broadcast_mention_role ? `<@&${settings.broadcast_mention_role}>` : '';
-            await channel.send({ content: mentionContent || undefined, embeds: [embed] });
             res.json({ success: true });
         } catch (e) {
             res.status(500).json({ success: false, error: e.message });
