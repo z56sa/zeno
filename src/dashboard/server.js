@@ -12,6 +12,10 @@ const SecretManager = require('../utils/secretManager');
 const identityWallpapers = require('../data/identityWallpapers.json');
 const { askAI } = require('../utils/ai');
 
+const { requireAuth, createGuildAuthMiddleware } = require('./middleware/auth');
+const { apiLimiter, sensitiveActionLimiter, aiLimiter } = require('./middleware/rateLimiter');
+const { errorHandler } = require('./middleware/errorHandler');
+
 module.exports = function (app, client) {
     const sessionStore = new SqliteStore({ client: rawDb });
     let sessionSecret = '';
@@ -23,18 +27,25 @@ module.exports = function (app, client) {
         sessionSecret = 'ZENO_TICKETS_SUPER_SECRET';
     }
 
+    const requireGuildPermission = createGuildAuthMiddleware(client);
+
     app.use(express.static(require('path').join(__dirname, 'public'), { index: false }));
     app.use(session({
         store: sessionStore,
         secret: sessionSecret,
         resave: false,
         saveUninitialized: false,
+        rolling: true, // Renews cookie and session expiration on active requests
         cookie: {
-            maxAge: 7 * 24 * 60 * 60 * 1000,
+            maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
             httpOnly: true,
-            secure: false
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax'
         }
     }));
+
+    // Apply API rate limiter to all API endpoints
+    app.use('/api/', apiLimiter);
 
     // Helper: Discord OAuth2 config
     const getOAuthConfig = (req) => {
@@ -180,14 +191,22 @@ module.exports = function (app, client) {
                 }
             }
 
-            // Save to user session
+            // Save to user session including OAuth token lifecycle
             req.session.user = {
                 id: userData.id,
                 username: userData.global_name || userData.username,
                 discriminator: userData.discriminator,
                 avatar: userData.avatar
             };
+            req.session.token = {
+                accessToken: accessToken,
+                refreshToken: tokenData.refresh_token || null,
+                tokenType: tokenData.token_type || 'Bearer',
+                scope: tokenData.scope || '',
+                expiresAt: tokenData.expires_in ? Date.now() + (tokenData.expires_in * 1000) : null
+            };
             req.session.guilds = manageableGuilds;
+            req.session.lastActive = Date.now();
 
             // Redirect directly to dashboard
             res.redirect('/dashboard/manage');
@@ -198,8 +217,15 @@ module.exports = function (app, client) {
     });
 
     app.get('/logout', (req, res) => {
-        req.session?.destroy?.(() => {});
-        return res.redirect('/');
+        if (req.session) {
+            req.session.destroy(err => {
+                if (err) console.error('[AUTH LOGOUT ERROR]', err);
+                res.clearCookie('connect.sid');
+                return res.redirect('/');
+            });
+        } else {
+            return res.redirect('/');
+        }
     });
 
     // Bot Info API for public landing pages
@@ -10134,7 +10160,9 @@ ${embedScriptHtml}
         }
     });
 
-    // 5. REST APIs
+    // 5. REST APIs - Protected by Real-Time Guild Permission Check
+    app.use('/api/guild/:guildId', requireGuildPermission);
+
     app.post('/api/guild/:guildId/upload-image', express.json({ limit: '20mb' }), async (req, res) => {
         try {
             if (!req.session?.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
@@ -11176,5 +11204,7 @@ ${embedScriptHtml}
         }
     });
 
+    // Global Dashboard & API Error Handler
+    app.use(errorHandler);
 };
 
