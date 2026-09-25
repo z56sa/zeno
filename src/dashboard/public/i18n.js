@@ -2885,7 +2885,7 @@
         updateLayoutStyles(lang);
 
         // Disconnect observer during bulk translation to avoid infinite mutation loops
-        if (typeof observer !== 'undefined' && observer) {
+        if (observer) {
             observer.disconnect();
         }
 
@@ -2895,7 +2895,7 @@
         }
 
         // Reconnect observer after translation is done
-        if (typeof observer !== 'undefined' && observer && document.body) {
+        if (observer && document.body) {
             observer.observe(document.body, { childList: true, subtree: true });
         }
 
@@ -2914,6 +2914,9 @@
         apply: () => applyLanguage(currentLang)
     };
 
+    // Declare observer here (before auto-run) to avoid TDZ ReferenceError inside applyLanguage
+    let observer = null;
+
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', () => applyLanguage(currentLang));
     } else {
@@ -2921,7 +2924,7 @@
     }
 
     // Observer for dynamically added elements (tabs, modals, AJAX content)
-    const observer = new MutationObserver((mutations) => {
+    observer = new MutationObserver((mutations) => {
         if (currentLang === 'en') {
             for (const mutation of mutations) {
                 if (mutation.type === 'childList') {
