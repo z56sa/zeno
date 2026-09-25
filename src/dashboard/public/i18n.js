@@ -139,6 +139,10 @@
         "إرسال": "Send",
         "تطبيق": "Apply",
         "تحديث": "Refresh",
+        "المشرف": "Staff / Mod",
+        "إجراءات": "Actions",
+        "تذاكر": "Tickets",
+        "الجلسات": "Shifts",
         "إجمالي": "Total",
         "عضو": "Member",
         "الأعضاء": "Members",
@@ -1395,6 +1399,13 @@
         "✕ حذف": "✕ Delete",
         "⭐ تعديل النقاط": "⭐ Edit Points",
         "⭐ نقاط البونص": "⭐ Bonus Points",
+        "⏱️ ساعات التواجد": "⏱️ Shift Hours",
+        "🔄 الجلسات": "🔄 Shifts",
+        "🎫 تذاكر": "🎫 Tickets",
+        "🔨 إجراءات": "🔨 Actions",
+        "المشرف": "Staff / Mod",
+        "إجراءات": "Actions",
+        "تذاكر": "Tickets",
         "✨ تطبيق على جميع السجلات المفعلة": "✨ Apply to all active logs",
         "🚀 إرسال": "🚀 Send",
         "🚀 إرسال البانل في القناة": "🚀 Send Panel to Channel",
@@ -2757,6 +2768,11 @@
                             }
                         }
                     }
+                    // Convert Arabic time units (e.g., "0س 0د" -> "0h 0m", "15د" -> "15m", "30ث" -> "30s")
+                    original = original.replace(/(\d+)\s*س\b/g, '$1h')
+                                       .replace(/(\d+)\s*د\b/g, '$1m')
+                                       .replace(/(\d+)\s*ث\b/g, '$1s');
+
                     node.textContent = original;
                 }
             } else {

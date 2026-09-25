@@ -8436,13 +8436,13 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                                         <thead>
                                             <tr class="text-gray-500 border-b border-white/5">
                                                 <th class="pb-3 pr-3 font-bold">#</th>
-                                                <th class="pb-3 font-bold">المشرف</th>
-                                                <th class="pb-3 text-center font-bold text-emerald-400">⏱️ ساعات التواجد</th>
-                                                <th class="pb-3 text-center font-bold">🔄 الجلسات</th>
-                                                <th class="pb-3 text-center font-bold">🎫 تذاكر</th>
-                                                <th class="pb-3 text-center font-bold">🔨 إجراءات</th>
-                                                <th class="pb-3 text-center font-bold text-purple-400">⭐ نقاط البونص</th>
-                                                <th class="pb-3 text-center font-bold">إجراءات</th>
+                                                <th class="pb-3 font-bold" data-i18n="المشرف">المشرف</th>
+                                                <th class="pb-3 text-center font-bold text-emerald-400" data-i18n="⏱️ ساعات التواجد">⏱️ ساعات التواجد</th>
+                                                <th class="pb-3 text-center font-bold" data-i18n="🔄 الجلسات">🔄 الجلسات</th>
+                                                <th class="pb-3 text-center font-bold" data-i18n="🎫 تذاكر">🎫 تذاكر</th>
+                                                <th class="pb-3 text-center font-bold" data-i18n="🔨 إجراءات">🔨 إجراءات</th>
+                                                <th class="pb-3 text-center font-bold text-purple-400" data-i18n="⭐ نقاط البونص">⭐ نقاط البونص</th>
+                                                <th class="pb-3 text-center font-bold" data-i18n="إجراءات">إجراءات</th>
                                             </tr>
                                         </thead>
                                         <tbody class="divide-y divide-white/5">
@@ -8470,17 +8470,19 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                                                             <div class="truncate max-w-[170px]">
                                                                 <span class="block font-bold text-white leading-tight truncate">${staffDisplayName}</span>
                                                                 <span class="text-[10px] text-gray-400 font-mono block leading-tight truncate">${staffHandle}</span>
-                                                                ${isOnline ? '<span class="text-[9px] text-emerald-400 font-bold block mt-0.5">🟢 في الخدمة الآن</span>' : ''}
+                                                                ${isOnline ? '<span class="text-[9px] text-emerald-400 font-bold block mt-0.5" data-i18n="🟢 في الخدمة الآن">🟢 في الخدمة الآن</span>' : ''}
                                                             </div>
                                                         </div>
                                                     </td>
-                                                    <td class="py-3.5 text-center font-mono font-black text-emerald-400 text-sm">${sHours}س ${sMins}د</td>
+                                                    <td class="py-3.5 text-center font-mono font-black text-emerald-400 text-sm">
+                                                        <span>${sHours}</span><span class="lang-ar">س </span><span class="lang-en">h </span><span>${sMins}</span><span class="lang-ar">د</span><span class="lang-en">m</span>
+                                                    </td>
                                                     <td class="py-3.5 text-center font-mono font-bold text-gray-300">${st.total_shifts || 0}</td>
                                                     <td class="py-3.5 text-center font-mono font-bold text-cyan-400">${st.tickets_closed || 0}</td>
                                                     <td class="py-3.5 text-center font-mono font-bold text-amber-400">${st.mod_actions || 0}</td>
                                                     <td class="py-3.5 text-center font-mono font-black text-purple-400 text-sm">${Number(st.points || 0).toLocaleString()}</td>
                                                     <td class="py-3.5 text-center">
-                                                        <button type="button" onclick="modifyStaffPointsPrompt('${st.user_id}', '${staffDisplayName.replace(/'/g, "\\'")}')" class="px-2.5 py-1 bg-purple-600/30 hover:bg-purple-600 text-purple-200 rounded-lg text-[10px] font-bold transition">
+                                                        <button type="button" onclick="modifyStaffPointsPrompt('${st.user_id}', '${staffDisplayName.replace(/'/g, "\\'")}')" class="px-2.5 py-1 bg-purple-600/30 hover:bg-purple-600 text-purple-200 rounded-lg text-[10px] font-bold transition" data-i18n="⭐ تعديل النقاط">
                                                             ⭐ تعديل النقاط
                                                         </button>
                                                     </td>
