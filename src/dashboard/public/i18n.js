@@ -2884,9 +2884,19 @@
 
         updateLayoutStyles(lang);
 
+        // Disconnect observer during bulk translation to avoid infinite mutation loops
+        if (typeof observer !== 'undefined' && observer) {
+            observer.disconnect();
+        }
+
         // Translate the whole body
         if (document.body) {
             translateNode(document.body, lang);
+        }
+
+        // Reconnect observer after translation is done
+        if (typeof observer !== 'undefined' && observer && document.body) {
+            observer.observe(document.body, { childList: true, subtree: true });
         }
 
         // Update toggle buttons text & flag
@@ -2910,8 +2920,7 @@
         applyLanguage(currentLang);
     }
 
-    // Observer for dynamically added elements and text changes (tabs, modals, AJAX content)
-    let translateTimer = null;
+    // Observer for dynamically added elements (tabs, modals, AJAX content)
     const observer = new MutationObserver((mutations) => {
         if (currentLang === 'en') {
             for (const mutation of mutations) {
@@ -2919,22 +2928,16 @@
                     for (let i = 0; i < mutation.addedNodes.length; i++) {
                         translateNode(mutation.addedNodes[i], 'en');
                     }
-                } else if (mutation.type === 'characterData') {
-                    if (mutation.target && !mutation.target._isZenoTranslating) {
-                        mutation.target._isZenoTranslating = true;
-                        translateNode(mutation.target, 'en');
-                        mutation.target._isZenoTranslating = false;
-                    }
                 }
             }
         }
     });
 
     if (document.body) {
-        observer.observe(document.body, { childList: true, subtree: true, characterData: true });
+        observer.observe(document.body, { childList: true, subtree: true });
     } else {
         document.addEventListener('DOMContentLoaded', () => {
-            observer.observe(document.body, { childList: true, subtree: true, characterData: true });
+            observer.observe(document.body, { childList: true, subtree: true });
         });
     }
 
