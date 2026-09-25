@@ -125,6 +125,9 @@
         "سجلات الأحداث": "Event Logs",
         "تحديث": "Update",
         "جديد": "New",
+        "جديد وذكي": "New & Smart",
+        "وذكي": "and Smart",
+        "ذكي": "Smart",
 
         // Common General Buttons & Texts
         "تفعيل": "Enable",
