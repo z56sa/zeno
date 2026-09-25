@@ -220,6 +220,17 @@ module.exports = function (app, client) {
             req.session.guilds = manageableGuilds;
             req.session.lastActive = Date.now();
 
+            // حفظ بيانات المستخدم المسجل في كاش وقاعدة بيانات Turso
+            if (database.trackUserProfile) {
+                database.trackUserProfile({
+                    userId: userData.id,
+                    username: userData.username,
+                    displayName: userData.global_name || userData.username,
+                    avatar: userData.avatar,
+                    avatarUrl: userData.avatar ? `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png` : 'https://cdn.discordapp.com/embed/avatars/0.png'
+                });
+            }
+
             // Redirect directly to dashboard
             res.redirect('/dashboard/manage');
         } catch (err) {
@@ -457,7 +468,7 @@ module.exports = function (app, client) {
     });
 
     // 3. User Dashboard & Main Routes (لوحة التحكم الداخلية للسيرفرات)
-    app.get('/dashboard/manage', (req, res) => {
+    app.get('/dashboard/manage', async (req, res) => {
         try {
             // التحقق من تسجيل دخول المستخدم عبر Discord OAuth2
             let user = req.session?.user || null;
@@ -492,20 +503,59 @@ module.exports = function (app, client) {
                 userWallpaper = userRow?.wallpaper || 'default';
 
                 xpLeaderboard = rawDb.prepare(`
-                    SELECT user_id, SUM(xp) as total_xp, MAX(level) as max_level, SUM(coins) as total_coins
-                    FROM users
-                    GROUP BY user_id
+                    SELECT u.user_id, SUM(u.xp) as total_xp, MAX(u.level) as max_level, SUM(u.coins) as total_coins,
+                           p.username, p.display_name, p.avatar, p.avatar_url
+                    FROM users u
+                    LEFT JOIN user_profiles p ON u.user_id = p.user_id
+                    GROUP BY u.user_id
                     ORDER BY total_xp DESC
                     LIMIT 100
                 `).all();
 
                 coinsLeaderboard = rawDb.prepare(`
-                    SELECT user_id, SUM(coins) as total_coins, MAX(level) as max_level, SUM(xp) as total_xp
-                    FROM users
-                    GROUP BY user_id
+                    SELECT u.user_id, SUM(u.coins) as total_coins, MAX(u.level) as max_level, SUM(u.xp) as total_xp,
+                           p.username, p.display_name, p.avatar, p.avatar_url
+                    FROM users u
+                    LEFT JOIN user_profiles p ON u.user_id = p.user_id
+                    GROUP BY u.user_id
                     ORDER BY total_coins DESC
                     LIMIT 100
                 `).all();
+
+                // حل أسماء وصور المستخدمين غير المسجلين مسبقاً وتخزينها في Turso
+                const resolveProfiles = async (list) => {
+                    for (const item of list) {
+                        if (!item.username || !item.avatar_url) {
+                            let resolvedUser = client?.users?.cache?.get(item.user_id);
+                            if (!resolvedUser && client?.users?.fetch) {
+                                try {
+                                    resolvedUser = await client.users.fetch(item.user_id);
+                                } catch (e) {}
+                            }
+                            if (resolvedUser) {
+                                item.username = resolvedUser.tag || resolvedUser.username;
+                                item.display_name = resolvedUser.globalName || resolvedUser.username;
+                                item.avatar = resolvedUser.avatar;
+                                item.avatar_url = resolvedUser.displayAvatarURL({ dynamic: true, size: 128 });
+                                if (database.trackUserProfile) {
+                                    database.trackUserProfile({
+                                        userId: item.user_id,
+                                        username: item.username,
+                                        displayName: item.display_name,
+                                        avatar: item.avatar,
+                                        avatarUrl: item.avatar_url
+                                    });
+                                }
+                            } else {
+                                item.username = item.username || `عضو #${item.user_id.slice(-4)}`;
+                                item.display_name = item.display_name || item.username;
+                                item.avatar_url = item.avatar_url || 'https://cdn.discordapp.com/embed/avatars/0.png';
+                            }
+                        }
+                    }
+                };
+
+                await Promise.all([resolveProfiles(xpLeaderboard), resolveProfiles(coinsLeaderboard)]);
 
                 const xIndex = xpLeaderboard.findIndex(r => r.user_id === user.id);
                 if (xIndex !== -1) userRankXp = xIndex + 1;
@@ -554,25 +604,57 @@ module.exports = function (app, client) {
                 </div>
             `;
 
-            const xpLeaderboardHtml = xpLeaderboard.slice(0, 100).map((r, i) => `
-                <div class="bg-[#1c1f2e] border border-white/5 p-3 rounded-2xl flex items-center justify-between">
-                    <span class="text-xs font-mono font-bold text-purple-400">⚡ ${Number(r.total_xp || 0).toLocaleString()} XP</span>
+            const xpLeaderboardHtml = xpLeaderboard.slice(0, 100).map((r, i) => {
+                const uName = r.display_name || r.username || `عضو #${String(r.user_id).slice(-4)}`;
+                const uTag = r.username && r.username !== uName ? `@${r.username}` : `ID: ${r.user_id}`;
+                const uAvatar = r.avatar_url || (r.avatar ? `https://cdn.discordapp.com/avatars/${r.user_id}/${r.avatar}.png` : 'https://cdn.discordapp.com/embed/avatars/0.png');
+                const badgeClass = i === 0 ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40' :
+                                   i === 1 ? 'bg-slate-400/20 text-slate-300 border border-slate-400/40' :
+                                   i === 2 ? 'bg-orange-800/20 text-orange-300 border border-orange-700/40' :
+                                             'bg-purple-950/60 text-purple-300 border border-purple-800/40';
+                return `
+                <div class="bg-[#1c1f2e] border border-white/5 hover:border-purple-500/30 p-3 rounded-2xl flex items-center justify-between transition-all group">
+                    <div class="text-left">
+                        <span class="text-xs font-mono font-bold text-purple-400">⚡ ${Number(r.total_xp || 0).toLocaleString()} XP</span>
+                        <span class="text-[10px] text-gray-500 block font-mono">المستوى: ${r.max_level || 1}</span>
+                    </div>
                     <div class="flex items-center gap-3">
-                        <span class="text-xs text-white font-bold">${r.user_id}</span>
-                        <span class="w-6 h-6 rounded-full bg-purple-950/60 text-purple-300 text-[10px] font-black flex items-center justify-center">#${i + 1}</span>
+                        <div class="text-right">
+                            <span class="text-xs text-white font-bold block group-hover:text-purple-300 transition truncate max-w-[150px]">${uName}</span>
+                            <span class="text-[10px] text-gray-400 font-mono block">${uTag}</span>
+                        </div>
+                        <img src="${uAvatar}" alt="${uName}" class="w-9 h-9 rounded-xl object-cover ring-2 ring-white/10 group-hover:ring-purple-500/50 transition shrink-0" onerror="this.src='https://cdn.discordapp.com/embed/avatars/0.png'">
+                        <span class="w-6 h-6 rounded-lg ${badgeClass} text-[10px] font-black flex items-center justify-center shrink-0">#${i + 1}</span>
                     </div>
                 </div>
-            `).join('') || '<p class="text-xs text-gray-500 text-center py-4">لا توجد بيانات خبرة مسجلة بعد</p>';
+                `;
+            }).join('') || '<p class="text-xs text-gray-500 text-center py-4">لا توجد بيانات خبرة مسجلة بعد</p>';
 
-            const coinsLeaderboardHtml = coinsLeaderboard.slice(0, 100).map((r, i) => `
-                <div class="bg-[#1c1f2e] border border-white/5 p-3 rounded-2xl flex items-center justify-between">
-                    <span class="text-xs font-mono font-bold text-amber-400">🪙 ${Number(r.total_coins || 0).toLocaleString()}</span>
+            const coinsLeaderboardHtml = coinsLeaderboard.slice(0, 100).map((r, i) => {
+                const uName = r.display_name || r.username || `عضو #${String(r.user_id).slice(-4)}`;
+                const uTag = r.username && r.username !== uName ? `@${r.username}` : `ID: ${r.user_id}`;
+                const uAvatar = r.avatar_url || (r.avatar ? `https://cdn.discordapp.com/avatars/${r.user_id}/${r.avatar}.png` : 'https://cdn.discordapp.com/embed/avatars/0.png');
+                const badgeClass = i === 0 ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40' :
+                                   i === 1 ? 'bg-slate-400/20 text-slate-300 border border-slate-400/40' :
+                                   i === 2 ? 'bg-orange-800/20 text-orange-300 border border-orange-700/40' :
+                                             'bg-amber-950/60 text-amber-300 border border-amber-800/40';
+                return `
+                <div class="bg-[#1c1f2e] border border-white/5 hover:border-amber-500/30 p-3 rounded-2xl flex items-center justify-between transition-all group">
+                    <div class="text-left">
+                        <span class="text-xs font-mono font-bold text-amber-400">🪙 ${Number(r.total_coins || 0).toLocaleString()}</span>
+                        <span class="text-[10px] text-gray-500 block font-mono">الذهب</span>
+                    </div>
                     <div class="flex items-center gap-3">
-                        <span class="text-xs text-white font-bold">${r.user_id}</span>
-                        <span class="w-6 h-6 rounded-full bg-amber-950/60 text-amber-300 text-[10px] font-black flex items-center justify-center">#${i + 1}</span>
+                        <div class="text-right">
+                            <span class="text-xs text-white font-bold block group-hover:text-amber-300 transition truncate max-w-[150px]">${uName}</span>
+                            <span class="text-[10px] text-gray-400 font-mono block">${uTag}</span>
+                        </div>
+                        <img src="${uAvatar}" alt="${uName}" class="w-9 h-9 rounded-xl object-cover ring-2 ring-white/10 group-hover:ring-amber-500/50 transition shrink-0" onerror="this.src='https://cdn.discordapp.com/embed/avatars/0.png'">
+                        <span class="w-6 h-6 rounded-lg ${badgeClass} text-[10px] font-black flex items-center justify-center shrink-0">#${i + 1}</span>
                     </div>
                 </div>
-            `).join('') || '<p class="text-xs text-gray-500 text-center py-4">لا توجد بيانات ذهب مسجلة بعد</p>';
+                `;
+            }).join('') || '<p class="text-xs text-gray-500 text-center py-4">لا توجد بيانات ذهب مسجلة بعد</p>';
 
             const dailyActionBoxHtml = canClaimDaily ? `
                 <button type="button" onclick="window.claimDailyReward()" id="claimDailyBtn" class="px-10 py-3.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-black text-sm rounded-2xl shadow-xl shadow-purple-950/60 hover:scale-105 transition-all cursor-pointer flex items-center gap-2 mx-auto">
@@ -1574,17 +1656,31 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                                 <h4 class="font-black text-white text-sm flex items-center gap-2"><span>أكثر الأعضاء نشاطاً</span><span>🏆</span></h4>
                             </div>
                             <div class="space-y-2">
-                                ${guildLeaderboardUsers.slice(0, 5).map((u, i) => `
-                                <div class="flex items-center justify-between bg-[#0b0d14] border border-white/5 p-3 rounded-xl hover:border-purple-500/20 transition">
-                                    <div class="flex items-center gap-3">
-                                        <span class="text-xs font-mono font-black text-purple-400">⚡ ${Number(u.total_xp || 0).toLocaleString()} XP</span>
-                                        <span class="text-xs text-gray-300 font-mono truncate max-w-[120px]">${u.user_id}</span>
+                                ${guildLeaderboardUsers.slice(0, 5).map((u, i) => {
+                                    const uName = u.display_name || u.username || `عضو #${String(u.user_id).slice(-4)}`;
+                                    const uTag = u.username && u.username !== uName ? `@${u.username}` : `ID: ${u.user_id}`;
+                                    const uAvatar = u.avatar_url || (u.avatar ? `https://cdn.discordapp.com/avatars/${u.user_id}/${u.avatar}.png` : 'https://cdn.discordapp.com/embed/avatars/0.png');
+                                    const badgeClass = i === 0 ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' :
+                                                       i === 1 ? 'bg-gray-400/20 text-gray-300 border border-gray-400/30' :
+                                                       i === 2 ? 'bg-purple-700/20 text-purple-400 border border-purple-500/30' :
+                                                                 'bg-purple-600/20 text-purple-400 border border-purple-500/30';
+                                    return `
+                                    <div class="flex items-center justify-between bg-[#0b0d14] border border-white/5 p-3 rounded-xl hover:border-purple-500/20 transition group">
+                                        <div class="text-left">
+                                            <span class="text-xs font-mono font-black text-purple-400">⚡ ${Number(u.total_xp || 0).toLocaleString()} XP</span>
+                                            <span class="text-[10px] text-gray-500 block font-mono">المستوى: ${u.level || 1}</span>
+                                        </div>
+                                        <div class="flex items-center gap-3">
+                                            <div class="text-right">
+                                                <span class="text-xs text-white font-bold block group-hover:text-purple-300 transition truncate max-w-[130px]">${uName}</span>
+                                                <span class="text-[10px] text-gray-400 font-mono block">${uTag}</span>
+                                            </div>
+                                            <img src="${uAvatar}" alt="${uName}" class="w-8 h-8 rounded-xl object-cover ring-2 ring-white/10 group-hover:ring-purple-500/50 transition shrink-0" onerror="this.src='https://cdn.discordapp.com/embed/avatars/0.png'">
+                                            <span class="w-6 h-6 rounded-lg ${badgeClass} text-[10px] font-black flex items-center justify-center shrink-0">#${i+1}</span>
+                                        </div>
                                     </div>
-                                    <div class="flex items-center gap-2">
-                                        <span class="w-6 h-6 rounded-lg ${i === 0 ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' : i === 1 ? 'bg-gray-400/20 text-gray-300 border border-gray-400/30' : i === 2 ? 'bg-purple-700/20 text-purple-400 border border-purple-500/30' : 'bg-purple-600/20 text-purple-400 border border-purple-500/30'} text-[10px] font-black flex items-center justify-center">#${i+1}</span>
-                                    </div>
-                                </div>
-                                `).join('')}
+                                    `;
+                                }).join('')}
                                 ${guildLeaderboardUsers.length === 0 ? '<p class="text-xs text-gray-500 text-center py-4">لا توجد بيانات نشاط حتى الآن</p>' : ''}
                             </div>
                         </div>
@@ -8155,13 +8251,16 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                 const staffList = (() => {
                     try {
                         return rawDb.prepare(`
-                            SELECT user_id, tickets_closed, mod_actions, bans_count, kicks_count,
-                                   mutes_count, warns_count, messages_count, voice_seconds,
-                                   shift_seconds, total_shifts, points,
-                                   (tickets_closed*10 + warns_count*3 + bans_count*5 + kicks_count*4 + 
-                                    (voice_seconds/60) + messages_count + points) as total_points
-                            FROM staff_activity WHERE guild_id = ?
-                            ORDER BY shift_seconds DESC, total_points DESC LIMIT 50
+                            SELECT s.user_id, s.tickets_closed, s.mod_actions, s.bans_count, s.kicks_count,
+                                   s.mutes_count, s.warns_count, s.messages_count, s.voice_seconds,
+                                   s.shift_seconds, s.total_shifts, s.points,
+                                   p.username, p.display_name, p.avatar_url,
+                                   (s.tickets_closed*10 + s.warns_count*3 + s.bans_count*5 + s.kicks_count*4 + 
+                                    (s.voice_seconds/60) + s.messages_count + s.points) as total_points
+                            FROM staff_activity s
+                            LEFT JOIN user_profiles p ON s.user_id = p.user_id
+                            WHERE s.guild_id = ?
+                            ORDER BY s.shift_seconds DESC, total_points DESC LIMIT 50
                         `).all(guildId);
                     } catch(e) { return []; }
                 })();
@@ -8354,21 +8453,24 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                                                 const sHours = Math.floor(effectiveSeconds / 3600);
                                                 const sMins = Math.floor((effectiveSeconds % 3600) / 60);
                                                 const memberObj = botGuild?.members?.cache?.get(st.user_id);
-                                                const displayName = memberObj ? memberObj.user.tag : st.user_id;
+                                                const staffAvatar = memberObj?.user?.displayAvatarURL?.({ size: 64 }) || st.avatar_url || 'https://cdn.discordapp.com/embed/avatars/0.png';
+                                                const staffDisplayName = memberObj?.displayName || st.display_name || memberObj?.user?.username || st.username || `المشرف (${st.user_id.slice(-4)})`;
+                                                const staffHandle = memberObj?.user?.tag || (st.username ? `@${st.username}` : st.user_id);
                                                 const badge = i === 0 ? 'bg-amber-500/20 text-amber-300 border-amber-500/40' : i === 1 ? 'bg-gray-300/20 text-gray-300 border-gray-400/30' : i === 2 ? 'bg-orange-700/20 text-orange-400 border-orange-600/30' : 'bg-purple-600/20 text-purple-300 border-purple-500/30';
                                                 const isOnline = !!activeObj;
                                                 return `
                                                 <tr class="hover:bg-white/5 transition">
                                                     <td class="py-3.5 pr-3"><span class="w-7 h-7 rounded-lg border ${badge} flex items-center justify-center font-mono text-[11px] font-black">${i + 1}</span></td>
-                                                    <td class="py-3.5 font-bold text-white font-mono text-[11px]">
-                                                        <div class="flex items-center gap-2">
-                                                            <div class="relative">
-                                                                <div class="w-7 h-7 rounded-full bg-purple-900/50 flex items-center justify-center text-[10px]">👤</div>
+                                                    <td class="py-3.5 font-bold text-white text-xs">
+                                                        <div class="flex items-center gap-2.5">
+                                                            <div class="relative flex-shrink-0">
+                                                                <img src="${staffAvatar}" alt="" class="w-8 h-8 rounded-full border border-purple-500/30 object-cover shadow" onerror="this.src='https://cdn.discordapp.com/embed/avatars/0.png'">
                                                                 ${isOnline ? '<span class="w-2.5 h-2.5 rounded-full bg-emerald-400 absolute -bottom-0.5 -right-0.5 ring-2 ring-[#12141f]"></span>' : ''}
                                                             </div>
-                                                            <div>
-                                                                <span>${displayName}</span>
-                                                                ${isOnline ? '<span class="text-[9px] text-emerald-400 block">🟢 في الخدمة الآن</span>' : ''}
+                                                            <div class="truncate max-w-[170px]">
+                                                                <span class="block font-bold text-white leading-tight truncate">${staffDisplayName}</span>
+                                                                <span class="text-[10px] text-gray-400 font-mono block leading-tight truncate">${staffHandle}</span>
+                                                                ${isOnline ? '<span class="text-[9px] text-emerald-400 font-bold block mt-0.5">🟢 في الخدمة الآن</span>' : ''}
                                                             </div>
                                                         </div>
                                                     </td>
@@ -8378,7 +8480,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                                                     <td class="py-3.5 text-center font-mono font-bold text-amber-400">${st.mod_actions || 0}</td>
                                                     <td class="py-3.5 text-center font-mono font-black text-purple-400 text-sm">${Number(st.points || 0).toLocaleString()}</td>
                                                     <td class="py-3.5 text-center">
-                                                        <button type="button" onclick="modifyStaffPointsPrompt('${st.user_id}', '${displayName}')" class="px-2.5 py-1 bg-purple-600/30 hover:bg-purple-600 text-purple-200 rounded-lg text-[10px] font-bold transition">
+                                                        <button type="button" onclick="modifyStaffPointsPrompt('${st.user_id}', '${staffDisplayName.replace(/'/g, "\\'")}')" class="px-2.5 py-1 bg-purple-600/30 hover:bg-purple-600 text-purple-200 rounded-lg text-[10px] font-bold transition">
                                                             ⭐ تعديل النقاط
                                                         </button>
                                                     </td>

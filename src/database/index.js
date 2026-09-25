@@ -734,6 +734,79 @@ function getTrackedGuildInfo(guildId) {
   }
 }
 
+// جدول كاش بيانات المستخدمين (الاسم والصورة والمعرف) لحفظها في Turso وعرضها في لوحات الصدارة
+try {
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS user_profiles (
+      user_id TEXT PRIMARY KEY,
+      username TEXT,
+      display_name TEXT,
+      avatar TEXT,
+      avatar_url TEXT,
+      updated_at INTEGER DEFAULT 0
+    );
+  `);
+} catch(e) {}
+
+function trackUserProfile(data) {
+  if (!data || !data.userId) return;
+  const userId = String(data.userId);
+  const username = data.username ? String(data.username) : null;
+  const displayName = data.displayName ? String(data.displayName) : (username || null);
+  const avatar = data.avatar ? String(data.avatar) : null;
+  const avatarUrl = data.avatarUrl ? String(data.avatarUrl) : (avatar ? `https://cdn.discordapp.com/avatars/${userId}/${avatar}.png` : null);
+  const updatedAt = data.updatedAt || Date.now();
+
+  try {
+    db.prepare(`
+      INSERT INTO user_profiles (user_id, username, display_name, avatar, avatar_url, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?)
+      ON CONFLICT(user_id) DO UPDATE SET
+        username = COALESCE(excluded.username, user_profiles.username),
+        display_name = COALESCE(excluded.display_name, user_profiles.display_name),
+        avatar = COALESCE(excluded.avatar, user_profiles.avatar),
+        avatar_url = COALESCE(excluded.avatar_url, user_profiles.avatar_url),
+        updated_at = excluded.updated_at
+    `).run(userId, username, displayName, avatar, avatarUrl, updatedAt);
+
+    // مزامنة فورية إلى قاعدة بيانات Turso السحابية
+    if (tursoSync && tursoSync.queueProfileSync) {
+      tursoSync.queueProfileSync({
+        user_id: userId,
+        username,
+        display_name: displayName,
+        avatar,
+        avatar_url: avatarUrl,
+        updated_at: updatedAt
+      });
+    }
+  } catch (e) {}
+}
+
+function getUserProfile(userId) {
+  if (!userId) return null;
+  try {
+    return db.prepare('SELECT * FROM user_profiles WHERE user_id = ?').get(String(userId)) || null;
+  } catch (e) {
+    return null;
+  }
+}
+
+function getTrackedUserProfiles(userIds = []) {
+  if (!userIds || userIds.length === 0) return {};
+  try {
+    const placeholders = userIds.map(() => '?').join(',');
+    const rows = db.prepare(`SELECT * FROM user_profiles WHERE user_id IN (${placeholders})`).all(...userIds.map(String));
+    const map = {};
+    for (const r of rows) {
+      map[r.user_id] = r;
+    }
+    return map;
+  } catch (e) {
+    return {};
+  }
+}
+
 console.log('[DB] ✅ SQLite database initialized successfully');
 tursoSync.initAndRestore(db).catch(e => console.error('[TURSO] Init error:', e.message));
 
@@ -933,11 +1006,25 @@ function setWallpaper(userId, guildId, wallpaper) {
 }
 
 function getLeaderboard(guildId, limit = 10) {
-  return db.prepare('SELECT * FROM users WHERE guild_id = ? ORDER BY xp DESC, level DESC LIMIT ?').all(guildId, limit);
+  return db.prepare(`
+    SELECT u.*, p.username, p.display_name, p.avatar, p.avatar_url
+    FROM users u
+    LEFT JOIN user_profiles p ON u.user_id = p.user_id
+    WHERE u.guild_id = ?
+    ORDER BY u.xp DESC, u.level DESC
+    LIMIT ?
+  `).all(guildId, limit);
 }
 
 function getCoinsLeaderboard(guildId, limit = 10) {
-  return db.prepare('SELECT * FROM users WHERE guild_id = ? ORDER BY coins DESC LIMIT ?').all(guildId, limit);
+  return db.prepare(`
+    SELECT u.*, p.username, p.display_name, p.avatar, p.avatar_url
+    FROM users u
+    LEFT JOIN user_profiles p ON u.user_id = p.user_id
+    WHERE u.guild_id = ?
+    ORDER BY u.coins DESC
+    LIMIT ?
+  `).all(guildId, limit);
 }
 
 // ==========================================
@@ -2119,5 +2206,8 @@ module.exports = {
   },
   trackGuildInfo,
   getTrackedGuildInfo,
+  trackUserProfile,
+  getUserProfile,
+  getTrackedUserProfiles,
   db
 };

@@ -73,6 +73,18 @@ class TursoSync {
         );
       `);
 
+      // 1.5 Create user_profiles table in Turso for persistent usernames & avatars
+      await this.client.execute(`
+        CREATE TABLE IF NOT EXISTS user_profiles (
+          user_id TEXT PRIMARY KEY,
+          username TEXT,
+          display_name TEXT,
+          avatar TEXT,
+          avatar_url TEXT,
+          updated_at INTEGER DEFAULT 0
+        );
+      `);
+
       console.log('[TURSO] ✅ Turso remote tables verified.');
 
       // 2. Restore users data from Turso to local SQLite (Restoring coins/streak/XP after container restart)
@@ -118,6 +130,44 @@ class TursoSync {
         // If Turso is currently empty, push existing local users to Turso
         console.log('[TURSO] ℹ️ Turso is currently empty. Initializing remote database with local data...');
         this.backupAllLocalUsers(localDb);
+      }
+
+      // 3. Restore user_profiles from Turso into local SQLite
+      try {
+        const profilesResult = await this.client.execute('SELECT * FROM user_profiles');
+        if (profilesResult.rows && profilesResult.rows.length > 0) {
+          console.log(`[TURSO] 🔄 Restoring ${profilesResult.rows.length} user profiles from Turso into local SQLite...`);
+          const insertProfile = localDb.prepare(`
+            INSERT INTO user_profiles (user_id, username, display_name, avatar, avatar_url, updated_at)
+            VALUES (@user_id, @username, @display_name, @avatar, @avatar_url, @updated_at)
+            ON CONFLICT(user_id) DO UPDATE SET
+              username = COALESCE(excluded.username, user_profiles.username),
+              display_name = COALESCE(excluded.display_name, user_profiles.display_name),
+              avatar = COALESCE(excluded.avatar, user_profiles.avatar),
+              avatar_url = COALESCE(excluded.avatar_url, user_profiles.avatar_url),
+              updated_at = excluded.updated_at
+          `);
+
+          const restoreProfilesTx = localDb.transaction((rows) => {
+            for (const row of rows) {
+              insertProfile.run({
+                user_id: String(row.user_id),
+                username: row.username ? String(row.username) : null,
+                display_name: row.display_name ? String(row.display_name) : null,
+                avatar: row.avatar ? String(row.avatar) : null,
+                avatar_url: row.avatar_url ? String(row.avatar_url) : null,
+                updated_at: Number(row.updated_at || 0)
+              });
+            }
+          });
+
+          restoreProfilesTx(profilesResult.rows);
+          console.log('[TURSO] 🎉 User profiles successfully restored from Turso!');
+        } else {
+          this.backupAllLocalProfiles(localDb);
+        }
+      } catch (profErr) {
+        console.error('[TURSO] ⚠️ Error restoring user profiles:', profErr.message);
       }
     } catch (err) {
       console.error('[TURSO] ⚠️ Error during initAndRestore:', err.message);
@@ -170,6 +220,47 @@ class TursoSync {
       const rows = localDb.prepare('SELECT * FROM users').all();
       for (const row of rows) {
         this.queueUserSync(row);
+      }
+    } catch (e) {}
+  }
+
+  /**
+   * Syncs a specific user's profile (username, avatar, display name) immediately to Turso
+   */
+  queueProfileSync(profileData) {
+    if (!this.enabled || !this.client || !profileData || !profileData.user_id) return;
+
+    const sql = `
+      INSERT INTO user_profiles (user_id, username, display_name, avatar, avatar_url, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?)
+      ON CONFLICT(user_id) DO UPDATE SET
+        username = COALESCE(excluded.username, user_profiles.username),
+        display_name = COALESCE(excluded.display_name, user_profiles.display_name),
+        avatar = COALESCE(excluded.avatar, user_profiles.avatar),
+        avatar_url = COALESCE(excluded.avatar_url, user_profiles.avatar_url),
+        updated_at = excluded.updated_at;
+    `;
+    const args = [
+      String(profileData.user_id),
+      profileData.username ? String(profileData.username) : null,
+      profileData.display_name ? String(profileData.display_name) : null,
+      profileData.avatar ? String(profileData.avatar) : null,
+      profileData.avatar_url ? String(profileData.avatar_url) : null,
+      Number(profileData.updated_at || Date.now())
+    ];
+
+    this.enqueue({ sql, args });
+  }
+
+  /**
+   * Pushes all local user profiles to Turso
+   */
+  async backupAllLocalProfiles(localDb) {
+    if (!this.enabled || !this.client) return;
+    try {
+      const rows = localDb.prepare('SELECT * FROM user_profiles').all();
+      for (const row of rows) {
+        this.queueProfileSync(row);
       }
     } catch (e) {}
   }

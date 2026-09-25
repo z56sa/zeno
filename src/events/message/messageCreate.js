@@ -22,6 +22,17 @@ module.exports = {
       serverTracker.trackGuild(message.guild).catch(() => {});
     }
 
+    // حفظ وتحديث بيانات العضو (الاسم والصورة) في كاش قاعدة البيانات و Turso
+    if (db.trackUserProfile) {
+      db.trackUserProfile({
+        userId: message.author.id,
+        username: message.author.tag || message.author.username,
+        displayName: message.member?.displayName || message.author.globalName || message.author.username,
+        avatar: message.author.avatar,
+        avatarUrl: message.author.displayAvatarURL({ dynamic: true, size: 128 })
+      });
+    }
+
     const isAdmin = message.member?.permissions.has(PermissionFlagsBits.Administrator) ||
                     message.member?.permissions.has(PermissionFlagsBits.ManageGuild);
 
