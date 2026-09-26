@@ -846,7 +846,12 @@
             'html.zeno-lang-en .text-right { text-align: left !important; }',
             'html.zeno-lang-en .justify-end { justify-content: flex-start !important; }',
             'html.zeno-lang-en .flex-row-reverse { flex-direction: row !important; }',
-            'html.zeno-lang-en body > .flex-1.flex { flex-direction: row-reverse; }'
+            'html.zeno-lang-en body > .flex-1.flex { flex-direction: row-reverse; }',
+
+            'html.zeno-lang-en .lang-ar, html.zeno-lang-en [data-lang="ar"], html.zeno-lang-en span[lang="ar"] { display: none !important; }',
+            'html.zeno-lang-ar .lang-en, html.zeno-lang-ar [data-lang="en"], html.zeno-lang-ar span[lang="en"] { display: none !important; }',
+            'html.zeno-lang-en .lang-en, html.zeno-lang-en [data-lang="en"], html.zeno-lang-en span[lang="en"] { display: inline !important; }',
+            'html.zeno-lang-ar .lang-ar, html.zeno-lang-ar [data-lang="ar"], html.zeno-lang-ar span[lang="ar"] { display: inline !important; }'
         ].join('\n');
         (document.head || document.documentElement).appendChild(style);
     }
@@ -864,8 +869,31 @@
         });
     }
 
+    function isLangHandledSpan(node) {
+        if (!node) return false;
+        let cur = node;
+        while (cur) {
+            if (cur.nodeType === Node.ELEMENT_NODE) {
+                if (cur.classList && (cur.classList.contains('lang-ar') || cur.classList.contains('lang-en'))) {
+                    return true;
+                }
+                if (cur.getAttribute) {
+                    const dlang = cur.getAttribute('data-lang');
+                    const elang = cur.getAttribute('lang');
+                    if (dlang || elang === 'ar' || elang === 'en') {
+                        if (dlang && (dlang === 'ar' || dlang === 'en')) return true;
+                        if (elang === 'ar' || elang === 'en') return true;
+                    }
+                }
+            }
+            cur = cur.parentNode;
+        }
+        return false;
+    }
+
     function translateNodeWithDict(node, dict, keys) {
         if (!node || !dict) return;
+        if (isLangHandledSpan(node)) return;
         if (node.nodeType === Node.TEXT_NODE) {
             const original = node.nodeValue;
             const next = translateString(original, dict, keys);
@@ -875,6 +903,13 @@
         if (node.nodeType !== Node.ELEMENT_NODE) return;
         const tag = node.tagName;
         if (tag === 'SCRIPT' || tag === 'STYLE' || tag === 'NOSCRIPT') return;
+
+        if (node.classList && (node.classList.contains('lang-ar') || node.classList.contains('lang-en'))) return;
+        if (node.getAttribute) {
+            const dlang = node.getAttribute('data-lang');
+            const elang = node.getAttribute('lang');
+            if ((dlang && (dlang === 'ar' || dlang === 'en')) || elang === 'ar' || elang === 'en') return;
+        }
 
         if (node.hasAttribute('placeholder')) {
             node.setAttribute('placeholder', translateString(node.getAttribute('placeholder'), dict, keys));
