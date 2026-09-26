@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl" class="dark">
+<html lang="en" dir="ltr" class="dark">
 
 <head>
     <meta charset="UTF-8">
@@ -83,7 +83,11 @@
             } else {
                 var current = document.documentElement.getAttribute('lang') || 'ar';
                 var next = current === 'ar' ? 'en' : 'ar';
-                try { localStorage.setItem('zeno_dashboard_lang', next); } catch(e){}
+                try {
+                    localStorage.setItem('zeno_dashboard_lang', next);
+                    localStorage.setItem('zeno_lang', next);
+                } catch(e){}
+                document.cookie = 'zeno_dashboard_lang=' + next + ';path=/;max-age=31536000;SameSite=Lax';
                 document.documentElement.setAttribute('lang', next);
                 document.documentElement.setAttribute('dir', next === 'ar' ? 'rtl' : 'ltr');
                 document.querySelectorAll('.zeno-lang-toggle-btn').forEach(function(btn) {

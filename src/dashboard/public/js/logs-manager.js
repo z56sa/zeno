@@ -1,7 +1,13 @@
 document.addEventListener('DOMContentLoaded', () => {
     console.log("Logs Manager Initialized");
 
-    // 1. الفلترة
+    function t(text) {
+        if (window.ZenoI18n && typeof window.ZenoI18n.translate === 'function') {
+            return window.ZenoI18n.translate(text);
+        }
+        return text;
+    }
+
     document.querySelectorAll('.filter-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
             const filter = e.target.dataset.filter;
@@ -14,7 +20,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // 2. التحكم الجماعي
     document.getElementById('enable-all')?.addEventListener('click', () => {
         document.querySelectorAll('.log-toggle').forEach(t => t.checked = true);
     });
@@ -22,7 +27,6 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.log-toggle').forEach(t => t.checked = false);
     });
 
-    // 3. حفظ الإعدادات
     document.getElementById('save-logs-settings')?.addEventListener('click', async () => {
         const settings = [];
         document.querySelectorAll('.log-card').forEach(card => {
@@ -35,7 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const btn = document.getElementById('save-logs-settings');
         const originalText = btn.textContent;
-        btn.textContent = 'جاري الحفظ...';
+        btn.textContent = t('جاري الحفظ...');
         btn.disabled = true;
 
         try {
@@ -45,9 +49,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify({ settings })
             });
             const result = await res.json();
-            alert(result.success ? '✅ تم حفظ إعدادات السجلات!' : '❌ فشل حفظ الإعدادات');
+            alert(result.success ? t('✅ تم حفظ إعدادات السجلات!') : t('❌ فشل حفظ الإعدادات'));
         } catch (err) {
-            alert('حدث خطأ في الاتصال');
+            alert(t('حدث خطأ في الاتصال'));
         } finally {
             btn.textContent = originalText;
             btn.disabled = false;

@@ -138,7 +138,6 @@
         "إلغاء": "Cancel",
         "إرسال": "Send",
         "تطبيق": "Apply",
-        "تحديث": "Refresh",
         "المشرف": "Staff / Mod",
         "إجراءات": "Actions",
         "تذاكر": "Tickets",
@@ -147,7 +146,6 @@
         "عضو": "Member",
         "الأعضاء": "Members",
         "إدارة سيرفر": "Manage Server",
-        "لوحة التحكم": "Dashboard",
         "لوحة المتصدرين": "Leaderboards",
         "أغنى الأثرياء": "Richest Users",
         "أعلى نقاط السمعة & XP": "Top Rep & XP",
@@ -166,7 +164,6 @@
         "السمعة": "Reputation",
         "التصنيف": "Rank",
         "المستوى": "Level",
-        "الأعضاء": "Members",
         "احصل على": "Get",
         "مجاناً كل 24 ساعة!": "for free every 24 hours!",
         "مكافأة اليوم": "Today's Reward",
@@ -188,7 +185,7 @@
         "سرعة الاستجابة": "Response Latency",
         "مستخدم نشط": "Active Users",
 
-        // ── Landing Page Features Section ──
+        // Landing Page Features Section
         "مميزات حقيقية وشاملة": "Real & Comprehensive Features",
         "كل ما يحتاجه سيرفرك في مكان واحد": "Everything Your Server Needs in One Place",
         "أنظمة برمجية متطورة مصممة بأعلى معايير الحماية والأداء، بتحكم كامل ولحظي.": "Advanced software systems built to the highest security and performance standards, with complete real-time control.",
@@ -199,7 +196,7 @@
         "نظام اقتصاد ومكافآت يومية": "Economy & Daily Rewards System",
         "نظام راتب يومي مع مكافآت Streak متتالية، لوحة متصدرين بالذهب والخبرة، ومتجر خلفيات هوية غني بـ 105 خلفية حصرية.": "Daily salary system with consecutive Streak rewards, Gold and XP leaderboards, and a profile card wallpaper shop with 105 exclusive designs.",
         "لوحات تذاكر متعددة الأقسام": "Multi-Category Ticket Panels",
-        "نظام تذاكر احترافي بأزرار تفاعلية، استلام التذاكر من فريق الدعم، حفظ سجل المحادثات (Transcripts)، وتقييم طاقم العمل.": "Professional ticket panels with interactive buttons, support staff claiming, full chat transcripts, and staff rating.",
+        "نظام تذاكر احترافي بأزرار تفاعلية، استلاستلام التذاكر من فريق الدعم، حفظ سجل المحادثات (Transcripts)، وتقييم طاقم العمل.": "Professional ticket panels with interactive buttons, support staff claiming, full chat transcripts, and staff rating.",
         "سجلات دقيقة (Server Logs)": "Detailed Server Logs",
         "سجلات دقيقة": "Detailed Logs",
         "تسجيل شامل لـ 13 فئة (حذف وتعديل الرسائل، دخول وخروج الصوت، تعديل الرتب والقنوات، الطرد والحظر) بأدق التفاصيل.": "Comprehensive logging across 13 categories (messages, voice, roles, channels, kicks, bans) with precision details.",
@@ -275,7 +272,7 @@
         "سجن عضو": "Jail member",
         "إخراج من السجن": "Unjail member",
 
-        // ── Appearance Section ──
+        // Appearance Section
         "تخصيص البوت": "Bot Customization",
         "غير اسم البوت وصورته وبنره لكل سيرفر": "Change bot name, avatar and banner per server",
         "اسم البوت في السيرفر": "Bot Name in Server",
@@ -298,7 +295,7 @@
         "رابط الصورة المباشر": "Direct image link",
         "رابط البنر المباشر": "Direct banner link",
 
-        // ── Moderation Section Detailed Badges & Cards ──
+        // Moderation Section Detailed Badges & Cards
         "إعدادات الإشراف والعقوبات": "Moderation & Punishments Settings",
         "مسح كل التحذيرات": "Clear All Warnings",
         "رتب الإشراف": "Moderator Roles",
@@ -311,7 +308,7 @@
         "فلتر الحروف الكبيرة": "Caps Filter",
         "سبام الإيموجيات": "Emoji Spam",
 
-        // ── General Settings & Danger Zone ──
+        // General Settings & Danger Zone
         "تصفير سجلات العقوبات التلقائي": "Auto-Clear Infractions",
         "حذف دوري لسجلات العقوبات المنتهية / المزالة – العقوبات النشطة لا تتأثر إطلاقاً.": "Periodic cleanup of expired / removed punishment logs – active punishments are never affected.",
         "فترة التصفير": "Clearing Period",
@@ -336,12 +333,11 @@
         "تصفير قاعدة بيانات السيرفر": "Reset Server Database",
         "أونر السيرفر حصراً. يمسح كل بيانات البوت لهذا السيرفر نهائياً – الإعدادات، الحماية، سجل العقوبات، كل شيء (عدا التوب الكتابي/الصوتي والدعوات، تُدار منفصلة عبر أمر reset).": "Server owner only. Permanently deletes all bot data for this server – Settings, Security, Punishment Logs, everything (except text/voice top & invites, managed separately via reset command).",
 
-        // ── Analytics & Stats Section ──
+        // Analytics & Stats Section
         "لوحة الإحصائيات والتحليلات المتقدمة": "Advanced Analytics & Stats Dashboard",
         "تحليل شامل لحركة السيرفر ونموه وتوزيع الأعضاء والقنوات": "Comprehensive analysis of server activity, growth, and member & channel distribution",
         "إدارة قنوات العدادات 📡": "Manage Stat Channels 📡",
         "إدارة قنوات العدادات": "Manage Stat Channels",
-        "مؤشرات تفاعل السيرفر": "Server Engagement Indicators",
         "الاقتراحات والشكاوى": "Suggestions & Feedback",
         "إجمالي قنوات السيرفر": "Total Server Channels",
         "قنوات السيرفر": "Server Channels",
@@ -363,7 +359,7 @@
         "حذف هذه القناة": "Delete this channel",
         "مربوطة بـ:": "Linked to:",
 
-        // ── Commands DB: Category titles & descriptions ──
+        // Commands DB
         "الأوامر الرئيسية للبوت والاستخدام اليومي": "Core bot commands for daily use",
         "أوامر تنفيذ العقوبات المباشرة على الأعضاء": "Commands for direct member punishments",
         "استعلام وعرض سجلات العقوبات السابقة": "Query and view past punishment logs",
@@ -371,15 +367,13 @@
         "أوامر حذف الرسائل والإعلانات والتفاعل": "Message deletion, announcements & interaction",
         "أوامر التحكم في قنوات الصوت والأعضاء": "Voice channel & member control commands",
         "أوامر إعطاء وإزالة وإنشاء الرتب": "Give, remove & create role commands",
-        "أوامر الرتب الشخصية المخصصة لكل عضو": "Personal custom role commands for each member",
+        "أوامر الرتب الخاصة المخصصة لكل عضو": "Personal custom role commands for each member",
         "أوامر عرض إحصائيات ومعلومات السيرفر": "Server info & statistics commands",
         "أوامر تخصيص مظهر وحالة البوت الخاص": "Custom bot appearance & status commands",
         "أوامر الحماية من التخريب ومكافحة السبام": "Anti-nuke & anti-spam protection commands",
         "أوامر المستويات وبطاقات الرانك": "Level system & rank card commands",
         "أوامر قنوات العدادات التلقائية": "Automatic stat counter channel commands",
         "أوامر البروفايل والسمعة والعملات": "Profile, reputation & currency commands",
-
-        // ── Commands DB: Item descriptions ──
         "قائمة جميع الأوامر المتاحة": "List of all available commands",
         "سرعة استجابة البوت": "Bot response latency",
         "معلومات البوت الكاملة": "Complete bot information",
@@ -551,2423 +545,480 @@
         "تغيير جودة الصوت (Bitrate)": "Change audio quality (Bitrate)",
         "إنشاء قناة صوتية مؤقتة": "Create a temporary voice channel",
         "تغيير اسم قناة الصوت": "Change voice channel name",
-
-        // ── Commands Management UI ──
         "تخصيص وإدارة جميع أوامر البوت والصلاحيات": "Customize and manage all bot commands and permissions",
         "...ابحث عن أمر": "Search for a command...",
-        "✓ حُفظ": "✓ Saved",
-        "لا توجد أوامر مطابقة 🔍": "No matching commands found 🔍",
 
-        // ── AutoMod section ──
-        "حظر سبام المنشن": "Mention Spam Block",
-        "حظر الحروف الكبيرة": "Block Uppercase Spam",
-        "إزعاج Spoilers": "Spoiler Annoyance",
-        "نص Zalgo": "Zalgo Text",
-        "مكافحة السبام": "Anti-Spam",
-        "إزعاج الإيموجي": "Emoji Spam",
-        "تكرار النص": "Text Repetition",
-        "رسائل مكررة": "Duplicate Messages",
-        "سبام الملصقات": "Sticker Spam",
-        "سبام الأسطر": "Line Spam",
-        "الرسائل الطويلة": "Long Messages",
-        "حماية البوت — حماية متقدمة يديرها البوت مباشرة": "Bot Protection — Advanced protection managed directly by the bot",
-        "مرونة أكثر في التخصيص": "More flexibility in customization",
-        "حدد عدد المنشنات المسموح بها في الرسالة الواحدة": "Set max allowed mentions per message",
-        "منع الرسائل التي تحتوي على أحرف كبيرة بشكل مفرط (70% أو أكثر)": "Block messages with excessive capital letters (70%+)",
-        "نظام الحماية من السبام والرسائل المتكررة": "Protection system against spam and repeated messages",
-        "الحد الأقصى للمنشنات": "Max Mentions",
-        "الحد الأقصى للإيموجيات": "Max Emojis",
-        "حد الأسطر": "Line Limit",
-        "حد الرسائل الطويلة": "Long Message Limit",
-        "حد تكرار الرسائل": "Message Repeat Limit",
-        "منع رسائل": "Block messages",
-        "ثانية": "second",
-        "رسائل في ثانية": "messages per second",
-        "إعداد فلتر الكلمات": "Word Filter Settings",
-        "نظام الحماية التلقائية": "Automatic Protection System",
-
-        // ── Bad words filter ──
-        "الكلمات المحظورة": "Banned Words",
-        "فلتر الكلمات المحظورة المشدد": "Strict Bad Words Filter",
-        "كلمات مسموح بها (Whitelist)": "Allowed Words (Whitelist)",
-        "أعضاء معفيون من الفلتر": "Members Exempt from Filter",
-        "قناة السجل ((اختياري))": "Log Channel (optional)",
-        "جزئي — يحتوي على الكلمة في أي مكان": "Partial — contains the word anywhere",
-        "كلمة كاملة — الكلمة وحدها فقط": "Exact — the word alone only",
-        "جزئي": "Partial",
-        "كلمة كاملة": "Exact Match",
-        "إضافة": "Add",
-        "اكتب كلمة محظورة...": "Type a banned word...",
-        "اكتب كلمة مسموح بها...": "Type an allowed word...",
-        "ابحث عن عضو أو أدخل الـ ID...": "Search for a member or enter ID...",
-        "...اختر القناة": "Select channel...",
-        "...اختر الرتبة": "Select role...",
-
-        // ── Warn punishment system ──
-        "نظام العقوبات التلقائية للتحذيرات": "Auto Warn Punishment System",
-        "إضافة قاعدة جديدة": "Add New Rule",
-        "عند بلوغ X تحذيرات": "Upon reaching X warnings",
-        "قاعدة": "Rule",
-        "العقوبة": "Punishment",
-        "لا توجد قواعد بعد": "No rules yet",
-        "أضف قاعدة عقوبة لتفعيل النظام": "Add a punishment rule to activate the system",
-        "حذف 🗑️": "Delete 🗑️",
-        "عزل 5 دقائق": "Timeout 5 min",
-        "عزل ساعة": "Timeout 1 hour",
-        "عزل 24 ساعة": "Timeout 24 hours",
-        "حظر نهائي": "Permanent Ban",
-        "تحذيرات": "warnings",
-        "تحذير": "warning",
-
-        // ── Manage page ──
-        "آخر 5 معاملات الذهب": "Last 5 Gold Transactions",
-        "سجل التحويلات والمكافآت": "Transfers & Rewards Log",
-        "مرحباً بك في لوحة تحكم ZENO Bot!": "Welcome to ZENO Bot Dashboard!",
-        "المبلغ": "Amount",
-        "تاريخ": "Date",
-        "ترتيبك الحالي": "Your Current Rank",
-        "أعلى 100 عضو بواسطة نقاط الخبرة (XP Leaderboard) 🏆": "Top 100 Members by XP Points 🏆",
-        "أعلى 100 عضو بواسطة نقاط الخبرة": "Top 100 Members by XP Points",
-        "ترتيبك المالي": "Your Financial Rank",
-        "أغنى الأثرياء برصيد الذهب 🪙": "Richest Members by Gold Balance 🪙",
-        "أغنى الأثرياء برصيد الذهب": "Richest Members by Gold Balance",
-        "احصل على 500 إلى 1,000 من الذهب": "Get 500 to 1,000 Gold",
-        "صوّت للبوت على Top.gg": "Vote for Bot on Top.gg",
-        "صوّت الآن على Top.gg": "Vote Now on Top.gg",
-        "صوّت الآن واكسب ذهباً إضافياً!": "Vote now and earn extra Gold!",
-
-        // ── Invites section ──
-        "متتبع الدعوات المتقدم (Invite Tracker) 🔗": "Advanced Invite Tracker 🔗",
-        "تتبع دقيق لمن قام بدعوة الأعضاء وحساب الدعوات الحقيقية والمغادرين والوهمية والبونص": "Precise tracking of who invited members with real, left, fake and bonus invite counts",
-        "تصفير كل الدعوات": "Reset All Invites",
-        "إجمالي الدعوات الصالحة": "Total Valid Invites",
-        "دعوة نشطة في السيرفر": "active invite in server",
-        "متصدر الدعوات (Top Inviter)": "Top Inviter",
-        "دعوة مسجلة": "registered invite",
-        "الأعضاء المشاركون بالدعوة": "Members Participating in Invites",
-        "داعين مسجلين": "registered inviters",
-        "إضافة أو خصم دعوات إضافية (Bonus Invites)": "Add or deduct bonus invites",
-        "أيدي أو منشن العضو (User ID)": "Member ID or mention (User ID)",
-        "عدد الدعوات (موجب للإضافة / سالب للخصم)": "Invite count (positive to add / negative to deduct)",
-        "تطبيق الرصيد ✅": "Apply Balance ✅",
-        "قائمة متصدري الدعوات (Top Invites Leaderboard)": "Top Invites Leaderboard",
-        "حقيقية (Regular)": "Real (Regular)",
-        "مغادرين (Leaves)": "Left (Leaves)",
-        "وهمية (Fake)": "Fake",
-        "بونص (Bonus)": "Bonus",
-        "الصافي (Total)": "Net (Total)",
-        "لا توجد بيانات دعوات مسجلة حتى الآن": "No invite data recorded yet",
-
-        // ── Broadcast section ──
-        "نظام الإعلانات والمذيع الآلي": "Announcements & Auto Broadcaster",
-        "جدولة وإرسال إعلانات دورية تلقائية بتضمينات جذابة وتحديثات آلية": "Schedule and send periodic auto announcements with rich embeds",
-        "إرسال فوري": "Send Now",
-        "جدولة إعلان": "Schedule Announcement",
-        "القناة المستهدفة": "Target Channel",
-        "العنوان": "Title",
-        "المحتوى": "Content",
-        "لون الإمبد": "Embed Color",
-        "إضافة صورة": "Add Image",
-        "إعلانات مجدولة": "Scheduled Announcements",
-        "لا توجد إعلانات مجدولة": "No scheduled announcements",
-
-        // ── Moderation section ──
-        "الإشراف وإدارة الأعضاء": "Moderation & Member Management",
-        "قناة سجل الإشراف": "Moderation Log Channel",
-        "رتبة الإشراف": "Moderator Role",
-        "رتبة المشرف": "Moderator Role",
-        "مدة الكتم الافتراضية": "Default Mute Duration",
-        "دقائق": "minutes",
-        "ساعات": "hours",
-        "أيام": "days",
-        "دقيقة": "minute",
-        "ساعة": "hour",
-        "يوم": "day",
-        "أسبوع": "week",
-        "شهر": "month",
-        "نظام السجن": "Jail System",
-        "رتبة السجن": "Jail Role",
-        "قناة السجن": "Jail Channel",
-        "نظام الكتم": "Mute System",
-        "رتبة الكتم": "Mute Role",
-
-        // ── Welcome section ──
-        "رسائل وبطاقات الترحيب": "Welcome & Leave Messages",
-        "قناة الترحيب": "Welcome Channel",
-        "قناة المغادرة": "Leave Channel",
-        "رسالة الترحيب": "Welcome Message",
-        "رسالة المغادرة": "Leave Message",
-        "تفعيل الترحيب": "Enable Welcome",
-        "تفعيل المغادرة": "Enable Leave",
-        "معاينة الرسالة": "Message Preview",
-        "خلفية البطاقة": "Card Background",
-        "لون النص": "Text Color",
-        "حجم الخط": "Font Size",
-        "البطاقة الترحيبية": "Welcome Card",
-        "متغيرات الرسالة": "Message Variables",
-        "اسم العضو": "Member Name",
-        "ذكر العضو": "Member Mention",
-        "اسم السيرفر": "Server Name",
-        "عدد الأعضاء": "Member Count",
-
-        // ── Auto responder section ──
-        "الرد التلقائي على الكلمات": "Auto Word Responder",
-        "إضافة رد جديد": "Add New Response",
-        "الكلمة المشغِّلة": "Trigger Word",
-        "الرد": "Response",
-        "حذف الرسالة الأصلية": "Delete Original Message",
-        "لا توجد ردود تلقائية": "No auto responses",
-        "ردود تلقائية": "Auto Responses",
-
-        // ── Tickets section ──
-        "نظام التذاكر والدعم": "Ticket & Support System",
-        "قناة التذاكر": "Tickets Channel",
-        "قسم التذاكر": "Tickets Category",
-        "رتبة الدعم": "Support Role",
-        "رسالة فتح التذكرة": "Ticket Open Message",
-        "رسالة الترحيب بالتذكرة": "Ticket Welcome Message",
-        "تذاكر مفتوحة": "Open Tickets",
-        "إجمالي التذاكر": "Total Tickets",
-        "وقت الاستجابة المتوسط": "Average Response Time",
-
-        // ── Antinuke section ──
-        "جدار الحماية الشامل": "Comprehensive Anti-Nuke Shield",
-        "نظام Anti-Nuke": "Anti-Nuke System",
-        "حماية حذف القنوات": "Channel Delete Protection",
-        "حماية حذف الرتب": "Role Delete Protection",
-        "حماية الكيك الجماعي": "Mass Kick Protection",
-        "حماية الباند الجماعي": "Mass Ban Protection",
-        "حماية البوت": "Bot Protection",
-        "الحد الأقصى للإجراءات": "Max Actions Threshold",
-        "مدة الحظر التلقائي": "Auto-ban Duration",
-        "الإجراء عند الاختراق": "Action on Breach",
-        "إزالة الرتب الإدارية": "Remove Admin Roles",
-        "حظر مؤقت": "Temporary Ban",
-        "طرد من السيرفر": "Kick from Server",
-
-        // ── Logs section ──
-        "سجلات الأحداث الشاملة": "Comprehensive Event Logs",
-        "سجلات السيرفر الشاملة": "Comprehensive Server Logs",
-        "قناة سجل الأحداث": "Event Log Channel",
-        "سجل الرسائل": "Message Logs",
-        "سجل الأعضاء": "Member Logs",
-        "سجل الرتب": "Role Logs",
-        "سجل القنوات": "Channel Logs",
-        "سجل الأصوات": "Voice Logs",
-        "سجل الإشراف": "Moderation Logs",
-        "سجل السيرفر": "Server Logs",
-        "سجل الدعوات": "Invite Logs",
-        "أحداث مفعلة": "Active Events",
-        "أحداث معطلة": "Disabled Events",
-        "السجلات": "Logs",
-        "تتبع جميع الأحداث في السيرفر مع الفاعل والتفاصيل فورياً": "Track all server events with author and instant details",
-        "القنوات المستخدمة": "Channels Used",
-        "إجمالي السجلات": "Total Logs",
-        "السجلات المفعلة": "Enabled Logs",
-        "إعداد تلقائي للقنوات": "Auto Channels Setup",
-        "إنشاء قنوات السجلات تلقائياً لجميع الأقسام بضغطة واحدة": "Automatically create log channels for all categories with one click",
-        "إنشاء قنوات عادية": "Create Standard Channels",
-        "قناة واحدة لكل قسم (أعضاء، رسائل، أدوار...) — مناسب لأغلب السيرفرات": "One channel per category (members, messages, roles...) — fits most servers",
-        "إنشاء قنوات مفصلة": "Create Detailed Channels",
-        "قناة منفصلة لكل نوع سجل — للسيرفرات الكبيرة التي تحتاج تنظيم دقيق": "Separate channel for each log type — for large servers needing precise structure",
-        "حذف قنوات السجلات": "Delete Log Channels",
-        "حذف كاتيجوري ZENO Server Logs وجميع القنوات بداخله وتعطيل السجلات": "Delete ZENO Server Logs category and all channels inside and disable logs",
-        "المعطلة": "Disabled",
-        "المفعلة": "Enabled",
-        "ابحث عن سجل": "Search for a log...",
-        "...ابحث عن سجل": "Search for a log...",
-        "الأقسام": "Categories",
-        "إعدادات القسم": "Section Settings",
-        "طبق نفس الإعدادات على جميع السجلات المفعلة بالقسم": "Apply the same settings to all enabled logs in this category",
-        "اللون الافتراضي": "Default Color",
-        "اللون الافتراضي 🎨": "Default Color 🎨",
-        "القناة الافتراضية": "Default Channel",
-        "القناة الافتراضية 📢": "Default Channel 📢",
-        "تطبيق على جميع السجلات المفعلة": "Apply to All Enabled Logs",
-        "✨ تطبيق على جميع السجلات المفعلة": "✨ Apply to All Enabled Logs",
-        "تخصيص السجل": "Customize Log",
-        "القناة المخصصة لهذا السجل": "Custom Channel for this Log",
-        "اتركها فارغة لاستخدام القناة الافتراضية للقسم": "Leave empty to use category default channel",
-        "لون الإيمبد (Hex Color)": "Embed Color (Hex Color)",
-        "قناة مخصصة": "Custom Channel",
-        "بوتات خاصة فقط": "Custom Bots Only",
-        "لا توجد سجلات مطابقة للبحث أو الفلتر 🔍": "No logs match the search or filter 🔍",
-        "لا توجد أقسام مطابقة للفلتر 🔍": "No categories match the filter 🔍",
-        "سجل": "logs",
-        "حُفظت الإعدادات": "Settings Saved",
-        "الأعضاء": "Members",
-        "الأدوار": "Roles",
-        "الرتب": "Roles",
-        "القنوات": "Channels",
-        "الرسائل": "Messages",
-        "الصوت": "Voice",
-        "الصوتيات": "Voice",
-        "السيرفر": "Server",
+        // Dashboard chrome & AI page (often left untranslated)
+        "قائمة الأوامر": "Commands List",
         "الإشراف": "Moderation",
-        "الدعوات": "Invites",
-        "الإيموجي": "Emojis",
-        "الإيموجيات والستيكرات": "Emojis & Stickers",
-        "الأحداث": "Events",
-        "التكاملات": "Integrations",
-        "الأوتو مود": "AutoMod",
-        "المنصة": "Stage",
-        "أحداث دخول وخروج وحظر وعقوبات الأعضاء": "Member join, leave, ban, and punishment events",
-        "أحداث إنشاء وتعديل وحذف الرتب": "Role creation, edit, and deletion events",
-        "أحداث إنشاء وتعديل وحذف القنوات والثريدات": "Channel and thread creation, update, and deletion events",
-        "أحداث حذف وتعديل وتثبيت ومسح الرسائل": "Message deletion, edit, pin, and purge events",
-        "أحداث دخول وخروج وانتقال وكتم وبث الغرف الصوتية": "Voice channel join, leave, switch, mute, and streaming events",
-        "أحداث تعديل السيرفر والأيقونة والبانر والروابط": "Server setting, icon, banner, and vanity URL update events",
-        "أحداث الطرد والحظر والتحذيرات والعقوبات الإشرافية": "Kick, ban, warning, and moderation punishment events",
-        "أحداث إنشاء واستخدام وحذف روابط الدعوة": "Invite link creation, usage, and deletion events",
-        "أحداث إضافة وحذف وتعديل الإيموجيات والستيكرات": "Emoji and sticker create, edit, and delete events",
-        "أحداث إنشاء ومجدولة وبدء الأحداث المباشرة بالسيرفر": "Server scheduled event create, update, start, and end events",
-        "أحداث التكاملات والويب هوك والبوتات": "Integrations, webhooks, and bot add/remove events",
-        "أحداث وقواعد الأوتو مود وحظر المحتوى والسبام": "AutoMod rules, content block, and spam detection events",
-        "أحداث الرومات التفاعلية والمنصة والمتحدثين": "Stage channel, speaker, and topic events",
-        "دخول عضو": "Member Join",
-        "عند دخول عضو جديد للسيرفر": "When a new member joins the server",
-        "خروج عضو": "Member Leave",
-        "عند خروج عضو من السيرفر": "When a member leaves the server",
-        "حظر عضو": "Ban Member",
-        "عند حظر عضو من السيرفر": "When a member is banned from the server",
-        "فك حظر عضو": "Unban Member",
-        "عند فك حظر عضو": "When a member is unbanned",
-        "طرد عضو": "Kick Member",
-        "عند طرد عضو من السيرفر": "When a member is kicked from the server",
-        "سجن عضو": "Jail Member",
-        "عند سجن عضو": "When a member is jailed",
-        "إخراج من السجن": "Unjail Member",
-        "عند إخراج عضو من السجن": "When a member is unjailed",
-        "عزل عضو": "Timeout Member",
-        "عند عزل عضو (تايم أوت)": "When a member is timed out",
-        "إزالة العزل": "Remove Timeout",
-        "عند إزالة العزل عن عضو": "When timeout is removed from a member",
-        "إسكات كتابي": "Mute Member",
-        "عند إسكات عضو كتابياً": "When a member is text muted",
-        "إلغاء الإسكات الكتابي": "Unmute Member",
-        "عند إلغاء الإسكات الكتابي": "When text mute is removed",
-        "تغيير الاسم المستعار": "Nickname Change",
-        "عند تغيير الاسم المستعار لعضو": "When a member changes their nickname",
-        "تعديل الأفاتار": "Avatar Change",
-        "عند تغيير صورة البروفايل": "When a member changes profile avatar",
-        "بوست جديد": "New Server Boost",
-        "عند دعم السيرفر ببوست": "When a member boosts the server",
-        "إزالة البوست": "Boost Removed",
-        "عند إزالة بوست من السيرفر": "When a server boost is removed",
-        "إنشاء رتبة": "Create Role",
-        "عند إنشاء رتبة جديدة": "When a new role is created",
-        "حذف رتبة": "Delete Role",
-        "عند حذف رتبة": "When a role is deleted",
-        "تعديل رتبة": "Edit Role",
-        "عند تعديل رتبة": "When a role is modified",
-        "إعطاء رتبة لعضو": "Give Role to Member",
-        "عند إعطاء رتبة لعضو": "When a role is assigned to a member",
-        "إزالة رتبة من عضو": "Remove Role from Member",
-        "عند إزالة رتبة من عضو": "When a role is removed from a member",
-        "تعديل صلاحيات رتبة": "Edit Role Permissions",
-        "عند تعديل صلاحيات رتبة": "When role permissions are modified",
-        "إنشاء قناة": "Create Channel",
-        "عند إنشاء قناة جديدة": "When a new channel is created",
-        "حذف قناة": "Delete Channel",
-        "عند حذف قناة": "When a channel is deleted",
-        "تعديل قناة": "Edit Channel",
-        "عند تعديل قناة": "When a channel is modified",
-        "تعديل صلاحيات قناة": "Edit Channel Permissions",
-        "عند تعديل صلاحيات قناة": "When channel permissions are updated",
-        "إنشاء ثريد": "Create Thread",
-        "عند إنشاء ثريد جديد": "When a new thread is created",
-        "حذف ثريد": "Delete Thread",
-        "عند حذف ثريد": "When a thread is deleted",
-        "تعديل ثريد": "Edit Thread",
-        "عند تعديل ثريد": "When a thread is modified",
-        "حذف رسالة": "Delete Message",
-        "عند حذف رسالة": "When a message is deleted",
-        "حذف صورة": "Delete Image",
-        "عند حذف رسالة تحتوي على صورة": "When a message with an image is deleted",
-        "تعديل رسالة": "Edit Message",
-        "عند تعديل رسالة": "When a message is edited",
-        "حذف رسائل جماعي": "Bulk Message Purge",
-        "عند حذف عدة رسائل": "When multiple messages are purged",
-        "تثبيت رسالة": "Pin Message",
-        "عند تثبيت رسالة": "When a message is pinned",
-        "إلغاء تثبيت رسالة": "Unpin Message",
-        "عند إلغاء تثبيت رسالة": "When a message is unpinned",
-        "إضافة تفاعل": "Add Reaction",
-        "عند إضافة تفاعل على رسالة": "When a reaction is added",
-        "إزالة تفاعل": "Remove Reaction",
-        "عند إزالة تفاعل من رسالة": "When a reaction is removed",
-        "مسح جميع التفاعلات": "Clear All Reactions",
-        "عند مسح جميع التفاعلات": "When all reactions are cleared",
-        "دخول روم صوتي": "Join Voice Channel",
-        "عند دخول عضو لروم صوتي": "When a member joins a voice channel",
-        "خروج من روم صوتي": "Leave Voice Channel",
-        "عند خروج عضو من روم صوتي": "When a member leaves a voice channel",
-        "نقل بين الرومات": "Switch Voice Channels",
-        "عند انتقال عضو بين رومات صوتية": "When a member switches voice channels",
-        "كتم عضو (Server Mute)": "Server Mute",
-        "عند كتم عضو في الصوتي": "When a member is server muted in voice",
-        "إلغاء كتم عضو": "Server Unmute",
-        "عند إلغاء كتم عضو في الصوتي": "When a member is server unmuted",
-        "إصمات عضو (Server Deaf)": "Server Deafen",
-        "عند إصمات عضو في الصوتي": "When a member is server deafened",
-        "إلغاء إصمات": "Server Undeafen",
-        "عند إلغاء إصمات عضو": "When a member is server undeafened",
-        "بدء بث": "Start Stream",
-        "عند بدء بث فيديو أو شاشة": "When a member starts screen sharing or streaming",
-        "إنهاء بث": "Stop Stream",
-        "عند إنهاء بث": "When a stream is ended",
-        "بدء كاميرا": "Camera On",
-        "عند تشغيل كاميرا الفيديو": "When a member turns on video camera",
-        "إغلاق كاميرا": "Camera Off",
-        "عند إغلاق كاميرا الفيديو": "When a member turns off video camera",
-        "تعديل السيرفر": "Server Update",
-        "عند تعديل إعدادات السيرفر": "When server settings are updated",
-        "تغيير اسم السيرفر": "Server Name Change",
-        "عند تغيير اسم السيرفر": "When server name is changed",
-        "تغيير أيقونة السيرفر": "Server Icon Change",
-        "عند تغيير صورة/أيقونة السيرفر": "When server icon is changed",
-        "تغيير بانر السيرفر": "Server Banner Change",
-        "عند تغيير بانر السيرفر": "When server banner is changed",
-        "تغيير رابط الفانيتي": "Vanity URL Change",
-        "عند تعديل رابط الدعوة المخصص": "When custom vanity URL is updated",
-        "ترقية مستوى البوست": "Boost Level Up",
-        "عند ارتفاع مستوى بوست السيرفر": "When server boost tier increases",
-        "انخفاض مستوى البوست": "Boost Level Down",
-        "عند انخفاض مستوى بوست السيرفر": "When server boost tier decreases",
-        "إنشاء دعوة": "Create Invite",
-        "عند إنشاء رابط دعوة جديد": "When a new invite link is created",
-        "حذف دعوة": "Delete Invite",
-        "عند حذف أو انتهاء رابط دعوة": "When an invite link is deleted or expires",
-        "استخدام دعوة": "Use Invite",
-        "عند استخدام رابط دعوة للدخول": "When an invite link is used to join",
-        "إضافة إيموجي": "Create Emoji",
-        "عند إضافة إيموجي جديد": "When a new emoji is added",
-        "حذف إيموجي": "Delete Emoji",
-        "عند حذف إيموجي": "When an emoji is deleted",
-        "تعديل إيموجي": "Edit Emoji",
-        "عند تعديل اسم إيموجي": "When an emoji name is modified",
-        "إضافة ستيكر": "Create Sticker",
-        "عند إضافة ستيكر جديد": "When a new sticker is added",
-        "حذف ستيكر": "Delete Sticker",
-        "عند حذف ستيكر": "When a sticker is deleted",
-        "تعديل ستيكر": "Edit Sticker",
-        "عند تعديل ستيكر": "When a sticker is modified",
-        "إنشاء حدث": "Create Event",
-        "عند إنشاء حدث مجدول": "When a scheduled event is created",
-        "حذف حدث": "Delete Event",
-        "عند حذف حدث": "When a scheduled event is deleted",
-        "تعديل حدث": "Edit Event",
-        "عند تعديل حدث": "When a scheduled event is modified",
-        "بدء حدث": "Start Event",
-        "عند بدء حدث": "When a scheduled event starts",
-        "انتهاء حدث": "End Event",
-        "عند انتهاء حدث": "When a scheduled event ends",
-        "اشتراك في حدث": "Event User Interested",
-        "عند اشتراك عضو في حدث": "When a user marks interest in an event",
-        "إضافة تكامل": "Add Integration",
-        "عند إضافة تكامل جديد": "When a new integration is added",
-        "حذف تكامل": "Delete Integration",
-        "عند حذف تكامل": "When an integration is deleted",
-        "تعديل تكامل": "Edit Integration",
-        "عند تعديل تكامل": "When an integration is modified",
-        "إنشاء ويب هوك": "Create Webhook",
-        "عند إنشاء ويب هوك": "When a webhook is created",
-        "حذف ويب هوك": "Delete Webhook",
-        "عند حذف ويب هوك": "When a webhook is deleted",
-        "تعديل ويب هوك": "Edit Webhook",
-        "عند تعديل ويب هوك": "When a webhook is modified",
-        "إضافة بوت": "Bot Added",
-        "عند إضافة بوت للسيرفر": "When a bot is invited to the server",
-        "إزالة بوت": "Bot Removed",
-        "عند إزالة بوت من السيرفر": "When a bot is removed from the server",
-        "إنشاء قاعدة": "Create AutoMod Rule",
-        "عند إنشاء قاعدة أوتو مود": "When an AutoMod rule is created",
-        "حذف قاعدة": "Delete AutoMod Rule",
-        "عند حذف قاعدة أوتو مود": "When an AutoMod rule is deleted",
-        "تعديل قاعدة": "Edit AutoMod Rule",
-        "عند تعديل قاعدة أوتو مود": "When an AutoMod rule is modified",
-        "إجراء أوتو مود": "AutoMod Action Triggered",
-        "عند تنفيذ إجراء أوتو مود": "When an AutoMod action is executed",
-        "حظر محتوى": "Content Blocked",
-        "عند حظر محتوى تلقائياً": "When content is blocked automatically",
-        "عزل تلقائي": "Auto Timeout",
-        "عند عزل عضو تلقائياً": "When a member is automatically timed out",
-        "رقابة السبام": "Spam Detection",
-        "عند اكتشاف سبام أو رسائل مكررة أو نص متكرر": "When spam or repeated text is detected",
-        "إنشاء منصة": "Create Stage",
-        "عند إنشاء منصة صوتية": "When a stage channel is created",
-        "حذف منصة": "Delete Stage",
-        "عند حذف منصة": "When a stage channel is deleted",
-        "بدء حديث بالمنصة": "Stage Talk Start",
-        "عند صعود متحدث للمنصة": "When a speaker goes on stage",
-        "إنهاء حديث بالمنصة": "Stage Talk End",
-        "عند نزول متحدث من المنصة": "When a speaker leaves the stage",
+        "الأعضاء:": "Members:",
+        "الذكاء الاصطناعي": "AI",
+        "الذكاء الاصطناعي (ZENO AI & Web)": "AI (ZENO AI & Web)",
+        "الذكاء الاصطناعي والتصفح الذكي": "AI & Smart Browsing",
+        "تجربة الذكاء الاصطناعي الحي (Live Chat)": "Live AI Experience (Live Chat)",
+        "محادثة تجريبية مباشرة من الداشبورد": "Live Chat Test from Dashboard",
+        "اسأل ZENO أي سؤال أو Search في الويب...": "Ask ZENO any question or search the web...",
+        "جاري التفكير...": "Thinking...",
+        "جاري الحفظ...": "Saving...",
+        "جارٍ الحفظ...": "Saving...",
+        "ارسال": "Send",
+        "تصفح حي": "Live Browsing",
+        "بالإنترنت Online": "Online",
+        "logout": "Logout",
+        "support_server": "Support Server",
+        "back_to_dashboard": "Back to Dashboard",
 
-        // ── Levels section ──
-        "نظام المستويات والخبرة XP": "XP Levels System",
-        "قناة إشعارات الترقية": "Level-up Notification Channel",
-        "رسالة الترقية": "Level-up Message",
-        "مكاسب XP للرسائل": "XP Gain per Message",
-        "مكاسب XP للصوت": "XP Gain in Voice",
-        "الحد الأدنى لـ XP": "Minimum XP",
-        "الحد الأقصى لـ XP": "Maximum XP",
-        "قنوات مستثناة": "Excluded Channels",
-        "رتب مستثناة": "Excluded Roles",
-        "رتب مضاعفة XP": "Double XP Roles",
-        "أكثر الأعضاء نشاطاً بالخبرة": "Most Active Members by XP",
-
-        // ── Auto roles section ──
-        "الرتب التلقائية عند الانضمام": "Auto Roles on Join",
-        "الرتب الممنوحة للبشر": "Roles Granted to Humans",
-        "الرتب الممنوحة للبوتات": "Roles Granted to Bots",
-        "إضافة رتبة": "Add Role",
-
-        // ── Giveaways section ──
-        "نظام مسابقات القيف اواي": "Giveaway System",
-        "إنشاء قيف اواي": "Create Giveaway",
-        "الجائزة": "Prize",
-        "المدة": "Duration",
-        "عدد الفائزين": "Winner Count",
-        "متطلبات الدخول": "Entry Requirements",
-        "القيف اواي النشطة": "Active Giveaways",
-        "لا توجد مسابقات نشطة": "No active giveaways",
-        "انتهت": "Ended",
-        "فائزون": "Winners",
-
-        // ── Suggestions section ──
-        "نظام الاقتراحات والشكاوي": "Suggestions & Feedback System",
-        "قناة الاقتراحات": "Suggestions Channel",
-        "قناة الاقتراحات المقبولة": "Accepted Suggestions Channel",
-        "قناة الاقتراحات المرفوضة": "Rejected Suggestions Channel",
-        "تفعيل التصويت التلقائي": "Enable Auto Voting",
-        "مقبول": "Accepted",
-        "مرفوض": "Rejected",
-        "قيد المراجعة": "Under Review",
-        "اقتراح جديد": "New Suggestion",
-
-        // ── Applications section ──
-        "نظام التقديمات والتوظيف": "Staff Applications System",
-        "نماذج التقديم": "Application Forms",
-        "أضف نموذجاً": "Add Form",
-        "أسئلة النموذج": "Form Questions",
-        "قناة استقبال الطلبات": "Application Receive Channel",
-        "رتبة المراجع": "Reviewer Role",
-        "تلقائي": "Automatic",
-        "يدوي": "Manual",
-
-        // ── Embed builder ──
-        "صانع رسائل الإيمبد المتقدم": "Advanced Embed Builder",
-        "الوصف": "Description",
-        "الحقول": "Fields",
-        "إضافة حقل": "Add Field",
-        "اسم الحقل": "Field Name",
-        "قيمة الحقل": "Field Value",
-        "مضمّن": "Inline",
-        "الصورة المصغرة": "Thumbnail",
-        "الصورة الكبيرة": "Image",
-        "التذييل": "Footer",
-        "المرسل": "Author",
-        "انسخ الكود": "Copy Code",
-        "معاينة": "Preview",
-        "إرسال الإمبد": "Send Embed",
-
-        // ── Quran section ──
-        "القرآن الكريم والإذاعات الإسلامية": "Holy Quran & Islamic Broadcasts",
-        "قناة الإذاعة": "Broadcast Channel",
-        "القارئ": "Reciter",
-        "المحطة الإسلامية": "Islamic Station",
-        "تشغيل الإذاعة": "Start Broadcasting",
-        "إيقاف الإذاعة": "Stop Broadcasting",
-        "بدء البث": "Start Broadcast",
-
-        // ── Temp Voice section ──
-        "نظام الرومات الصوتية المؤقتة": "Temp Voice Channels System",
-        "قناة إنشاء الروم": "Room Creation Channel",
-        "قسم الرومات": "Rooms Category",
-        "اسم الروم الافتراضي": "Default Room Name",
-        "الحد الافتراضي للأعضاء": "Default Member Limit",
-        "صلاحيات الأعضاء": "Member Permissions",
-        "صلاحية إدارة الروم": "Room Management Permission",
-        "إنشاء الروم": "Create Room",
-        "تعديل الروم": "Edit Room",
-        "قفل الروم": "Lock Room",
-        "فتح الروم": "Unlock Room",
-
-        // ── Boost section ──
-        "نظام تنبيهات البوست": "Boost Notifications System",
-        "قناة البوست": "Boost Channel",
-        "رسالة البوست": "Boost Message",
-        "رتبة البوست": "Boost Role",
-        "مكافأة البوست": "Boost Reward",
-        "مبوستون": "Boosters",
-        "عدد البوستات": "Boost Count",
-
-        // ── Colors section ──
-        "نظام رتب الألوان": "Color Roles System",
-        "ألوان متاحة": "Available Colors",
-        "إضافة لون": "Add Color",
-        "اسم اللون": "Color Name",
-        "كود اللون": "Color Code",
-        "اختر لوناً": "Pick a Color",
-
-        // ── Settings / Appearance section ──
-        "مظهر وتخصيص البوت": "Bot Appearance & Customization",
-        "اسم البوت": "Bot Name",
-        "صورة البوت": "Bot Avatar",
-        "بنر البوت": "Bot Banner",
-        "حالة البوت": "Bot Status",
-        "نشاط البوت": "Bot Activity",
-        "البادئة": "Prefix",
-        "اللغة": "Language",
-        "المنطقة الزمنية": "Timezone",
-
-        // ── Anti-raid section ──
-        "نظام مكافحة الغزو والأعضاء الوهميين": "Anti-Raid & Fake Accounts System",
-        "الحد الأقصى للانضمام": "Max Joins per Window",
-        "نافذة الوقت": "Time Window",
-        "الإجراء عند الغزو": "Action on Raid",
-        "تفعيل التحقق": "Enable Verification",
-        "قناة التحقق": "Verification Channel",
-        "عمر الحساب الأدنى": "Minimum Account Age",
-
-        // ── Staff Activity section ──
-        "تتبع نشاط الإدارة والمشرفين": "Staff & Moderator Activity Tracking",
-        "نظام وإحصائيات طاقم الإدارة": "Staff & Moderator System & Statistics",
-        "متابعة دقيقة لساعات العمل والشفتات، تسجيل الحضور والانصراف، تقييم الأداء، وتوزيع النقاط": "Precise tracking of work hours and shifts, attendance logging, performance review, and point distribution",
-        "إرسال لوحة الحضور (Login/Logout)": "Send Attendance Panel (Login/Logout)",
-        "🚀 إرسال لوحة الحضور (Login/Logout)": "🚀 Send Attendance Panel (Login/Logout)",
-        "ضبط قنوات ورتبة الإدارة": "Configure Staff Channels & Roles",
-        "إعدادات الحضور والانصراف": "Attendance Settings",
-        "رتبة الإدارة المخولة بالتسجيل": "Authorized Staff Role for Attendance",
-        "(اختياري - متاح لكل الإدارة تلقائياً)": "(Optional - available for all staff automatically)",
-        "👑 جميع أفراد الإدارة والمشرفين (تلقائي)": "👑 All Administrators & Moderators (Automatic)",
-        "قناة لوحة تسجيل الحضور والانصراف": "Attendance Panel Channel",
-        "قناة إرسال سجلات الحضور (Logs)": "Attendance Logs Channel",
-        "الحد الأقصى للتواجد المتواصل (بالساعات)": "Max Continuous Shift Hours",
-        "الحد الأقصى للتواجد المتواصل": "Max Continuous Shift Hours",
-        "ساعة واحدة": "1 hour",
-        "ساعتان": "2 hours",
-        "4 ساعات": "4 hours",
-        "6 ساعات": "6 hours",
-        "8 ساعات (افتراضي)": "8 hours (Default)",
-        "8 ساعات": "8 hours",
-        "12 ساعة": "12 hours",
-        "مهلة عدم التفاعل (شات/تذاكر)": "Inactivity Timeout (Chat/Tickets)",
-        "15 دقيقة": "15 minutes",
-        "30 دقيقة (مستحسن)": "30 minutes (Recommended)",
-        "30 دقيقة": "30 minutes",
-        "45 دقيقة": "45 minutes",
-        "60 دقيقة (ساعة)": "60 minutes (1 hour)",
-        "60 دقيقة": "60 minutes",
-        "معطل (حسب الحد الأقصى فقط)": "Disabled (Max shift duration only)",
-        "رابط بانر لوحة الحضور (اختياري)": "Attendance Panel Banner URL (Optional)",
-        "تسجيل الخروج التلقائي (Auto Logout)": "Auto Logout",
-        "⚡ تسجيل الخروج التلقائي (Auto Logout)": "⚡ Auto Logout",
-        "يسجل خروج الإداري تلقائياً عند الخمول (AFK) أو انعدام التفاعل في الشات واستلام التذاكر أو انتهاء الحد الأقصى للمدة": "Automatically logs staff out on inactivity (AFK), lack of interaction in chat/tickets, or shift timeout",
-        "حفظ إعدادات الإدارة 💾": "Save Staff Settings 💾",
-        "حفظ إعدادات الإدارة": "Save Staff Settings",
-        "في الخدمة حالياً": "Currently on Duty",
-        "إداريون مسجلون دخول ويستقبلون التذاكر وخدمة الأعضاء الآن": "Staff logged in and actively handling tickets and member service now",
-        "في الخدمة الآن": "On Duty Now",
-        "🟢 في الخدمة الآن": "🟢 On Duty Now",
-        "إجمالي ساعات تواجد الإداري": "Total Staff Active Hours",
-        "ساعات التواجد": "Shift Hours",
-        "أعلى نقاط بونص": "Top Bonus Points",
-        "نقاط البونص": "Bonus Points",
-        "لوحة صدارة وتواجد المشرفين": "Staff Leaderboard & Shifts",
-        "الجلسات": "Shifts",
-        "نقاط الفريق": "Team Points",
-        "إجراءات الإشراف": "Moderation Actions",
-        "الوقت في الصوت": "Voice Time",
-        "التذاكر المعالجة": "Handled Tickets",
-        "تصفير إحصائيات": "Reset Statistics",
-        "إحصائيات دقيقة": "Accurate Statistics",
-        "مشرف مسجل": "Registered Moderator",
-        "لا يوجد إداريين مسجلين": "No registered staff",
-
-        // ── General Settings section ──
-        "إعدادات السيرفر العامة": "General Server Settings",
-        "لغة البوت": "Bot Language",
-        "تفعيل ميزة": "Enable Feature",
-        "تعطيل ميزة": "Disable Feature",
-        "إعادة ضبط الإعدادات": "Reset Settings",
-        "استعادة الإعدادات الافتراضية": "Restore Default Settings",
-
-        // ── Analytics section ──
-        "الإحصائيات والتحليلات": "Analytics & Stats",
-        "رسائل اليوم": "Today's Messages",
-        "أعضاء جدد اليوم": "New Members Today",
-        "معدل النشاط": "Activity Rate",
-        "الساعة الأكثر نشاطاً": "Most Active Hour",
-        "اليوم الأكثر نشاطاً": "Most Active Day",
-        "إجمالي الرسائل": "Total Messages",
-        "معدل النمو": "Growth Rate",
-        "الأسبوع الماضي": "Last Week",
-        "الشهر الماضي": "Last Month",
-        "آخر 30 يوم": "Last 30 Days",
-
-        // ── Common alerts and prompts ──
-        "هل أنت متأكد؟": "Are you sure?",
-        "هل أنت متأكد من رغبتك في حذف قاعدة العقوبة هذه؟": "Are you sure you want to delete this punishment rule?",
-        "تحذير: هل أنت متأكد من تصفير كافة بيانات الدعوات في السيرفر؟ لا يمكن التراجع عن هذا الإجراء!": "Warning: Are you sure you want to reset all invite data? This action cannot be undone!",
-        "أدخل عدد التحذيرات المطلوب لتنفيذ العقوبة (مثلاً: 3):": "Enter the warning count to trigger punishment (e.g., 3):",
-        "اختر نوع العقوبة:": "Choose punishment type:",
-        "تمت إضافة قاعدة العقوبة التلقائية بنجاح!": "Auto punishment rule added successfully!",
-        "تم الحذف بنجاح!": "Deleted successfully!",
-        "خطأ في الحذف": "Error while deleting",
+        // Client-side JS messages (dashboard.js, dashboard-actions.js, logs-manager.js)
+        "تم الحفظ بنجاح!": "Saved successfully!",
+        "فشل في حفظ الإعدادات": "Failed to save settings",
         "حدث خطأ في الاتصال": "Connection error occurred",
-        "تم تحديث رصيد دعوات العضو بنجاح!": "Member invite balance updated successfully!",
-        "تم تصفير الدعوات بنجاح!": "Invites reset successfully!",
-        "يرجى كتابة أيدي العضو وتحديد عدد الدعوات!": "Please enter member ID and specify invite count!",
-        "بنجاح": "successfully",
+        "حدث خطأ في الاتصال بالسيرفر": "Server connection error occurred",
+        "✅ تم حفظ إعدادات السجلات!": "✅ Log settings saved!",
+        "❌ فشل حفظ الإعدادات": "❌ Failed to save settings",
 
-        // ── Common UI ──
-        "بحث": "Search",
-        "فلتر": "Filter",
-        "تصفية": "Filter",
-        "ترتيب": "Sort",
-        "تحميل...": "Loading...",
-        "جارٍ التحميل": "Loading",
-        "لا توجد نتائج": "No results",
-        "لا يوجد": "None",
-        "غير محدد": "Not set",
-        "اختياري": "Optional",
-        "مطلوب": "Required",
-        "الصفحة": "Page",
-        "التالي": "Next",
-        "السابق": "Previous",
-        "موافق": "OK",
-        "تأكيد": "Confirm",
-        "رجوع": "Back",
-        "إغلاق": "Close",
-        "حفظ": "Save",
-        "نسخ": "Copy",
-        "لصق": "Paste",
-        "مسح": "Clear",
-        "تحديد الكل": "Select All",
-        "إلغاء التحديد": "Deselect All",
-        "البحث في الأعضاء": "Search members",
-        "ابحث...": "Search...",
-        "ابحث عن...": "Search for...",
-        "اختر...": "Select...",
-        "اكتب هنا...": "Type here...",
-        "لا يوجد شيء هنا": "Nothing here",
-        "قريباً": "Coming Soon",
-        "جديد!": "New!",
-        "مميز": "Featured",
-        "مكتمل": "Completed",
-        "معلق": "Pending",
-        "فاشل": "Failed",
-        "منتهي": "Expired",
-        "نشط": "Active",
-        "غير نشط": "Inactive",
-        "متصل": "Online",
-        "غير متصل": "Offline",
-        "مشغول": "Busy",
-        "بعيد": "Away",
-        "خطأ": "Error",
-        "تحذير!": "Warning!",
-        "ملاحظة": "Note",
-        "نجاح": "Success",
-        "معلومات": "Info",
-
-        // ── Broadcast System ──
-        "نظام الإعلانات والمذيع الآلي": "Broadcast & Auto Announcer System",
-        "جدولة وإرسال إعلانات دورية تلقائية بتضمينات جذابة وتحديثات آلية": "Schedule and send automatic periodic announcements with rich embeds",
-        "تفعيل المذيع الآلي": "Enable Auto Broadcaster",
-        "إرسال رسائل إعلانية دورية تلقائياً في القناة المحددة": "Automatically send periodic announcement messages in the selected channel",
-        "قناة البث": "Broadcast Channel",
-        "فترة التكرار": "Broadcast Interval",
-        "رتبة الإشارة (اختياري)": "Mention Role (Optional)",
-        "رتبة يتم ذكرها تلقائياً مع كل إعلان للتنبيه": "A role automatically mentioned with each announcement for alerts",
-        "قائمة رسائل البث": "Broadcast Messages List",
-        "إضافة رسالة جديدة": "Add New Message",
-        "لا توجد رسائل مضافة بعد — أضف رسالتك الأولى أعلاه 📢": "No messages added yet — add your first message above 📢",
-        "إرسال الآن يدوياً": "Send Manually Now",
-        "إرسال فوري": "Instant Send",
-        "إرسال رسالة عشوائية من القائمة فوراً إلى القناة المحددة": "Immediately send a random message from the list to the selected channel",
-        "اكتب نص الإعلان هنا... (يدعم markdown ومتغيرات مثل {server} و {members})": "Write announcement text here... (supports markdown and variables like {server} and {members})",
-        "يرجى كتابة نص الرسالة أولاً!": "Please write the message text first!",
-        "هل تريد حذف هذه الرسالة؟": "Do you want to delete this message?",
-        "جارٍ الإرسال...": "Sending...",
-        "تم الإرسال!": "Sent!",
-        "فشل الإرسال. تأكد من ضبط القناة وإضافة رسائل في القائمة.": "Send failed. Make sure the channel is set and messages are added to the list.",
-        "🟢 مفعل": "🟢 Active",
-        "🔴 معطل": "🔴 Disabled",
-        "دقيقة": "minute",
-        "ساعة": "hour",
-        "ساعات": "hours",
-        "يوم": "day",
-
-        // ── Embed Builder ──
-        "رسائل الإيمبد": "Embed Messages",
-        "صمم وأرسل رسائل إيمبد منسقة واحترافية لقنواتك": "Design and send formatted, professional embed messages to your channels",
-        "محرر": "Editor",
-        "مستند": "Document",
-        "معاينة": "Preview",
-        "أرسل إلى القناة": "Send to Channel",
-        "لون الإيمبد": "Embed Color",
-        "محتوى الإيمبد": "Embed Content",
-        "أيقونة الكاتب (Author Icon URL)": "Author Icon URL",
-        "اسم الكاتب (Author Name)": "Author Name",
-        "رابط العنوان (Title URL - اختياري)": "Title URL (Optional)",
-        "عنوان الإيمبد (Title)": "Embed Title",
-        "الوصف والمحتوى (Description)": "Description & Content",
-        "اكتب محتوى الرسالة هنا... يدعم Markdown مثل **عريض** و *مائل*": "Write message content here... supports Markdown like **bold** and *italic*",
-        "الصورة المصغرة (Thumbnail URL)": "Thumbnail URL",
-        "الصورة الكبيرة (Main Image URL)": "Main Image URL",
-        "الحقول الإضافية (Fields)": "Additional Fields",
-        "+ إضافة حقل (Field)": "+ Add Field",
-        "إظهار الوقت (Timestamp)": "Show Timestamp",
-        "التذييل والوقت (Footer)": "Footer & Timestamp",
-        "أيقونة التذييل (Footer Icon URL)": "Footer Icon URL",
-        "نص التذييل (Footer Text)": "Footer Text",
-        "معاينة مباشرة": "Live Preview",
-        "شكل الرسالة في ديسكورد": "Message Preview in Discord",
-        "المحرر المرئي مفعل": "Visual editor is active",
-
-        // ── Arabic months → English (for server creation date) ──
-        "كانون الثاني": "January",
-        "شباط": "February",
-        "آذار": "March",
-        "نيسان": "April",
-        "أيار": "May",
-        "حزيران": "June",
-        "تموز": "July",
-        "آب": "August",
-        "أيلول": "September",
-        "تشرين الأول": "October",
-        "تشرين الثاني": "November",
-        "كانون الأول": "December",
-
-        // ── Input placeholders ──
-        "مثال: ZENO Announcement": "Example: ZENO Announcement",
-        "مثال: ZENO Bot • اليوم": "Example: ZENO Bot • Today",
-        "مثال: 123456789012345678": "Example: 123456789012345678",
-        "مثال: Discord Nitro لمدة شهر": "Example: Discord Nitro for a month",
-        "مثال: تقديم الإدارة / تقديم الدعم الفني": "Example: Management application / Support application",
-        "عنوان الرسالة الرئيسي...": "Main message title...",
-        "عنوان الحقل...": "Field title...",
-        "قيمة ومحتوى الحقل...": "Field value and content...",
-        "اكتب الرد...": "Write reply...",
-        "اكتب الكلمة أو العبارة...": "Write the word or phrase...",
-        "اكتب عنواناً مختصراً...": "Write a short title...",
-        "اكتب كلمة محظورة...": "Write a banned word...",
-        "اكتب كلمة مسموح بها...": "Write an allowed word...",
-        "اكتب نص السؤال هنا...": "Write the question text here...",
-        "اكتب وصفاً للبوت في هذا السيرفر...": "Write a description for the bot in this server...",
-        "شرح مختصر عن المنصب أو الشروط المطلوبة...": "Brief description of the position or requirements...",
-        "ابحث عن عضو أو أدخل الـ ID...": "Search for a member or enter the ID...",
-        "ابحث عن عضو لإضافته...": "Search for a member to add...",
-        "...أضف تفاصيل إضافية": "Add more details...",
-        "...ابحث عن سجل": "Search logs...",
-        "أيدي_رتبة_1, أيدي_رتبة_2, أيدي_رتبة_3...": "role_id_1, role_id_2, role_id_3...",
-        "اشرح فكرتك بالتفصيل وكيف ستفيد السيرفر...": "Explain your idea in detail and how it will benefit the server...",
-        "آيدي الكاتيجوري الذي ستنشأ تحته الرومات...": "Category ID where rooms will be created...",
-        "أدخل User ID لإضافته إلى Anti Mod": "Enter User ID to add to Anti Mod",
-        "أدخل معرف المستخدم (User ID) ثم اضغط إضافة أو Enter": "Enter User ID then press Add or Enter",
-        "https://... (أسفل الإيمبد)": "https://... (bottom of embed)",
-        "https://... (أعلى اليمين)": "https://... (top right)",
-        "https://i.imgur.com/... (رابط البنر المباشر)": "https://i.imgur.com/... (direct banner URL)",
-        "https://i.imgur.com/... (رابط الصورة المباشر)": "https://i.imgur.com/... (direct image URL)",
-        "0 = غير محدود": "0 = unlimited",
-
-        // ── Sidebar items not yet covered ──
-        "الإشراف": "Moderation",
-        "الإشراف وإدارة الأعضاء": "Moderation & Members Management",
-        "الحماية": "Protection",
-        "الحماية / القائمة البيضاء": "Security / Whitelist",
-        "الحماية / السجلات": "Security / Logs",
-        "النظام الصوتي المؤقت": "Temp Voice System",
-        "الميزات الأساسية": "Core Features",
-        "الأتمتة": "Automation",
-        "الأمان والحماية": "Security & Protection",
-        "قناة إحصائيات": "Stat Channel",
-        "قناة عدادات": "Counter Channel",
-        "نشط الآن": "Now Active",
-        "لوحة الترحيب": "Welcome Board",
-        "رسالة المغادرة": "Leave Message",
-        "رسالة الترحيب": "Welcome Message",
-
-        // ── Common action buttons ──
-        "✓ إضافة": "✓ Add",
-        "✓ حُفظ": "✓ Saved",
-        "✓ حُفظت الإعدادات": "✓ Settings saved",
-        "✓ مفعّل حالياً": "✓ Currently active",
-        "↻ تحديث": "↻ Refresh",
-        "✏️ تعديل": "✏️ Edit",
-        "✕ حذف": "✕ Delete",
-        "⭐ تعديل النقاط": "⭐ Edit Points",
-        "⭐ نقاط البونص": "⭐ Bonus Points",
-        "⏱️ ساعات التواجد": "⏱️ Shift Hours",
-        "🔄 الجلسات": "🔄 Shifts",
-        "🎫 تذاكر": "🎫 Tickets",
-        "🔨 إجراءات": "🔨 Actions",
-        "المشرف": "Staff / Mod",
-        "إجراءات": "Actions",
-        "تذاكر": "Tickets",
-        "✨ تطبيق على جميع السجلات المفعلة": "✨ Apply to all active logs",
-        "🚀 إرسال": "🚀 Send",
-        "🚀 إرسال البانل في القناة": "🚀 Send Panel to Channel",
-        "🚀 إرسال لوحة الحضور (Login/Logout)": "🚀 Send Attendance Panel (Login/Logout)",
-        "🚀 تم التنفيذ": "🚀 Done",
-        "⏹️ إيقاف البث": "⏹️ Stop Stream",
-        "▶️ تشغيل الآن في الروم الصوتي": "▶️ Play Now in Voice Room",
-        "🗳️ صوّت الآن على Top.gg": "🗳️ Vote Now on Top.gg",
-        "➕ إضافة البوت لسيرفرك": "➕ Add Bot to Your Server",
-        "🗑️ تصفير كل الدعوات": "🗑️ Reset All Invites",
-        "🎁 إضافة أو خصم دعوات إضافية (Bonus Invites)": "🎁 Add or Deduct Bonus Invites",
-        "+ إضافة سؤال (حتى 5)": "+ Add Question (up to 5)",
-        "+ إنشاء قيف اواي": "+ Create Giveaway",
-        "+ إنشاء نموذج جديد": "+ Create New Form",
-        "🔄 تصفير الإحصائيات": "🔄 Reset Stats",
-        "اضغط Enter للإضافة السريعة": "Press Enter for quick add",
-
-        // ── Status & badge labels ──
-        "✅ مقبول": "✅ Accepted",
-        "❌ مرفوض": "❌ Rejected",
-        "⏳ عزل": "⏳ Timeout",
-        "⏳ قيد المراجعة": "⏳ Under Review",
-        "🟢 في الخدمة الآن": "🟢 On duty now",
-        "💡 اقتراح عام": "💡 General Suggestion",
-        "⚠️ شكوى أو بلاغ": "⚠️ Complaint or Report",
-        "🎉 فعاليات ومسابقات": "🎉 Events & Contests",
-        "🔘 زر (Button)": "🔘 Button",
-        "😊 تفاعل (Reaction)": "😊 Reaction",
-
-        // ── Stats counters ──
-        "مفعل": "active",
-        "دقائق": "minutes",
-        "ساعتان": "2 hours",
-        "أيام": "days",
-        "سجل": "log",
-        "الأقسام": "Sections",
-
-        // ── Misc UI strings ──
-        "اختر القارئ أو الإذاعة": "Choose a reciter or station",
-        "اختر بنر": "Choose banner",
-        "اختر صورة": "Choose image",
-        "اختصارات مخصصة": "Custom shortcuts",
-        "إجابة قصيرة (Short Answer)": "Short Answer",
-        "إجراء مكافحة الغزو": "Anti-Raid action",
-        "إداري مسجل": "Registered admin",
-        "إداريون مسجلون دخول ويستقبلون التذاكر وخدمة الأعضاء الآن": "Admins logged in and receiving tickets and member service now",
-        "إداريين مسجلين": "Registered admins",
-        "إذا تركته فارغاً سيستخدم البوت النص الافتراضي": "If left empty, the bot will use the default text",
-        "إذا تريد فقط Embed أو صورة بدون نص، اترك الرسالة فارغة.": "If you want only an Embed or image without text, leave the message empty.",
-        "اترك فارغاً لاستخدام القناة الافتراضية للقسم": "Leave empty to use category default channel",
-        "اتركها فارغة لاستخدام القناة الافتراضية للقسم": "Leave empty to use the section default channel",
-        "احتفظ بنسخة من قنوات ورتب سيرفرك وأعدها بضغطة زر": "Keep a backup of your server channels and roles and restore them with one click",
-        "أحدث سجلات الأمان والإشراف المسجلة لحظياً": "Latest real-time security and moderation logs",
-        "ابدأ بإنشاء أول قيف اواي لسيرفرك!": "Start by creating the first giveaway for your server!",
-        "اضغط أو الصق رابط صورة جديدة": "Click or paste a new image link",
-        "اضغط على زر \"إنشاء نموذج جديد\" بالأعلى لإنشاء أول استمارة تقديم": "Click the \"Create New Form\" button above to create the first application form",
-        "أضف أعضاء موثوقين أعلاه لاستثنائهم من قيود الحماية": "Add trusted members above to exempt them from protection restrictions",
-        "أضف رتب لمكافأة الأعضاء النشطين": "Add roles to reward active members",
-        "أضف رتب يحصل عليها الأعضاء عند الوصول لمستوى صوتي معين": "Add roles members receive when reaching a specific voice level",
-        "أضف رتب يحصل عليها الأعضاء عند الوصول لمستوى كتابي معين": "Add roles members receive when reaching a specific text level",
-        "احصل على": "Get",
-        "استعادة": "Restore",
-        "استلام الرصيد اليومي": "Claim daily balance",
-        "اسم البوت في السيرفر": "Bot name in server",
-        "اسم النموذج (العنوان)": "Form name (title)",
-        "إشعار الأونر عبر DM": "Owner notification via DM",
-        "أسئلة نموذج التقديم (Discord Modal)": "Application form questions (Discord Modal)",
-        "أسبوع كامل": "Full week",
-        "أدوات البوت الخاص": "Private bot tools",
-        "أدوات الشات": "Chat tools",
-        "أخرى": "Other",
-        "⚪ رمادي (Secondary)": "⚪ Gray (Secondary)",
-        "🔴 أحمر (Danger)": "🔴 Red (Danger)",
-        "🔵 أزرق (Primary)": "🔵 Blue (Primary)",
-        "🟢 أخضر (Success)": "🟢 Green (Success)",
-        "🖼️ [صورة البنر أو بطاقة الترحيب]": "🖼️ [Welcome banner or card]",
-        "🖼️ [صورة البنر أو بطاقة المغادرة]": "🖼️ [Leave banner or card]",
-        "إذاعة القاهرة 🇪🇬": "Cairo Radio 🇪🇬",
-        "إذاعة مكة المكرمة 🇸🇦": "Makkah Radio 🇸🇦",
-        "📻 إذاعة القرآن الكريم من القاهرة (مباشر 24/7)": "📻 Holy Quran Radio from Cairo (Live 24/7)",
-        "📻 إذاعة القرآن الكريم من مكة المكرمة (مباشر 24/7)": "📻 Holy Quran Radio from Makkah (Live 24/7)",
-        "⚙️ إدارة السيرفر": "⚙️ Manage Server",
-        "⚠️ تأكد أن البوت لديه صلاحية إدارة القنوات (Manage Channels)": "⚠️ Make sure the bot has Manage Channels permission",
-        "⚡ تسجيل الخروج التلقائي (Auto Logout)": "⚡ Auto Logout",
-        "✨ دعوة نشطة في السيرفر": "✨ Active invite in server",
-        "🏆 قائمة متصدري الدعوات (Top Invites Leaderboard)": "🏆 Top Invites Leaderboard",
-        "📡 مربوطة بـ:": "📡 Connected to:",
-        "• الصور يجب أن تكون بروابط مباشرة بصيغة PNG أو JPG أو WEBP أو GIF.": "• Images must be direct links in PNG, JPG, WEBP, or GIF format.",
-        "• تغيير الاسم والصورة والبنر يؤثر فقط على السيرفر المحدد.": "• Changing the name, avatar, and banner only affects the selected server.",
-        "• قد يستغرق ظهور التغييرات بضع ثوانٍ في ديسكورد فور الضغط على حفظ.": "• Changes may take a few seconds to appear in Discord after saving.",
-        "إرسال إشعار رفع المستوى برسالة خاصة في DM": "Send level-up notification via DM",
-        "إرسال تنبيه خاص لأونر السيرفر عند رصد أي غزو": "Send private alert to server owner when a raid is detected",
-        "إرسال رسالة أو إمبد ترحيبي عند انضمام عضو جديد للسيرفر": "Send a welcome message or embed when a new member joins the server",
-        "إرسال رسالة خاصة": "Send private message",
-        "إرسال رسالة عند اختيار الفائزين": "Send message when winners are selected",
-        "إرسال رسالة عند رفع المستوى": "Send message on level up",
-        "إرسال رسالة عند مغادرة عضو من السيرفر": "Send message when a member leaves the server",
-        "أرسل لوحة الحضور عبر الزر بالأعلى وسيبدأ حساب الساعات فور تسجيل الإداريين": "Send the attendance panel using the button above and hours will be counted as soon as admins log in",
-        "إزعاج الإيموجي": "Emoji Spam",
-        "إزعاج Spoilers": "Spoiler Spam",
-        "إجمالي الاستخدام": "Total Usage",
-        "إجمالي الاقتراحات": "Total Suggestions",
-        "إجمالي الأوامر": "Total Commands",
-        "إجمالي التذاكر المسجلة": "Total Registered Tickets",
-        "إجمالي الدعوات الصالحة": "Total Valid Invites",
-        "إجمالي الردود": "Total Replies",
-        "إجمالي القيف اواي": "Total Giveaways",
-        "إجمالي المشاركين": "Total Participants",
-        "إجمالي النماذج": "Total Forms",
-        "إجمالي ساعات تواجد الإداري": "Total Admin Hours",
-        "إجمالي قنوات السيرفر": "Total Server Channels",
-        "إحصائيات السيرفر": "Server Statistics",
-        "إدارة الرتب": "Manage Roles",
-        "إدارة الصوت": "Manage Voice",
-        "إدارة القنوات": "Manage Channels",
-        "إدارة قنوات العدادات 📡": "Manage Counter Channels 📡",
-        "إدارة سيرفر": "Server Management",
-
-        // ── Levels & XP section ──
-        "الإعدادات": "Settings",
-        "رتب كتابية": "Text Roles",
-        "رتب صوتية": "Voice Roles",
-        "رتب مشتركة": "Shared Roles",
-        "المتصدرين": "Leaderboard",
-        "نظام XP": "XP System",
-        "مستويات كتابية": "Text Levels",
-        "مستويات صوتية": "Voice Levels",
-        "فترة انتظار XP": "XP Cooldown",
-        "الثواني بين كل رسالة تكسب XP": "Seconds between each message that earns XP",
-        "XP الصوت في الدقيقة": "Voice XP per Minute",
-        "كمية XP الممنوحة لكل دقيقة في الصوت": "Amount of XP granted per minute in voice",
-        "XP/دقيقة": "XP/min",
-        "ثانية": "second",
-        "إعدادات صوتية": "Voice Settings",
-        "الحد الأدنى للأعضاء في القناة": "Minimum Members in Channel",
-        "عدد الأعضاء المطلوب في القناة لبدء حساب XP": "Number of members required in channel to start earning XP",
-        "تجاهل الأعضاء المكتومين": "Ignore Deafened Members",
-        "لن يحصل الأعضاء المكتومون على XP صوتي": "Deafened members will not earn voice XP",
-        "تجاهل الأعضاء الصامتين": "Ignore Muted Members",
-        "لن يحصل الأعضاء الصامتون على XP صوتي": "Muted members will not earn voice XP",
-        "تجاهل قناة AFK": "Ignore AFK Channel",
-        "لن يحصل الأعضاء في قناة AFK على XP": "Members in AFK channel will not earn XP",
-        "إعدادات رفع المستوى": "Level Up Settings",
-        "رسائل رفع المستوى": "Level Up Messages",
-        "قناة إشعارات المستوى": "Level Notification Channel",
-        "رسالة رفع المستوى (كتابي)": "Level Up Message (Text)",
-        "رسالة رفع المستوى (صوتي)": "Level Up Message (Voice)",
-        "إعدادات الرتب والاستثناءات": "Roles & Exemptions Settings",
-        "تكديس الرتب": "Stack Roles",
-        "الاحتفاظ بجميع رتب المستويات السابقة عند الترقية": "Keep all previous level roles when leveling up",
-        "قنوات مستثناة": "Exempt Channels",
-        "رتب مستثناة": "Exempt Roles",
-        "رتب المستويات الكتابية": "Text Level Roles",
-        "رتب المستويات الصوتية": "Voice Level Roles",
-        "معادلة حساب XP": "XP Calculation Formula",
-        "XP المطلوب للمستوى = (المستوى × 25)²": "XP required for level = (level × 25)²",
-        "رتب الشرط المزدوج": "Dual Condition Roles",
-        "الرتبة تُمنح فقط عند تحقق شرطي الكتابة والصوت معاً": "Role is granted only when both text and voice conditions are met",
-        "كيف تعمل الرتب المشتركة؟": "How do shared roles work?",
-        "تُمنح الرتبة فقط عندما يحقق العضو كلا الشرطين في نفس الوقت — مستوى كتابي وصوتي يبلغان الحد المطلوب. إذا نقص أي شرط، تُسحب الرتبة تلقائياً.": "The role is granted only when the member meets both conditions at the same time — reaching the required text and voice level. If either condition is not met, the role is automatically removed.",
-        "مثال توضيحي:": "Example:",
-        "عضو نشيط": "Active Member",
-        "صوتي ≥ 5": "Voice ≥ 5",
-        "كتابي ≥ 10": "Text ≥ 10",
-        "لا توجد رتب مشتركة": "No shared roles",
-        "أضف شرطاً مزدوجاً يمنح رتبة عند تحقق مستوى صوتي وكتابي معاً": "Add a dual condition that grants a role when both voice and text levels are met",
-        "لا توجد رتب مستويات": "No level roles",
-        "لوحة المتصدرين": "Leaderboard",
-        "أكثر الأعضاء نشاطاً في السيرفر": "Most active members in the server",
-        "عضو نشط": "Active Members",
-        "أعلى مستوى": "Top Level",
-        "إجمالي XP": "Total XP",
-        "لا توجد بيانات مسجلة في لوحة المتصدرين بعد.": "No data recorded in the leaderboard yet.",
-        "مزامنة": "Sync",
-        "مستوى كتابي": "Text Level",
-        "مستوى صوتي": "Voice Level",
-        "الرتبة:": "Role:",
-        "حذف 🗑️": "Delete 🗑️",
-
-        // ── Sidebar badges ──
-        "سجلات": "Logs",
-        "نسخ": "Copy",
-
-        // ── Levels prompts (alert/confirm dialogs) ──
-        "أدخل رقم المستوى": "Enter level number",
-        "المطلوب (مثال: 5 أو 10 أو 20):": "required (e.g. 5, 10, or 20):",
-        "أدخل ID الرتبة الممنوحة:": "Enter the granted Role ID:",
-        "تمت إضافة رتبة المستوى بنجاح!": "Level role added successfully!",
-        "فشل الإضافة": "Addition failed",
-        "الصوتي": "Voice",
-        "الكتابي": "Text",
-        "أدخل الحد الأدنى للمستوى الكتابي (مثال: 10):": "Enter minimum text level (e.g. 10):",
-        "أدخل الحد الأدنى للمستوى الصوتي (مثال: 5):": "Enter minimum voice level (e.g. 5):",
-        "أدخل ID الرتبة الممنوحة عند تحقق الشرطين:": "Enter Role ID granted when both conditions are met:",
-        "حدث خطأ في الاتصال بالخادم": "An error occurred connecting to the server",
-
-        // ── Auto Roles on Join (autoroles) ──
-        "رتب الأعضاء الجدد": "New Members Roles",
-        "الرتب التي تُعطى للأعضاء الجدد عند الانضمام": "Roles given to new members upon joining",
-        "رتبة البوتات الجديدة": "New Bots Role",
-        "الرتبة التي تُعطى للبوتات عند إضافتها للسيرفر": "Role given to bots when added to the server",
-
-        // ── Giveaways System (giveaways) ──
-        "نظام القيف اواي": "Giveaways System",
-        "إنشاء وإدارة مسابقات القيف اواي في سيرفرك": "Create and manage giveaways in your server",
-        "إنشاء قيف اواي جديد": "Create New Giveaway",
-        "نشطة الآن": "Active Now",
-        "المنتهية": "Ended",
-        "النشطة": "Active",
-        "الكل": "All",
-        "لا توجد قيف اواي بعد": "No giveaways yet",
-        "الفائزين:": "Winners:",
-        "مشارك": "Participant",
-        "نشط 🟢": "Active 🟢",
-        "منتهي 🔴": "Ended 🔴",
-
-        // ── Welcome & Leave Messages (welcome) ──
-        "رسائل الترحيب": "Welcome Messages",
-        "رسائل المغادرة": "Leave Messages",
-        "قناة الترحيب": "Welcome Channel",
-        "قناة المغادرة": "Leave Channel",
-        "رسالة الترحيب (نص عادي)": "Welcome Message (Plain Text)",
-        "رسالة المغادرة (نص عادي)": "Leave Message (Plain Text)",
-        "نص فقط": "Text Only",
-        "رسالة نصية بسيطة": "Simple text message",
-        "صورة ترحيب": "Welcome Image",
-        "صورة مخصصة مع اسم العضو": "Custom image with member name",
-        "رسالة Embed": "Embed Message",
-        "رسالة منسقة مع ألوان": "Formatted message with colors",
-        "رسالة نصية": "Text Message",
-        "رسالة بسيطة": "Simple message",
-        "تخصيص رسالة الترحيب": "Customize Welcome Message",
-        "تخصيص رسالة المغادرة": "Customize Leave Message",
-        "مرحباً بك!": "Welcome!",
-        "نتمنى لك وقتاً ممتعاً 🕒": "We wish you a pleasant time 🕒",
-        "إظهار الوقت": "Show Time",
-        "مرحباً {user} في سيرفر **{server}**! أنت العضو رقم **{memberCount}**": "Welcome {user} to **{server}**! You are member **{memberCount}**",
-        "مرحباً {user} في سيرفر **{server}**! 🎉 أنت العضو رقم **{memberCount}**": "Welcome {user} to **{server}**! 🎉 You are member **{memberCount}**",
-        "وداعاً **{user}**، نتمنى لك التوفيق 👋": "Goodbye **{user}**, we wish you all the best 👋",
-
-        // ── Advanced Invite Tracker (invites) ──
-        "العضو": "Member",
-        "حقيقية (Regular)": "Regular",
-        "مغادرين (Leaves)": "Leaves",
-        "وهمية (Fake)": "Fake",
-        "بونص (Bonus)": "Bonus",
-        "الصافي (Total)": "Total",
-        "تطبيق الرصيد ✅": "Apply Balance ✅",
-        "أيدي أو منشن العضو (User ID)": "User ID or mention",
-        "دعوة مسجلة": "registered invite",
-        "الأعضاء المشاركون بالدعوة": "Members Participating in Invites",
-
-        // ── Auto Responder (autoresponder) ──
-        "الرد التلقائي": "Auto Responder",
-        "إعداد ردود تلقائية على كلمات أو عبارات معينة": "Set up automatic responses to specific words or phrases",
-        "إضافة رد تلقائي": "Add Auto Response",
-        "ردود نشطة": "Active Responses",
-        "رد مسجل": "registered response",
-        "الردود التلقائية النشطة": "Active Auto Responses",
-        "لا توجد ردود تلقائية": "No auto responses",
-        "أضف ردود تلقائية للرد على كلمات أو عبارات محددة": "Add auto responses to reply to specific words or phrases",
-        "إضافة أول رد تلقائي": "Add First Auto Response",
-        "إضافة رد جديد": "Add New Response",
-        "يحتوي على": "Contains",
-        "مطابقة تامة": "Exact Match",
-        "يبدأ بـ": "Starts with",
-        "ينتهي بـ": "Ends with",
-        "الكلمة:": "Word:",
-
-        // ── Tickets & Support (tickets) ──
-        "لوحات تذاكر تفاعلية، تصنيفات مخصصة، وتقييمات خدمة العملاء": "Interactive ticket panels, custom categories, and customer service reviews",
-        "التذاكر المفتوحة حالياً": "Currently Open Tickets",
-        "التذاكر المغلقة": "Closed Tickets",
-        "إعدادات ومظهر لوحة الدعم الفني (Wicks Design)": "Support Panel Settings & Appearance (Wicks Design)",
-        "رتبة طاقم الدعم الفني (Support Role)": "Support Staff Role (Support Role)",
-        "روم إرسال لوحة التذاكر (Panel Channel)": "Send Ticket Panel Channel (Panel Channel)",
-        "عنوان لوحة التذاكر (Panel Title)": "Ticket Panel Title (Panel Title)",
-        "قناة سجلات التذاكر (Transcripts Channel)": "Ticket Transcripts Channel",
-        "رابط بانر لوحة التذاكر (Panel Banner URL)": "Ticket Panel Banner URL",
-        "رابط صورة الترحيب داخل التذكرة (Welcome Embed Image)": "Welcome Embed Image URL inside Ticket",
-        "رسالة الترحيب التلقائية داخل التذكرة (Ticket Welcome Message)": "Automatic Welcome Message inside Ticket",
-        "مرحباً بك {user}! يرجى كتابة استفسارك وسيقوم طاقم الإدارة بالرد عليك قريباً 🌟": "Welcome {user}! Please write your inquiry and staff will reply soon 🌟",
-        "سجل التذاكر الأخيرة": "Recent Tickets Log",
-        "لا توجد تذاكر مسجلة حالياً في السيرفر 🎫": "No tickets currently registered in the server 🎫",
-        "صاحب التذكرة:": "Ticket Creator:",
-        "تذكرة": "ticket",
-        "مفتوحة 🟢": "Open 🟢",
-        "مغلقة 🔴": "Closed 🔴",
-
-        // ── Staff Applications (applications) ──
-        "طلبات بانتظار المراجعة": "Applications Pending Review",
-        "النماذج المفتوحة": "Open Application Forms",
-        "الحالية Application Forms": "Current Application Forms",
-        "نماذج التقديم الحالية": "Current Application Forms",
-        "لا توجد نماذج تقديم حالياً": "No application forms currently",
-        "رتبة المقبولين التلقائية": "Automatic Accepted Role",
-        "رتبة مسؤولي المراجعة": "Reviewers Role",
-        "الأسئلة المعينة": "Assigned Questions",
-
-        // ── Suggestions & Feedback (suggestions) ──
-        "جمع آراء وتصويتات الأعضاء ومراجعة وتحديث حالات الاقتراحات": "Collect member votes and feedback, review and update suggestion statuses",
-        "إضافة اقتراح جديد": "Add New Suggestion",
-        "مقبولة / منفذة": "Accepted / Implemented",
-        "مرفوضة": "Rejected",
-        "إعدادات قناة وصلاحيات الاقتراحات": "Suggestions Channel & Permissions Settings",
-        "قناة نشر الاقتراحات (Suggestions Channel)": "Post Suggestions Channel (Suggestions Channel)",
-        "قناة سجلات الإدارة (Log Channel)": "Admin Log Channel (Log Channel)",
-        "رتب الإدارة المسؤولة عن المراجعة (Staff Roles)": "Reviewing Staff Roles (Staff Roles)",
-        "إنشاء خيط نقاش تلقائي (Thread)": "Create Automatic Discussion Thread",
-        "فتح ثريد تحت كل اقتراح لتمكين الأعضاء من النقاش": "Open a thread under each suggestion to allow member discussions",
-        "المرفوضة": "Rejected",
-        "المقبولة": "Accepted",
-        "لا توجد اقتراحات بعد": "No suggestions yet",
-        "كن أول من يطرح فكرة لتطوير وتحسين السيرفر": "Be the first to propose an idea to improve the server",
-
-        // ── Protection & Anti-Nuke (protection) ──
-        "قفل لوحة التحكم": "Lock Dashboard",
-        "البوت لا يملك صلاحيات حرجة الآن": "Bot does not have critical permissions currently",
-        "تفعيل نظام الحماية": "Enable Protection System",
-        "تفعيل أو تعطيل نظام الحماية الشامل": "Enable or disable comprehensive protection system",
-        "حماية المتصفح": "Browser Protection",
-        "يزيل رتب الأعضاء المحمية مؤقتاً عند الدخول من متصفح — بوتات خاصة فقط": "Temporarily removes protected member roles when entering via browser — Private bots only",
-        "هذه الميزة تعمل فقط مع البوتات الخاصة — يتطلب اشتراك بوت خاص نشط لهذا السيرفر.": "This feature only works with private bots — Requires an active private bot subscription for this server.",
-        "تحديد وعقوبة": "Limits & Penalties",
-        "تعيين حد وعقوبة لكل إجراء": "Set a limit and penalty for each action",
-        "حماية الرومات / الشاتات": "Channels & Chats Protection",
-        "مكافحة حذف القنوات": "Anti-Channel Delete",
-        "منع حذف قنوات جماعي": "Prevent mass channel deletion",
-        "مكافحة إنشاء القنوات": "Anti-Channel Create",
-        "منع إنشاء قنوات جماعي": "Prevent mass channel creation",
-        "مكافحة تعديل القنوات": "Anti-Channel Update",
-        "منع تعديل قنوات جماعي": "Prevent mass channel editing",
-        "حماية صلاحيات القنوات": "Channel Permissions Protection",
-        "منع أي تعديل على صلاحيات القنوات بأي شكل (Allow/Deny/Overwrites)": "Prevent any modification to channel permissions in any form (Allow/Deny/Overwrites)",
-        "حماية الرتب": "Roles Protection",
-        "مكافحة حذف الرتب": "Anti-Role Delete",
-        "منع حذف رتب جماعي": "Prevent mass role deletion",
-        "مكافحة إنشاء الرتب": "Anti-Role Create",
-        "منع إنشاء رتب جماعي": "Prevent mass role creation",
-        "مكافحة تعديل الرتب": "Anti-Role Update",
-        "منع تعديل رتب جماعي": "Prevent mass role editing",
-        "حماية الويب هوك": "Webhook Protection",
-        "مكافحة إنشاء الويب هوك": "Anti-Webhook Create",
-        "منع إنشاء الويب هوك وحذفه فوراً مع معاقبة المسؤول": "Prevent webhook creation, delete immediately and punish executor",
-        "مكافحة تعديل الويب هوك": "Anti-Webhook Update",
-        "منع التعديل الجماعي على الويب هوكات الحالية مع معاقبة المسؤول": "Prevent mass modification of existing webhooks and punish executor",
-        "حماية الأعضاء": "Members Protection",
-        "مكافحة الحظر": "Anti-Mass Ban",
-        "منع الحظر الجماعي": "Prevent mass banning",
-        "مكافحة الطرد": "Anti-Mass Kick",
-        "منع الطرد الجماعي": "Prevent mass kicking",
-        "حماية المحتوى": "Content Protection",
-        "مكافحة المنشنات": "Anti-Mass Mention",
-        "منع المنشنات المفرطة": "Prevent excessive mentions",
-        "عقوبة فورية": "Immediate Penalty",
-        "تطبيق العقوبة فوراً": "Apply penalty immediately",
-        "رتب Onboarding الخطيرة": "Dangerous Onboarding Roles",
-        "يمنع منح رتبة بصلاحيات خطيرة تلقائياً لأي عضو جديد عبر أسئلة الانضمام (Onboarding)": "Prevents granting dangerous permission roles automatically to new members via Onboarding",
-        "رتب خطيرة عند الانضمام (حماية الانفايت)": "Dangerous Roles on Join (Invite Protection)",
-        "يزيل تلقائياً أي رتبة استقرت على عضو جديد عبر رابط دعوة أو Onboarding ولم تكن الرتبة التلقائية الرسمية": "Automatically removes any role given to a new member via invite link or Onboarding if not the official auto-role",
-        "مكافحة الريد": "Anti-Raid",
-        "حماية ضد الانضمام الجماعي": "Protection against mass joins",
-        "مكافحة الصلاحيات الخطيرة": "Anti-Dangerous Permissions",
-        "منع منح صلاحيات خطيرة": "Prevent granting dangerous permissions",
-        "مكافحة الرتب الخطيرة القابلة للربط": "Anti-Dangerous Linked Roles",
-        "يمنع أي رتبة تحمل صلاحية خطيرة من أن تصبح قابلة للحصول عليها ذاتياً عبر ربط حساب خارجي (Linked Roles)": "Prevents any dangerous role from being self-obtainable via external account linking (Linked Roles)",
-        "مكافحة إضافة البوتات": "Anti-Bot Add",
-        "منع إضافة بوتات بدون إذن": "Prevent adding bots without permission",
-        "مكافحة التطهير": "Anti-Prune",
-        "منع تطهير الأعضاء": "Prevent member pruning",
-        "مكافحة تغيير اسم السيرفر": "Anti-Server Name Change",
-        "منع تغيير اسم السيرفر": "Prevent server name change",
-        "مكافحة تغيير أيقونة السيرفر": "Anti-Server Icon Change",
-        "منع تغيير أيقونة السيرفر": "Prevent server icon change",
-        "كشف فقط": "Detection Only",
-        "تسجيل فقط بدون عقوبة": "Log only without penalty",
-        "مكافحة الاحتيال": "Anti-Scam",
-        "كشف وحذف روابط الاحتيال": "Detect and delete scam links",
-        "مكافحة روابط الدعوة": "Anti-Invite Links",
-        "حذف روابط الدعوة": "Delete invite links",
-        "مكافحة المحتوى الغير لائق": "Anti-NSFW Content",
-        "حذف المحتوى الغير لائق": "Delete inappropriate content",
-        "مكافحة الغوست بينغ": "Anti-Ghost Ping",
-        "كشف حذف المنشنات": "Detect deleted mentions",
-        "كشف نقل القنوات": "Channel Move Detection",
-        "كشف نقل القنوات إلى تصنيفات أخرى (تنبيه فقط)": "Detect channel moves to other categories (Alert only)",
-        "مكافحة سبام الويب هوك": "Anti-Webhook Spam",
-        "يحذف تلقائياً رسائل السبام المرسلة عبر أي ويبهوك ويزيل الويب هوك نفسه — يعمل باستمرار بالخلفية": "Automatically deletes spam messages sent via any webhook and removes the webhook itself — Runs continuously in background",
-        "الدفاع الذاتي للبوت": "Bot Self-Defense",
-        "مقفلة دائماً — تحمي البوت نفسه، لا يمكن إيقافها": "Always locked — Protects the bot itself, cannot be disabled",
-        "مقفلة دائماً": "Always Locked",
-        "مكافحة نزع صلاحيات البوت": "Anti-Bot Permission Stripping",
-        "ينبهك (عبر رسالة خاصة) لو فقدت رتبة البوت نفسها صلاحيات حرجة — مثلاً عند إعادة استخدام رابط دعوته وإلغاء تحديد الصلاحيات": "Alerts you (via DM) if the bot role itself loses critical permissions — e.g. when reinviting with unchecked permissions",
-        "مكافحة إزالة رتبة البوت": "Anti-Bot Role Removal",
-        "ينبهك (عبر رسالة خاصة) لو أزيلت من البوت مباشرة رتبة تمنحه صلاحيات حرجة": "Alerts you (via DM) if a critical permission role is directly removed from the bot",
-
-        // ── Security / Whitelist (whitelist) ──
-        "إضافة عضو موثوق": "Add Trusted Member",
-        "الأعضاء الموثوقين": "Trusted Members",
-        "مستثنى من جميع فلاتر الحماية": "Exempt from all protection filters",
-        "لا يوجد أعضاء موثوقين": "No trusted members",
-        "نظام Anti Mod (محمي من العقوبات)": "Anti-Mod System (Exempt from Penalties)",
-        "محمي من الطرد والحظر والعقوبات التلقائية": "Protected from kick, ban, and automated penalties",
-        "لا يوجد أعضاء في Anti Mod حالياً.": "No members in Anti-Mod currently.",
-
-        // ── Security & Mod Logs (protection-logs) ──
-        "سجلات الأمان": "Security Logs",
-        "تسجيل أحداث الأمان": "Log security events",
-        "سجلات الإشراف": "Moderation Logs",
-        "تسجيل إجراءات الإشراف": "Log moderation actions",
-        "ماذا يتم تسجيله؟": "What is logged?",
-        "محاولات التدمير": "Nuke Attempts",
-        "العقوبات التلقائية": "Automatic Penalties",
-        "تجاوز الحدود": "Limit Breaches",
-        "أنشطة مشبوهة": "Suspicious Activities",
-        "روابط الاحتيال": "Scam Links",
-        "أوامر الحظر والطرد": "Ban & Kick Commands",
-        "أوامر العزل والكتم": "Timeout & Mute Commands",
-        "التحذيرات": "Warnings",
-        "حذف الرسائل": "Message Deletions",
-        "قفل/فتح القنوات": "Lock/Unlock Channels",
-        "أحدث سجلات الأمان والإشراف المسجلة لحظياً": "Latest real-time security and moderation logs",
-        "لا توجد سجلات أمان مسجلة حتى الآن. السيرفر آمن تماماً! 🛡️": "No security logs recorded yet. The server is completely secure! 🛡️",
-
-        // ── Server Backups (backup) ──
-        "إنشاء نسخة الآن 💾": "Create Backup Now 💾",
-        "الحماية / النسخ الاحتياطية": "Protection / Server Backups",
-        "النسخ المتاحة": "Available Backups",
-        "يوم احتفاظ": "Retention Days",
-        "أقصى نسخة": "Max Backups",
-        "لا توجد نسخ احتياطية بعد": "No backups yet",
-        "سيتم إنشاء نسخة للقائمة عند تفعيل الحماية": "A backup will be created when protection is enabled",
-        "معلومات مهمة": "Important Information",
-        "يتم الاحتفاظ بالنسخ لمدة 30 يوم ثم تحذف تلقائياً": "Backups are kept for 30 days then automatically deleted",
-        "الاستعادة لا تحذف القنوات/الرتب الحالية، بل تضيف المفقودة فقط": "Restoring does not delete current channels/roles, but adds missing ones only",
-        "فقط مالك السيرفر والأعضاء الموثوقين يمكنهم استخدام أمر الاستعادة": "Only server owner and trusted members can use the restore command",
-
-        // ── AutoMod Rules & Chat Filters (automod) ──
-        "حماية سيرفرك من المحتوى غير المرغوب": "Protect your server from unwanted content",
-        "فلاتر الكلمات": "Word Filters",
-        "Discord AutoMod — حماية مدعومة من Discord مباشرة - سريعة وموثوقة": "Discord AutoMod — Direct Discord-powered protection - fast and reliable",
-        "فلترة الكلمات المحظورة": "Filter Banned Words",
-        "فلترة الكلمات المسيئة والشتائم والمحتوى غير اللائق": "Filter offensive words, insults, and inappropriate content",
-        "حظر دعوات السيرفرات": "Block Server Invites",
-        "منع مشاركة روابط دعوات السيرفرات الأخرى": "Prevent sharing other server invite links",
-        "فلاتر السبام": "Spam Filters",
-        "كشف وحظر الرسائل المزعجة والمتكررة": "Detect and block repetitive spam messages",
-        "حظر الروابط": "Block Links",
-        "حظر الروابط الغير مسموح بها": "Block unallowed links",
-        "منع الاستخدام المفرط لعلامات السبويلر": "Prevent excessive use of spoiler tags",
-        "منع النصوص المشوهة والرموز الغريبة (Zalgo text)": "Prevent distorted text and strange symbols (Zalgo text)",
-        "مكافحة السبام المتقدم": "Advanced Anti-Spam",
-        "كشف الرسائل المتكررة والفيضان السريع وحظرها تلقائياً": "Detect repeated messages and fast floods and ban automatically",
-        "منع الاستخدام المفرط للرموز التعبيرية": "Prevent excessive use of emojis",
-        "منع تكرار نفس الحروف أو الكلمات بشكل مفرط": "Prevent excessive repetition of same letters or words",
-        "منع إرسال نفس الرسالة عدة مرات متتالية": "Prevent sending the exact same message multiple consecutive times",
-        "منع إرسال الملصقات بشكل متكرر وسريع": "Prevent sending stickers repeatedly and rapidly",
-        "منع الرسائل التي تحتوي على أسطر فارغة كثيرة": "Prevent messages containing too many blank lines",
-        "منع الرسائل التي تتجاوز الحد الأقصى لعدد الأحرف": "Prevent messages exceeding the maximum character limit",
-        "تطبيق عقوبات تلقائية عند تجاوز عدد التحذيرات من أمر warn!": "Apply automatic penalties when exceeding warnings from warn! command",
-        "يعمل على جميع الأعضاء — يتخطى Discord AutoMod": "Applies to all members — bypasses Discord AutoMod",
-        "أضف كلمات تحتوي على كلمة محظورة لكنها مقبولة": "Add words that contain a banned word but are acceptable",
-        "الأدمنية غير معفيين تلقائياً — أضفهم هنا إذا أردت": "Admins are not automatically exempt — add them here if desired",
-
-        // ── Anti-Raid & Fake Accounts (antiraid) ──
-        "مكافحة الغزو والأعضاء الوهميين": "Anti-Raid & Fake Accounts",
-        "كشف الغزو الجماعي وحظر الحسابات الوهمية والجديدة تلقائياً": "Detect mass raids and automatically block fake and new accounts",
-        "أيام الحساب": "Account Days",
-        "حد الغزو": "Raid Threshold",
-        "الحالة": "Status",
-        "تفعيل نظام مكافحة الغزو (Anti-Raid)": "Enable Anti-Raid System (Anti-Raid)",
-        "رصد ومنع هجمات الدخول الجماعي والحسابات الوهمية أو الجديدة تلقائياً": "Detect and prevent mass join attacks and fake or new accounts automatically",
-        "الحد الأدنى لعمر الحساب": "Minimum Account Age",
-        "الحسابات الجديدة الأقل من هذا العمر لن تتمكن من الدخول": "New accounts younger than this age will not be able to join",
-        "حد رصد الغزو الجماعي": "Mass Raid Detection Limit",
-        "عدد الأعضاء الذين ينضمون في 10 ثوانٍ لتفعيل درع الغزو": "Number of members joining within 10 seconds to activate raid shield",
-        "كلما كان العدد أصغر، كلما كان النظام أكثر حساسية للغزو": "The smaller the number, the more sensitive the system is to raids",
-        "الإجراء التلقائي عند رصد غزو أو دخول مشبوه": "Automatic action upon detecting raid or suspicious entry",
-        "إجراء مكافحة الغزو": "Anti-Raid Action",
-        "خيارات إضافية": "Additional Options",
-        "منع إضافة بوتات جديدة (Anti-Bot)": "Block New Bots (Anti-Bot)",
-        "تقييد إضافة أي بوتات إلا من قِبل الأونر أو الأدمن فقط": "Restrict adding any bots to owner or admin only",
-        "قناة سجلات مكافحة الغزو": "Anti-Raid Logs Channel",
-        "تسجيل جميع الأحداث المشبوهة والإجراءات المتخذة": "Log all suspicious events and actions taken",
-        "رتبة مستثناة من الحماية (Whitelist)": "Protection Exempt Role (Whitelist)",
-        "هذه الرتبة لن تخضع لفلتر عمر الحساب أو حد الغزو": "This role will not be subject to account age filter or raid threshold",
-
-        // ── Staff & Moderator Activity Tracking (staff-activity) ──
-        "نظام وإحصائيات طاقم الإدارة": "Staff & Moderator Activity Tracking",
-        "متابعة دقيقة لساعات العمل والشفتات، تسجيل الحضور والانصراف، تقييم الأداء، وتوزيع النقاط": "Accurate tracking of work hours, shifts, attendance, performance evaluation, and points",
-        "إعدادات الحضور والانصراف": "Attendance Settings",
-        "ضبط قنوات ورتبة الإدارة": "Configure Staff Channels & Roles",
-        "رتبة الإدارة المخولة بالتسجيل": "Authorized Staff Role for Attendance",
-        "قناة لوحة تسجيل الحضور والانصراف": "Attendance Panel Channel",
-        "قناة إرسال سجلات الحضور (Logs)": "Attendance Logs Channel",
-        "الحد الأقصى للتواجد المتواصل (بالساعات)": "Max Continuous Shift Hours",
-        "مهلة عدم التفاعل (شات/تذاكر)": "Inactivity Timeout (Chat/Tickets)",
-        "رابط بانر لوحة الحضور (اختياري)": "Attendance Panel Banner URL (Optional)",
-        "تسجيل الخروج التلقائي (Auto Logout)": "Auto Logout (Auto Logout)",
-        "يسجل خروج الإداري تلقائياً عند الخمول (AFK) أو انعدام التفاعل في الشات واستلام التذاكر أو انتهاء الحد الأقصى للمدة": "Automatically logs staff out on inactivity (AFK), lack of interaction in chat/tickets, or shift timeout",
-        "حفظ إعدادات الإدارة 💾": "Save Staff Settings 💾",
-        "أعلى نقاط بونص": "Top Bonus Points",
-        "لوحة صدارة وتواجد المشرفين": "Staff Leaderboard & Shift Activity",
-        "ساعات التواجد": "Shift Hours",
-        "الجلسات": "Shifts",
-        "نقاط البونص": "Bonus Points",
-
-        // ── Temp Voice (tempvoice) ──
-        "نظام الرومات الصوتية المؤقتة 🕒": "Temporary Voice Channels System 🕒",
-        "الرومات الصوتية المؤقتة (Temp Voice)": "Temporary Voice Channels (Temp Voice)",
-        "إنشاء غرف صوتية خاصة تلقائياً عند دخول الأعضاء وحذفها فور خروجهم": "Create private voice channels automatically when members join and auto-delete upon leaving",
-        "إنشاء غرف صوتية خاصة عند دخول الأعضاء وحذفها فور خروجهم تلقائياً": "Create private voice channels when members join and auto-delete upon leaving automatically",
-        "الرومات المؤقتة النشطة حالياً": "Currently Active Temporary Channels",
-        "حالة روم الإنشاء (Join-to-Create)": "Join-to-Create Channel Status",
-        "حالة روم الدخول (Join-to-Create)": "Join-to-Create Channel Status",
-        "الحد الأقصى الافتراضي": "Default Maximum Limit",
-        "غير معطى": "Not Set",
-        "غير معطل": "Not Disabled",
-        "غير محدود": "Unlimited",
-        "إعدادات الروم الرئيسي والكاتيجوري": "Main Channel & Category Settings",
-        "روم الدخول الرئيسي (Join-to-Create Channel)": "Main Join Channel (Join-to-Create Channel)",
-        "قسم الرومات المنشأة (Category ID)": "Created Channels Category (Category ID)",
-        "الكاتيجوري المنشأة (Category ID)": "Created Category (Category ID)",
-        "آيدي الكاتيجوري الذي ستنشأ تحته الرومات...": "Category ID under which channels will be created...",
-        "الاسم الافتراضي للروم المنشأ": "Default Created Channel Name",
-        "الحد الأقصى للمستخدمين الافتراضي": "Default Maximum Users",
-        "0 = غير محدود": "0 = Unlimited",
-        "روم نشط": "active channel",
-        "روم Active": "active channel",
-        "الرومات المؤقتة الفعالة الآن": "Currently Active Temporary Channels",
-        "الرومات الصوتية المؤقتة الفعالة الآن": "Active Temporary Voice Channels Now",
-        "لا توجد أي رومات صوتية مؤقتة مفتوحة حالياً بالسيرفر": "No temporary voice channels are currently open in the server",
-        "صاحب الروم:": "Channel Owner:",
-
-        // ── Server Boost Notifications (boost) ──
-        "نظام تنبيهات ومعلومات البوست 💎": "Server Boost Notifications System 💎",
-        "نظام تنبيهات ومعلومات البوست (Server Boost)": "Server Boost Notifications System (Server Boost)",
-        "نظام تنبيهات وبوست السيرفر (Server Boost)": "Server Boost Notifications System (Server Boost)",
-        "تنبيهات تلقائية في الشات وشكر البوسترز وتوزيع الرتب والمميزات": "Automatic chat notifications, thanking boosters, and distributing roles & perks",
-        "إرسال إشعار في الشات وشكر البوسترز وتوزيع الرتب والـ Roles تلقائياً": "Send chat notifications, thank boosters, and distribute roles automatically",
-        "إعدادات رسالة البوست": "Boost Message Settings",
-        "قناة تنبيهات البوست": "Boost Notifications Channel",
-        "رتبة مكافأة البوستر التلقائية": "Automatic Booster Reward Role",
-        "رتبة مكافأة البوست التلقائية": "Automatic Boost Reward Role",
-        "نص رسالة البوست (يدعم {user} و {count})": "Boost Message Text (supports {user} and {count})",
-        "نص رسالة البوست": "Boost Message Text",
-        "شكراً لك {user} على تعزيز السيرفر 💎! أصبح عدد البوستات الآن {count} بوست!": "Thank you {user} for boosting the server 💎! Total boosts now: {count}!",
-        "شكراً {user} لدعمك السيرفر بالبوست! أصبح السيرفر الآن {totalBoosts} بوست 🎉": "Thank you {user} for boosting the server! The server now has {totalBoosts} boosts 🎉",
-
-        // ── Color Roles (colors / color-roles) ──
-        "نظام رتب الألوان المتقدم 🎨": "Advanced Color Roles System 🎨",
-        "نظام رتب الألوان المتقدم (Color Roles)": "Advanced Color Roles System (Color Roles)",
-        "لوحة وقوائم تفاعلية لتمكين الأعضاء من اختيار ألوانهم المفضلة": "Interactive panel and menus enabling members to pick their favorite colors",
-        "إعدادات نشر لوحة الألوان": "Color Roles Panel Settings",
-        "إعدادات نشر لوحة Color Roles": "Color Roles Panel Settings",
-        "قناة لوحة الألوان": "Color Roles Panel Channel",
-        "قناة لوحة Color Roles": "Color Roles Panel Channel",
-        "الرتبة المطلوبة لاختيار الألوان (اختياري)": "Required Role to Pick Colors (Optional)",
-        "رتب الألوان المتاحة (Role IDs مفصولة بفواصل)": "Available Color Roles (Comma-separated Role IDs)",
-        "رتب Color Roles المتاحة (Role IDs مفصولة بفواصل)": "Available Color Roles (Comma-separated Role IDs)",
-        "أيدي_رتبة_1, أيدي_رتبة_2, أيدي_رتبة_3...": "role_id_1, role_id_2, role_id_3...",
-
-        // ── General Server Logs (logs) ──
-        "تتبع جميع الأحداث في السيرفر مع الفاعل والتفاصيل فورياً": "Track all server events with executor and details in real-time",
-        "القنوات المستخدمة": "Channels Used",
-        "13 الأقسام": "13 Categories",
-        "السجلات المفعلة": "Enabled Logs",
-        "105 إجمالي السجلات": "105 Total Logs",
-        "إعداد تلقائي للقنوات": "Automatic Channel Setup",
-        "إعداد القنوات التلقائية": "Automatic Channels Setup",
-        "إنشاء قنوات السجلات تلقائياً لجميع الأقسام بضغطة واحدة": "Automatically create log channels for all categories with one click",
-        "بضغطة واحدة إنشاء قنوات Logs تلقائية لجميع الأقسام": "One-click auto setup of log channels for all sections",
-        "إنشاء قنوات عادية": "Create Standard Channels",
-        "قنوات عادية Create": "Create Standard Channels",
-        "قناة واحدة لكل قسم (أعضاء، رسائل، أدوار...) — مناسب لأغلب السيرفرات": "One channel per category (members, messages, roles...) — Suitable for most servers",
-        "واحدة لكل قسم (أعضاء، رسائل، أدوار...) — مناسب لأغلب السيرفرات": "One per category (members, messages, roles...) — Suitable for most servers",
-        "إنشاء قنوات مفصلة": "Create Detailed Channels",
-        "قنوات مفصلة Create": "Create Detailed Channels",
-        "قناة منفصلة لكل نوع سجل — للسيرفرات الكبيرة التي تحتاج تنظيم دقيق": "Separate channel for each log type — For large servers needing precise organization",
-        "قناة منفصلة لكل نوع حدث — للسيرفرات الكبيرة التي تحتاج تنظيم دقيق": "Separate channel for each event type — For large servers needing precise organization",
-        "حذف قنوات السجلات": "Delete Log Channels",
-        "حذف قنوات Logs": "Delete Log Channels",
-        "حذف كاتيجوري ZENO Server Logs وجميع القنوات بداخله وتعطيل السجلات": "Delete ZENO Server Logs category and all channels inside and disable logs",
-        "حذف كاتيجوري ZENO Server Logs وجميع القنوات بداخله": "Delete ZENO Server Logs category and all channels inside",
-        "ابحث عن سجل...": "Search for a log...",
-        "...ابحث عن سجل": "Search for a log...",
-        "الأقسام": "Categories",
-        "تعطيل الكل": "Disable All",
-        "تفعيل الكل": "Enable All",
-        "سجل": "logs",
-        "طبق نفس الإعدادات على جميع السجلات المفعلة بالقسم": "Apply same settings to all active logs in category",
-        "تطبيق نفس الإعدادات على جميع Logs بالقسم": "Apply same settings to all logs in category",
-        "إعدادات القسم": "Category Settings",
-        "اللون الافتراضي 🎨": "Default Color 🎨",
-        "اللون الافتراضي": "Default Color",
-        "القناة الافتراضية 📢": "Default Channel 📢",
-        "القناة الافتراضية": "Default Channel",
-        "تطبيق على جميع السجلات المفعلة": "Apply to All Active Logs",
-        "تطبيق على كل الـ Logs النشطة": "Apply to all active logs",
-        "تخصيص السجل": "Customize Log",
-        "القناة المخصصة لهذا السجل": "Custom Channel for This Log",
-        "اتركها فارغة لاستخدام القناة الافتراضية للقسم": "Leave empty to use category default channel",
-        "لون الإيمبد (Hex Color)": "Embed Color (Hex Color)",
-        "لون الإيمبد": "Embed Color",
-        "بوتات خاصة فقط": "Custom Bots Only",
-        "قناة مخصصة": "Custom Channel",
-        "لا توجد سجلات مطابقة للبحث أو الفلتر 🔍": "No logs match your search or filter 🔍",
-        "حُفظت الإعدادات": "Settings Saved",
-        "تخصيص القناة واللون": "Customize Channel and Color",
-
-        // Categories Names & Descriptions
-        "أحداث دخول وخروج وحظر وعقوبات الأعضاء": "Member join, leave, ban, and moderation events",
-        "أحداث إنشاء وتعديل وحذف وإعطاء الرتب": "Role create, edit, delete, and assignment events",
-        "أحداث إنشاء وتعديل وحذف القنوات والثريدات": "Channel and thread create, edit, and delete events",
-        "أحداث حذف وتعديل وتثبيت ومسح الرسائل": "Message delete, edit, pin, and purge events",
-        "أحداث الرومات الصوتية والكتم والبث والكاميرا": "Voice channel, mute, stream, and camera events",
-        "أحداث التحذيرات والبلوك والبلاك لست": "Warning, block, and blacklist events",
-        "أحداث تعديل إعدادات وبنر وبوستات السيرفر": "Server settings, banner, and boost update events",
-        "أحداث إنشاء وحذف واستخدام روابط الدعوة": "Invite link create, delete, and usage events",
-        "أحداث إضافة وتعديل وحذف الإيموجيات والستيكرات": "Emoji and sticker create, edit, and delete events",
-        "أحداث إنشاء ومجدولة وبدء الأحداث المباشرة بالسيرفر": "Scheduled event create, update, start, and end events",
-        "أحداث التكاملات والويب هوك والبوتات": "Integrations, webhook, and bot addition events",
-        "أحداث وقواعد الأوتو مود وحظر المحتوى والسبام": "AutoMod rules, content block, and spam detection events",
-        "أحداث الرومات التفاعلية والمنصة والمتحدثين": "Stage channel, moderator, and speaker events",
-
-        // Log Items Names & Descs
-        "دخول عضو": "Member Join",
-        "عند دخول عضو جديد للسيرفر": "When a new member joins the server",
-        "خروج عضو": "Member Leave",
-        "عند خروج عضو من السيرفر": "When a member leaves the server",
-        "حظر عضو": "Member Ban",
-        "عند حظر عضو من السيرفر": "When a member is banned from the server",
-        "فك حظر عضو": "Member Unban",
-        "عند فك حظر عضو": "When a member is unbanned",
-        "طرد عضو": "Member Kick",
-        "عند طرد عضو من السيرفر": "When a member is kicked from the server",
-        "سجن عضو": "Prison Member",
-        "عند سجن عضو": "When a member is imprisoned",
-        "إخراج من السجن": "Release from Prison",
-        "عند إخراج عضو من السجن": "When a member is released from prison",
-        "عزل عضو": "Timeout Member",
-        "عند عزل عضو (تايم أوت)": "When a member is timed out",
-        "إزالة العزل": "Remove Timeout",
-        "عند إزالة العزل عن عضو": "When timeout is removed from a member",
-        "إسكات كتابي": "Mute Member",
-        "عند إسكات عضو كتابياً": "When a member is text muted",
-        "إلغاء إسكات كتابي": "Unmute Member",
-        "عند إلغاء الإسكات الكتابي": "When text mute is cancelled",
-        "تغيير الاسم المستعار": "Nickname Change",
-        "عند تغيير الاسم المستعار للعضو": "When a member changes their nickname",
-        "تغيير الصورة": "Avatar Change",
-        "عند تغيير صورة العضو": "When a member changes their avatar",
-        "تغيير اسم المستخدم": "Username Change",
-        "عند تغيير اسم المستخدم للعضو": "When a member changes their username",
-        "بوست السيرفر": "Server Boost",
-        "عند بوست السيرفر من قبل عضو": "When a member boosts the server",
-        "إزالة البوست": "Remove Boost",
-        "عند إزالة البوست من السيرفر": "When a boost is removed from the server",
-        "حساب مشبوه": "Suspicious Account",
-        "عند إسناد رتبة لحساب جديد بسبب عمر الحساب": "When a new account is assigned a role due to account age",
-
-        "إنشاء رتبة": "Role Create",
-        "عند إنشاء رتبة جديدة": "When a new role is created",
-        "حذف رتبة": "Role Delete",
-        "عند حذف رتبة": "When a role is deleted",
-        "تعديل رتبة": "Role Edit",
-        "عند تعديل رتبة": "When a role is edited",
-        "إضافة رتبة لعضو": "Add Role to Member",
-        "عند إعطاء رتبة لعضو": "When a role is given to a member",
-        "إزالة رتبة من عضو": "Remove Role from Member",
-        "عند إزالة رتبة من عضو": "When a role is removed from a member",
-        "رتبة خاصة": "Custom Role",
-        "تعديل/حذف رتبة خاصة (نفس أمر rlog)": "Edit/delete custom role (same as rlog command)",
-
-        "إنشاء قناة": "Channel Create",
-        "عند إنشاء قناة جديدة": "When a new channel is created",
-        "حذف قناة": "Channel Delete",
-        "عند حذف قناة": "When a channel is deleted",
-        "تعديل قناة": "Channel Edit",
-        "عند تعديل قناة": "When a channel is edited",
-        "تعديل صلاحيات قناة": "Channel Permissions Edit",
-        "عند تعديل صلاحيات قناة": "When channel permissions are updated",
-        "إنشاء ثريد": "Thread Create",
-        "عند إنشاء ثريد جديد": "When a new thread is created",
-        "حذف ثريد": "Thread Delete",
-        "عند حذف ثريد": "When a thread is deleted",
-        "تعديل ثريد": "Thread Edit",
-        "عند تعديل ثريد": "When a thread is edited",
-
-        "حذف رسالة": "Message Delete",
-        "عند حذف رسالة": "When a message is deleted",
-        "حذف صورة": "Image Delete",
-        "عند حذف رسالة تحتوي على صورة": "When a message containing an image is deleted",
-        "تعديل رسالة": "Message Edit",
-        "عند تعديل رسالة": "When a message is edited",
-        "حذف رسائل جماعي": "Bulk Message Purge",
-        "عند حذف عدة رسائل": "When multiple messages are deleted",
-        "تثبيت رسالة": "Pin Message",
-        "عند تثبيت رسالة": "When a message is pinned",
-        "إلغاء تثبيت رسالة": "Unpin Message",
-        "عند إلغاء تثبيت رسالة": "When a message is unpinned",
-        "إضافة تفاعل": "Add Reaction",
-        "عند إضافة تفاعل على رسالة": "When a reaction is added to a message",
-        "إزالة تفاعل": "Remove Reaction",
-        "عند إزالة تفاعل من رسالة": "When a reaction is removed from a message",
-        "مسح جميع التفاعلات": "Clear All Reactions",
-        "عند مسح جميع التفاعلات": "When all reactions are cleared",
-
-        "دخول روم صوتي": "Voice Channel Join",
-        "عند دخول عضو لروم صوتي": "When a member joins a voice channel",
-        "خروج من روم صوتي": "Voice Channel Leave",
-        "عند خروج عضو من روم صوتي": "When a member leaves a voice channel",
-        "نقل بين الرومات": "Voice Channel Switch",
-        "عند نقل عضو بين الرومات": "When a member switches between voice channels",
-        "كتم عضو": "Server Mute",
-        "عند كتم عضو في الصوتي": "When a member is server muted in voice",
-        "إلغاء كتم عضو": "Server Unmute",
-        "عند إلغاء كتم عضو": "When server mute is removed from a member",
-        "إصمات عضو": "Server Deafen",
-        "عند إصمات عضو": "When a member is server deafened",
-        "إلغاء إصمات": "Server Undeafen",
-        "عند إلغاء إصمات عضو": "When server deafen is removed from a member",
-        "سيلف ميوت": "Self Mute",
-        "عند تفعيل العضو سيلف ميوت": "When a member enables self mute",
-        "إلغاء السيلف ميوت": "Self Unmute",
-        "عند إلغاء العضو السيلف ميوت": "When a member disables self mute",
-        "سيلف ديفن": "Self Deafen",
-        "عند تفعيل العضو سيلف ديفن": "When a member enables self deafen",
-        "إلغاء السيلف ديفن": "Self Undeafen",
-        "عند إلغاء العضو السيلف ديفن": "When a member disables self deafen",
-        "بدء بث": "Start Stream",
-        "عند بدء عضو بث مباشر": "When a member starts streaming",
-        "إنهاء بث": "End Stream",
-        "عند إنهاء البث": "When streaming ends",
-        "تشغيل الكاميرا": "Turn On Camera",
-        "عند تشغيل الكاميرا": "When camera is turned on",
-        "إيقاف الكاميرا": "Turn Off Camera",
-        "عند إيقاف الكاميرا": "When camera is turned off",
-        "فصل من الصوتية": "Disconnect from Voice",
-        "عند فصل عضو من قناة صوتية (بواسطة مشرف)": "When a member is disconnected from voice (by a moderator)",
-
-        "إعطاء تحذير": "Issue Warning",
-        "عند إعطاء عضو تحذير": "When a warning is issued to a member",
-        "إزالة تحذير": "Remove Warning",
-        "عند إزالة تحذير واحد من عضو": "When a single warning is removed from a member",
-        "مسح التحذيرات": "Clear Warnings",
-        "عند مسح جميع تحذيرات عضو أو السيرفر": "When all warnings of a member or server are cleared",
-        "إعطاء بلوك": "Block Member",
-        "عند إعطاء عضو بلوك على رتبة": "When a member is blocked from a role",
-        "إضافة بلاك لست": "Add Blacklist",
-        "عند إضافة عضو إلى البلاك لست": "When a member is added to blacklist",
-        "إزالة بلاك لست": "Remove Blacklist",
-        "عند إزالة عضو من البلاك لست": "When a member is removed from blacklist",
-
-        "تعديل السيرفر": "Server Update",
-        "عند تعديل إعدادات السيرفر": "When server settings are updated",
-        "تغيير اسم السيرفر": "Server Name Change",
-        "عند تغيير اسم السيرفر": "When server name is changed",
-        "تغيير أيقونة السيرفر": "Server Icon Change",
-        "عند تغيير أيقونة السيرفر": "When server icon is changed",
-        "تغيير بانر السيرفر": "Server Banner Change",
-        "عند تغيير بانر السيرفر": "When server banner is changed",
-        "تغيير رابط الفانيتي": "Vanity URL Change",
-        "عند تغيير رابط الدعوة المخصص": "When custom vanity invite URL is changed",
-        "رفع مستوى البوست": "Boost Level Up",
-        "عند رفع مستوى بوست السيرفر": "When server boost level increases",
-        "انخفاض مستوى البوست": "Boost Level Down",
-        "عند انخفاض مستوى البوست": "When server boost level decreases",
-
-        "إنشاء دعوة": "Invite Create",
-        "عند إنشاء رابط دعوة": "When an invite link is created",
-        "حذف دعوة": "Invite Delete",
-        "عند حذف رابط دعوة": "When an invite link is deleted",
-        "استخدام دعوة": "Invite Used",
-        "عند استخدام رابط دعوة": "When an invite link is used",
-
-        "إضافة إيموجي": "Emoji Create",
-        "عند إضافة إيموجي جديد": "When a new emoji is added",
-        "حذف إيموجي": "Emoji Delete",
-        "عند حذف إيموجي": "When an emoji is deleted",
-        "تعديل إيموجي": "Emoji Edit",
-        "عند تعديل إيموجي": "When an emoji is edited",
-        "إضافة ستيكر": "Sticker Create",
-        "عند إضافة ستيكر جديد": "When a new sticker is added",
-        "حذف ستيكر": "Sticker Delete",
-        "عند حذف ستيكر": "When a sticker is deleted",
-        "تعديل ستيكر": "Sticker Edit",
-        "عند تعديل ستيكر": "When a sticker is edited",
-
-        "إنشاء حدث": "Event Create",
-        "عند إنشاء حدث مجدول": "When a scheduled event is created",
-        "حذف حدث": "Event Delete",
-        "عند حذف حدث": "When a scheduled event is deleted",
-        "تعديل حدث": "Event Edit",
-        "عند تعديل حدث": "When a scheduled event is edited",
-        "بدء حدث": "Event Start",
-        "عند بدء حدث": "When an event starts",
-        "انتهاء حدث": "Event End",
-        "عند انتهاء حدث": "When an event ends",
-        "اشتراك في حدث": "Event Interested",
-        "عند اشتراك عضو في حدث": "When a member subscribes to an event",
-
-        "إضافة تكامل": "Integration Create",
-        "عند إضافة تكامل جديد": "When a new integration is added",
-        "حذف تكامل": "Integration Delete",
-        "عند حذف تكامل": "When an integration is deleted",
-        "تعديل تكامل": "Integration Edit",
-        "عند تعديل تكامل": "When an integration is edited",
-        "إنشاء ويب هوك": "Webhook Create",
-        "عند إنشاء ويب هوك": "When a webhook is created",
-        "حذف ويب هوك": "Webhook Delete",
-        "عند حذف ويب هوك": "When a webhook is deleted",
-        "تعديل ويب هوك": "Webhook Edit",
-        "عند تعديل ويب هوك": "When a webhook is edited",
-        "إضافة بوت": "Bot Add",
-        "عند إضافة بوت للسيرفر": "When a bot is added to the server",
-        "إزالة بوت": "Bot Remove",
-        "عند إزالة بوت من السيرفر": "When a bot is removed from the server",
-
-        "إنشاء قاعدة": "Rule Create",
-        "عند إنشاء قاعدة أوتو مود": "When an AutoMod rule is created",
-        "حذف قاعدة": "Rule Delete",
-        "عند حذف قاعدة أوتو مود": "When an AutoMod rule is deleted",
-        "تعديل قاعدة": "Rule Edit",
-        "عند تعديل قاعدة أوتو مود": "When an AutoMod rule is edited",
-        "إجراء أوتو مود": "AutoMod Action Trigger",
-        "عند تنفيذ إجراء أوتو مود": "When an AutoMod action is executed",
-        "حظر محتوى": "Block Content",
-        "عند حظر محتوى تلقائياً": "When content is blocked automatically",
-        "عزل تلقائي": "Automatic Timeout",
-        "عند عزل عضو تلقائياً": "When a member is automatically timed out",
-        "رقابة السبام": "Spam Moderation",
-        "عند اكتشاف سبام أو رسائل مكررة أو نص متكرر": "When spam, duplicate messages, or repeated text is detected",
-
-        "إنشاء منصة": "Stage Create",
-        "عند إنشاء منصة صوتية": "When a stage channel is created",
-        "حذف منصة": "Stage Delete",
-        "عند حذف منصة": "When a stage channel is deleted",
-        "تعديل منصة": "Stage Edit",
-        "عند تعديل منصة": "When a stage channel is edited",
-        "إضافة متحدث": "Add Speaker",
-        "عند إضافة متحدث للمنصة": "When a speaker is added to stage",
-        "إزالة متحدث": "Remove Speaker",
-        "عند إزالة متحدث": "When a speaker is removed from stage",
-        "طلب التحدث": "Request to Speak",
-        "عند طلب عضو التحدث": "When a member requests to speak",
-
-        // Additional tickets phrases
-        "مرحباً بك {user}! يرجى كتابة استفسارك وسيقوم طاقم الإدارة بالرد عليك قريباً 🌟": "Welcome {user}! Please write your inquiry and staff will reply soon 🌟",
-        "يرجى كتابة استفسارك وسيقوم طاقم الإدارة بالرد عليك قريباً": "Please write your inquiry and staff will reply soon",
-
-        // ── Holy Quran & Islamic Broadcasts (quran) ──
-        "القرآن الكريم والإذاعات الإسلامية 🕌": "Holy Quran & Islamic Broadcasts 🕌",
-        "القرآن الكريم والإذاعات الإسلامية": "Holy Quran & Islamic Broadcasts",
-        "تشغيل القرآن الكريم وإذاعات كبار القراء على مدار الساعة 24/7 في قنوات السيرفر الصوتية": "24/7 Holy Quran and top reciter broadcasts in server voice channels",
-        "تشغيل القرآن الكريم وإذاعات كبار القراء على مدار الـ 24/7 في Voice Channels السيرفر": "24/7 Holy Quran and top reciter broadcasts in server voice channels",
-        "تشغيل مباشر في القناة الصوتية": "Direct Play in Voice Channel",
-        "تشغيل مباشر في الـ Voice Channel": "Direct Play in Voice Channel",
-        "القناة الصوتية المستهدفة": "Target Voice Channel",
-        "الـ Voice Channel المستهدفة": "Target Voice Channel",
-        "اختر القارئ أو الإذاعة": "Choose a reciter or station",
-        "إذاعة القرآن الكريم من القاهرة (مباشر 24/7)": "Holy Quran Radio from Cairo (Live 24/7)",
-        "إذاعة القرآن الكريم من مكة المكرمة (مباشر 24/7)": "Holy Quran Radio from Makkah (Live 24/7)",
-        "إذاعة القرآن الكريم من القاهرة": "Holy Quran Radio from Cairo",
-        "إذاعة القرآن الكريم من مكة المكرمة": "Holy Quran Radio from Makkah",
-        "الشيخ مشاري راشد العفاسي": "Sheikh Mishary Rashid Alafasy",
-        "الشيخ عبدالباسط عبدالصمد (المجود)": "Sheikh Abdulbasit Abdulsamad (Mujawwad)",
-        "الشيخ عبدالباسط عبدالصمد": "Sheikh Abdulbasit Abdulsamad",
-        "الشيخ ماهر المعيقلي": "Sheikh Maher Al-Muaiqly",
-        "الشيخ ياسر الدوسري": "Sheikh Yasser Al-Dosari",
-        "الشيخ سعد الغامدي": "Sheikh Saad Al-Ghamdi",
-        "الشيخ عبدالرحمن السديس": "Sheikh Abdulrahman Al-Sudais",
-        "الشيخ سعود الشريم": "Sheikh Saud Al-Shuraim",
-        "الشيخ أحمد العجمي": "Sheikh Ahmed Al-Ajmy",
-        "الشيخ أبو بكر الشاطري": "Sheikh Abu Bakr Al-Shatri",
-        "إيقاف البث": "Stop Stream",
-        "تشغيل الآن في الروم الصوتي": "Play Now in Voice Room",
-        "قائمة المحطات والتلاوات المتاحة (11 محطة):": "Available Stations & Recitations (11 stations):",
-        "قائمة المحطات والتلاوات المتاحة (11 محطة)": "Available Stations & Recitations (11 stations)",
-        "قائمة المحطات والتلاوات المتاحة": "Available Stations & Recitations",
-        "إذاعة القاهرة 🇪🇬": "Cairo Radio 🇪🇬",
-        "إذاعة مكة المكرمة 🇸🇦": "Makkah Radio 🇸🇦",
-        "مشاري العفاسي 📖": "Mishary Alafasy 📖",
-        "مشاري العفاسي": "Mishary Alafasy",
-        "عبدالباسط عبدالصمد 📖": "Abdulbasit Abdulsamad 📖",
-        "عبدالباسط عبدالصمد": "Abdulbasit Abdulsamad",
-        "ماهر المعيقلي 📖": "Maher Al-Muaiqly 📖",
-        "ماهر المعيقلي": "Maher Al-Muaiqly",
-        "ياسر الدوسري 📖": "Yasser Al-Dosari 📖",
-        "ياسر الدوسري": "Yasser Al-Dosari",
-        "بث مباشر متواصل على مدار الساعة": "Continuous 24/7 live broadcast",
-        "بث مباشر متواصل": "Continuous live broadcast",
-        "تلاوات الحرم المكي الشريف": "Makkah Holy Mosque recitations",
-        "المصحف المرتل كاملاً": "Full Murattal Quran",
-        "تلاوات نادرة ومجودة": "Rare & Mujawwad recitations",
-        "تلاوات عذبة وخاشعة": "Sweet & humbling recitations",
-        "تلاوة ترتيل مؤثرة": "Moving recitation",
-        "يرجى اختيار القناة الصوتية أولاً": "Please select a voice channel first",
-        "جارٍ الاتصال والتشغيل... ⏳": "Connecting and playing... ⏳",
-        "تم بدء تشغيل إذاعة القرآن الكريم في القناة الصوتية بنجاح!": "Holy Quran broadcast started in voice channel successfully!",
-        "تم إيقاف البث ومغادرة الروم الصوتي.": "Broadcast stopped and left the voice room.",
-
-        // ── Commands Management (general / commands) ──
-        "جميع الأوامر والخدمات ⌨️": "All Commands & Services ⌨️",
-        "جميع الأوامر والخدمات": "All Commands & Services",
-        "كل الأوامر والخدمات مُصنفة ومنظمة، يمكن تعطيل أو تفعيل أي أمر لحظياً دون الحاجة إعادة تشغيل البوت": "All commands and services categorized and organized, toggle any command instantly without restarting the bot",
-        "اختصارات مخصصة": "Custom Aliases",
-        "الأوامر المفعلة": "Enabled Commands",
-        "إجمالي الأوامر": "Total Commands",
-        "إدارة الأوامر": "Commands Management",
-        "تخصيص وإدارة جميع أوامر البوت والصلاحيات": "Customize and manage all bot commands and permissions",
-        "...ابحث عن أمر": "Search for a command...",
-        "لا توجد أوامر مطابقة 🔍": "No matching commands 🔍",
-        "✓ حُفظ": "✓ Saved",
-        "حُفظ": "Saved",
-        "صلاحيات ديسكورد": "Discord Permissions",
-
-        // Category names
-        "الأوامر الأساسية": "Basic Commands",
-        "سجلات العقوبات": "Punishment Logs",
-        "إدارة الصوت": "Voice Management",
-        "إدارة الرتب": "Role Management",
-        "الرتب الخاصة": "Custom Roles",
-        "معلومات السيرفر": "Server Info",
-        "أدوات البوت الخاص": "Custom Bot Tools",
-        "المستويات والخبرة": "Levels & XP",
-        "إحصائيات السيرفر": "Server Statistics",
+        // Server.js generated HTML & JS messages
+        "غير معروف": "Unknown",
+        "السيرفر غير موجود في كاش البوت": "Server not found in bot cache",
+        "يجب تسجيل الدخول أولاً": "Please login first",
+        "بيانات غير صالحة": "Invalid data",
+        "إجراء غير معروف": "Unknown action",
+        "تم تحديث الرصيد وحفظه فوراً في قاعدة البيانات": "Balance updated and saved to database instantly",
+        "لا توجد بيانات خبرة مسجلة بعد": "No XP data recorded yet",
+        "لا توجد بيانات ذهب مسجلة بعد": "No gold data recorded yet",
+        "لا توجد بيانات نشاط حتى الآن": "No activity data yet",
+        "✓ مفعّل حالياً": "✓ Currently Active",
+        "مجهزة على بطاقتك 🪪": "Equipped on your card 🪪",
+        "شراء وتجهيز": "Buy & Equip",
+        "جارٍ الاستلام... ⏳": "Claiming... ⏳",
+        "فشل استلام الراتب اليومي": "Failed to claim daily reward",
+        "استلام الرصيد 🎁": "Claim Reward 🎁",
+        "جارٍ الشراء... ⏳": "Purchasing... ⏳",
+        "✅ تم الشراء والتفعيل بنجاح!": "✅ Purchased and activated successfully!",
+        "رصيدك لا يكفي لإتمام الشراء": "Your balance is insufficient for this purchase",
+        "حدث خطأ أثناء الشراء": "Error occurred during purchase",
+        "الرصيد": "Balance",
+        "المبلغ": "Amount",
+        "اليوم": "Today",
+        "تاريخ": "Date",
+        "المكافأة اليومية (Daily)": "Daily Reward",
         "الملف الشخصي": "Profile",
-
-        // Category descriptions
-        "الأوامر الرئيسية للبوت والاستخدام اليومي": "Main bot commands for daily use",
-        "أوامر تنفيذ العقوبات المباشرة على الأعضاء": "Commands to execute direct punishments on members",
-        "استعلام وعرض سجلات العقوبات السابقة": "Query and display previous punishment records",
-        "أوامر قفل وإخفاء وإدارة القنوات": "Commands to lock, hide, and manage channels",
-        "أوامر حذف الرسائل والإعلانات والتفاعل": "Commands to delete messages, announcements and interactions",
-        "أوامر التحكم في قنوات الصوت والأعضاء": "Commands to control voice channels and members",
-        "أوامر إعطاء وإزالة وإنشاء الرتب": "Commands to give, remove, and create roles",
-        "أوامر الرتب الشخصية المخصصة لكل عضو": "Personal custom role commands for each member",
-        "أوامر عرض إحصائيات ومعلومات السيرفر": "Commands to display server stats and information",
-        "أوامر تخصيص مظهر وحالة البوت الخاص": "Commands to customize custom bot appearance and status",
-        "أوامر الحماية من التخريب ومكافحة السبام": "Commands to protect from nukes and fight spam",
-        "أوامر المستويات وبطاقات الرانك": "Commands for levels and rank cards",
-        "أوامر قنوات العدادات التلقائية": "Commands for automatic counter channels",
-        "أوامر البروفايل والسمعة والعملات": "Commands for profile, reputation, and currency",
-
-        // Basic Commands descriptions
-        "قائمة جميع الأوامر المتاحة": "List of all available commands",
-        "سرعة استجابة البوت": "Bot response speed",
-        "معلومات البوت الكاملة": "Full bot information",
-        "معلومات عضو في السيرفر": "Member information in the server",
-        "عرض صورة عضو بدقة عالية": "Display member avatar in high quality",
-        "عرض بنر عضو": "Display member banner",
-        "عدد دعوات عضو في السيرفر": "Member invite count in server",
-        "قائمة رتب السيرفر الكاملة": "Full server roles list",
-        "قائمة قنوات السيرفر": "Server channels list",
-        "قائمة إيموجيات السيرفر المخصصة": "Server custom emojis list",
-        "تقديم طلب وظيفي بالسيرفر": "Submit a job application in server",
-        "فتح تذكرة دعم": "Open a support ticket",
-        "استلام الراتب اليومي": "Collect daily salary",
-        "عرض بطاقة البروفايل": "Display profile card",
-        "قائمة المتصدرين": "Leaderboard",
-        "رصيد النجوم والتقييمات": "Stars and ratings balance",
-
-        // Punishments descriptions
-        "حظر عضو": "Ban a member",
-        "فك حظر عضو": "Unban a member",
-        "طرد عضو": "Kick a member",
-        "كتم عضو": "Mute a member",
-        "فك كتم عضو": "Unmute a member",
-        "عزل عضو": "Timeout a member",
-        "فك عزل عضو": "Remove member timeout",
-        "تحذير عضو": "Warn a member",
-        "حذف تحذير": "Delete a warning",
-        "مسح جميع التحذيرات": "Clear all warnings",
-        "مسح تحذيرات عضو كاملة": "Clear all warnings of a member",
-        "حذف نهائي لكل سجلات العقوبات": "Permanently delete all punishment records",
-        "سجن عضو": "Imprison a member",
-        "إخراج من السجن": "Release from prison",
-        "تغيير الاسم المستعار": "Change nickname",
-        "بلاك لست عضو (دائم)": "Permanently blacklist a member",
-        "فك بلاك لست عضو": "Remove member from blacklist",
-        "حذف عقوبة من عضو": "Remove a punishment from member",
-        "إزالة الرتب الإدارية لمدة محددة": "Remove admin roles for a set duration",
-        "استعادة الرتب الإدارية المزالة": "Restore removed admin roles",
-        "حظر عضو من رتبة": "Block a member from a role",
-        "فك حظر عضو من رتبة": "Unblock a member from a role",
-
-        // Punishment Logs descriptions
-        "عرض كل التحذيرات النشطة": "Display all active warnings",
-        "سجل باندات عضو": "Member ban history",
-        "سجل بلاك لست عضو": "Member blacklist history",
-        "سجل بلوكات عضو": "Member block history",
-        "عرض تفاصيل عقوبة": "Display punishment details",
-        "سجل عقوبات العضو الكامل": "Full member punishment record",
-        "عقوبات العضو النشطة حالياً": "Member's currently active punishments",
-        "سجل داونات عضو": "Member down history",
-        "سجل إشراف المشرفين": "Moderator moderation log",
-        "سجل طرديات عضو": "Member kick history",
-        "سجل كتمات عضو": "Member mute history",
-        "سجل سجنات عضو": "Member prison history",
-        "سجل عزلات عضو": "Member timeout history",
-        "سجل تحذيرات عضو": "Member warning history",
-        "تقرير نشاط فريق الإدارة": "Staff team activity report",
-        "سجل التدقيق والعمليات": "Audit and operations log",
-        "ملخص جميع العقوبات النشطة": "Summary of all active punishments",
-
-        // Channel Management descriptions
-        "قفل قناة": "Lock a channel",
-        "فتح قناة مقفولة": "Unlock a locked channel",
-        "إخفاء قناة عن الأعضاء": "Hide a channel from members",
-        "إظهار قناة مخفية": "Show a hidden channel",
-        "تفعيل السلو مود في القناة": "Enable slow mode in channel",
-        "نسخ قناة بكامل إعداداتها": "Clone a channel with all settings",
-        "تغيير اسم القناة": "Change channel name",
-        "تغيير وصف القناة": "Change channel description",
-        "تفعيل/تعطيل وضع NSFW": "Enable/disable NSFW mode",
-
-        // Chat Tools descriptions
-        "حذف عدد محدد من الرسائل": "Delete a specific number of messages",
-        "حذف الرسائل المثبتة": "Delete pinned messages",
-        "حذف رسائل البوتات": "Delete bot messages",
-        "حذف رسائل عضو معين": "Delete messages from a specific member",
-        "إرسال رسالة عبر البوت": "Send a message via the bot",
-        "إنشاء Embed مخصص": "Create a custom Embed",
-        "إنشاء استطلاع رأي": "Create a poll",
-        "تعيين تذكير مؤقت": "Set a temporary reminder",
-        "إرسال إعلان رسمي": "Send an official announcement",
-        "بث رسالة في جميع القنوات": "Broadcast a message to all channels",
-        "ترجمة نص إلى لغة أخرى": "Translate text to another language",
-        "اقتباس رسالة قديمة": "Quote an old message",
-
-        // Voice Management descriptions
-        "كتم عضو في الصوت": "Mute a member in voice",
-        "فك كتم عضو في الصوت": "Unmute a member in voice",
-        "صمم عضو في الصوت": "Deafen a member in voice",
-        "فك تصميم عضو في الصوت": "Undeafen a member in voice",
-        "طرد عضو من قناة الصوت": "Kick a member from voice channel",
-        "نقل عضو بين قنوات الصوت": "Move a member between voice channels",
-        "نقل جميع الأعضاء لقناة أخرى": "Move all members to another channel",
-        "تحديد الحد الأقصى للمستخدمين": "Set maximum user limit",
-        "قفل قناة الصوت": "Lock voice channel",
-        "فتح قناة الصوت": "Unlock voice channel",
-        "إخفاء قناة الصوت": "Hide voice channel",
-        "إظهار قناة الصوت": "Show voice channel",
-        "تغيير جودة الصوت (Bitrate)": "Change audio quality (Bitrate)",
-        "إنشاء قناة صوتية مؤقتة": "Create a temporary voice channel",
-        "معلومات قناة الصوت الحالية": "Current voice channel information",
-        "تشغيل نشاط جماعي بالصوت": "Launch a group activity in voice",
-        "تغيير اسم قناة الصوت": "Change voice channel name",
-        "السماح لعضو بالدخول": "Allow a member to enter",
-        "منع عضو من الدخول": "Prevent a member from entering",
-
-        // Role Management descriptions
-        "إعطاء رتبة لعضو": "Give a role to a member",
-        "إزالة رتبة من عضو": "Remove a role from a member",
-        "إنشاء رتبة جديدة": "Create a new role",
-        "حذف رتبة": "Delete a role",
-        "تعديل لون رتبة": "Edit role color",
-        "نسخ صلاحيات رتبة لأخرى": "Copy permissions from one role to another",
-        "عرض معلومات رتبة": "Display role information",
-        "قائمة أعضاء رتبة معينة": "List of members with a specific role",
-        "إعطاء رتبة لجميع الأعضاء": "Give a role to all members",
-        "إزالة رتبة من جميع الأعضاء": "Remove a role from all members",
-
-        // Custom Roles descriptions
-        "إنشاء رتبة شخصية": "Create a personal role",
-        "تعديل رتبتك الشخصية": "Edit your personal role",
-        "حذف رتبتك الشخصية": "Delete your personal role",
-        "تغيير لون رتبتك": "Change your role color",
-        "تغيير اسم رتبتك": "Change your role name",
-        "تغيير أيقونة رتبتك": "Change your role icon",
-
-        // Server Info descriptions
-        "معلومات السيرفر الكاملة": "Full server information",
-        "عدد الأعضاء وإحصائياتهم": "Member count and statistics",
-        "معلومات قناة معينة": "Specific channel information",
-        "عرض الدعوات النشطة": "Display active invites",
-        "معلومات رتبة محددة": "Specific role information",
-        "إحصائيات الإيموجيات": "Emoji statistics",
-        "معلومات البوست والنيتروا": "Boost and Nitro information",
-        "عرض شعار السيرفر": "Display server icon",
-        "عرض بنر السيرفر": "Display server banner",
-
-        // Custom Bot Tools descriptions
-        "تغيير اسم البوت الخاص": "Change custom bot name",
-        "تغيير صورة البوت الخاص": "Change custom bot avatar",
-        "تغيير حالة البوت الخاص": "Change custom bot status",
-        "تغيير نشاط البوت الخاص": "Change custom bot activity",
-        "إعادة تشغيل البوت الخاص": "Restart custom bot",
-
-        // Security/Protection descriptions
-        "تفعيل وضع القفل الشامل": "Enable server lockdown mode",
-        "إلغاء وضع القفل الشامل": "Disable server lockdown mode",
-        "حظر جماعي للأعضاء المشتبه بهم": "Mass ban suspicious members",
-        "تنظيف الأعضاء الجدد": "Clean up new members",
-        "فحص عضو من السبام": "Check a member for spam",
-        "تقرير حماية السيرفر": "Server protection report",
-
-        // Levels & XP descriptions
-        "عرض رتبة ومستوى عضو": "Display member rank and level",
-        "عرض بطاقة المستوى": "Display level card",
-        "إعطاء نقاط XP لعضو": "Give XP points to a member",
-        "إزالة نقاط XP من عضو": "Remove XP points from a member",
-        "إعادة تعيين مستوى عضو": "Reset member level",
-        "قائمة المتصدرين في المستويات": "Levels leaderboard",
-        "إعادة تعيين جميع المستويات": "Reset all levels",
-
-        // Server Statistics descriptions
-        "إنشاء قناة عداد الأعضاء": "Create member counter channel",
-        "إنشاء قناة عداد البوتات": "Create bot counter channel",
-        "إنشاء قناة عداد القنوات": "Create channel counter channel",
-        "إنشاء قناة عداد الرتب": "Create role counter channel",
-        "تحديث العدادات يدوياً": "Manually update counters",
-
-        // Profile descriptions
-        "عرض البروفايل الشخصي": "Display personal profile",
-        "تغيير بايو البروفايل": "Change profile bio",
-        "تغيير لون البروفايل": "Change profile color",
-        "إعطاء سمعة لعضو": "Give reputation to a member",
-        "عرض رصيد العملات": "Display currency balance",
-        "تحويل عملات لعضو": "Transfer currency to a member",
-        "المتجر الخاص بالسيرفر": "Server shop",
-        "تسجيل الحضور اليومي": "Daily attendance check-in",
-        // ── Command Management Accordion & Details ──
-        "اختصار مخصص للأمر (Custom Alias)": "Custom Command Alias",
-        "اختصار مخصص للأمر": "Custom Command Alias",
-        "اختصار مخصص": "Custom Alias",
-        "الرتب المسموح لها فقط بتشغيل الأمر (Allowed Roles)": "Allowed Roles Only",
-        "الرتب المسموح لها فقط بتشغيل الأمر": "Allowed Roles Only",
-        "الرتب المسموح لها": "Allowed Roles",
-        "القنوات المسموح فيها فقط بتشغيل الأمر (Allowed Channels)": "Allowed Channels Only",
-        "القنوات المسموح فيها فقط بتشغيل الأمر": "Allowed Channels Only",
-        "القنوات المسموح فيها": "Allowed Channels",
-        "جميع الرتب مسموح لها (لا يوجد تقييد)": "All roles allowed (No restrictions)",
-        "جميع القنوات مسموح فيها (لا يوجد تقييد)": "All channels allowed (No restrictions)",
-        "حفظ تفاصيل الأمر": "Save Command Details",
-        "إعادة ضبط": "Reset",
-        "حفظ الإعدادات": "Save Settings",
-        "تفاصيل بطاقات الأوامر": "Command Card Details",
-        "اختصارات مخصصة": "Custom Aliases",
-        "الأوامر المفعلة": "Enabled Commands",
-        "إجمالي الأوامر": "Total Commands",
-        "ابحث عن أمر...": "Search for a command...",
-        "ابحث عن أمر": "Search for a command",
-        "معطل": "Disabled",
-        "مفعل": "Enabled",
-        "الكل": "All",
-        "الأقسام": "Categories",
-        "الأوامر الأساسية": "Basic Commands",
-        "العقوبات": "Punishments",
-        "سجلات العقوبات": "Punishment Logs",
-        "إدارة القنوات": "Channel Management",
-        "أدوات الشات": "Chat Tools",
-        "إدارة الصوت": "Voice Management",
-        "إدارة الرتب": "Role Management",
-        "الرتب الخاصة": "Custom Roles",
-        "معلومات السيرفر": "Server Info",
-        "أدوات البوت الخاص": "Custom Bot Tools",
-        "الحماية": "Security",
-        "المستويات والخبرة": "Levels & XP",
-        "إحصائيات السيرفر": "Server Statistics",
-        "الملف الشخصي": "Profile",
-        "تفعيل الكل": "Enable All",
-        "تعطيل الكل": "Disable All",
-        "صلاحيات ديسكورد": "Discord Permissions",
-        "مثال: !b أو /b": "e.g. !b or /b",
-        "مثال: !ban": "e.g. !ban",
-        "لا توجد أوامر مطابقة 🔍": "No matching commands found 🔍",
-        "حُفظ": "Saved",
-        // ── Dashboard Manage & User Profile Translations ──
-        "خوادمك المتاحة للإدارة": "Your Manageable Servers",
-        "آخر 5 معاملات الذهب": "Last 5 Gold Transactions",
-        "سجل التحويلات والمكافآت": "Transfers & Rewards Log",
-        "المكافأة اليومية (Daily)": "Daily Reward (Daily)",
-        "المكافأة اليومية": "Daily Reward",
-        "الراتب اليومي (Daily Reward)": "Daily Reward (Daily Reward)",
-        "الراتب اليومي": "Daily Reward",
-        "مكافأة اليوم": "Today's Reward",
-        "التكرار": "Frequency",
-        "كل 24 ساعة": "Every 24 hours",
-        "استلام الرصيد اليومي": "Claim daily balance",
-        "استلام الرصيد": "Claim balance",
-        "متاح بعد:": "Available in:",
-        "متاح بعد": "Available in",
-        "صوّت للبوت على Top.gg": "Vote for Bot on Top.gg",
-        "صوّت للبوت": "Vote for Bot",
-        "صوّت الآن على Top.gg": "Vote Now on Top.gg",
-        "صوّتك يساعد البوت على الانتشار ويدعم تطويره! يمكنك التصويت مرة كل": "Your vote helps the bot grow and supports development! You can vote every",
-        "ساعة": "hours",
-        "ساعات": "hours",
-        "دقيقة": "minutes",
-        "ثانية": "seconds",
-        "احصل على": "Get",
-        "من الذهب": "Gold",
-        "مجاناً كل 24 ساعة!": "for free every 24 hours!",
-        "500 إلى 1,000 من الذهب": "500 to 1,000 Gold",
-        "إدارة سيرفر": "Server Management",
-        "إدارة السيرفر": "Manage Server",
-        "أعلى 100 عضو بواسطة نقاط الخبرة (XP Leaderboard) 🏆": "Top 100 Members by XP (XP Leaderboard) 🏆",
-        "أعلى 100 عضو بواسطة نقاط الخبرة": "Top 100 Members by XP",
-        "أغنى الأثرياء برصيد الذهب 🪙": "Richest Users by Gold 🪙",
-        "أغنى الأثرياء": "Richest Users",
-        "أعلى نقاط السمعة & XP": "Top Rep & XP",
-        "ترتيبك الحالي:": "Your current rank:",
-        "ترتيبك الحالي": "Your current rank",
-        "ترتيبك المالي:": "Your financial rank:",
-        "ترتيبك المالي": "Your financial rank",
         "بطاقة الهوية": "ID Card",
         "مرحباً بك في لوحة تحكم ZENO Bot!": "Welcome to ZENO Bot Dashboard!",
-        "لا توجد سيرفرات مشتركة لديك صلاحيات إدارتها": "No shared servers with manage permissions found",
-        "إضافة البوت لسيرفرك": "Add Bot to your Server",
-        "لا توجد بيانات خبرة مسجلة بعد": "No XP data recorded yet",
-        "لا توجد بيانات ذهب مسجلة بعد": "No Gold data recorded yet",
-        "لا توجد بيانات نشاط حتى الآن": "No activity data yet",
-        "المبلغ": "Amount",
-        "الرصيد": "Balance",
-        "تاريخ": "Date",
-        "اليوم": "Today",
-        "سيرفر": "Servers",
-        "الذهب": "Gold",
-        "السمعة": "Reputation",
-        "التصنيف": "Rank",
-        "المستوى": "Level",
-        "نظرة عامة": "Overview",
-        "لوحة المتصدرين": "Leaderboard",
+        "لوحة المتصدرين": "Leaderboards",
+        "أعلى 100 عضو بواسطة نقاط الخبرة (XP Leaderboard) 🏆": "Top 100 Members by XP 🏆",
+        "أغنى الأثرياء": "Richest Users",
+        "الراتب اليومي (Daily Reward)": "Daily Reward",
+        "مكافأة اليوم": "Today's Reward",
+        "التكرار": "Frequency",
+        "صوّت للبوت على Top.gg": "Vote for Bot on Top.gg",
+        "🗳️ صوّت الآن على Top.gg": "🗳️ Vote Now on Top.gg",
         "عام": "General",
         "أخرى": "Other",
-        "شراء وتجهيز": "Buy & Equip",
-        "مجهزة على بطاقتك 🪪": "Equipped on your card 🪪",
-        "مفعّل حالياً": "Currently active",
-        "الصفحة الرئيسية": "Home Page",
+        "الصفحة الرئيسية": "Home",
+        "...اختر القناة": "...Select Channel",
+        "...اختر الرتبة": "...Select Role",
+        "حدد عدد المنشنات المسموح بها في الرسالة الواحدة": "Set maximum mentions allowed per message",
+        "حظر الحروف الكبيرة": "Block Capital Letters",
+        "منع الرسائل التي تحتوي على أحرف كبيرة بشكل مفرط (70% أو أكثر)": "Prevent messages with excessive capital letters (70% or more)",
+        "إزعاج Spoilers": "Spoiler Spam",
+        "منع الاستخدام المفرط لعلامات السبويلر": "Prevent excessive use of spoiler tags",
+        "نص Zalgo": "Zalgo Text",
+        "منع النصوص المشوهة والرموز الغريبة (Zalgo text)": "Prevent distorted text and weird symbols (Zalgo text)",
+        "مرونة أكثر في التخصيص": "More customization flexibility",
+        "حماية البوت — حماية متقدمة يديرها البوت مباشرة": "Bot Shield — Advanced protection managed directly by the bot",
+        "مكافحة السبام المتقدم": "Advanced Anti-Spam",
+        "مكافحة السبام": "Anti-Spam",
+        "عضو #": "Member #",
+        "خطأ في إعدادات البوت: CLIENT_SECRET غير مضاف في لوحة Render.": "Bot config error: CLIENT_SECRET is not added in Render dashboard.",
+        "تعذر إكمال تسجيل الدخول عبر Discord": "Could not complete Discord login",
+        "رسالة الخطأ من Discord: ": "Error message from Discord: ",
+        "تأكد من صحة Client Secret في إعدادات البوت.": "Verify the Client Secret in bot settings.",
+        "العودة للصفحة الرئيسية": "Back to Home",
+        "فشل جلب بيانات المستخدم من Discord": "Failed to fetch user data from Discord",
+        "فشل جلب سيرفرات المستخدم من Discord": "Failed to fetch user servers from Discord",
+        "الإعدادات": "Settings",
+        "ترتيبك الحالي: #": "Your current rank: #",
+        "عودة لخوادمك المتاحة": "Back to your available servers",
+        "ليس لديك صلاحيات إدارة في هذا السيرفر": "You don't have manage permissions in this server",
+        "يجب أن تكون مالك السيرفر أو تمتلك صلاحية Manage Server / Administrator": "You must be the server owner or have Manage Server / Administrator permission",
+        "البوت غير موجود في هذا السيرفر": "Bot is not in this server",
+        "حدث خطأ داخلي في الخادم": "Internal server error occurred",
+        "عذراً، حدث خطأ أثناء معالجة الطلب": "Sorry, an error occurred while processing the request",
+        "العودة للوحة التحكم": "Back to Dashboard",
+        "Unauthorized: يرجى تسجيل الدخول أولاً": "Unauthorized: Please login first",
+        "Bad Request: معرف السيرفر مطلوب": "Bad Request: Server ID is required",
+        "البوت غير متواجد في هذا السيرفر أو السيرفر غير موجود": "Bot is not in this server or server does not exist",
+        "Forbidden: لا تملك صلاحيات إدارة (Administrator أو Manage Server) في هذا السيرفر": "Forbidden: You don't have manage permissions (Administrator or Manage Server) in this server",
+        "حدث خطأ أثناء التحقق من الصلاحيات": "Error occurred while checking permissions",
+        "حدث خطأ أثناء فحص الصلاحيات": "Error occurred while verifying permissions",
+        "Too Many Requests: تم تجاوز حد الطلبات المسموح به. يرجى الانتظار قليلاً.": "Too Many Requests: Request limit exceeded. Please wait a moment.",
+        "Too Many Requests: عدد كبير من العمليات الحساسة في وقت قصير. يرجى المحاولة بعد قليل.": "Too Many Requests: Too many sensitive operations in a short time. Please try again later.",
+        "Too Many Requests: تم تجاوز حد رسائل الذكاء الاصطناعي للدقيقة. انتظر قليلاً.": "Too Many Requests: AI messages per minute limit exceeded. Please wait.",
+        "المحفز مطلوب": "Trigger word is required",
+        "الرد مطلوب": "Reply text is required",
+        "العنوان أو محتوى الوصف مطلوب على الأقل": "At least title or description content is required",
+        "اسم الجائزة مطلوب": "Prize name is required",
+        "محتوى الاقتراح مطلوب": "Suggestion content is required",
+        "نص السؤال مطلوب": "Question text is required",
 
-        // ── Landing Page Full Texts & Keys ──
-        "جديد: نظام التذاكر والتحكم المتطور": "New: Advanced Ticket & Control System",
-        "اصنع خادم ديسكورد": "Build a Professional",
-        "احترافي!": "Discord Server!",
-        "إضافة البوت في Discord": "Add Bot to Discord",
-        "لوحة التحكم": "Dashboard",
-        "السيرفرات النشطة": "Active Servers",
-        "سرعة الاستجابة": "Response speed",
-        "إجمالي الأعضاء": "Total Members",
-        "مميزات حقيقية وشاملة": "Real & Comprehensive Features",
-        "كل ما يحتاجه سيرفرك في مكان واحد": "Everything Your Server Needs in One Place",
-        "أنظمة برمجية متطورة مصممة بأعلى معايير الحماية والأداء، بتحكم كامل ولحظي.": "Advanced software systems built to the highest security and performance standards, with complete real-time control.",
-        "حماية متقدمة ومانع تخريب": "Advanced Security & Anti-Nuke",
-        "تصدي فوري لمحاولات السبام والروابط المشبوهة، حماية الرتب، منع تخريب القنوات، وسجل أمان ومراقبة متكامل لحظة بلحظة.": "Instant defense against spam and suspicious links, role protection, anti-channel deletion, and comprehensive real-time security logging.",
-        "بطاقات ترحيب ورتب فورية": "Welcome Cards & Auto Roles",
-        "تصميم بطاقات ترحيب بالصور الاحترافية ومشاركتها فور دخول العضو، مع إسناد تلقائي للرتب وإرسال رسائل خاصة مميزة.": "Professional image welcome card designs sent instantly upon member join, with automatic role assignment and direct welcome messages.",
-        "نظام اقتصاد ومكافآت يومية": "Economy System & Daily Rewards",
-        "نظام راتب يومي مع مكافآت Streak متتالية، لوحة متصدرين بالذهب والخبرة، ومتجر خلفيات هوية غني بـ 105 خلفية حصرية.": "Daily salary system with consecutive Streak bonuses, Gold & XP leaderboards, and an ID wallpaper shop rich with 105 exclusive designs.",
-        "لوحات تذاكر متعددة الأقسام": "Multi-Category Ticket Panels",
-        "نظام تذاكر احترافي بأزرار تفاعلية، استلام التذاكر من فريق الدعم، حفظ سجل المحادثات (Transcripts)، وتقييم طاقم العمل.": "Professional ticket system with interactive buttons, staff claiming, transcript logging, and staff performance ratings.",
-        "سجلات دقيقة (Server Logs)": "Detailed Server Logs",
-        "تسجيل شامل لـ 13 فئة (حذف وتعديل الرسائل، دخول وخروج الصوت، تعديل الرتب والقنوات، الطرد والحظر) بأدق التفاصيل.": "Comprehensive logging across 13 categories (deleted/edited messages, voice join/leave, role and channel changes, kicks and bans) with full details.",
-        "رومات صوتية مؤقتة وتلقائية": "Temp Voice Channels",
-        "إنشاء رومات صوتية خاصة تلقائياً فور دخول العضو، مع لوحة تحكم كاملة لقفل الروم، تحديد العدد، وتغيير الاسم والجودة.": "Automatic private voice channels created instantly upon join, complete with a control panel to lock, limit, rename, and adjust bitrate.",
-        "جميع الحقوق محفوظة ©": "All Rights Reserved ©",
-        "سيرفر الدعم الفني": "Support Server",
-        "بوت متعدد الأغراض قابل للتخصيص جداً حيث يوفر لك تخصيص صورة كرسالة ترحيبية وسجلات متعمقة وأوامر اجتماعية وإشراف وأكثر ...": "A highly customizable multipurpose bot providing custom welcome image cards, in-depth logs, social commands, moderation, and more...",
-        "بوت متعدد الأغراض قابل للتخصيص جداً حيث يوفر لك تخصيص صورة كرسالة ترحيبية وسجلات متعمقة وأوامر اجتماعية وإشراف وأكثر": "A highly customizable multipurpose bot providing custom welcome image cards, in-depth logs, social commands, moderation, and more",
+        // Guild dashboard JS alerts and messages (from server.js inline scripts)
+        "✅ تمت إضافة قاعدة العقوبة التلقائية بنجاح!": "✅ Auto-punishment rule added successfully!",
+        "❌ خطأ: ": "❌ Error: ",
+        "فشل الإضافة": "Addition failed",
+        "حدث خطأ في الاتصال": "Connection error occurred",
+        "✅ تم تحديث حد المنشنات بنجاح!": "✅ Mention limit updated successfully!",
+        "✅ تم تحديث حد طول الرسائل بنجاح!": "✅ Message length limit updated successfully!",
+        "⚙️ إعدادات ": "⚙️ Settings for ",
+        ":\\nيمكنك استثناء أعضاء محددين عبر حقل \"أعضاء معفيون من الفلتر\" بالأسفل.": ":\\nYou can exclude specific members via the \"Exempt Members\" field below.",
+        " تعمل بكفاءة وفق الإعدادات الحالية.": " is working efficiently with current settings.",
+        "هل أنت متأكد من رغبتك في حذف قاعدة العقوبة هذه؟": "Are you sure you want to delete this punishment rule?",
+        "✅ تم الحذف بنجاح!": "✅ Deleted successfully!",
+        "❌ خطأ في الحذف": "❌ Delete error",
+        "يرجى كتابة أيدي العضو أو منشن صالح وتحديد عدد الدعوات!": "Please enter a valid user ID/mention and set the invite count!",
+        "✅ تم تحديث رصيد دعوات العضو بنجاح!": "✅ Member invite balance updated successfully!",
+        "فشل التحديث": "Update failed",
+        "⚠️ تحذير: هل أنت متأكد من تصفير كافة بيانات الدعوات في السيرفر؟ لا يمكن التراجع عن هذا الإجراء!": "⚠️ Warning: Are you sure you want to reset all invite data in the server? This action cannot be undone!",
+        "✅ تم تصفير الدعوات بنجاح!": "✅ Invites reset successfully!",
+        "يرجى إدخال معرف المستخدم (User ID)!": "Please enter a valid User ID!",
+        "✅ تم إضافة العضو بنجاح!": "✅ Member added successfully!",
+        "حدث خطأ في الاتصال بالخادم": "Server connection error occurred",
+        "هل أنت متأكد من حذف هذا العضو؟": "Are you sure you want to delete this member?",
+        "فشل الحذف": "Deletion failed",
+        "يرجى كتابة كلمة أو عبارة المحفز": "Please enter a trigger word or phrase",
+        "يرجى كتابة الرد التلقائي": "Please enter the auto reply text",
+        "✅ تمت إضافة الرد التلقائي بنجاح!": "✅ Auto reply added successfully!",
+        "هل أنت متأكد من حذف هذا الرد التلقائي؟": "Are you sure you want to delete this auto reply?",
+        "❌ يرجى اختيار ملف صورة صالح (PNG, JPG, WEBP, GIF)": "❌ Please select a valid image file (PNG, JPG, WEBP, GIF)",
+        "❌ حجم الصورة يتجاوز 15 ميجابايت. يرجى اختيار صورة أصغر.": "❌ Image size exceeds 15 MB. Please choose a smaller image.",
+        "❌ فشل رفع الصورة: ": "❌ Image upload failed: ",
+        "خطأ غير معروف": "Unknown error",
+        "حدث خطأ أثناء رفع الصورة: ": "Error occurred while uploading image: ",
+        "يرجى اختيار \"روم إرسال لوحة التذاكر (Panel Channel)\" أولاً ثم حفظ التغييرات.": "Please select a \"Ticket Panel Channel\" first then save changes.",
+        "هل تريد إرسال لوحة التذاكر الآن مباشرة إلى الروم المختار؟": "Do you want to send the ticket panel now to the selected channel?",
+        "✅ تم إرسال لوحة التذاكر بنجاح إلى القناة!": "✅ Ticket panel sent to channel successfully!",
+        "❌ فشل الإرسال: ": "❌ Send failed: ",
+        "تأكد من صلاحيات البوت في القناة": "Check bot permissions in the channel",
+        "حدث خطأ أثناء محاولة الإرسال: ": "Error occurred while attempting to send: ",
+        "✅ تمت إضافة رتبة المستوى بنجاح!": "✅ Level reward role added successfully!",
+        "✅ تمت إضافة رتبة الشرط المزدوج بنجاح!": "✅ Dual condition role added successfully!",
+        "هل أنت متأكد من حذف هذه الرتبة؟": "Are you sure you want to delete this role?",
+        "هل أنت متأكد من مسح جميع التحذيرات المسجلة لجميع الأعضاء في هذا السيرفر؟": "Are you sure you want to clear all recorded warnings for all members in this server?",
+        "✅ تم مسح جميع التحذيرات بنجاح!": "✅ All warnings cleared successfully!",
+        "❌ فشل مسح التحذيرات": "❌ Failed to clear warnings",
+        "يرجى كتابة اسم الجائزة": "Please enter the prize name",
+        "يرجى اختيار القناة التي سيتم نشر القيف اواي فيها": "Please select the channel where the giveaway will be posted",
+        "✅ تم إنشاء ونشر القيف اواي في السيرفر بنجاح!": "✅ Giveaway created and posted to the server successfully!",
+        "❌ خطأ: ": "❌ Error: ",
+        "فشل إنشاء القيف اواي": "Giveaway creation failed",
+        "❌ حجم الصورة كبير جداً (أكثر من 15 ميجابايت)": "❌ Image size is too large (over 15 MB)",
+        "⚠️ تعذّر رفع الصورة: ": "⚠️ Image upload failed: ",
+        "⚠️ خطأ في الاتصال أثناء رفع الصورة": "⚠️ Connection error during image upload",
+        "يرجى كتابة تفاصيل الاقتراح": "Please enter suggestion details",
+        "✅ تم إرسال الاقتراح بنجاح ونشره في السيرفر!": "✅ Suggestion submitted and posted to the server successfully!",
+        "فشل إرسال الاقتراح": "Suggestion submission failed",
+        "✅ تم تحديث حالة الاقتراح بنجاح!": "✅ Suggestion status updated successfully!",
+        "❌ فشل تحديث الحالة": "❌ Status update failed",
+        "لا توجد سجلات مطابقة للبحث أو الفلتر 🔍": "No records match the search or filter 🔍",
+        " سجل": " records",
 
-        // data-i18n key mappings
-        "landing_badge": "New: Advanced Ticket & Control System",
-        "landing_h1_1": "Build a Professional",
-        "landing_h1_2": "Discord Server!",
-        "landing_desc": "A highly customizable multipurpose bot providing custom welcome image cards, in-depth logs, social commands, moderation, and more...",
-        "add_to_discord": "Add Bot to Discord",
-        "dashboard": "Dashboard",
-        "active_servers": "Active Servers",
-        "ping_response": "Response speed",
-        "total_members": "Total Members",
-        "support_server": "Support Server",
-        "features_systems": "Features & Systems",
+        // Common variants (with/without tashkeel, etc.)
+        "جاري الحفظ...": "Saving...",
+        "جارٍ الحفظ...": "Saving...",
+        "تم الحفظ بنجاح!": "Saved successfully!",
+        "خطأ: ": "Error: ",
+        "❌ ": "❌ ",
+        "✅ ": "✅ ",
+        "⚠️ ": "⚠️ ",
+        "🗳️ ": "🗳️ ",
+        "🎁 ": "🎁 ",
+        "🪪 ": "🪪 ",
+        "⏳ ": "⏳ ",
+        "⚙️ ": "⚙️ ",
+        "🔍 ": "🔍 ",
+        "←": "←",
+        "->": "->",
+        "س": "h",
+        "د": "m",
+        "ث": "s",
+        "ساعة": "hour",
+        "دقيقة": "minute",
+        "ثانية": "second",
+        "؟": "?",
+        "!": "!"
     };
 
-    // Sort phrases by length descending to prevent sub-word collision
-    let sortedDictionaryKeys = null;
-    function getSortedKeys() {
-        if (!sortedDictionaryKeys) {
-            sortedDictionaryKeys = Object.keys(dictionary).sort((a, b) => b.length - a.length);
-        }
-        return sortedDictionaryKeys;
+    // Helper function to translate a single text string
+    function translateText(text) {
+        if (!text) return text;
+        const trimmed = text.trim();
+        return dictionary[trimmed] || text;
     }
 
-    // Auto-detect device/browser language
-    function detectInitialLanguage() {
-        const saved = localStorage.getItem('zeno_dashboard_lang');
-        if (saved === 'ar' || saved === 'en') {
-            return saved;
-        }
-        const browserLang = (navigator.language || navigator.userLanguage || 'ar').toLowerCase();
-        return browserLang.startsWith('ar') ? 'ar' : 'en';
-    }
-
-    let currentLang = detectInitialLanguage();
-
-    function setLanguage(lang) {
-        if (lang !== 'ar' && lang !== 'en') return;
-        currentLang = lang;
-        localStorage.setItem('zeno_dashboard_lang', lang);
-        applyLanguage(lang);
-    }
-
-    function toggleLanguage() {
-        setLanguage(currentLang === 'ar' ? 'en' : 'ar');
-    }
-
-    // Translate DOM tree nodes
-    function translateNode(node, lang) {
-        if (!node) return;
-
-        // Avoid translating script, style, code elements, or manually handled bilingual elements
-        if (node.nodeType === Node.ELEMENT_NODE) {
-            if (node.tagName === 'SCRIPT' || node.tagName === 'STYLE' || node.tagName === 'CODE') {
-                return;
-            }
-            if (node.classList && (node.classList.contains('lang-ar') || node.classList.contains('lang-en') || node.classList.contains('lang-ar-block') || node.classList.contains('lang-en-block'))) {
-                return;
-            }
-        }
-
+    // Function to traverse and translate DOM nodes
+    function translateNode(node) {
         if (node.nodeType === Node.TEXT_NODE) {
-            const parent = node.parentElement;
-            if (parent) {
-                if (parent.closest && parent.closest('.lang-ar, .lang-en, .lang-ar-block, .lang-en-block, script, style, code')) {
-                    return;
+            const original = node.nodeValue;
+            const trimmed = original.trim();
+            if (trimmed && dictionary[trimmed]) {
+                node.nodeValue = original.replace(trimmed, dictionary[trimmed]);
+            }
+        } else if (node.nodeType === Node.ELEMENT_NODE) {
+            // Translate placeholders
+            if (node.hasAttribute('placeholder')) {
+                const ph = node.getAttribute('placeholder').trim();
+                if (dictionary[ph]) {
+                    node.setAttribute('placeholder', dictionary[ph]);
                 }
             }
-
-            let text = node.textContent;
-            let trimmed = text.trim();
-            if (!trimmed) return;
-
-            const hasArabic = /[\u0600-\u06FF]/.test(text);
-
-            if (lang === 'en') {
-                if (hasArabic || !node._zenoOriginalAr) {
-                    node._zenoOriginalAr = text;
-                }
-                let original = node._zenoOriginalAr || text;
-                let origTrimmed = original.trim();
-
-                if (dictionary[origTrimmed]) {
-                    node.textContent = original.replace(origTrimmed, dictionary[origTrimmed]);
-                } else {
-                    const keys = getSortedKeys();
-                    for (let i = 0; i < keys.length; i++) {
-                        const ar = keys[i];
-                        if (ar.length < 2) continue;
-                        if (original.includes(ar)) {
-                            // If key has spaces or is long (>= 4 chars), replace directly
-                            // Otherwise, ensure it matches a discrete word boundary or standalone phrase
-                            if (ar.indexOf(' ') !== -1 || ar.length >= 4) {
-                                original = original.split(ar).join(dictionary[ar]);
-                            } else {
-                                // Short words (2-3 chars) like 'من', 'كل': only replace when surrounded by space or punctuation
-                                const escaped = ar.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-                                const rx = new RegExp('(^|\\s|[.,!?:;()\\-\\[\\]])' + escaped + '(?=$|\\s|[.,!?:;()\\-\\[\\]])', 'g');
-                                original = original.replace(rx, '$1' + dictionary[ar]);
-                            }
-                        }
-                    }
-                    // Convert Arabic time units (e.g., "0س 0د" -> "0h 0m", "15د" -> "15m", "30ث" -> "30s")
-                    original = original.replace(/(\d+)\s*س\b/g, '$1h')
-                                       .replace(/(\d+)\s*د\b/g, '$1m')
-                                       .replace(/(\d+)\s*ث\b/g, '$1s');
-
-                    node.textContent = original;
-                }
-            } else {
-                if (node._zenoOriginalAr) {
-                    node.textContent = node._zenoOriginalAr;
+            // Translate title attributes
+            if (node.hasAttribute('title')) {
+                const titleAttr = node.getAttribute('title').trim();
+                if (dictionary[titleAttr]) {
+                    node.setAttribute('title', dictionary[titleAttr]);
                 }
             }
-            return;
-        }
-
-        // Support data-i18n attribute translation
-        if (node.getAttribute && node.getAttribute('data-i18n')) {
-            const i18nKey = node.getAttribute('data-i18n');
-            if (lang === 'en') {
-                if (dictionary[i18nKey]) {
-                    if (!node._zenoOriginalHtml) node._zenoOriginalHtml = node.innerHTML;
-                    node.textContent = dictionary[i18nKey];
-                    return;
-                }
-            } else if (node._zenoOriginalHtml) {
-                node.innerHTML = node._zenoOriginalHtml;
-                return;
-            }
-        }
-
-        // Check attributes like placeholder, title
-        if (node.getAttribute) {
-            const placeholder = node.getAttribute('placeholder');
-            if (placeholder) {
-                if (lang === 'en') {
-                    if (!node._zenoOrigPlaceholder) node._zenoOrigPlaceholder = placeholder;
-                    const trimmed = node._zenoOrigPlaceholder.trim();
-                    if (dictionary[trimmed]) {
-                        node.setAttribute('placeholder', dictionary[trimmed]);
-                    } else {
-                        let orig = node._zenoOrigPlaceholder;
-                        const keys = getSortedKeys();
-                        for (let i = 0; i < keys.length; i++) {
-                            const ar = keys[i];
-                            if (orig.includes(ar)) orig = orig.split(ar).join(dictionary[ar]);
-                        }
-                        node.setAttribute('placeholder', orig);
-                    }
-                } else if (node._zenoOrigPlaceholder) {
-                    node.setAttribute('placeholder', node._zenoOrigPlaceholder);
-                }
-            }
-            const title = node.getAttribute('title');
-            if (title) {
-                if (lang === 'en') {
-                    if (!node._zenoOrigTitle) node._zenoOrigTitle = title;
-                    const trimmed = node._zenoOrigTitle.trim();
-                    if (dictionary[trimmed]) {
-                        node.setAttribute('title', dictionary[trimmed]);
-                    } else {
-                        let orig = node._zenoOrigTitle;
-                        const keys = getSortedKeys();
-                        for (let i = 0; i < keys.length; i++) {
-                            const ar = keys[i];
-                            if (orig.includes(ar)) orig = orig.split(ar).join(dictionary[ar]);
-                        }
-                        node.setAttribute('title', orig);
-                    }
-                } else if (node._zenoOrigTitle) {
-                    node.setAttribute('title', node._zenoOrigTitle);
-                }
-            }
-        }
-
-        for (let i = 0; i < node.childNodes.length; i++) {
-            translateNode(node.childNodes[i], lang);
-        }
-    }
-
-    let enStyleElement = null;
-    function updateLayoutStyles(lang) {
-        if (lang === 'en') {
-            if (!enStyleElement) {
-                enStyleElement = document.createElement('style');
-                enStyleElement.id = 'zeno-en-layout-overrides';
-                enStyleElement.textContent = `
-                    html[dir="ltr"] [dir="rtl"] {
-                        direction: ltr !important;
-                    }
-                    html[dir="ltr"] .text-right {
-                        text-align: left !important;
-                    }
-                    html[dir="ltr"] select.text-right, html[dir="ltr"] input.text-right {
-                        text-align: left !important;
-                        direction: ltr !important;
-                    }
-                    html[dir="ltr"] .justify-end {
-                        justify-content: flex-start !important;
-                    }
-                    html[dir="ltr"] .items-end {
-                        align-items: flex-start !important;
-                    }
-                    html[dir="ltr"] aside.border-l {
-                        border-left-width: 0 !important;
-                        border-right-width: 1px !important;
-                    }
-                    html[dir="ltr"] .flex-row-reverse {
-                        flex-direction: row !important;
-                    }
-                    html[dir="ltr"] .border-l {
-                        border-left-width: 0 !important;
-                        border-right-width: 1px !important;
-                    }
-                    html[dir="ltr"] .border-r {
-                        border-right-width: 0 !important;
-                        border-left-width: 1px !important;
-                    }
-                `;
-                document.head.appendChild(enStyleElement);
-            }
-        } else {
-            if (enStyleElement && enStyleElement.parentNode) {
-                enStyleElement.parentNode.removeChild(enStyleElement);
-                enStyleElement = null;
+            // Recursively translate child nodes
+            for (let child of node.childNodes) {
+                translateNode(child);
             }
         }
     }
 
-    function applyLanguage(lang) {
+    const LANG_KEYS = ['zeno_dashboard_lang', 'zeno_lang'];
+    const reverseDictionary = {};
+    Object.keys(dictionary).forEach((ar) => {
+        const en = dictionary[ar];
+        if (en && !reverseDictionary[en]) reverseDictionary[en] = ar;
+    });
+    const arKeysByLength = Object.keys(dictionary).sort((a, b) => b.length - a.length);
+    const enKeysByLength = Object.keys(reverseDictionary).sort((a, b) => b.length - a.length);
+
+    function translateString(text, dict, keys) {
+        if (!text) return text;
+        const trimmed = text.trim();
+        if (!trimmed) return text;
+        if (dict[trimmed]) return text.replace(trimmed, dict[trimmed]);
+        let out = text;
+        for (let i = 0; i < keys.length; i++) {
+            const key = keys[i];
+            if (key.length < 4) continue;
+            if (out.indexOf(key) !== -1) out = out.split(key).join(dict[key]);
+        }
+        return out;
+    }
+
+    function readStoredLang() {
+        try {
+            for (const key of LANG_KEYS) {
+                const value = localStorage.getItem(key);
+                if (value === 'ar' || value === 'en') return value;
+            }
+        } catch (e) {}
+        const match = (document.cookie || '').match(/(?:^|;\s*)zeno_dashboard_lang=(ar|en)/);
+        if (match) return match[1];
+        return null;
+    }
+
+    function persistLang(lang) {
+        try {
+            localStorage.setItem('zeno_dashboard_lang', lang);
+            localStorage.setItem('zeno_lang', lang);
+        } catch (e) {}
+        document.cookie = 'zeno_dashboard_lang=' + lang + ';path=/;max-age=31536000;SameSite=Lax';
+    }
+
+    function detectLang() {
+        const stored = readStoredLang();
+        if (stored) return stored;
+        const htmlLang = (document.documentElement.getAttribute('lang') || '').toLowerCase();
+        if (htmlLang.startsWith('ar')) return 'ar';
+        if (htmlLang.startsWith('en')) return 'en';
+        const nav = (navigator.language || navigator.userLanguage || '').toLowerCase();
+        return nav.startsWith('ar') ? 'ar' : 'en';
+    }
+
+    function ensureLayoutStyle() {
+        if (document.getElementById('zeno-i18n-layout')) return;
+        const style = document.createElement('style');
+        style.id = 'zeno-i18n-layout';
+        style.textContent = [
+            'html.zeno-lang-en [dir="rtl"] { direction: ltr !important; }',
+            'html.zeno-lang-en .text-right { text-align: left !important; }',
+            'html.zeno-lang-en .justify-end { justify-content: flex-start !important; }',
+            'html.zeno-lang-en .flex-row-reverse { flex-direction: row !important; }',
+            'html.zeno-lang-en body > .flex-1.flex { flex-direction: row-reverse; }'
+        ].join('\n');
+        (document.head || document.documentElement).appendChild(style);
+    }
+
+    function applyLayout(lang) {
+        ensureLayoutStyle();
         const html = document.documentElement;
         html.setAttribute('lang', lang);
         html.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
-
-        updateLayoutStyles(lang);
-
-        // Disconnect observer during bulk translation to avoid infinite mutation loops
-        if (observer) {
-            observer.disconnect();
-        }
-
-        // Translate the whole body
-        if (document.body) {
-            translateNode(document.body, lang);
-        }
-
-        // Reconnect observer after translation is done
-        if (observer && document.body) {
-            observer.observe(document.body, { childList: true, subtree: true });
-        }
-
-        // Update toggle buttons text & flag
-        document.querySelectorAll('.zeno-lang-toggle-btn').forEach(btn => {
-            btn.innerHTML = lang === 'ar' 
-                ? '<span class="text-sm">🌐</span><span class="lang-toggle-label font-black text-xs uppercase tracking-wider">EN</span>' 
-                : '<span class="text-sm">🌐</span><span class="lang-toggle-label font-black text-xs uppercase tracking-wider">AR</span>';
+        html.classList.toggle('zeno-lang-en', lang === 'en');
+        html.classList.toggle('zeno-lang-ar', lang === 'ar');
+        document.querySelectorAll('.zeno-lang-toggle-btn').forEach((btn) => {
+            const label = lang === 'ar' ? 'EN' : 'AR';
+            btn.innerHTML = '<span class="text-sm">🌐</span><span class="font-black text-xs uppercase tracking-wider">' + label + '</span>';
         });
     }
 
-    window.zenoI18n = {
-        getLang: () => currentLang,
-        setLang: setLanguage,
-        toggleLang: toggleLanguage,
-        apply: () => applyLanguage(currentLang)
-    };
+    function translateNodeWithDict(node, dict, keys) {
+        if (!node || !dict) return;
+        if (node.nodeType === Node.TEXT_NODE) {
+            const original = node.nodeValue;
+            const next = translateString(original, dict, keys);
+            if (next !== original) node.nodeValue = next;
+            return;
+        }
+        if (node.nodeType !== Node.ELEMENT_NODE) return;
+        const tag = node.tagName;
+        if (tag === 'SCRIPT' || tag === 'STYLE' || tag === 'NOSCRIPT') return;
 
-    // Declare observer here (before auto-run) to avoid TDZ ReferenceError inside applyLanguage
-    let observer = null;
-
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', () => applyLanguage(currentLang));
-    } else {
-        applyLanguage(currentLang);
-    }
-
-    // Observer for dynamically added elements (tabs, modals, AJAX content)
-    observer = new MutationObserver((mutations) => {
-        if (currentLang === 'en') {
-            for (const mutation of mutations) {
-                if (mutation.type === 'childList') {
-                    for (let i = 0; i < mutation.addedNodes.length; i++) {
-                        translateNode(mutation.addedNodes[i], 'en');
-                    }
-                }
+        if (node.hasAttribute('placeholder')) {
+            node.setAttribute('placeholder', translateString(node.getAttribute('placeholder'), dict, keys));
+        }
+        if (node.hasAttribute('title')) {
+            node.setAttribute('title', translateString(node.getAttribute('title'), dict, keys));
+        }
+        if (node.hasAttribute('data-i18n')) {
+            const key = node.getAttribute('data-i18n').trim();
+            if (dict[key] && node.childElementCount === 0) {
+                node.textContent = dict[key];
             }
         }
-    });
-
-    if (document.body) {
-        observer.observe(document.body, { childList: true, subtree: true });
-    } else {
-        document.addEventListener('DOMContentLoaded', () => {
-            observer.observe(document.body, { childList: true, subtree: true });
-        });
+        for (let i = 0; i < node.childNodes.length; i++) {
+            translateNodeWithDict(node.childNodes[i], dict, keys);
+        }
     }
 
-    // Listen for storage changes across all open browser tabs / pages
-    window.addEventListener('storage', (e) => {
-        if (e.key === 'zeno_dashboard_lang' && (e.newValue === 'ar' || e.newValue === 'en')) {
-            currentLang = e.newValue;
-            applyLanguage(currentLang);
+    function applyLanguage() {
+        const lang = detectLang();
+        applyLayout(lang);
+        if (!document.body) return lang;
+        if (lang === 'en') {
+            translateNodeWithDict(document.body, dictionary, arKeysByLength);
+        } else {
+            translateNodeWithDict(document.body, reverseDictionary, enKeysByLength);
         }
-    });
+        return lang;
+    }
+
+    function toggleLang() {
+        const next = detectLang() === 'ar' ? 'en' : 'ar';
+        persistLang(next);
+        applyLayout(next);
+        location.reload();
+    }
+
+    function translateRuntimeText(text) {
+        if (!text || typeof text !== 'string') return text;
+        const lang = detectLang();
+        if (lang === 'en') {
+            return translateString(text, dictionary, arKeysByLength);
+        } else {
+            return translateString(text, reverseDictionary, enKeysByLength);
+        }
+    }
+
+    window._zenoT = function(text) {
+        return translateRuntimeText(text);
+    };
+    window._zenoIsEn = function() {
+        return detectLang() === 'en';
+    };
+
+    const originalAlert = window.alert;
+    window.alert = function(message) {
+        return originalAlert(translateRuntimeText(message));
+    };
+
+    const originalConfirm = window.confirm;
+    window.confirm = function(message) {
+        return originalConfirm(translateRuntimeText(message));
+    };
+
+    const originalPrompt = window.prompt;
+    window.prompt = function(message, defaultValue) {
+        return originalPrompt(translateRuntimeText(message), defaultValue);
+    };
+
+    const api = {
+        dictionary,
+        translate: translateText,
+        translateRuntime: translateRuntimeText,
+        detectLang,
+        apply: applyLanguage,
+        translatePage: applyLanguage,
+        toggleLang,
+        toggleLanguage: toggleLang
+    };
+
+    window.ZenoI18n = api;
+    window.zenoI18n = api;
+
+    let observerActive = false;
+    function startMutationObserver() {
+        if (observerActive || !('MutationObserver' in window)) return;
+        observerActive = true;
+        const observer = new MutationObserver(function(mutations) {
+            const lang = detectLang();
+            const dict = lang === 'en' ? dictionary : reverseDictionary;
+            const keys = lang === 'en' ? arKeysByLength : enKeysByLength;
+            mutations.forEach(function(m) {
+                if (m.addedNodes && m.addedNodes.length) {
+                    for (let i = 0; i < m.addedNodes.length; i++) {
+                        const node = m.addedNodes[i];
+                        if (node.nodeType === Node.ELEMENT_NODE || node.nodeType === Node.TEXT_NODE) {
+                            translateNodeWithDict(node, dict, keys);
+                        }
+                    }
+                }
+                if (m.type === 'characterData' && m.target.nodeType === Node.TEXT_NODE) {
+                    const next = translateString(m.target.nodeValue, dict, keys);
+                    if (next !== m.target.nodeValue) m.target.nodeValue = next;
+                }
+                if (m.type === 'attributes' && m.target.nodeType === Node.ELEMENT_NODE) {
+                    const el = m.target;
+                    if (m.attributeName === 'placeholder' && el.hasAttribute('placeholder')) {
+                        el.setAttribute('placeholder', translateString(el.getAttribute('placeholder'), dict, keys));
+                    }
+                    if (m.attributeName === 'title' && el.hasAttribute('title')) {
+                        el.setAttribute('title', translateString(el.getAttribute('title'), dict, keys));
+                    }
+                }
+            });
+        });
+        if (document.body) {
+            observer.observe(document.body, {
+                childList: true,
+                subtree: true,
+                characterData: true,
+                attributes: true,
+                attributeFilter: ['placeholder', 'title']
+            });
+        } else {
+            document.addEventListener('DOMContentLoaded', function() {
+                if (document.body) observer.observe(document.body, {
+                    childList: true,
+                    subtree: true,
+                    characterData: true,
+                    attributes: true,
+                    attributeFilter: ['placeholder', 'title']
+                });
+            });
+        }
+    }
+
+    applyLayout(detectLang());
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function() {
+            applyLanguage();
+            startMutationObserver();
+        });
+    } else {
+        applyLanguage();
+        startMutationObserver();
+    }
 })();

@@ -13,6 +13,14 @@ const identityWallpapers = require('../data/identityWallpapers.json');
 const config = require('../../config.json');
 const { askAI } = require('../utils/ai');
 
+// Language detection helper
+function detectLanguage(req) {
+    const cookieLang = req.cookies?.zeno_dashboard_lang;
+    if (cookieLang === 'ar' || cookieLang === 'en') return cookieLang;
+    const acceptLang = req.headers['accept-language'] || '';
+    return acceptLang.toLowerCase().startsWith('ar') ? 'ar' : 'en';
+}
+
 const { requireAuth, createGuildAuthMiddleware } = require('./middleware/auth');
 const { apiLimiter, sensitiveActionLimiter, aiLimiter } = require('./middleware/rateLimiter');
 const { errorHandler } = require('./middleware/errorHandler');
@@ -583,7 +591,7 @@ module.exports = function (app, client) {
             const userDashboardGuildsHtml = guilds.length > 0 ? guilds.map(g => `
                 <div class="bg-[#1c1f2e] border border-white/5 p-4 rounded-2xl flex items-center justify-between hover:border-purple-500/40 transition group">
                     <a href="/dashboard/${g.id}" class="px-5 py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs rounded-xl transition shadow-lg shadow-purple-950/40 flex items-center gap-2">
-                        <span>⚙️ إدارة السيرفر</span>
+                        <span>⚙️ Manage Server</span>
                     </a>
                     <div class="flex items-center gap-3">
                         <div class="text-right">
@@ -596,10 +604,10 @@ module.exports = function (app, client) {
             `).join('') : `
                 <div class="col-span-full py-12 text-center space-y-3 bg-[#131520] rounded-2xl border border-dashed border-white/10 p-6">
                     <div class="text-4xl">🛡️</div>
-                    <h4 class="text-white font-bold text-sm">لا توجد سيرفرات مشتركة لديك صلاحيات إدارتها</h4>
-                    <p class="text-gray-400 text-xs max-w-md mx-auto">لإدارة سيرفر، يجب أن تكون مالك السيرفر أو تملك رتبة إدارية (Manage Server أو Administrator) ويكون البوت مضافاً في السيرفر.</p>
+                    <h4 class="text-white font-bold text-sm">No manageable servers found</h4>
+                    <p class="text-gray-400 text-xs max-w-md mx-auto">To manage a server, you must be the owner or have Administrator / Manage Server permissions, and the bot must be invited.</p>
                     <a href="https://discord.com/api/oauth2/authorize?client_id=${client?.user?.id || config.clientId}&permissions=8&scope=bot%20applications.commands" target="_blank" class="inline-flex items-center gap-2 px-5 py-2.5 bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold rounded-xl transition shadow-lg mt-2">
-                        <span>➕ إضافة البوت لسيرفرك</span>
+                        <span>➕ Add Bot to Server</span>
                     </a>
                 </div>
             `;
@@ -616,7 +624,7 @@ module.exports = function (app, client) {
                 <div class="bg-[#1c1f2e] border border-white/5 hover:border-purple-500/30 p-3 rounded-2xl flex items-center justify-between transition-all group">
                     <div class="text-left">
                         <span class="text-xs font-mono font-bold text-purple-400">⚡ ${Number(r.total_xp || 0).toLocaleString()} XP</span>
-                        <span class="text-[10px] text-gray-500 block font-mono">المستوى: ${r.max_level || 1}</span>
+                        <span class="text-[10px] text-gray-500 block font-mono">Level: ${r.max_level || 1}</span>
                     </div>
                     <div class="flex items-center gap-3">
                         <div class="text-right">
@@ -642,7 +650,7 @@ module.exports = function (app, client) {
                 <div class="bg-[#1c1f2e] border border-white/5 hover:border-amber-500/30 p-3 rounded-2xl flex items-center justify-between transition-all group">
                     <div class="text-left">
                         <span class="text-xs font-mono font-bold text-amber-400">🪙 ${Number(r.total_coins || 0).toLocaleString()}</span>
-                        <span class="text-[10px] text-gray-500 block font-mono">الذهب</span>
+                        <span class="text-[10px] text-gray-500 block font-mono">Gold</span>
                     </div>
                     <div class="flex items-center gap-3">
                         <div class="text-right">
@@ -696,7 +704,7 @@ module.exports = function (app, client) {
 
             res.send(`
             <!DOCTYPE html>
-            <html lang="ar" dir="rtl" class="dark">
+            <html lang="en" dir="ltr" class="dark">
             <head>
                 <meta charset="UTF-8">
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -732,6 +740,17 @@ module.exports = function (app, client) {
                 </style>
             
     <script>
+    function _t(text) {
+        if (window.ZenoI18n && typeof window.ZenoI18n.translate === 'function') {
+            return window.ZenoI18n.translate(text);
+        }
+        return text;
+    }
+
+    function _isEn() {
+        return document.documentElement.getAttribute('lang') === 'en';
+    }
+
     window.toggleNavGroup = function(groupId) {
         const el = document.getElementById(groupId);
         const arrow = document.getElementById('arrow_' + groupId);
@@ -789,26 +808,30 @@ module.exports = function (app, client) {
         const btn = document.getElementById('claimDailyBtn');
         if (btn) {
             btn.disabled = true;
-            btn.textContent = 'جارٍ الاستلام... ⏳';
+            btn.textContent = _t('جارٍ الاستلام... ⏳');
         }
         try {
             const res = await fetch('/api/user/daily', { method: 'POST' });
             const data = await res.json();
             if (data.success) {
-                alert('🎉 تم استلام ' + data.amount + ' من الذهب بنجاح! رصيدك الجديد: ' + data.newBalance.toLocaleString() + ' 🪙');
+                if (_isEn()) {
+                    alert('🎉 Successfully received ' + data.amount + ' gold! Your new balance: ' + data.newBalance.toLocaleString() + ' 🪙');
+                } else {
+                    alert('🎉 تم استلام ' + data.amount + ' ذهب بنجاح! رصيدك الجديد: ' + data.newBalance.toLocaleString() + ' 🪙');
+                }
                 location.reload();
             } else {
-                alert('❌ ' + (data.error || 'فشل استلام الراتب اليومي'));
+                alert('❌ ' + (data.error || _t('فشل استلام الراتب اليومي')));
                 if (btn) {
                     btn.disabled = false;
-                    btn.textContent = 'استلام الرصيد 🎁';
+                    btn.textContent = _t('استلام الرصيد 🎁');
                 }
             }
         } catch(e) {
-            alert('حدث خطأ في الاتصال بالسيرفر');
+            alert(_t('حدث خطأ في الاتصال بالسيرفر'));
             if (btn) {
                 btn.disabled = false;
-                btn.textContent = 'استلام الرصيد 🎁';
+                btn.textContent = _t('استلام الرصيد 🎁');
             }
         }
     };
@@ -824,21 +847,29 @@ module.exports = function (app, client) {
         if (diff <= 0) {
             var box = document.getElementById('dailyActionBox');
             if (box) {
-                box.innerHTML = '<button type="button" onclick="window.claimDailyReward()" id="claimDailyBtn" class="px-10 py-3.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-black text-sm rounded-2xl shadow-xl shadow-purple-950/60 hover:scale-105 transition-all cursor-pointer flex items-center gap-2 mx-auto"><span class="text-lg">🎁</span><span>استلام الرصيد اليومي</span></button>';
+                const claimBtnLabel = _t('استلام الرصيد اليومي');
+                box.innerHTML = '<button type="button" onclick="window.claimDailyReward()" id="claimDailyBtn" class="px-10 py-3.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-black text-sm rounded-2xl shadow-xl shadow-purple-950/60 hover:scale-105 transition-all cursor-pointer flex items-center gap-2 mx-auto"><span class="text-lg">🎁</span><span>' + claimBtnLabel + '</span></button>';
             }
             return;
         }
         var h = Math.floor(diff / (1000 * 60 * 60));
         var m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
         var sec = Math.floor((diff % (1000 * 60)) / 1000);
-        timerEl.textContent = (h < 10 ? '0' + h : h) + 'س ' + (m < 10 ? '0' + m : m) + 'د ' + (sec < 10 ? '0' + sec : sec) + 'ث';
+        if (_isEn()) {
+            timerEl.textContent = (h < 10 ? '0' + h : h) + 'h ' + (m < 10 ? '0' + m : m) + 'm ' + (sec < 10 ? '0' + sec : sec) + 's';
+        } else {
+            timerEl.textContent = (h < 10 ? '0' + h : h) + 'س ' + (m < 10 ? '0' + m : m) + 'د ' + (sec < 10 ? '0' + sec : sec) + 'ث';
+        }
     }, 1000);
     
     window.buyItem = async function(type, name, price, btn) {
-        if (!confirm('هل أنت متأكد من شراء وتفعيل "' + name + '" مقابل ' + price.toLocaleString() + ' 🪙؟')) return;
+        const confirmMsg = _isEn()
+            ? 'Are you sure you want to buy and activate "' + name + '" for ' + price.toLocaleString() + ' 🪙?'
+            : _t('هل أنت متأكد من شراء وتفعيل "') + name + _t('" مقابل ') + price.toLocaleString() + _t(' 🪙؟');
+        if (!confirm(confirmMsg)) return;
         if (btn) {
             btn.disabled = true;
-            btn.textContent = 'جارٍ الشراء... ⏳';
+            btn.textContent = _t('جارٍ الشراء... ⏳');
         }
         try {
             const res = await fetch('/api/user/buy', {
@@ -848,20 +879,20 @@ module.exports = function (app, client) {
             });
             const data = await res.json();
             if (data.success) {
-                alert('✅ تم الشراء والتفعيل بنجاح!');
+                alert(_t('✅ تم الشراء والتفعيل بنجاح!'));
                 location.reload();
             } else {
-                alert('❌ ' + (data.error || 'رصيدك لا يكفي لإتمام الشراء'));
+                alert('❌ ' + (data.error || _t('رصيدك لا يكفي لإتمام الشراء')));
                 if (btn) {
                     btn.disabled = false;
-                    btn.textContent = 'شراء وتجهيز';
+                    btn.textContent = _t('شراء وتجهيز');
                 }
             }
         } catch(e) {
-            alert('حدث خطأ أثناء الشراء');
+            alert(_t('حدث خطأ أثناء الشراء'));
             if (btn) {
                 btn.disabled = false;
-                btn.textContent = 'شراء وتجهيز';
+                btn.textContent = _t('شراء وتجهيز');
             }
         }
     };
@@ -908,41 +939,41 @@ module.exports = function (app, client) {
                                 <span class="text-purple-400">🎛️</span>
                             </div>
 
-                            <!-- Top Stats 4-Grid (Novax Exact Order & Icons: الذهب / السمعة / التصنيف / المستوى) -->
+                            <!-- Top Stats 4-Grid (Novax Exact Order & Icons: Gold / Reputation / Rank / Level) -->
                             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                                 
-                                <!-- 1. الذهب (Golds / Gold) -->
+                                <!-- 1. Gold (Golds / Gold) -->
                                 <div class="bg-[#10121b] border border-white/5 hover:border-purple-500/30 rounded-2xl p-4 flex items-center justify-between shadow-lg transition">
                                     <div class="w-10 h-10 rounded-xl bg-purple-600/10 text-amber-400 flex items-center justify-center text-xl font-bold shadow-inner">🪙</div>
                                     <div class="text-right">
-                                        <span class="text-xs font-bold text-gray-400">الذهب</span>
+                                        <span class="text-xs font-bold text-gray-400">Gold</span>
                                         <h3 id="userCoinsDisplay" class="text-xl font-black text-white mt-0.5">${userCoins.toLocaleString()}</h3>
                                     </div>
                                 </div>
 
-                                <!-- 2. السمعة (Reputation) -->
+                                <!-- 2. Reputation (Reputation) -->
                                 <div class="bg-[#10121b] border border-white/5 hover:border-purple-500/30 rounded-2xl p-4 flex items-center justify-between shadow-lg transition">
                                     <div class="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center text-xl shadow-inner">👍</div>
                                     <div class="text-right">
-                                        <span class="text-xs font-bold text-gray-400">السمعة</span>
+                                        <span class="text-xs font-bold text-gray-400">Reputation</span>
                                         <h3 class="text-xl font-black text-white mt-0.5">${userStars}</h3>
                                     </div>
                                 </div>
 
-                                <!-- 3. التصنيف (Rank) -->
+                                <!-- 3. Rank (Rank) -->
                                 <div class="bg-[#10121b] border border-white/5 hover:border-purple-500/30 rounded-2xl p-4 flex items-center justify-between shadow-lg transition">
                                     <div class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-xl shadow-inner">🏆</div>
                                     <div class="text-right">
-                                        <span class="text-xs font-bold text-gray-400">التصنيف</span>
+                                        <span class="text-xs font-bold text-gray-400">Rank</span>
                                         <h3 class="text-xl font-black text-white mt-0.5">#${userRankXp}</h3>
                                     </div>
                                 </div>
 
-                                <!-- 4. المستوى (Level) -->
+                                <!-- 4. Level (Level) -->
                                 <div class="bg-[#10121b] border border-white/5 hover:border-purple-500/30 rounded-2xl p-4 flex items-center justify-between shadow-lg transition">
                                     <div class="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center text-xl shadow-inner">📈</div>
                                     <div class="text-right">
-                                        <span class="text-xs font-bold text-gray-400">المستوى</span>
+                                        <span class="text-xs font-bold text-gray-400">Level</span>
                                         <h3 class="text-xl font-black text-white mt-0.5">${userLevel}</h3>
                                     </div>
                                 </div>
@@ -952,19 +983,19 @@ module.exports = function (app, client) {
                             <!-- خوادمك المتاحة للإدارة (Servers List) -->
                             <div class="bg-[#10121b] border border-white/5 rounded-3xl p-6 shadow-xl space-y-4">
                                 <div class="flex items-center justify-between border-b border-white/5 pb-3">
-                                    <span class="text-xs text-purple-400 font-bold bg-purple-950/40 px-2.5 py-1 rounded-lg">${guilds.length} سيرفر</span>
-                                    <h3 class="text-sm font-black text-white text-right flex items-center gap-2"><span>خوادمك المتاحة للإدارة</span><span>🛡️</span></h3>
+                                    <span class="text-xs text-purple-400 font-bold bg-purple-950/40 px-2.5 py-1 rounded-lg">${guilds.length} Servers</span>
+                                    <h3 class="text-sm font-black text-white text-right flex items-center gap-2"><span>🛡️</span><span>Your Manageable Servers</span></h3>
                                 </div>
                                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                                     ${userDashboardGuildsHtml}
                                 </div>
                             </div>
 
-                            <!-- آخر معاملات الذهب (Recent Gold Transactions - Novax Exact Style) -->
+                            <!-- Recent Gold Transactions (Recent Gold Transactions - Novax Exact Style) -->
                             <div class="bg-[#10121b] border border-white/5 rounded-3xl p-6 shadow-xl space-y-4 text-right">
                                 <div class="flex items-center justify-between border-b border-white/5 pb-3">
-                                    <span class="text-xs text-gray-400">سجل التحويلات والمكافآت</span>
-                                    <h3 class="text-sm font-black text-white flex items-center gap-2"><span>آخر 5 معاملات الذهب</span><span>🪙</span></h3>
+                                    <span class="text-xs text-gray-400">Transaction & Rewards Log</span>
+                                    <h3 class="text-sm font-black text-white flex items-center gap-2"><span>Last 5 Gold Transactions</span><span>🪙</span></h3>
                                 </div>
 
                                 <div class="overflow-x-auto">
@@ -1122,8 +1153,8 @@ module.exports = function (app, client) {
                         <div id="tabCoinsLeaderboard" class="tab-content hidden space-y-6">
                             <div class="probot-card border border-white/5 rounded-3xl p-6 shadow-xl">
                                 <div class="flex items-center justify-between mb-4 border-b border-white/5 pb-3">
-                                    <span class="text-xs text-amber-400 font-mono font-bold">ترتيبك المالي: #${userRankCoins}</span>
-                                    <h3 class="text-sm font-black text-white text-right">أغنى الأثرياء برصيد الذهب 🪙</h3>
+                                    <span class="text-xs text-amber-400 font-mono font-bold">Financial Rank: #${userRankCoins}</span>
+                                    <h3 class="text-sm font-black text-white text-right">Richest Users by Gold Balance 🪙</h3>
                                 </div>
                                 <div class="space-y-2.5 max-h-[600px] overflow-y-auto pr-1">
                                     ${coinsLeaderboardHtml}
@@ -1140,7 +1171,7 @@ module.exports = function (app, client) {
                                 <div>
                                     <h3 class="text-xl font-black text-white">الراتب اليومي (Daily Reward)</h3>
                                     <p class="text-gray-400 text-xs mt-2 leading-relaxed">
-                                        احصل على <span class="text-amber-300 font-bold">500 إلى 1,000 من الذهب</span> مجاناً كل 24 ساعة!
+                                        Get <span class="text-amber-300 font-bold">500 to 1,000 Gold</span> for free every 24 hours!
                                     </p>
                                 </div>
 
@@ -1190,7 +1221,7 @@ module.exports = function (app, client) {
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"/></svg>
                                 </div>
                                 <div class="flex items-center gap-2.5">
-                                    <span class="font-bold text-white text-xs">إدارة سيرفر</span>
+                                    <span class="font-bold text-white text-xs">Manage Server</span>
                                     <div class="w-8 h-8 rounded-xl bg-purple-600/20 text-purple-400 flex items-center justify-center text-sm border border-purple-500/30">
                                         🗂️
                                     </div>
@@ -1229,7 +1260,7 @@ module.exports = function (app, client) {
                                     </button>
                                     <button onclick="switchTab('tabLeaderboard', this)" class="nav-btn px-3 py-2 rounded-xl text-gray-300 hover:text-white hover:bg-[#151724] font-medium flex items-center justify-between transition w-full">
                                         <span></span>
-                                        <span class="flex items-center gap-2"><span>أعلى نقاط السمعة & XP</span><span class="text-gray-400">🏆</span></span>
+                                        <span class="flex items-center gap-2"><span class="text-gray-400">🏆</span><span>Top Rep & XP</span></span>
                                     </button>
                                 </div>
                             </div>
@@ -1332,8 +1363,8 @@ module.exports = function (app, client) {
             if (!botGuild) {
                 return res.status(404).send(`
                     <div style="background:#0b0d14;color:#fff;font-family:sans-serif;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;">
-                        <h2>البوت غير موجود في هذا السيرفر</h2>
-                        <a href="/dashboard/manage" style="color:#a855f7;margin-top:10px;">العودة للوحة التحكم</a>
+                        <h2>Bot not in this server</h2>
+                        <a href="/dashboard/manage" style="color:#a855f7;margin-top:10px;">Back to Dashboard</a>
                     </div>
                 `);
             }
@@ -1344,9 +1375,9 @@ module.exports = function (app, client) {
             if (!userCanManage) {
                 return res.status(403).send(`
                     <div style="background:#0b0d14;color:#fff;font-family:sans-serif;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;">
-                        <h2>ليس لديك صلاحيات إدارة في هذا السيرفر</h2>
-                        <p style="color:#888;">يجب أن تكون مالك السيرفر أو تمتلك صلاحية Manage Server / Administrator</p>
-                        <a href="/dashboard/manage" style="color:#a855f7;margin-top:10px;">العودة لخوادمك المتاحة</a>
+                        <h2>You don't have admin permissions in this server</h2>
+                        <p style="color:#888;">You must be the server owner or have Manage Server / Administrator permissions</p>
+                        <a href="/dashboard/manage" style="color:#a855f7;margin-top:10px;">Back to Manageable Servers</a>
                     </div>
                 `);
             }
@@ -1428,37 +1459,37 @@ module.exports = function (app, client) {
             `).join('');
 
             const sectionTitles = {
-                'overview': 'نظرة عامة على السيرفر 📊',
-                'analytics': 'الإحصائيات والتحليلات 📊',
-                'stats': 'الإحصائيات والتحليلات 📊',
-                'appearance': 'مظهر وتخصيص البوت 🎨',
-                'settings': 'إعدادات السيرفر العامة ⚙️',
-                'general': 'جميع الأوامر والخدمات ⌨️',
-                'commands': 'مركز إدارة الأوامر الشامل ⌨️',
-                'moderation': 'الإشراف وإدارة الأعضاء 🔨',
-                'automod': 'الرقابة التلقائية وفلاتر السب والشات 🤖',
-                'welcome': 'رسائل وبطاقات الترحيب والمغادرة 👋',
-                'autoresponder': 'الرد التلقائي على الكلمات 💬',
-                'tickets': 'نظام التذاكر والدعم الفني 🎫',
-                'protection': 'جدار الحماية الشامل ومكافحة التخريب 🛡️',
-                'whitelist': 'الحماية / القائمة البيضاء ⚪',
-                'protection-logs': 'الحماية / السجلات 📋',
-                'antiraid': 'نظام مكافحة الغزو والأعضاء الوهميين 🚨',
-                'staff-activity': 'تتبع نشاط الإدارة والمشرفين 👮',
-                'tempvoice': 'نظام الرومات الصوتية المؤقتة 🕒',
-                'boost': 'نظام تنبيهات ومعلومات البوست 💎',
-                'colors': 'نظام رتب الألوان المتقدم 🎨',
-                'logs': 'سجلات السيرفر الشاملة 📜',
-                'levels': 'نظام المستويات والخبرة XP 🏆',
-                'autoroles': 'الرتب التلقائية عند الانضمام 🎖️',
-                'giveaways': 'نظام مسابقات القيف اواي 🎁',
-                'suggestions': 'نظام الاقتراحات والشكاوي 💡',
-                'invites': 'متتبع الدعوات المتقدم (Invite Tracker) 🔗',
-                'broadcast': 'نظام الإعلانات والمذيع الآلي 📢',
-                'embed': 'صانع رسائل الإيمبد المتقدم 📄',
-                'applications': 'نظام التقديمات والتوظيف 📝',
-                'help': 'قائمة الأوامر الكاملة 📚',
-                'ai': 'الذكاء الاصطناعي (ZENO AI & Web) 🤖'
+                'overview': 'Server Overview 📊',
+                'analytics': 'Analytics & Stats 📊',
+                'stats': 'Analytics & Stats 📊',
+                'appearance': 'Bot Appearance & Customization 🎨',
+                'settings': 'General Server Settings ⚙️',
+                'general': 'All Commands & Services ⌨️',
+                'commands': 'Comprehensive Commands Center ⌨️',
+                'moderation': 'Moderation & Members Management 🔨',
+                'automod': 'AutoMod Rules & Chat Filters 🤖',
+                'welcome': 'Welcome & Leave Messages 👋',
+                'autoresponder': 'Auto Responder on Words 💬',
+                'tickets': 'Ticket & Support System 🎫',
+                'protection': 'Comprehensive Shield & Anti-Nuke 🛡️',
+                'whitelist': 'Security / Whitelist ⚪',
+                'protection-logs': 'Security / Logs 📋',
+                'antiraid': 'Anti-Raid & Fake Accounts 🚨',
+                'staff-activity': 'Staff & Moderator Activity Tracking 👮',
+                'tempvoice': 'Temp Voice Channels 🕒',
+                'boost': 'Server Boost Notifications 💎',
+                'colors': 'Advanced Color Roles System 🎨',
+                'logs': 'Comprehensive Server Logs 📜',
+                'levels': 'Levels & XP System 🏆',
+                'autoroles': 'Auto Roles on Join 🎖️',
+                'giveaways': 'Giveaways System 🎁',
+                'suggestions': 'Suggestions & Feedback System 💡',
+                'invites': 'Advanced Invite Tracker 🔗',
+                'broadcast': 'Broadcast System 📢',
+                'embed': 'Advanced Embed Builder 📄',
+                'applications': 'Staff Applications System 📝',
+                'help': 'Full Commands List 📚',
+                'ai': 'AI & Web (ZENO AI & Web) 🤖'
             };
 
             let title = sectionTitles[section] || 'لوحة الإعدادات ⚙️';
@@ -1544,7 +1575,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                                     <span class="text-[10px] text-gray-500 font-mono">BOOSTS</span>
                                 </div>
                                 <div class="text-2xl font-black text-white">${(botGuild?.premiumSubscriptionCount || 0)}</div>
-                                <p class="text-xs text-gray-400 mt-1 font-bold">بوستات السيرفر</p>
+                                <p class="text-xs text-gray-400 mt-1 font-bold">Server Boosts</p>
                             </div>
                         </div>
 
@@ -1588,11 +1619,11 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                             <!-- Server Details -->
                             <div class="bg-[#12141f] border border-white/5 p-6 rounded-3xl shadow-xl space-y-3 text-right">
-                                <h4 class="font-black text-white text-sm flex items-center justify-end gap-2"><span>معلومات السيرفر</span><span>🏰</span></h4>
+                                <h4 class="font-black text-white text-sm flex items-center justify-end gap-2"><span>🏰</span><span>Server Information</span></h4>
                                 <div class="space-y-2.5 text-xs text-gray-400">
                                     <div class="flex items-center justify-between bg-[#0b0d14] p-3 rounded-xl border border-white/5">
                                         <span class="text-white font-bold font-mono">${new Date((parseInt(guildId) / 4194304 + 1420070400000)).toLocaleDateString('ar-IQ', {year:'numeric',month:'long',day:'numeric'})}</span>
-                                        <span>تاريخ إنشاء السيرفر</span>
+                                        <span>Server Creation Date</span>
                                     </div>
                                     <div class="flex items-center justify-between bg-[#0b0d14] p-3 rounded-xl border border-white/5">
                                         <span class="text-purple-300 font-bold">مستوى ${botGuild?.premiumTier || 0}</span>
@@ -1600,7 +1631,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                                     </div>
                                     <div class="flex items-center justify-between bg-[#0b0d14] p-3 rounded-xl border border-white/5">
                                         <span class="text-white font-bold font-mono">${botGuild?.vanityURLCode ? `discord.gg/${botGuild.vanityURLCode}` : '—'}</span>
-                                        <span>رابط السيرفر المخصص</span>
+                                        <span>Vanity URL</span>
                                     </div>
                                     <div class="flex items-center justify-between bg-[#0b0d14] p-3 rounded-xl border border-white/5">
                                         <span class="text-white font-bold">${botGuild?.verificationLevel === 0 ? 'لا يوجد' : botGuild?.verificationLevel === 1 ? 'منخفض' : botGuild?.verificationLevel === 2 ? 'متوسط' : botGuild?.verificationLevel === 3 ? 'عالي' : 'عالي جداً'}</span>
@@ -1668,7 +1699,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                                     <div class="flex items-center justify-between bg-[#0b0d14] border border-white/5 p-3 rounded-xl hover:border-purple-500/20 transition group">
                                         <div class="text-left">
                                             <span class="text-xs font-mono font-black text-purple-400">⚡ ${Number(u.total_xp || 0).toLocaleString()} XP</span>
-                                            <span class="text-[10px] text-gray-500 block font-mono">المستوى: ${u.level || 1}</span>
+                                            <span class="text-[10px] text-gray-500 block font-mono">Level: ${u.level || 1}</span>
                                         </div>
                                         <div class="flex items-center gap-3">
                                             <div class="text-right">
@@ -1690,7 +1721,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
             } else if (section === 'general' || section === 'commands') {
 formFieldsHtml = "<div id=\"cmdsMgmtRoot\" class=\"space-y-6 text-right\" dir=\"rtl\" style=\"margin-top:0\">\n\n    <!-- Header Card -->\n    <div class=\"bg-[#12141f] border border-white/5 p-6 rounded-2xl flex items-center justify-between shadow-xl\">\n        <div class=\"flex items-center gap-6\">\n            <div class=\"text-center\">\n                <span id=\"customAliasesCount\" class=\"text-xl font-black text-purple-400 font-mono\">0</span>\n                <span class=\"text-[10px] text-gray-400 block font-bold\">اختصارات مخصصة</span>\n            </div>\n            <div class=\"text-center\">\n                <span id=\"enabledCmdsCount\" class=\"text-xl font-black text-emerald-400 font-mono\">177</span>\n                <span class=\"text-[10px] text-gray-400 block font-bold\">الأوامر المفعلة</span>\n            </div>\n            <div class=\"text-center\">\n                <span id=\"totalCmdsCount\" class=\"text-xl font-black text-white font-mono\">177</span>\n                <span class=\"text-[10px] text-gray-400 block font-bold\">إجمالي الأوامر</span>\n            </div>\n        </div>\n        <div class=\"flex items-center gap-3\">\n            <div class=\"text-right\">\n                <h4 class=\"font-black text-white text-base\">إدارة الأوامر</h4>\n                <p class=\"text-gray-400 text-xs mt-0.5\">تخصيص وإدارة جميع أوامر البوت والصلاحيات</p>\n            </div>\n            <div class=\"w-10 h-10 rounded-xl bg-purple-600/20 text-purple-400 flex items-center justify-center text-lg border border-purple-500/30\">🎛️</div>\n        </div>\n    </div>\n\n    <!-- Search & Filter Bar -->\n    <div class=\"flex items-center justify-between gap-4\">\n        <div class=\"flex items-center gap-1.5 bg-[#12141f] border border-white/5 p-1 rounded-xl\">\n            <button type=\"button\" id=\"btnFilterDisabled\" onclick=\"window.filterCmdStatus('disabled')\" class=\"px-3 py-1 rounded-lg text-xs font-bold text-gray-400 hover:text-white transition cursor-pointer\">معطل</button>\n            <button type=\"button\" id=\"btnFilterEnabled\" onclick=\"window.filterCmdStatus('enabled')\" class=\"px-3 py-1 rounded-lg text-xs font-bold text-gray-400 hover:text-white transition cursor-pointer\">مفعل</button>\n            <button type=\"button\" id=\"btnFilterAll\" onclick=\"window.filterCmdStatus('all')\" class=\"px-3 py-1 rounded-lg text-xs font-bold bg-purple-600 text-white transition shadow cursor-pointer\">الكل</button>\n        </div>\n        <div class=\"flex-1 relative\">\n            <input type=\"text\" id=\"cmdSearchInput\" placeholder=\"...ابحث عن أمر\" oninput=\"window.searchCommands()\" class=\"w-full bg-[#12141f] border border-white/5 focus:border-purple-500 rounded-xl px-4 py-2.5 text-xs text-white outline-none text-right pr-10\">\n            <span class=\"absolute right-3 top-2.5 text-gray-400\">🔍</span>\n        </div>\n    </div>\n\n    <!-- Main Grid -->\n    <div class=\"grid grid-cols-1 lg:grid-cols-4 gap-6\">\n\n        <!-- Sidebar: Categories -->\n        <div class=\"lg:col-span-1 space-y-1.5 bg-[#12141f] border border-white/5 p-3 rounded-2xl shadow-xl h-fit\">\n            <div class=\"flex items-center justify-end gap-1.5 text-xs font-black text-white px-2 py-1.5 border-b border-white/5 mb-1\">\n                <span>الأقسام</span><span>📁</span>\n            </div>\n            <button type=\"button\" id=\"btnCatBasic\" onclick=\"window.switchCmdCategory('basic')\" class=\"w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-white hover:bg-white/5 transition cursor-pointer\">\n                <span id=\"badgeCatBasic\" class=\"px-2 py-0.5 bg-emerald-950/60 text-emerald-400 rounded-lg text-[10px] font-mono\">17/17</span>\n                <span class=\"flex items-center gap-1.5\"><span>الأوامر الأساسية</span><span>⚙️</span></span>\n            </button>\n            <button type=\"button\" id=\"btnCatPunishments\" onclick=\"window.switchCmdCategory('punishments')\" class=\"w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold bg-purple-600 text-white shadow-lg transition cursor-pointer\">\n                <span id=\"badgeCatPunishments\" class=\"px-2 py-0.5 bg-white/20 text-white rounded-lg text-[10px] font-mono\">22/22</span>\n                <span class=\"flex items-center gap-1.5\"><span>العقوبات</span><span>🔨</span></span>\n            </button>\n            <button type=\"button\" id=\"btnCatPunishmentLogs\" onclick=\"window.switchCmdCategory('punishment_logs')\" class=\"w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-white hover:bg-white/5 transition cursor-pointer\">\n                <span id=\"badgeCatPunishmentLogs\" class=\"px-2 py-0.5 bg-emerald-950/60 text-emerald-400 rounded-lg text-[10px] font-mono\">17/17</span>\n                <span class=\"flex items-center gap-1.5\"><span>سجلات العقوبات</span><span>📜</span></span>\n            </button>\n            <button type=\"button\" id=\"btnCatChannels\" onclick=\"window.switchCmdCategory('channels')\" class=\"w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-white hover:bg-white/5 transition cursor-pointer\">\n                <span id=\"badgeCatChannels\" class=\"px-2 py-0.5 bg-emerald-950/60 text-emerald-400 rounded-lg text-[10px] font-mono\">9/9</span>\n                <span class=\"flex items-center gap-1.5\"><span>إدارة القنوات</span><span>📌</span></span>\n            </button>\n            <button type=\"button\" id=\"btnCatChat\" onclick=\"window.switchCmdCategory('chat')\" class=\"w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-white hover:bg-white/5 transition cursor-pointer\">\n                <span id=\"badgeCatChat\" class=\"px-2 py-0.5 bg-emerald-950/60 text-emerald-400 rounded-lg text-[10px] font-mono\">12/12</span>\n                <span class=\"flex items-center gap-1.5\"><span>أدوات الشات</span><span>💬</span></span>\n            </button>\n            <button type=\"button\" id=\"btnCatVoice\" onclick=\"window.switchCmdCategory('voice')\" class=\"w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-white hover:bg-white/5 transition cursor-pointer\">\n                <span id=\"badgeCatVoice\" class=\"px-2 py-0.5 bg-emerald-950/60 text-emerald-400 rounded-lg text-[10px] font-mono\">19/19</span>\n                <span class=\"flex items-center gap-1.5\"><span>إدارة الصوت</span><span>🎙️</span></span>\n            </button>\n            <button type=\"button\" id=\"btnCatRoles\" onclick=\"window.switchCmdCategory('roles')\" class=\"w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-white hover:bg-white/5 transition cursor-pointer\">\n                <span id=\"badgeCatRoles\" class=\"px-2 py-0.5 bg-emerald-950/60 text-emerald-400 rounded-lg text-[10px] font-mono\">10/10</span>\n                <span class=\"flex items-center gap-1.5\"><span>إدارة الرتب</span><span>🎖️</span></span>\n            </button>\n            <button type=\"button\" id=\"btnCatCustomRoles\" onclick=\"window.switchCmdCategory('custom_roles')\" class=\"w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-white hover:bg-white/5 transition cursor-pointer\">\n                <span id=\"badgeCatCustomRoles\" class=\"px-2 py-0.5 bg-emerald-950/60 text-emerald-400 rounded-lg text-[10px] font-mono\">9/9</span>\n                <span class=\"flex items-center gap-1.5\"><span>الرتب الخاصة</span><span>👑</span></span>\n            </button>\n            <button type=\"button\" id=\"btnCatServerInfo\" onclick=\"window.switchCmdCategory('server_info')\" class=\"w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-white hover:bg-white/5 transition cursor-pointer\">\n                <span id=\"badgeCatServerInfo\" class=\"px-2 py-0.5 bg-emerald-950/60 text-emerald-400 rounded-lg text-[10px] font-mono\">19/19</span>\n                <span class=\"flex items-center gap-1.5\"><span>معلومات السيرفر</span><span>📊</span></span>\n            </button>\n            <button type=\"button\" id=\"btnCatCustomBot\" onclick=\"window.switchCmdCategory('custom_bot')\" class=\"w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-white hover:bg-white/5 transition cursor-pointer\">\n                <span id=\"badgeCatCustomBot\" class=\"px-2 py-0.5 bg-emerald-950/60 text-emerald-400 rounded-lg text-[10px] font-mono\">5/5</span>\n                <span class=\"flex items-center gap-1.5\"><span>أدوات البوت الخاص</span><span>🤖</span></span>\n            </button>\n            <button type=\"button\" id=\"btnCatSecurity\" onclick=\"window.switchCmdCategory('security')\" class=\"w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-white hover:bg-white/5 transition cursor-pointer\">\n                <span id=\"badgeCatSecurity\" class=\"px-2 py-0.5 bg-emerald-950/60 text-emerald-400 rounded-lg text-[10px] font-mono\">15/15</span>\n                <span class=\"flex items-center gap-1.5\"><span>الحماية</span><span>🛡️</span></span>\n            </button>\n            <button type=\"button\" id=\"btnCatLevels\" onclick=\"window.switchCmdCategory('levels_cat')\" class=\"w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-white hover:bg-white/5 transition cursor-pointer\">\n                <span id=\"badgeCatLevels\" class=\"px-2 py-0.5 bg-emerald-950/60 text-emerald-400 rounded-lg text-[10px] font-mono\">10/10</span>\n                <span class=\"flex items-center gap-1.5\"><span>المستويات والخبرة</span><span>⭐</span></span>\n            </button>\n            <button type=\"button\" id=\"btnCatServerStats\" onclick=\"window.switchCmdCategory('server_stats')\" class=\"w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-white hover:bg-white/5 transition cursor-pointer\">\n                <span id=\"badgeCatServerStats\" class=\"px-2 py-0.5 bg-emerald-950/60 text-emerald-400 rounded-lg text-[10px] font-mono\">11/11</span>\n                <span class=\"flex items-center gap-1.5\"><span>إحصائيات السيرفر</span><span>📈</span></span>\n            </button>\n            <button type=\"button\" id=\"btnCatProfile\" onclick=\"window.switchCmdCategory('profile_cat')\" class=\"w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-white hover:bg-white/5 transition cursor-pointer\">\n                <span id=\"badgeCatProfile\" class=\"px-2 py-0.5 bg-emerald-950/60 text-emerald-400 rounded-lg text-[10px] font-mono\">10/10</span>\n                <span class=\"flex items-center gap-1.5\"><span>الملف الشخصي</span><span>👤</span></span>\n            </button>\n        </div>\n\n        <!-- Commands Display Area -->\n        <div class=\"lg:col-span-3 space-y-4\">\n            <!-- Active Category Header -->\n            <div class=\"bg-[#12141f] border border-white/5 p-4 rounded-2xl flex items-center justify-between shadow-xl\">\n                <div class=\"flex items-center gap-2\">\n                    <span id=\"cmdSaveIndicator\" class=\"text-xs font-bold text-emerald-400 bg-emerald-950/60 px-2 py-1 rounded-lg opacity-0 transition-opacity duration-300\">✓ حُفظ</span>\n                    <button type=\"button\" onclick=\"window.toggleAllCategoryCmds(false)\" class=\"px-3.5 py-1.5 bg-rose-950/40 hover:bg-rose-900/60 text-rose-400 border border-rose-800/40 rounded-xl text-xs font-bold transition flex items-center gap-1\">\n                        <span>✕</span><span>تعطيل الكل</span>\n                    </button>\n                    <button type=\"button\" onclick=\"window.toggleAllCategoryCmds(true)\" class=\"px-3.5 py-1.5 bg-emerald-950/40 hover:bg-emerald-900/60 text-emerald-400 border border-emerald-800/40 rounded-xl text-xs font-bold transition flex items-center gap-1\">\n                        <span>✓</span><span>تفعيل الكل</span>\n                    </button>\n                </div>\n                <div class=\"flex items-center gap-3\">\n                    <div class=\"text-right\">\n                        <h5 id=\"catTitle\" class=\"font-black text-white text-sm\">العقوبات</h5>\n                        <p id=\"catDesc\" class=\"text-gray-400 text-[11px] mt-0.5\">أوامر تنفيذ العقوبات المباشرة على الأعضاء</p>\n                    </div>\n                    <span id=\"catIcon\" class=\"text-xl\">🔨</span>\n                </div>\n            </div>\n            <!-- Commands List -->\n            <div id=\"cmdsListContainer\" class=\"space-y-3\"></div>\n        </div>\n    </div>\n</div>\n\n<script>\n\n(function() {\n    var DB = {\n        basic: { title: 'الأوامر الأساسية', desc: 'الأوامر الرئيسية للبوت والاستخدام اليومي', icon: '⚙️', items: [\n            { name: '/help', desc: 'قائمة جميع الأوامر المتاحة', badge: '', icon: '📖' },\n            { name: '/ping', desc: 'سرعة استجابة البوت', badge: '', icon: '📶' },\n            { name: '/botinfo', desc: 'معلومات البوت الكاملة', badge: '', icon: '🤖' },\n            { name: '/serverinfo', desc: 'معلومات السيرفر الشاملة', badge: '', icon: '🏠' },\n            { name: '/userinfo', desc: 'معلومات عضو في السيرفر', badge: '', icon: '👤' },\n            { name: '/avatar', desc: 'عرض صورة عضو بدقة عالية', badge: '', icon: '🖼️' },\n            { name: '/banner', desc: 'عرض بنر عضو', badge: '', icon: '🎨' },\n            { name: '/invites', desc: 'عدد دعوات عضو في السيرفر', badge: '', icon: '🔗' },\n            { name: '/roles', desc: 'قائمة رتب السيرفر الكاملة', badge: '', icon: '🎖️' },\n            { name: '/channels', desc: 'قائمة قنوات السيرفر', badge: '', icon: '📁' },\n            { name: '/emojis', desc: 'قائمة إيموجيات السيرفر المخصصة', badge: '', icon: '😃' },\n            { name: '/apply', desc: 'تقديم طلب وظيفي بالسيرفر', badge: '', icon: '📝' },\n            { name: '/ticket', desc: 'فتح تذكرة دعم', badge: '', icon: '🎫' },\n            { name: '/daily', desc: 'استلام الراتب اليومي', badge: '', icon: '🪙' },\n            { name: '/profile', desc: 'عرض بطاقة البروفايل', badge: '', icon: '💳' },\n            { name: '/leaderboard', desc: 'قائمة المتصدرين', badge: '', icon: '🏆' },\n            { name: '/gold', desc: 'رصيد الذهب والعملات', badge: '', icon: '🪙' }\n        ]},\n        punishments: { title: 'العقوبات', desc: 'أوامر تنفيذ العقوبات المباشرة على الأعضاء', icon: '🔨', items: [\n            { name: '/ban', desc: 'حظر عضو', badge: 'صلاحيات ديسكورد', icon: '🪓' },\n            { name: '/unban', desc: 'فك حظر عضو', badge: 'صلاحيات ديسكورد', icon: '🛡️' },\n            { name: '/kick', desc: 'طرد عضو', badge: 'صلاحيات ديسكورد', icon: '🪓' },\n            { name: '/mute', desc: 'كتم عضو', badge: 'صلاحيات ديسكورد', icon: '🚨' },\n            { name: '/unmute', desc: 'فك كتم عضو', badge: 'صلاحيات ديسكورد', icon: '📢' },\n            { name: '/timeout', desc: 'عزل عضو', badge: 'صلاحيات ديسكورد', icon: '⏳' },\n            { name: '/untimeout', desc: 'فك عزل عضو', badge: 'صلاحيات ديسكورد', icon: '🛡️' },\n            { name: '/warn', desc: 'تحذير عضو', badge: 'صلاحيات ديسكورد', icon: '🚨' },\n            { name: '/delwarn', desc: 'حذف تحذير', badge: 'صلاحيات ديسكورد', icon: '🗑️' },\n            { name: '/clearwarns', desc: 'مسح جميع التحذيرات', badge: 'صلاحيات ديسكورد', icon: '🗑️' },\n            { name: '/clearallwarns', desc: 'مسح تحذيرات عضو كاملة', badge: 'صلاحيات ديسكورد', icon: '🗑️' },\n            { name: '/clearallpunishments', desc: 'حذف نهائي لكل سجلات العقوبات', badge: '', icon: '🗑️' },\n            { name: '/prison', desc: 'سجن عضو', badge: 'صلاحيات ديسكورد', icon: '🪓' },\n            { name: '/unprison', desc: 'إخراج من السجن', badge: 'صلاحيات ديسكورد', icon: '🛡️' },\n            { name: '/setnick', desc: 'تغيير الاسم المستعار', badge: 'صلاحيات ديسكورد', icon: '✏️' },\n            { name: '/blacklist', desc: 'بلاك لست عضو (دائم)', badge: 'صلاحيات ديسكورد', icon: '🪓' },\n            { name: '/unblacklist', desc: 'فك بلاك لست عضو', badge: 'صلاحيات ديسكورد', icon: '🛡️' },\n            { name: '/remove', desc: 'حذف عقوبة من عضو', badge: 'صلاحيات ديسكورد', icon: '🗑️' },\n            { name: '/down', desc: 'إزالة الرتب الإدارية لمدة محددة', badge: 'صلاحيات ديسكورد', icon: '🪓' },\n            { name: '/undown', desc: 'استعادة الرتب الإدارية المزالة', badge: '', icon: '🛡️' },\n            { name: '/block', desc: 'حظر عضو من رتبة', badge: 'صلاحيات ديسكورد', icon: '🛡️' },\n            { name: '/unblock', desc: 'فك حظر عضو من رتبة', badge: 'صلاحيات ديسكورد', icon: '🛡️' }\n        ]},\n        punishment_logs: { title: 'سجلات العقوبات', desc: 'استعلام وعرض سجلات العقوبات السابقة', icon: '📜', items: [\n            { name: '/allwarns', desc: 'عرض كل التحذيرات النشطة', badge: '', icon: '📋' },\n            { name: '/bans', desc: 'سجل باندات عضو', badge: '', icon: '📜' },\n            { name: '/blacklists', desc: 'سجل بلاك لست عضو', badge: '', icon: '📜' },\n            { name: '/blocks', desc: 'سجل بلوكات عضو', badge: '', icon: '📜' },\n            { name: '/case', desc: 'عرض تفاصيل عقوبة', badge: 'صلاحيات ديسكورد', icon: '📄' },\n            { name: '/crime', desc: 'سجل عقوبات العضو الكامل', badge: '', icon: '📜' },\n            { name: '/crimes', desc: 'عقوبات العضو النشطة حالياً', badge: '', icon: '📜' },\n            { name: '/downs', desc: 'سجل داونات عضو', badge: '', icon: '📜' },\n            { name: '/modlogs', desc: 'سجل إشراف المشرفين', badge: 'صلاحيات ديسكورد', icon: '📜' },\n            { name: '/kicks', desc: 'سجل طرديات عضو', badge: '', icon: '📜' },\n            { name: '/mutes', desc: 'سجل كتمات عضو', badge: '', icon: '📜' },\n            { name: '/prisons', desc: 'سجل سجنات عضو', badge: '', icon: '📜' },\n            { name: '/timeouts', desc: 'سجل عزلات عضو', badge: '', icon: '📜' },\n            { name: '/warns', desc: 'سجل تحذيرات عضو', badge: '', icon: '📜' },\n            { name: '/staffactivity', desc: 'تقرير نشاط فريق الإدارة', badge: 'صلاحيات ديسكورد', icon: '📊' },\n            { name: '/audit', desc: 'سجل التدقيق والعمليات', badge: 'صلاحيات ديسكورد', icon: '🔍' },\n            { name: '/punishments', desc: 'ملخص جميع العقوبات النشطة', badge: '', icon: '📋' }\n        ]},\n        channels: { title: 'إدارة القنوات', desc: 'أوامر قفل وإخفاء وإدارة القنوات', icon: '📌', items: [\n            { name: '/lock', desc: 'قفل قناة', badge: 'صلاحيات ديسكورد', icon: '🔒' },\n            { name: '/unlock', desc: 'فتح قناة مقفولة', badge: 'صلاحيات ديسكورد', icon: '🔓' },\n            { name: '/hide', desc: 'إخفاء قناة عن الأعضاء', badge: 'صلاحيات ديسكورد', icon: '👁️' },\n            { name: '/unhide', desc: 'إظهار قناة مخفية', badge: 'صلاحيات ديسكورد', icon: '👁️' },\n            { name: '/slowmode', desc: 'تفعيل السلو مود في القناة', badge: 'صلاحيات ديسكورد', icon: '🐌' },\n            { name: '/clone', desc: 'نسخ قناة بكامل إعداداتها', badge: 'صلاحيات ديسكورد', icon: '📋' },\n            { name: '/rename', desc: 'تغيير اسم القناة', badge: 'صلاحيات ديسكورد', icon: '✏️' },\n            { name: '/settopic', desc: 'تغيير وصف القناة', badge: 'صلاحيات ديسكورد', icon: '📝' },\n            { name: '/setnsfw', desc: 'تفعيل/تعطيل وضع NSFW', badge: 'صلاحيات ديسكورد', icon: '🔞' }\n        ]},\n        chat: { title: 'أدوات الشات', desc: 'أوامر حذف الرسائل والإعلانات والتفاعل', icon: '💬', items: [\n            { name: '/clear', desc: 'حذف عدد محدد من الرسائل', badge: 'صلاحيات ديسكورد', icon: '🗑️' },\n            { name: '/clearpinned', desc: 'حذف الرسائل المثبتة', badge: 'صلاحيات ديسكورد', icon: '🗑️' },\n            { name: '/clearbots', desc: 'حذف رسائل البوتات', badge: 'صلاحيات ديسكورد', icon: '🗑️' },\n            { name: '/clearuser', desc: 'حذف رسائل عضو معين', badge: 'صلاحيات ديسكورد', icon: '🗑️' },\n            { name: '/say', desc: 'إرسال رسالة عبر البوت', badge: 'صلاحيات ديسكورد', icon: '💬' },\n            { name: '/embed', desc: 'إنشاء Embed مخصص', badge: 'صلاحيات ديسكورد', icon: '📦' },\n            { name: '/poll', desc: 'إنشاء استطلاع رأي', badge: 'صلاحيات ديسكورد', icon: '📊' },\n            { name: '/remind', desc: 'تعيين تذكير مؤقت', badge: '', icon: '⏰' },\n            { name: '/announce', desc: 'إرسال إعلان رسمي', badge: 'صلاحيات ديسكورد', icon: '📢' },\n            { name: '/broadcast', desc: 'بث رسالة في جميع القنوات', badge: 'صلاحيات ديسكورد', icon: '📡' },\n            { name: '/translate', desc: 'ترجمة نص إلى لغة أخرى', badge: '', icon: '🌐' },\n            { name: '/quote', desc: 'اقتباس رسالة قديمة', badge: '', icon: '💬' }\n        ]},\n        voice: { title: 'إدارة الصوت', desc: 'أوامر التحكم في قنوات الصوت والأعضاء', icon: '🎙️', items: [\n            { name: '/vcmute', desc: 'كتم عضو في الصوت', badge: 'صلاحيات ديسكورد', icon: '🔇' },\n            { name: '/vcunmute', desc: 'فك كتم عضو في الصوت', badge: 'صلاحيات ديسكورد', icon: '🔊' },\n            { name: '/vcdeafen', desc: 'صمم عضو في الصوت', badge: 'صلاحيات ديسكورد', icon: '🔕' },\n            { name: '/vcundeafen', desc: 'فك تصميم عضو في الصوت', badge: 'صلاحيات ديسكورد', icon: '🔔' },\n            { name: '/vckick', desc: 'طرد عضو من قناة الصوت', badge: 'صلاحيات ديسكورد', icon: '👢' },\n            { name: '/vcmove', desc: 'نقل عضو بين قنوات الصوت', badge: 'صلاحيات ديسكورد', icon: '🔀' },\n            { name: '/vcmoveall', desc: 'نقل جميع الأعضاء لقناة أخرى', badge: 'صلاحيات ديسكورد', icon: '🔀' },\n            { name: '/vclimit', desc: 'تحديد الحد الأقصى للمستخدمين', badge: 'صلاحيات ديسكورد', icon: '🔢' },\n            { name: '/vclock', desc: 'قفل قناة الصوت', badge: 'صلاحيات ديسكورد', icon: '🔒' },\n            { name: '/vcunlock', desc: 'فتح قناة الصوت', badge: 'صلاحيات ديسكورد', icon: '🔓' },\n            { name: '/vchide', desc: 'إخفاء قناة الصوت', badge: 'صلاحيات ديسكورد', icon: '👁️' },\n            { name: '/vcunhide', desc: 'إظهار قناة الصوت', badge: 'صلاحيات ديسكورد', icon: '👁️' },\n            { name: '/vcbitrate', desc: 'تغيير جودة الصوت (Bitrate)', badge: 'صلاحيات ديسكورد', icon: '🎵' },\n            { name: '/tempvoice', desc: 'إنشاء قناة صوتية مؤقتة', badge: '', icon: '⏳' },\n            { name: '/vcinfo', desc: 'معلومات قناة الصوت الحالية', badge: '', icon: '📊' },\n            { name: '/vcactivity', desc: 'تشغيل نشاط جماعي بالصوت', badge: '', icon: '🎮' },\n            { name: '/vcrename', desc: 'تغيير اسم قناة الصوت', badge: 'صلاحيات ديسكورد', icon: '✏️' },\n            { name: '/vcpermit', desc: 'السماح لعضو بالدخول', badge: 'صلاحيات ديسكورد', icon: '✅' },\n            { name: '/vcreject', desc: 'منع عضو من الدخول', badge: 'صلاحيات ديسكورد', icon: '🚫' }\n        ]},\n        roles: { title: 'إدارة الرتب', desc: 'أوامر إعطاء وإزالة وإنشاء الرتب', icon: '🎖️', items: [\n            { name: '/giverole', desc: 'إعطاء رتبة لعضو', badge: 'صلاحيات ديسكورد', icon: '🎁' },\n            { name: '/removerole', desc: 'إزالة رتبة من عضو', badge: 'صلاحيات ديسكورد', icon: '❌' },\n            { name: '/roleall', desc: 'إعطاء رتبة لجميع الأعضاء', badge: 'صلاحيات ديسكورد', icon: '👥' },\n            { name: '/rolebots', desc: 'إعطاء رتبة لجميع البوتات', badge: 'صلاحيات ديسكورد', icon: '🤖' },\n            { name: '/rolehumans', desc: 'إعطاء رتبة لجميع البشر', badge: 'صلاحيات ديسكورد', icon: '👤' },\n            { name: '/createrole', desc: 'إنشاء رتبة جديدة', badge: 'صلاحيات ديسكورد', icon: '✨' },\n            { name: '/deleterole', desc: 'حذف رتبة من السيرفر', badge: 'صلاحيات ديسكورد', icon: '🗑️' },\n            { name: '/rolecolor', desc: 'تغيير لون رتبة', badge: 'صلاحيات ديسكورد', icon: '🎨' },\n            { name: '/roleinfo', desc: 'معلومات رتبة مفصلة', badge: '', icon: '📋' },\n            { name: '/inrole', desc: 'قائمة أعضاء رتبة معينة', badge: '', icon: '👥' }\n        ]},\n        custom_roles: { title: 'الرتب الخاصة', desc: 'أوامر الرتب الشخصية المخصصة لكل عضو', icon: '👑', items: [\n            { name: '/customrole', desc: 'إنشاء رتبة خاصة بك', badge: '', icon: '👑' },\n            { name: '/myrole', desc: 'عرض معلومات رتبتك الخاصة', badge: '', icon: '👤' },\n            { name: '/myrole-color', desc: 'تغيير لون رتبتك الخاصة', badge: '', icon: '🎨' },\n            { name: '/myrole-name', desc: 'تغيير اسم رتبتك الخاصة', badge: '', icon: '✏️' },\n            { name: '/myrole-icon', desc: 'تغيير أيقونة رتبتك الخاصة', badge: '', icon: '🖼️' },\n            { name: '/myrole-give', desc: 'مشاركة رتبتك الخاصة مع عضو', badge: '', icon: '🎁' },\n            { name: '/myrole-remove', desc: 'إلغاء مشاركة الرتبة مع عضو', badge: '', icon: '❌' },\n            { name: '/myrole-delete', desc: 'حذف رتبتك الخاصة نهائياً', badge: '', icon: '🗑️' },\n            { name: '/customroles-list', desc: 'قائمة جميع الرتب الخاصة', badge: 'صلاحيات ديسكورد', icon: '📋' }\n        ]},\n        server_info: { title: 'معلومات السيرفر', desc: 'أوامر عرض إحصائيات ومعلومات السيرفر', icon: '📊', items: [\n            { name: '/serverinfo', desc: 'معلومات السيرفر الشاملة', badge: '', icon: '🏠' },\n            { name: '/serverbanner', desc: 'بنر السيرفر الرسمي', badge: '', icon: '🎨' },\n            { name: '/servericon', desc: 'أيقونة السيرفر بدقة عالية', badge: '', icon: '🖼️' },\n            { name: '/serverstats', desc: 'إحصائيات السيرفر المفصلة', badge: '', icon: '📊' },\n            { name: '/boosts', desc: 'قائمة المبوستين وعدد البوستات', badge: '', icon: '💎' },\n            { name: '/invites-top', desc: 'أكثر الأعضاء دعوةً', badge: '', icon: '🔗' },\n            { name: '/channels-list', desc: 'قائمة كاملة بالقنوات', badge: '', icon: '📁' },\n            { name: '/roles-list', desc: 'قائمة وتوزيع الرتب', badge: '', icon: '🎖️' },\n            { name: '/emojis-list', desc: 'قائمة الإيموجيات المخصصة', badge: '', icon: '😃' },\n            { name: '/stickers-list', desc: 'قائمة الستيكرات', badge: '', icon: '🏷️' },\n            { name: '/bans-list', desc: 'قائمة المحظورين', badge: 'صلاحيات ديسكورد', icon: '🔨' },\n            { name: '/admins', desc: 'قائمة الإدارة والمشرفين', badge: '', icon: '👮' },\n            { name: '/bots', desc: 'قائمة بوتات السيرفر', badge: '', icon: '🤖' },\n            { name: '/vanity', desc: 'رابط السيرفر المخصص', badge: '', icon: '🌐' },\n            { name: '/features', desc: 'ميزات السيرفر المفعلة', badge: '', icon: '✨' },\n            { name: '/created', desc: 'تاريخ إنشاء السيرفر', badge: '', icon: '📅' },\n            { name: '/uptime', desc: 'مدة تشغيل البوت', badge: '', icon: '⏱️' },\n            { name: '/ping', desc: 'سرعة الاستجابة', badge: '', icon: '📶' },\n            { name: '/shards', desc: 'معلومات الشاردات', badge: '', icon: '🖧' }\n        ]},\n        custom_bot: { title: 'أدوات البوت الخاص', desc: 'أوامر تخصيص مظهر وحالة البوت الخاص', icon: '🤖', items: [\n            { name: '/bot-setnick', desc: 'تغيير اسم البوت في السيرفر', badge: 'صلاحيات ديسكورد', icon: '✏️' },\n            { name: '/bot-setavatar', desc: 'تغيير صورة البوت', badge: 'صلاحيات ديسكورد', icon: '🖼️' },\n            { name: '/bot-setbanner', desc: 'تغيير بنر البوت', badge: 'صلاحيات ديسكورد', icon: '🎨' },\n            { name: '/bot-setactivity', desc: 'تغيير نشاط وحالة البوت', badge: 'صلاحيات ديسكورد', icon: '🎮' },\n            { name: '/bot-setstatus', desc: 'تغيير حالة التواجد Online/DND/Idle', badge: 'صلاحيات ديسكورد', icon: '🟢' }\n        ]},\n        security: { title: 'الحماية', desc: 'أوامر الحماية من التخريب ومكافحة السبام', icon: '🛡️', items: [\n            { name: '/antiraid', desc: 'تفعيل/تعطيل مكافحة الغزو', badge: 'صلاحيات ديسكورد', icon: '🚨' },\n            { name: '/antinuke', desc: 'إعدادات جدار الحماية Anti-Nuke', badge: 'صلاحيات ديسكورد', icon: '🛡️' },\n            { name: '/whitelist-add', desc: 'إضافة عضو للقائمة البيضاء', badge: 'صلاحيات ديسكورد', icon: '⚪' },\n            { name: '/whitelist-remove', desc: 'إزالة عضو من القائمة البيضاء', badge: 'صلاحيات ديسكورد', icon: '⚫' },\n            { name: '/whitelist-list', desc: 'عرض القائمة البيضاء', badge: 'صلاحيات ديسكورد', icon: '📋' },\n            { name: '/antibot', desc: 'منع دخول البوتات غير الموثقة', badge: 'صلاحيات ديسكورد', icon: '🤖' },\n            { name: '/antispam', desc: 'مكافحة السبام والرسائل المتكررة', badge: 'صلاحيات ديسكورد', icon: '⚡' },\n            { name: '/antilink', desc: 'منع نشر الروابط', badge: 'صلاحيات ديسكورد', icon: '🔗' },\n            { name: '/backup-create', desc: 'إنشاء نسخة احتياطية للسيرفر', badge: 'صلاحيات ديسكورد', icon: '📦' },\n            { name: '/backup-load', desc: 'استعادة نسخة احتياطية', badge: 'صلاحيات ديسكورد', icon: '🔄' },\n            { name: '/backup-list', desc: 'قائمة النسخ الاحتياطية', badge: 'صلاحيات ديسكورد', icon: '📜' },\n            { name: '/lockdown', desc: 'إغلاق كامل قنوات السيرفر فوراً', badge: 'صلاحيات ديسكورد', icon: '🔒' },\n            { name: '/unlockdown', desc: 'إعادة فتح جميع القنوات المغلقة', badge: 'صلاحيات ديسكورد', icon: '🔓' },\n            { name: '/security-status', desc: 'تقرير حالة الحماية', badge: '', icon: '📊' },\n            { name: '/security-audit', desc: 'فحص ثغرات وصلاحيات السيرفر', badge: 'صلاحيات ديسكورد', icon: '🔍' }\n        ]},\n        levels_cat: { title: 'المستويات والخبرة', desc: 'أوامر المستويات وبطاقات الرانك', icon: '⭐', items: [\n            { name: '/rank', desc: 'عرض بطاقة مستواك الحالية', badge: '', icon: '💳' },\n            { name: '/levels-leaderboard', desc: 'المتصدرين في المستويات', badge: '', icon: '🏆' },\n            { name: '/setxp', desc: 'تعديل نقاط الخبرة لعضو', badge: 'صلاحيات ديسكورد', icon: '⚡' },\n            { name: '/setlevel', desc: 'تعديل مستوى عضو', badge: 'صلاحيات ديسكورد', icon: '🎖️' },\n            { name: '/resetlevels', desc: 'تصفير نظام المستويات', badge: 'صلاحيات ديسكورد', icon: '🗑️' },\n            { name: '/level-reward-add', desc: 'إضافة رتبة مكافأة عند مستوى', badge: 'صلاحيات ديسكورد', icon: '🎁' },\n            { name: '/level-reward-remove', desc: 'إزالة رتبة مكافأة', badge: 'صلاحيات ديسكورد', icon: '❌' },\n            { name: '/level-rewards-list', desc: 'قائمة جميع رتب المكافآت', badge: '', icon: '📜' },\n            { name: '/levelcard-bg', desc: 'تغيير خلفية بطاقة الرانك', badge: '', icon: '🎨' },\n            { name: '/doublexp', desc: 'تفعيل مضاعفة الخبرة 2x', badge: 'صلاحيات ديسكورد', icon: '🚀' }\n        ]},\n        server_stats: { title: 'إحصائيات السيرفر', desc: 'أوامر قنوات العدادات التلقائية', icon: '📈', items: [\n            { name: '/stats-setup', desc: 'إنشاء قنوات عدادات السيرفر', badge: 'صلاحيات ديسكورد', icon: '📊' },\n            { name: '/stats-members', desc: 'تفعيل عداد الأعضاء', badge: 'صلاحيات ديسكورد', icon: '👥' },\n            { name: '/stats-bots', desc: 'تفعيل عداد البوتات', badge: 'صلاحيات ديسكورد', icon: '🤖' },\n            { name: '/stats-channels', desc: 'تفعيل عداد القنوات', badge: 'صلاحيات ديسكورد', icon: '📁' },\n            { name: '/stats-roles', desc: 'تفعيل عداد الرتب', badge: 'صلاحيات ديسكورد', icon: '🎖️' },\n            { name: '/stats-boosts', desc: 'تفعيل عداد البوستات', badge: 'صلاحيات ديسكورد', icon: '💎' },\n            { name: '/stats-online', desc: 'تفعيل عداد المتواجدين أونلاين', badge: 'صلاحيات ديسكورد', icon: '🟢' },\n            { name: '/stats-voice', desc: 'تفعيل عداد المتواجدين في الصوت', badge: 'صلاحيات ديسكورد', icon: '🎙️' },\n            { name: '/stats-delete', desc: 'حذف جميع قنوات العدادات', badge: 'صلاحيات ديسكورد', icon: '🗑️' },\n            { name: '/stats-refresh', desc: 'تحديث فوري لأرقام العدادات', badge: 'صلاحيات ديسكورد', icon: '🔄' },\n            { name: '/stats-format', desc: 'تعديل شكل قنوات العدادات', badge: 'صلاحيات ديسكورد', icon: '✏️' }\n        ]},\n        profile_cat: { title: 'الملف الشخصي', desc: 'أوامر البروفايل والسمعة والعملات', icon: '👤', items: [\n            { name: '/profile', desc: 'عرض بطاقة بروفايلك الشاملة', badge: '', icon: '💳' },\n            { name: '/rep', desc: 'إعطاء نقطة سمعة لعضو (+rep)', badge: '', icon: '⭐' },\n            { name: '/daily', desc: 'استلام الراتب اليومي (Gold)', badge: '', icon: '🪙' },\n            { name: '/coins', desc: 'رصيدك من عملات Gold', badge: '', icon: '💰' },\n            { name: '/pay', desc: 'تحويل عملات Gold لعضو آخر', badge: '', icon: '💸' },\n            { name: '/setbio', desc: 'تعديل النبذة الشخصية', badge: '', icon: '📝' },\n            { name: '/settitle', desc: 'تعديل اللقب الشخصي', badge: '', icon: '🏷️' },\n            { name: '/setbadge', desc: 'تعديل الشارة المفضلة', badge: '', icon: '🎖️' },\n            { name: '/profile-bg', desc: 'تغيير خلفية بطاقة البروفايل', badge: '', icon: '🎨' },\n            { name: '/marry', desc: 'الزواج التفاعلي في السيرفر', badge: '', icon: '💍' }\n        ]}\n    };\n\n    var catBtnMap = {\n        basic:'btnCatBasic', punishments:'btnCatPunishments', punishment_logs:'btnCatPunishmentLogs',\n        channels:'btnCatChannels', chat:'btnCatChat', voice:'btnCatVoice',\n        roles:'btnCatRoles', custom_roles:'btnCatCustomRoles', server_info:'btnCatServerInfo',\n        custom_bot:'btnCatCustomBot', security:'btnCatSecurity', levels_cat:'btnCatLevels',\n        server_stats:'btnCatServerStats', profile_cat:'btnCatProfile'\n    };\n    var catBadgeMap = {\n        basic:'badgeCatBasic', punishments:'badgeCatPunishments', punishment_logs:'badgeCatPunishmentLogs',\n        channels:'badgeCatChannels', chat:'badgeCatChat', voice:'badgeCatVoice',\n        roles:'badgeCatRoles', custom_roles:'badgeCatCustomRoles', server_info:'badgeCatServerInfo',\n        custom_bot:'badgeCatCustomBot', security:'badgeCatSecurity', levels_cat:'badgeCatLevels',\n        server_stats:'badgeCatServerStats', profile_cat:'badgeCatProfile'\n    };\n\n    var currentCat = 'punishments';\n    var currentFilter = 'all';\n    var disabledCmds = " + JSON.stringify((function() { try { var raw = settings.disabled_commands; if (!raw) return {}; var arr = typeof raw === "string" ? JSON.parse(raw) : raw; var m = {}; for (var i = 0; i < arr.length; i++) m[arr[i]] = true; return m; } catch(e) { return {}; } })()) + ";\n    var commandConfigs = " + JSON.stringify((function() { try { var raw = settings.command_configs; if (!raw) return {}; return typeof raw === "string" ? JSON.parse(raw) : (raw || {}); } catch(e) { return {}; } })()) + ";\n    var guildRoles = " + JSON.stringify((guildRoles || []).map(function(r) { return { id: r.id, name: r.name }; })) + ";\n    var guildChannels = " + JSON.stringify((guildTextChannels || []).map(function(c) { return { id: c.id, name: c.name }; })) + ";\n\n    function isEn(name) { return !disabledCmds[name]; }\n\n    function render() {\n        var container = document.getElementById('cmdsListContainer');\n        if (!container) return;\n        var data = DB[currentCat] || DB.punishments;\n        var t = document.getElementById('catTitle');\n        var d = document.getElementById('catDesc');\n        var ic = document.getElementById('catIcon');\n        if (t) t.innerText = data.title;\n        if (d) d.innerText = data.desc;\n        if (ic) ic.innerText = data.icon;\n        var searchEl = document.getElementById('cmdSearchInput');\n        var sv = searchEl ? searchEl.value.toLowerCase().trim() : '';\n        var filtered = data.items.filter(function(item) {\n            if (currentFilter === 'enabled' && !isEn(item.name)) return false;\n            if (currentFilter === 'disabled' && isEn(item.name)) return false;\n            if (sv && item.name.toLowerCase().indexOf(sv) === -1 && item.desc.toLowerCase().indexOf(sv) === -1) return false;\n            return true;\n        });\n        if (!filtered.length) {\n            container.innerHTML = '<div class=\"py-12 bg-[#12141f] border border-white/5 rounded-2xl text-center text-xs text-gray-500\">لا توجد أوامر مطابقة 🔍</div>';\n            updateCounters(); return;\n        }\n        var html = '';\n        for (var i = 0; i < filtered.length; i++) {\n            var item = filtered[i];\n            var en = isEn(item.name);\n            var bh = item.badge ? '<span class=\"px-2.5 py-0.5 bg-purple-950/60 text-purple-300 border border-purple-800/40 rounded-lg text-[10px] font-bold flex items-center gap-1\"><span>' + item.badge + '</span><span>&#128737;</span></span>' : '';\n            var cfg = commandConfigs[item.name] || {};\n            var alias = cfg.alias || '';\n            var aRoles = cfg.allowedRoles || [];\n            var aChs = cfg.allowedChannels || [];\n            html += '<div class=\"cmd-card-wrap border border-white/5 rounded-2xl bg-[#12141f] overflow-hidden transition hover:border-purple-500/40' + (en ? '' : ' opacity-50') + '\" data-cmd=\"' + item.name + '\">';\n            html += '<div class=\"p-4 flex items-center justify-between\">';\n            html += '<div class=\"flex items-center gap-3\">';\n            html += '<label class=\"toggle\"><input type=\"checkbox\" data-cmd=\"' + item.name + '\"' + (en ? ' checked' : '') + '><span class=\"slider\"></span></label>';\n            html += '<button type=\"button\" class=\"cmd-expand-btn text-gray-500 hover:text-purple-400 p-1 text-xs transition cursor-pointer\" data-cmd=\"' + item.name + '\">&#9660;</button>';\n            html += '</div>';\n            html += '<div class=\"flex items-center gap-3\">';\n            html += '<div class=\"text-right\">';\n            html += '<div class=\"flex items-center justify-end gap-2\">' + bh + '<span class=\"font-black text-white text-xs font-mono\">' + item.name + '</span></div>';\n            html += '<p class=\"text-[11px] text-gray-400 mt-0.5\">' + item.desc + '</p>';\n            html += '</div>';\n            html += '<div class=\"w-9 h-9 rounded-xl bg-[#0b0d14] border border-white/5 flex items-center justify-center text-sm shadow-inner\">' + (item.icon || '&#9881;') + '</div>';\n            html += '</div>';\n            html += '</div>';\n            // Accordion Settings Details\n            html += '<div class=\"cmd-accordion border-t border-white/5 bg-[#0b0d14] p-4 space-y-4 text-right\" data-cmd=\"' + item.name + '\" style=\"display:none;\">';\n            html += '<div class=\"flex items-center justify-between gap-4 flex-wrap\">';\n            html += '<div class=\"flex-1 min-w-[200px]\">';\n            html += '<label class=\"block text-[10px] text-gray-400 font-bold mb-1\">اختصار مخصص للأمر (Custom Alias)</label>';\n            html += '<input type=\"text\" class=\"cmd-alias-input w-full bg-[#12141f] border border-white/10 focus:border-purple-500 rounded-xl px-3 py-2 text-xs text-white outline-none text-right\" placeholder=\"مثال: !b أو /b\" data-cmd=\"' + item.name + '\" value=\"' + alias.split('\"').join('&quot;') + '\">';\n            html += '</div>';\n            html += '</div>';\n            html += '<div>';\n            html += '<label class=\"block text-[10px] text-gray-400 font-bold mb-1.5\">الرتب المسموح لها فقط بتشغيل الأمر (Allowed Roles)</label>';\n            html += '<div class=\"flex flex-wrap gap-1.5 max-h-28 overflow-y-auto p-1 bg-[#12141f]/50 border border-white/5 rounded-xl justify-end\">';\n            for (var ri = 0; ri < guildRoles.length; ri++) {\n                var role = guildRoles[ri];\n                var rChecked = aRoles.indexOf(role.id) !== -1;\n                html += '<label class=\"flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-white/5 bg-[#12141f] hover:border-purple-500/30 cursor-pointer text-[10px] text-gray-300\">';\n                html += '<span>' + role.name + '</span>';\n                html += '<input type=\"checkbox\" class=\"cmd-role-chk accent-purple-600\" data-cmd=\"' + item.name + '\" data-rid=\"' + role.id + '\"' + (rChecked ? ' checked' : '') + '>';\n                html += '</label>';\n            }\n            html += '</div>';\n            html += '</div>';\n            html += '<div>';\n            html += '<label class=\"block text-[10px] text-gray-400 font-bold mb-1.5\">القنوات المسموح فيها فقط بتشغيل الأمر (Allowed Channels)</label>';\n            html += '<div class=\"flex flex-wrap gap-1.5 max-h-28 overflow-y-auto p-1 bg-[#12141f]/50 border border-white/5 rounded-xl justify-end\">';\n            for (var ci = 0; ci < guildChannels.length; ci++) {\n                var ch = guildChannels[ci];\n                var cChecked = aChs.indexOf(ch.id) !== -1;\n                html += '<label class=\"flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-white/5 bg-[#12141f] hover:border-purple-500/30 cursor-pointer text-[10px] text-gray-300\">';\n                html += '<span>#' + ch.name + '</span>';\n                html += '<input type=\"checkbox\" class=\"cmd-ch-chk accent-purple-600\" data-cmd=\"' + item.name + '\" data-chid=\"' + ch.id + '\"' + (cChecked ? ' checked' : '') + '>';\n                html += '</label>';\n            }\n            html += '</div>';\n            html += '</div>';\n            html += '<div class=\"flex items-center justify-between pt-2 border-t border-white/5\">';\n            html += '<button type=\"button\" class=\"cmd-reset-btn px-3 py-1.5 bg-rose-950/40 hover:bg-rose-900/60 text-rose-400 border border-rose-800/40 rounded-xl text-xs font-bold transition cursor-pointer\" data-cmd=\"' + item.name + '\">إعادة ضبط</button>';\n            html += '<button type=\"button\" class=\"cmd-save-btn px-4 py-1.5 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold transition shadow-lg cursor-pointer\" data-cmd=\"' + item.name + '\">حفظ تفاصيل الأمر</button>';\n            html += '</div>';\n            html += '</div>';\n            html += '</div>';\n        }\n        container.innerHTML = html;\n        var checks = container.querySelectorAll('input[type=\"checkbox\"][data-cmd]:not(.cmd-role-chk):not(.cmd-ch-chk)');\n        for (var j = 0; j < checks.length; j++) {\n            (function(cb) {\n                cb.addEventListener('change', function() {\n                    window.toggleSingleCmd(cb.getAttribute('data-cmd'), cb.checked);\n                    var card = cb.closest('div.cmd-card-wrap');\n                    if (card) { if (cb.checked) card.classList.remove('opacity-50'); else card.classList.add('opacity-50'); }\n                });\n            })(checks[j]);\n        }\n        var expBtns = container.querySelectorAll('.cmd-expand-btn');\n        for (var eb = 0; eb < expBtns.length; eb++) {\n            (function(btn) {\n                btn.addEventListener('click', function() {\n                    var cmdName = btn.getAttribute('data-cmd');\n                    var panel = container.querySelector('.cmd-accordion[data-cmd=\"' + cmdName + '\"]');\n                    if (!panel) return;\n                    var open = panel.style.display !== 'none';\n                    panel.style.display = open ? 'none' : 'block';\n                    btn.innerHTML = open ? '&#9660;' : '&#9650;';\n                });\n            })(expBtns[eb]);\n        }\n        var saveBtns = container.querySelectorAll('.cmd-save-btn');\n        for (var sb = 0; sb < saveBtns.length; sb++) {\n            (function(btn) {\n                btn.addEventListener('click', function() {\n                    var cmdName = btn.getAttribute('data-cmd');\n                    var panel = container.querySelector('.cmd-accordion[data-cmd=\"' + cmdName + '\"]');\n                    if (!panel) return;\n                    var aliasInput = panel.querySelector('.cmd-alias-input');\n                    var alias = aliasInput ? aliasInput.value.trim() : '';\n                    var roleChks = panel.querySelectorAll('.cmd-role-chk:checked');\n                    var chChks = panel.querySelectorAll('.cmd-ch-chk:checked');\n                    var roles = [], chs = [];\n                    for (var i = 0; i < roleChks.length; i++) roles.push(roleChks[i].getAttribute('data-rid'));\n                    for (var i = 0; i < chChks.length; i++) chs.push(chChks[i].getAttribute('data-chid'));\n                    if (!commandConfigs[cmdName]) commandConfigs[cmdName] = {};\n                    commandConfigs[cmdName].alias = alias;\n                    commandConfigs[cmdName].allowedRoles = roles;\n                    commandConfigs[cmdName].allowedChannels = chs;\n                    saveStates();\n                    updateCounters();\n                });\n            })(saveBtns[sb]);\n        }\n        var resetBtns = container.querySelectorAll('.cmd-reset-btn');\n        for (var rb = 0; rb < resetBtns.length; rb++) {\n            (function(btn) {\n                btn.addEventListener('click', function() {\n                    var cmdName = btn.getAttribute('data-cmd');\n                    delete commandConfigs[cmdName];\n                    render();\n                    saveStates();\n                    updateCounters();\n                });\n            })(resetBtns[rb]);\n        }\n        updateCounters();\n        if (window.zenoI18n && typeof window.zenoI18n.apply === \"function\") { try { window.zenoI18n.apply(); } catch(e) {} }\n    }\n\n    function updateCounters() {\n        var total = 0, enabled = 0;\n        var keys = Object.keys(DB);\n        for (var i = 0; i < keys.length; i++) {\n            var cat = keys[i];\n            var items = DB[cat].items;\n            total += items.length;\n            var catEn = 0;\n            for (var j = 0; j < items.length; j++) { if (isEn(items[j].name)) catEn++; }\n            enabled += catEn;\n            var bId = catBadgeMap[cat];\n            if (bId) {\n                var badge = document.getElementById(bId);\n                if (badge) {\n                    badge.textContent = catEn + '/' + items.length;\n                    badge.className = catEn === 0\n                        ? 'px-2 py-0.5 bg-rose-950/60 text-rose-400 rounded-lg text-[10px] font-mono'\n                        : catEn < items.length\n                            ? 'px-2 py-0.5 bg-amber-950/60 text-amber-400 rounded-lg text-[10px] font-mono'\n                            : 'px-2 py-0.5 bg-emerald-950/60 text-emerald-400 rounded-lg text-[10px] font-mono';\n                }\n            }\n        }\n        var aliasCount = Object.keys(commandConfigs).filter(function(k){ return commandConfigs[k] && commandConfigs[k].alias; }).length;\n        var acEl = document.getElementById('customAliasesCount');\n        if (acEl) acEl.textContent = aliasCount;\n        var te = document.getElementById('totalCmdsCount');\n        var ee = document.getElementById('enabledCmdsCount');\n        if (te) te.textContent = total;\n        if (ee) ee.textContent = enabled;\n    }\n\n    function showSaved() {\n        var el = document.getElementById('cmdSaveIndicator');\n        if (el) { el.classList.remove('opacity-0'); setTimeout(function() { el.classList.add('opacity-0'); }, 2000); }\n    }\n\n    function saveStates() {\n        try {\n            var gId = window.location.pathname.split('/')[2];\n            if (!gId) return;\n            var disArr = Object.keys(disabledCmds).filter(function(k) { return disabledCmds[k]; });\n            var xhr = new XMLHttpRequest();\n            xhr.open('POST', '/api/guild/' + gId + '/settings', true);\n            xhr.setRequestHeader('Content-Type', 'application/json');\n            xhr.onload = function() { try { if (JSON.parse(xhr.responseText).success) showSaved(); } catch(e) {} };\n            xhr.send(JSON.stringify({ disabled_commands: JSON.stringify(disArr), command_configs: JSON.stringify(commandConfigs) }));\n        } catch(e) {}\n    }\n\n    window.switchCmdCategory = function(catKey) {\n        currentCat = catKey;\n        var bKeys = Object.keys(catBtnMap);\n        for (var i = 0; i < bKeys.length; i++) {\n            var btn = document.getElementById(catBtnMap[bKeys[i]]);\n            if (!btn) continue;\n            btn.className = bKeys[i] === catKey\n                ? 'w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold bg-purple-600 text-white shadow-lg transition cursor-pointer'\n                : 'w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-white hover:bg-white/5 transition cursor-pointer';\n        }\n        render();\n    };\n\n    window.searchCommands = function() { render(); };\n\n    window.filterCmdStatus = function(status) {\n        currentFilter = status;\n        var statusList = ['all','enabled','disabled'];\n        for (var i = 0; i < statusList.length; i++) {\n            var s = statusList[i];\n            var label = s === 'all' ? 'All' : s.charAt(0).toUpperCase() + s.slice(1);\n            var btn = document.getElementById('btnFilter' + label);\n            if (btn) btn.className = s === status\n                ? 'px-3 py-1 rounded-lg text-xs font-bold bg-purple-600 text-white transition shadow cursor-pointer'\n                : 'px-3 py-1 rounded-lg text-xs font-bold text-gray-400 hover:text-white transition cursor-pointer';\n        }\n        render();\n    };\n\n    window.toggleAllCategoryCmds = function(enable) {\n        var items = (DB[currentCat] || DB.punishments).items;\n        for (var i = 0; i < items.length; i++) { disabledCmds[items[i].name] = !enable; }\n        saveStates(); render();\n    };\n\n    window.toggleSingleCmd = function(cmdName, enabled) {\n        disabledCmds[cmdName] = !enabled;\n        saveStates(); updateCounters();\n    };\n\n    // Run render immediately\n    render();\n})();\n\n</script>";
             } else if (section === 'automod') {
-formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl">
+formFieldsHtml = `                    <div class="space-y-6 text-left" dir="ltr">
 
                         <!-- 1. Master Toggle & Banner -->
                         <div class="bg-[#12141f] border border-white/5 p-5 rounded-2xl flex items-center justify-between shadow-xl">
@@ -1699,9 +1730,9 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                                 <span class="slider"></span>
                             </label>
                             <div class="flex items-center gap-3">
-                                <div class="text-right">
-                                    <h4 class="font-black text-white text-base">الرقابة التلقائية</h4>
-                                    <p class="text-gray-400 text-xs mt-0.5">حماية سيرفرك من المحتوى غير المرغوب</p>
+                                <div class="text-left">
+                                    <h4 class="font-black text-white text-base">Auto Moderation</h4>
+                                    <p class="text-gray-400 text-xs mt-0.5">Protect your server from unwanted content</p>
                                 </div>
                                 <div class="w-10 h-10 rounded-xl bg-purple-600/20 text-purple-400 flex items-center justify-center text-lg border border-purple-500/30">
                                     🛡️
@@ -1712,101 +1743,101 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                         <!-- 2. Discord AutoMod Header -->
                         <div class="space-y-4">
                             <div class="flex items-center justify-between">
-                                <span class="text-[11px] text-gray-400 font-bold">فلاتر الكلمات</span>
+                                <span class="text-[11px] text-gray-400 font-bold">Word Filters</span>
                                 <div class="flex items-center gap-2 text-indigo-400 font-bold text-xs">
-                                    <span>Discord AutoMod — حماية مدعومة من Discord مباشرة - سريعة وموثوقة</span>
+                                    <span>Discord AutoMod — Protection supported directly by Discord - fast and reliable</span>
                                     <span>🤖</span>
                                 </div>
                             </div>
 
-                            <!-- فلترة الكلمات المحظورة -->
+                            <!-- Banned Words Filtering -->
                             <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between hover:border-purple-500/30 transition">
                                 <div class="flex items-center gap-2">
                                     <label class="toggle"><input type="checkbox" name="bad_words_enabled" value="1" ${settings.bad_words_enabled ? 'checked' : ''} onchange="saveAutomodSetting('bad_words_enabled', this.checked)"><span class="slider"></span></label>
                                     <button type="button" onclick="document.getElementById('sec_strict_words').scrollIntoView({behavior:'smooth'})" class="text-gray-400 hover:text-white p-1 text-xs">⚙️</button>
                                 </div>
-                                <div class="flex items-center gap-3 text-right">
+                                <div class="flex items-center gap-3 text-left">
                                     <div>
-                                        <div class="flex items-center justify-end gap-2">
-                                            <h5 class="text-xs font-bold text-white">فلترة الكلمات المحظورة</h5>
-                                            <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-950/60 text-amber-400 border border-amber-800/40">مفعل</span>
+                                        <div class="flex items-center justify-start gap-2">
+                                            <h5 class="text-xs font-bold text-white">Banned Words Filtering</h5>
+                                            <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-950/60 text-amber-400 border border-amber-800/40">Enabled</span>
                                         </div>
-                                        <p class="text-[10px] text-gray-400 mt-0.5">فلترة الكلمات المسيئة والشتائم والمحتوى غير اللائق</p>
+                                        <p class="text-[10px] text-gray-400 mt-0.5">Filter offensive words, profanity, and inappropriate content</p>
                                     </div>
                                     <span class="text-base">🛡️</span>
                                 </div>
                             </div>
 
-                            <!-- حظر دعوات السيرفرات -->
+                            <!-- Server Invites Blocking -->
                             <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between hover:border-purple-500/30 transition">
                                 <div class="flex items-center gap-2">
                                     <label class="toggle"><input type="checkbox" name="anti_invites" value="1" ${settings.anti_invites ? 'checked' : ''} onchange="saveAutomodSetting('anti_invites', this.checked)"><span class="slider"></span></label>
-                                    <button type="button" onclick="configureAutomodRule('anti_invites', 'حظر دعوات السيرفرات')" class="text-gray-400 hover:text-white p-1 text-xs" title="إعدادات">⚙️</button>
+                                    <button type="button" onclick="configureAutomodRule('anti_invites', 'Server Invites Blocking')" class="text-gray-400 hover:text-white p-1 text-xs" title="Settings">⚙️</button>
                                 </div>
-                                <div class="flex items-center gap-3 text-right">
+                                <div class="flex items-center gap-3 text-left">
                                     <div>
-                                        <div class="flex items-center justify-end gap-2">
-                                            <h5 class="text-xs font-bold text-white">حظر دعوات السيرفرات</h5>
-                                            <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-950/60 text-amber-400 border border-amber-800/40">مفعل</span>
+                                        <div class="flex items-center justify-start gap-2">
+                                            <h5 class="text-xs font-bold text-white">Server Invites Blocking</h5>
+                                            <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-950/60 text-amber-400 border border-amber-800/40">Enabled</span>
                                         </div>
-                                        <p class="text-[10px] text-gray-400 mt-0.5">منع مشاركة روابط دعوات السيرفرات الأخرى</p>
+                                        <p class="text-[10px] text-gray-400 mt-0.5">Prevent sharing of other server invite links</p>
                                     </div>
                                     <span class="text-base">🚨</span>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- 3. فلاتر السبام (Spam Filters) -->
+                        <!-- 3. Spam Filters -->
                         <div class="space-y-3 pt-2">
-                            <span class="text-[11px] text-gray-400 font-bold block">فلاتر السبام</span>
+                            <span class="text-[11px] text-gray-400 font-bold block">Spam Filters</span>
 
-                            <!-- مكافحة السبام -->
+                            <!-- Anti Spam -->
                             <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between hover:border-purple-500/30 transition">
                                 <div class="flex items-center gap-2">
                                     <label class="toggle"><input type="checkbox" name="anti_spam" value="1" ${settings.anti_spam ? 'checked' : ''} onchange="saveAutomodSetting('anti_spam', this.checked)"><span class="slider"></span></label>
-                                    <button type="button" onclick="configureAutomodRule('anti_spam', 'مكافحة السبام')" class="text-gray-400 hover:text-white p-1 text-xs" title="إعدادات">⚙️</button>
+                                    <button type="button" onclick="configureAutomodRule('anti_spam', 'Anti Spam')" class="text-gray-400 hover:text-white p-1 text-xs" title="Settings">⚙️</button>
                                 </div>
-                                <div class="flex items-center gap-3 text-right">
+                                <div class="flex items-center gap-3 text-left">
                                     <div>
-                                        <div class="flex items-center justify-end gap-2">
-                                            <h5 class="text-xs font-bold text-white">مكافحة السبام</h5>
-                                            <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-950/60 text-amber-400 border border-amber-800/40">مفعل</span>
+                                        <div class="flex items-center justify-start gap-2">
+                                            <h5 class="text-xs font-bold text-white">Anti Spam</h5>
+                                            <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-950/60 text-amber-400 border border-amber-800/40">Enabled</span>
                                         </div>
-                                        <p class="text-[10px] text-gray-400 mt-0.5">كشف وحظر الرسائل المزعجة والمتكررة</p>
+                                        <p class="text-[10px] text-gray-400 mt-0.5">Detect and block annoying and repetitive messages</p>
                                     </div>
                                     <span class="text-base">🛡️</span>
                                 </div>
                             </div>
 
-                            <!-- حظر الروابط -->
+                            <!-- Link Blocking -->
                             <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between hover:border-purple-500/30 transition">
                                 <div class="flex items-center gap-2">
                                     <label class="toggle"><input type="checkbox" name="anti_link" value="1" ${settings.anti_link ? 'checked' : ''} onchange="saveAutomodSetting('anti_link', this.checked)"><span class="slider"></span></label>
-                                    <button type="button" onclick="configureAutomodRule('anti_link', 'حظر الروابط')" class="text-gray-400 hover:text-white p-1 text-xs" title="إعدادات">⚙️</button>
+                                    <button type="button" onclick="configureAutomodRule('anti_link', 'Link Blocking')" class="text-gray-400 hover:text-white p-1 text-xs" title="Settings">⚙️</button>
                                 </div>
-                                <div class="flex items-center gap-3 text-right">
+                                <div class="flex items-center gap-3 text-left">
                                     <div>
-                                        <div class="flex items-center justify-end gap-2">
-                                            <h5 class="text-xs font-bold text-white">حظر الروابط</h5>
-                                            <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-950/60 text-amber-400 border border-amber-800/40">مفعل</span>
+                                        <div class="flex items-center justify-start gap-2">
+                                            <h5 class="text-xs font-bold text-white">Link Blocking</h5>
+                                            <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-950/60 text-amber-400 border border-amber-800/40">Enabled</span>
                                         </div>
-                                        <p class="text-[10px] text-gray-400 mt-0.5">حظر الروابط الغير مسموح بها</p>
+                                        <p class="text-[10px] text-gray-400 mt-0.5">Block unauthorized links</p>
                                     </div>
                                     <span class="text-base">🗑️</span>
                                 </div>
                             </div>
 
-                            <!-- حظر سبام المنشن -->
+                            <!-- Mention Spam Blocking -->
                             <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between hover:border-purple-500/30 transition">
                                 <div class="flex items-center gap-2">
                                     <label class="toggle"><input type="checkbox" name="anti_mass_mention" value="1" ${settings.anti_mass_mention ? 'checked' : ''} onchange="saveAutomodSetting('anti_mass_mention', this.checked)"><span class="slider"></span></label>
-                                    <button type="button" onclick="configureAutomodRule('anti_mass_mention', 'حظر سبام المنشن')" class="text-gray-400 hover:text-white p-1 text-xs" title="إعدادات">⚙️</button>
+                                    <button type="button" onclick="configureAutomodRule('anti_mass_mention', 'Mention Spam Blocking')" class="text-gray-400 hover:text-white p-1 text-xs" title="Settings">⚙️</button>
                                 </div>
-                                <div class="flex items-center gap-3 text-right">
+                                <div class="flex items-center gap-3 text-left">
                                     <div>
-                                        <div class="flex items-center justify-end gap-2">
-                                            <h5 class="text-xs font-bold text-white">حظر سبام المنشن</h5>
-                                            <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-950/60 text-amber-400 border border-amber-800/40">مفعل</span>
+                                        <div class="flex items-center justify-start gap-2">
+                                            <h5 class="text-xs font-bold text-white">Mention Spam Blocking</h5>
+                                            <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-950/60 text-amber-400 border border-amber-800/40">Enabled</span>
                                         </div>
                                         <p class="text-[10px] text-gray-400 mt-0.5">حدد عدد المنشنات المسموح بها في الرسالة الواحدة</p>
                                     </div>
@@ -1897,91 +1928,91 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                                 </div>
                             </div>
 
-                            <!-- إزعاج الإيموجي -->
+                            <!-- Emoji Spam -->
                             <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between hover:border-purple-500/30 transition">
                                 <div class="flex items-center gap-2">
                                     <label class="toggle"><input type="checkbox" name="anti_emoji" value="1" ${settings.anti_emoji ? 'checked' : ''} onchange="saveAutomodSetting('anti_emoji', this.checked)"><span class="slider"></span></label>
-                                    <button type="button" onclick="configureAutomodRule('anti_emoji', 'إزعاج الإيموجي')" class="text-gray-400 hover:text-white p-1 text-xs" title="إعدادات">⚙️</button>
+                                    <button type="button" onclick="configureAutomodRule('anti_emoji', 'Emoji Spam')" class="text-gray-400 hover:text-white p-1 text-xs" title="Settings">⚙️</button>
                                 </div>
-                                <div class="flex items-center gap-3 text-right">
+                                <div class="flex items-center gap-3 text-left">
                                     <div>
-                                        <div class="flex items-center justify-end gap-2">
-                                            <h5 class="text-xs font-bold text-white">إزعاج الإيموجي</h5>
-                                            <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-950/60 text-amber-400 border border-amber-800/40">مفعل</span>
+                                        <div class="flex items-center justify-start gap-2">
+                                            <h5 class="text-xs font-bold text-white">Emoji Spam</h5>
+                                            <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-950/60 text-amber-400 border border-amber-800/40">Enabled</span>
                                         </div>
-                                        <p class="text-[10px] text-gray-400 mt-0.5">منع الاستخدام المفرط للرموز التعبيرية</p>
+                                        <p class="text-[10px] text-gray-400 mt-0.5">Prevent excessive use of emojis</p>
                                     </div>
                                     <span class="text-base">✨</span>
                                 </div>
                             </div>
 
-                            <!-- تكرار النص -->
+                            <!-- Text Repeat -->
                             <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between hover:border-purple-500/30 transition">
                                 <div class="flex items-center gap-2">
                                     <label class="toggle"><input type="checkbox" name="anti_text_repeat" value="1" ${settings.anti_text_repeat ? 'checked' : ''} onchange="saveAutomodSetting('anti_text_repeat', this.checked)"><span class="slider"></span></label>
-                                    <button type="button" onclick="configureAutomodRule('anti_text_repeat', 'تكرار النص')" class="text-gray-400 hover:text-white p-1 text-xs" title="إعدادات">⚙️</button>
+                                    <button type="button" onclick="configureAutomodRule('anti_text_repeat', 'Text Repeat')" class="text-gray-400 hover:text-white p-1 text-xs" title="Settings">⚙️</button>
                                 </div>
-                                <div class="flex items-center gap-3 text-right">
+                                <div class="flex items-center gap-3 text-left">
                                     <div>
-                                        <div class="flex items-center justify-end gap-2">
-                                            <h5 class="text-xs font-bold text-white">تكرار النص</h5>
-                                            <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-950/60 text-amber-400 border border-amber-800/40">مفعل</span>
+                                        <div class="flex items-center justify-start gap-2">
+                                            <h5 class="text-xs font-bold text-white">Text Repeat</h5>
+                                            <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-950/60 text-amber-400 border border-amber-800/40">Enabled</span>
                                         </div>
-                                        <p class="text-[10px] text-gray-400 mt-0.5">منع تكرار نفس الحروف أو الكلمات بشكل مفرط</p>
+                                        <p class="text-[10px] text-gray-400 mt-0.5">Prevent excessive repetition of same characters or words</p>
                                     </div>
                                     <span class="text-base">⏳</span>
                                 </div>
                             </div>
 
-                            <!-- رسائل مكررة -->
+                            <!-- Duplicate Messages -->
                             <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between hover:border-purple-500/30 transition">
                                 <div class="flex items-center gap-2">
                                     <label class="toggle"><input type="checkbox" name="anti_repeat_messages" value="1" ${settings.anti_repeat_messages ? 'checked' : ''} onchange="saveAutomodSetting('anti_repeat_messages', this.checked)"><span class="slider"></span></label>
-                                    <button type="button" onclick="configureAutomodRule('anti_repeat_messages', 'رسائل مكررة')" class="text-gray-400 hover:text-white p-1 text-xs" title="إعدادات">⚙️</button>
+                                    <button type="button" onclick="configureAutomodRule('anti_repeat_messages', 'Duplicate Messages')" class="text-gray-400 hover:text-white p-1 text-xs" title="Settings">⚙️</button>
                                 </div>
-                                <div class="flex items-center gap-3 text-right">
+                                <div class="flex items-center gap-3 text-left">
                                     <div>
-                                        <div class="flex items-center justify-end gap-2">
-                                            <h5 class="text-xs font-bold text-white">رسائل مكررة</h5>
-                                            <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-950/60 text-amber-400 border border-amber-800/40">مفعل</span>
+                                        <div class="flex items-center justify-start gap-2">
+                                            <h5 class="text-xs font-bold text-white">Duplicate Messages</h5>
+                                            <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-950/60 text-amber-400 border border-amber-800/40">Enabled</span>
                                         </div>
-                                        <p class="text-[10px] text-gray-400 mt-0.5">منع إرسال نفس الرسالة عدة مرات متتالية</p>
+                                        <p class="text-[10px] text-gray-400 mt-0.5">Prevent sending the same message multiple times consecutively</p>
                                     </div>
                                     <span class="text-base">📜</span>
                                 </div>
                             </div>
 
-                            <!-- سبام الملصقات -->
+                            <!-- Sticker Spam -->
                             <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between hover:border-purple-500/30 transition">
                                 <div class="flex items-center gap-2">
                                     <label class="toggle"><input type="checkbox" name="anti_stickers" value="1" ${settings.anti_stickers ? 'checked' : ''} onchange="saveAutomodSetting('anti_stickers', this.checked)"><span class="slider"></span></label>
-                                    <button type="button" onclick="configureAutomodRule('anti_stickers', 'سبام الملصقات')" class="text-gray-400 hover:text-white p-1 text-xs" title="إعدادات">⚙️</button>
+                                    <button type="button" onclick="configureAutomodRule('anti_stickers', 'Sticker Spam')" class="text-gray-400 hover:text-white p-1 text-xs" title="Settings">⚙️</button>
                                 </div>
-                                <div class="flex items-center gap-3 text-right">
+                                <div class="flex items-center gap-3 text-left">
                                     <div>
-                                        <div class="flex items-center justify-end gap-2">
-                                            <h5 class="text-xs font-bold text-white">سبام الملصقات</h5>
-                                            <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-950/60 text-amber-400 border border-amber-800/40">مفعل</span>
+                                        <div class="flex items-center justify-start gap-2">
+                                            <h5 class="text-xs font-bold text-white">Sticker Spam</h5>
+                                            <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-950/60 text-amber-400 border border-amber-800/40">Enabled</span>
                                         </div>
-                                        <p class="text-[10px] text-gray-400 mt-0.5">منع إرسال الملصقات بشكل متكرر وسريع</p>
+                                        <p class="text-[10px] text-gray-400 mt-0.5">Prevent sending stickers repeatedly and quickly</p>
                                     </div>
                                     <span class="text-base">✨</span>
                                 </div>
                             </div>
 
-                            <!-- سبام الأسطر -->
+                            <!-- Line Spam -->
                             <div class="bg-[#0b0d14] border border-white/5 p-4 rounded-xl flex items-center justify-between hover:border-purple-500/30 transition">
                                 <div class="flex items-center gap-2">
                                     <label class="toggle"><input type="checkbox" name="anti_line_spam" value="1" ${settings.anti_line_spam ? 'checked' : ''} onchange="saveAutomodSetting('anti_line_spam', this.checked)"><span class="slider"></span></label>
-                                    <button type="button" onclick="configureAutomodRule('anti_line_spam', 'سبام الأسطر')" class="text-gray-400 hover:text-white p-1 text-xs" title="إعدادات">⚙️</button>
+                                    <button type="button" onclick="configureAutomodRule('anti_line_spam', 'Line Spam')" class="text-gray-400 hover:text-white p-1 text-xs" title="Settings">⚙️</button>
                                 </div>
-                                <div class="flex items-center gap-3 text-right">
+                                <div class="flex items-center gap-3 text-left">
                                     <div>
-                                        <div class="flex items-center justify-end gap-2">
-                                            <h5 class="text-xs font-bold text-white">سبام الأسطر</h5>
-                                            <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-950/60 text-amber-400 border border-amber-800/40">مفعل</span>
+                                        <div class="flex items-center justify-start gap-2">
+                                            <h5 class="text-xs font-bold text-white">Line Spam</h5>
+                                            <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-950/60 text-amber-400 border border-amber-800/40">Enabled</span>
                                         </div>
-                                        <p class="text-[10px] text-gray-400 mt-0.5">منع الرسائل التي تحتوي على أسطر فارغة كثيرة</p>
+                                        <p class="text-[10px] text-gray-400 mt-0.5">Prevent messages with many empty lines</p>
                                     </div>
                                     <span class="text-base">⏳</span>
                                 </div>
@@ -7442,7 +7473,7 @@ console.log('[ZENO LOGS] Script loaded successfully. logsState keys:', Object.ke
                 const catCounts = {};
                 helpCommands.forEach(c => { catCounts[c.cat] = (catCounts[c.cat] || 0) + 1; });
 
-                formFieldsHtml = '<div class="space-y-6 text-right" dir="rtl">'
+                formFieldsHtml = '<div class="space-y-6 text-left" dir="ltr">'
                     + '<div class="bg-gradient-to-r from-[#1a132e] via-[#12141f] to-[#1a132e] border border-purple-500/20 p-6 rounded-3xl shadow-2xl">'
                     + '<div class="flex items-center justify-between flex-wrap gap-4">'
                     + '<div class="flex items-center gap-3 flex-wrap">'
@@ -7508,57 +7539,57 @@ console.log('[ZENO LOGS] Script loaded successfully. logsState keys:', Object.ke
                     + 'if (filterEl) filterEl.addEventListener("change", filterCards);'
                     + '})();';
             } else if (section === 'ai') {
-                title = 'الذكاء الاصطناعي (ZENO AI & Web) 🤖';
+                title = 'AI & Web (ZENO AI & Web) 🤖';
 
-                formFieldsHtml = '<div class="space-y-6 text-right" dir="rtl">'
+                formFieldsHtml = '<div class="space-y-6 text-left" dir="ltr">'
                     + '<div class="bg-gradient-to-r from-[#1c0f38] via-[#12141f] to-[#0d1527] border border-purple-500/30 p-6 rounded-3xl shadow-2xl relative overflow-hidden">'
                     + '<div class="flex items-center justify-between flex-wrap gap-4 relative z-10">'
                     + '<div class="flex items-center gap-2 flex-wrap">'
                     + '<span class="bg-purple-600/30 border border-purple-500/50 text-purple-300 text-xs font-bold px-3 py-1 rounded-full">ZENO AI</span>'
-                    + '<span class="bg-emerald-600/30 border border-emerald-500/50 text-emerald-300 text-xs font-bold px-3 py-1 rounded-full">🌐 متصل بالإنترنت</span>'
-                    + '<span class="bg-indigo-600/30 border border-indigo-500/50 text-indigo-300 text-xs font-bold px-3 py-1 rounded-full">تصفح حي</span>'
+                    + '<span class="bg-emerald-600/30 border border-emerald-500/50 text-emerald-300 text-xs font-bold px-3 py-1 rounded-full">🌐 Online</span>'
+                    + '<span class="bg-indigo-600/30 border border-indigo-500/50 text-indigo-300 text-xs font-bold px-3 py-1 rounded-full">Live Browsing</span>'
                     + '</div>'
                     + '<div>'
-                    + '<h3 class="text-2xl font-black text-white flex items-center gap-2 justify-end"><span>الذكاء الاصطناعي والتصفح الذكي</span><span>🤖</span></h3>'
-                    + '<p class="text-gray-400 text-xs mt-1">تحدث مباشرة مع ZENO AI، واختبر قدرات التصفح الحي والبحث من الإنترنت.</p>'
+                    + '<h3 class="text-2xl font-black text-white flex items-center gap-2 justify-start"><span>🤖</span><span>AI & Smart Browsing</span></h3>'
+                    + '<p class="text-gray-400 text-xs mt-1">Chat directly with ZENO AI and test live browsing capabilities and internet search.</p>'
                     + '</div>'
                     + '</div>'
                     + '</div>'
                     + '<div class="grid grid-cols-1 md:grid-cols-3 gap-4">'
-                    + '<div class="bg-[#12141f] border border-white/5 rounded-2xl p-4 text-right">'
+                    + '<div class="bg-[#12141f] border border-white/5 rounded-2xl p-4 text-left">'
                     + '<div class="text-purple-400 text-xl mb-1">⚡</div>'
-                    + '<h4 class="text-white font-bold text-sm">التفاعل التلقائي في السيرفر</h4>'
-                    + '<p class="text-gray-400 text-xs mt-1 leading-relaxed">أي عضو يكتب <code class="text-purple-300 bg-purple-950/60 px-1 py-0.5 rounded">zeno</code> أو <code class="text-purple-300 bg-purple-950/60 px-1 py-0.5 rounded">زينو</code> أو يمنشن البوت سيرد عليه الذكاء الاصطناعي فوراً.</p>'
+                    + '<h4 class="text-white font-bold text-sm">Auto Interaction in Server</h4>'
+                    + '<p class="text-gray-400 text-xs mt-1 leading-relaxed">Any member who types <code class="text-purple-300 bg-purple-950/60 px-1 py-0.5 rounded">zeno</code> or <code class="text-purple-300 bg-purple-950/60 px-1 py-0.5 rounded">زينو</code> or mentions the bot will get an instant AI response.</p>'
                     + '</div>'
-                    + '<div class="bg-[#12141f] border border-white/5 rounded-2xl p-4 text-right">'
+                    + '<div class="bg-[#12141f] border border-white/5 rounded-2xl p-4 text-left">'
                     + '<div class="text-cyan-400 text-xl mb-1">🌐</div>'
-                    + '<h4 class="text-white font-bold text-sm">تصفح الويب المباشر</h4>'
-                    + '<p class="text-gray-400 text-xs mt-1 leading-relaxed">مدعوم بـ Google Search Grounding ومحرك بحث حي للإجابة عن أحدث الأخبار والنتائج والأسعار.</p>'
+                    + '<h4 class="text-white font-bold text-sm">Live Web Browsing</h4>'
+                    + '<p class="text-gray-400 text-xs mt-1 leading-relaxed">Powered by Google Search Grounding and live search engine for latest news, results, and prices.</p>'
                     + '</div>'
-                    + '<div class="bg-[#12141f] border border-white/5 rounded-2xl p-4 text-right">'
+                    + '<div class="bg-[#12141f] border border-white/5 rounded-2xl p-4 text-left">'
                     + '<div class="text-amber-400 text-xl mb-1">⌨️</div>'
-                    + '<h4 class="text-white font-bold text-sm">أوامر ديسكورد السريعة</h4>'
-                    + '<p class="text-gray-400 text-xs mt-1 leading-relaxed">استخدم أوامر السلاش <code class="text-amber-300 bg-amber-950/60 px-1 py-0.5 rounded">/ai</code> و <code class="text-amber-300 bg-amber-950/60 px-1 py-0.5 rounded">/ask</code> أو البرفكس <code class="text-amber-300 bg-amber-950/60 px-1 py-0.5 rounded">#ai</code> لأي سؤال.</p>'
+                    + '<h4 class="text-white font-bold text-sm">Quick Discord Commands</h4>'
+                    + '<p class="text-gray-400 text-xs mt-1 leading-relaxed">Use slash commands <code class="text-amber-300 bg-amber-950/60 px-1 py-0.5 rounded">/ai</code> and <code class="text-amber-300 bg-amber-950/60 px-1 py-0.5 rounded">/ask</code> or prefix <code class="text-amber-300 bg-amber-950/60 px-1 py-0.5 rounded">#ai</code> for any question.</p>'
                     + '</div>'
                     + '</div>'
                     + '<div class="bg-[#12141f] border border-white/10 rounded-3xl p-6 shadow-2xl space-y-4">'
                     + '<div class="flex items-center justify-between border-b border-white/5 pb-3">'
-                    + '<span class="text-xs text-gray-400">محادثة تجريبية مباشرة من الداشبورد</span>'
-                    + '<h4 class="text-white font-black text-sm flex items-center gap-2"><span>تجربة الذكاء الاصطناعي الحي (Live Chat)</span><span>💬</span></h4>'
+                    + '<h4 class="text-white font-black text-sm flex items-center gap-2"><span>💬</span><span>Live AI Experience (Live Chat)</span></h4>'
+                    + '<span class="text-xs text-gray-400">Live Chat Test from Dashboard</span>'
                     + '</div>'
                     + '<div id="ai-chat-box" class="h-80 overflow-y-auto space-y-3 p-4 bg-[#0a0c13] border border-white/5 rounded-2xl text-xs custom-scrollbar">'
-                    + '<div class="flex items-start gap-2.5 justify-start flex-row-reverse">'
+                    + '<div class="flex items-start gap-2.5 justify-start">'
                     + '<div class="w-7 h-7 rounded-xl bg-purple-600/30 border border-purple-500/40 flex items-center justify-center text-sm shrink-0">🤖</div>'
-                    + '<div class="bg-[#161928] border border-white/10 text-gray-200 p-3 rounded-2xl max-w-[80%] leading-relaxed text-right">'
-                    + 'مرحباً بك في لوحة تحكم ZENO! أنا مساعدك الذكي المتصل بالإنترنت، اسألني عن أي شيء في سيرفرك أو ابحث عن أحدث الأخبار والمعلومات وسأجيبك فوراً.'
+                    + '<div class="bg-[#161928] border border-white/10 text-gray-200 p-3 rounded-2xl max-w-[80%] leading-relaxed text-left">'
+                    + 'Welcome to ZENO Dashboard! I am your smart AI assistant connected to the internet. Ask me anything about your server or search for latest news and information, and I will answer instantly.'
                     + '</div>'
                     + '</div>'
                     + '</div>'
                     + '<div class="flex items-center gap-2">'
                     + '<button type="button" id="ai-send-btn" class="px-5 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs rounded-xl transition flex items-center gap-1.5 shrink-0 shadow-lg shadow-purple-900/30">'
-                    + '<span>إرسال</span><span>🚀</span>'
+                    + '<span>🚀</span><span>Send</span>'
                     + '</button>'
-                    + '<input type="text" id="ai-input" placeholder="اسأل ZENO أي سؤال أو ابحث في الويب..." dir="rtl" class="flex-1 bg-[#0a0c13] border border-white/10 focus:border-purple-500 rounded-xl px-4 py-2.5 text-xs text-white outline-none transition">'
+                    + '<input type="text" id="ai-input" placeholder="Ask ZENO any question or search the web..." dir="ltr" class="flex-1 bg-[#0a0c13] border border-white/10 focus:border-purple-500 rounded-xl px-4 py-2.5 text-xs text-white outline-none transition">'
                     + '</div>'
                     + '</div>'
                     + '</div>';
@@ -9705,7 +9736,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
 
             res.send(`
             <!DOCTYPE html>
-            <html lang="ar" dir="rtl" class="dark">
+            <html lang="en" dir="ltr" class="dark">
             <head>
                 <meta charset="UTF-8">
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9865,7 +9896,7 @@ formFieldsHtml = `                    <div class="space-y-6 text-right" dir="rtl
                                     </a>
                                     <a href="/dashboard/${guildId}/ai" class="flex items-center justify-between px-3 py-2 rounded-xl ${section === 'ai' ? 'bg-purple-600 text-white font-bold shadow-md' : 'text-gray-300 hover:text-white hover:bg-[#151724]'} transition group">
                                         <span class="text-[9px] font-bold text-purple-300 bg-purple-950/70 border border-purple-500/30 px-1.5 py-0.2 rounded">ZENO</span>
-                                        <span class="flex items-center gap-2"><span>الذكاء الاصطناعي</span><span class="text-gray-400 group-hover:text-purple-400">🤖</span></span>
+                                        <span class="flex items-center gap-2"><span class="text-gray-400 group-hover:text-purple-400">🤖</span><span>AI & Web</span></span>
                                     </a>
                                 </div>
                             </div>

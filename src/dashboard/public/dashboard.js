@@ -1,5 +1,11 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // إصلاح جميع أزرار الحفظ في كل الصفحات
+    function t(text) {
+        if (window.ZenoI18n && typeof window.ZenoI18n.translate === 'function') {
+            return window.ZenoI18n.translate(text);
+        }
+        return text;
+    }
+
     document.querySelectorAll('form').forEach(form => {
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -7,7 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!btn) return;
 
             const originalText = btn.textContent;
-            btn.textContent = 'جارٍ الحفظ...';
+            btn.textContent = t('جارٍ الحفظ...');
             btn.disabled = true;
 
             try {
@@ -22,10 +28,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
                 
                 const result = await res.json();
-                if (result.success) alert('تم الحفظ بنجاح!');
-                else alert('خطأ: ' + (result.error || 'فشل في حفظ الإعدادات'));
+                if (result.success) alert(t('تم الحفظ بنجاح!'));
+                else alert(t('خطأ: ') + (result.error || t('فشل في حفظ الإعدادات')));
             } catch (err) {
-                alert('حدث خطأ في الاتصال');
+                alert(t('حدث خطأ في الاتصال'));
             } finally {
                 btn.textContent = originalText;
                 btn.disabled = false;
