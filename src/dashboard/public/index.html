@@ -16,6 +16,27 @@
             margin: 0;
             padding: 0;
         }
+        html[lang="en"] body, html.zeno-lang-en body {
+            font-family: 'Cairo', 'Segoe UI', system-ui, -apple-system, sans-serif !important;
+            letter-spacing: -0.01em;
+        }
+        html[lang="en"] h1, html.zeno-lang-en h1,
+        html[lang="en"] h2, html.zeno-lang-en h2,
+        html[lang="en"] h3, html.zeno-lang-en h3,
+        html[lang="en"] h4, html.zeno-lang-en h4 {
+            font-family: 'Cairo', 'Segoe UI', 'Poppins', system-ui, sans-serif !important;
+        }
+        html[dir="rtl"] * { direction: rtl; }
+        html[dir="ltr"] * { direction: ltr; }
+        html[dir="rtl"] main, html[dir="rtl"] section, html[dir="rtl"] #features {
+            text-align: center;
+        }
+        html[dir="rtl"] #features {
+            text-align: right !important;
+        }
+        html[dir="ltr"] #features {
+            text-align: left !important;
+        }
         .purple-glow-bg {
             background: radial-gradient(circle at 50% 20%, rgba(147, 51, 234, 0.16), transparent 65%);
         }
@@ -54,10 +75,31 @@
         .lang-ar-block { display: block; }
         .lang-en-block { display: none; }
 
+        html[lang="ar"] .lang-ar { display: inline !important; }
+        html[lang="ar"] .lang-en { display: none !important; }
+        html[lang="ar"] .lang-ar-block { display: block !important; }
+        html[lang="ar"] .lang-en-block { display: none !important; }
         html[lang="en"] .lang-ar { display: none !important; }
         html[lang="en"] .lang-en { display: inline !important; }
         html[lang="en"] .lang-ar-block { display: none !important; }
         html[lang="en"] .lang-en-block { display: block !important; }
+
+        /* Explicit blocks for titles/paragraphs that must always be block-level */
+        h1 .lang-ar, h1 .lang-en,
+        h2 .lang-ar, h2 .lang-en,
+        h3 .lang-ar, h3 .lang-en,
+        p  .lang-ar, p  .lang-en,
+        li .lang-ar, li .lang-en,
+        a  .lang-ar, a  .lang-en,
+        button .lang-ar, button .lang-en,
+        span.lang-ar-block, span.lang-en-block,
+        div .lang-ar-block,  div .lang-en-block {
+            display: inline !important;
+        }
+        .lang-ar-block, .lang-en-block {
+            display: block !important;
+            width: 100%;
+        }
 
         /* ===== Ensure all links/buttons are always clickable ===== */
         html { scroll-behavior: smooth; }
@@ -76,27 +118,77 @@
     </style>
 
     <script>
+        /* ===== Apply saved lang on page load BEFORE body ===== */
+        (function applySavedZenoLang() {
+            var saved = null;
+            try { saved = localStorage.getItem('zeno_dashboard_lang') || localStorage.getItem('zeno_lang'); } catch(e){}
+            if (!saved) {
+                var cook = document.cookie.match(/zeno_dashboard_lang=([^;]+)/);
+                saved = cook ? cook[1] : null;
+            }
+            var lang = (saved === 'en' || saved === 'ar') ? saved : null;
+            if (!lang) {
+                try {
+                    var nav = navigator.language || navigator.userLanguage || '';
+                    lang = nav.toLowerCase().startsWith('ar') ? 'ar' : 'en';
+                } catch(e){ lang = 'en'; }
+            }
+            document.documentElement.setAttribute('lang', lang);
+            document.documentElement.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
+            if (lang === 'en') {
+                document.documentElement.classList.add('zeno-lang-en');
+                document.documentElement.classList.remove('zeno-lang-ar');
+            } else {
+                document.documentElement.classList.add('zeno-lang-ar');
+                document.documentElement.classList.remove('zeno-lang-en');
+            }
+        })();
+
         /* ===== Global lang toggle - defined BEFORE body so always available ===== */
+        function applyZenoLangVisibility(lang) {
+            document.documentElement.setAttribute('lang', lang);
+            document.documentElement.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
+            document.documentElement.classList.toggle('zeno-lang-en', lang === 'en');
+            document.documentElement.classList.toggle('zeno-lang-ar', lang === 'ar');
+
+            document.querySelectorAll('.lang-ar, .lang-ar-block, .lang-en, .lang-en-block').forEach(function(el) {
+                var cls = Array.from(el.classList);
+                var isArSpan = cls.indexOf('lang-ar') > -1 || cls.indexOf('lang-ar-block') > -1;
+                var isBlock = (cls.indexOf('lang-ar-block') > -1 || cls.indexOf('lang-en-block') > -1);
+                var show = (lang === 'ar' && isArSpan) || (lang === 'en' && !isArSpan);
+                if (isBlock) {
+                    el.style.display = show ? 'block' : 'none';
+                } else {
+                    el.style.display = show ? 'inline' : 'none';
+                }
+            });
+
+            document.querySelectorAll('.zeno-lang-toggle-btn').forEach(function(btn) {
+                btn.innerHTML = lang === 'ar'
+                    ? '<span class="text-sm">🌐</span><span class="font-black text-xs uppercase tracking-wider">EN</span>'
+                    : '<span class="text-sm">🌐</span><span class="font-black text-xs uppercase tracking-wider">AR</span>';
+            });
+        }
+
         function toggleZenoLang() {
             if (window.zenoI18n && window.zenoI18n.toggleLang) {
                 window.zenoI18n.toggleLang();
-            } else {
-                var current = document.documentElement.getAttribute('lang') || 'ar';
-                var next = current === 'ar' ? 'en' : 'ar';
-                try {
-                    localStorage.setItem('zeno_dashboard_lang', next);
-                    localStorage.setItem('zeno_lang', next);
-                } catch(e){}
-                document.cookie = 'zeno_dashboard_lang=' + next + ';path=/;max-age=31536000;SameSite=Lax';
-                document.documentElement.setAttribute('lang', next);
-                document.documentElement.setAttribute('dir', next === 'ar' ? 'rtl' : 'ltr');
-                document.querySelectorAll('.zeno-lang-toggle-btn').forEach(function(btn) {
-                    btn.innerHTML = next === 'ar'
-                        ? '<span class="text-sm">🌐</span><span class="font-black text-xs uppercase tracking-wider">EN</span>'
-                        : '<span class="text-sm">🌐</span><span class="font-black text-xs uppercase tracking-wider">AR</span>';
-                });
+                return;
             }
+            var current = document.documentElement.getAttribute('lang') || 'ar';
+            var next = current === 'ar' ? 'en' : 'ar';
+            try {
+                localStorage.setItem('zeno_dashboard_lang', next);
+                localStorage.setItem('zeno_lang', next);
+            } catch(e){}
+            document.cookie = 'zeno_dashboard_lang=' + next + ';path=/;max-age=31536000;SameSite=Lax';
+            applyZenoLangVisibility(next);
         }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            var lang = document.documentElement.getAttribute('lang') || 'en';
+            applyZenoLangVisibility(lang);
+        });
     </script>
 </head>
 
