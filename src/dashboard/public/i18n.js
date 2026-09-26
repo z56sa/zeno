@@ -928,10 +928,24 @@
         }
     }
 
+    function isManualLangPage() {
+        if (document.body && document.body.hasAttribute && document.body.hasAttribute('data-zeno-manual-lang')) return true;
+        if (document.documentElement && document.documentElement.hasAttribute && document.documentElement.hasAttribute('data-zeno-manual-lang')) return true;
+        try {
+            var lp = location.pathname;
+            if (lp === '/' || lp === '' || lp === '/dashboard' || lp === '/index.html' || lp === '/dashboard/') {
+                var hasLangSpans = document.querySelector && (document.querySelector('.lang-ar') || document.querySelector('.lang-en'));
+                if (hasLangSpans) return true;
+            }
+        } catch(e){}
+        return false;
+    }
+
     function applyLanguage() {
         const lang = detectLang();
         applyLayout(lang);
         if (!document.body) return lang;
+        if (isManualLangPage()) return lang;
         if (lang === 'en') {
             translateNodeWithDict(document.body, dictionary, arKeysByLength);
         } else {
@@ -944,6 +958,14 @@
         const next = detectLang() === 'ar' ? 'en' : 'ar';
         persistLang(next);
         applyLayout(next);
+        if (isManualLangPage()) {
+            try {
+                if (window.applyZenoLangVisibility) {
+                    window.applyZenoLangVisibility(next);
+                }
+            } catch(e){}
+            return;
+        }
         location.reload();
     }
 
@@ -996,6 +1018,7 @@
     let observerActive = false;
     function startMutationObserver() {
         if (observerActive || !('MutationObserver' in window)) return;
+        if (isManualLangPage()) return;
         observerActive = true;
         const observer = new MutationObserver(function(mutations) {
             const lang = detectLang();
