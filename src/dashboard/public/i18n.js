@@ -846,7 +846,8 @@
             'html.zeno-lang-en .text-right { text-align: left !important; }',
             'html.zeno-lang-en .justify-end { justify-content: flex-start !important; }',
             'html.zeno-lang-en .flex-row-reverse { flex-direction: row !important; }',
-            'html.zeno-lang-en body > .flex-1.flex { flex-direction: row-reverse; }',
+            'html.zeno-lang-en body > .flex-1.flex.items-stretch { flex-direction: row-reverse; }',
+            'html.zeno-lang-en body > div.flex-1.flex:not(.flex-col) { flex-direction: row-reverse; }',
 
             'html.zeno-lang-en .lang-ar, html.zeno-lang-en [data-lang="ar"], html.zeno-lang-en span[lang="ar"] { display: none !important; }',
             'html.zeno-lang-ar .lang-en, html.zeno-lang-ar [data-lang="en"], html.zeno-lang-ar span[lang="en"] { display: none !important; }',
@@ -958,14 +959,7 @@
         const next = detectLang() === 'ar' ? 'en' : 'ar';
         persistLang(next);
         applyLayout(next);
-        if (isManualLangPage()) {
-            try {
-                if (window.applyZenoLangVisibility) {
-                    window.applyZenoLangVisibility(next);
-                }
-            } catch(e){}
-            return;
-        }
+        // Always reload to ensure clean render with correct lang CSS classes
         location.reload();
     }
 

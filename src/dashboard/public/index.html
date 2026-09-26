@@ -69,36 +69,51 @@
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
         }
 
-        /* ===== Bilingual system: show/hide based on html[lang] ===== */
-        .lang-ar { display: inline; }
-        .lang-en { display: none; }
+        /* ===== Bilingual system: show/hide based on html[lang] =====
+           RULES ARE: 
+           .lang-ar / .lang-en     = inline text (span inside a parent)
+           .lang-ar-block / .lang-en-block = block-level content (full row)
+        */
+        .lang-ar       { display: inline; }
+        .lang-en       { display: none; }
         .lang-ar-block { display: block; }
         .lang-en-block { display: none; }
 
-        html[lang="ar"] .lang-ar { display: inline !important; }
-        html[lang="ar"] .lang-en { display: none !important; }
-        html[lang="ar"] .lang-ar-block { display: block !important; }
-        html[lang="ar"] .lang-en-block { display: none !important; }
-        html[lang="en"] .lang-ar { display: none !important; }
-        html[lang="en"] .lang-en { display: inline !important; }
-        html[lang="en"] .lang-ar-block { display: none !important; }
-        html[lang="en"] .lang-en-block { display: block !important; }
+        html[lang="ar"] .lang-ar        { display: inline !important; }
+        html[lang="ar"] .lang-en        { display: none   !important; }
+        html[lang="ar"] .lang-ar-block  { display: block  !important; }
+        html[lang="ar"] .lang-en-block  { display: none   !important; }
 
-        /* Explicit blocks for titles/paragraphs that must always be block-level */
+        html[lang="en"] .lang-ar        { display: none   !important; }
+        html[lang="en"] .lang-en        { display: inline !important; }
+        html[lang="en"] .lang-ar-block  { display: none   !important; }
+        html[lang="en"] .lang-en-block  { display: block  !important; }
+
+        /* Compatibility with zeno-lang-* class names on <html> */
+        html.zeno-lang-ar .lang-ar        { display: inline !important; }
+        html.zeno-lang-ar .lang-en        { display: none   !important; }
+        html.zeno-lang-ar .lang-ar-block  { display: block  !important; }
+        html.zeno-lang-ar .lang-en-block  { display: none   !important; }
+        html.zeno-lang-en .lang-ar        { display: none   !important; }
+        html.zeno-lang-en .lang-en        { display: inline !important; }
+        html.zeno-lang-en .lang-ar-block  { display: none   !important; }
+        html.zeno-lang-en .lang-en-block  { display: block  !important; }
+
+        /* Inline-level elements: always inline (never block inside titles/buttons) */
         h1 .lang-ar, h1 .lang-en,
         h2 .lang-ar, h2 .lang-en,
         h3 .lang-ar, h3 .lang-en,
+        h4 .lang-ar, h4 .lang-en,
         p  .lang-ar, p  .lang-en,
-        li .lang-ar, li .lang-en,
         a  .lang-ar, a  .lang-en,
         button .lang-ar, button .lang-en,
-        span.lang-ar-block, span.lang-en-block,
-        div .lang-ar-block,  div .lang-en-block {
+        span  .lang-ar, span  .lang-en,
+        li .lang-ar, li .lang-en,
+        label .lang-ar, label .lang-en,
+        small .lang-ar, small .lang-en,
+        strong .lang-ar, strong .lang-en,
+        b .lang-ar, b .lang-en {
             display: inline !important;
-        }
-        .lang-ar-block, .lang-en-block {
-            display: block !important;
-            width: 100%;
         }
 
         /* ===== Force layout stability for Hero & Stats ===== */
@@ -168,7 +183,7 @@
     </style>
 
     <script>
-        /* ===== Apply saved lang on page load BEFORE body ===== */
+        /* ===== Apply saved lang on page load BEFORE body parsed ===== */
         (function applySavedZenoLang() {
             var saved = null;
             try { saved = localStorage.getItem('zeno_dashboard_lang') || localStorage.getItem('zeno_lang'); } catch(e){}
@@ -185,41 +200,11 @@
             }
             document.documentElement.setAttribute('lang', lang);
             document.documentElement.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
-            if (lang === 'en') {
-                document.documentElement.classList.add('zeno-lang-en');
-                document.documentElement.classList.remove('zeno-lang-ar');
-            } else {
-                document.documentElement.classList.add('zeno-lang-ar');
-                document.documentElement.classList.remove('zeno-lang-en');
-            }
-        })();
-
-        /* ===== Global lang toggle - defined BEFORE body so always available ===== */
-        function applyZenoLangVisibility(lang) {
-            document.documentElement.setAttribute('lang', lang);
-            document.documentElement.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
             document.documentElement.classList.toggle('zeno-lang-en', lang === 'en');
             document.documentElement.classList.toggle('zeno-lang-ar', lang === 'ar');
+        })();
 
-            document.querySelectorAll('.lang-ar, .lang-ar-block, .lang-en, .lang-en-block').forEach(function(el) {
-                var cls = Array.from(el.classList);
-                var isArSpan = cls.indexOf('lang-ar') > -1 || cls.indexOf('lang-ar-block') > -1;
-                var isBlock = (cls.indexOf('lang-ar-block') > -1 || cls.indexOf('lang-en-block') > -1);
-                var show = (lang === 'ar' && isArSpan) || (lang === 'en' && !isArSpan);
-                if (isBlock) {
-                    el.style.display = show ? 'block' : 'none';
-                } else {
-                    el.style.display = show ? 'inline' : 'none';
-                }
-            });
-
-            document.querySelectorAll('.zeno-lang-toggle-btn').forEach(function(btn) {
-                btn.innerHTML = lang === 'ar'
-                    ? '<span class="text-sm">🌐</span><span class="font-black text-xs uppercase tracking-wider">EN</span>'
-                    : '<span class="text-sm">🌐</span><span class="font-black text-xs uppercase tracking-wider">AR</span>';
-            });
-        }
-
+        /* ===== Global lang toggle: switch attr + persist + reload (guarantees clean render) ===== */
         function toggleZenoLang() {
             if (window.zenoI18n && window.zenoI18n.toggleLang) {
                 window.zenoI18n.toggleLang();
@@ -232,12 +217,21 @@
                 localStorage.setItem('zeno_lang', next);
             } catch(e){}
             document.cookie = 'zeno_dashboard_lang=' + next + ';path=/;max-age=31536000;SameSite=Lax';
-            applyZenoLangVisibility(next);
+            document.documentElement.setAttribute('lang', next);
+            document.documentElement.setAttribute('dir', next === 'ar' ? 'rtl' : 'ltr');
+            document.documentElement.classList.toggle('zeno-lang-en', next === 'en');
+            document.documentElement.classList.toggle('zeno-lang-ar', next === 'ar');
+            // Force clean re-render to avoid any CSS/DOM glitches
+            setTimeout(function(){ location.reload(); }, 50);
         }
 
         document.addEventListener('DOMContentLoaded', function() {
             var lang = document.documentElement.getAttribute('lang') || 'en';
-            applyZenoLangVisibility(lang);
+            document.querySelectorAll('.zeno-lang-toggle-btn').forEach(function(btn) {
+                btn.innerHTML = lang === 'ar'
+                    ? '<span class="text-sm">🌐</span><span class="font-black text-xs uppercase tracking-wider">EN</span>'
+                    : '<span class="text-sm">🌐</span><span class="font-black text-xs uppercase tracking-wider">AR</span>';
+            });
         });
     </script>
 </head>
